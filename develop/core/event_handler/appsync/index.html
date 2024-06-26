@@ -1025,6 +1025,72 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch processing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Batch processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-n1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding N+1 problem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch resolvers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Batch resolvers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-items-individually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing items individually
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raise-on-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Raise on error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-batch-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      Async batch resolver
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1824,6 +1890,72 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch processing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Batch processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-n1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding N+1 problem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-resolvers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch resolvers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Batch resolvers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-items-individually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Processing items individually
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raise-on-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Raise on error
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-batch-resolver" class="md-nav__link">
+    <span class="md-ellipsis">
+      Async batch resolver
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1858,27 +1990,53 @@
 
   <h1>GraphQL API</h1>
 
-<p>Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.</p>
+<p>Event Handler for AWS AppSync and Amplify GraphQL Transformer.</p>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    EventSource: AWS Lambda Event Sources
+    EventHandlerResolvers: AWS AppSync Direct invocation&lt;br/&gt;&lt;br/&gt; AWS AppSync Batch invocation
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Adapts response to Event Source contract
+    LambdaResponse: Lambda response
+
+    state EventSource {
+        EventHandlerResolvers
+    }
+
+    EventHandlerResolvers --&gt; LambdaInit
+
+    LambdaInit --&gt; EventHandler
+    EventHandler --&gt; EventHandlerResolver
+
+    state EventHandler {
+        [*] --&gt; EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --&gt; YourLogic
+        YourLogic --&gt; EventHandlerResolverBuilder
+    }
+
+    EventHandler --&gt; LambdaResponse</code></pre>
 <h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Automatically parse API arguments to function arguments</li>
 <li>Choose between strictly match a GraphQL field name or all of them to a function</li>
-<li>Integrates with <a href="../../../utilities/data_classes/" target="_blank">Data classes utilities</a> to access resolver and identity information</li>
-<li>Works with both Direct Lambda Resolver and Amplify GraphQL Transformer <code>@function</code> directive</li>
-<li>Support async Python 3.8+ functions, and generators</li>
+<li>Automatically parse API arguments to function arguments</li>
+<li>Integrates with <a href="../../../utilities/data_classes/" target="_blank">Event Source Data classes utilities</a> to access resolver and identity information</li>
+<li>Support async Python 3.8+ functions and generators</li>
 </ul>
 <h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h2>
 <p><strong><a href="https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html" target="_blank">Direct Lambda Resolver</a></strong>. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.</p>
-<p><strong><a href="https://docs.amplify.aws/cli/graphql-transformer/function" target="_blank">Amplify GraphQL Transformer</a></strong>. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.</p>
+<p><strong><a href="https://docs.amplify.aws/cli/graphql-transformer/function" target="_blank">Amplify GraphQL Transformer</a></strong>. Custom GraphQL directives to define your application's data model using Schema Definition Language <em>(SDL)</em>, <em>e.g., <code>@function</code></em>. Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.</p>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
-<p>You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.</p>
-<p>This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.</p>
 <details class="tip" open="open">
 <summary>Tip: Designing GraphQL Schemas for the first time?</summary>
-<p>Visit <a href="https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html" target="_blank">AWS AppSync schema documentation</a> for understanding how to define types, nesting, and pagination.</p>
+<p>Visit <a href="https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html" target="_blank">AWS AppSync schema documentation</a> to understand how to define types, nesting, and pagination.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="getting_started_schemagraphql" name="__tabbed_1" type="radio" /><input id="templateyml" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="getting_started_schemagraphql">getting_started_schema.graphql</label><label for="templateyml">template.yml</label></div>
+<h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
+<p>You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use Event Handler as routing requires no dependency (<em>standard library</em>).</p>
+<p>This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="getting_started_schemagraphql" name="__tabbed_1" type="radio" /><input id="templateyaml" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="getting_started_schemagraphql">getting_started_schema.graphql</label><label for="templateyaml">template.yaml</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2053,7 +2211,7 @@
 <span class="nt">Globals</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">Function</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.9</span>
+<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.12</span>
 <span class="w">    </span><span class="nt">Tracing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Active</span>
 <span class="w">    </span><span class="nt">Environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Variables</span><span class="p">:</span>
@@ -3316,7 +3474,8 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
@@ -3354,15 +3513,16 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;listLocations&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">list_locations</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
     <span class="c1"># additional properties/methods will now be available under current_event</span>
-<span class="hll">    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request country origin: </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">country_viewer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
-</span>    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Perry, James and Carroll&quot;</span><span class="p">}]</span>
+<span class="hll">    <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="p">:</span>
+</span>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request country origin: </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">country_viewer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Perry, James and Carroll&quot;</span><span class="p">}]</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">APPSYNC_RESOLVER</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="hll">    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">data_model</span><span class="o">=</span><span class="n">MyCustomModel</span><span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">data_model</span><span class="o">=</span><span class="n">MyCustomModel</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3492,7 +3652,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.appsync</span> <span class="kn">import</span> <span class="n">Router</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.graphql_appsync.router</span> <span class="kn">import</span> <span class="n">Router</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
@@ -3630,7 +3790,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.appsync</span> <span class="kn">import</span> <span class="n">Router</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.graphql_appsync.router</span> <span class="kn">import</span> <span class="n">Router</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
@@ -3655,11 +3815,1062 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 </div>
 </div>
 </div>
+<h3 id="batch-processing">Batch processing<a class="headerlink" href="#batch-processing" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Verifies response is a list
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchRelatedPosts: get related posts &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --&gt; AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --&gt; AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --&gt; AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --&gt; AppSyncBatchRelatedPosts: &lt;strong&gt;N additional queries&lt;/strong&gt;
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchAggregate --&gt; AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --&gt; LambdaInit: 1x Invoke with N events
+    LambdaInit --&gt; EventHandler
+
+    state EventHandler {
+        [*] --&gt; EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --&gt; YourLogic
+        YourLogic --&gt; EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --&gt; LambdaResponse
+    }</code></pre>
+<p><em><center>Batch resolvers mechanics: visualizing N+1 in <code>relatedPosts</code> field.</center></em></p>
+<h4 id="understanding-n1-problem">Understanding N+1 problem<a class="headerlink" href="#understanding-n1-problem" title="Permanent link">&para;</a></h4>
+<p>When AWS AppSync has <a href="https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching" target="_blank">batching enabled for Lambda Resolvers</a>, it will group as many requests as possible before invoking your Lambda invocation. Effectively solving the <a href="https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/" target="_blank">N+1 problem in GraphQL</a>.</p>
+<p>For example, say you have a query named <code>listPosts</code>. For each post, you also want <code>relatedPosts</code>. <strong>Without batching</strong>, AppSync will:</p>
+<ol>
+<li>Invoke your Lambda function to get the first post</li>
+<li>Invoke your Lambda function for each related post</li>
+<li>Repeat 1 until done</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant Database
+
+    Client-&gt;&gt;AppSync: GraphQL Query
+    Note over Client,AppSync: query listPosts { &lt;br/&gt;id &lt;br/&gt;title &lt;br/&gt;relatedPosts { id title } &lt;br/&gt; }
+
+    AppSync-&gt;&gt;Lambda: Fetch N posts (listPosts)
+    Lambda-&gt;&gt;Database: Query
+    Database-&gt;&gt;Lambda: Posts
+    Lambda--&gt;&gt;AppSync: Return posts (id, title)
+    loop Fetch N related posts (relatedPosts)
+        AppSync-&gt;&gt;Lambda: Invoke function (N times)
+        Lambda-&gt;&gt;Database: Query
+        Database--&gt;&gt;Lambda: Return related posts
+        Lambda--&gt;&gt;AppSync: Return related posts
+    end
+    AppSync--&gt;&gt;Client: Return posts and their related posts</code></pre>
+<h4 id="batch-resolvers">Batch resolvers<a class="headerlink" href="#batch-resolvers" title="Permanent link">&para;</a></h4>
+<p>You can use <code>@batch_resolver</code> or <code>@async_batch_resolver</code> decorators to receive the entire batch of requests.</p>
+<p>In this mode, you must return results in the same order of your batch items, so AppSync can associate the results back to the client.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="advanced_batch_resolverpy" name="__tabbed_9" type="radio" /><input id="advanced_batch_resolver_payloadjson" name="__tabbed_9" type="radio" /><input id="advanced_batch_querygraphql" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="advanced_batch_resolverpy">advanced_batch_resolver.py</label><label for="advanced_batch_resolver_payloadjson">advanced_batch_resolver_payload.json</label><label for="advanced_batch_querygraphql">advanced_batch_query.graphql</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">AppSyncResolverEvent</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+</span>
+<span class="c1"># mimic DB data for simplicity</span>
+<span class="n">posts_related</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post1&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post2&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post3&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">search_batch_posts</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">post_id</span><span class="p">:</span> <span class="n">posts_related</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">post_id</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">}</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">batch_resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">related_posts</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AppSyncResolverEvent</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>  <span class="c1"># (1)!</span>
+    <span class="c1"># Extract all post_ids in order</span>
+    <span class="n">post_ids</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="p">]</span>  <span class="c1"># (2)!</span>
+
+    <span class="c1"># Get unique post_ids while preserving order</span>
+    <span class="n">unique_post_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">post_ids</span><span class="p">))</span>
+
+    <span class="c1"># Fetch posts in a single batch operation</span>
+    <span class="n">fetched_posts</span> <span class="o">=</span> <span class="n">search_batch_posts</span><span class="p">(</span><span class="n">unique_post_ids</span><span class="p">)</span>
+
+    <span class="c1"># Return results in original order</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">fetched_posts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">post_id</span> <span class="ow">in</span> <span class="n">post_ids</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>The entire batch is sent to the resolver. You need to iterate through it to process all records.</li>
+<li>We use <code>post_id</code> as our unique identifier of the GraphQL request.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author2&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nx">query</span><span class="w"> </span><span class="nx">MyQuery</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">getPost</span><span class="p">(</span><span class="nx">post_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">      </span><span class="nx">post_id</span>
+<span class="w">      </span><span class="nx">author</span>
+<span class="hll"><span class="w">      </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">        </span><span class="nx">post_id</span>
+<span class="w">        </span><span class="nx">author</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h5 id="processing-items-individually">Processing items individually<a class="headerlink" href="#processing-items-individually" title="Permanent link">&para;</a></h5>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Call your registered resolver function &lt;strong&gt;N times&lt;/strong&gt;
+    EventHandlerResolverErrorHandling: Gracefully &lt;strong&gt;handle errors&lt;/strong&gt; with null response
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchRelatedPosts: get related posts &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --&gt; AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --&gt; AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --&gt; AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --&gt; AppSyncBatchRelatedPosts: &lt;strong&gt;N additional queries&lt;/strong&gt;
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchAggregate --&gt; AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --&gt; LambdaInit: 1x Invoke with N events
+    LambdaInit --&gt; EventHandler
+
+    state EventHandler {
+        [*] --&gt; EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --&gt; YourLogic
+        YourLogic --&gt; EventHandlerResolverErrorHandling
+        EventHandlerResolverErrorHandling --&gt; EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --&gt; LambdaResponse
+    }</code></pre>
+<p><em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em></p>
+<p>In rare scenarios, you might want to process each item individually, trading ease of use for increased latency as you handle one batch item at a time.</p>
+<p>You can toggle <code>aggregate</code> parameter in <code>@batch_resolver</code> decorator for your resolver function to be called N times.</p>
+<div class="admonition note">
+<p class="admonition-title">This does not resolve the N+1 problem, but shifts it to the Lambda runtime.</p>
+</div>
+<p>In this mode, we will:</p>
+<ol>
+<li>Aggregate each response we receive from your function in the exact order it receives</li>
+<li>Gracefully handle errors by adding <code>None</code> in the final response for each batch item that failed processing<ul>
+<li>You can customize <code>nul</code> or error responses back to the client in the <a href="https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#returning-individual-errors" target="_blank">AppSync resolver mapping templates</a></li>
+</ul>
+</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="advanced_batch_resolver_individualpy" name="__tabbed_10" type="radio" /><input id="advanced_batch_resolver_payloadjson_1" name="__tabbed_10" type="radio" /><input id="advanced_batch_querygraphql_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="advanced_batch_resolver_individualpy">advanced_batch_resolver_individual.py</label><label for="advanced_batch_resolver_payloadjson_1">advanced_batch_resolver_payload.json</label><label for="advanced_batch_querygraphql_1">advanced_batch_query.graphql</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">AppSyncResolverEvent</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+</span>
+
+<span class="n">posts_related</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post1&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post2&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post3&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">batch_resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+</span><span class="k">def</span> <span class="nf">related_posts</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">AppSyncResolverEvent</span><span class="p">,</span> <span class="n">post_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">posts_related</span><span class="p">[</span><span class="n">post_id</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>You need to disable the aggregated event by using <code>aggregate</code> flag.
+    The resolver receives and processes each record one at a time.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author2&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nx">query</span><span class="w"> </span><span class="nx">MyQuery</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">getPost</span><span class="p">(</span><span class="nx">post_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">      </span><span class="nx">post_id</span>
+<span class="w">      </span><span class="nx">author</span>
+<span class="hll"><span class="w">      </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">        </span><span class="nx">post_id</span>
+<span class="w">        </span><span class="nx">author</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h5 id="raise-on-error">Raise on error<a class="headerlink" href="#raise-on-error" title="Permanent link">&para;</a></h5>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Call your registered resolver function &lt;strong&gt;N times&lt;/strong&gt;
+    EventHandlerResolverErrorHandling: &lt;strong&gt;Error?&lt;/strong&gt;
+    EventHandlerResolverHappyPath: &lt;strong&gt;No error?&lt;/strong&gt;
+    EventHandlerResolverUnhappyPath: Propagate any exception
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchRelatedPosts: get related posts &lt;em&gt;(id, title, relatedPosts)&lt;/em&gt;
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: &lt;strong&gt;Lambda response&lt;/strong&gt;
+    LambdaErrorResponse: &lt;strong&gt;Lambda error&lt;/strong&gt;
+
+    Client --&gt; AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --&gt; AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --&gt; AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --&gt; AppSyncBatchRelatedPosts: &lt;strong&gt;N additional queries&lt;/strong&gt;
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --&gt; AppSyncBatchAggregate
+        AppSyncBatchAggregate --&gt; AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --&gt; LambdaInit: 1x Invoke with N events
+    LambdaInit --&gt; EventHandler
+
+    state EventHandler {
+        [*] --&gt; EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --&gt; YourLogic
+        YourLogic --&gt; EventHandlerResolverHappyPath
+        YourLogic --&gt; EventHandlerResolverErrorHandling
+        EventHandlerResolverHappyPath --&gt; EventHandlerResolverBuilder
+        EventHandlerResolverErrorHandling --&gt; EventHandlerResolverUnhappyPath
+        EventHandlerResolverUnhappyPath --&gt; LambdaErrorResponse
+
+        EventHandlerResolverBuilder --&gt; LambdaResponse
+    }</code></pre>
+<p><em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em></p>
+<p>You can toggle <code>raise_on_error</code> parameter in <code>@batch_resolver</code> to propagate any exception instead of gracefully returning <code>None</code> for a given batch item.</p>
+<p>This is useful when you want to stop processing immediately in the event of an unhandled or unrecoverable exception.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="advanced_batch_resolver_handling_errorpy" name="__tabbed_11" type="radio" /><input id="advanced_batch_resolver_payloadjson_2" name="__tabbed_11" type="radio" /><input id="advanced_batch_querygraphql_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="advanced_batch_resolver_handling_errorpy">advanced_batch_resolver_handling_error.py</label><label for="advanced_batch_resolver_payloadjson_2">advanced_batch_resolver_payload.json</label><label for="advanced_batch_querygraphql_2">advanced_batch_query.graphql</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">AppSyncResolverEvent</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+</span>
+
+<span class="n">posts_related</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post1&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post2&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post3&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">batch_resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raise_on_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+</span><span class="k">def</span> <span class="nf">related_posts</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">AppSyncResolverEvent</span><span class="p">,</span> <span class="n">post_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">posts_related</span><span class="p">[</span><span class="n">post_id</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>You can enable enable the error handling by using <code>raise_on_error</code> flag.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author2&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nx">query</span><span class="w"> </span><span class="nx">MyQuery</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">getPost</span><span class="p">(</span><span class="nx">post_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">      </span><span class="nx">post_id</span>
+<span class="w">      </span><span class="nx">author</span>
+<span class="hll"><span class="w">      </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">        </span><span class="nx">post_id</span>
+<span class="w">        </span><span class="nx">author</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h4 id="async-batch-resolver">Async batch resolver<a class="headerlink" href="#async-batch-resolver" title="Permanent link">&para;</a></h4>
+<p>Similar to <code>@batch_resolver</code> explained in <a href="#batch-resolvers">batch resolvers</a>, you can use <code>async_batch_resolver</code> to handle async functions.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="advanced_batch_async_resolverpy" name="__tabbed_12" type="radio" /><input id="advanced_batch_resolver_payloadjson_3" name="__tabbed_12" type="radio" /><input id="advanced_batch_querygraphql_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="advanced_batch_async_resolverpy">advanced_batch_async_resolver.py</label><label for="advanced_batch_resolver_payloadjson_3">advanced_batch_resolver_payload.json</label><label for="advanced_batch_querygraphql_3">advanced_batch_query.graphql</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">AppSyncResolverEvent</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+</span>
+<span class="c1"># mimic DB data for simplicity</span>
+<span class="n">posts_related</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post1&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post2&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;post3&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">search_batch_posts</span><span class="p">(</span><span class="n">posts</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">post_id</span><span class="p">:</span> <span class="n">posts_related</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">post_id</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">}</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">async_batch_resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">)</span>
+</span><span class="k">async</span> <span class="k">def</span> <span class="nf">related_posts</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AppSyncResolverEvent</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="c1"># Extract all post_ids in order</span>
+    <span class="n">post_ids</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;post_id&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="p">]</span>
+
+    <span class="c1"># Get unique post_ids while preserving order</span>
+    <span class="n">unique_post_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">post_ids</span><span class="p">))</span>
+
+    <span class="c1"># Fetch posts in a single batch operation</span>
+    <span class="n">fetched_posts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">search_batch_posts</span><span class="p">(</span><span class="n">unique_post_ids</span><span class="p">)</span>
+
+    <span class="c1"># Return results in original order</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">fetched_posts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">post_id</span> <span class="ow">in</span> <span class="n">post_ids</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li><code>async_batch_resolver</code> takes care of running and waiting for coroutine completion.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author2&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;arguments&quot;</span><span class="p">:{},</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;source&quot;</span><span class="p">:{</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;post_id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;author&quot;</span><span class="p">:</span><span class="s2">&quot;Author1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;prev&quot;</span><span class="p">:</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;info&quot;</span><span class="p">:{</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetList&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="s2">&quot;post_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;author&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;selectionSetGraphQL&quot;</span><span class="p">:</span><span class="s2">&quot;{\n  post_id\n  author\n}&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">         </span><span class="nt">&quot;fieldName&quot;</span><span class="p">:</span><span class="s2">&quot;relatedPosts&quot;</span><span class="p">,</span>
+</span><span class="w">         </span><span class="nt">&quot;parentTypeName&quot;</span><span class="p">:</span><span class="s2">&quot;Post&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;variables&quot;</span><span class="p">:{}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nx">query</span><span class="w"> </span><span class="nx">MyQuery</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">getPost</span><span class="p">(</span><span class="nx">post_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">      </span><span class="nx">post_id</span>
+<span class="w">      </span><span class="nx">author</span>
+<span class="hll"><span class="w">      </span><span class="nx">relatedPosts</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">        </span><span class="nx">post_id</span>
+<span class="w">        </span><span class="nx">author</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.</p>
 <p>You can use either <code>app.resolve(event, context)</code> or simply <code>app(event, context)</code>.</p>
 <p>Here's an example of how you can test your synchronous resolvers:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="assert_graphql_responsepy" name="__tabbed_9" type="radio" /><input id="assert_graphql_response_modulepy" name="__tabbed_9" type="radio" /><input id="assert_graphql_responsejson" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="assert_graphql_responsepy">assert_graphql_response.py</label><label for="assert_graphql_response_modulepy">assert_graphql_response_module.py</label><label for="assert_graphql_responsejson">assert_graphql_response.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="assert_graphql_responsepy" name="__tabbed_13" type="radio" /><input id="assert_graphql_response_modulepy" name="__tabbed_13" type="radio" /><input id="assert_graphql_responsejson" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="assert_graphql_responsepy">assert_graphql_response.py</label><label for="assert_graphql_response_modulepy">assert_graphql_response_module.py</label><label for="assert_graphql_responsejson">assert_graphql_response.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3888,7 +5099,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <summary>Note</summary>
 <p>Alternatively, you can continue call <code>lambda_handler</code> function synchronously as it'd run <code>asyncio.run</code> to await for the coroutine to complete.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="assert_async_graphql_responsepy" name="__tabbed_10" type="radio" /><input id="assert_async_graphql_response_modulepy" name="__tabbed_10" type="radio" /><input id="assert_async_graphql_responsejson" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="assert_async_graphql_responsepy">assert_async_graphql_response.py</label><label for="assert_async_graphql_response_modulepy">assert_async_graphql_response_module.py</label><label for="assert_async_graphql_responsejson">assert_async_graphql_response.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="assert_async_graphql_responsepy" name="__tabbed_14" type="radio" /><input id="assert_async_graphql_response_modulepy" name="__tabbed_14" type="radio" /><input id="assert_async_graphql_responsejson" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="assert_async_graphql_responsepy">assert_async_graphql_response.py</label><label for="assert_async_graphql_response_modulepy">assert_async_graphql_response_module.py</label><label for="assert_async_graphql_responsejson">assert_async_graphql_response.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4156,7 +5367,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-02-05
+    2024-06-26
   </span>
 
     
