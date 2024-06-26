@@ -370,22 +370,22 @@ You can use `@batch_resolver` or `@async_batch_resolver` decorators to receive t
 
 In this mode, you must return results in the same order of your batch items, so AppSync can associate the results back to the client.
 
-=== "getting_started_with_batch_resolver.py"
+=== "advanced_batch_resolver.py"
   	```python hl_lines="5 9 23"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver.py"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver.py"
   	```
 
     1. The entire batch is sent to the resolver. You need to iterate through it to process all records.
     2. We use `post_id` as our unique identifier of the GraphQL request.
 
-=== "getting_started_with_batch_resolver_payload.json"
+=== "advanced_batch_resolver_payload.json"
   	```json hl_lines="6 16 25 35 44 54"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
   	```
 
-=== "getting_started_with_batch_query.graphql"
+=== "advanced_batch_query.graphql"
   	```typescript hl_lines="3 6"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
   	```
 
 ##### Processing items individually
@@ -445,22 +445,22 @@ In this mode, we will:
 2. Gracefully handle errors by adding `None` in the final response for each batch item that failed processing
     * You can customize `nul` or error responses back to the client in the [AppSync resolver mapping templates](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#returning-individual-errors){target="_blank"}
 
-=== "getting_started_with_batch_resolver_individual.py"
+=== "advanced_batch_resolver_individual.py"
   	```python hl_lines="5 9 19"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_individual.py"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_individual.py"
   	```
 
     1. You need to disable the aggregated event by using `aggregate` flag.
         The resolver receives and processes each record one at a time.
 
-=== "getting_started_with_batch_resolver_payload.json"
+=== "advanced_batch_resolver_payload.json"
   	```json hl_lines="6 16 25 35 44 54"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
   	```
 
-=== "getting_started_with_batch_query.graphql"
+=== "advanced_batch_query.graphql"
   	```typescript hl_lines="3 6"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
   	```
 
 ##### Raise on error
@@ -519,42 +519,42 @@ You can toggle `raise_on_error` parameter in `@batch_resolver` to propagate any 
 
 This is useful when you want to stop processing immediately in the event of an unhandled or unrecoverable exception.
 
-=== "getting_started_with_batch_resolver_handling_error.py"
+=== "advanced_batch_resolver_handling_error.py"
   	```python hl_lines="5 9 19"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_handling_error.py"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_handling_error.py"
   	```
 
     1. You can enable enable the error handling by using `raise_on_error` flag.
 
-=== "getting_started_with_batch_resolver_payload.json"
+=== "advanced_batch_resolver_payload.json"
   	```json hl_lines="6 16 25 35 44 54"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
   	```
 
-=== "getting_started_with_batch_query.graphql"
+=== "advanced_batch_query.graphql"
   	```typescript hl_lines="3 6"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
   	```
 
 #### Async batch resolver
 
 Similar to `@batch_resolver` explained in [batch resolvers](#batch-resolvers), you can use `async_batch_resolver` to handle async functions.
 
-=== "getting_started_with_batch_async_resolver.py"
+=== "advanced_batch_async_resolver.py"
   	```python hl_lines="5 9 23"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver.py"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_async_resolver.py"
   	```
 
     1. `async_batch_resolver` takes care of running and waiting for coroutine completion.
 
-=== "getting_started_with_batch_resolver_payload.json"
+=== "advanced_batch_resolver_payload.json"
   	```json hl_lines="6 16 25 35 44 54"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
   	```
 
-=== "getting_started_with_batch_query.graphql"
+=== "advanced_batch_query.graphql"
   	```typescript hl_lines="3 6"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
   	```
 
 ## Testing your code
