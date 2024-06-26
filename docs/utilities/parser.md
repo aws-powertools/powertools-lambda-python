@@ -155,9 +155,9 @@ def my_function():
 		}
 ```
 
-#### Arbitrary data model parsing
+#### Primitive data model parsing
 
-The parser allows you parse events into arbitrary data structures, such as `dict` or classes that don't inherit from BaseModel. The following example shows you how to parse a [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union):
+The parser allows you parse events into primitive data types, such as `dict` or classes that don't inherit from `BaseModel`. The following example shows you how to parse a [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union):
 
 ```python
 --8<-- "examples/parser/src/multiple_model_parsing.py"
