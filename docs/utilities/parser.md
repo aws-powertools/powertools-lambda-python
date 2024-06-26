@@ -11,27 +11,13 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
-* Support for Pydantic v1 and v2
+* Support for Pydantic v2
 
 ## Getting started
 
 ### Install
 
-Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.
-
-#### Using Pydantic v1
-
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
-
-Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
-
-???+ warning
-    This will increase the compressed package size by >10MB due to the Pydantic dependency.
-
-    To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
-    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank" rel="nofollow"}:
-
-	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
+Powertools for AWS Lambda (Python) supports Pydantic v2.
 
 #### Using Pydantic v2
 
@@ -167,6 +153,14 @@ def my_function():
 			"status_code": 400,
 			"message": "Invalid order"
 		}
+```
+
+#### Primitive data model parsing
+
+The parser allows you parse events into primitive data types, such as `dict` or classes that don't inherit from `BaseModel`. The following example shows you how to parse a [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union):
+
+```python
+--8<-- "examples/parser/src/multiple_model_parsing.py"
 ```
 
 ### Built-in models
