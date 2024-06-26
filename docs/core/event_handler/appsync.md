@@ -428,10 +428,17 @@ stateDiagram-v2
 
 <em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
 
-You can process each item in the batch individually, and we can handle exceptions for you. However, it's important to note that utilizing this method may increase the execution time of your Lambda function.
+In rare scenarios, you might want to process each item individually, trading ease of use for increased latency as you handle one batch item at a time.
 
-???+ tip
-    For better error handling, you may need to configure response mapping templates and specify error keys. Explore more on returning individual errors [here](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}.
+You can toggle `aggregate` parameter in `@batch_resolver` parameter for your resolver function to be called N times.
+
+!!! note "This does not resolve the N+1 problem, but shifts it to the Lambda runtime."
+
+In this mode, we will:
+
+1. Aggregate each response we receive from your function in the exact order it receives
+2. Gracefully handle errors by adding `None` in the final response for each batch item that failed processing
+    * You can customize `nul` or error responses back to the client in the [AppSync resolver mapping templates](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#returning-individual-errors){target="_blank"}
 
 === "getting_started_with_batch_resolver_individual.py"
   	```python hl_lines="3 7 17"
