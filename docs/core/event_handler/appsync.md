@@ -350,6 +350,49 @@ We support AWS Appsync's batching mechanism for Lambda Resolvers. It prevents mu
 
 #### Processing Batch items individually
 
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (getPosts)
+    YourLogic: Call your registered resolver function <strong>N times</strong>
+    EventHandlerResolverErrorHandling: Gracefully <strong>handle errors</strong> with null response
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverErrorHandling
+        EventHandlerResolverErrorHandling --> EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
+
 You can process each item in the batch individually, and we can handle exceptions for you. However, it's important to note that utilizing this method may increase the execution time of your Lambda function.
 
 ???+ tip
