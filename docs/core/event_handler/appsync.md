@@ -430,7 +430,7 @@ stateDiagram-v2
 
 In rare scenarios, you might want to process each item individually, trading ease of use for increased latency as you handle one batch item at a time.
 
-You can toggle `aggregate` parameter in `@batch_resolver` parameter for your resolver function to be called N times.
+You can toggle `aggregate` parameter in `@batch_resolver` decorator for your resolver function to be called N times.
 
 !!! note "This does not resolve the N+1 problem, but shifts it to the Lambda runtime."
 
@@ -454,8 +454,6 @@ In this mode, we will:
   	```
 
 ##### Raise on error
-
-!!! todo "Explanation about hard failure"
 
 ```mermaid
 stateDiagram-v2
@@ -506,6 +504,10 @@ stateDiagram-v2
 ```
 
 <em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
+
+You can toggle `raise_on_error` parameter in `@batch_resolver` to propagate any exception instead of gracefully returning `None` for a given batch item.
+
+This is useful when you want to stop processing immediately in the event of an unhandled or unrecoverable exception.
 
 === "getting_started_with_batch_resolver_handling_error.py"
   	```python hl_lines="3 7 17"
