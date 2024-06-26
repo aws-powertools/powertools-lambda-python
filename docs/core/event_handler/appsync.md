@@ -383,6 +383,11 @@ In this mode, you must return results in the same order of your batch items, so 
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
+=== "getting_started_with_batch_query.graphql"
+  	```typescript hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+  	```
+
 #### Processing items individually
 
 ```mermaid
@@ -453,6 +458,11 @@ In this mode, we will:
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
+=== "getting_started_with_batch_query.graphql"
+  	```typescript hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+  	```
+
 ##### Raise on error
 
 ```mermaid
@@ -521,6 +531,11 @@ This is useful when you want to stop processing immediately in the event of an u
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
+=== "getting_started_with_batch_query.graphql"
+  	```typescript hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
+  	```
+
 #### Async
 
 Choose the asynchronous batch processor when your objective is to leverage concurrency capabilities without the necessity of preserving records in a specific order.
@@ -536,6 +551,11 @@ Choose the asynchronous batch processor when your objective is to leverage concu
 === "getting_started_with_batch_async_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver_payload.json"
+  	```
+
+=== "getting_started_with_batch_query.graphql"
+  	```typescript hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
   	```
 
 ## Testing your code

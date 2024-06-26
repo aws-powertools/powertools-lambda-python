@@ -23,10 +23,10 @@ def search_batch_posts(posts: list) -> dict[str, Any]:
 @app.batch_resolver(type_name="Query", field_name="relatedPosts")
 def related_posts(event: list[AppSyncResolverEvent]) -> list[Any]:  # (1)!
     # Extract all post_ids in order
-    post_ids = [record.arguments.get("post_id") for record in event]  # (2)!
+    post_ids: list = [record.source.get("post_id") for record in event]  # (2)!
 
     # Get unique post_ids while preserving order
-    unique_post_ids: list[str] = list(dict.fromkeys(post_ids))
+    unique_post_ids = list(dict.fromkeys(post_ids))
 
     # Fetch posts in a single batch operation
     fetched_posts = search_batch_posts(unique_post_ids)
