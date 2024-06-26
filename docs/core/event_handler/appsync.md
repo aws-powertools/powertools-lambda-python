@@ -318,7 +318,7 @@ stateDiagram-v2
         AppSyncBatchAggregate --> AppSyncBatchLimit
     }
 
-    AppSyncBatchResolverMode --> LambdaInit: Invoke with batch results
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
     LambdaInit --> EventHandler
 
     state EventHandler {
