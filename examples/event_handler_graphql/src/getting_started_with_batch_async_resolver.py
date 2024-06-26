@@ -1,13 +1,10 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List
 
-from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-logger = Logger()
 app = AppSyncResolver()
-
 
 posts_related = {
     "1": {"title": "post1"},
@@ -16,19 +13,23 @@ posts_related = {
 }
 
 
+def search_batch_posts(posts: List) -> Dict[str, Any]:
+    return {post_id: posts_related.get(post_id) for post_id in posts}
+
+
 @app.async_batch_resolver(type_name="Query", field_name="relatedPosts")
-async def related_posts(event: List[AppSyncResolverEvent]) -> Optional[List[Any]]:
-    results = []
+async def related_posts(event: List[AppSyncResolverEvent]) -> List[Any]:
+    # Extract all post_ids in order
+    post_ids = [record.arguments.get("post_id") for record in event]
 
-    for record in event:  # (1)!
-        post_id = record.arguments.get("post_id")
-        try:
-            results.append(posts_related[post_id] if post_id else None)
-            # Add other logic here
-        except Exception:
-            logger.error("Error processing record", post_id=post_id)
+    # Get unique post_ids while preserving order
+    unique_post_ids = list(dict.fromkeys(post_ids))
 
-    return results
+    # Fetch posts in a single batch operation
+    fetched_posts: Dict = search_batch_posts(unique_post_ids)
+
+    # Return results in original order
+    return [fetched_posts.get(post_id) for post_id in post_ids]
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
