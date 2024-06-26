@@ -296,10 +296,10 @@ stateDiagram-v2
     LambdaInit: Lambda invocation
     EventHandler: Event Handler
     EventHandlerResolver: Route event based on GraphQL type/field keys
-    Client: Client query (getPosts)
+    Client: Client query (listPosts)
     YourLogic: Run your registered resolver function
     EventHandlerResolverBuilder: Verifies response is a list
-    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsResolution: query listPosts
     AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
     AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
     AppSyncBatchAggregate: aggregate batch resolver event
@@ -329,12 +329,46 @@ stateDiagram-v2
     }
 ```
 
-<em><center>Batch resolvers: visualizing N+1 in `relatedPosts` field.</center></em>
+<em><center>Batch resolvers mechanics: visualizing N+1 in `relatedPosts` field.</center></em>
 
-We support AWS Appsync's batching mechanism for Lambda Resolvers. It prevents multiple Lambda executions by grouping events and using the `@batch_resolver` or `@async_batch_resolver` decorators to resolve the entire batch.
+#### Understanding N+1 problem
 
-???+ info
-    If you want to understand more how to configure batch processing for the AppSync, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
+When AWS AppSync has [batching enabled for Lambda Resolvers](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}, it will group as many requests as possible before invoking your Lambda invocation. Effectively solving the [N+1 problem in GraphQL](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
+
+For example, say you have a query named `listPosts`. For each post, you also want `relatedPosts`. **Without batching**, AppSync will:
+
+1. Invoke your Lambda function to get the first post
+2. Invoke your Lambda function for each related post
+3. Repeat 1 until done
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant Database
+
+    Client->>AppSync: GraphQL Query
+    Note over Client,AppSync: query listPosts { <br/>id <br/>title <br/>relatedPosts { id title } <br/> }
+
+    AppSync->>Lambda: Fetch N posts (listPosts)
+    Lambda->>Database: Query
+    Database->>Lambda: Posts
+    Lambda-->>AppSync: Return posts (id, title)
+    loop Fetch N related posts (relatedPosts)
+        AppSync->>Lambda: Invoke function (N times)
+        Lambda->>Database: Query
+        Database-->>Lambda: Return related posts
+        Lambda-->>AppSync: Return related posts
+    end
+    AppSync-->>Client: Return posts and their related posts
+```
+
+#### Batch resolvers
+
+You can use `@batch_resolver` or `@async_batch_resolver` decorators to receive the entire batch of requests.
+
+In this mode, you must return results in the same order of your batch items, so AppSync can associate the results.
 
 === "getting_started_with_batch_resolver.py"
   	```python hl_lines="3 7 17"
@@ -348,7 +382,7 @@ We support AWS Appsync's batching mechanism for Lambda Resolvers. It prevents mu
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
-#### Processing Batch items individually
+#### Processing items individually
 
 ```mermaid
 stateDiagram-v2
@@ -356,11 +390,11 @@ stateDiagram-v2
     LambdaInit: Lambda invocation
     EventHandler: Event Handler
     EventHandlerResolver: Route event based on GraphQL type/field keys
-    Client: Client query (getPosts)
+    Client: Client query (listPosts)
     YourLogic: Call your registered resolver function <strong>N times</strong>
     EventHandlerResolverErrorHandling: Gracefully <strong>handle errors</strong> with null response
     EventHandlerResolverBuilder: Aggregate responses to match batch size
-    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsResolution: query listPosts
     AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
     AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
     AppSyncBatchAggregate: aggregate batch resolver event
@@ -421,13 +455,13 @@ stateDiagram-v2
     LambdaInit: Lambda invocation
     EventHandler: Event Handler
     EventHandlerResolver: Route event based on GraphQL type/field keys
-    Client: Client query (getPosts)
+    Client: Client query (listPosts)
     YourLogic: Call your registered resolver function <strong>N times</strong>
     EventHandlerResolverErrorHandling: <strong>Error?</strong>
     EventHandlerResolverHappyPath: <strong>No error?</strong>
     EventHandlerResolverUnhappyPath: Propagate any exception
     EventHandlerResolverBuilder: Aggregate responses to match batch size
-    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsResolution: query listPosts
     AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
     AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
     AppSyncBatchAggregate: aggregate batch resolver event
