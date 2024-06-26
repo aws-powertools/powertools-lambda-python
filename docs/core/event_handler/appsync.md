@@ -379,16 +379,16 @@ In this mode, you must return results in the same order of your batch items, so 
     2. We use `post_id` as our unique identifier of the GraphQL request.
 
 === "getting_started_with_batch_resolver_payload.json"
-  	```json hl_lines="4 16 21 29 41 46"
+  	```json hl_lines="6 16 25 35 44 54"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 === "getting_started_with_batch_query.graphql"
-  	```typescript hl_lines="4 16 21 29 41 46"
+  	```typescript hl_lines="3 6"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
   	```
 
-#### Processing items individually
+##### Processing items individually
 
 ```mermaid
 stateDiagram-v2
@@ -446,7 +446,7 @@ In this mode, we will:
     * You can customize `nul` or error responses back to the client in the [AppSync resolver mapping templates](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#returning-individual-errors){target="_blank"}
 
 === "getting_started_with_batch_resolver_individual.py"
-  	```python hl_lines="3 7 17"
+  	```python hl_lines="5 9 19"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_individual.py"
   	```
 
@@ -454,12 +454,12 @@ In this mode, we will:
         The resolver receives and processes each record one at a time.
 
 === "getting_started_with_batch_resolver_payload.json"
-  	```json hl_lines="4 16 21 29 41 46"
+  	```json hl_lines="6 16 25 35 44 54"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 === "getting_started_with_batch_query.graphql"
-  	```typescript hl_lines="4 16 21 29 41 46"
+  	```typescript hl_lines="3 6"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
   	```
 
@@ -520,38 +520,40 @@ You can toggle `raise_on_error` parameter in `@batch_resolver` to propagate any 
 This is useful when you want to stop processing immediately in the event of an unhandled or unrecoverable exception.
 
 === "getting_started_with_batch_resolver_handling_error.py"
-  	```python hl_lines="3 7 17"
+  	```python hl_lines="5 9 19"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_handling_error.py"
   	```
 
     1. You can enable enable the error handling by using `raise_on_error` flag.
 
 === "getting_started_with_batch_resolver_payload.json"
-  	```json hl_lines="4 16 21 29 41 46"
+  	```json hl_lines="6 16 25 35 44 54"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 === "getting_started_with_batch_query.graphql"
-  	```typescript hl_lines="4 16 21 29 41 46"
+  	```typescript hl_lines="3 6"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
   	```
 
-#### Async
+#### Async batch resolver
 
 Similar to `@batch_resolver` explained in [batch resolvers](#batch-resolvers), you can use `async_batch_resolver` to handle async functions.
 
 === "getting_started_with_batch_async_resolver.py"
-  	```python hl_lines="3 7 17"
+  	```python hl_lines="5 9 23"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver.py"
   	```
 
-=== "getting_started_with_batch_async_resolver_payload.json"
-  	```json hl_lines="4 16 21 29 41 46"
-    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver_payload.json"
+    1. `async_batch_resolver` takes care of running and waiting for coroutine completion.
+
+=== "getting_started_with_batch_resolver_payload.json"
+  	```json hl_lines="6 16 25 35 44 54"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 === "getting_started_with_batch_query.graphql"
-  	```typescript hl_lines="4 16 21 29 41 46"
+  	```typescript hl_lines="3 6"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_query.graphql"
   	```
 

@@ -21,9 +21,9 @@ async def search_batch_posts(posts: list) -> dict[str, Any]:
 
 
 @app.async_batch_resolver(type_name="Query", field_name="relatedPosts")
-async def related_posts(event: list[AppSyncResolverEvent]) -> list[Any]:  # (1)!
+async def related_posts(event: list[AppSyncResolverEvent]) -> list[Any]:
     # Extract all post_ids in order
-    post_ids: list = [record.source.get("post_id") for record in event]  # (2)!
+    post_ids: list = [record.source.get("post_id") for record in event]
 
     # Get unique post_ids while preserving order
     unique_post_ids = list(dict.fromkeys(post_ids))
@@ -36,4 +36,4 @@ async def related_posts(event: list[AppSyncResolverEvent]) -> list[Any]:  # (1)!
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
-    return app.resolve(event, context)
+    return app.resolve(event, context)  # (1)!
