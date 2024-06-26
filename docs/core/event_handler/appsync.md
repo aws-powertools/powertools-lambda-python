@@ -290,6 +290,47 @@ You can use `append_context` when you want to share data between your App and Ro
 
 ### Batch processing
 
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (getPosts)
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Verifies response is a list
+    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: Invoke with batch results
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers: visualizing N+1 in `relatedPosts` field.</center></em>
+
 We support AWS Appsync's batching mechanism for Lambda Resolvers. It prevents multiple Lambda executions by grouping events and using the `@batch_resolver` or `@async_batch_resolver` decorators to resolve the entire batch.
 
 ???+ info
