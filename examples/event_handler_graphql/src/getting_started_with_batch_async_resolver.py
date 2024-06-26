@@ -16,7 +16,7 @@ posts_related = {
 }
 
 
-def search_batch_posts(posts: list) -> dict[str, Any]:
+async def search_batch_posts(posts: list) -> dict[str, Any]:
     return {post_id: posts_related.get(post_id) for post_id in posts}
 
 
@@ -29,7 +29,7 @@ async def related_posts(event: list[AppSyncResolverEvent]) -> list[Any]:  # (1)!
     unique_post_ids = list(dict.fromkeys(post_ids))
 
     # Fetch posts in a single batch operation
-    fetched_posts = search_batch_posts(unique_post_ids)
+    fetched_posts = await search_batch_posts(unique_post_ids)
 
     # Return results in original order
     return [fetched_posts.get(post_id) for post_id in post_ids]

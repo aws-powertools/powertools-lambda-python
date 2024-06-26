@@ -538,10 +538,7 @@ This is useful when you want to stop processing immediately in the event of an u
 
 #### Async
 
-Choose the asynchronous batch processor when your objective is to leverage concurrency capabilities without the necessity of preserving records in a specific order.
-
-???+ warning
-    Make sure that preserving the order of the response is not a requirement of your logic.
+Similar to `@batch_resolver` explained in [batch resolvers](#batch-resolvers), you can use `async_batch_resolver` to handle async functions.
 
 === "getting_started_with_batch_async_resolver.py"
   	```python hl_lines="3 7 17"
