@@ -354,6 +354,33 @@ def test_cors():
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
+def test_cors_no_origin():
+    # GIVEN a function with cors=True
+    # AND http method set to GET
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", cors=True)
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # remove origin header from request
+    del LOAD_GW_EVENT["multiValueHeaders"]["Origin"]
+
+    # WHEN calling the event handler
+    result = handler(LOAD_GW_EVENT, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Access-Control-Allow-Origin"] == ["*"]
+    assert "Access-Control-Allow-Credentials" not in headers
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
+
+
 def test_cors_preflight_body_is_empty_not_null():
     # GIVEN CORS is configured
     app = ALBResolver(cors=CORSConfig())
