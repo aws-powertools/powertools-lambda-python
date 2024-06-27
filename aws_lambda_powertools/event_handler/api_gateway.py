@@ -806,7 +806,10 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         extracted_origin_header = extract_origin_header(event.resolved_headers_field)
-        self.response.headers.update(cors.to_dict(extracted_origin_header))
+        if extracted_origin_header is None:
+            self.response.headers.update(cors.to_dict("*"))
+        else:
+            self.response.headers.update(cors.to_dict(extracted_origin_header))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
