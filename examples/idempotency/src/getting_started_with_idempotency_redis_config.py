@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-redis_endpoint = os.getenv("REDIS_CLUSTER_ENDPOINT")
+redis_endpoint = os.getenv("REDIS_CLUSTER_ENDPOINT", "localhost")
 persistence_layer = RedisCachePersistenceLayer(host=redis_endpoint, port=6379)
 
 

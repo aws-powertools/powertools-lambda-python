@@ -12,7 +12,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 # See: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session
 boto3_session = boto3.session.Session()
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table, boto3_session=boto3_session)
 
 config = IdempotencyConfig(event_key_jmespath="body")

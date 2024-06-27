@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(
     event_key_jmespath='["user_id", "product_id"]',

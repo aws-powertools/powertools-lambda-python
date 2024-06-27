@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.idempotency import (
 from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 dynamodb = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(event_key_jmespath="order_id")  # see Choosing a payload subset section
 

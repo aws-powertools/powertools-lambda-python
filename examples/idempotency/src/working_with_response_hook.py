@@ -31,7 +31,7 @@ def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
     return response
 
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 dynamodb = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(response_hook=my_response_hook)
 

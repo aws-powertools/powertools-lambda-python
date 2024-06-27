@@ -12,7 +12,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 # See: https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html#botocore-config
 boto_config = Config()
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table, boto_config=boto_config)
 
 config = IdempotencyConfig(event_key_jmespath="body")

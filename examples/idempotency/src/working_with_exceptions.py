@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.idempotency import (
 from aws_lambda_powertools.utilities.idempotency.exceptions import IdempotencyPersistenceLayerError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-table = os.getenv("IDEMPOTENCY_TABLE")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 
 config = IdempotencyConfig()
