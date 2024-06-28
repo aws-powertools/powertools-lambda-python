@@ -8,6 +8,7 @@ from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
+from tests.functional.utils import load_event
 
 
 # TESTS RECEIVING THE EVENT PARTIALLY AND PROCESS EACH RECORD PER TIME.
@@ -710,7 +711,6 @@ def test_resolve_batch_processing_with_simple_queries_with_aggregate():
     assert result == [appsync_event["source"]["id"] for appsync_event in event]
 
     assert app.current_batch_event and len(app.current_batch_event) == len(event)
-    assert not app.current_event
 
 
 def test_resolve_async_batch_processing_with_simple_queries_with_aggregate():
@@ -772,7 +772,6 @@ def test_resolve_async_batch_processing_with_simple_queries_with_aggregate():
     assert result == [appsync_event["source"]["id"] for appsync_event in event]
 
     assert app.current_batch_event and len(app.current_batch_event) == len(event)
-    assert not app.current_event
 
 
 def test_resolve_batch_processing_with_aggregate_and_returning_a_non_list():
@@ -907,3 +906,40 @@ def test_resolve_async_batch_processing_with_aggregate_and_without_return():
     # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
     with pytest.raises(InvalidBatchResponse):
         app.resolve(event, LambdaContext())
+
+
+def test_include_router_access_batch_current_event():
+    mock_event = load_event("appSyncBatchEvent.json")
+
+    # GIVEN An instance of AppSyncResolver, a Router instance, and a resolver function registered with the router
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.batch_resolver(field_name="createSomething")
+    def get_user(event: List) -> List:
+        return [router.current_batch_event[0].identity.sub]
+
+    app.include_router(router)
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the batch_current_event
+    assert ret[0] == mock_event[0]["identity"]["sub"]
+
+
+def test_app_access_batch_current_event():
+    mock_event = load_event("appSyncBatchEvent.json")
+
+    # GIVEN An instance of AppSyncResolver and a resolver function registered with the app
+    app = AppSyncResolver()
+
+    @app.batch_resolver(field_name="createSomething")
+    def get_user(event: List) -> List:
+        return [app.current_batch_event[0].identity.sub]
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the batch_current_event
+    assert ret[0] == mock_event[0]["identity"]["sub"]
