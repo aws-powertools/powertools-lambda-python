@@ -188,9 +188,12 @@ class CORSConfig:
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
-        self._allowed_origins = [allow_origin]
+
+        self.allowed_origins = [allow_origin]
+
         if extra_origins:
-            self._allowed_origins.extend(extra_origins)
+            self.allowed_origins.extend(extra_origins)
+
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
@@ -205,7 +208,7 @@ class CORSConfig:
 
         # If the origin doesn't match any of the allowed origins, and we don't allow all origins ("*"),
         # don't add any CORS headers
-        if origin not in self._allowed_origins and "*" not in self._allowed_origins:
+        if origin not in self.allowed_origins and "*" not in self.allowed_origins:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers
@@ -218,7 +221,7 @@ class CORSConfig:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
             headers["Access-Control-Max-Age"] = str(self.max_age)
-        if self.allow_credentials is True:
+        if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
 
@@ -806,10 +809,11 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         extracted_origin_header = extract_origin_header(event.resolved_headers_field)
-        if extracted_origin_header is None:
-            self.response.headers.update(cors.to_dict("*"))
-        else:
+
+        if extracted_origin_header in cors.allowed_origins:
             self.response.headers.update(cors.to_dict(extracted_origin_header))
+        if extracted_origin_header is not None and "*" in cors.allowed_origins:
+            self.response.headers.update(cors.to_dict("*"))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""

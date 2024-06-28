@@ -324,7 +324,7 @@ def test_no_matches():
 def test_cors():
     # GIVEN a function with cors=True
     # AND http method set to GET
-    app = ApiGatewayResolver()
+    app = ApiGatewayResolver(cors=CORSConfig("https://aws.amazon.com", allow_credentials=True))
 
     @app.get("/my/path", cors=True)
     def with_cors() -> Response:
@@ -345,7 +345,7 @@ def test_cors():
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.TEXT_HTML]
     assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
-    assert "Access-Control-Allow-Credentials" not in headers
+    assert "Access-Control-Allow-Credentials" in headers
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
@@ -354,7 +354,7 @@ def test_cors():
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
-def test_cors_no_origin():
+def test_cors_no_request_origin():
     # GIVEN a function with cors=True
     # AND http method set to GET
     app = ApiGatewayResolver()
@@ -366,8 +366,41 @@ def test_cors_no_origin():
     def handler(event, context):
         return app.resolve(event, context)
 
-    # remove origin header from request
-    del LOAD_GW_EVENT["multiValueHeaders"]["Origin"]
+    event = LOAD_GW_EVENT.copy()
+    del event["headers"]["Origin"]
+    del event["multiValueHeaders"]["Origin"]
+
+    # WHEN calling the event handler
+    result = handler(LOAD_GW_EVENT, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert "Access-Control-Allow-Credentials" not in headers
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_cors_allow_all_request_origins():
+    # GIVEN a function with cors=True
+    # AND http method set to GET
+    app = ApiGatewayResolver(
+        cors=CORSConfig(
+            allow_origin="*",
+            allow_credentials=True,
+        ),
+    )
+
+    @app.get("/my/path", cors=True)
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    @app.get("/without-cors")
+    def without_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
 
     # WHEN calling the event handler
     result = handler(LOAD_GW_EVENT, None)
@@ -379,6 +412,11 @@ def test_cors_no_origin():
     assert headers["Access-Control-Allow-Origin"] == ["*"]
     assert "Access-Control-Allow-Credentials" not in headers
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
+
+    # THEN for routes without cors flag return no cors headers
+    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    result = handler(mock_event, None)
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
 def test_cors_preflight_body_is_empty_not_null():
