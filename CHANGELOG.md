@@ -4,10 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.40.1"></a>
+## [v2.40.1] - 2024-06-28
 ## Maintenance
 
-* **deps-dev:** bump cfn-lint from 1.3.7 to 1.4.1 ([#4646](https://github.com/aws-powertools/powertools-lambda-python/issues/4646))
-* **deps-dev:** bump sentry-sdk from 2.7.0 to 2.7.1 ([#4645](https://github.com/aws-powertools/powertools-lambda-python/issues/4645))
+* version bump
+* **ci:** new pre-release 2.40.1a1 ([#4653](https://github.com/aws-powertools/powertools-lambda-python/issues/4653))
 
 
 <a name="v2.40.0"></a>
@@ -5066,7 +5069,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.40.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.40.1...HEAD
+[v2.40.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.40.0...v2.40.1
 [v2.40.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.39.1...v2.40.0
 [v2.39.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.39.0...v2.39.1
 [v2.39.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.38.1...v2.39.0
