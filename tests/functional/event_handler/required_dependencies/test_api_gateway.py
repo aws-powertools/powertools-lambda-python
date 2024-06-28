@@ -48,6 +48,7 @@ def read_media(file_name: str) -> bytes:
 
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+LOAD_GW_EVENT_NO_ORIGIN = load_event("apiGatewayProxyEventNoOrigin.json")
 LOAD_GW_EVENT_TRAILING_SLASH = load_event("apiGatewayProxyEventPathTrailingSlash.json")
 
 
@@ -366,12 +367,10 @@ def test_cors_no_request_origin():
     def handler(event, context):
         return app.resolve(event, context)
 
-    event = LOAD_GW_EVENT.copy()
-    del event["headers"]["Origin"]
-    del event["multiValueHeaders"]["Origin"]
+    event = LOAD_GW_EVENT_NO_ORIGIN
 
     # WHEN calling the event handler
-    result = handler(LOAD_GW_EVENT, None)
+    result = handler(event, None)
 
     # THEN the headers should include cors headers
     assert "multiValueHeaders" in result
