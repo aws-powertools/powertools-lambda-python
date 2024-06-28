@@ -251,3 +251,41 @@ def test_include_router_merges_context():
     app.include_router(router)
 
     assert app.context == router.context
+
+
+def test_include_router_access_current_event():
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    # GIVEN An instance of AppSyncResolver, a Router instance, and a resolver function registered with the router
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.resolver(field_name="createSomething")
+    def get_user(id_user: str) -> dict:
+        return router.current_event.identity.sub
+
+    app.include_router(router)
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the current_event
+    assert ret == mock_event["identity"]["sub"]
+
+
+def test_app_access_current_event():
+    # Check whether we can handle an example appsync direct resolver
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    # GIVEN An instance of AppSyncResolver and a resolver function registered with the app
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    def get_user(id_user: str) -> dict:
+        return app.current_event.identity.sub
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the current_event
+    assert ret == mock_event["identity"]["sub"]

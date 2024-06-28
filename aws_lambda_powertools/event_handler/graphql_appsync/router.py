@@ -1,11 +1,16 @@
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 from aws_lambda_powertools.event_handler.graphql_appsync._registry import ResolverRegistry
 from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseRouter
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
+from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 
 
 class Router(BaseRouter):
     context: dict
+    current_batch_event: List[AppSyncResolverEvent] = []
+    current_event: Optional[AppSyncResolverEvent] = None
+    lambda_context: Optional[LambdaContext] = None
 
     def __init__(self):
         self.context = {}  # early init as customers might add context before event resolution
