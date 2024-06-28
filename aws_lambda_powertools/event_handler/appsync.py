@@ -161,6 +161,7 @@ class AppSyncResolver(Router):
 
         logger.debug("Processing direct resolver event")
 
+        self.current_event = data_model(event)
         resolver = self._resolver_registry.find_resolver(self.current_event.type_name, self.current_event.field_name)
         if not resolver:
             raise ValueError(f"No resolver found for '{self.current_event.type_name}.{self.current_event.field_name}'")
@@ -307,6 +308,7 @@ class AppSyncResolver(Router):
         """
         logger.debug("Processing batch resolver event")
 
+        self.current_batch_event = [data_model(e) for e in event]
         type_name, field_name = self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
 
         resolver = self._batch_resolver_registry.find_resolver(type_name, field_name)
