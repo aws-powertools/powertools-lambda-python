@@ -261,7 +261,7 @@ def test_include_router_access_current_event():
     router = Router()
 
     @router.resolver(field_name="createSomething")
-    def get_user(id_user: str) -> dict:
+    def get_user(id: str) -> dict:  # noqa AA03 VNE003
         return router.current_event.identity.sub
 
     app.include_router(router)
@@ -281,7 +281,7 @@ def test_app_access_current_event():
     app = AppSyncResolver()
 
     @app.resolver(field_name="createSomething")
-    def get_user(id_user: str) -> dict:
+    def get_user(id: str) -> dict:  # noqa AA03 VNE003
         return app.current_event.identity.sub
 
     # WHEN we resolve the event

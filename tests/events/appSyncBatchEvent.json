@@ -1,7 +1,7 @@
 [
   {
     "arguments": {
-      "id": "1"
+      "user_id": "1"
     },
     "identity": {
       "sub": "192879fc-a240-4bf1-ab5a-d6a00f3063f9",
@@ -23,7 +23,7 @@
   },
   {
     "arguments": {
-      "id": "2"
+      "user_id": "2"
     },
     "identity": {
       "sub": "192879fc-a240-4bf1-ab5a-d6a00f3063f9",
