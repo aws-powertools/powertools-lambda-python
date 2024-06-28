@@ -49,10 +49,6 @@ class AppSyncResolver(Router):
         super().__init__()
         self.context = {}  # early init as customers might add context before event resolution
 
-        self.current_batch_event: List[AppSyncResolverEvent] = []
-        self.current_event: Optional[AppSyncResolverEvent] = None
-        self.lambda_context: Optional[LambdaContext] = None
-
     def __call__(
         self,
         event: dict,
@@ -139,10 +135,13 @@ class AppSyncResolver(Router):
         """
 
         self.lambda_context = context
+        Router.lambda_context = context
 
         if isinstance(event, list):
+            Router.current_batch_event = [data_model(e) for e in event]
             response = self._call_batch_resolver(event=event, data_model=data_model)
         else:
+            Router.current_event = data_model(event)
             response = self._call_single_resolver(event=event, data_model=data_model)
 
         self.clear_context()
