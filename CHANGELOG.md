@@ -6,6 +6,8 @@
 
 ## Maintenance
 
+* **deps-dev:** bump cfn-lint from 1.3.7 to 1.4.1 ([#4646](https://github.com/aws-powertools/powertools-lambda-python/issues/4646))
+* **deps-dev:** bump sentry-sdk from 2.7.0 to 2.7.1 ([#4645](https://github.com/aws-powertools/powertools-lambda-python/issues/4645))
 
 
 <a name="v2.40.0"></a>
