@@ -4,13 +4,24 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps-dev:** bump ruff from 0.4.10 to 0.5.0 ([#4644](https://github.com/aws-powertools/powertools-lambda-python/issues/4644))
+
 
 <a name="v2.40.1"></a>
 ## [v2.40.1] - 2024-06-28
+## Bug Fixes
+
+* **event_handler:** current_event regression AppSyncResolver Router ([#4652](https://github.com/aws-powertools/powertools-lambda-python/issues/4652))
+
 ## Maintenance
 
 * version bump
 * **ci:** new pre-release 2.40.1a1 ([#4653](https://github.com/aws-powertools/powertools-lambda-python/issues/4653))
+* **ci:** new pre-release 2.40.1a0 ([#4648](https://github.com/aws-powertools/powertools-lambda-python/issues/4648))
+* **deps-dev:** bump cfn-lint from 1.3.7 to 1.4.1 ([#4646](https://github.com/aws-powertools/powertools-lambda-python/issues/4646))
+* **deps-dev:** bump sentry-sdk from 2.7.0 to 2.7.1 ([#4645](https://github.com/aws-powertools/powertools-lambda-python/issues/4645))
 
 
 <a name="v2.40.0"></a>
