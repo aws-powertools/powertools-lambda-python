@@ -67,8 +67,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:73__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73__{: .copyMe}:clipboard: |
+    | x86          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:75__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75__{: .copyMe}:clipboard: |
 
     === "AWS Console"
 
@@ -84,70 +84,70 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
                 | Region name               | Region code          | Layer ARN                                                                                                 |
                 | ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------- |
-                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-                | Canada (West)             | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard: |
+                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:   |
+                | Canada (West)             | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:   |
+                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:   |
+                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:   |
+                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:   |
+                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:     |
+                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
+                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:75**{: .copyMe}:clipboard:      |
 
 
             === "arm64"
 
                 | Region name               | Region code          | Layer ARN                                                                                                       |
                 | ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard: |
+                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:   |
                 | Canada (West)             | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:   |
+                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:   |
+                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:   |
+                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:   |
+                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:     |
+                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
+                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:75**{: .copyMe}:clipboard:      |
 
 
     === "Infrastructure as Code (IaC)"
@@ -237,7 +237,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:75 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
