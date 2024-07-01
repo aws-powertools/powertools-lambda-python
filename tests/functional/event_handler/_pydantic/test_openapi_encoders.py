@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic.color import Color
 
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
@@ -230,6 +230,7 @@ def test_openapi_encode_custom_serializer_sequences():
     assert result == ["serialized"]
 
 
+@pytest.mark.usefixtures("pydanticv2_only")
 def test_openapi_encode_custom_serializer_pydantic():
     # GIVEN a sequence with a custom class
     class CustomClass:
@@ -238,9 +239,7 @@ def test_openapi_encode_custom_serializer_pydantic():
     class Order(BaseModel):
         kind: CustomClass
 
-        # maintenance: deprecate in V3; becomes model_config =ConfigDict(<directive>=True)
-        class Config:
-            arbitrary_types_allowed = True
+        model_config = ConfigDict(arbitrary_types_allowed=True)
 
     order = Order(kind=CustomClass())
 
