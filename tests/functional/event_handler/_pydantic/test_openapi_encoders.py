@@ -197,8 +197,7 @@ def test_openapi_encode_with_error():
 
 def test_openapi_encode_custom_serializer_nested_dict():
     # GIVEN a nested dictionary with a custom class
-    class CustomClass(object):
-        __slots__ = []
+    class CustomClass: ...
 
     nested_dict = {"a": {"b": CustomClass()}}
 
@@ -211,3 +210,21 @@ def test_openapi_encode_custom_serializer_nested_dict():
 
     # THEN we should get the custom serializer output
     assert result == {"a": {"b": "serialized"}}
+
+
+def test_openapi_encode_custom_serializer_sequences():
+    # GIVEN a sequence with a custom class
+    class CustomClass:
+        __slots__ = []
+
+    seq = [CustomClass()]
+
+    # AND a custom serializer
+    def serializer(value):
+        return "serialized"
+
+    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
+    result = jsonable_encoder(seq, custom_serializer=serializer)
+
+    # THEN we should get the custom serializer output
+    assert result == ["serialized"]

@@ -130,6 +130,7 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_none=exclude_none,
                 exclude_defaults=exclude_defaults,
                 exclude_unset=exclude_unset,
+                custom_serializer=custom_serializer,
             )
 
         # Other types
@@ -209,7 +210,8 @@ def _dump_dict(
 
     Parameters
     ----------
-    custom_serializer
+    custom_serializer : Callable, optional
+        A custom serializer to use for encoding the object, when everything else fails.
     """
     encoded_dict = {}
     allowed_keys = set(obj.keys())
@@ -250,9 +252,10 @@ def _dump_sequence(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> List[Any]:
     """
-    Dump a sequence to a list, using the same parameters as jsonable_encoder
+    Dump a sequence to a list, using the same parameters as jsonable_encoder.
     """
     encoded_list = []
     for item in obj:
@@ -265,6 +268,7 @@ def _dump_sequence(
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             ),
         )
     return encoded_list
