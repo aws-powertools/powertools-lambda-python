@@ -95,6 +95,7 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
 
         # Enums

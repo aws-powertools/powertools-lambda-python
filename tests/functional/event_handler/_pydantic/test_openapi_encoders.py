@@ -253,3 +253,25 @@ def test_openapi_encode_custom_serializer_pydantic():
 
     # THEN we should get the custom serializer output
     assert result == {"kind": "serialized"}
+
+
+def test_openapi_encode_custom_serializer_dataclasses():
+    # GIVEN a sequence with a custom class
+    class CustomClass:
+        __slots__ = []
+
+    @dataclass
+    class Order:
+        kind: CustomClass
+
+    order = Order(kind=CustomClass())
+
+    # AND a custom serializer
+    def serializer(value):
+        return "serialized"
+
+    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
+    result = jsonable_encoder(order, custom_serializer=serializer)
+
+    # THEN we should get the custom serializer output
+    assert result == {"kind": "serialized"}
