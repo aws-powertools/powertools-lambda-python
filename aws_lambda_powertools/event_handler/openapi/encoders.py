@@ -115,8 +115,9 @@ def jsonable_encoder(  # noqa: PLR0911
                 include=include,
                 exclude=exclude,
                 by_alias=by_alias,
-                exclude_none=exclude_none,
                 exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
 
         # Sequences
@@ -201,9 +202,14 @@ def _dump_dict(
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> Dict[str, Any]:
     """
     Dump a dict to a dict, using the same parameters as jsonable_encoder
+
+    Parameters
+    ----------
+    custom_serializer
     """
     encoded_dict = {}
     allowed_keys = set(obj.keys())
@@ -222,12 +228,14 @@ def _dump_dict(
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_value = jsonable_encoder(
                 value,
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_dict[encoded_key] = encoded_value
     return encoded_dict
