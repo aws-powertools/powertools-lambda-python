@@ -156,6 +156,7 @@ def jsonable_encoder(  # noqa: PLR0911
             exclude_none=exclude_none,
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
+            custom_serializer=custom_serializer,
         )
     except ValueError as exc:
         raise SerializationError(
@@ -287,6 +288,7 @@ def _dump_other(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> Any:
     """
     Dump an object to a hashable object, using the same parameters as jsonable_encoder
@@ -308,6 +310,7 @@ def _dump_other(
         exclude_unset=exclude_unset,
         exclude_defaults=exclude_defaults,
         exclude_none=exclude_none,
+        custom_serializer=custom_serializer,
     )
 
 
