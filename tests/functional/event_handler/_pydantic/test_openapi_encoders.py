@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List
 
 import pytest
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from pydantic.color import Color
 
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
@@ -228,30 +228,6 @@ def test_openapi_encode_custom_serializer_sequences():
 
     # THEN we should get the custom serializer output
     assert result == ["serialized"]
-
-
-@pytest.mark.usefixtures("pydanticv2_only")
-def test_openapi_encode_custom_serializer_pydantic():
-    # GIVEN a sequence with a custom class
-    class CustomClass:
-        __slots__ = []
-
-    class Order(BaseModel):
-        kind: CustomClass
-
-        model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    order = Order(kind=CustomClass())
-
-    # AND a custom serializer
-    def serializer(value):
-        return "serialized"
-
-    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
-    result = jsonable_encoder(order, custom_serializer=serializer)
-
-    # THEN we should get the custom serializer output
-    assert result == {"kind": "serialized"}
 
 
 def test_openapi_encode_custom_serializer_dataclasses():

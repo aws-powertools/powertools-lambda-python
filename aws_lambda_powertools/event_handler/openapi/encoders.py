@@ -81,7 +81,6 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
                 exclude_defaults=exclude_defaults,
-                custom_serializer=custom_serializer,
             )
 
         # Dataclasses
@@ -174,7 +173,6 @@ def _dump_base_model(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
-    custom_serializer: Optional[Callable[[Any], str]] = None,
 ):
     """
     Dump a BaseModel object to a dict, using the same parameters as jsonable_encoder
@@ -196,7 +194,6 @@ def _dump_base_model(
         obj_dict,
         exclude_none=exclude_none,
         exclude_defaults=exclude_defaults,
-        custom_serializer=custom_serializer,
     )
 
 
