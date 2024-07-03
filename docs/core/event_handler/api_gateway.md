@@ -51,15 +51,45 @@ This is the sample infrastructure for API Gateway and Lambda Function URLs we ar
 
 ### Event Resolvers
 
-Before you decorate your functions to handle a given path and HTTP method(s), you need to initialize a resolver.
+Before you decorate your functions to handle a given path and HTTP method(s), you need to initialize a resolver. A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
+By default, we will use `APIGatewayRestResolver` throughout the documentation. You can use any of the following:
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, `LambdaFunctionUrlResolver`, and `VPCLatticeResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
+| Resolver                                                | AWS service                            |
+| ------------------------------------------------------- | -------------------------------------- |
+| **[`APIGatewayRestResolver`](#api-gateway-rest-api)**   | Amazon API Gateway REST API            |
+| **[`APIGatewayHttpResolver`](#api-gateway-http-api)**   | Amazon API Gateway HTTP API            |
+| **[`ALBResolver`](#application-load-balancer)**         | Amazon Application Load Balancer (ALB) |
+| **[`LambdaFunctionUrlResolver`](#lambda-function-url)** | AWS Lambda Function URL                |
+| **[`VPCLatticeResolver`](#vpc-lattice)**                | Amazon VPC Lattice                     |
 
-???+ info "Auto-serialization"
-    We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
-    return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
+#### Response auto-serialization
+
+> Want full control of the response, headers and status code? [Read about `Response` object here](#fine-grained-responses).
+
+For your convenience, we automatically perform these if you return a dictionary response:
+
+1. Auto-serialize `dictionary` responses to JSON and trim it
+2. Include the response under each resolver's equivalent of a `body`
+3. Set `Content-Type` to `application/json`
+4. Set `status_code` to 200 (OK)
+
+=== "getting_started_resolvers_response_serialization.py"
+
+    ```python hl_lines="9"
+    --8<-- "examples/event_handler_rest/src/getting_started_resolvers_response_serialization.py"
+    ```
+
+    1. This dictionary will be serialized, trimmed, and included under the `body` key
+
+=== "getting_started_resolvers_response_serialization_output.json"
+
+    ```json hl_lines="8"
+    --8<-- "examples/event_handler_rest/src/getting_started_resolvers_response_serialization_output.json"
+    ```
+
+??? info "Coming from Flask? We also support tuple response"
+    You can optionally set a different HTTP status code as the second argument of the tuple.
 
     ```python hl_lines="15 16"
     --8<-- "examples/event_handler_rest/src/getting_started_return_tuple.py"
@@ -462,16 +492,16 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
 With data validation enabled, we natively support serializing the following data types to JSON:
 
-| Data type                                                            | Serialized type                                                                  |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Pydantic models**                                                  | `dict`                                                                           |
-| **Python Dataclasses**                                               | `dict`                                                                           |
-| **Enum**                                                             | Enum values                                                                      |
-| **Datetime**                                                         | Datetime ISO format string                                                       |
-| **Decimal**                                                          | `int` if no exponent, or `float`                                                 |
-| **Path**                                                             | `str`                                                                            |
-| **UUID**                                                             | `str`                                                                            |
-| **Set**                                                              | `list`                                                                           |
+| Data type                                                            | Serialized type                                                                                                                               |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pydantic models**                                                  | `dict`                                                                                                                                        |
+| **Python Dataclasses**                                               | `dict`                                                                                                                                        |
+| **Enum**                                                             | Enum values                                                                                                                                   |
+| **Datetime**                                                         | Datetime ISO format string                                                                                                                    |
+| **Decimal**                                                          | `int` if no exponent, or `float`                                                                                                              |
+| **Path**                                                             | `str`                                                                                                                                         |
+| **UUID**                                                             | `str`                                                                                                                                         |
+| **Set**                                                              | `list`                                                                                                                                        |
 | **Python primitives** _(dict, string, sequences, numbers, booleans)_ | [Python's default JSON serializable types](https://docs.python.org/3/library/json.html#encoders-and-decoders){target="_blank" rel="nofollow"} |
 
 ???+ info "See [custom serializer section](#custom-serializer) for bringing your own."

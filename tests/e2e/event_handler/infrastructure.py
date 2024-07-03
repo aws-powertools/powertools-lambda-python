@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from aws_cdk import CfnOutput
 from aws_cdk import aws_apigateway as apigwv1
@@ -17,12 +17,12 @@ class EventHandlerStack(BaseInfrastructure):
     def create_resources(self):
         functions = self.create_lambda_functions()
 
-        self._create_alb(function=functions["AlbHandler"])
+        self._create_alb(function=[functions["AlbHandler"], functions["AlbHandlerWithBodyNone"]])
         self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
-    def _create_alb(self, function: Function):
+    def _create_alb(self, function: List[Function]):
         vpc = ec2.Vpc.from_lookup(
             self.stack,
             "VPC",
@@ -33,14 +33,18 @@ class EventHandlerStack(BaseInfrastructure):
         alb = elbv2.ApplicationLoadBalancer(self.stack, "ALB", vpc=vpc, internet_facing=True)
         CfnOutput(self.stack, "ALBDnsName", value=alb.load_balancer_dns_name)
 
-        self._create_alb_listener(alb=alb, name="Basic", port=80, function=function)
+        # Function with Body
+        self._create_alb_listener(alb=alb, name="Basic", port=80, function=function[0])
         self._create_alb_listener(
             alb=alb,
             name="MultiValueHeader",
             port=8080,
-            function=function,
+            function=function[0],
             attributes={"lambda.multi_value_headers.enabled": "true"},
         )
+
+        # Function without Body
+        self._create_alb_listener(alb=alb, name="BasicWithoutBody", port=8081, function=function[1])
 
     def _create_alb_listener(
         self,
