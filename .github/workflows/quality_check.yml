@@ -77,6 +77,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # 4.5.0
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           env_vars: PYTHON
           name: aws-lambda-powertools-python-codecov
