@@ -1820,3 +1820,21 @@ def test_route_match_prioritize_full_match():
     # THEN the static_handler should have been called, because it fully matches the path directly
     response_body = json.loads(response["body"])
     assert response_body["hello"] == "static"
+
+
+def test_alb_empty_response_object():
+    # GIVEN an ALB Resolver
+    app = ALBResolver()
+    event = {"path": "/my/request", "httpMethod": "GET"}
+
+    # AND route returns a Response object with empty body
+    @app.get("/my/request")
+    def opa():
+        return Response(status_code=200, content_type=content_types.APPLICATION_JSON)
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN body should be converted to an empty string
+    assert result["statusCode"] == 200
+    assert result["body"] == ""
