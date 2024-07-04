@@ -21,7 +21,7 @@ from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreaming
 if TYPE_CHECKING:
     from mmap import mmap
 
-    from mypy_boto3_s3 import Client
+    from mypy_boto3_s3.client import S3Client
 
     _CData = TypeVar("_CData")
 
@@ -52,7 +52,7 @@ class _S3SeekableIO(IO[bytes]):
         bucket: str,
         key: str,
         version_id: Optional[str] = None,
-        boto3_client=Optional["Client"],
+        boto3_client: Optional["S3Client"] = None,
         **sdk_options,
     ):
         self.bucket = bucket
@@ -67,7 +67,7 @@ class _S3SeekableIO(IO[bytes]):
         # Caches the size of the object
         self._size: Optional[int] = None
 
-        self._s3_client: Optional["Client"] = boto3_client
+        self._s3_client = boto3_client
         self._raw_stream: Optional[PowertoolsStreamingBody] = None
 
         self._sdk_options = sdk_options
@@ -78,7 +78,7 @@ class _S3SeekableIO(IO[bytes]):
             self._sdk_options["VersionId"] = version_id
 
     @property
-    def s3_client(self) -> "Client":
+    def s3_client(self) -> "S3Client":
         """
         Returns a boto3 S3 client
         """

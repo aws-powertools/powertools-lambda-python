@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 
 import boto3
 import requests
-from mypy_boto3_lambda import LambdaClient
+from mypy_boto3_lambda.client import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 from pydantic import BaseModel
 from requests import Request, Response

@@ -81,7 +81,7 @@ class TraceFetcher:
         self.filter_expression = filter_expression
         self.start_date = start_date
         self.end_date = end_date or self.start_date + timedelta(minutes=5)
-        self.xray_client: XRayClient = xray_client or boto3.client("xray")
+        self.xray_client = xray_client or boto3.client("xray")
         self.trace_documents: Dict[str, TraceDocument] = {}
         self.subsegments: List[TraceSubsegment] = []
         self.exclude_segment_name = exclude_segment_name or self.default_exclude_seg_name

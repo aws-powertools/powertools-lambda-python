@@ -23,7 +23,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
 )
 
 if TYPE_CHECKING:
-    from mypy_boto3_dynamodb import DynamoDBClient
+    from mypy_boto3_dynamodb.client import DynamoDBClient
     from mypy_boto3_dynamodb.type_defs import AttributeValueTypeDef
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: "DynamoDBClient" | None = None,
+        boto3_client: Optional[DynamoDBClient] = None,
     ):
         """
         Initialize the DynamoDB client
@@ -71,7 +71,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for hashed representation of the parts of the event used for validation
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
-        boto3_session : boto3.Session, optional
+        boto3_session : boto3.session.Session, optional
             Boto3 session to use for AWS API communication
         boto3_client : DynamoDBClient, optional
             Boto3 DynamoDB Client to use, boto3_session and boto_config will be ignored if both are provided
@@ -91,11 +91,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             >>>     return {"StatusCode": 200}
         """
         if boto3_client is None:
-            self._boto_config = boto_config or Config()
-            self._boto3_session: boto3.Session = boto3_session or boto3.session.Session()
-            self.client: "DynamoDBClient" = self._boto3_session.client("dynamodb", config=self._boto_config)
-        else:
-            self.client = boto3_client
+            boto3_client = (boto3_session or boto3.session.Session()).client("dynamodb", config=boto_config)
+        self.client = boto3_client
 
         user_agent.register_feature_to_client(client=self.client, feature="idempotency")
 
@@ -297,7 +294,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
-        expression_attr_values: Dict[str, "AttributeValueTypeDef"] = {
+        expression_attr_values: Dict[str, AttributeValueTypeDef] = {
             ":expiry": {"N": str(data_record.expiry_timestamp)},
             ":response_data": {"S": data_record.response_data},
             ":status": {"S": data_record.status},
