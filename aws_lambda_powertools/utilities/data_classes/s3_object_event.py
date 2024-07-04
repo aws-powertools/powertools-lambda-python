@@ -1,8 +1,6 @@
-from typing import MutableMapping, Optional
+from typing import Dict, Optional
 
-from requests.structures import CaseInsensitiveDict
-
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 
 class S3ObjectContext(DictWrapper):
@@ -64,7 +62,7 @@ class S3ObjectUserRequest(DictWrapper):
         return self["url"]
 
     @property
-    def headers(self) -> MutableMapping[str, str]:
+    def headers(self) -> Dict[str, str]:
         """A map of string to strings containing the HTTP headers and their values from the original call,
         excluding any authorization-related headers.
 

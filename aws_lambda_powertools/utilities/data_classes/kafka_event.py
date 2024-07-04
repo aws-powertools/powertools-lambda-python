@@ -1,10 +1,8 @@
 import base64
 from functools import cached_property
-from typing import Any, Dict, Iterator, List, MutableMapping, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
-from requests.structures import CaseInsensitiveDict
-
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 
 class KafkaEventRecord(DictWrapper):
@@ -64,9 +62,9 @@ class KafkaEventRecord(DictWrapper):
         return self["headers"]
 
     @cached_property
-    def decoded_headers(self) -> MutableMapping[str, bytes]:
+    def decoded_headers(self) -> Dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
-        return CaseInsensitiveDict({k: bytes(v) for chunk in self.headers for k, v in chunk.items()})
+        return CaseInsensitiveDict((k, bytes(v)) for chunk in self.headers for k, v in chunk.items())
 
 
 class KafkaEvent(DictWrapper):

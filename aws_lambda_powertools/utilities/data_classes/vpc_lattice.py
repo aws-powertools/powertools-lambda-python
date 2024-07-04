@@ -1,13 +1,15 @@
 from functools import cached_property
-from typing import Any, Dict, MutableMapping, Optional
-
-from requests.structures import CaseInsensitiveDict
+from typing import Any, Dict, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
     HttpApiHeadersSerializer,
 )
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    CaseInsensitiveDict,
+    DictWrapper,
+)
 from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
 
 
@@ -23,7 +25,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         return self._json_deserializer(self.decoded_body)
 
     @property
-    def headers(self) -> MutableMapping[str, str]:
+    def headers(self) -> Dict[str, str]:
         """The VPC Lattice event headers."""
         return CaseInsensitiveDict(self["headers"])
 
@@ -73,8 +75,8 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         return self["query_string_parameters"]
 
     @cached_property
-    def resolved_headers_field(self) -> MutableMapping[str, Any]:
-        return CaseInsensitiveDict({k: v.split(",") if "," in v else v for k, v in self.headers.items()})
+    def resolved_headers_field(self) -> Dict[str, Any]:
+        return CaseInsensitiveDict((k, v.split(",") if "," in v else v) for k, v in self.headers.items())
 
 
 class vpcLatticeEventV2Identity(DictWrapper):

@@ -1,6 +1,4 @@
-from typing import Any, Dict, List, MutableMapping
-
-from requests.structures import CaseInsensitiveDict
+from typing import Any, Dict, List
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -9,6 +7,7 @@ from aws_lambda_powertools.shared.headers_serializer import (
 )
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseProxyEvent,
+    CaseInsensitiveDict,
     DictWrapper,
 )
 
@@ -42,11 +41,11 @@ class ALBEvent(BaseProxyEvent):
         return self.multi_value_query_string_parameters or super().resolved_query_string_parameters
 
     @property
-    def multi_value_headers(self) -> MutableMapping[str, List[str]]:
+    def multi_value_headers(self) -> Dict[str, List[str]]:
         return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
-    def resolved_headers_field(self) -> MutableMapping[str, Any]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         return self.multi_value_headers or self.headers
 
     def header_serializer(self) -> BaseHeadersSerializer:

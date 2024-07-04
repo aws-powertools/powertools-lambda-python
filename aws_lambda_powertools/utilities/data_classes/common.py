@@ -1,11 +1,53 @@
 import base64
 import json
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Mapping, MutableMapping, Optional
-
-from requests.structures import CaseInsensitiveDict
+from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+
+
+class CaseInsensitiveDict(dict):
+    """Case insensitive dict implementation. Assumes string keys only."""
+
+    def __init__(self, data=None, **kwargs):
+        super().__init__()
+        self.update(data, **kwargs)
+
+    def get(self, k, default=None):
+        return super().get(k.lower(), default)
+
+    def pop(self, k):
+        return super().pop(k.lower())
+
+    def setdefault(self, k, default=None):
+        return super().setdefault(k.lower(), default)
+
+    def update(self, data=None, **kwargs):
+        if data is not None:
+            if isinstance(data, Mapping):
+                super().update((k.lower(), v) for k, v in data.items())
+            else:
+                super().update((k.lower(), v) for k, v in data)
+        super().update((k.lower(), v) for k, v in kwargs)
+
+    def __contains__(self, k):
+        return super().__contains__(k.lower())
+
+    def __delitem__(self, k):
+        super().__delitem__(k.lower())
+
+    def __eq__(self, other):
+        if not isinstance(other, Mapping):
+            return False
+        if not isinstance(other, CaseInsensitiveDict):
+            other = CaseInsensitiveDict(other)
+        return super().__eq__(other)
+
+    def __getitem__(self, k):
+        return super().__getitem__(k.lower())
+
+    def __setitem__(self, k, v):
+        super().__setitem__(k.lower(), v)
 
 
 class DictWrapper(Mapping):
@@ -93,7 +135,7 @@ class DictWrapper(Mapping):
 
 class BaseProxyEvent(DictWrapper):
     @property
-    def headers(self) -> MutableMapping[str, str]:
+    def headers(self) -> Dict[str, str]:
         return CaseInsensitiveDict(self.get("headers"))
 
     @property
@@ -116,7 +158,7 @@ class BaseProxyEvent(DictWrapper):
         return {k: v.split(",") for k, v in self.query_string_parameters.items()}
 
     @property
-    def resolved_headers_field(self) -> MutableMapping[str, str]:
+    def resolved_headers_field(self) -> Dict[str, str]:
         """
         This property determines the appropriate header to be used
         as a trusted source for validating OpenAPI.

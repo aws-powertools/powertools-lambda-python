@@ -1,12 +1,11 @@
 import enum
 import re
-from typing import Any, Dict, List, MutableMapping, Optional
-
-from requests.structures import CaseInsensitiveDict
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
     BaseRequestContextV2,
+    CaseInsensitiveDict,
     DictWrapper,
 )
 
@@ -142,7 +141,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return self["httpMethod"]
 
     @property
-    def headers(self) -> MutableMapping[str, str]:
+    def headers(self) -> Dict[str, str]:
         return CaseInsensitiveDict(self["headers"])
 
     @property
@@ -223,7 +222,7 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         return self["cookies"]
 
     @property
-    def headers(self) -> MutableMapping[str, str]:
+    def headers(self) -> Dict[str, str]:
         """Http headers"""
         return CaseInsensitiveDict(self["headers"])
 

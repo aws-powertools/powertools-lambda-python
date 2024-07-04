@@ -1,8 +1,6 @@
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-from requests.structures import CaseInsensitiveDict
-
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 
 def get_identity_object(identity: Optional[dict]) -> Any:
@@ -188,7 +186,7 @@ class AppSyncResolverEvent(DictWrapper):
         return self.get("source") or {}
 
     @property
-    def request_headers(self) -> MutableMapping[str, str]:
+    def request_headers(self) -> Dict[str, str]:
         """Request headers"""
         return CaseInsensitiveDict(self["request"]["headers"])
 
