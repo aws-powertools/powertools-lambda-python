@@ -94,6 +94,7 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
 
         # Enums
@@ -115,8 +116,9 @@ def jsonable_encoder(  # noqa: PLR0911
                 include=include,
                 exclude=exclude,
                 by_alias=by_alias,
-                exclude_none=exclude_none,
                 exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
 
         # Sequences
@@ -129,6 +131,7 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_none=exclude_none,
                 exclude_defaults=exclude_defaults,
                 exclude_unset=exclude_unset,
+                custom_serializer=custom_serializer,
             )
 
         # Other types
@@ -152,6 +155,7 @@ def jsonable_encoder(  # noqa: PLR0911
             exclude_none=exclude_none,
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
+            custom_serializer=custom_serializer,
         )
     except ValueError as exc:
         raise SerializationError(
@@ -201,9 +205,15 @@ def _dump_dict(
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> Dict[str, Any]:
     """
     Dump a dict to a dict, using the same parameters as jsonable_encoder
+
+    Parameters
+    ----------
+    custom_serializer : Callable, optional
+        A custom serializer to use for encoding the object, when everything else fails.
     """
     encoded_dict = {}
     allowed_keys = set(obj.keys())
@@ -222,12 +232,14 @@ def _dump_dict(
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_value = jsonable_encoder(
                 value,
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_dict[encoded_key] = encoded_value
     return encoded_dict
@@ -242,9 +254,10 @@ def _dump_sequence(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> List[Any]:
     """
-    Dump a sequence to a list, using the same parameters as jsonable_encoder
+    Dump a sequence to a list, using the same parameters as jsonable_encoder.
     """
     encoded_list = []
     for item in obj:
@@ -257,6 +270,7 @@ def _dump_sequence(
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             ),
         )
     return encoded_list
@@ -271,6 +285,7 @@ def _dump_other(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> Any:
     """
     Dump an object to a hashable object, using the same parameters as jsonable_encoder
@@ -292,6 +307,7 @@ def _dump_other(
         exclude_unset=exclude_unset,
         exclude_defaults=exclude_defaults,
         exclude_none=exclude_none,
+        custom_serializer=custom_serializer,
     )
 
 

@@ -30,6 +30,8 @@ from typing import (
     cast,
 )
 
+from typing_extensions import override
+
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
@@ -2659,3 +2661,24 @@ class ALBResolver(ApiGatewayResolver):
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string
         return ""
+
+    @override
+    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
+        """Convert the route's result to a Response
+
+        ALB requires a non-null body otherwise it converts as HTTP 5xx
+
+         3 main result types are supported:
+
+        - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
+          application/json
+        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
+        - Response: returned as is, and allows for more flexibility
+        """
+
+        # NOTE: Minor override for early return on Response with null body for ALB
+        if isinstance(result, Response) and result.body is None:
+            logger.debug("ALB doesn't allow None responses; converting to empty string")
+            result.body = ""
+
+        return super()._to_response(result)
