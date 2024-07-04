@@ -573,13 +573,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.4.2"
+version = "1.5.0"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "cfn_lint-1.4.2-py3-none-any.whl", hash = "sha256:7b884d0c79b7f3b40212df42299211e2c4f37e1598ac9f5d36c7e2142d23702c"},
-    {file = "cfn_lint-1.4.2.tar.gz", hash = "sha256:5f70df127c438117bb7f6da73e2310cebcf1901ba5ed001c6fbb0715c09efdde"},
+    {file = "cfn_lint-1.5.0-py3-none-any.whl", hash = "sha256:46ecae4dc6dc0eedf7a4169fbe24d893ff3125c3b53d05d3cab196f704709731"},
+    {file = "cfn_lint-1.5.0.tar.gz", hash = "sha256:7fdcf1b1393ace49d50f7e8f047f90811a1c463a1cd57489d4781a31f205a8d0"},
 ]
 
 [package.dependencies]
@@ -592,6 +592,7 @@ sympy = ">=1.0.0"
 typing-extensions = "*"
 
 [package.extras]
+full = ["jschema-to-python (>=1.2.3,<1.3.0)", "junit-xml (>=1.9,<2.0)", "pydot", "sarif-om (>=1.0.4,<1.1.0)"]
 graph = ["pydot"]
 junit = ["junit-xml (>=1.9,<2.0)"]
 sarif = ["jschema-to-python (>=1.2.3,<1.3.0)", "sarif-om (>=1.0.4,<1.1.0)"]
@@ -3703,4 +3704,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "61d5d07f5f0c606e362a5f66128cdff0ec10a1f0b3aeafc26cb9ed4145aa7354"
+content-hash = "e01e15ed5cf96086b1fa514a3e6bf19ae59198313d7a71d06c1102f907fb967e"
