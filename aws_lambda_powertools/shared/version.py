@@ -1,3 +1,3 @@
 """Exposes version constant to avoid circular dependencies."""
 
-VERSION = "2.40.2a3"
+VERSION = "2.40.2a4"

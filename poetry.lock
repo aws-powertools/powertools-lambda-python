@@ -190,17 +190,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.147.2a0"
+version = "2.147.3a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.147.2a0.tar.gz", hash = "sha256:b1765c956cecd96a30570963b66a40e99fae24b208ae8d0b83f969b5266bb7a2"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.147.2a0-py3-none-any.whl", hash = "sha256:bb580e65801db5f15f1841f2d4c205da3d5b1413842461d3f20a06e18f407fac"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.147.3a0.tar.gz", hash = "sha256:d09d2eb98bfadd25f60a22214e4bb9a0bf6aeb9eaf973e5df9010cbe3a8f3dce"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.147.3a0-py3-none-any.whl", hash = "sha256:05c967f1808f6412bd17ccc36f4de81c32f66828eb81ce97405f1ad79f817890"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.147.2,<3.0.0"
+aws-cdk-lib = ">=2.147.3,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.99.0,<2.0.0"
 publication = ">=0.0.3"
@@ -479,13 +479,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.200"
+version = "0.1.201"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.200.tar.gz", hash = "sha256:2616d0c295ace17fac0322acacf548c95acc328acdf70fb0fd6760a0ed21d470"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.200-py3-none-any.whl", hash = "sha256:4d65e953022ab9395aca1364fb31165b016d84a08e12eeaddb8bb39bacb72ef3"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.201.tar.gz", hash = "sha256:575efc142f960a017457c0c0ebe7d0ad28a86bf132fc2d11323dbc71aa912e9e"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.201-py3-none-any.whl", hash = "sha256:62fe20f1d4e7517b5375c025c8d24b8d17d9fa95046194f9a0a3904225a2576d"},
 ]
 
 [package.dependencies]
@@ -3704,4 +3704,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "e01e15ed5cf96086b1fa514a3e6bf19ae59198313d7a71d06c1102f907fb967e"
+content-hash = "c83bf717cceb3e34213ebf8e74262b532767ce8799e74b6b827259a394f0de95"
