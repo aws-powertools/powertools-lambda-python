@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
@@ -22,10 +24,11 @@ class OpenapiExtensions(BaseModel):
     # and then remove the 'openapi_extensions' field from the 'values' dictionary
 
     if PYDANTIC_V2:
+
         model_config = {"extra": "allow"}
 
         @parser_openapi_extension(mode="before")
-        def serialize_openapi_extension(self):
+        def serialize_openapi_extension_v2(self):
             if isinstance(self, dict) and self.get("openapi_extensions"):
                 self.update(self.get("openapi_extensions"))
                 self.pop("openapi_extensions", None)
@@ -35,7 +38,7 @@ class OpenapiExtensions(BaseModel):
     else:
 
         @parser_openapi_extension(pre=False, allow_reuse=True)
-        def serialize_openapi_extension(cls, values):
+        def serialize_openapi_extension_v1(cls, values):
             if values.get("openapi_extensions"):
                 values.update(values["openapi_extensions"])
                 del values["openapi_extensions"]
