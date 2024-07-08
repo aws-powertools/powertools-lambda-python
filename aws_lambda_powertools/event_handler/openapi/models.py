@@ -14,6 +14,13 @@ These models can be used to parse OpenAPI JSON/YAML files into Python objects, o
 
 
 class OpenapiExtensions(BaseModel):
+    """
+    This class serves as a Pydantic proxy model to add OpenAPI extensions.
+
+    OpenAPI extensions are arbitrary fields, so we remove openapi_extensions when dumping
+    and add only the provided value in the schema.
+    """
+
     openapi_extensions: Optional[Dict[str, Any]] = None
 
     # This rule is valid for Pydantic v1 and v2
@@ -474,7 +481,7 @@ class SecurityBase(OpenapiExtensions):
     description: Optional[str] = None
 
     if PYDANTIC_V2:
-        model_config = {"extra": "allow", "populate_by_name": True}
+        model_config = {"extra": "allow", "populate_by_name": True}  # type: ignore
 
     else:
 
