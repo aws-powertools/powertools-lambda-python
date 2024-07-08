@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 from pydantic import AnyUrl, BaseModel, Field
 
-from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
+from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild, parser_openapi_extension
 from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.shared.types import Annotated, Literal
 
@@ -11,6 +11,28 @@ from aws_lambda_powertools.shared.types import Annotated, Literal
 The code defines Pydantic models for the various OpenAPI objects like OpenAPI, PathItem, Operation, Parameter etc.
 These models can be used to parse OpenAPI JSON/YAML files into Python objects, or generate OpenAPI from Python data.
 """
+
+
+class OpenapiExtensions(BaseModel):
+    """OpenAPI extensions, see https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions"""
+
+    openapi_extensions: Optional[Dict[str, Any]] = None
+
+    if PYDANTIC_V2:
+
+        @parser_openapi_extension()
+        def serialize(self):
+            if self.openapi_extensions:
+                return self.openapi_extensions
+
+    else:
+
+        @parser_openapi_extension(pre=False, allow_reuse=True)
+        def check_json(cls, values):
+            if values.get("openapi_extensions"):
+                values.update(values["openapi_extensions"])
+                del values["openapi_extensions"]
+            return values
 
 
 # https://swagger.io/specification/#contact-object
@@ -77,7 +99,7 @@ class ServerVariable(BaseModel):
 
 
 # https://swagger.io/specification/#server-object
-class Server(BaseModel):
+class Server(OpenapiExtensions):
     url: Union[AnyUrl, str]
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
@@ -379,7 +401,7 @@ class Tag(BaseModel):
 
 
 # https://swagger.io/specification/#operation-object
-class Operation(BaseModel):
+class Operation(OpenapiExtensions):
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -436,7 +458,7 @@ class SecuritySchemeType(Enum):
     openIdConnect = "openIdConnect"
 
 
-class SecurityBase(BaseModel):
+class SecurityBase(OpenapiExtensions):
     type_: SecuritySchemeType = Field(alias="type")
     description: Optional[str] = None
 
@@ -534,7 +556,7 @@ SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer]
 
 
 # https://swagger.io/specification/#components-object
-class Components(BaseModel):
+class Components(OpenapiExtensions):
     schemas: Optional[Dict[str, Union[Schema, Reference]]] = None
     responses: Optional[Dict[str, Union[Response, Reference]]] = None
     parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
@@ -557,7 +579,7 @@ class Components(BaseModel):
 
 
 # https://swagger.io/specification/#openapi-object
-class OpenAPI(BaseModel):
+class OpenAPI(OpenapiExtensions):
     openapi: str
     info: Info
     jsonSchemaDialect: Optional[str] = None

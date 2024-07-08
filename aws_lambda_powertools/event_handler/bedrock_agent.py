@@ -102,6 +102,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+
+        openapi_extensions = None
         security = None
 
         return super(BedrockAgentResolver, self).get(
@@ -117,6 +119,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -137,6 +140,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().post(
@@ -152,6 +156,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -172,6 +177,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().put(
@@ -187,6 +193,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -207,6 +214,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable]] = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().patch(
@@ -222,6 +230,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -242,6 +251,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().delete(
@@ -257,6 +267,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 

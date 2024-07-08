@@ -120,3 +120,20 @@ def openapi31_schema():
 @pytest.fixture
 def security_scheme():
     return {"apiKey": APIKey(name="X-API-KEY", description="API Key", in_=APIKeyIn.header)}
+
+
+@pytest.fixture
+def openapi_extension_integration_detail():
+    return {
+        "type": "aws",
+        "httpMethod": "POST",
+        "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/..integration/invocations",
+        "responses": {"default": {"statusCode": "200"}},
+        "passthroughBehavior": "when_no_match",
+        "contentHandling": "CONVERT_TO_TEXT",
+    }
+
+
+@pytest.fixture
+def openapi_extension_validator_detail():
+    return "Validate body, query string parameters, and headers"
