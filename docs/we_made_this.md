@@ -43,6 +43,8 @@ A collection of articles explaining in detail how Powertools for AWS Lambda help
 
 * [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){:target="_blank"}
 
+* [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools and CDK](https://www.ranthebuilder.cloud/post/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
