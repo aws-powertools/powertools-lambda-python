@@ -41,7 +41,7 @@ sequence_types = tuple(sequence_annotation_to_type.keys())
 RequestErrorModel: Type[BaseModel] = create_model("Request")
 
 if PYDANTIC_V2:  # pragma: no cover # false positive; dropping in v3
-    from pydantic import TypeAdapter, ValidationError, model_serializer as parser_openapi_extension
+    from pydantic import TypeAdapter, ValidationError, model_validator as parser_openapi_extension
     from pydantic._internal._typing_extra import eval_type_lenient
     from pydantic.fields import FieldInfo
     from pydantic._internal._utils import lenient_issubclass

@@ -1623,7 +1623,7 @@ class ApiGatewayResolver(BaseRouter):
 
         info.update({field: value for field, value in optional_fields.items() if value})
 
-        if not openapi_extensions:
+        if not isinstance(openapi_extensions, Dict):
             openapi_extensions = {}
 
         output: Dict[str, Any] = {

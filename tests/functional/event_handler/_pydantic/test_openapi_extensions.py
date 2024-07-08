@@ -65,6 +65,8 @@ def test_openapi_extension_server_level():
     # THEN the OpenAPI schema must contain the "x-amazon-apigateway-endpoint-configuration" at the server level
     assert "x-amazon-apigateway-endpoint-configuration" in schema["servers"][0]
     assert schema["servers"][0]["x-amazon-apigateway-endpoint-configuration"] == endpoint_config
+    assert schema["servers"][0]["url"] == server_config["url"]
+    assert schema["servers"][0]["description"] == server_config["description"]
 
 
 def test_openapi_extension_security_scheme_level_with_api_key():
@@ -102,6 +104,9 @@ def test_openapi_extension_security_scheme_level_with_api_key():
     assert "x-amazon-apigateway-authtype" in schema["components"]["securitySchemes"]["apiKey"]
     assert schema["components"]["securitySchemes"]["apiKey"]["x-amazon-apigateway-authtype"] == "custom"
     assert schema["components"]["securitySchemes"]["apiKey"]["x-amazon-apigateway-authorizer"] == authorizer_config
+    assert schema["components"]["securitySchemes"]["apiKey"]["name"] == api_key_config["name"]
+    assert schema["components"]["securitySchemes"]["apiKey"]["description"] == api_key_config["description"]
+    assert schema["components"]["securitySchemes"]["apiKey"]["in"] == "header"
 
 
 def test_openapi_extension_security_scheme_level_with_oauth2():
@@ -142,6 +147,19 @@ def test_openapi_extension_security_scheme_level_with_oauth2():
     # THEN the OpenAPI schema must contain the "x-amazon-apigateway-authorizer" extension at the security scheme level
     assert "x-amazon-apigateway-authorizer" in schema["components"]["securitySchemes"]["oauth2"]
     assert schema["components"]["securitySchemes"]["oauth2"]["x-amazon-apigateway-authorizer"] == authorizer_config
+    assert (
+        schema["components"]["securitySchemes"]["oauth2"]["x-amazon-apigateway-authorizer"]["identitySource"]
+        == "$request.header.Authorization"
+    )
+    assert schema["components"]["securitySchemes"]["oauth2"]["x-amazon-apigateway-authorizer"]["jwtConfiguration"][
+        "audience"
+    ] == ["test"]
+    assert (
+        schema["components"]["securitySchemes"]["oauth2"]["x-amazon-apigateway-authorizer"]["jwtConfiguration"][
+            "issuer"
+        ]
+        == "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxx/"
+    )
 
 
 def test_openapi_extension_operation_level(openapi_extension_integration_detail):
@@ -159,6 +177,7 @@ def test_openapi_extension_operation_level(openapi_extension_integration_detail)
     # THEN the OpenAPI schema must contain the "x-amazon-apigateway-integration" extension at the operation level
     assert "x-amazon-apigateway-integration" in schema["paths"]["/test"]["get"]
     assert schema["paths"]["/test"]["get"]["x-amazon-apigateway-integration"] == openapi_extension_integration_detail
+    assert schema["paths"]["/test"]["get"]["operationId"] == "lambda_handler_test_get"
 
 
 def test_openapi_extension_operation_level_multiple_paths(
