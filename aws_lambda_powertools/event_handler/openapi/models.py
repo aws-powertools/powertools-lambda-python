@@ -1,5 +1,3 @@
-# mypy: ignore-errors
-
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
