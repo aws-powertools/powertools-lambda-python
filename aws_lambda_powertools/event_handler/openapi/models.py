@@ -22,11 +22,15 @@ class OpenapiExtensions(BaseModel):
 
         @parser_openapi_extension()
         def serialize(self):
+            # If the 'openapi_extensions' field is not None, return it
             if self.openapi_extensions:
                 return self.openapi_extensions
 
     else:
 
+        # If the 'openapi_extensions' field is present in the 'values' dictionary,
+        # update the 'values' dictionary with the contents of 'openapi_extensions',
+        # and then remove the 'openapi_extensions' field from the 'values' dictionary
         @parser_openapi_extension(pre=False, allow_reuse=True)
         def check_json(cls, values):
             if values.get("openapi_extensions"):
