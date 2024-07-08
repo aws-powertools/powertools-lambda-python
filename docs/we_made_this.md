@@ -23,25 +23,27 @@ Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollo
 
 A collection of articles explaining in detail how Powertools for AWS Lambda helps with a Serverless adoption strategy and its challenges.
 
-* [Part 1 - Logging](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging){:target="_blank"}
+* [Part 1 - Logging](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging){target="_blank" rel="nofollow"}
 
-* [Part 2 - Observability: monitoring and tracing](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability){:target="_blank"}
+* [Part 2 - Observability: monitoring and tracing](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability){target="_blank" rel="nofollow"}
 
-* [Part 3 - Business Domain Observability](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability){:target="_blank"}
+* [Part 3 - Business Domain Observability](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability){target="_blank" rel="nofollow"}
 
-* [Part 4 - Environment Variables](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-environment-variables){:target="_blank"}
+* [Part 4 - Environment Variables](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-environment-variables){target="_blank" rel="nofollow"}
 
-* [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){:target="_blank"}
+* [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){target="_blank" rel="nofollow"}
 
-* [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
+* [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){target="_blank" rel="nofollow"}
 
-* [Serverless API Idempotency with AWS Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){:target="_blank"}
+* [Serverless API Idempotency with AWS Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){target="_blank" rel="nofollow"}
 
-* [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){:target="_blank"}
+* [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){target="_blank" rel="nofollow"}
 
-* [Serverless API Documentation with Powertools for AWS](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
+* [Serverless API Documentation with Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
 
-* [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){:target="_blank"}
+* [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){target="_blank" rel="nofollow"}
+
+* [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools){target="_blank" rel="nofollow"}
 
 ### Making all your APIs idempotent
 
