@@ -13,32 +13,6 @@ These models can be used to parse OpenAPI JSON/YAML files into Python objects, o
 """
 
 
-class OpenapiExtensions(BaseModel):
-    """OpenAPI extensions, see https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions"""
-
-    openapi_extensions: Optional[Dict[str, Any]] = None
-
-    if PYDANTIC_V2:
-
-        @parser_openapi_extension()
-        def serialize(self):
-            # If the 'openapi_extensions' field is not None, return it
-            if self.openapi_extensions:
-                return self.openapi_extensions
-
-    else:
-
-        # If the 'openapi_extensions' field is present in the 'values' dictionary,
-        # update the 'values' dictionary with the contents of 'openapi_extensions',
-        # and then remove the 'openapi_extensions' field from the 'values' dictionary
-        @parser_openapi_extension(pre=False, allow_reuse=True)
-        def check_json(cls, values):
-            if values.get("openapi_extensions"):
-                values.update(values["openapi_extensions"])
-                del values["openapi_extensions"]
-            return values
-
-
 # https://swagger.io/specification/#contact-object
 class Contact(BaseModel):
     name: Optional[str] = None
@@ -103,15 +77,32 @@ class ServerVariable(BaseModel):
 
 
 # https://swagger.io/specification/#server-object
-class Server(OpenapiExtensions):
+class Server(BaseModel):
     url: Union[AnyUrl, str]
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
+    openapi_extensions: Optional[Dict[str, Any]] = None
 
     if PYDANTIC_V2:
         model_config = {"extra": "allow"}
 
+        @parser_openapi_extension()
+        def serialize(self):
+            # If the 'openapi_extensions' field is not None, return it
+            if self.openapi_extensions:
+                return self.openapi_extensions
+
     else:
+
+        # If the 'openapi_extensions' field is present in the 'values' dictionary,
+        # update the 'values' dictionary with the contents of 'openapi_extensions',
+        # and then remove the 'openapi_extensions' field from the 'values' dictionary
+        @parser_openapi_extension(pre=False, allow_reuse=True)
+        def check_json(cls, values):
+            if values.get("openapi_extensions"):
+                values.update(values["openapi_extensions"])
+                del values["openapi_extensions"]
+            return values
 
         class Config:
             extra = "allow"
@@ -405,7 +396,7 @@ class Tag(BaseModel):
 
 
 # https://swagger.io/specification/#operation-object
-class Operation(OpenapiExtensions):
+class Operation(BaseModel):
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -419,11 +410,22 @@ class Operation(OpenapiExtensions):
     deprecated: Optional[bool] = None
     security: Optional[List[Dict[str, List[str]]]] = None
     servers: Optional[List[Server]] = None
+    openapi_extensions: Optional[Dict[str, Any]] = None
 
     if PYDANTIC_V2:
         model_config = {"extra": "allow"}
 
     else:
+
+        # If the 'openapi_extensions' field is present in the 'values' dictionary,
+        # update the 'values' dictionary with the contents of 'openapi_extensions',
+        # and then remove the 'openapi_extensions' field from the 'values' dictionary
+        @parser_openapi_extension(pre=False, allow_reuse=True)
+        def check_json(cls, values):
+            if values.get("openapi_extensions"):
+                values.update(values["openapi_extensions"])
+                del values["openapi_extensions"]
+            return values
 
         class Config:
             extra = "allow"
@@ -462,14 +464,31 @@ class SecuritySchemeType(Enum):
     openIdConnect = "openIdConnect"
 
 
-class SecurityBase(OpenapiExtensions):
+class SecurityBase(BaseModel):
     type_: SecuritySchemeType = Field(alias="type")
     description: Optional[str] = None
+    openapi_extensions: Optional[Dict[str, Any]] = None
 
     if PYDANTIC_V2:
         model_config = {"extra": "allow", "populate_by_name": True}
 
+        @parser_openapi_extension()
+        def serialize(self):
+            # If the 'openapi_extensions' field is not None, return it
+            if self.openapi_extensions:
+                return self.openapi_extensions
+
     else:
+
+        # If the 'openapi_extensions' field is present in the 'values' dictionary,
+        # update the 'values' dictionary with the contents of 'openapi_extensions',
+        # and then remove the 'openapi_extensions' field from the 'values' dictionary
+        @parser_openapi_extension(pre=False, allow_reuse=True)
+        def check_json(cls, values):
+            if values.get("openapi_extensions"):
+                values.update(values["openapi_extensions"])
+                del values["openapi_extensions"]
+            return values
 
         class Config:
             extra = "allow"
@@ -560,7 +579,7 @@ SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer]
 
 
 # https://swagger.io/specification/#components-object
-class Components(OpenapiExtensions):
+class Components(BaseModel):
     schemas: Optional[Dict[str, Union[Schema, Reference]]] = None
     responses: Optional[Dict[str, Union[Response, Reference]]] = None
     parameters: Optional[Dict[str, Union[Parameter, Reference]]] = None
@@ -583,7 +602,7 @@ class Components(OpenapiExtensions):
 
 
 # https://swagger.io/specification/#openapi-object
-class OpenAPI(OpenapiExtensions):
+class OpenAPI(BaseModel):
     openapi: str
     info: Info
     jsonSchemaDialect: Optional[str] = None
@@ -595,11 +614,22 @@ class OpenAPI(OpenapiExtensions):
     security: Optional[List[Dict[str, List[str]]]] = None
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
+    openapi_extensions: Optional[Dict[str, Any]] = None
 
     if PYDANTIC_V2:
         model_config = {"extra": "allow"}
 
     else:
+
+        # If the 'openapi_extensions' field is present in the 'values' dictionary,
+        # update the 'values' dictionary with the contents of 'openapi_extensions',
+        # and then remove the 'openapi_extensions' field from the 'values' dictionary
+        @parser_openapi_extension(pre=False, allow_reuse=True)
+        def check_json(cls, values):
+            if values.get("openapi_extensions"):
+                values.update(values["openapi_extensions"])
+                del values["openapi_extensions"]
+            return values
 
         class Config:
             extra = "allow"
