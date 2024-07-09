@@ -361,6 +361,8 @@ class Route:
             Whether or not to include this route in the OpenAPI schema
         security: List[Dict[str, List[str]]], optional
             The OpenAPI security for this route
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -1591,6 +1593,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: List[Dict[str, List[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
 
         Returns
         -------
@@ -1781,6 +1785,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: List[Dict[str, List[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
 
         Returns
         -------
@@ -1874,6 +1880,8 @@ class ApiGatewayResolver(BaseRouter):
             The OAuth2 configuration for the Swagger UI.
         persist_authorization: bool, optional
             Whether to persist authorization data on browser close/refresh.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
