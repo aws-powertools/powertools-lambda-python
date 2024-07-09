@@ -427,6 +427,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**Brsk**](https://www.brsk.co.uk/){target="_blank" rel="nofollow"}
 { .card }
 
+[**BusPatrol**](https://buspatrol.com/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**Capital One**](https://www.capitalone.com/){target="_blank" rel="nofollow"}
 { .card }
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import json
 import logging
@@ -190,9 +192,12 @@ class CORSConfig:
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
+
         self._allowed_origins = [allow_origin]
+
         if extra_origins:
             self._allowed_origins.extend(extra_origins)
+
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
@@ -220,9 +225,17 @@ class CORSConfig:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
             headers["Access-Control-Max-Age"] = str(self.max_age)
-        if self.allow_credentials is True:
+        if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
+
+    def allowed_origin(self, extracted_origin: str) -> str | None:
+        if extracted_origin in self._allowed_origins:
+            return extracted_origin
+        if extracted_origin is not None and "*" in self._allowed_origins:
+            return "*"
+
+        return None
 
     @staticmethod
     def build_allow_methods(methods: Set[str]) -> str:
@@ -808,7 +821,10 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         extracted_origin_header = extract_origin_header(event.resolved_headers_field)
-        self.response.headers.update(cors.to_dict(extracted_origin_header))
+
+        origin = cors.allowed_origin(extracted_origin_header)
+        if origin is not None:
+            self.response.headers.update(cors.to_dict(origin))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
