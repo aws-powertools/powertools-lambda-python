@@ -1,7 +1,8 @@
 import logging
 import traceback
-from typing import Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
+from botocore.client import BaseClient
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import jmespath_utils
@@ -15,6 +16,11 @@ from ... import Logger
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
 
+if TYPE_CHECKING:
+    from mypy_boto3_appconfigdata import AppConfigDataClient
+else:
+    AppConfigDataClient = BaseClient
+
 
 class AppConfigStore(StoreProvider):
     def __init__(
@@ -27,6 +33,7 @@ class AppConfigStore(StoreProvider):
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
         logger: Optional[Union[logging.Logger, Logger]] = None,
+        sdk_client: Optional[AppConfigDataClient] = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -48,6 +55,8 @@ class AppConfigStore(StoreProvider):
             Alternative JMESPath options to be included when filtering expr
         logger: A logging object
             Used to log messages. If None is supplied, one will be created.
+        sdk_client: Optional[AppConfigDataClient]
+            AppConfigData boto3 client, `sdk_config` will be ignored if this value is provided.
         """
         super().__init__()
         self.logger = logger or logging.getLogger(__name__)
@@ -58,7 +67,12 @@ class AppConfigStore(StoreProvider):
         self.config = sdk_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
-        self._conf_store = AppConfigProvider(environment=environment, application=application, config=sdk_config)
+        self._conf_store = AppConfigProvider(
+            environment=environment,
+            application=application,
+            config=sdk_config,
+            boto3_client=sdk_client,
+        )
 
     @property
     def get_raw_configuration(self) -> Dict[str, Any]:
