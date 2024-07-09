@@ -222,7 +222,12 @@ class BasePartialProcessor(ABC):
 class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     DEFAULT_RESPONSE: PartialItemFailureResponse = {"batchItemFailures": []}
 
-    def __init__(self, event_type: EventType, model: Optional["BatchTypeModels"] = None):
+    def __init__(
+        self,
+        event_type: EventType,
+        model: Optional["BatchTypeModels"] = None,
+        raise_on_entire_batch_fail: bool = True,
+    ):
         """Process batch and partially report failed items
 
         Parameters
@@ -231,6 +236,9 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
         model: Optional["BatchTypeModels"]
             Parser's data model using either SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecord
+        raise_on_entire_batch_fail: bool
+            Raise an exception when the entire batch has failed processing.
+            When set to False, partial failures are reported in the response
 
         Exceptions
         ----------
@@ -239,6 +247,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         """
         self.event_type = event_type
         self.model = model
+        self.raise_on_entire_batch_fail = raise_on_entire_batch_fail
         self.batch_response: PartialItemFailureResponse = copy.deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
@@ -274,7 +283,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         if not self._has_messages_to_report():
             return
 
-        if self._entire_batch_failed():
+        if self._entire_batch_failed() and self.raise_on_entire_batch_fail:
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
                 f"separately below.",
@@ -475,7 +484,7 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
     Raises
     ------
     BatchProcessingError
-        When all batch records fail processing
+        When all batch records fail processing and raise_on_entire_batch_fail is True
 
     Limitations
     -----------
@@ -624,7 +633,7 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
     Raises
     ------
     BatchProcessingError
-        When all batch records fail processing
+        When all batch records fail processing and raise_on_entire_batch_fail is True
 
     Limitations
     -----------

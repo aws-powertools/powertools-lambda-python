@@ -491,6 +491,20 @@ Inheritance is importance because we need to access message IDs and sequence num
     --8<-- "examples/batch_processing/src/pydantic_dynamodb_event.json"
     ```
 
+### Working with full batch failures
+
+By default, the `BatchProcessor` will raise `BatchProcessingError` if all records in the batch fail to process, we do this to reflect the failure in your operational metrics.
+
+When working with functions that handle batches with a small number of records, or when you use errors as a flow control mechanism, this behavior might not be desirable as your function might generate an unnaturally high number of errors. When this happens, the [Lambda service will scale down the concurrency of your function](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html#services-sqs-backoff-strategy){target="_blank"}, potentially impacting performance.
+
+For these scenarios, you can set the `raise_on_entire_batch_fail` option to `False`.
+
+=== "working_with_entire_batch_fail.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/batch_processing/src/working_with_entire_batch_fail.py"
+    ```
+
 ### Accessing processed messages
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
