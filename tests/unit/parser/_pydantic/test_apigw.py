@@ -2,7 +2,11 @@ import pytest
 from pydantic import ValidationError
 
 from aws_lambda_powertools.utilities.parser import envelopes, parse
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from aws_lambda_powertools.utilities.parser.models import (
+    ApiGatewayAuthorizerRequest,
+    ApiGatewayAuthorizerToken,
+    APIGatewayProxyEventModel,
+)
 from tests.functional.utils import load_event
 from tests.unit.parser._pydantic.schemas import MyApiGatewayBusiness
 
@@ -148,3 +152,20 @@ def test_apigw_event_empty_body():
     event = load_event("apiGatewayProxyEvent.json")
     event["body"] = None
     parse(event=event, model=APIGatewayProxyEventModel)
+
+
+def test_apigw_event_authorizer_token():
+    raw_event = load_event("apiGatewayAuthorizerTokenEvent.json")
+    parsed_event: ApiGatewayAuthorizerToken = ApiGatewayAuthorizerToken(**raw_event)
+
+    assert parsed_event.type == raw_event["type"]
+    assert parsed_event.methodArn == raw_event["methodArn"]
+    assert parsed_event.authorizationToken == raw_event["authorizationToken"]
+
+
+def test_apigw_event_authorizer_event():
+    raw_event = load_event("apiGatewayAuthorizerRequestEvent.json")
+    parsed_event: ApiGatewayAuthorizerRequest = ApiGatewayAuthorizerRequest(**raw_event)
+
+    assert parsed_event.type == raw_event["type"]
+    assert parsed_event.methodArn == raw_event["methodArn"]
