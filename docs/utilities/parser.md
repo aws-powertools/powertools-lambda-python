@@ -177,7 +177,10 @@ Parser comes with the following built-in models:
 | ------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
 | **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
+| **ApiGatewayAuthorizerToken**               | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Token       |
+| **ApiGatewayAuthorizerRequest**             | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Request     |
 | **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
+| **ApiGatewayAuthorizerRequestV2**           | Lambda Event Source payload for Amazon API Gateway v2 Lambda Authorizer               |
 | **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents                                        |
 | **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
 | **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                 |
