@@ -1329,6 +1329,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#customizing-boto-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customizing boto configuration
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2016,6 +2025,15 @@
   <a href="#appconfig" class="md-nav__link">
     <span class="md-ellipsis">
       AppConfig
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-boto-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customizing boto configuration
     </span>
   </a>
   
@@ -4244,11 +4262,6 @@ of the same experiment.</p>
 <td>Number of seconds to cache feature flags configuration fetched from AWS AppConfig</td>
 </tr>
 <tr>
-<td><strong>sdk_config</strong></td>
-<td><code>None</code></td>
-<td><a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">Botocore Config object</a></td>
-</tr>
-<tr>
 <td><strong>jmespath_options</strong></td>
 <td><code>None</code></td>
 <td>For advanced use cases when you want to bring your own <a href="https://github.com/jmespath/jmespath.py#custom-functions" rel="nofollow" target="_blank">JMESPath functions</a></td>
@@ -4257,6 +4270,21 @@ of the same experiment.</p>
 <td><strong>logger</strong></td>
 <td><code>logging.Logger</code></td>
 <td>Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.</td>
+</tr>
+<tr>
+<td><strong>boto3_client</strong></td>
+<td><code>None</code></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client" target="_blank">AppConfigData boto3 client</a></td>
+</tr>
+<tr>
+<td><strong>boto3_session</strong></td>
+<td><code>None</code></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">Boto3 session</a></td>
+</tr>
+<tr>
+<td><strong>boto_config</strong></td>
+<td><code>None</code></td>
+<td><a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">Botocore config</a></td>
 </tr>
 </tbody>
 </table>
@@ -4335,7 +4363,7 @@ of the same experiment.</p>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">,</span>
     <span class="n">max_age</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
 <span class="hll">    <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;special_decoder(features)&quot;</span><span class="p">,</span>  <span class="c1"># using a custom function defined in CustomFunctions Class</span>
-</span><span class="hll">    <span class="n">sdk_config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">boto_config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">jmespath_options</span><span class="o">=</span><span class="n">custom_jmespath_options</span><span class="p">,</span>
 </span><span class="p">)</span>
 
@@ -4390,6 +4418,195 @@ of the same experiment.</p>
 </div>
 </div>
 </div>
+<h4 id="customizing-boto-configuration">Customizing boto configuration<a class="headerlink" href="#customizing-boto-configuration" title="Permanent link">&para;</a></h4>
+<!-- markdownlint-disable MD013 -->
+<p>The <strong><code>boto_config</code></strong> , <strong><code>boto3_session</code></strong>, and <strong><code>boto3_client</code></strong>  parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a>, <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a>, or  a <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html" target="_blank">boto3 client</a> when constructing the AppConfig store provider.</p>
+<!-- markdownlint-enable MD013 -->
+
+<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="custom_boto_session_feature_flagspy" name="__tabbed_18" type="radio" /><input id="custom_boto_config_feature_flagspy" name="__tabbed_18" type="radio" /><input id="custom_boto_client_feature_flagspy" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="custom_boto_session_feature_flagspy">custom_boto_session_feature_flags.py</label><label for="custom_boto_config_feature_flagspy">custom_boto_config_feature_flags.py</label><label for="custom_boto_client_feature_flagspy">custom_boto_client_feature_flags.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">boto3</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+</span>
+<span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span>
+    <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="n">application</span><span class="o">=</span><span class="s2">&quot;product-catalogue&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">,</span>
+<span class="hll">    <span class="n">boto3_session</span><span class="o">=</span><span class="n">boto3_session</span><span class="p">,</span>
+</span><span class="p">)</span>
+
+<span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">apply_discount</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ten_percent_off_campaign&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">price</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">apply_discount</span><span class="p">:</span>
+        <span class="c1"># apply 10% discount to product</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.9</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">botocore.config</span> <span class="kn">import</span> <span class="n">Config</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">boto_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">read_timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;total_max_attempts&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+</span>
+<span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span>
+    <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="n">application</span><span class="o">=</span><span class="s2">&quot;product-catalogue&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">,</span>
+<span class="hll">    <span class="n">boto_config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">,</span>
+</span><span class="p">)</span>
+
+<span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">apply_discount</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ten_percent_off_campaign&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">price</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">apply_discount</span><span class="p">:</span>
+        <span class="c1"># apply 10% discount to product</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.9</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">boto3</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">boto3_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;appconfigdata&quot;</span><span class="p">)</span>
+</span>
+<span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span>
+    <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="n">application</span><span class="o">=</span><span class="s2">&quot;product-catalogue&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">,</span>
+<span class="hll">    <span class="n">boto3_client</span><span class="o">=</span><span class="n">boto3_client</span><span class="p">,</span>
+</span><span class="p">)</span>
+
+<span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">apply_discount</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ten_percent_off_campaign&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">price</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">apply_discount</span><span class="p">:</span>
+        <span class="c1"># apply 10% discount to product</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">price</span> <span class="o">*</span> <span class="mf">0.9</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="create-your-own-store-provider">Create your own store provider<a class="headerlink" href="#create-your-own-store-provider" title="Permanent link">&para;</a></h3>
 <p>You can create your own custom FeatureFlags store provider by inheriting the <code>StoreProvider</code> class, and implementing both <code>get_raw_configuration()</code> and <code>get_configuration()</code> methods to retrieve the configuration from your custom store.</p>
 <ul>
@@ -4401,7 +4618,7 @@ of the same experiment.</p>
 <summary>Note</summary>
 <p>This is just one example of how you can create your own store provider. Before creating a custom store provider, carefully evaluate your requirements and consider factors such as performance, scalability, and ease of maintenance.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="working_with_own_s3_store_providerpy" name="__tabbed_18" type="radio" /><input id="custom_s3_store_providerpy" name="__tabbed_18" type="radio" /><input id="working_with_own_s3_store_provider_payloadjson" name="__tabbed_18" type="radio" /><input id="working_with_own_s3_store_provider_featuresjson" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="working_with_own_s3_store_providerpy">working_with_own_s3_store_provider.py</label><label for="custom_s3_store_providerpy">custom_s3_store_provider.py</label><label for="working_with_own_s3_store_provider_payloadjson">working_with_own_s3_store_provider_payload.json</label><label for="working_with_own_s3_store_provider_featuresjson">working_with_own_s3_store_provider_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="working_with_own_s3_store_providerpy" name="__tabbed_19" type="radio" /><input id="custom_s3_store_providerpy" name="__tabbed_19" type="radio" /><input id="working_with_own_s3_store_provider_payloadjson" name="__tabbed_19" type="radio" /><input id="working_with_own_s3_store_provider_featuresjson" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="working_with_own_s3_store_providerpy">working_with_own_s3_store_provider.py</label><label for="custom_s3_store_providerpy">custom_s3_store_provider.py</label><label for="working_with_own_s3_store_provider_payloadjson">working_with_own_s3_store_provider_payload.json</label><label for="working_with_own_s3_store_provider_featuresjson">working_with_own_s3_store_provider_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4558,7 +4775,7 @@ of the same experiment.</p>
 <summary>Warning</summary>
 <p>This excerpt relies on <code>pytest</code> and <code>pytest-mock</code> dependencies.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="testing-your-code_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="testing-your-code_1">Testing your code</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:1"><input checked="checked" id="testing-your-code_1" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="testing-your-code_1">Testing your code</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4719,7 +4936,7 @@ of the same experiment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-02-19
+    2024-07-10
   </span>
 
     
