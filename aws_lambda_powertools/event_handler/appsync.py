@@ -126,8 +126,8 @@ class AppSyncResolver(BaseRouter):
 
         class MyCustomModel(AppSyncResolverEvent):
             @property
-            def country_viewer(self):
-                return self.request_headers.get("cloudfront-viewer-country")
+            def country_viewer(self) -> str:
+                return self.request_headers.get("cloudfront-viewer-country", "")
 
 
         @app.resolver(field_name="listLocations")

@@ -145,8 +145,8 @@ def test_resolve_custom_data_model():
 
     class MyCustomModel(AppSyncResolverEvent):
         @property
-        def country_viewer(self):
-            return self.request_headers.get("cloudfront-viewer-country")
+        def country_viewer(self) -> str:
+            return self.request_headers.get("cloudfront-viewer-country", "")
 
     app = AppSyncResolver()
 
