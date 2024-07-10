@@ -83,7 +83,7 @@ def test_appsync_resolver_direct():
     assert parsed_event.source == {}
     assert parsed_event.arguments.get("id") == raw_event["arguments"]["id"]
     assert parsed_event.stash == {}
-    assert parsed_event.prev_result == {}
+    assert parsed_event.prev_result is None
     assert isinstance(parsed_event.identity, AppSyncIdentityCognito)
 
     info = parsed_event.info
