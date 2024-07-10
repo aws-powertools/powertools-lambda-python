@@ -236,7 +236,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             Whether this is a SQS, DynamoDB Streams, or Kinesis Data Stream event
         model: Optional["BatchTypeModels"]
             Parser's data model using either SqsRecordModel, DynamoDBStreamRecordModel, KinesisDataStreamRecord
-        raise_on_entire_batch_fail: bool
+        raise_on_entire_batch_failure: bool
             Raise an exception when the entire batch has failed processing.
             When set to False, partial failures are reported in the response
 
@@ -247,7 +247,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         """
         self.event_type = event_type
         self.model = model
-        self.raise_on_entire_batch_fail = raise_on_entire_batch_failure
+        self.raise_on_entire_batch_failure = raise_on_entire_batch_failure
         self.batch_response: PartialItemFailureResponse = copy.deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
@@ -283,7 +283,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         if not self._has_messages_to_report():
             return
 
-        if self._entire_batch_failed() and self.raise_on_entire_batch_fail:
+        if self._entire_batch_failed() and self.raise_on_entire_batch_failure:
             raise BatchProcessingError(
                 msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
                 f"separately below.",
