@@ -5,7 +5,7 @@ import boto3
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-boto3_client = boto3.client("ssm")
+boto3_client = boto3.client("appconfigdata")
 
 app_config = AppConfigStore(
     environment="dev",
