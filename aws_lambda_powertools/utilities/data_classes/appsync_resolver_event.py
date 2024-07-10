@@ -191,12 +191,12 @@ class AppSyncResolverEvent(DictWrapper):
         return CaseInsensitiveDict(self["request"]["headers"])
 
     @property
-    def prev_result(self) -> Dict[str, Any]:
+    def prev_result(self) -> Optional[Dict[str, Any]]:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         prev = self.get("prev")
         if not prev:
-            return {}
-        return prev.get("result") or {}
+            return None
+        return prev.get("result")
 
     @property
     def info(self) -> AppSyncResolverEventInfo:
