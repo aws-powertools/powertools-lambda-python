@@ -413,7 +413,7 @@ def test_batch_processor_not_raise_when_entire_batch_fails_sync(sqs_event_factor
     second_record = SQSRecord(sqs_event_factory("fail"))
     event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
-    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_fail False
+    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_failure False
     processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
 
     # WHEN processing the messages
@@ -434,7 +434,7 @@ def test_batch_processor_not_raise_when_entire_batch_fails_async(sqs_event_facto
     second_record = SQSRecord(sqs_event_factory("fail"))
     event = {"Records": [first_record.raw_event, second_record.raw_event]}
 
-    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_fail False
+    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_failure False
     processor = AsyncBatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
 
     # WHEN processing the messages
