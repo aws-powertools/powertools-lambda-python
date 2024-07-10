@@ -1,5 +1,6 @@
 import pytest
 
+from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.models import OpenAPIExtensions
 
 
@@ -10,6 +11,14 @@ def test_openapi_extensions_with_dict():
 
     # THEN we get a dict with the extension
     assert extensions.dict(exclude_none=True) == {"x-amazon-apigateway": {"foo": "bar"}}
+
+
+@pytest.mark.usefixtures("pydanticv1_only")
+def test_openapi_extensions_with_invalid_key():
+    # GIVEN we create an OpenAPIExtensions object with an invalid value
+    with pytest.raises(SchemaValidationError):
+        # THEN must raise an exception
+        OpenAPIExtensions(openapi_extensions={"amazon-apigateway-invalid": {"foo": "bar"}})
 
 
 @pytest.mark.usefixtures("pydanticv1_only")

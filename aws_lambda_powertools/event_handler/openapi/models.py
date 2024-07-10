@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from pydantic import AnyUrl, BaseModel, Field
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild, parser_openapi_extension
+from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.shared.types import Annotated, Literal
 
@@ -25,6 +26,7 @@ class OpenAPIExtensions(BaseModel):
 
     # This rule is valid for Pydantic v1 and v2
     # If the 'openapi_extensions' field is present in the 'values' dictionary,
+    # And if the extension starts with x-
     # update the 'values' dictionary with the contents of 'openapi_extensions',
     # and then remove the 'openapi_extensions' field from the 'values' dictionary
 
@@ -34,8 +36,15 @@ class OpenAPIExtensions(BaseModel):
 
         @parser_openapi_extension(mode="before")
         def serialize_openapi_extension_v2(self):
-            if isinstance(self, dict) and self.get("openapi_extensions"):
-                self.update(self.get("openapi_extensions"))
+            openapi_extension_value = self.get("openapi_extensions")
+
+            if isinstance(self, dict) and openapi_extension_value:
+
+                for extension_key in openapi_extension_value:
+                    if not str(extension_key).startswith("x-"):
+                        raise SchemaValidationError("An OpenAPI extension key must start with x-")
+
+                self.update(openapi_extension_value)
                 self.pop("openapi_extensions", None)
 
             return self
@@ -44,9 +53,17 @@ class OpenAPIExtensions(BaseModel):
 
         @parser_openapi_extension(pre=False, allow_reuse=True)
         def serialize_openapi_extension_v1(cls, values):
-            if values.get("openapi_extensions"):
+            openapi_extension_value = values.get("openapi_extensions")
+
+            if openapi_extension_value:
+
+                for extension_key in openapi_extension_value:
+                    if not str(extension_key).startswith("x-"):
+                        raise SchemaValidationError("An OpenAPI extension key must start with x-")
+
                 values.update(values["openapi_extensions"])
                 del values["openapi_extensions"]
+
             return values
 
         class Config:
