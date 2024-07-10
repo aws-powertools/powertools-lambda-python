@@ -25,9 +25,8 @@ class CaseInsensitiveDict(dict):
     def update(self, data=None, **kwargs):
         if data is not None:
             if isinstance(data, Mapping):
-                super().update((k.lower(), v) for k, v in data.items())
-            else:
-                super().update((k.lower(), v) for k, v in data)
+                data = data.items()
+            super().update((k.lower(), v) for k, v in data)
         super().update((k.lower(), v) for k, v in kwargs)
 
     def __contains__(self, k):
