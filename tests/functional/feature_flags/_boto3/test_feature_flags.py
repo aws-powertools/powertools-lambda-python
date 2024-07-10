@@ -1,7 +1,12 @@
+from io import BytesIO
+from json import dumps
 from typing import Dict, List, Optional
 
+import boto3
 import pytest
 from botocore.config import Config
+from botocore.response import StreamingBody
+from botocore.stub import Stubber
 
 from aws_lambda_powertools.utilities.feature_flags import (
     ConfigurationStoreError,
@@ -37,17 +42,46 @@ def init_feature_flags(
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
 ) -> FeatureFlags:
-    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
-    mocked_get_conf.return_value = mock_schema
+    environment = "test_env"
+    application = "test_app"
+    name = "test_conf_name"
+    configuration_token = "foo"
+    mock_schema_to_bytes = dumps(mock_schema).encode()
+
+    client = boto3.client("appconfigdata", config=config)
+    stubber = Stubber(client)
+
+    stubber.add_response(
+        method="start_configuration_session",
+        expected_params={
+            "ConfigurationProfileIdentifier": name,
+            "ApplicationIdentifier": application,
+            "EnvironmentIdentifier": environment,
+        },
+        service_response={"InitialConfigurationToken": configuration_token},
+    )
+    stubber.add_response(
+        method="get_latest_configuration",
+        expected_params={"ConfigurationToken": configuration_token},
+        service_response={
+            "Configuration": StreamingBody(
+                raw_stream=BytesIO(mock_schema_to_bytes),
+                content_length=len(mock_schema_to_bytes),
+            ),
+            "NextPollConfigurationToken": configuration_token,
+        },
+    )
+    stubber.activate()
 
     app_conf_fetcher = AppConfigStore(
-        environment="test_env",
-        application="test_app",
-        name="test_conf_name",
+        environment=environment,
+        application=application,
+        name=name,
         max_age=600,
         sdk_config=config,
         envelope=envelope,
         jmespath_options=jmespath_options,
+        sdk_client=client,
     )
     feature_flags: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
     return feature_flags
