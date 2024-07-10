@@ -86,6 +86,7 @@ def test_cookie_with_http_only():
     assert cookie.name == "powertools"
     assert cookie.value == "test"
     assert cookie.path == "/"
+    assert cookie.http_only is True
     assert str(cookie) == "powertools=test; Path=/; HttpOnly; Secure"
 
 
@@ -98,6 +99,7 @@ def test_cookie_with_same_site():
     assert cookie.name == "powertools"
     assert cookie.value == "test"
     assert cookie.path == "/"
+    assert cookie.same_site == SameSite.STRICT_MODE
     assert str(cookie) == "powertools=test; Path=/; Secure; SameSite=Strict"
 
 
@@ -110,4 +112,5 @@ def test_cookie_with_custom_attribute():
     assert cookie.name == "powertools"
     assert cookie.value == "test"
     assert cookie.path == "/"
+    assert cookie.custom_attributes == ["extra1=value1", "extra2=value2"]
     assert str(cookie) == "powertools=test; Path=/; Secure; extra1=value1; extra2=value2"
