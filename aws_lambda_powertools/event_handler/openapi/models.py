@@ -13,7 +13,7 @@ These models can be used to parse OpenAPI JSON/YAML files into Python objects, o
 """
 
 
-class OpenapiExtensions(BaseModel):
+class OpenAPIExtensions(BaseModel):
     """
     This class serves as a Pydantic proxy model to add OpenAPI extensions.
 
@@ -117,7 +117,7 @@ class ServerVariable(BaseModel):
 
 
 # https://swagger.io/specification/#server-object
-class Server(OpenapiExtensions):
+class Server(OpenAPIExtensions):
     url: Union[AnyUrl, str]
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
@@ -419,7 +419,7 @@ class Tag(BaseModel):
 
 
 # https://swagger.io/specification/#operation-object
-class Operation(OpenapiExtensions):
+class Operation(OpenAPIExtensions):
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -476,7 +476,7 @@ class SecuritySchemeType(Enum):
     openIdConnect = "openIdConnect"
 
 
-class SecurityBase(OpenapiExtensions):
+class SecurityBase(OpenAPIExtensions):
     type_: SecuritySchemeType = Field(alias="type")
     description: Optional[str] = None
 
@@ -597,7 +597,7 @@ class Components(BaseModel):
 
 
 # https://swagger.io/specification/#openapi-object
-class OpenAPI(OpenapiExtensions):
+class OpenAPI(OpenAPIExtensions):
     openapi: str
     info: Info
     jsonSchemaDialect: Optional[str] = None
