@@ -36,9 +36,9 @@ class OpenAPIExtensions(BaseModel):
 
         @parser_openapi_extension(mode="before")
         def serialize_openapi_extension_v2(self):
-            openapi_extension_value = self.get("openapi_extensions")
+            if isinstance(self, dict) and self.get("openapi_extensions"):
 
-            if isinstance(self, dict) and openapi_extension_value:
+                openapi_extension_value = self.get("openapi_extensions")
 
                 for extension_key in openapi_extension_value:
                     if not str(extension_key).startswith("x-"):
