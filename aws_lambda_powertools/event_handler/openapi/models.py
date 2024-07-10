@@ -26,7 +26,7 @@ class OpenAPIExtensions(BaseModel):
 
     # This rule is valid for Pydantic v1 and v2
     # If the 'openapi_extensions' field is present in the 'values' dictionary,
-    # And if the extension starts with x-
+    # And if the extension starts with x- (must respect the RFC)
     # update the 'values' dictionary with the contents of 'openapi_extensions',
     # and then remove the 'openapi_extensions' field from the 'values' dictionary
 
