@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.batch import (
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_fail=False)
+processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
 tracer = Tracer()
 logger = Logger()
 

@@ -226,7 +226,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         self,
         event_type: EventType,
         model: Optional["BatchTypeModels"] = None,
-        raise_on_entire_batch_fail: bool = True,
+        raise_on_entire_batch_failure: bool = True,
     ):
         """Process batch and partially report failed items
 
@@ -247,7 +247,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         """
         self.event_type = event_type
         self.model = model
-        self.raise_on_entire_batch_fail = raise_on_entire_batch_fail
+        self.raise_on_entire_batch_fail = raise_on_entire_batch_failure
         self.batch_response: PartialItemFailureResponse = copy.deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
@@ -484,7 +484,7 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
     Raises
     ------
     BatchProcessingError
-        When all batch records fail processing and raise_on_entire_batch_fail is True
+        When all batch records fail processing and raise_on_entire_batch_failure is True
 
     Limitations
     -----------
@@ -633,7 +633,7 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
     Raises
     ------
     BatchProcessingError
-        When all batch records fail processing and raise_on_entire_batch_fail is True
+        When all batch records fail processing and raise_on_entire_batch_failure is True
 
     Limitations
     -----------

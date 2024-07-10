@@ -497,7 +497,7 @@ By default, the `BatchProcessor` will raise `BatchProcessingError` if all record
 
 When working with functions that handle batches with a small number of records, or when you use errors as a flow control mechanism, this behavior might not be desirable as your function might generate an unnaturally high number of errors. When this happens, the [Lambda service will scale down the concurrency of your function](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html#services-sqs-backoff-strategy){target="_blank"}, potentially impacting performance.
 
-For these scenarios, you can set the `raise_on_entire_batch_fail` option to `False`.
+For these scenarios, you can set the `raise_on_entire_batch_failure` option to `False`.
 
 === "working_with_entire_batch_fail.py"
 
