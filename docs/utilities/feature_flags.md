@@ -503,10 +503,11 @@ These are the available options for further customization.
 | **name**             | `""`             | AWS AppConfig Configuration name, e.g `features`                                                                                                                      |
 | **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                                    |
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                                     |
-| **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                                           |
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} |
 | **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                                         |
-| **sdk_client**       | `None`           | [AppConfigData boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client){target="_blank"}     |
+| **boto3_client**     | `None`           | [AppConfigData boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client){target="_blank"}     |
+| **boto3_session**    | `None`           | [Boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}     |
+| **boto_config**     | `None`            | [Botocore config](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}     |
 
 === "appconfig_provider_options.py"
 
@@ -524,6 +525,27 @@ These are the available options for further customization.
 
     ```json hl_lines="6-9"
     --8<-- "examples/feature_flags/src/appconfig_provider_options_features.json"
+    ```
+
+#### Customizing boto configuration
+
+<!-- markdownlint-disable MD013 -->
+The **`boto_config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}, [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}, or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html){target="_blank"} when constructing the AppConfig store provider.
+<!-- markdownlint-enable MD013 -->
+
+=== "custom_boto_session_feature_flags.py"
+    ```python hl_lines="8 14"
+    --8<-- "examples/feature_flags/src/custom_boto_session_feature_flags.py"
+    ```
+
+=== "custom_boto_config_feature_flags.py"
+    ```python hl_lines="8 14"
+    --8<-- "examples/feature_flags/src/custom_boto_config_feature_flags.py"
+    ```
+
+=== "custom_boto_client_feature_flags.py"
+    ```python hl_lines="8 14"
+    --8<-- "examples/feature_flags/src/custom_boto_client_feature_flags.py"
     ```
 
 ### Create your own store provider

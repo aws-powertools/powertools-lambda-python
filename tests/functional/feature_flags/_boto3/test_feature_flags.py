@@ -78,10 +78,10 @@ def init_feature_flags(
         application=application,
         name=name,
         max_age=600,
-        sdk_config=config,
         envelope=envelope,
         jmespath_options=jmespath_options,
-        sdk_client=client,
+        boto_config=config,
+        boto3_client=client,
     )
     feature_flags: FeatureFlags = FeatureFlags(store=app_conf_fetcher)
     return feature_flags
