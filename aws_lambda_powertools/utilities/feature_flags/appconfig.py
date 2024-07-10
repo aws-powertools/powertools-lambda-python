@@ -2,7 +2,6 @@ import logging
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
-from botocore.client import BaseClient
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import jmespath_utils
@@ -18,8 +17,6 @@ from .exceptions import ConfigurationStoreError, StoreClientError
 
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata import AppConfigDataClient
-else:
-    AppConfigDataClient = BaseClient
 
 
 class AppConfigStore(StoreProvider):
@@ -33,7 +30,7 @@ class AppConfigStore(StoreProvider):
         envelope: Optional[str] = "",
         jmespath_options: Optional[Dict] = None,
         logger: Optional[Union[logging.Logger, Logger]] = None,
-        sdk_client: Optional[AppConfigDataClient] = None,
+        sdk_client: Optional["AppConfigDataClient"] = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
