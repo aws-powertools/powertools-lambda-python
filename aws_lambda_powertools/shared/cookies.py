@@ -99,10 +99,10 @@ class Cookie:
 
         if self.max_age:
             if self.max_age > 0:
-                payload.write(f"; MaxAge={self.max_age}")
+                payload.write(f"; Max-Age={self.max_age}")
             else:
                 # negative or zero max-age should be set to 0
-                payload.write("; MaxAge=0")
+                payload.write("; Max-Age=0")
 
         if self.http_only:
             payload.write("; HttpOnly")
