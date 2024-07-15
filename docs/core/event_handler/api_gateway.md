@@ -1115,6 +1115,22 @@ OpenAPI 3 lets you describe APIs protected using the following security schemes:
     --8<-- "examples/event_handler_rest/src/swagger_with_oauth2.py"
     ```
 
+#### OpenAPI extensions
+
+For a better experience when working with Lambda and Amazon API Gateway, customers can define extensions using the `openapi_extensions` parameter. We support defining OpenAPI extensions at the following levels of the OpenAPI JSON Schema: Root, Servers, Operation, and Security Schemes.
+
+???+ warning
+    We do not support the `x-amazon-apigateway-any-method` and `x-amazon-apigateway-integrations` extensions.
+
+```python hl_lines="9 15 25 28" title="Adding OpenAPI extensions"
+--8<-- "examples/event_handler_rest/src/working_with_openapi_extensions.py"
+```
+
+1. Server level
+2. Operation level
+3. Security scheme level
+4. Root level
+
 ### Custom serializer
 
 You can instruct event handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.

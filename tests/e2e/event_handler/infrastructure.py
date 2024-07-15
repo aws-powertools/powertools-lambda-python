@@ -18,7 +18,7 @@ class EventHandlerStack(BaseInfrastructure):
         functions = self.create_lambda_functions()
 
         self._create_alb(function=[functions["AlbHandler"], functions["AlbHandlerWithBodyNone"]])
-        self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
+        self._create_api_gateway_rest(function=[functions["ApiGatewayRestHandler"], functions["OpenapiHandler"]])
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
@@ -76,7 +76,7 @@ class EventHandlerStack(BaseInfrastructure):
 
         CfnOutput(self.stack, "APIGatewayHTTPUrl", value=(apigw.url or ""))
 
-    def _create_api_gateway_rest(self, function: Function):
+    def _create_api_gateway_rest(self, function: List[Function]):
         apigw = apigwv1.RestApi(
             self.stack,
             "APIGatewayRest",
@@ -87,7 +87,10 @@ class EventHandlerStack(BaseInfrastructure):
         )
 
         todos = apigw.root.add_resource("todos")
-        todos.add_method("POST", apigwv1.LambdaIntegration(function, proxy=True))
+        todos.add_method("POST", apigwv1.LambdaIntegration(function[0], proxy=True))
+
+        openapi_schema = apigw.root.add_resource("openapi_schema")
+        openapi_schema.add_method("GET", apigwv1.LambdaIntegration(function[1], proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 

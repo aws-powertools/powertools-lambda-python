@@ -163,6 +163,7 @@ def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
             f"{PREFIX_TESTS_FUNCTIONAL}/batch/_pydantic/",
             f"{PREFIX_TESTS_UNIT}/parser/_pydantic/",
+            f"{PREFIX_TESTS_UNIT}/event_handler/_pydantic/",
         ],
     )
 
