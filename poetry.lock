@@ -479,13 +479,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.211"
+version = "0.1.212"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.211.tar.gz", hash = "sha256:64694b1adfd8a9d0cf88b281ed3888e81501ac698cea8ebabe528c8264de94b7"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.211-py3-none-any.whl", hash = "sha256:048d6b122b2d24d875aa447673be3ceebd16b43d1628afe245f8223fc8d049b2"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.212.tar.gz", hash = "sha256:acd39af52204a4731f628ecf65fdf33fed258bfdb003c80fd5a6b45e121b0d70"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.212-py3-none-any.whl", hash = "sha256:dda3d0fe7ba6a449b061ab5f482699deda64e6b722b23bc3e4de8e95a6bc65eb"},
 ]
 
 [package.dependencies]
@@ -3707,4 +3707,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "87f725f527c991f0f84992c1b83182148c769981ce235367914b4350ef1efa0a"
+content-hash = "7d20aacb3cdd0fae3005d0f2c11231e14e683f9eda97c562e2bf5555f2177d1d"
