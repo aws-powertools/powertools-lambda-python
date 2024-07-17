@@ -301,7 +301,7 @@ class BasePersistenceLayer(ABC):
             payload_hash=self._get_hashed_payload(data=data),
         )
 
-        if remaining_time_in_millis:
+        if remaining_time_in_millis is not None:
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
             timestamp = (now + period).timestamp()
