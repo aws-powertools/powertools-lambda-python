@@ -65,11 +65,11 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
     logs = capture_multiple_logging_statements_output(stdout)
 
     # THEN all external loggers used Powertools for AWS Lambda (Python) handler, formatter and log level
-    for index, logger in enumerate([logger_1, logger_2]):
-        assert len(logger.handlers) == 1
-        assert isinstance(logger.handlers[0], logging.StreamHandler)
-        assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
-        assert logger.level == log_level.INFO.value
+    for index, in_logger in enumerate([logger_1, logger_2]):
+        assert len(in_logger.handlers) == 1
+        assert isinstance(in_logger.handlers[0], logging.StreamHandler)
+        assert isinstance(in_logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
+        assert in_logger.level == log_level.INFO.value
         assert logs[index]["message"] == msg
         assert logs[index]["level"] == log_level.INFO.name
 

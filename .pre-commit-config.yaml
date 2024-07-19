@@ -19,7 +19,7 @@ repos:
         types: [python]
       - id: ruff
         name: linting-format::ruff
-        entry: poetry run ruff
+        entry: poetry run ruff check
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli
