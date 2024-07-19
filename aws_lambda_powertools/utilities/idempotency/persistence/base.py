@@ -301,6 +301,10 @@ class BasePersistenceLayer(ABC):
             payload_hash=self._get_hashed_payload(data=data),
         )
 
+        # When Lambda kills the container after timeout, the remaining_time_in_millis is 0, which is considered False.
+        # Therefore, we need to check if remaining_time_in_millis is not None (>=0) to handle this case.
+        # See:
+
         if remaining_time_in_millis is not None:
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
