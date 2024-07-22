@@ -250,7 +250,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
+        lambda_handler: Optional[AnyCallableT] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
