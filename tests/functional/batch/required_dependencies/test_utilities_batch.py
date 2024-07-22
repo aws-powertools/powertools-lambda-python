@@ -408,6 +408,48 @@ def test_batch_processor_error_when_entire_batch_fails(sqs_event_factory, record
     assert "All records failed processing. " in str(e.value)
 
 
+def test_batch_processor_not_raise_when_entire_batch_fails_sync(sqs_event_factory, record_handler):
+    first_record = SQSRecord(sqs_event_factory("fail"))
+    second_record = SQSRecord(sqs_event_factory("fail"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_failure False
+    processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
+
+    # WHEN processing the messages
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    response = lambda_handler(event, {})
+
+    # THEN assert the `itemIdentifier` of each failure matches the message ID of the corresponding record
+    assert len(response["batchItemFailures"]) == 2
+    assert response["batchItemFailures"][0]["itemIdentifier"] == first_record.message_id
+    assert response["batchItemFailures"][1]["itemIdentifier"] == second_record.message_id
+
+
+def test_batch_processor_not_raise_when_entire_batch_fails_async(sqs_event_factory, record_handler):
+    first_record = SQSRecord(sqs_event_factory("fail"))
+    second_record = SQSRecord(sqs_event_factory("fail"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    # GIVEN the BatchProcessor constructor with raise_on_entire_batch_failure False
+    processor = AsyncBatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
+
+    # WHEN processing the messages
+    @async_batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    response = lambda_handler(event, {})
+
+    # THEN assert the `itemIdentifier` of each failure matches the message ID of the corresponding record
+    assert len(response["batchItemFailures"]) == 2
+    assert response["batchItemFailures"][0]["itemIdentifier"] == first_record.message_id
+    assert response["batchItemFailures"][1]["itemIdentifier"] == second_record.message_id
+
+
 def test_sqs_fifo_batch_processor_middleware_success_only(sqs_event_fifo_factory, record_handler):
     # GIVEN
     first_record = SQSRecord(sqs_event_fifo_factory("success"))

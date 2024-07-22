@@ -1,0 +1,59 @@
+[
+   {
+      "arguments":{},
+      "identity":"None",
+      "source":{
+         "post_id":"1",
+         "author":"Author1"
+      },
+      "prev":"None",
+      "info":{
+         "selectionSetList":[
+            "post_id",
+            "author"
+         ],
+         "selectionSetGraphQL":"{\n  post_id\n  author\n}",
+         "fieldName":"relatedPosts",
+         "parentTypeName":"Post",
+         "variables":{}
+      }
+   },
+   {
+      "arguments":{},
+      "identity":"None",
+      "source":{
+         "post_id":"2",
+         "author":"Author2"
+      },
+      "prev":"None",
+      "info":{
+         "selectionSetList":[
+            "post_id",
+            "author"
+         ],
+         "selectionSetGraphQL":"{\n  post_id\n  author\n}",
+         "fieldName":"relatedPosts",
+         "parentTypeName":"Post",
+         "variables":{}
+      }
+   },
+   {
+      "arguments":{},
+      "identity":"None",
+      "source":{
+         "post_id":"1",
+         "author":"Author1"
+      },
+      "prev":"None",
+      "info":{
+         "selectionSetList":[
+            "post_id",
+            "author"
+         ],
+         "selectionSetGraphQL":"{\n  post_id\n  author\n}",
+         "fieldName":"relatedPosts",
+         "parentTypeName":"Post",
+         "variables":{}
+      }
+   }
+]

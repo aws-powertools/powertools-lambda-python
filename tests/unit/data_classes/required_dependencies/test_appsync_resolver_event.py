@@ -80,7 +80,7 @@ def test_appsync_resolver_direct():
     raw_event = load_event("appSyncDirectResolver.json")
     parsed_event = AppSyncResolverEvent(raw_event)
 
-    assert parsed_event.source is None
+    assert parsed_event.source == {}
     assert parsed_event.arguments.get("id") == raw_event["arguments"]["id"]
     assert parsed_event.stash == {}
     assert parsed_event.prev_result is None
@@ -112,7 +112,7 @@ def test_appsync_resolver_event_info():
 
     event = AppSyncResolverEvent(event)
 
-    assert event.source is None
+    assert event.source == {}
     assert event.identity is None
     assert event.info is not None
     assert isinstance(event.info, AppSyncResolverEventInfo)

@@ -1,5 +1,6 @@
 from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
+    ApiGatewayAuthorizerRequestV2,
     APIGatewayProxyEventV2Model,
     RequestContextV2,
     RequestContextV2Authorizer,
@@ -120,3 +121,12 @@ def test_apigw_event_empty_query_strings():
     raw_event["rawQueryString"] = ""
     raw_event.pop("queryStringParameters")  # API GW v2 removes certain keys when no data is passed
     parse(event=raw_event, model=APIGatewayProxyEventV2Model)
+
+
+def test_apigw_v2_request_authorizer():
+    raw_event = load_event("apiGatewayAuthorizerV2Event.json")
+    parsed_event: ApiGatewayAuthorizerRequestV2 = ApiGatewayAuthorizerRequestV2(**raw_event)
+
+    assert parsed_event.type == raw_event["type"]
+    assert parsed_event.identitySource == raw_event["identitySource"]
+    assert parsed_event.routeArn == raw_event["routeArn"]

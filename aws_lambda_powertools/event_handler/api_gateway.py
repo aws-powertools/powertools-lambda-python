@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import json
 import logging
@@ -29,6 +31,8 @@ from typing import (
     Union,
     cast,
 )
+
+from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
@@ -188,9 +192,12 @@ class CORSConfig:
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
+
         self._allowed_origins = [allow_origin]
+
         if extra_origins:
             self._allowed_origins.extend(extra_origins)
+
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
@@ -218,9 +225,17 @@ class CORSConfig:
             headers["Access-Control-Expose-Headers"] = ",".join(self.expose_headers)
         if self.max_age is not None:
             headers["Access-Control-Max-Age"] = str(self.max_age)
-        if self.allow_credentials is True:
+        if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
+
+    def allowed_origin(self, extracted_origin: str) -> str | None:
+        if extracted_origin in self._allowed_origins:
+            return extracted_origin
+        if extracted_origin is not None and "*" in self._allowed_origins:
+            return "*"
+
+        return None
 
     @staticmethod
     def build_allow_methods(methods: Set[str]) -> str:
@@ -308,6 +323,7 @@ class Route:
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
     ):
         """
@@ -345,6 +361,8 @@ class Route:
             Whether or not to include this route in the OpenAPI schema
         security: List[Dict[str, List[str]]], optional
             The OpenAPI security for this route
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -368,6 +386,7 @@ class Route:
         self.tags = tags or []
         self.include_in_schema = include_in_schema
         self.security = security
+        self.openapi_extensions = openapi_extensions
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
 
@@ -518,6 +537,10 @@ class Route:
         # Add security if present
         if self.security:
             operation["security"] = self.security
+
+        # Add OpenAPI extensions if present
+        if self.openapi_extensions:
+            operation.update(self.openapi_extensions)
 
         # Add the parameters to the OpenAPI operation
         if parameters:
@@ -806,7 +829,10 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         extracted_origin_header = extract_origin_header(event.resolved_headers_field)
-        self.response.headers.update(cors.to_dict(extracted_origin_header))
+
+        origin = cors.allowed_origin(extracted_origin_header)
+        if origin is not None:
+            self.response.headers.update(cors.to_dict(origin))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -921,6 +947,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -980,6 +1007,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -1018,6 +1046,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1035,6 +1064,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -1074,6 +1104,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1091,6 +1122,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -1130,6 +1162,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1147,6 +1180,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -1185,6 +1219,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1202,6 +1237,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -1243,6 +1279,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1260,6 +1297,7 @@ class BaseRouter(ABC):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Head route decorator with HEAD `method`
@@ -1300,6 +1338,7 @@ class BaseRouter(ABC):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -1523,6 +1562,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
     ) -> "OpenAPI":
         """
         Returns the OpenAPI schema as a pydantic model.
@@ -1553,6 +1593,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: List[Dict[str, List[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
 
         Returns
         -------
@@ -1585,11 +1627,15 @@ class ApiGatewayResolver(BaseRouter):
 
         info.update({field: value for field, value in optional_fields.items() if value})
 
+        if not isinstance(openapi_extensions, Dict):
+            openapi_extensions = {}
+
         output: Dict[str, Any] = {
             "openapi": openapi_version,
             "info": info,
             "servers": self._get_openapi_servers(servers),
             "security": self._get_openapi_security(security, security_schemes),
+            **openapi_extensions,
         }
 
         components: Dict[str, Dict[str, Any]] = {}
@@ -1708,6 +1754,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1738,6 +1785,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: List[Dict[str, List[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
 
         Returns
         -------
@@ -1760,6 +1809,7 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
                 security_schemes=security_schemes,
                 security=security,
+                openapi_extensions=openapi_extensions,
             ),
             by_alias=True,
             exclude_none=True,
@@ -1787,6 +1837,7 @@ class ApiGatewayResolver(BaseRouter):
         security: Optional[List[Dict[str, List[str]]]] = None,
         oauth2_config: Optional["OAuth2Config"] = None,
         persist_authorization: bool = False,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1829,6 +1880,8 @@ class ApiGatewayResolver(BaseRouter):
             The OAuth2 configuration for the Swagger UI.
         persist_authorization: bool, optional
             Whether to persist authorization data on browser close/refresh.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
@@ -1878,6 +1931,7 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
                 security_schemes=security_schemes,
                 security=security,
+                openapi_extensions=openapi_extensions,
             )
 
             # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
@@ -1931,6 +1985,7 @@ class ApiGatewayResolver(BaseRouter):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1958,6 +2013,7 @@ class ApiGatewayResolver(BaseRouter):
                     operation_id,
                     include_in_schema,
                     security,
+                    openapi_extensions,
                     middlewares,
                 )
 
@@ -2471,6 +2527,7 @@ class Router(BaseRouter):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -2479,6 +2536,7 @@ class Router(BaseRouter):
             frozen_responses = _FrozenDict(responses) if responses else None
             frozen_tags = frozenset(tags) if tags else None
             frozen_security = _FrozenListDict(security) if security else None
+            fronzen_openapi_extensions = _FrozenDict(openapi_extensions) if openapi_extensions else None
 
             route_key = (
                 rule,
@@ -2494,6 +2552,7 @@ class Router(BaseRouter):
                 operation_id,
                 include_in_schema,
                 frozen_security,
+                fronzen_openapi_extensions,
             )
 
             # Collate Middleware for routes
@@ -2574,6 +2633,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
+        openapi_extensions: Optional[Dict[str, Any]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
@@ -2591,6 +2651,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -2652,3 +2713,24 @@ class ALBResolver(ApiGatewayResolver):
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string
         return ""
+
+    @override
+    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
+        """Convert the route's result to a Response
+
+        ALB requires a non-null body otherwise it converts as HTTP 5xx
+
+         3 main result types are supported:
+
+        - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
+          application/json
+        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
+        - Response: returned as is, and allows for more flexibility
+        """
+
+        # NOTE: Minor override for early return on Response with null body for ALB
+        if isinstance(result, Response) and result.body is None:
+            logger.debug("ALB doesn't allow None responses; converting to empty string")
+            result.body = ""
+
+        return super()._to_response(result)

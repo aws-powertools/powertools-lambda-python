@@ -1,0 +1,10 @@
+{
+    "statusCode": 200,
+    "multiValueHeaders": {
+        "Content-Type": [
+            "application/json"
+        ]
+    },
+    "body": "{'message':'pong'}",
+    "isBase64Encoded": false
+}

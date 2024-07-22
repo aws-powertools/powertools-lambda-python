@@ -17,6 +17,18 @@
     "CloudFront-Is-Mobile-Viewer": "false",
     "User-Agent": "..."
   },
+  "multiValueHeaders": {
+    "Header1": [
+      "value1"
+    ],
+    "Origin": [
+      "https://aws.amazon.com"
+    ],
+    "Header2": [
+      "value1",
+      "value2"
+    ]
+  },
   "queryStringParameters": {
     "QueryString1": "queryValue1"
   },
@@ -42,7 +54,7 @@
       "cognitoIdentityPoolId": null,
       "principalOrgId": null,
       "apiKey": "...",
-      "sourceIp": "...",
+      "sourceIp": "test-invoke-source-ip",
       "user": null,
       "userAgent": "PostmanRuntime/7.28.3",
       "userArn": null,

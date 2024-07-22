@@ -3,7 +3,7 @@ import asyncio
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
-from aws_lambda_powertools.event_handler.appsync import Router
+from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
@@ -169,11 +169,11 @@ def test_resolver_include_resolver():
 
     @router.resolver(type_name="Query", field_name="listLocations")
     def get_locations(name: str):
-        return "get_locations#" + name
+        return f"get_locations#{name}"
 
     @app.resolver(field_name="listLocations2")
     def get_locations2(name: str):
-        return "get_locations2#" + name
+        return f"get_locations2#{name}"
 
     app.include_router(router)
 
@@ -225,7 +225,7 @@ def test_router_has_access_to_app_context():
 
     @router.resolver(type_name="Query", field_name="listLocations")
     def get_locations(name: str):
-        if router.context["is_admin"]:
+        if router.context.get("is_admin"):
             return f"get_locations#{name}"
 
     app.include_router(router)
@@ -251,3 +251,41 @@ def test_include_router_merges_context():
     app.include_router(router)
 
     assert app.context == router.context
+
+
+def test_include_router_access_current_event():
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    # GIVEN An instance of AppSyncResolver, a Router instance, and a resolver function registered with the router
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.resolver(field_name="createSomething")
+    def get_user(id: str) -> dict:  # noqa AA03 VNE003
+        return router.current_event.identity.sub
+
+    app.include_router(router)
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the current_event
+    assert ret == mock_event["identity"]["sub"]
+
+
+def test_app_access_current_event():
+    # Check whether we can handle an example appsync direct resolver
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    # GIVEN An instance of AppSyncResolver and a resolver function registered with the app
+    app = AppSyncResolver()
+
+    @app.resolver(field_name="createSomething")
+    def get_user(id: str) -> dict:  # noqa AA03 VNE003
+        return app.current_event.identity.sub
+
+    # WHEN we resolve the event
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the current_event
+    assert ret == mock_event["identity"]["sub"]

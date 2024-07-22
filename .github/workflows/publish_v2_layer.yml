@@ -101,11 +101,11 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
         with:
           python-version: "3.12"
           cache: "pip"
@@ -117,14 +117,14 @@ jobs:
           pip install --require-hashes -r requirements.txt
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v2.0.0
+        uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
 
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@4fd812986e6c8c2a69e18311145f9371337f27d4 # v3.4.0
         with:
           install: true
           driver: docker
@@ -146,7 +146,7 @@ jobs:
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: cdk-layer-artefact
           path: layer/cdk.out.zip
@@ -258,7 +258,7 @@ jobs:
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
       - name: Download CDK layer artifacts
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           path: cdk-layer-stack
           pattern: cdk-layer-stack-*  # merge all Layer artifacts created per region earlier (reusable_deploy_v2_layer_stack.yml; step "Save Layer ARN artifact")

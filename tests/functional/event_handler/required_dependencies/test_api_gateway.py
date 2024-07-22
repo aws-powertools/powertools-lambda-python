@@ -48,6 +48,7 @@ def read_media(file_name: str) -> bytes:
 
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+LOAD_GW_EVENT_NO_ORIGIN = load_event("apiGatewayProxyEventNoOrigin.json")
 LOAD_GW_EVENT_TRAILING_SLASH = load_event("apiGatewayProxyEventPathTrailingSlash.json")
 
 
@@ -324,7 +325,7 @@ def test_no_matches():
 def test_cors():
     # GIVEN a function with cors=True
     # AND http method set to GET
-    app = ApiGatewayResolver()
+    app = ApiGatewayResolver(cors=CORSConfig("https://aws.amazon.com", allow_credentials=True))
 
     @app.get("/my/path", cors=True)
     def with_cors() -> Response:
@@ -345,6 +346,69 @@ def test_cors():
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.TEXT_HTML]
     assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
+    assert "Access-Control-Allow-Credentials" in headers
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
+
+    # THEN for routes without cors flag return no cors headers
+    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    result = handler(mock_event, None)
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_cors_no_request_origin():
+    # GIVEN a function with cors=True
+    # AND http method set to GET
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", cors=True)
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    event = LOAD_GW_EVENT_NO_ORIGIN
+
+    # WHEN calling the event handler
+    result = handler(event, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert "Access-Control-Allow-Credentials" not in headers
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_cors_allow_all_request_origins():
+    # GIVEN a function with cors=True
+    # AND http method set to GET
+    app = ApiGatewayResolver(
+        cors=CORSConfig(
+            allow_origin="*",
+            allow_credentials=True,
+        ),
+    )
+
+    @app.get("/my/path", cors=True)
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    @app.get("/without-cors")
+    def without_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(LOAD_GW_EVENT, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Access-Control-Allow-Origin"] == ["*"]
     assert "Access-Control-Allow-Credentials" not in headers
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
@@ -1820,3 +1884,21 @@ def test_route_match_prioritize_full_match():
     # THEN the static_handler should have been called, because it fully matches the path directly
     response_body = json.loads(response["body"])
     assert response_body["hello"] == "static"
+
+
+def test_alb_empty_response_object():
+    # GIVEN an ALB Resolver
+    app = ALBResolver()
+    event = {"path": "/my/request", "httpMethod": "GET"}
+
+    # AND route returns a Response object with empty body
+    @app.get("/my/request")
+    def opa():
+        return Response(status_code=200, content_type=content_types.APPLICATION_JSON)
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN body should be converted to an empty string
+    assert result["statusCode"] == 200
+    assert result["body"] == ""

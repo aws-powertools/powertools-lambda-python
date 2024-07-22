@@ -193,3 +193,60 @@ def test_openapi_encode_with_error():
 
     with pytest.raises(SerializationError, match="Unable to serialize the object*"):
         jsonable_encoder(MyClass())
+
+
+def test_openapi_encode_custom_serializer_nested_dict():
+    # GIVEN a nested dictionary with a custom class
+    class CustomClass: ...
+
+    nested_dict = {"a": {"b": CustomClass()}}
+
+    # AND a custom serializer
+    def serializer(value):
+        return "serialized"
+
+    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
+    result = jsonable_encoder(nested_dict, custom_serializer=serializer)
+
+    # THEN we should get the custom serializer output
+    assert result == {"a": {"b": "serialized"}}
+
+
+def test_openapi_encode_custom_serializer_sequences():
+    # GIVEN a sequence with a custom class
+    class CustomClass:
+        __slots__ = []
+
+    seq = [CustomClass()]
+
+    # AND a custom serializer
+    def serializer(value):
+        return "serialized"
+
+    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
+    result = jsonable_encoder(seq, custom_serializer=serializer)
+
+    # THEN we should get the custom serializer output
+    assert result == ["serialized"]
+
+
+def test_openapi_encode_custom_serializer_dataclasses():
+    # GIVEN a sequence with a custom class
+    class CustomClass:
+        __slots__ = []
+
+    @dataclass
+    class Order:
+        kind: CustomClass
+
+    order = Order(kind=CustomClass())
+
+    # AND a custom serializer
+    def serializer(value):
+        return "serialized"
+
+    # WHEN we call jsonable_encoder with the nested dictionary and unserializable value
+    result = jsonable_encoder(order, custom_serializer=serializer)
+
+    # THEN we should get the custom serializer output
+    assert result == {"kind": "serialized"}
