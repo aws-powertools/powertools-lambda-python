@@ -22,7 +22,7 @@ The property of idempotency means that an operation does not cause additional si
 
 **Idempotent request** is an operation with the same input previously processed that is not expired in your persistent storage or in-memory cache.
 
-**Persistence layer** is a storage we use to read, create, expire, and delete idempotency records.
+**Persistence layer** is a storage we use to create, read, expire, and delete idempotency records.
 
 **Idempotency record** is the data representation of an idempotent request saved in the persistent layer and in its various status. We use it to coordinate  whether **(a)** a request is idempotent, **(b)** it's not expired, **(c)** JSON response to return, and more.
 
