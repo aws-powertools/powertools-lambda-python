@@ -101,7 +101,7 @@ Unless you're looking to use an [existing table or customize each attribute](#dy
 | Configuration      | Value        | Notes                                                                                    |
 | ------------------ | ------------ | ---------------------------------------------------------------------------------------- |
 | Partition key      | `id`         | Format: <br> `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}` |
-| TTL attribute name | `expiration` | Using AWS Console? this is configurable after table creation                             |
+| TTL attribute name | `expiration` | Using AWS Console? This is configurable after table creation                             |
 
 Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
 
@@ -207,7 +207,7 @@ By default, `idempotent_function` serializes, stores, and returns your annotated
 
 The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
 
-!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON string."
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in your persistent storage as a JSON string."
 
 === "Pydantic"
 
@@ -321,7 +321,7 @@ We want to use `user_id` and `product_id` fields as our idempotency key. **If we
 
 ### Adjusting expiration window
 
-!!! note "We expire idempotency records after **an hour** (3600 seconds). After that, a transaction with the same payload [will not be considered idempotent](#expired-idempotency-records)."
+!!! note "By default, we expire idempotency records after **an hour** (3600 seconds). After that, a transaction with the same payload [will not be considered idempotent](#expired-idempotency-records)."
 
 You can change this expiration window with the **`expires_after_seconds`** parameter. There is no limit on how long this expiration window can be set to.
 
@@ -436,7 +436,7 @@ You can customize the attribute names during initialization:
 
 !!! info "We recommend Redis version 7 or higher for optimal performance."
 
-For simple setups, initialize `RedisCachePersistenceLayer` with your cluster endpoint and port to connect.
+For simple setups, initialize `RedisCachePersistenceLayer` with your Redis endpoint and port to connect.
 
 For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
 
