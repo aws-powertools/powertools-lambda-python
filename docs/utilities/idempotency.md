@@ -5,7 +5,7 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The idempotency utility allows you to retry operations with the same input within a time window, producing the same output.
+The idempotency utility allows you to retry operations within a time window with the same input, producing the same output.
 
 ## Key features
 
