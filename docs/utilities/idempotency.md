@@ -9,7 +9,7 @@ The idempotency utility allows you to retry operations within a time window with
 
 ## Key features
 
-* Produces the same result when a function is called repeatedly with the same idempotency key
+* Produces the previous successful result when a function is called repeatedly with the same idempotency key
 * Choose your idempotency key from one or more fields, or entire payload
 * Safeguard concurrent requests, timeouts, missing idempotency keys, and payload tampering
 * Support for Amazon DynamoDB, Redis, bring your own persistence layer, and in-memory caching
