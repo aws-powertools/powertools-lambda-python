@@ -105,7 +105,7 @@ Unless you're looking to use an [existing table or customize each attribute](#dy
 
 Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
 
-##### IaC examples
+##### DynamoDB IaC examples
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -134,9 +134,9 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 #### Redis cluster
 
-**TODO**: Experiment bringing upfront Redis even at the cost of readability, as setup and usage are disconnected today causing further harm.
+We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
 
-##### Constraints
+In both services and self-hosting Redis, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
 
 ##### Redis IaC examples
 
@@ -356,7 +356,7 @@ By default, we protect against [concurrent executions](#handling-concurrent-exec
 
 To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
 
-```python title="working_with_lambda_timeout.py" hl_lines="11 20"
+```python title="working_with_lambda_timeout.py" hl_lines="14 23"
 --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
 ```
 
@@ -384,7 +384,7 @@ If an exception is handled or raised **outside** your decorated function, then i
 
 This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
 
-```python title="customize_persistence_layer.py" hl_lines="7-15"
+```python title="customize_persistence_layer.py" hl_lines="10-18"
 --8<-- "examples/idempotency/src/customize_persistence_layer.py"
 ```
 
@@ -441,12 +441,12 @@ For simple setups, initialize `RedisCachePersistenceLayer` with your cluster end
 For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
 
 === "Redis quick start"
-    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="7-9 12 26"
+    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="8-10 14 27"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
 === "Using an existing Redis client"
-    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="4 9-11 14 22 36"
+    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="5 10-11 16 24 38"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
@@ -504,7 +504,7 @@ You can customize the attribute names during initialization:
 | **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
 | **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
 
-```python title="customize_persistence_layer_redis.py" hl_lines="9-16"
+```python title="customize_persistence_layer_redis.py" hl_lines="15-18"
 --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
 ```
 
