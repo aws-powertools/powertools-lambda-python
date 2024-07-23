@@ -123,6 +123,7 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
     ```terraform hl_lines="14-26 64-70"
     --8<-- "examples/idempotency/templates/terraform.tf"
     ```
+`
 
 ##### Limitations
 
@@ -136,7 +137,7 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
 
-In both services and self-hosting Redis, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
+In both services, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
 
 ##### Redis IaC examples
 
