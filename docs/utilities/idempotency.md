@@ -52,7 +52,7 @@ classDiagram
 
 ## Getting started
 
-We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-cluster).
+We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-database).
 
 ### IAM Permissions
 
@@ -80,7 +80,7 @@ To start, you'll need:
 
     ---
 
-    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-cluster)
+    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-database)
 
 *   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
 
@@ -126,13 +126,13 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 ##### Limitations
 
-* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-cluster) as an alternative.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-database) as an alternative.
 
 * **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
 * **Old boto3 versions can increase costs**. For cost optimization, we use a conditional `PutItem` to always lock a new idempotency record. If locking fails, it means we already have an idempotency record saving us an additional `GetItem` call. However, this is only supported in boto3 `1.26.194` and higher _([June 30th 2023](https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-dynamodb-cost-failed-conditional-writes/){target="_blank"})_.
 
-#### Redis cluster
+#### Redis database
 
 We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
 
