@@ -45,6 +45,16 @@ Powertools for AWS Lambda follows the [AWS Lambda Runtime deprecation policy cyc
 
 !!! note "AWS reserves the right to stop support for an underlying dependency without increasing the major SDK version"
 
+### Lambda layer lifecycle
+
+Powertools for AWS Lambda provides public Lambda layers as an alternative method for including the Powertools SDK into your Lambda functions.
+
+Unlike package indexers such as PyPi and NPMJS, which use semantic versioning (e.g., v1.2.3, v1.3.0), Lambda layers employs incrementing sequential versions (e.g., 1, 2, 3, 4). With each new release of the SDK, Powertools for AWS Lambda publishes an updated layer, including the SDK version in the layer description.
+
+Powertools for AWS Lambda layers are immutable and remain available beyond their end-of-life dates.
+
+Each Powertools for AWS Lambda layer adheres to the versioning policy outlined above.
+
 ### Communication methods
 
 Maintenance announcements are communicated in several ways:
