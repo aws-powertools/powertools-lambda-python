@@ -1379,6 +1379,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#lambda-layer-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lambda layer lifecycle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#communication-methods" class="md-nav__link">
     <span class="md-ellipsis">
       Communication methods
@@ -1637,6 +1646,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#lambda-layer-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lambda layer lifecycle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#communication-methods" class="md-nav__link">
     <span class="md-ellipsis">
       Communication methods
@@ -1709,6 +1727,11 @@
 <div class="admonition note">
 <p class="admonition-title">AWS reserves the right to stop support for an underlying dependency without increasing the major SDK version</p>
 </div>
+<h3 id="lambda-layer-lifecycle">Lambda layer lifecycle<a class="headerlink" href="#lambda-layer-lifecycle" title="Permanent link">&para;</a></h3>
+<p>Powertools for AWS Lambda provides public Lambda layers as an alternative method for including the Powertools SDK into your Lambda functions.</p>
+<p>Unlike package indexers such as PyPi and NPMJS, which use semantic versioning (e.g., v1.2.3, v1.3.0), Lambda layers employs incrementing sequential versions (e.g., 1, 2, 3, 4). With each new release of the SDK, Powertools for AWS Lambda publishes an updated layer, including the SDK version in the layer description.</p>
+<p>Powertools for AWS Lambda layers are immutable and remain available beyond their end-of-life dates.</p>
+<p>Each Powertools for AWS Lambda layer adheres to the versioning policy outlined above.</p>
 <h3 id="communication-methods">Communication methods<a class="headerlink" href="#communication-methods" title="Permanent link">&para;</a></h3>
 <p>Maintenance announcements are communicated in several ways:</p>
 <ul>
@@ -1772,7 +1795,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-04-29
+    2024-07-24
   </span>
 
     
