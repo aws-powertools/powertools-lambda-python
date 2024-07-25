@@ -20,12 +20,12 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-312:1
       # Find the latest Layer version in the Datadog official documentation
 
       # Datadog SDK
       # Latest versions: https://github.com/DataDog/datadog-lambda-python/releases
-      - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python310:78
+      - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python312:78
 
       # Datadog Lambda Extension
       # Latest versions: https://github.com/DataDog/datadog-lambda-extension/releases

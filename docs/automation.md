@@ -87,4 +87,59 @@ This is a snapshot of our automated checks at a glance.
 
 ![Continuous Deployment practices](./media/continuous_deployment_practices.png)
 
+## Lambda layer build & deploy
+
+We fetch the latest PyPi release, then build Python **3.8-3.12** for **x86_64** and **arm64** architectures, using QEMU emulation for arm64. We create **a single CDK Asset** with x86_64 and arm for each Python version to optimize deployment performance.
+
+<!--In our layer deployment pipeline, we begin by fetching the **latest PyPi release**. After that, we build Python versions 3.8, 3.9, 3.10, 3.11, and 3.12 for both x86_64 and arm64 architectures. For the arm64 builds, we utilize QEMU emulation to ensure compatibility. After completing the builds, we create **a single CDK Asset** containing both Stacks for each Python version. This approach is adopted to optimize performance during the deployment process.-->
+
+Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we execute the following:
+
+* **Canary Tests**: Run thorough canary tests to assess stability and functionality
+* **In case of success**: If canary tests pass, deploy previous CDK Asset to production across all regions
+* **In case of error**: If any canary tests fail, halt pipeline to investigate and remediate issues before redeploying
+
+This process ensures the quality of the delivery and helps anticipate problems to avoid impacting customers.
+
+<!--Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the deployment in the beta account is complete, we execute canary tests. These tests cover all platforms, runtimes, and regions, allowing us to thoroughly assess the stability and functionality of the deployment. If the canary tests are successful, indicating that the deployment meets our quality standards, we proceed to deploy the previous CDK Asset to the production account. This deployment is rolled out across all AWS regions, ensuring widespread availability of the latest version and keeping previous version untouched.
+However, if any of the canary tests fail, indicating potential issues with the deployment, we halt the pipeline immediately. This preventive measure allows us to investigate and remediate any problems before attempting another deployment. -->
+
+```mermaid
+graph LR
+    A[Fetch PyPi release] --> P38[Python 3.8]
+    A --> P39[Python 3.9]
+    A --> P310[Python 3.10]
+    A --> P311[Python 3.11]
+    A --> P312[Python 3.12]
+    P38 --> P38x86[build x86_64]
+    P38 --> P38arm64[build arm64]
+    P39 --> P39x86[build x86_64]
+    P39 --> P39arm64[build arm64]
+    P310 --> P310x86[build x86_64]
+    P310 --> P310arm64[build arm64]
+    P311 --> P311x86[build x86_64]
+    P311 --> P311arm64[build arm64]
+    P312 --> P312x86[build x86_64]
+    P312 --> P312arm64[build arm64]
+    P38x86 --> CDKP1[CDK Asset with both Stacks]
+    P38arm64 --> CDKP1[CDK Asset with both Stacks]
+    P39x86 --> CDKP2[CDK Asset with both Stacks]
+    P39arm64 --> CDKP2[CDK Asset with both Stacks]
+    P310x86 --> CDKP3[CDK Asset with both Stacks]
+    P310arm64 --> CDKP3[CDK Asset with both Stacks]
+    P311x86 --> CDKP4[CDK Asset with both Stacks]
+    P311arm64 --> CDKP4[CDK Asset with both Stacks]
+    P312x86 --> CDKP5[CDK Asset with both Stacks]
+    P312arm64 --> CDKP5[CDK Asset with both Stacks]
+    CDKP1 --> DeployBeta[Deploy in the beta account<br>in every AWS Region]
+    CDKP2 --> DeployBeta
+    CDKP3 --> DeployBeta
+    CDKP4 --> DeployBeta
+    CDKP5 --> DeployBeta
+    DeployBeta --> RunCanary[Perform canary tests<br>on all platforms, runtimes and regions]
+    RunCanary --> DeployBetaSuccess{Success?}
+    DeployBetaSuccess -- Yes --> DeployProd[Deploy the previous<br>CDK Asset in the prod account<br>in every AWS Region]
+    DeployBetaSuccess -- No --> PipelineStop[Stop the pipeline]
+```
+
 !!! info "More details to come"
