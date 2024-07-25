@@ -190,9 +190,8 @@ jobs:
         run: |
           PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
           echo "PYTHON_VERSION=${PYTHON_VERSION}" >> "$GITHUB_OUTPUT"
-        #  LAYER_VERSION=$(echo ${{ matrix.region }}-$PYTHON_VERSION-layer-version.txt)
-
-        #  echo "LAYER_VERSION=${LAYER_VERSION}" >> $GITHUB_OUTPUT
+          LAYER_VERSION=${{ matrix.region }}-$PYTHON_VERSION-layer-version.txt
+          echo "LAYER_VERSION=${LAYER_VERSION}" >> "$GITHUB_OUTPUT"
       - name: CDK Deploy Layer
         run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV2Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
       - name: Store latest Layer ARN
