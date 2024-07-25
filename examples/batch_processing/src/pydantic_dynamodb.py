@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.batch import (
     EventType,
     process_partial_response,
 )
-from aws_lambda_powertools.utilities.parser import BaseModel, validator
+from aws_lambda_powertools.utilities.parser import BaseModel, field_validator
 from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamRecordModel,
@@ -26,7 +26,7 @@ class OrderDynamoDB(BaseModel):
 
     # auto transform json string
     # so Pydantic can auto-initialize nested Order model
-    @validator("Message", pre=True)
+    @field_validator("Message", mode="before")
     def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
         return json.loads(value["S"])
 

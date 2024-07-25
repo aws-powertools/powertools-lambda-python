@@ -11,5 +11,6 @@ EnvelopeModel = TypeVar("EnvelopeModel")
 EventParserReturnType = TypeVar("EventParserReturnType")
 AnyInheritedModel = Union[Type[BaseModel], BaseModel]
 RawDictOrModel = Union[Dict[str, Any], AnyInheritedModel]
+T = TypeVar("T")
 
 __all__ = ["Json", "Literal"]

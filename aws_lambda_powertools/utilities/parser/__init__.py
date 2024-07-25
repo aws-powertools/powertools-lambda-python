@@ -1,10 +1,11 @@
 """Advanced event_parser utility
 """
 
-from . import envelopes
-from .envelopes import BaseEnvelope
-from .parser import event_parser, parse
-from .pydantic import BaseModel, Field, ValidationError, root_validator, validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+
+from aws_lambda_powertools.utilities.parser import envelopes
+from aws_lambda_powertools.utilities.parser.envelopes import BaseEnvelope
+from aws_lambda_powertools.utilities.parser.parser import event_parser, parse
 
 __all__ = [
     "event_parser",
@@ -13,7 +14,7 @@ __all__ = [
     "BaseEnvelope",
     "BaseModel",
     "Field",
-    "validator",
-    "root_validator",
+    "field_validator",
+    "model_validator",
     "ValidationError",
 ]

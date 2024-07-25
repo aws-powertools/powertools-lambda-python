@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Optional, TypeVar, Union
 
-from aws_lambda_powertools.utilities.parser.types import Model
+from aws_lambda_powertools.utilities.parser.functions import _retrieve_or_set_model_from_cache
+from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -11,14 +14,14 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Union[Model, None]:
+    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: type[T]) -> Union[T, None]:
         """Parses envelope data against model provided
 
         Parameters
         ----------
         data : Dict
             Data to be parsed and validated
-        model : Type[Model]
+        model : type[T]
             Data model to parse and validate data against
 
         Returns
@@ -30,15 +33,17 @@ class BaseEnvelope(ABC):
             logger.debug("Skipping parsing as event is None")
             return data
 
+        adapter = _retrieve_or_set_model_from_cache(model=model)
+
         logger.debug("parsing event against model")
         if isinstance(data, str):
             logger.debug("parsing event as string")
-            return model.model_validate_json(data)
+            return adapter.validate_json(data)
 
-        return model.model_validate(data)
+        return adapter.validate_python(data)
 
     @abstractmethod
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]):
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: type[T]):
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.

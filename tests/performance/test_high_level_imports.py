@@ -7,11 +7,13 @@ import pytest
 LOGGER_INIT_SLA: float = 0.005
 METRICS_INIT_SLA: float = 0.005
 TRACER_INIT_SLA: float = 0.5
+PARSER_INIT_SLA: float = 0.05
 IMPORT_INIT_SLA: float = 0.035
 PARENT_PACKAGE = "aws_lambda_powertools"
 TRACING_PACKAGE = "aws_lambda_powertools.tracing"
 LOGGING_PACKAGE = "aws_lambda_powertools.logging"
 METRICS_PACKAGE = "aws_lambda_powertools.metrics"
+TRACER_PACKAGE = "aws_lambda_powertools.utilities.parser"
 
 
 def import_core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
@@ -20,6 +22,7 @@ def import_core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
         importlib.import_module(TRACING_PACKAGE),
         importlib.import_module(LOGGING_PACKAGE),
         importlib.import_module(METRICS_PACKAGE),
+        importlib.import_module(TRACER_PACKAGE),
     )
 
 
@@ -93,3 +96,15 @@ def test_logger_init(benchmark):
     stat = benchmark.stats.stats.max
     if stat > LOGGER_INIT_SLA:
         pytest.fail(f"High level imports should be below ${LOGGER_INIT_SLA}s: {stat}")
+
+
+@pytest.mark.perf
+@pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
+def test_parser_init(benchmark):
+    # GIVEN parser is initialized
+    # WHEN default options are used
+    # THEN initialization perf should be below 5ms
+    benchmark.pedantic(import_init_logger)
+    stat = benchmark.stats.stats.max
+    if stat > PARSER_INIT_SLA:
+        pytest.fail(f"High level imports should be below ${PARSER_INIT_SLA}s: {stat}")
