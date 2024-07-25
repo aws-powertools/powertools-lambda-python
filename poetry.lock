@@ -2059,13 +2059,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.34.131"
-description = "Type annotations for boto3.DynamoDB 1.34.131 service generated with mypy-boto3-builder 7.24.0"
+version = "1.34.148"
+description = "Type annotations for boto3.DynamoDB 1.34.148 service generated with mypy-boto3-builder 7.25.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_dynamodb-1.34.131-py3-none-any.whl", hash = "sha256:62e4fd85c621561f145828de14752a51380182d492cb039043d7f46bef872c34"},
-    {file = "mypy_boto3_dynamodb-1.34.131.tar.gz", hash = "sha256:d23c857568ae7c8c8fc1fbd96709a1dd00c140f917d74e09423fd44677097abf"},
+    {file = "mypy_boto3_dynamodb-1.34.148-py3-none-any.whl", hash = "sha256:f1a7aabff5c6e926b9b272df87251c9d6dfceb4c1fb159fb5a2df52062cd7e87"},
+    {file = "mypy_boto3_dynamodb-1.34.148.tar.gz", hash = "sha256:c85489b92cbbbe4f6997070372022df914d4cb8eb707fdc73aa18ce6ba25c578"},
 ]
 
 [package.dependencies]
@@ -3707,4 +3707,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "8cc7848ce90d752f997c552a3b9c0b50206827a5058361b41ba6bb99a6ff2ccf"
+content-hash = "72484bb9554cbf82b825d3f8203044f4720ed409a398eba451e71eac0d1f32b8"
