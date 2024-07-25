@@ -92,18 +92,22 @@ To start, you'll need:
 
 <!-- markdownlint-enable MD030 -->
 
-#### DynamoDB table
+!!! note "Primary key for any persistence storage"
+    We combine the Lambda function name and the [fully qualified name](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} for classes/functions to
+    prevent accidental reuse for similar code sharing input/output.
 
-!!! tip "You can share a single state table for all functions"
+    Primary key sample: `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}`
+
+#### DynamoDB table
 
 Unless you're looking to use an [existing table or customize each attribute](#dynamodbpersistencelayer), you only need the following:
 
-| Configuration      | Value        | Notes                                                                                    |
-| ------------------ | ------------ | ---------------------------------------------------------------------------------------- |
-| Partition key      | `id`         | Format: <br> `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}` |
-| TTL attribute name | `expiration` | Using AWS Console? This is configurable after table creation                             |
+| Configuration      | Value        | Notes                                                        |
+| ------------------ | ------------ | ------------------------------------------------------------ |
+| Partition key      | `id`         |                                                              |
+| TTL attribute name | `expiration` | Using AWS Console? This is configurable after table creation |
 
-Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
+You **can** use a single DynamoDB table for all functions annotated with Idempotency.
 
 ##### DynamoDB IaC examples
 
