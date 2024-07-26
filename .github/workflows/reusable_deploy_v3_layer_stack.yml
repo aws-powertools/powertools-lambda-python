@@ -193,13 +193,13 @@ jobs:
           LAYER_VERSION=${{ matrix.region }}-$PYTHON_VERSION-layer-version.txt
           echo "LAYER_VERSION=${LAYER_VERSION}" >> "$GITHUB_OUTPUT"
       - name: CDK Deploy Layer
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV2Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
           mkdir cdk-layer-stack
-          jq -r -c ".[\"LayerV2Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArn" cdk-outputs.json > cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
-          jq -r -c ".[\"LayerV2Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArm64Arn" cdk-outputs.json >> cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
+          jq -r -c ".[\"LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArn" cdk-outputs.json > cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
+          jq -r -c ".[\"LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArm64Arn" cdk-outputs.json >> cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
           cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
@@ -210,4 +210,4 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} "CanaryV2Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} "CanaryV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose

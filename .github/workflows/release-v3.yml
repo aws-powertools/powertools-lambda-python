@@ -37,7 +37,7 @@ on:
     inputs:
       version_to_publish:
         description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v3.0.0, v3.0.0a0 (pre-release)"
-        default: v2.0.0
+        default: v3.0.0
         required: true
       skip_pypi:
         description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"
@@ -246,7 +246,7 @@ jobs:
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
-  # We create a Git Tag using our release version (e.g., v2.16.0)
+  # We create a Git Tag using our release version (e.g., v3.16.0)
   # using our sealed source code we created earlier.
   # Because we bumped version of our project as part of CI
   # we need to add this into git before pushing the tag
@@ -330,7 +330,7 @@ jobs:
   # NOTE
   #
   # Watch out for the depth limit of 4 nested workflow_calls.
-  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack
+  # publish_layer -> publish_3_layer -> reusable_deploy_v3_layer_stack
   publish_layer:
     needs: [seal, release, create_tag]
     secrets: inherit

@@ -1,0 +1,209 @@
+name: Deploy V3 SAR
+
+# PROCESS
+#
+# 1. This workflow starts after the layer artifact is produced on `publish_v3_layer`
+# 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
+# 3. We publish the SAR for both x86_64 and arm64 (see `matrix` section)
+# 4. We use `sam package` and `sam publish` to publish the SAR app
+# 5. We remove the previous Canary stack (if present) and deploy a new one to test the SAR App. We retain the Canary in the account for debugging purposes
+# 6. Finally the published SAR app is made public on the PROD environment
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# sar-beta:
+#   needs: build-layer
+#   permissions:
+#     # lower privilege propagated from parent workflow (release.yml)
+#     id-token: write
+#     contents: read
+#     pull-requests: none
+#     pages: none
+#   uses: ./.github/workflows/reusable_deploy_v3_sar.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     package-version: ${{ inputs.latest_published_version }}
+#     source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+#     source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  NODE_VERSION: 16.12
+  AWS_REGION: eu-west-1
+  SAR_NAME: aws-lambda-powertools-python-layer
+  TEST_STACK_NAME: serverlessrepo-v2-powertools-layer-test-stack
+  RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: "Deployment stage (BETA, PROD)"
+        required: true
+        type: string
+      artefact-name:
+        description: "CDK Layer Artefact name to download"
+        required: true
+        type: string
+      package-version:
+        description: "The version of the package to deploy"
+        required: true
+        type: string
+      environment:
+        description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
+jobs:
+  deploy-sar-app:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    strategy:
+      matrix:
+        architecture: ["x86_64", "arm64"]
+    steps:
+      - name: checkout
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
+
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
+
+      # NOTE
+      # We connect to Layers account to log our intent to publish a SAR Layer
+      # we then jump to our specific SAR Account with the correctly scoped IAM Role
+      # this allows us to have a single trail when a release occurs for a given layer (beta+prod+SAR beta+SAR prod)
+      - name: AWS credentials SAR role
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        id: aws-credentials-sar-role
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          role-duration-seconds: 1200
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_SAR_V2_ROLE_ARN }}
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Download artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: ${{ inputs.artefact-name }}
+      - name: Unzip artefact
+        run: unzip cdk.out.zip
+      - name: Configure SAR name
+        run: |
+          if [[ "${{ inputs.stage }}" == "BETA" ]]; then
+            SAR_NAME="test-${SAR_NAME}"
+          fi
+          echo SAR_NAME="${SAR_NAME}" >> "$GITHUB_ENV"
+      - name: Adds arm64 suffix to SAR name
+        if: ${{ matrix.architecture == 'arm64' }}
+        run: echo SAR_NAME="${SAR_NAME}-arm64" >> "$GITHUB_ENV"
+      - name: Normalize semantic version
+        id: semantic-version # v2.0.0a0 -> v2.0.0-a0
+        env:
+          VERSION: ${{ inputs.package-version }}
+        run: |
+          VERSION="${VERSION/a/-a}"
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Prepare SAR App
+        env:
+          VERSION: ${{ steps.semantic-version.outputs.VERSION }}
+        run: |
+          # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
+          # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
+          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
+
+          # fill in the SAR SAM template
+          sed \
+            -e "s|<VERSION>|${VERSION}|g" \
+            -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" \
+            -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" \
+            layer/sar/template.txt > template.yml
+
+          # SAR needs a README and a LICENSE, so just copy the ones from the repo
+          cp README.md LICENSE "./cdk.out/$asset/"
+
+          # Debug purposes
+          cat template.yml
+      - name: Deploy SAR
+        run: |
+          # Package the SAR to our SAR S3 bucket, and publish it
+          sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          sam publish --template packaged.yml --region "$AWS_REGION"
+      - name: Deploy BETA canary
+        if: ${{ inputs.stage == 'BETA' }}
+        run: |
+          if [[ "${{ matrix.architecture }}" == "arm64" ]]; then
+            TEST_STACK_NAME="${TEST_STACK_NAME}-arm64"
+          fi
+
+          echo "Check if stack does not exist"
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$TEST_STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)
+
+          if [[ -n "$stack_exists" ]] ; then
+            echo "Found test deployment stack, removing..."
+            aws cloudformation delete-stack --stack-name "$TEST_STACK_NAME"
+            aws cloudformation wait stack-delete-complete --stack-name "$TEST_STACK_NAME"
+          fi
+
+          echo "Creating canary stack"
+          echo "Stack name: $TEST_STACK_NAME"
+          aws serverlessrepo create-cloud-formation-change-set \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --stack-name "${TEST_STACK_NAME/serverlessrepo-/}" \
+            --capabilities CAPABILITY_NAMED_IAM
+
+          CHANGE_SET_ID=$(aws cloudformation list-change-sets --stack-name "$TEST_STACK_NAME" --query 'Summaries[*].ChangeSetId' --output text)
+          aws cloudformation wait change-set-create-complete --change-set-name "$CHANGE_SET_ID"
+          aws cloudformation execute-change-set --change-set-name "$CHANGE_SET_ID"
+          aws cloudformation wait stack-create-complete --stack-name "$TEST_STACK_NAME"
+
+          echo "Waiting until stack deployment completes..."
+
+          echo "Exit with error if stack is not in CREATE_COMPLETE"
+          stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$TEST_STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}")
+          if [[ -z "$stack_exists" ]] ; then
+            echo "Could find successful deployment, exit error..."
+            exit 1
+          fi
+          echo "Deployment successful"
+      - name: Publish SAR
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          # wait until SAR registers the app, otherwise it fails to make it public
+          sleep 15
+          echo "Make SAR app public"
+          aws serverlessrepo put-application-policy \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --statements Principals='*',Actions=Deploy
