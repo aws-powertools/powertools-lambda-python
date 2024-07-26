@@ -88,7 +88,7 @@ jobs:
         python-version: ["3.8","3.9","3.10","3.11","3.12"]
     defaults:
       run:
-        working-directory: ./layer
+        working-directory: ./layer_v3
     steps:
       - name: checkout
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
