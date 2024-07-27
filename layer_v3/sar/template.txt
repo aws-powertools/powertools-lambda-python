@@ -3,32 +3,30 @@ AWSTemplateFormatVersion: '2010-09-09'
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: <SAR_APP_NAME>
-    Description: "AWS Lambda Layer for aws-lambda-powertools"
+    Description: "AWS Lambda Layer for Powertools for AWS Lambda V3 [<ARCHITECTURE>] with python <PYTHON_RUNTIME>"
     Author: AWS
     SpdxLicenseId: Apache-2.0
     LicenseUrl: <LAYER_CONTENT_PATH>/LICENSE
     ReadmeUrl: <LAYER_CONTENT_PATH>/README.md
-    Labels: ['layer','lambda','powertools','python', 'aws']
+    Labels: ['layer','lambda','powertools','python', 'aws', '<ARCHITECTURE>']
     HomePageUrl: https://github.com/aws-powertools/powertools-lambda-python
     SemanticVersion: <VERSION>
     SourceCodeUrl: https://github.com/aws-powertools/powertools-lambda-python
 
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Lambda Layer for aws-lambda-powertools with python 3.12, 3.11, 3.10, 3.9 or 3.8
+Description: AWS Lambda Layer for Powertools for AWS Lambda V3 [<ARCHITECTURE>] with python <PYTHON_RUNTIME>
 
 Resources:
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      Description: "AWS Lambda Layer for aws-lambda-powertools version <VERSION>"
+      Description: "AWS Lambda Layer for Powertools for AWS Lambda V3 [<ARCHITECTURE>] - python <PYTHON_RUNTIME> - version <VERSION>"
       LayerName: <SAR_APP_NAME>
       ContentUri: <LAYER_CONTENT_PATH>
+      CompatibleArchitectures:
+        - <ARCHITECTURE>
       CompatibleRuntimes:
-        - python3.12
-        - python3.11
-        - python3.10
-        - python3.9
-        - python3.8
+        - python<PYTHON_RUNTIME>
       LicenseInfo: 'Available under the Apache-2.0 license.'
       RetentionPolicy: Retain
 

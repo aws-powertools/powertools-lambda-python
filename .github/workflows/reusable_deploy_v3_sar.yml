@@ -4,14 +4,14 @@ name: Deploy V3 SAR
 #
 # 1. This workflow starts after the layer artifact is produced on `publish_v3_layer`
 # 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
-# 3. We publish the SAR for both x86_64 and arm64 (see `matrix` section)
+# 3. We publish the SAR for 3.8 to 3.12 Python runtime and both x86_64 and arm64 (see `matrix` section)
 # 4. We use `sam package` and `sam publish` to publish the SAR app
 # 5. We remove the previous Canary stack (if present) and deploy a new one to test the SAR App. We retain the Canary in the account for debugging purposes
 # 6. Finally the published SAR app is made public on the PROD environment
 
 # USAGE
 #
-# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+# NOTE: meant to be used with ./.github/workflows/publish_v3_layer.yml
 #
 # sar-beta:
 #   needs: build-layer
@@ -25,7 +25,6 @@ name: Deploy V3 SAR
 #   secrets: inherit
 #   with:
 #     stage: "BETA"
-#     artefact-name: "cdk-layer-artefact"
 #     environment: "layer-beta"
 #     package-version: ${{ inputs.latest_published_version }}
 #     source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
@@ -36,10 +35,10 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: 16.12
+  NODE_VERSION: 18.20.4
   AWS_REGION: eu-west-1
-  SAR_NAME: aws-lambda-powertools-python-layer
-  TEST_STACK_NAME: serverlessrepo-v2-powertools-layer-test-stack
+  SAR_NAME: aws-lambda-powertools-python-layer # PROBLEM - WE NEED TO TALK
+  TEST_STACK_NAME: serverlessrepo-v3-powertools-layer-test-stack
   RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
 
 on:
@@ -47,10 +46,6 @@ on:
     inputs:
       stage:
         description: "Deployment stage (BETA, PROD)"
-        required: true
-        type: string
-      artefact-name:
-        description: "CDK Layer Artefact name to download"
         required: true
         type: string
       package-version:
@@ -77,6 +72,7 @@ jobs:
     strategy:
       matrix:
         architecture: ["x86_64", "arm64"]
+        python-version: ["3.8","3.9","3.10","3.11","3.12"]
     steps:
       - name: checkout
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
@@ -117,14 +113,20 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
-          name: ${{ inputs.artefact-name }}
+          name: cdk-layer-artifact-py${{ matrix.python-version }}
       - name: Unzip artefact
-        run: unzip cdk.out.zip
+        run: unzip cdk.py${{ matrix.python-version }}.out.zip
+      - name: normalize Python Version
+        run: |
+          PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
+          echo "PYTHON_VERSION=${PYTHON_VERSION}" >> "$GITHUB_ENV"
       - name: Configure SAR name
         run: |
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
             SAR_NAME="test-${SAR_NAME}"
           fi
+          ARCH_NAME=$(echo ${{ matrix.architecture }} | tr -d '_')
+          SAR_NAME="${SAR_NAME}-python${{env.PYTHON_VERSION}}-${ARCH_NAME}"
           echo SAR_NAME="${SAR_NAME}" >> "$GITHUB_ENV"
       - name: Adds arm64 suffix to SAR name
         if: ${{ matrix.architecture == 'arm64' }}
@@ -142,31 +144,33 @@ jobs:
         run: |
           # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
           # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
-          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' cdk.out/LayerV2Stack.template.json)
+          PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
+          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' "cdk.out/LayerV3Stack-${PYTHON_VERSION}.template.json")
 
           # fill in the SAR SAM template
           sed \
             -e "s|<VERSION>|${VERSION}|g" \
             -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" \
             -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" \
+            -e "s|<PYTHON_RUNTIME>|${{ matrix.python-version }}|g" \
+            -e "s|<ARCHITECTURE>|${{ matrix.architecture }}|g" \
             layer/sar/template.txt > template.yml
 
           # SAR needs a README and a LICENSE, so just copy the ones from the repo
           cp README.md LICENSE "./cdk.out/$asset/"
-
-          # Debug purposes
-          cat template.yml
       - name: Deploy SAR
         run: |
+          # Debug purposes
+          cat template.yml
+
           # Package the SAR to our SAR S3 bucket, and publish it
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
         run: |
-          if [[ "${{ matrix.architecture }}" == "arm64" ]]; then
-            TEST_STACK_NAME="${TEST_STACK_NAME}-arm64"
-          fi
+          ARCH_NAME=$(echo ${{ matrix.architecture }} | tr -d '_')
+          TEST_STACK_NAME="${TEST_STACK_NAME}-python${{env.PYTHON_VERSION}}-${ARCH_NAME}"
 
           echo "Check if stack does not exist"
           stack_exists=$(aws cloudformation list-stacks --query "StackSummaries[?(StackName == '$TEST_STACK_NAME' && StackStatus == 'CREATE_COMPLETE')].{StackId:StackId, StackName:StackName, CreationTime:CreationTime, StackStatus:StackStatus}" --output text)

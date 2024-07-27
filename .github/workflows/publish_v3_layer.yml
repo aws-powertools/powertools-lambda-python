@@ -194,11 +194,10 @@ jobs:
       contents: read
       pull-requests: none
       pages: none
-    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    uses: ./.github/workflows/reusable_deploy_v3_sar.yml
     secrets: inherit
     with:
       stage: "BETA"
-      artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
       package-version: ${{ inputs.latest_published_version }}
       source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
@@ -213,11 +212,10 @@ jobs:
       contents: read
       pull-requests: none
       pages: none
-    uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+    uses: ./.github/workflows/reusable_deploy_v3_sar.yml
     secrets: inherit
     with:
       stage: "PROD"
-      artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
       package-version: ${{ inputs.latest_published_version }}
       source_code_artifact_name: ${{ inputs.source_code_artifact_name }}

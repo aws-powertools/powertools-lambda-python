@@ -80,8 +80,8 @@ class LayerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         python_version_normalized = python_version.replace(".", "")
-        layer_name_x86 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}"
-        layer_name_arm64 = f"AWSLambdaPowertoolsPythonV3-Arm64-{python_version_normalized}"
+        layer_name_x86 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-x86"
+        layer_name_arm64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-arm64"
 
         has_arm64_support = CfnParameter(
             self,
