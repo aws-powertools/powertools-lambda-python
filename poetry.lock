@@ -3315,13 +3315,13 @@ files = [
 
 [[package]]
 name = "types-redis"
-version = "4.6.0.20240425"
+version = "4.6.0.20240726"
 description = "Typing stubs for redis"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-redis-4.6.0.20240425.tar.gz", hash = "sha256:9402a10ee931d241fdfcc04592ebf7a661d7bb92a8dea631279f0d8acbcf3a22"},
-    {file = "types_redis-4.6.0.20240425-py3-none-any.whl", hash = "sha256:ac5bc19e8f5997b9e76ad5d9cf15d0392d9f28cf5fc7746ea4a64b989c45c6a8"},
+    {file = "types-redis-4.6.0.20240726.tar.gz", hash = "sha256:de2aefcf7afe80057debada8c540463d06c8863de50b8016bd369ccdbcb59b5e"},
+    {file = "types_redis-4.6.0.20240726-py3-none-any.whl", hash = "sha256:233062b7120a9908532ec9163d17af74b80fa49a89d510444cad4cac42717378"},
 ]
 
 [package.dependencies]
