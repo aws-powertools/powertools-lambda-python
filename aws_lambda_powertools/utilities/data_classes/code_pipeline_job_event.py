@@ -19,12 +19,11 @@ class CodePipelineConfiguration(DictWrapper):
         return self.get("UserParameters", None)
 
     @cached_property
-    def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
+    def decoded_user_parameters(self) -> Dict[str, Any]:
         """Json Decoded user parameters"""
         if self.user_parameters is not None:
             return self._json_deserializer(self.user_parameters)
-
-        return None
+        return {}
 
 
 class CodePipelineActionConfiguration(DictWrapper):
@@ -177,7 +176,7 @@ class CodePipelineJobEvent(DictWrapper):
         return self.data.action_configuration.configuration.user_parameters
 
     @property
-    def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
+    def decoded_user_parameters(self) -> Dict[str, Any]:
         """Json Decoded action configuration user parameters"""
         return self.data.action_configuration.configuration.decoded_user_parameters
 

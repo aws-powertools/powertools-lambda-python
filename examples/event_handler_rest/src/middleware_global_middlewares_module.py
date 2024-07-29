@@ -34,7 +34,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMidd
 
 def enforce_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:
     # If missing mandatory header raise an error
-    if not app.current_event.get_header_value("x-correlation-id", case_sensitive=False):
+    if not app.current_event.headers.get("x-correlation-id"):
         return Response(status_code=400, body="Correlation ID header is now mandatory.")  # (1)!
 
     # Get the response from the next middleware and return it

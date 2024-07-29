@@ -23,7 +23,7 @@ def test_s3_object_event_iam():
     user_request = parsed_event.user_request
     assert user_request.url == raw_event["userRequest"]["url"]
     assert user_request.headers == raw_event["userRequest"]["headers"]
-    assert user_request.get_header_value("Accept-Encoding") == "identity"
+    assert user_request.headers["Accept-Encoding"] == "identity"
     assert parsed_event.user_identity is not None
     user_identity = parsed_event.user_identity
     assert user_identity.get_type == raw_event["userIdentity"]["type"]

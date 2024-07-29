@@ -175,7 +175,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
     @event_source(data_class=APIGatewayAuthorizerRequestEvent)
     def handler(event: APIGatewayAuthorizerRequestEvent, context):
-        user = get_user_by_token(event.get_header_value("Authorization"))
+        user = get_user_by_token(event.headers["Authorization"])
 
         if user is None:
             # No user was found
@@ -263,7 +263,7 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
 
     @event_source(data_class=APIGatewayAuthorizerEventV2)
     def handler(event: APIGatewayAuthorizerEventV2, context):
-        user = get_user_by_token(event.get_header_value("x-token"))
+        user = get_user_by_token(event.headers["x-token"])
 
         if user is None:
             # No user was found, so we return not authorized
@@ -397,7 +397,7 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
         event: AppSyncResolverEvent = AppSyncResolverEvent(event)
 
         # Case insensitive look up of request headers
-        x_forwarded_for = event.get_header_value("x-forwarded-for")
+        x_forwarded_for = event.headers.get("x-forwarded-for")
 
         # Support for AppSyncIdentityCognito or AppSyncIdentityIAM identity types
         assert isinstance(event.identity, AppSyncIdentityCognito)

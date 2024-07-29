@@ -31,7 +31,7 @@ def handle_invalid_limit_qs(ex: ValueError):  # receives exception raised
 def get_todos():
     # educational purpose only: we should receive a `ValueError`
     # if a query string value for `limit` cannot be coerced to int
-    max_results: int = int(app.current_event.get_query_string_value(name="limit", default_value=0))
+    max_results = int(app.current_event.query_string_parameters.get("limit", 0))
 
     todos: requests.Response = requests.get(f"https://jsonplaceholder.typicode.com/todos?limit={max_results}")
     todos.raise_for_status()

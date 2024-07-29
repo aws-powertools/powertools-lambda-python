@@ -52,16 +52,16 @@ def test_api_gateway_authorizer_v2():
     assert parsed_event.path_parameters == raw_event["pathParameters"]
     assert parsed_event.stage_variables == raw_event["stageVariables"]
 
-    assert parsed_event.get_header_value("Authorization") == "value"
-    assert parsed_event.get_header_value("authorization") == "value"
-    assert parsed_event.get_header_value("missing") is None
+    assert parsed_event.headers["Authorization"] == "value"
+    assert parsed_event.headers["authorization"] == "value"
+    assert parsed_event.headers.get("missing") is None
 
     # Check for optionals
     event_optionals = APIGatewayAuthorizerEventV2({"requestContext": {}})
-    assert event_optionals.identity_source is None
+    assert event_optionals.identity_source == []
     assert event_optionals.request_context.authentication is None
-    assert event_optionals.path_parameters is None
-    assert event_optionals.stage_variables is None
+    assert event_optionals.path_parameters == {}
+    assert event_optionals.stage_variables == {}
 
 
 def test_api_gateway_authorizer_token_event():
@@ -90,7 +90,7 @@ def test_api_gateway_authorizer_request_event():
     assert parsed_event.path == raw_event["path"]
     assert parsed_event.http_method == raw_event["httpMethod"]
     assert parsed_event.headers == raw_event["headers"]
-    assert parsed_event.get_header_value("accept") == "*/*"
+    assert parsed_event.headers["accept"] == "*/*"
     assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
     assert parsed_event.path_parameters == raw_event["pathParameters"]
     assert parsed_event.stage_variables == raw_event["stageVariables"]

@@ -19,7 +19,7 @@ def test_s3_batch_operation_schema_v1():
 
     job = parsed_event.job
     assert job.get_id == raw_event["job"]["id"]
-    assert job.user_arguments is None
+    assert job.user_arguments == {}
 
     assert parsed_event.invocation_schema_version == raw_event["invocationSchemaVersion"]
     assert parsed_event.invocation_id == raw_event["invocationId"]

@@ -26,11 +26,11 @@ class Location(TypedDict, total=False):
 class MyCustomModel(AppSyncResolverEvent):
     @property
     def country_viewer(self) -> str:
-        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)
+        return self.request_headers.get("cloudfront-viewer-country", "")
 
     @property
     def api_key(self) -> str:
-        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)
+        return self.request_headers.get("x-api-key", "")
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
