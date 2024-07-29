@@ -89,7 +89,14 @@ This is a snapshot of our automated checks at a glance.
 
 ## Lambda layer pipeline
 
-We fetch the latest PyPi release, then build Python **3.8-3.12** for **x86_64** and **arm64** architectures, using QEMU emulation for arm64. We create **a single CDK Asset** with x86_64 and arm for each Python version to optimize deployment performance.
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data, or configuration files. It provides a way to efficiently include libraries and other resources in your Lambda functions, promoting code reusability and reducing deployment package sizes.
+
+To build and deploy the Lambda Layers, we run a pipeline with the following steps:
+
+* We fetch the latest PyPi release and use it as the source for our layer.
+* We build Python versions ranging from **3.8 to 3.12** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
+* We provide layer distributions for both the **x86_64** and **arm64** architectures.
+* For each Python version, we create a single CDK package containing both x86_64 and arm64 assets to optimize deployment performance.
 
 Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we run:
 
@@ -117,16 +124,16 @@ graph LR
       P311 --> P311arm64[build arm64]
       P312 --> P312x86[build x86_64]
       P312 --> P312arm64[build arm64]
-      P38x86 --> CDKP1[CDK Asset]
-      P38arm64 --> CDKP1[CDK Asset]
-      P39x86 --> CDKP2[CDK Asset]
-      P39arm64 --> CDKP2[CDK Asset]
-      P310x86 --> CDKP3[CDK Asset]
-      P310arm64 --> CDKP3[CDK Asset]
-      P311x86 --> CDKP4[CDK Asset]
-      P311arm64 --> CDKP4[CDK Asset]
-      P312x86 --> CDKP5[CDK Asset]
-      P312arm64 --> CDKP5[CDK Asset]
+      P38x86 --> CDKP1[CDK Package]
+      P38arm64 --> CDKP1[CDK Package]
+      P39x86 --> CDKP2[CDK Package]
+      P39arm64 --> CDKP2[CDK Package]
+      P310x86 --> CDKP3[CDK Package]
+      P310arm64 --> CDKP3[CDK Package]
+      P311x86 --> CDKP4[CDK Package]
+      P311arm64 --> CDKP4[CDK Package]
+      P312x86 --> CDKP5[CDK Package]
+      P312arm64 --> CDKP5[CDK Package]
     end
 
     subgraph beta ["BETA (all regions)"]
@@ -135,10 +142,10 @@ graph LR
       CDKP3 --> DeployBeta
       CDKP4 --> DeployBeta
       CDKP5 --> DeployBeta
-      DeployBeta --> RunBetaCanary["Beta canary tests<br> <i>(all assets)</i>"]
+      DeployBeta --> RunBetaCanary["Beta canary tests<br> <i>(all packages)</i>"]
     end
     subgraph prod ["PROD (all regions)"]
         RunBetaCanary---|<strong>If successful</strong>|DeployProd[Deploy to Prod]
-        DeployProd --> RunProdCanary["Prod canary tests<br> <i>(all assets)</i>"]
+        DeployProd --> RunProdCanary["Prod canary tests<br> <i>(all packages)</i>"]
     end
 ```
