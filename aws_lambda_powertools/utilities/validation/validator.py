@@ -172,7 +172,7 @@ def validate(
     provider_options: Optional[Dict] = None,
     envelope: Optional[str] = None,
     jmespath_options: Optional[Dict] = None,
-):
+) -> Any:
     """Standalone function to validate event data using a JSON Schema
 
      Typically used when you need more control over the validation process.
@@ -245,6 +245,12 @@ def validate(
             validate(event=event, schema=json_schema_dict, envelope="awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]")
             return event
 
+    Returns
+    -------
+    Dict
+        The validated event.  If the schema includes a `default` for fields that are not provided, they will be included
+        in the response.
+
     Raises
     ------
     SchemaValidationError
@@ -261,7 +267,7 @@ def validate(
             jmespath_options=jmespath_options,
         )
 
-    validate_data_against_schema(
+    return validate_data_against_schema(
         data=event,
         schema=schema,
         formats=formats,

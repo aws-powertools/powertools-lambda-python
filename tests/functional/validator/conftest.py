@@ -31,6 +31,34 @@ def schema():
 
 
 @pytest.fixture
+def schema_default():
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema",
+        "$id": "http://example.com/example.json",
+        "type": "object",
+        "title": "Sample schema",
+        "description": "The root schema comprises the entire JSON document.",
+        "examples": [{"message": "hello world", "username": "lessa"}, {"username": "lessa"}],
+        "required": ["username"],
+        "properties": {
+            "message": {
+                "$id": "#/properties/message",
+                "type": "string",
+                "title": "The message",
+                "examples": ["hello world"],
+                "default": "The default message",
+            },
+            "username": {
+                "$id": "#/properties/username",
+                "type": "string",
+                "title": "The username",
+                "examples": ["lessa"],
+            },
+        },
+    }
+
+
+@pytest.fixture
 def schema_array():
     return {
         "$schema": "http://json-schema.org/draft-07/schema",
@@ -135,6 +163,11 @@ def schema_ref_handlers(schema_refs):
 @pytest.fixture
 def raw_event():
     return {"message": "hello hello", "username": "blah blah"}
+
+
+@pytest.fixture
+def raw_event_default():
+    return {"username": "blah blah"}
 
 
 @pytest.fixture

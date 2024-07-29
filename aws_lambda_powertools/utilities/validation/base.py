@@ -14,7 +14,7 @@ def validate_data_against_schema(
     formats: Optional[Dict] = None,
     handlers: Optional[Dict] = None,
     provider_options: Optional[Dict] = None,
-):
+) -> Union[Dict, str]:
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -31,6 +31,12 @@ def validate_data_against_schema(
         Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
         For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
 
+    Returns
+    -------
+    Dict
+        The validated event.  If the schema includes a `default` for fields that are not provided, they will be included
+        in the response.
+
     Raises
     ------
     SchemaValidationError
@@ -42,7 +48,13 @@ def validate_data_against_schema(
         formats = formats or {}
         handlers = handlers or {}
         provider_options = provider_options or {}
-        fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers, **provider_options)
+        return fastjsonschema.validate(
+            definition=schema,
+            data=data,
+            formats=formats,
+            handlers=handlers,
+            **provider_options,
+        )
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
     except fastjsonschema.JsonSchemaValueException as e:
