@@ -87,22 +87,15 @@ This is a snapshot of our automated checks at a glance.
 
 ![Continuous Deployment practices](./media/continuous_deployment_practices.png)
 
-## Lambda layer build & deploy
+## Lambda layer pipeline
 
 We fetch the latest PyPi release, then build Python **3.8-3.12** for **x86_64** and **arm64** architectures, using QEMU emulation for arm64. We create **a single CDK Asset** with x86_64 and arm for each Python version to optimize deployment performance.
 
-<!--In our layer deployment pipeline, we begin by fetching the **latest PyPi release**. After that, we build Python versions 3.8, 3.9, 3.10, 3.11, and 3.12 for both x86_64 and arm64 architectures. For the arm64 builds, we utilize QEMU emulation to ensure compatibility. After completing the builds, we create **a single CDK Asset** containing both Stacks for each Python version. This approach is adopted to optimize performance during the deployment process.-->
-
-Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we execute the following:
+Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we run:
 
 * **Canary Tests**: Run thorough canary tests to assess stability and functionality
-* **In case of success**: If canary tests pass, deploy previous CDK Asset to production across all regions
-* **In case of error**: If any canary tests fail, halt pipeline to investigate and remediate issues before redeploying
-
-This process ensures the quality of the delivery and helps anticipate problems to avoid impacting customers.
-
-<!--Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the deployment in the beta account is complete, we execute canary tests. These tests cover all platforms, runtimes, and regions, allowing us to thoroughly assess the stability and functionality of the deployment. If the canary tests are successful, indicating that the deployment meets our quality standards, we proceed to deploy the previous CDK Asset to the production account. This deployment is rolled out across all AWS regions, ensuring widespread availability of the latest version and keeping previous version untouched.
-However, if any of the canary tests fail, indicating potential issues with the deployment, we halt the pipeline immediately. This preventive measure allows us to investigate and remediate any problems before attempting another deployment. -->
+* **Successful?**: Deploy previous CDK Asset to production across all regions
+* **Failure?**: Halt pipeline to investigate and remediate issues before redeploying
 
 ```mermaid
 graph LR
