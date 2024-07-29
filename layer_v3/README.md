@@ -9,7 +9,7 @@ To build the layer construct you need to provide the Powertools for AWS Lambda (
 You can pass it as a context variable when running `synth` or `deploy`,
 
 ```shell
-cdk synth --context version=1.25.1
+cdk synth --context version=3.0.0 --pythonVersion=3.12
 ```
 
 ## Canary stack

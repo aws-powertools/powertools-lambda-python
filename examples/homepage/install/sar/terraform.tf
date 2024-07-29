@@ -21,7 +21,7 @@ resource "aws_serverlessapplicationrepository_cloudformation_stack" "deploy_sar_
 }
 
 data "aws_serverlessapplicationrepository_application" "sar_app" {
-  application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
+  application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86"
   semantic_version = var.aws_powertools_version
 }
 

@@ -99,40 +99,46 @@ Next, we deploy these CDK Assets to the beta account across all AWS regions. Onc
 
 ```mermaid
 graph LR
-    A[Fetch PyPi release] --> P38[Python 3.8]
-    A --> P39[Python 3.9]
-    A --> P310[Python 3.10]
-    A --> P311[Python 3.11]
-    A --> P312[Python 3.12]
-    P38 --> P38x86[build x86_64]
-    P38 --> P38arm64[build arm64]
-    P39 --> P39x86[build x86_64]
-    P39 --> P39arm64[build arm64]
-    P310 --> P310x86[build x86_64]
-    P310 --> P310arm64[build arm64]
-    P311 --> P311x86[build x86_64]
-    P311 --> P311arm64[build arm64]
-    P312 --> P312x86[build x86_64]
-    P312 --> P312arm64[build arm64]
-    P38x86 --> CDKP1[CDK Asset with both Stacks]
-    P38arm64 --> CDKP1[CDK Asset with both Stacks]
-    P39x86 --> CDKP2[CDK Asset with both Stacks]
-    P39arm64 --> CDKP2[CDK Asset with both Stacks]
-    P310x86 --> CDKP3[CDK Asset with both Stacks]
-    P310arm64 --> CDKP3[CDK Asset with both Stacks]
-    P311x86 --> CDKP4[CDK Asset with both Stacks]
-    P311arm64 --> CDKP4[CDK Asset with both Stacks]
-    P312x86 --> CDKP5[CDK Asset with both Stacks]
-    P312arm64 --> CDKP5[CDK Asset with both Stacks]
-    CDKP1 --> DeployBeta[Deploy in the beta account<br>in every AWS Region]
-    CDKP2 --> DeployBeta
-    CDKP3 --> DeployBeta
-    CDKP4 --> DeployBeta
-    CDKP5 --> DeployBeta
-    DeployBeta --> RunCanary[Perform canary tests<br>on all platforms, runtimes and regions]
-    RunCanary --> DeployBetaSuccess{Success?}
-    DeployBetaSuccess -- Yes --> DeployProd[Deploy the previous<br>CDK Asset in the prod account<br>in every AWS Region]
-    DeployBetaSuccess -- No --> PipelineStop[Stop the pipeline]
-```
+    Fetch[Fetch PyPi release] --> P38[<strong>Python 3.8</strong>]
+    Fetch --> P39[<strong>Python 3.9</strong>]
+    Fetch --> P310[<strong>Python 3.10</strong>]
+    Fetch --> P311[<strong>Python 3.11</strong>]
+    Fetch --> P312[<strong>Python 3.12</strong>]
 
-!!! info "More details to come"
+    subgraph build ["LAYER BUILD"]
+      P38 --> P38x86[build x86_64]
+      P38 --> P38arm64[build arm64]
+
+      P39 --> P39x86[build x86_64]
+      P39 --> P39arm64[build arm64]
+      P310 --> P310x86[build x86_64]
+      P310 --> P310arm64[build arm64]
+      P311 --> P311x86[build x86_64]
+      P311 --> P311arm64[build arm64]
+      P312 --> P312x86[build x86_64]
+      P312 --> P312arm64[build arm64]
+      P38x86 --> CDKP1[CDK Asset]
+      P38arm64 --> CDKP1[CDK Asset]
+      P39x86 --> CDKP2[CDK Asset]
+      P39arm64 --> CDKP2[CDK Asset]
+      P310x86 --> CDKP3[CDK Asset]
+      P310arm64 --> CDKP3[CDK Asset]
+      P311x86 --> CDKP4[CDK Asset]
+      P311arm64 --> CDKP4[CDK Asset]
+      P312x86 --> CDKP5[CDK Asset]
+      P312arm64 --> CDKP5[CDK Asset]
+    end
+
+    subgraph beta ["BETA (all regions)"]
+      CDKP1 --> DeployBeta[Deploy to Beta]
+      CDKP2 --> DeployBeta
+      CDKP3 --> DeployBeta
+      CDKP4 --> DeployBeta
+      CDKP5 --> DeployBeta
+      DeployBeta --> RunBetaCanary["Beta canary tests<br> <i>(all assets)</i>"]
+    end
+    subgraph prod ["PROD (all regions)"]
+        RunBetaCanary---|<strong>If successful</strong>|DeployProd[Deploy to Prod]
+        DeployProd --> RunProdCanary["Prod canary tests<br> <i>(all assets)</i>"]
+    end
+```
