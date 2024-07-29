@@ -3,9 +3,10 @@ name: Deploy CDK Layer v3 stack
 # PROCESS
 #
 # 1. Split what AWS regions support ARM vs regions that Lambda support ARM
-# 2. Deploy previously built layer for each AWS commercial region
-# 3. Export all published Layers as JSON
-# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
+# 2. We build the Lambda layer for 3.8 to 3.12 Python runtime and both x86_64 and arm64 (see `matrix` section)
+# 3. Deploy previously built layer for each AWS commercial region
+# 4. Export all published Layers as JSON
+# 5. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
 
 # USAGE
 #

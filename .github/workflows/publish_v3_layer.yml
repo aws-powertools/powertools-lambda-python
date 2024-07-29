@@ -9,7 +9,7 @@ name: Deploy v3 layer to all regions
 
 # USAGE
 #
-# NOTE: meant to be used with ./.github/workflows/release.yml
+# NOTE: meant to be used with ./.github/workflows/release-v3.yml
 #
 # publish_layer:
 #   needs: [seal, release, create_tag]
