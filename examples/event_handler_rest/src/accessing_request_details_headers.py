@@ -16,7 +16,7 @@ app = APIGatewayRestResolver()
 def get_todos():
     endpoint = "https://jsonplaceholder.typicode.com/todos"
 
-    api_key: str = app.current_event.get_header_value(name="X-Api-Key", case_sensitive=True, default_value="")
+    api_key = app.current_event.headers["X-Api-Key"]
     todos: Response = requests.get(endpoint, headers={"X-Api-Key": api_key})
     todos.raise_for_status()
 

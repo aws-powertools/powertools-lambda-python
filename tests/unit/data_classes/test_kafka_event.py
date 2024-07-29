@@ -31,7 +31,7 @@ def test_kafka_msk_event():
     assert record.value == raw_record["value"]
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
-    assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
+    assert record.decoded_headers["HeaderKey"] == b"headerValue"
 
     assert parsed_event.record == records[0]
 
@@ -62,7 +62,7 @@ def test_kafka_self_managed_event():
     assert record.value == raw_record["value"]
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
-    assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
+    assert record.decoded_headers["HeaderKey"] == b"headerValue"
 
     assert parsed_event.record == records[0]
 

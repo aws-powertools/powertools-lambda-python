@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import (
@@ -9,6 +10,7 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     BaseProxyEvent,
     BaseRequestContext,
     BaseRequestContextV2,
+    CaseInsensitiveDict,
     DictWrapper,
 )
 
@@ -113,7 +115,7 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def multi_value_headers(self) -> Dict[str, List[str]]:
-        return self.get("multiValueHeaders") or {}  # key might exist but can be `null`
+        return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
     def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
@@ -128,26 +130,19 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def resolved_headers_field(self) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
-
-        if self.multi_value_headers:
-            headers = self.multi_value_headers
-        else:
-            headers = self.headers
-
-        return {key.lower(): value for key, value in headers.items()}
+        return self.multi_value_headers or self.headers
 
     @property
     def request_context(self) -> APIGatewayEventRequestContext:
         return APIGatewayEventRequestContext(self._data)
 
     @property
-    def path_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("pathParameters")
+    def path_parameters(self) -> Dict[str, str]:
+        return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Optional[Dict[str, str]]:
-        return self.get("stageVariables")
+    def stage_variables(self) -> Dict[str, str]:
+        return self.get("stageVariables") or {}
 
     def header_serializer(self) -> BaseHeadersSerializer:
         return MultiValueHeadersSerializer()
@@ -289,20 +284,20 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return self["rawQueryString"]
 
     @property
-    def cookies(self) -> Optional[List[str]]:
-        return self.get("cookies")
+    def cookies(self) -> List[str]:
+        return self.get("cookies") or []
 
     @property
     def request_context(self) -> RequestContextV2:
         return RequestContextV2(self._data)
 
     @property
-    def path_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("pathParameters")
+    def path_parameters(self) -> Dict[str, str]:
+        return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Optional[Dict[str, str]]:
-        return self.get("stageVariables")
+    def stage_variables(self) -> Dict[str, str]:
+        return self.get("stageVariables") or {}
 
     @property
     def path(self) -> str:
@@ -319,10 +314,6 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
     def header_serializer(self):
         return HttpApiHeadersSerializer()
 
-    @property
+    @cached_property
     def resolved_headers_field(self) -> Dict[str, Any]:
-        if self.headers is not None:
-            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
-            return headers
-
-        return {}
+        return CaseInsensitiveDict((k, v.split(",") if "," in v else v) for k, v in self.headers.items())

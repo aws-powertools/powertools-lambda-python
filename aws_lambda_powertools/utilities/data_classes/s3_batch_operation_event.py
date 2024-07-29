@@ -147,9 +147,9 @@ class S3BatchOperationJob(DictWrapper):
         return self["id"]
 
     @property
-    def user_arguments(self) -> Optional[Dict[str, str]]:
+    def user_arguments(self) -> Dict[str, str]:
         """Get user arguments provided for this job (only for invocation schema 2.0)"""
-        return self.get("userArguments")
+        return self.get("userArguments") or {}
 
 
 class S3BatchOperationTask(DictWrapper):

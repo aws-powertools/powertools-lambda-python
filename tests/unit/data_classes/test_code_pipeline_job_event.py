@@ -93,8 +93,8 @@ def test_code_pipeline_event_missing_user_parameters():
     configuration = parsed_event.data.action_configuration.configuration
     decoded_params = configuration.decoded_user_parameters
     assert decoded_params == parsed_event.decoded_user_parameters
-    assert decoded_params is None
-    assert configuration.decoded_user_parameters is None
+    assert decoded_params == {}
+    assert configuration.decoded_user_parameters == {}
 
 
 def test_code_pipeline_event_non_json_user_parameters():

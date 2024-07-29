@@ -102,3 +102,4 @@ def test_cloud_watch_alarm_event_composite_metric():
         parsed_event.alarm_data.configuration.alarm_actions_suppressor
         == raw_event["alarmData"]["configuration"]["actionsSuppressor"]
     )
+    assert isinstance(parsed_event.alarm_data.configuration.metrics, List)
