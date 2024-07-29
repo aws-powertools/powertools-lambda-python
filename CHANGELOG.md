@@ -6,11 +6,18 @@
 
 ## Documentation
 
+* fix type vs. field in comment ([#4832](https://github.com/aws-powertools/powertools-lambda-python/issues/4832))
 * **public_reference:** add Caylent as a public reference ([#4822](https://github.com/aws-powertools/powertools-lambda-python/issues/4822))
 
 ## Maintenance
 
+* **ci:** new pre-release 2.42.1a1 ([#4837](https://github.com/aws-powertools/powertools-lambda-python/issues/4837))
 * **ci:** new pre-release 2.42.1a0 ([#4827](https://github.com/aws-powertools/powertools-lambda-python/issues/4827))
+* **deps:** bump ossf/scorecard-action from 2.3.3 to 2.4.0 ([#4829](https://github.com/aws-powertools/powertools-lambda-python/issues/4829))
+* **deps-dev:** bump types-redis from 4.6.0.20240425 to 4.6.0.20240726 ([#4831](https://github.com/aws-powertools/powertools-lambda-python/issues/4831))
+* **deps-dev:** bump ruff from 0.5.4 to 0.5.5 ([#4823](https://github.com/aws-powertools/powertools-lambda-python/issues/4823))
+* **deps-dev:** bump pytest from 8.3.1 to 8.3.2 ([#4824](https://github.com/aws-powertools/powertools-lambda-python/issues/4824))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.219 to 0.1.222 ([#4836](https://github.com/aws-powertools/powertools-lambda-python/issues/4836))
 
 
 <a name="v2.42.0"></a>
