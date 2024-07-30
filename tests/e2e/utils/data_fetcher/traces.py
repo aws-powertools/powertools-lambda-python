@@ -15,10 +15,10 @@ class TraceSubsegment(BaseModel):
     name: str
     start_time: float
     end_time: float
-    aws: Optional[dict]
-    subsegments: Optional[List["TraceSubsegment"]]
-    annotations: Optional[Dict[str, Any]]
-    metadata: Optional[Dict[str, Dict[str, Any]]]
+    aws: Optional[dict] = None
+    subsegments: Optional[List["TraceSubsegment"]] = None
+    annotations: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Dict[str, Any]]] = None
 
 
 class TraceDocument(BaseModel):
@@ -27,10 +27,10 @@ class TraceDocument(BaseModel):
     start_time: float
     end_time: float
     trace_id: str
-    parent_id: Optional[str]
+    parent_id: Optional[str] = None
     aws: Dict
     origin: str
-    subsegments: Optional[List[TraceSubsegment]]
+    subsegments: Optional[List[TraceSubsegment]] = None
 
 
 class TraceFetcher:
