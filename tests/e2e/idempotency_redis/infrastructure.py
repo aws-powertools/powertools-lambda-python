@@ -17,7 +17,7 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 class IdempotencyRedisServerlessStack(BaseInfrastructure):
     def create_resources(self) -> None:
-        service_name = build_random_value(10)
+        service_name = build_random_value(10).replace("_", "")
 
         vpc_stack: Vpc = self._create_vpc(service_name, "172.150.0.0/16")
         security_groups: Tuple = self._create_security_groups(vpc_stack)
