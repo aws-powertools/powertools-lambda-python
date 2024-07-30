@@ -1,0 +1,214 @@
+name: Deploy CDK Layer v3 stack
+
+# PROCESS
+#
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. We build the Lambda layer for 3.8 to 3.12 Python runtime and both x86_64 and arm64 (see `matrix` section)
+# 3. Deploy previously built layer for each AWS commercial region
+# 4. Export all published Layers as JSON
+# 5. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v3_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v3_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     environment: "layer-beta"
+#     source_code_artifact_name: code.zip
+#     source_code_integrity_hash: sha256string
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: "Deployment stage (BETA, PROD)"
+        required: true
+        type: string
+      environment:
+        description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
+
+jobs:
+  deploy-cdk-stack:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # lower privilege propagated from parent workflow (publish_v3_layer.yml)
+    permissions:
+      id-token: write
+      pull-requests: none
+      contents: read
+      pages: none
+    defaults:
+      run:
+        working-directory: ./layer_v3
+    strategy:
+      fail-fast: false
+      matrix:
+        # To get a list of current regions, use:
+        # aws ec2 describe-regions --all-regions --query "Regions[].RegionName" --output text | tr "\t" "\n" | sort
+        region: ["af-south-1", "ap-east-1", "ap-northeast-1", "ap-northeast-2", "ap-northeast-3",
+                 "ap-south-1", "ap-south-2", "ap-southeast-1", "ap-southeast-2", "ap-southeast-3",
+                 "ap-southeast-4", "ca-central-1", "ca-west-1", "eu-central-1", "eu-central-2",
+                 "eu-north-1", "eu-south-1", "eu-south-2", "eu-west-1", "eu-west-2", "eu-west-3",
+                 "il-central-1", "me-central-1", "me-south-1", "sa-east-1", "us-east-1",
+                 "us-east-2", "us-west-1", "us-west-2"]
+        python-version: ["3.8","3.9","3.10","3.11","3.12"]
+        include:
+          - region: "af-south-1"
+            has_arm64_support: "true"
+          - region: "ap-east-1"
+            has_arm64_support: "true"
+          - region: "ap-northeast-1"
+            has_arm64_support: "true"
+          - region: "ap-northeast-2"
+            has_arm64_support: "true"
+          - region: "ap-northeast-3"
+            has_arm64_support: "true"
+          - region: "ap-south-1"
+            has_arm64_support: "true"
+          - region: "ap-south-2"
+            has_arm64_support: "true"
+          - region: "ap-southeast-1"
+            has_arm64_support: "true"
+          - region: "ap-southeast-2"
+            has_arm64_support: "true"
+          - region: "ap-southeast-3"
+            has_arm64_support: "true"
+          - region: "ap-southeast-4"
+            has_arm64_support: "true"
+          - region: "ca-central-1"
+            has_arm64_support: "true"
+          - region: "ca-west-1"
+            has_arm64_support: "false"
+          - region: "eu-central-1"
+            has_arm64_support: "true"
+          - region: "eu-central-2"
+            has_arm64_support: "true"
+          - region: "eu-north-1"
+            has_arm64_support: "true"
+          - region: "eu-south-1"
+            has_arm64_support: "true"
+          - region: "eu-south-2"
+            has_arm64_support: "true"
+          - region: "eu-west-1"
+            has_arm64_support: "true"
+          - region: "eu-west-2"
+            has_arm64_support: "true"
+          - region: "eu-west-3"
+            has_arm64_support: "true"
+          - region: "il-central-1"
+            has_arm64_support: "true"
+          - region: "me-central-1"
+            has_arm64_support: "true"
+          - region: "me-south-1"
+            has_arm64_support: "true"
+          - region: "sa-east-1"
+            has_arm64_support: "true"
+          - region: "us-east-1"
+            has_arm64_support: "true"
+          - region: "us-east-2"
+            has_arm64_support: "true"
+          - region: "us-west-1"
+            has_arm64_support: "true"
+          - region: "us-west-2"
+            has_arm64_support: "true"
+    steps:
+      - name: checkout
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
+      - name: Install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+      - name: aws credentials
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        with:
+          aws-region: ${{ matrix.region }}
+          role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: "18.20.4"
+      - name: Setup python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Resolve and install project dependencies
+        # CDK spawns system python when compiling stack
+        # therefore it ignores both activated virtual env and cached interpreter by GH
+        run: |
+          poetry export --format requirements.txt --output requirements.txt
+          pip install --require-hashes -r requirements.txt
+      - name: install cdk and deps
+        working-directory: ./
+        run: |
+          npm ci
+          npx cdk --version
+      - name: install deps
+        run: poetry install
+      - name: Download artifact
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: cdk-layer-artifact-py${{ matrix.python-version }}
+          path: layer
+      - name: unzip artefact
+        run: unzip cdk.py${{ matrix.python-version }}.out.zip
+      - name: Define constants
+        id: constants
+        run: |
+          PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
+          echo "PYTHON_VERSION=${PYTHON_VERSION}" >> "$GITHUB_OUTPUT"
+          LAYER_VERSION=${{ matrix.region }}-$PYTHON_VERSION-layer-version.txt
+          echo "LAYER_VERSION=${LAYER_VERSION}" >> "$GITHUB_OUTPUT"
+      - name: CDK Deploy Layer
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
+      - name: Store latest Layer ARN
+        if: ${{ inputs.stage == 'PROD' }}
+        run: |
+          mkdir cdk-layer-stack
+          jq -r -c ".[\"LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArn" cdk-outputs.json > cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
+          jq -r -c ".[\"LayerV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}\"].LatestLayerArm64Arn" cdk-outputs.json >> cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
+          cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
+      - name: Save Layer ARN artifact
+        if: ${{ inputs.stage == 'PROD' }}
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
+          path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
+          if-no-files-found: error
+          retention-days: 1
+      - name: CDK Deploy Canary
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} "CanaryV3Stack-${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose

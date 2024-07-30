@@ -33,8 +33,8 @@ resource "aws_lambda_function" "test_lambda" {
   function_name = "lambda_function_name"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.test"
-  runtime       = "python3.9"
-  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:69"]
+  runtime       = "python3.12"
+  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:1"]
   architectures = ["arm64"]
 
   source_code_hash = filebase64sha256("lambda_function_payload.zip")

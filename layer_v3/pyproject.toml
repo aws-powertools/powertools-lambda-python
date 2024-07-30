@@ -6,7 +6,7 @@ authors = ["Powertools for AWS Maintainers <aws-powertools-maintainers@amazon.co
 
 license = "MIT"
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 cdk-aws-lambda-powertools-layer = "^3.7.0"
 
 [tool.poetry.dev-dependencies]
