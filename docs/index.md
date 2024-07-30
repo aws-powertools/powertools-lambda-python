@@ -424,6 +424,12 @@ Knowing which companies are using this library is important to help prioritize t
 
 <div class="grid" style="text-align:center;" markdown>
 
+[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Banxware**](https://www.banxware.com){target="_blank" rel="nofollow"}
+{ .card }
+
 [**Brsk**](https://www.brsk.co.uk/){target="_blank" rel="nofollow"}
 { .card }
 
@@ -470,9 +476,6 @@ Knowing which companies are using this library is important to help prioritize t
 { .card }
 
 [**Vertex Pharmaceuticals**](https://www.vrtx.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow}
 { .card }
 
 </div>
