@@ -53,6 +53,8 @@ Knowing which companies are using this library is important to help prioritize t
 
 The following companies, among others, use Powertools:
 
+* [Alma Media](https://www.almamedia.fi/en/)
+* [Banxware](https://www.banxware.com/)
 * [Brsk](https://www.brsk.co.uk/)
 * [BusPatrol](https://buspatrol.com/)
 * [Capital One](https://www.capitalone.com/)
@@ -69,8 +71,6 @@ The following companies, among others, use Powertools:
 * [Transformity](https://transformity.tech/)
 * [Trek10](https://www.trek10.com/)
 * [Vertex Pharmaceuticals](https://www.vrtx.com/)
-* [Alma Media](https://www.almamedia.fi/en/)
-* [Banxware](https://www.banxware.com/)
 
 ### Sharing your work
 
