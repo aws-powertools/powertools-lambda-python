@@ -240,90 +240,6 @@ def test_dict_wrapper_sensitive_properties_property():
     assert str(event_source) == "{'data_property': '[SENSITIVE]', 'raw_event': '[SENSITIVE]'}"
 
 
-def test_base_proxy_event_get_query_string_value():
-    default_value = "default"
-    set_value = "value"
-
-    event = BaseProxyEvent({})
-    value = event.get_query_string_value("test", default_value)
-    assert value == default_value
-
-    event._data["queryStringParameters"] = {"test": set_value}
-    value = event.get_query_string_value("test", default_value)
-    assert value == set_value
-
-    value = event.get_query_string_value("unknown", default_value)
-    assert value == default_value
-
-    value = event.get_query_string_value("unknown")
-    assert value is None
-
-
-def test_base_proxy_event_get_multi_value_query_string_values():
-    default_values = ["default_1", "default_2"]
-    set_values = ["value_1", "value_2"]
-
-    event = BaseProxyEvent({})
-    values = event.get_multi_value_query_string_values("test", default_values)
-    assert values == default_values
-
-    event._data["multiValueQueryStringParameters"] = {"test": set_values}
-    values = event.get_multi_value_query_string_values("test", default_values)
-    assert values == set_values
-
-    values = event.get_multi_value_query_string_values("unknown", default_values)
-    assert values == default_values
-
-    values = event.get_multi_value_query_string_values("unknown")
-    assert values == []
-
-
-def test_base_proxy_event_get_header_value():
-    default_value = "default"
-    set_value = "value"
-
-    event = BaseProxyEvent({"headers": {}})
-    value = event.get_header_value("test", default_value)
-    assert value == default_value
-
-    event._data["headers"] = {"test": set_value}
-    value = event.get_header_value("test", default_value)
-    assert value == set_value
-
-    # Verify that the default look is case insensitive
-    value = event.get_header_value("Test")
-    assert value == set_value
-
-    value = event.get_header_value("unknown", default_value)
-    assert value == default_value
-
-    value = event.get_header_value("unknown")
-    assert value is None
-
-
-def test_base_proxy_event_get_header_value_case_insensitive():
-    default_value = "default"
-    set_value = "value"
-
-    event = BaseProxyEvent({"headers": {}})
-
-    event._data["headers"] = {"Test": set_value}
-    value = event.get_header_value("test", case_sensitive=True)
-    assert value is None
-
-    value = event.get_header_value("test", default_value=default_value, case_sensitive=True)
-    assert value == default_value
-
-    value = event.get_header_value("Test", case_sensitive=True)
-    assert value == set_value
-
-    value = event.get_header_value("unknown", default_value, case_sensitive=True)
-    assert value == default_value
-
-    value = event.get_header_value("unknown", case_sensitive=True)
-    assert value is None
-
-
 def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
@@ -408,7 +324,7 @@ def test_reflected_types():
     def lambda_handler(event: APIGatewayProxyEventV2, _):
         # THEN we except the event to be of the pass in data class type
         assert isinstance(event, APIGatewayProxyEventV2)
-        assert event.get_header_value("x-foo") == "Foo"
+        assert event.headers["x-foo"] == "Foo"
 
     # WHEN calling the lambda handler
     lambda_handler({"headers": {"X-Foo": "Foo"}}, None)

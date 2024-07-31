@@ -32,8 +32,8 @@ def test_cognito_pre_signup_trigger_event():
     # Verify properties
     user_attributes = parsed_event.request.user_attributes
     assert user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
-    assert parsed_event.request.validation_data is None
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.validation_data == {}
+    assert parsed_event.request.client_metadata == {}
 
     # Verify setters
     parsed_event.response.auto_confirm_user = True
@@ -53,7 +53,7 @@ def test_cognito_post_confirmation_trigger_event():
 
     user_attributes = parsed_event.request.user_attributes
     assert user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
 
 def test_cognito_user_migration_trigger_event():
@@ -63,8 +63,8 @@ def test_cognito_user_migration_trigger_event():
     assert parsed_event.trigger_source == raw_event["triggerSource"]
 
     assert compare_digest(parsed_event.request.password, raw_event["request"]["password"])
-    assert parsed_event.request.validation_data is None
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.validation_data == {}
+    assert parsed_event.request.client_metadata == {}
 
     parsed_event.response.user_attributes = {"username": "username"}
     assert parsed_event.response.user_attributes == raw_event["response"]["userAttributes"]
@@ -72,7 +72,7 @@ def test_cognito_user_migration_trigger_event():
     assert parsed_event.response.final_user_status is None
     assert parsed_event.response.message_action is None
     assert parsed_event.response.force_alias_creation is None
-    assert parsed_event.response.desired_delivery_mediums is None
+    assert parsed_event.response.desired_delivery_mediums == []
 
     parsed_event.response.final_user_status = "CONFIRMED"
     assert parsed_event.response.final_user_status == "CONFIRMED"
@@ -93,7 +93,7 @@ def test_cognito_custom_message_trigger_event():
     assert parsed_event.request.code_parameter == raw_event["request"]["codeParameter"]
     assert parsed_event.request.username_parameter == raw_event["request"]["usernameParameter"]
     assert parsed_event.request.user_attributes.get("phone_number_verified") is False
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
     parsed_event.response.sms_message = "sms"
     assert parsed_event.response.sms_message == parsed_event["response"]["smsMessage"]
@@ -113,7 +113,7 @@ def test_cognito_pre_authentication_trigger_event():
     parsed_event["request"]["userNotFound"] = True
     assert parsed_event.request.user_not_found is True
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
-    assert parsed_event.request.validation_data is None
+    assert parsed_event.request.validation_data == {}
 
 
 def test_cognito_post_authentication_trigger_event():
@@ -124,7 +124,7 @@ def test_cognito_post_authentication_trigger_event():
 
     assert parsed_event.request.new_device_used is True
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
 
 def test_cognito_pre_token_generation_trigger_event():
@@ -138,7 +138,7 @@ def test_cognito_pre_token_generation_trigger_event():
     assert group_configuration.iam_roles_to_override == []
     assert group_configuration.preferred_role is None
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
     parsed_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
     group_configuration = parsed_event.request.group_configuration
@@ -148,8 +148,8 @@ def test_cognito_pre_token_generation_trigger_event():
     claims_override_details = parsed_event.response.claims_override_details
     assert parsed_event["response"]["claimsOverrideDetails"] == {}
 
-    assert claims_override_details.claims_to_add_or_override is None
-    assert claims_override_details.claims_to_suppress is None
+    assert claims_override_details.claims_to_add_or_override == {}
+    assert claims_override_details.claims_to_suppress == []
     assert claims_override_details.group_configuration is None
 
     claims_override_details.group_configuration = {}
@@ -208,7 +208,7 @@ def test_cognito_define_auth_challenge_trigger_event():
     assert session[0].challenge_result is True
     assert session[0].challenge_metadata is None
     assert session[1].challenge_metadata == raw_event["request"]["session"][1]["challengeMetadata"]
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
     # Verify setters
     parsed_event.response.challenge_name = "CUSTOM_CHALLENGE"
@@ -236,7 +236,7 @@ def test_create_auth_challenge_trigger_event():
     assert len(session) == 1
     assert session[0].challenge_name == raw_event["request"]["session"][0]["challengeName"]
     assert session[0].challenge_metadata == raw_event["request"]["session"][0]["challengeMetadata"]
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
     # Verify setters
     parsed_event.response.public_challenge_parameters = {"test": "value"}
@@ -263,7 +263,6 @@ def test_verify_auth_challenge_response_trigger_event():
         == raw_event["request"]["privateChallengeParameters"]["answer"]
     )
     assert parsed_event.request.challenge_answer == raw_event["request"]["challengeAnswer"]
-    assert parsed_event.request.client_metadata is not None
     assert parsed_event.request.client_metadata.get("foo") == raw_event["request"]["clientMetadata"]["foo"]
     assert parsed_event.request.user_not_found is True
 

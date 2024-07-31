@@ -2,7 +2,7 @@ import dataclasses
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 from pydantic import BaseModel
 
@@ -237,8 +237,8 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         Get the request body from the event, and parse it as JSON.
         """
 
-        content_type_value = app.current_event.get_header_value("content-type")
-        if not content_type_value or content_type_value.strip().startswith("application/json"):
+        content_type = app.current_event.headers.get("content-type")
+        if not content_type or content_type.strip().startswith("application/json"):
             try:
                 return app.current_event.json_body
             except json.JSONDecodeError as e:
@@ -410,7 +410,7 @@ def _normalize_multi_query_string_with_param(
     return resolved_query_string
 
 
-def _normalize_multi_header_values_with_param(headers: Dict[str, Any], params: Sequence[ModelField]):
+def _normalize_multi_header_values_with_param(headers: MutableMapping[str, Any], params: Sequence[ModelField]):
     """
     Extract and normalize resolved_headers_field
 

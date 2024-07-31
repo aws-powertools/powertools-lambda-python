@@ -87,4 +87,65 @@ This is a snapshot of our automated checks at a glance.
 
 ![Continuous Deployment practices](./media/continuous_deployment_practices.png)
 
-!!! info "More details to come"
+## Lambda layer pipeline
+
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data, or configuration files. It provides a way to efficiently include libraries and other resources in your Lambda functions, promoting code reusability and reducing deployment package sizes.
+
+To build and deploy the Lambda Layers, we run a pipeline with the following steps:
+
+* We fetch the latest PyPi release and use it as the source for our layer.
+* We build Python versions ranging from **3.8 to 3.12** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
+* We provide layer distributions for both the **x86_64** and **arm64** architectures.
+* For each Python version, we create a single CDK package containing both x86_64 and arm64 assets to optimize deployment performance.
+
+Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we run:
+
+* **Canary Tests**: Run thorough canary tests to assess stability and functionality
+* **Successful?**: Deploy previous CDK Asset to production across all regions
+* **Failure?**: Halt pipeline to investigate and remediate issues before redeploying
+
+```mermaid
+graph LR
+    Fetch[Fetch PyPi release] --> P38[<strong>Python 3.8</strong>]
+    Fetch --> P39[<strong>Python 3.9</strong>]
+    Fetch --> P310[<strong>Python 3.10</strong>]
+    Fetch --> P311[<strong>Python 3.11</strong>]
+    Fetch --> P312[<strong>Python 3.12</strong>]
+
+    subgraph build ["LAYER BUILD"]
+      P38 --> P38x86[build x86_64]
+      P38 --> P38arm64[build arm64]
+
+      P39 --> P39x86[build x86_64]
+      P39 --> P39arm64[build arm64]
+      P310 --> P310x86[build x86_64]
+      P310 --> P310arm64[build arm64]
+      P311 --> P311x86[build x86_64]
+      P311 --> P311arm64[build arm64]
+      P312 --> P312x86[build x86_64]
+      P312 --> P312arm64[build arm64]
+      P38x86 --> CDKP1[CDK Package]
+      P38arm64 --> CDKP1[CDK Package]
+      P39x86 --> CDKP2[CDK Package]
+      P39arm64 --> CDKP2[CDK Package]
+      P310x86 --> CDKP3[CDK Package]
+      P310arm64 --> CDKP3[CDK Package]
+      P311x86 --> CDKP4[CDK Package]
+      P311arm64 --> CDKP4[CDK Package]
+      P312x86 --> CDKP5[CDK Package]
+      P312arm64 --> CDKP5[CDK Package]
+    end
+
+    subgraph beta ["BETA (all regions)"]
+      CDKP1 --> DeployBeta[Deploy to Beta]
+      CDKP2 --> DeployBeta
+      CDKP3 --> DeployBeta
+      CDKP4 --> DeployBeta
+      CDKP5 --> DeployBeta
+      DeployBeta --> RunBetaCanary["Beta canary tests<br> <i>(all packages)</i>"]
+    end
+    subgraph prod ["PROD (all regions)"]
+        RunBetaCanary---|<strong>If successful</strong>|DeployProd[Deploy to Prod]
+        DeployProd --> RunProdCanary["Prod canary tests<br> <i>(all packages)</i>"]
+    end
+```

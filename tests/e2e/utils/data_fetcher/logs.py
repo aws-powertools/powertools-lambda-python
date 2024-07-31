@@ -4,22 +4,22 @@ from typing import List, Optional, Union
 
 import boto3
 from mypy_boto3_logs.client import CloudWatchLogsClient
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 from retry import retry
 
 
-class Log(BaseModel, extra=Extra.allow):
+class Log(BaseModel, extra="allow"):
     level: str
     location: str
     message: Union[dict, str]
     timestamp: str
     service: str
-    cold_start: Optional[bool]
-    function_name: Optional[str]
-    function_memory_size: Optional[str]
-    function_arn: Optional[str]
-    function_request_id: Optional[str]
-    xray_trace_id: Optional[str]
+    cold_start: Optional[bool] = None
+    function_name: Optional[str] = None
+    function_memory_size: Optional[str] = None
+    function_arn: Optional[str] = None
+    function_request_id: Optional[str] = None
+    xray_trace_id: Optional[str] = None
 
 
 class LogFetcher:

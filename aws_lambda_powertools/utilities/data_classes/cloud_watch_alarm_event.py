@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -117,11 +117,11 @@ class CloudWatchAlarmMetricStat(DictWrapper):
         return self.get("unit", None)
 
     @property
-    def metric(self) -> Optional[Dict]:
+    def metric(self) -> dict:
         """
         Metric details
         """
-        return self.get("metric", {})
+        return self.get("metric") or {}
 
 
 class CloudWatchAlarmData(DictWrapper):
@@ -191,12 +191,12 @@ class CloudWatchAlarmConfiguration(DictWrapper):
         return self.get("actionsSuppressorExtensionPeriod", None)
 
     @property
-    def metrics(self) -> Optional[List[CloudWatchAlarmMetric]]:
+    def metrics(self) -> List[CloudWatchAlarmMetric]:
         """
         The metrics evaluated for the Alarm.
         """
-        metrics = self.get("metrics")
-        return [CloudWatchAlarmMetric(i) for i in metrics] if metrics else None
+        metrics = self.get("metrics") or []
+        return [CloudWatchAlarmMetric(i) for i in metrics]
 
 
 class CloudWatchAlarmEvent(DictWrapper):

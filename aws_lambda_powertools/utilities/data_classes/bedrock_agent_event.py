@@ -80,8 +80,9 @@ class BedrockAgentEvent(BaseProxyEvent):
         return self["httpMethod"]
 
     @property
-    def parameters(self) -> Optional[List[BedrockAgentProperty]]:
-        return [BedrockAgentProperty(x) for x in self["parameters"]] if self.get("parameters") else None
+    def parameters(self) -> List[BedrockAgentProperty]:
+        parameters = self.get("parameters") or []
+        return [BedrockAgentProperty(x) for x in parameters]
 
     @property
     def request_body(self) -> Optional[BedrockAgentRequestBody]:
@@ -104,11 +105,12 @@ class BedrockAgentEvent(BaseProxyEvent):
     def path(self) -> str:
         return self["apiPath"]
 
-    @property
-    def query_string_parameters(self) -> Optional[Dict[str, str]]:
+    @cached_property
+    def query_string_parameters(self) -> Dict[str, str]:
         # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
         # together with the other parameters. So we just return all parameters here.
-        return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
+        parameters = self.get("parameters") or []
+        return {x["name"]: x["value"] for x in parameters}
 
     @property
     def resolved_headers_field(self) -> Dict[str, Any]:

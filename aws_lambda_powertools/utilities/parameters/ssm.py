@@ -120,6 +120,63 @@ class SSMProvider(BaseProvider):
 
         super().__init__(client=self.client)
 
+    def get_multiple(  # type: ignore[override]
+        self,
+        path: str,
+        max_age: Optional[int] = None,
+        transform: TransformOptions = None,
+        raise_on_transform_error: bool = False,
+        decrypt: Optional[bool] = None,
+        force_fetch: bool = False,
+        recursive: bool = False,
+        **sdk_options,
+    ) -> Union[Dict[str, str], Dict[str, dict], Dict[str, bytes]]:
+        """
+        Retrieve multiple parameters based on a path prefix
+
+        Parameters
+        ----------
+        path: str
+            Parameter path used to retrieve multiple parameters
+        max_age: int, optional
+            Maximum age of the cached value
+        transform: str, optional
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings, "binary" for base 64 encoded
+            values or "auto" which looks at the attribute key to determine the type.
+        raise_on_transform_error: bool, optional
+            Raises an exception if any transform fails, otherwise this will
+            return a None value for each transform that failed
+        force_fetch: bool, optional
+            Force update even before a cached item has expired, defaults to False
+        recursive: bool, optional
+            If this should retrieve the parameter values recursively or not
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve parameter values for
+            a given path.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
+        """
+
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
+        decrypt = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
+        )
+
+        sdk_options["decrypt"] = decrypt
+        sdk_options["recursive"] = recursive
+
+        return super().get_multiple(path, max_age, transform, force_fetch, raise_on_transform_error, **sdk_options)
+
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
     def get(  # type: ignore[override]
@@ -335,12 +392,6 @@ class SSMProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
         """
-
-        # If decrypt is not set, resolve it from the environment variable, defaulting to False
-        decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-            choice=decrypt,
-        )
 
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Path"] = path
@@ -783,14 +834,12 @@ def get_parameter(
         choice=decrypt,
     )
 
-    # Add to `decrypt` sdk_options to we can have an explicit option for this
-    sdk_options["decrypt"] = decrypt
-
     return DEFAULT_PROVIDERS["ssm"].get(
-        name,
+        name=name,
         max_age=max_age,
         transform=transform,
         force_fetch=force_fetch,
+        decrypt=decrypt,
         **sdk_options,
     )
 
@@ -923,15 +972,14 @@ def get_parameters(
         choice=decrypt,
     )
 
-    sdk_options["recursive"] = recursive
-    sdk_options["decrypt"] = decrypt
-
     return DEFAULT_PROVIDERS["ssm"].get_multiple(
-        path,
+        path=path,
         max_age=max_age,
         transform=transform,
         raise_on_transform_error=raise_on_transform_error,
         force_fetch=force_fetch,
+        recursive=recursive,
+        decrypt=decrypt,
         **sdk_options,
     )
 

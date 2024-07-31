@@ -22,11 +22,11 @@ lambda_function = aws.lambda_.Function(
         pulumi.Output.concat(
             "arn:aws:lambda:",
             aws.get_region_output().name,
-            ":017000801446:layer:AWSLambdaPowertoolsPythonV2:69",
+            ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:1",
         ),
     ],
     tracing_config={"mode": "Active"},
-    runtime=aws.lambda_.Runtime.PYTHON3D9,
+    runtime=aws.lambda_.Runtime.PYTHON3D12,
     handler="index.handler",
     role=role.arn,
     architectures=["x86_64"],
