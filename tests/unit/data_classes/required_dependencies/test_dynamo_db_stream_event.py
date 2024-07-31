@@ -44,6 +44,27 @@ def test_dynamodb_stream_trigger_event():
     assert dynamodb.stream_view_type == StreamViewType.NEW_AND_OLD_IMAGES
 
 
+def test_dynamodb_stream_record_deserialization_large_int():
+    decimal_context = Context(
+        Emin=-128,
+        Emax=126,
+        prec=38,
+        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+    )
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "11011111111111111000000000000000000000000000000"},
+        },
+    }
+    record = StreamRecord(data)
+    assert record.new_image == {
+        "Name": "Joe",
+        "Age": decimal_context.create_decimal("11011111111111111000000000000000000000"),
+    }
+
+
 def test_dynamodb_stream_record_deserialization():
     byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
     decimal_context = Context(
