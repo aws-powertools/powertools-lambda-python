@@ -12,12 +12,20 @@
 ## Maintenance
 
 * **ci:** new pre-release 2.42.1a1 ([#4837](https://github.com/aws-powertools/powertools-lambda-python/issues/4837))
+* **ci:** new pre-release 2.42.1a3 ([#4856](https://github.com/aws-powertools/powertools-lambda-python/issues/4856))
 * **ci:** new pre-release 2.42.1a0 ([#4827](https://github.com/aws-powertools/powertools-lambda-python/issues/4827))
+* **ci:** new pre-release 2.42.1a2 ([#4847](https://github.com/aws-powertools/powertools-lambda-python/issues/4847))
+* **deps:** bump docker/setup-buildx-action from 3.5.0 to 3.6.1 ([#4844](https://github.com/aws-powertools/powertools-lambda-python/issues/4844))
 * **deps:** bump ossf/scorecard-action from 2.3.3 to 2.4.0 ([#4829](https://github.com/aws-powertools/powertools-lambda-python/issues/4829))
 * **deps-dev:** bump types-redis from 4.6.0.20240425 to 4.6.0.20240726 ([#4831](https://github.com/aws-powertools/powertools-lambda-python/issues/4831))
-* **deps-dev:** bump ruff from 0.5.4 to 0.5.5 ([#4823](https://github.com/aws-powertools/powertools-lambda-python/issues/4823))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.222 to 0.1.223 ([#4843](https://github.com/aws-powertools/powertools-lambda-python/issues/4843))
 * **deps-dev:** bump pytest from 8.3.1 to 8.3.2 ([#4824](https://github.com/aws-powertools/powertools-lambda-python/issues/4824))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.219 to 0.1.222 ([#4836](https://github.com/aws-powertools/powertools-lambda-python/issues/4836))
+* **deps-dev:** bump ruff from 0.5.4 to 0.5.5 ([#4823](https://github.com/aws-powertools/powertools-lambda-python/issues/4823))
+* **deps-dev:** bump cfn-lint from 1.8.2 to 1.9.1 ([#4851](https://github.com/aws-powertools/powertools-lambda-python/issues/4851))
+* **deps-dev:** bump mypy-boto3-logs from 1.34.66 to 1.34.151 in the boto-typing group ([#4853](https://github.com/aws-powertools/powertools-lambda-python/issues/4853))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.223 to 0.1.224 ([#4855](https://github.com/aws-powertools/powertools-lambda-python/issues/4855))
+* **maintenance:** add Banxware customer refernece ([#4841](https://github.com/aws-powertools/powertools-lambda-python/issues/4841))
 
 
 <a name="v2.42.0"></a>
