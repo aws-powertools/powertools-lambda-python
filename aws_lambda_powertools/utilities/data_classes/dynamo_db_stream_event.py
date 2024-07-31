@@ -73,6 +73,10 @@ class TypeDeserializer:
         return value
 
     def _deserialize_n(self, value: str) -> Decimal:
+        if len(value) > 38:
+            l = len(value[38:]) - len(value[38:].rstrip('0'))
+            value = value[:-l]
+
         return DYNAMODB_CONTEXT.create_decimal(value)
 
     def _deserialize_s(self, value: str) -> str:
