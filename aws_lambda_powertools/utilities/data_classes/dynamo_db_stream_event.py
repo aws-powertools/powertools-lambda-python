@@ -73,6 +73,7 @@ class TypeDeserializer:
         return value
 
     def _deserialize_n(self, value: str) -> Decimal:
+        value = value.lstrip("0")
         if len(value) > 38:
             tail = len(value[38:]) - len(value[38:].rstrip("0"))
             value = value[:-tail]

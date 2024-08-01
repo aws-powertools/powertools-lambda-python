@@ -55,7 +55,7 @@ def test_dynamodb_stream_record_deserialization_large_int():
         "Keys": {"key1": {"attr1": "value1"}},
         "NewImage": {
             "Name": {"S": "Joe"},
-            "Age": {"N": "11011111111111111000000000000000000000000000000"},
+            "Age": {"N": "000000011011111111111111000000000000000000000000000000"},
         },
     }
     record = StreamRecord(data)
