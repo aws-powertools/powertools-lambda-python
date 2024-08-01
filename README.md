@@ -65,6 +65,7 @@ The following companies, among others, use Powertools:
 * [globaldatanet](https://globaldatanet.com/)
 * [IMS](https://ims.tech/)
 * [Jit Security](https://www.jit.io/)
+* [LocalStack](https://www.localstack.cloud/)
 * [Propellor.ai](https://www.propellor.ai/)
 * [Recast](https://getrecast.com/)
 * [TopSport](https://www.topsport.com.au/)
