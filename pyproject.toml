@@ -57,7 +57,7 @@ jsonpath-ng = { version = "^1.6.0", optional = true }
 [tool.poetry.dev-dependencies]
 coverage = { extras = ["toml"], version = "^7.6" }
 pytest = "^8.3.2"
-black = "^24.4"
+black = "^24.8"
 boto3 = "^1.26.164"
 isort = "^5.13.2"
 pytest-cov = "^5.0.0"
