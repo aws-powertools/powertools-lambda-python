@@ -243,13 +243,20 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     ":now_in_millis": {"N": str(int(now.timestamp() * 1000))},
                     ":inprogress": {"S": STATUS_CONSTANTS["INPROGRESS"]},
                 },
-                **self.return_value_on_condition,  # type: ignore
+                **self.return_value_on_condition,  # type: ignore[arg-type]
             )
         except ClientError as exc:
             error_code = exc.response.get("Error", {}).get("Code")
             if error_code == "ConditionalCheckFailedException":
-                old_data_record = self._item_to_data_record(exc.response["Item"]) if "Item" in exc.response else None
-                if old_data_record is not None:
+                try:
+                    item = exc.response["Item"]  # type: ignore[typeddict-item]
+                except KeyError:
+                    logger.debug(
+                        f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}",
+                    )
+                    raise IdempotencyItemAlreadyExistsError() from exc
+                else:
+                    old_data_record = self._item_to_data_record(item)
                     logger.debug(
                         f"Failed to put record for already existing idempotency key: "
                         f"{data_record.idempotency_key} with status: {old_data_record.status}, "
@@ -264,11 +271,6 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                         raise idempotency_validation_error from exc
 
                     raise IdempotencyItemAlreadyExistsError(old_data_record=old_data_record) from exc
-
-                logger.debug(
-                    f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}",
-                )
-                raise IdempotencyItemAlreadyExistsError() from exc
 
             raise
 
