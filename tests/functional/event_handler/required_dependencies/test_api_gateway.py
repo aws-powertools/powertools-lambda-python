@@ -331,7 +331,7 @@ def test_cors():
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
-    @app.get("/without-cors")
+    @app.get("/without-cors", cors=False)
     def without_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -350,17 +350,17 @@ def test_cors():
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
-    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    mock_event = {"path": "/without-cors", "httpMethod": "GET"}
     result = handler(mock_event, None)
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
 def test_cors_no_request_origin():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
-    app = ApiGatewayResolver()
+    app = ApiGatewayResolver(cors=CORSConfig())
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -381,7 +381,7 @@ def test_cors_no_request_origin():
 
 
 def test_cors_allow_all_request_origins():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
     app = ApiGatewayResolver(
         cors=CORSConfig(
@@ -390,11 +390,11 @@ def test_cors_allow_all_request_origins():
         ),
     )
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
-    @app.get("/without-cors")
+    @app.get("/without-cors", cors=False)
     def without_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -413,7 +413,7 @@ def test_cors_allow_all_request_origins():
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
-    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    mock_event = {"path": "/without-cors", "httpMethod": "GET"}
     result = handler(mock_event, None)
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
