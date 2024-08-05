@@ -442,6 +442,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**Caylent**](https://caylent.com/){target="_blank" rel="nofollow"}
 { .card }
 
+[**CHS Inc.**](https://www.chsinc.com/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**CPQi (Exadel Financial Services)**](https://cpqi.com/){target="_blank" rel="nofollow"}
 { .card }
 
@@ -458,6 +461,9 @@ Knowing which companies are using this library is important to help prioritize t
 { .card }
 
 [**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**LocalStack**](https://www.localstack.cloud/){target="_blank" rel="nofollow"}
 { .card }
 
 [**Propellor.ai**](https://www.propellor.ai/){target="_blank" rel="nofollow"}
