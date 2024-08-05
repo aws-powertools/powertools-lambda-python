@@ -19,6 +19,8 @@ else:
     from typing_extensions import TypeAlias, get_args, get_origin
 
 AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
+
+
 # JSON primitives only, mypy doesn't support recursive tho
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 

@@ -5,7 +5,7 @@ import inspect
 import logging
 import numbers
 import os
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast, overload
+from typing import Any, Callable, Dict, List, Optional, Sequence, TypeVar, Union, cast, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -21,6 +21,8 @@ is_cold_start = True
 logger = logging.getLogger(__name__)
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
+
+T = TypeVar("T")
 
 
 class Tracer:
@@ -250,7 +252,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Optional[AnyCallableT] = None,
+        lambda_handler: Optional[Union[Callable[[T, Any], Any], Callable[[T, Any, Any], Any]]] = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
     ):
