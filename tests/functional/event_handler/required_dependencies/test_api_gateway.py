@@ -964,7 +964,8 @@ def test_debug_unhandled_exceptions_debug_off():
 def test_powertools_dev_sets_debug_mode(monkeypatch):
     # GIVEN a debug mode environment variable is set
     monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
-    app = ApiGatewayResolver()
+    with pytest.warns(UserWarning, match="POWERTOOLS_DEV environment variable is enabled."):
+        app = ApiGatewayResolver()
 
     # WHEN calling app._debug
     # THEN the debug mode is enabled
@@ -1428,7 +1429,8 @@ def test_duplicate_routes():
     def get_func_another_duplicate():
         raise RuntimeError()
 
-    app.include_router(router)
+    with pytest.warns(UserWarning, match="A route like this was already registered"):
+        app.include_router(router)
 
     # WHEN calling the handler
     result = app(LOAD_GW_EVENT, None)
@@ -1707,7 +1709,12 @@ def test_event_source_compatibility():
     @event_source(data_class=APIGatewayProxyEventV2)
     def handler(event: APIGatewayProxyEventV2, context):
         assert isinstance(event, APIGatewayProxyEventV2)
-        return app.resolve(event, context)
+
+        with pytest.warns(
+            UserWarning,
+            match="You don't need to serialize event to Event Source Data Class when using Event Handler",
+        ):
+            return app.resolve(event, context)
 
     # THEN
     result = handler(load_event("apiGatewayProxyV2Event.json"), None)
