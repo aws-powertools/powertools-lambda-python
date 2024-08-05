@@ -248,8 +248,8 @@ def validate(
     Returns
     -------
     Dict
-        The validated event.  If the schema includes a `default` for fields that are not provided, they will be included
-        in the response.
+        The validated event. If the schema specifies a `default` value for fields that are omitted,
+        those default values will be included in the response.
 
     Raises
     ------
