@@ -7,10 +7,13 @@ from __future__ import annotations
 import json
 import logging
 import os
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
 
 import boto3
 from botocore.config import Config
+
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
@@ -79,6 +82,7 @@ class SecretsProvider(BaseProvider):
     def __init__(
         self,
         config: Optional[Config] = None,
+        boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
         boto3_client: Optional["SecretsManagerClient"] = None,
     ):
@@ -88,11 +92,19 @@ class SecretsProvider(BaseProvider):
 
         super().__init__()
 
+        if config:
+            warnings.warn(
+                message="The 'config' parameter is deprecated in V3 and will be removed in V4. "
+                "Please use 'boto_config' instead.",
+                category=PowertoolsDeprecationWarning,
+                stacklevel=2,
+            )
+
         self.client: "SecretsManagerClient" = self._build_boto3_client(
             service_name="secretsmanager",
             client=boto3_client,
             session=boto3_session,
-            config=config,
+            config=boto_config or config,
         )
 
     def _get(self, name: str, **sdk_options) -> str:

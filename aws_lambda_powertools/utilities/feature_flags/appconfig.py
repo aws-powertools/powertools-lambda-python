@@ -58,7 +58,7 @@ class AppConfigStore(StoreProvider):
         self.config = sdk_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
-        self._conf_store = AppConfigProvider(environment=environment, application=application, config=sdk_config)
+        self._conf_store = AppConfigProvider(environment=environment, application=application, boto_config=sdk_config)
 
     @property
     def get_raw_configuration(self) -> Dict[str, Any]:

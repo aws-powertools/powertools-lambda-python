@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import os
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
 import boto3
@@ -26,6 +27,7 @@ from aws_lambda_powertools.utilities.parameters.base import (
 )
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
 from aws_lambda_powertools.utilities.parameters.types import PutParameterResponse, TransformOptions
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
@@ -109,6 +111,7 @@ class SSMProvider(BaseProvider):
     def __init__(
         self,
         config: Optional[Config] = None,
+        boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
         boto3_client: Optional["SSMClient"] = None,
     ):
@@ -118,11 +121,19 @@ class SSMProvider(BaseProvider):
 
         super().__init__()
 
+        if config:
+            warnings.warn(
+                message="The 'config' parameter is deprecated in V3 and will be removed in V4. "
+                "Please use 'boto_config' instead.",
+                category=PowertoolsDeprecationWarning,
+                stacklevel=2,
+            )
+
         self.client: "SSMClient" = self._build_boto3_client(
             service_name="ssm",
             client=boto3_client,
             session=boto3_session,
-            config=config,
+            config=boto_config or config,
         )
 
     def get_multiple(  # type: ignore[override]

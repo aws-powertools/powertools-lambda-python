@@ -2,11 +2,14 @@
 Amazon DynamoDB parameter retrieval and caching utility
 """
 
+import warnings
 from typing import TYPE_CHECKING, Dict, Optional
 
 import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.config import Config
+
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 from .base import BaseProvider
 
@@ -156,17 +159,26 @@ class DynamoDBProvider(BaseProvider):
         value_attr: str = "value",
         endpoint_url: Optional[str] = None,
         config: Optional[Config] = None,
+        boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
         boto3_client: Optional["DynamoDBServiceResource"] = None,
     ):
         """
         Initialize the DynamoDB client
         """
+        if config:
+            warnings.warn(
+                message="The 'config' parameter is deprecated in V3 and will be removed in V4. "
+                "Please use 'boto_config' instead.",
+                category=PowertoolsDeprecationWarning,
+                stacklevel=2,
+            )
+
         self.table: "Table" = self._build_boto3_resource_client(
             service_name="dynamodb",
             client=boto3_client,
             session=boto3_session,
-            config=config,
+            config=boto_config or config,
             endpoint_url=endpoint_url,
         ).Table(table_name)
 
