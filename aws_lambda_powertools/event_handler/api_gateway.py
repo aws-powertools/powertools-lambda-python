@@ -122,20 +122,22 @@ class CORSConfig:
     Examples
     --------
 
-    Simple cors example using the default permissive cors, not this should only be used during early prototyping
+    Simple CORS example using the default permissive CORS, note that this should only be used during early prototyping.
 
     ```python
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        APIGatewayRestResolver, CORSConfig
+    )
 
-    app = APIGatewayRestResolver()
+    app = APIGatewayRestResolver(cors=CORSConfig())
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors():
         return {"message": "Foo"}
     ```
 
     Using a custom CORSConfig where `with_cors` used the custom provided CORSConfig and `without_cors`
-    do not include any cors headers.
+    do not include any CORS headers.
 
     ```python
     from aws_lambda_powertools.event_handler.api_gateway import (

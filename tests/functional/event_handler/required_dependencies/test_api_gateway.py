@@ -323,11 +323,11 @@ def test_no_matches():
 
 
 def test_cors():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
     app = ApiGatewayResolver(cors=CORSConfig("https://aws.amazon.com", allow_credentials=True))
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -811,7 +811,7 @@ def test_custom_preflight_response():
     # AND the request matches this custom preflight route
     app = ApiGatewayResolver(cors=CORSConfig())
 
-    @app.route(method="OPTIONS", rule="/some-call", cors=True)
+    @app.route(method="OPTIONS", rule="/some-call")
     def custom_preflight():
         return Response(
             status_code=200,
@@ -820,7 +820,7 @@ def test_custom_preflight_response():
             headers={"Access-Control-Allow-Methods": ["CUSTOM"]},
         )
 
-    @app.route(method="CUSTOM", rule="/some-call", cors=True)
+    @app.route(method="CUSTOM", rule="/some-call")
     def custom_method(): ...
 
     # AND the request includes an origin
@@ -903,7 +903,7 @@ def test_service_error_responses(json_dump):
     assert result["body"] == json_dump(expected)
 
     # GIVEN an ServiceError with a custom status code
-    @app.get(rule="/service-error", cors=True)
+    @app.get(rule="/service-error")
     def service_error():
         raise ServiceError(502, "Something went wrong!")
 
