@@ -8,14 +8,15 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from tests.functional.utils import load_event
 
+DECIMAL_CONTEXT = Context(
+    Emin=-128,
+    Emax=126,
+    prec=38,
+    traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
+)
+
 
 def test_dynamodb_stream_trigger_event():
-    decimal_context = Context(
-        Emin=-128,
-        Emax=126,
-        prec=38,
-        traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
-    )
 
     raw_event = load_event("dynamoStreamEvent.json")
     parsed_event = DynamoDBStreamEvent(raw_event)
@@ -36,12 +37,42 @@ def test_dynamodb_stream_trigger_event():
     assert dynamodb.approximate_creation_date_time == record_raw["dynamodb"]["ApproximateCreationDateTime"]
     keys = dynamodb.keys
     assert keys is not None
-    assert keys["Id"] == decimal_context.create_decimal(101)
+    assert keys["Id"] == DECIMAL_CONTEXT.create_decimal(101)
     assert dynamodb.new_image.get("Message") == record_raw["dynamodb"]["NewImage"]["Message"]["S"]
     assert dynamodb.old_image is None
     assert dynamodb.sequence_number == record_raw["dynamodb"]["SequenceNumber"]
     assert dynamodb.size_bytes == record_raw["dynamodb"]["SizeBytes"]
     assert dynamodb.stream_view_type == StreamViewType.NEW_AND_OLD_IMAGES
+
+
+def test_dynamodb_stream_record_deserialization_large_int():
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "000000011011111111111111000000000000000000000000000000"},
+        },
+    }
+    record = StreamRecord(data)
+    assert record.new_image == {
+        "Name": "Joe",
+        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111111000000000000000000000"),
+    }
+
+
+def test_dynamodb_stream_record_deserialization_large_int_without_trailing_zeros():
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "000000011011111111111112222222222221111111111111111111111"},
+        },
+    }
+    record = StreamRecord(data)
+    assert record.new_image == {
+        "Name": "Joe",
+        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111112222222222221111111111"),
+    }
 
 
 def test_dynamodb_stream_record_deserialization():
