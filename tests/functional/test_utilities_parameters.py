@@ -17,12 +17,13 @@ from botocore.config import Config
 from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities import parameters
+from aws_lambda_powertools.utilities.parameters import AppConfigProvider, DynamoDBProvider, SecretsProvider, SSMProvider
 from aws_lambda_powertools.utilities.parameters.base import (
     TRANSFORM_METHOD_MAPPING,
     BaseProvider,
     ExpirableValue,
 )
-from aws_lambda_powertools.utilities.parameters.ssm import SSMProvider
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 
 @pytest.fixture(scope="function")
@@ -83,7 +84,7 @@ def test_dynamodb_provider_get(mock_name, mock_value, config):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -137,7 +138,7 @@ def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Inject value in the internal store
     cache_key = provider._build_cache_key(name=mock_name)
@@ -164,7 +165,7 @@ def test_dynamodb_provider_get_expired(mock_name, mock_value, config):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
@@ -193,7 +194,7 @@ def test_dynamodb_provider_get_sdk_options(mock_name, mock_value, config):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -249,7 +250,7 @@ def test_dynamodb_provider_get_sdk_options_overwrite(mock_name, mock_value, conf
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -276,7 +277,7 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -314,7 +315,7 @@ def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
     table_name = "TEST_TABLE_AUTO"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -354,7 +355,7 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -407,7 +408,7 @@ def test_dynamodb_provider_get_multiple_sdk_options(mock_name, mock_value, confi
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -447,7 +448,7 @@ def test_dynamodb_provider_get_multiple_sdk_options_overwrite(mock_name, mock_va
     table_name = "TEST_TABLE"
 
     # Create a new provider
-    provider = parameters.DynamoDBProvider(table_name, config=config)
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -483,7 +484,7 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -540,7 +541,7 @@ def test_ssm_provider_set_parameter(mock_name, mock_value, mock_version, config)
     Test SSMProvider.set_parameter() with a non-cached value
     """
     # GIVEN a SSMProvider instance with default values
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # WHEN setting a parameter
     stubber = stub.Stubber(provider.client)
@@ -643,7 +644,7 @@ def test_ssm_provider_set_parameter_raise_on_failure(mock_name, mock_value, mock
     Test SSMProvider.set_parameter() with failure
     """
     # GIVEN a SSMProvider instance
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -700,7 +701,7 @@ def test_secret_provider_update_secret_with_plain_text_value(mock_name, mock_val
     Test SecretsProvider.set() with a plain text value
     """
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     client_request_token = str(uuid.uuid4())
 
@@ -731,7 +732,7 @@ def test_secret_provider_update_secret_with_binary_value(mock_name, config):
     mock_value = b"value_to_test"
 
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # WHEN setting a secret with a binary value
     stubber = stub.Stubber(provider.client)
@@ -759,7 +760,7 @@ def test_secret_provider_update_secret_with_dict_value(mock_name, config):
     mock_value = {"key": "powertools"}
 
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # WHEN setting a secret with a dictionary value
     stubber = stub.Stubber(provider.client)
@@ -784,7 +785,7 @@ def test_secret_provider_update_secret_with_raise_on_failure(mock_name, mock_val
     Test SecretsProvider.set() with raise on failure
     """
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -811,7 +812,7 @@ def test_secret_provider_create_secret(mocker, mock_name, mock_value, config):
     Test Test SecretsProvider.set() forcing a new secret creation
     """
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # WHEN the put_secret_value method raises a ResourceNotFoundException
     mock_update_secret = mocker.patch.object(provider, "_update_secret")
@@ -847,7 +848,7 @@ def test_secret_provider_create_secret_raise_on_error(mocker, mock_name, mock_va
     Test Test SecretsProvider.set() forcing a new secret creation
     """
     # GIVEN a SecretsProvider instance
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # WHEN the put_secret_value method raises a ResourceNotFoundException
     mock_update_secret = mocker.patch.object(provider, "_update_secret")
@@ -925,7 +926,7 @@ def test_ssm_provider_get_with_decrypt_environment_variable(monkeypatch, mock_na
     monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", "true")
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -997,7 +998,7 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Inject value in the internal store
     cache_key = provider._build_cache_key(name=mock_name)
@@ -1042,7 +1043,7 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
 
 def test_ssm_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -1054,7 +1055,7 @@ def test_ssm_provider_clear_cache(mock_name, mock_value, config):
 
 def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_value, config):
     # GIVEN two parameters are requested
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     success = f"/dev/{mock_name}"
     fail = f"/prod/{mock_name}"
 
@@ -1090,7 +1091,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, 
     expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
     expected_stub_params = {"Names": param_names}
 
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     stubber = stub.Stubber(provider.client)
     stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
     stubber.activate()
@@ -1114,7 +1115,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
     param = f"/{mock_name}"
     params = {param: {"decrypt": True}}
 
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     stubber = stub.Stubber(provider.client)
     stubber.add_client_error("get_parameters", "InvalidKeyId")
     stubber.activate()
@@ -1151,7 +1152,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
         invalid_parameters=[fail],
     )
 
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     stubber = stub.Stubber(provider.client)
     stubber.add_client_error("get_parameter")
     stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
@@ -1181,7 +1182,7 @@ def test_ssm_provider_get_parameters_by_name_raise_on_reserved_errors_key(mock_n
     fail = "_errors"
 
     params = {success: {}, fail: {}}
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # WHEN using get_parameters_by_name to fetch
     # THEN raise GetParameterError
@@ -1202,7 +1203,7 @@ def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_paramete
     expected_stub_response = build_get_parameters_stub(params=expected_param_values, invalid_parameters=[fail])
     expected_stub_params = {"Names": all_params_names, "WithDecryption": True}
 
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
     stubber = stub.Stubber(provider.client)
     stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
     stubber.activate()
@@ -1220,7 +1221,7 @@ def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_paramete
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.DynamoDBProvider(table_name="test", config=config)
+    provider = parameters.DynamoDBProvider(table_name="test", boto_config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -1232,7 +1233,7 @@ def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
 
 def test_secrets_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -1244,7 +1245,7 @@ def test_secrets_provider_clear_cache(mock_name, mock_value, config):
 
 def test_appconf_provider_clear_cache(mock_name, config):
     # GIVEN a provider is initialized with a cached value
-    provider = parameters.AppConfigProvider(environment="test", application="test", config=config)
+    provider = parameters.AppConfigProvider(environment="test", application="test", boto_config=config)
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
 
     # WHEN clear_cache is called from within the provider instance
@@ -1260,7 +1261,7 @@ def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
@@ -1298,7 +1299,7 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
     """
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1344,7 +1345,7 @@ def test_ssm_provider_get_multiple_with_decrypt_environment_variable(
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1388,7 +1389,7 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version, config):
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1432,7 +1433,7 @@ def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_ve
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1476,7 +1477,7 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1542,7 +1543,7 @@ def test_ssm_provider_get_multiple_sdk_options(mock_name, mock_value, mock_versi
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1586,7 +1587,7 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
     mock_param_names = ["A", "B", "C"]
 
     # Create a new provider
-    provider = parameters.SSMProvider(config=config)
+    provider = parameters.SSMProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1633,7 +1634,7 @@ def test_secrets_provider_get(mock_name, mock_value, config):
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1659,7 +1660,7 @@ def test_secrets_provider_get(mock_name, mock_value, config):
 
 def test_secrets_provider_get_binary_secret(mock_name, mock_binary_value, config):
     # GIVEN a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
     expected_params = {"SecretId": mock_name}
     expected_response = {
         "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}",
@@ -1751,7 +1752,7 @@ def test_secrets_provider_get_cached(mock_name, mock_value, config):
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Inject value in the internal store
     cache_key = provider._build_cache_key(name=mock_name)
@@ -1776,7 +1777,7 @@ def test_secrets_provider_get_expired(mock_name, mock_value, config):
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Inject value in the internal store
     provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() - timedelta(seconds=60))
@@ -1809,7 +1810,7 @@ def test_secrets_provider_get_sdk_options(mock_name, mock_value, config):
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1839,7 +1840,7 @@ def test_secrets_provider_get_sdk_options_overwrite(mock_name, mock_value, confi
     """
 
     # Create a new provider
-    provider = parameters.SecretsProvider(config=config)
+    provider = parameters.SecretsProvider(boto_config=config)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -2213,8 +2214,8 @@ def test_get_parameters_by_name(monkeypatch, mock_name, mock_value, config):
     params = {mock_name: {}}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
             return {mock_name: mock_value}
@@ -2236,8 +2237,8 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
     params = {mock_name: {}, **decrypt_params}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
             # THEN params with `decrypt` override should use GetParameter` (`_get`)
@@ -2266,8 +2267,8 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
     params = {mock_name: {"max_age": 0}, "no-override": {}}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         # NOTE: By convention, we check at `_get_parameters_by_name`
         # as that's right before we call SSM, and when options have been merged
@@ -2295,8 +2296,8 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
     params = {f"param_{i}": {} for i in range(20)}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         def _get_parameters_by_name(
             self,
@@ -2320,8 +2321,8 @@ def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config
     cache_key = (mock_name, None)
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
             raise RuntimeError("Should not be called if it's in cache")
@@ -2343,8 +2344,8 @@ def test_get_parameters_by_name_empty_batch(monkeypatch, config):
     params = {}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
 
@@ -2449,8 +2450,8 @@ def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value, config):
     params = {mock_name: {}}
 
     class TestProvider(SSMProvider):
-        def __init__(self, config: Config = config, **kwargs):
-            super().__init__(config, **kwargs)
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
 
         def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
             return {mock_name: mock_value}
@@ -2512,7 +2513,7 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
     # Create a new provider
     environment = "dev"
     application = "myapp"
-    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+    provider = parameters.AppConfigProvider(environment=environment, application=application, boto_config=config)
 
     mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
     encoded_message = json.dumps(mock_body_json).encode("utf-8")
@@ -2594,7 +2595,7 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     # Create a new provider
     environment = "dev"
     application = "myapp"
-    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+    provider = parameters.AppConfigProvider(environment=environment, application=application, boto_config=config)
 
     mock_body_json = {"myenvvar1": "Black Panther", "myenvvar2": 3}
     encoded_message = json.dumps(mock_body_json).encode("utf-8")
@@ -2629,7 +2630,7 @@ def test_appconf_provider_multiple_unique_config_names(mock_name, config):
     # GIVEN a provider instance, we should be able to retrieve multiple appconfig profiles.
     environment = "dev"
     application = "myapp"
-    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+    provider = parameters.AppConfigProvider(environment=environment, application=application, boto_config=config)
 
     mock_body_json_first_call = {"myenvvar1": "Black Panther", "myenvvar2": 3}
     encoded_message_first_call = json.dumps(mock_body_json_first_call).encode("utf-8")
@@ -2914,7 +2915,7 @@ def test_base_provider_get_force_update(mock_name, mock_value):
 def test_cache_ignores_max_age_zero_or_negative(mock_value, config):
     # GIVEN we have two parameters that shouldn't be cached
     param = "/no_cache"
-    provider = SSMProvider(config=config)
+    provider = SSMProvider(boto_config=config)
     cache_key = (param, None)
 
     # WHEN a provider adds them into the cache
@@ -2946,3 +2947,31 @@ def test_base_provider_single_and_nested_parameters_cached(mock_name, mock_value
     # see #2438
     with pytest.raises(parameters.exceptions.GetParameterError):
         provider.get(mock_name)
+
+
+def test_raise_warning_when_using_config_parameter_ssm(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        SSMProvider(config=config)
+
+
+def test_raise_warning_when_using_config_parameter_dynamodb(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        DynamoDBProvider(table_name="test", config=config)
+
+
+def test_raise_warning_when_using_config_parameter_appconfig(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        AppConfigProvider(environment="test", config=config)
+
+
+def test_raise_warning_when_using_config_parameter_secrets(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        SecretsProvider(config=config)

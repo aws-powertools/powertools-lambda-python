@@ -3,12 +3,14 @@ AWS App Config configuration retrieval and caching utility
 """
 
 import os
+import warnings
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata.client import AppConfigDataClient
@@ -72,15 +74,28 @@ class AppConfigProvider(BaseProvider):
         environment: str,
         application: Optional[str] = None,
         config: Optional[Config] = None,
+        boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
         boto3_client: Optional["AppConfigDataClient"] = None,
     ):
         """
         Initialize the App Config client
         """
+
+        super().__init__()
+
+        if config:
+            warnings.warn(
+                message="The 'config' parameter is deprecated in V3 and will be removed in V4. "
+                "Please use 'boto_config' instead.",
+                category=PowertoolsDeprecationWarning,
+                stacklevel=2,
+            )
+
         if boto3_client is None:
             boto3_session = boto3_session or boto3.session.Session()
-            boto3_client = boto3_session.client("appconfigdata", config=config)
+            boto3_client = boto3_session.client("appconfigdata", config=boto_config or config)
+
         self.client = boto3_client
 
         self.application = resolve_env_var_choice(

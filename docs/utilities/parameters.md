@@ -473,7 +473,7 @@ Bringing them together in a single code snippet would look like this:
 
 ### Customizing boto configuration
 
-The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}, [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}, or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html){target="_blank"} when constructing any of the built-in provider classes.
+The **`boto_config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}, [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}, or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html){target="_blank"} when constructing any of the built-in provider classes.
 
 ???+ tip
 	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
