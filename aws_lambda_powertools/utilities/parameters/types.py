@@ -1,3 +1,3 @@
-from aws_lambda_powertools.shared.types import Literal
+from typing import Literal
 
 TransformOptions = Literal["json", "binary", "auto", None]

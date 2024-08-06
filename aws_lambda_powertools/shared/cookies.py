@@ -1,9 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from io import StringIO
-from typing import Optional
-
-from aws_lambda_powertools.shared.types import List
+from typing import List, Optional
 
 
 class SameSite(Enum):

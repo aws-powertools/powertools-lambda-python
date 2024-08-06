@@ -1,9 +1,8 @@
-from typing import List
+from typing import List, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.shared.types import TypedDict
 from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncResolverEvent,

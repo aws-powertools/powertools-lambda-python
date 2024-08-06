@@ -5,11 +5,10 @@ import json
 import logging
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Literal, Protocol
 
 import redis
 
-from aws_lambda_powertools.shared.types import Literal, Protocol
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,

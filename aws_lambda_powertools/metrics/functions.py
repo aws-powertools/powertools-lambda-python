@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import List
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -8,7 +9,6 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.types import List
 
 
 def extract_cloudwatch_metric_resolution_value(metric_resolutions: List, resolution: int | MetricResolution) -> int:

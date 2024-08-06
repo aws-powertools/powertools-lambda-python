@@ -2,10 +2,10 @@ from typing import Optional
 
 import requests
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body  # (1)!
-from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver(enable_validation=True)

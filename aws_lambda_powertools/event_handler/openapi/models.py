@@ -1,14 +1,14 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 from pydantic import AnyUrl, BaseModel, Field
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
 from aws_lambda_powertools.event_handler.openapi.constants import (
     MODEL_CONFIG_ALLOW,
     MODEL_CONFIG_IGNORE,
 )
-from aws_lambda_powertools.shared.types import Annotated, Literal
 
 """
 The code defines Pydantic models for the various OpenAPI objects like OpenAPI, PathItem, Operation, Parameter etc.

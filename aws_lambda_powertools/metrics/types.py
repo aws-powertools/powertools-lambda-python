@@ -1,4 +1,6 @@
-from aws_lambda_powertools.shared.types import NotRequired, TypedDict
+from typing import TypedDict
+
+from typing_extensions import NotRequired
 
 
 class MetricNameUnitResolution(TypedDict):
