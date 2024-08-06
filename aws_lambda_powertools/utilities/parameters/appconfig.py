@@ -4,7 +4,7 @@ AWS App Config configuration retrieval and caching utility
 
 import os
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
-    from mypy_boto3_appconfigdata import AppConfigDataClient
+    from mypy_boto3_appconfigdata.client import AppConfigDataClient
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -69,8 +69,6 @@ class AppConfigProvider(BaseProvider):
 
     """
 
-    client: Any = None
-
     def __init__(
         self,
         environment: str,
@@ -94,12 +92,11 @@ class AppConfigProvider(BaseProvider):
                 stacklevel=2,
             )
 
-        self.client: "AppConfigDataClient" = self._build_boto3_client(
-            service_name="appconfigdata",
-            client=boto3_client,
-            session=boto3_session,
-            config=boto_config or config,
-        )
+        if boto3_client is None:
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.client("appconfigdata", config=boto_config or config)
+
+        self.client = boto3_client
 
         self.application = resolve_env_var_choice(
             choice=application,
@@ -110,9 +107,11 @@ class AppConfigProvider(BaseProvider):
 
         self._next_token: Dict[str, str] = {}  # nosec - token for get_latest_configuration executions
         # Dict to store the recently retrieved value for a specific configuration.
-        self.last_returned_value: Dict[str, str] = {}
+        self.last_returned_value: Dict[str, bytes] = {}
 
-    def _get(self, name: str, **sdk_options) -> str:
+        super().__init__(client=self.client)
+
+    def _get(self, name: str, **sdk_options) -> bytes:
         """
         Retrieve a parameter value from AWS App config.
 

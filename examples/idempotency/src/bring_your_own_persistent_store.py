@@ -27,9 +27,8 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
     ):
-        boto_config = boto_config or Config()
-        session = boto3_session or boto3.session.Session()
-        self._ddb_resource = session.resource("dynamodb", config=boto_config)
+        boto3_session = boto3_session or boto3.session.Session()
+        self._ddb_resource = boto3_session.resource("dynamodb", config=boto_config)
         self.table_name = table_name
         self.table = self._ddb_resource.Table(self.table_name)
         self.key_attr = key_attr
@@ -112,14 +111,12 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
             expression_attr_values[":validation_key"] = data_record.payload_hash
             expression_attr_names["#validation_key"] = self.validation_key_attr
 
-        kwargs = {
-            "Key": {self.key_attr: data_record.idempotency_key},
-            "UpdateExpression": update_expression,
-            "ExpressionAttributeValues": expression_attr_values,
-            "ExpressionAttributeNames": expression_attr_names,
-        }
-
-        self.table.update_item(**kwargs)
+        self.table.update_item(
+            Key={self.key_attr: data_record.idempotency_key},
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attr_values,
+            ExpressionAttributeNames=expression_attr_names,
+        )
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")

@@ -26,12 +26,12 @@ from aws_lambda_powertools.utilities.parameters.base import (
     transform_value,
 )
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
-from aws_lambda_powertools.utilities.parameters.types import PutParameterResponse, TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
-    from mypy_boto3_ssm import SSMClient
-    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef
+    from mypy_boto3_ssm.client import SSMClient
+    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef, PutParameterResultTypeDef
 
 SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
 SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
@@ -104,7 +104,6 @@ class SSMProvider(BaseProvider):
         /my/path/prefix/c   Parameter value c
     """
 
-    client: Any = None
     _MAX_GET_PARAMETERS_ITEM = 10
     _ERRORS_KEY = "_errors"
 
@@ -113,14 +112,11 @@ class SSMProvider(BaseProvider):
         config: Optional[Config] = None,
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional["SSMClient"] = None,
+        boto3_client: Optional[SSMClient] = None,
     ):
         """
         Initialize the SSM Parameter Store client
         """
-
-        super().__init__()
-
         if config:
             warnings.warn(
                 message="The 'config' parameter is deprecated in V3 and will be removed in V4. "
@@ -129,12 +125,12 @@ class SSMProvider(BaseProvider):
                 stacklevel=2,
             )
 
-        self.client: "SSMClient" = self._build_boto3_client(
-            service_name="ssm",
-            client=boto3_client,
-            session=boto3_session,
-            config=boto_config or config,
-        )
+        if boto3_client is None:
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.client("ssm", config=boto_config or config)
+        self.client = boto3_client
+
+        super().__init__(client=self.client)
 
     def get_multiple(  # type: ignore[override]
         self,
@@ -300,7 +296,7 @@ class SSMProvider(BaseProvider):
         tier: SSM_PARAMETER_TIER = "Standard",
         kms_key_id: str | None = None,
         **sdk_options,
-    ) -> PutParameterResponse:
+    ) -> PutParameterResultTypeDef:
         """
         Sets a parameter in AWS Systems Manager Parameter Store.
 
@@ -346,7 +342,7 @@ class SSMProvider(BaseProvider):
 
         Returns
         -------
-        PutParameterResponse
+        PutParameterResultTypeDef
             The dict returned by boto3.
         """
         opts = {
@@ -1010,7 +1006,7 @@ def set_parameter(
     tier: SSM_PARAMETER_TIER = "Standard",
     kms_key_id: str | None = None,
     **sdk_options,
-) -> PutParameterResponse:
+) -> PutParameterResultTypeDef:
     """
     Sets a parameter in AWS Systems Manager Parameter Store.
 
@@ -1055,7 +1051,7 @@ def set_parameter(
 
     Returns
     -------
-    PutParameterResponse
+    PutParameterResultTypeDef
         The dict returned by boto3.
     """
 

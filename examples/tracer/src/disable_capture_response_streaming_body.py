@@ -12,7 +12,7 @@ REPORT_KEY = os.getenv("REPORT_KEY", "")
 tracer = Tracer()
 logger = Logger()
 
-session = boto3.Session()
+session = boto3.session.Session()
 s3 = session.client("s3")
 
 
@@ -20,7 +20,7 @@ s3 = session.client("s3")
 def fetch_payment_report(payment_id: str) -> StreamingBody:
     ret = s3.get_object(Bucket=BUCKET, Key=f"{REPORT_KEY}/{payment_id}")
     logger.debug("Returning streaming body from S3 object....")
-    return ret["body"]
+    return ret["Body"]
 
 
 @tracer.capture_lambda_handler(capture_response=False)

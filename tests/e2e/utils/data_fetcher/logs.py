@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional, Union
 
 import boto3
-from mypy_boto3_logs import CloudWatchLogsClient
+from mypy_boto3_logs.client import CloudWatchLogsClient
 from pydantic import BaseModel
 from retry import retry
 

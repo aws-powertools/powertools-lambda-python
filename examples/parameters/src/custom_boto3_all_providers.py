@@ -7,7 +7,7 @@ config = Config(region_name="us-west-1")
 
 # construct boto clients with any custom configuration
 ssm = boto3.client("ssm", config=config)
-secrets = boto3.client("secrets", config=config)
+secrets = boto3.client("secretsmanager", config=config)
 appconfig = boto3.client("appconfigdata", config=config)
 dynamodb = boto3.resource("dynamodb", config=config)
 

@@ -14,8 +14,7 @@ from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from .base import BaseProvider
 
 if TYPE_CHECKING:
-    from mypy_boto3_dynamodb import DynamoDBServiceResource
-    from mypy_boto3_dynamodb.service_resource import Table
+    from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource
 
 
 class DynamoDBProvider(BaseProvider):
@@ -174,19 +173,16 @@ class DynamoDBProvider(BaseProvider):
                 stacklevel=2,
             )
 
-        self.table: "Table" = self._build_boto3_resource_client(
-            service_name="dynamodb",
-            client=boto3_client,
-            session=boto3_session,
-            config=boto_config or config,
-            endpoint_url=endpoint_url,
-        ).Table(table_name)
+        if boto3_client is None:
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.resource("dynamodb", config=boto_config or config, endpoint_url=endpoint_url)
 
+        self.table = boto3_client.Table(table_name)
         self.key_attr = key_attr
         self.sort_attr = sort_attr
         self.value_attr = value_attr
 
-        super().__init__()
+        super().__init__(resource=boto3_client)
 
     def _get(self, name: str, **sdk_options) -> str:
         """

@@ -9,5 +9,5 @@ def build_iam_auth(url: str, aws_service: str) -> BotoAWSRequestsAuth:
     This can be directly passed on to the requests library to authenticate the request.
     """
     hostname = urlparse(url).hostname
-    region = boto3.Session().region_name
+    region = boto3.session.Session().region_name
     return BotoAWSRequestsAuth(aws_host=hostname, aws_region=region, aws_service=aws_service)

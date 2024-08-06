@@ -1123,7 +1123,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
     from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
     logger = Logger()
-    session = boto3.Session()
+    session = boto3.session.Session()
     s3 = session.client("s3")
 
     @logger.inject_lambda_context(correlation_id_path=S3_OBJECT_LAMBDA, log_event=True)

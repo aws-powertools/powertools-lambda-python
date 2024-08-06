@@ -22,10 +22,8 @@ class S3StoreProvider(StoreProvider):
 
     def _get_s3_object(self) -> Dict[str, Any]:
         # Retrieve the object content
-        parameters = {"Bucket": self.bucket_name, "Key": self.object_key}
-
         try:
-            response = self.client.get_object(**parameters)
+            response = self.client.get_object(Bucket=self.bucket_name, Key=self.object_key)
             return json.loads(response["Body"].read().decode())
         except ClientError as exc:
             raise ConfigurationStoreError("Unable to get S3 Store Provider configuration file") from exc
