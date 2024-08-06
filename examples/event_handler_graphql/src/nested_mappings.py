@@ -1,9 +1,8 @@
-from typing import List
+from typing import List, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.shared.types import TypedDict
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()

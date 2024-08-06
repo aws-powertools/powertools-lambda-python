@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, TypedDict, Union
 
-from aws_lambda_powertools.shared.types import NotRequired, TypeAlias, TypedDict
+from typing_extensions import NotRequired, TypeAlias
 
 LogRecord: TypeAlias = Union[Dict[str, Any], "PowertoolsLogRecord"]
 LogStackTrace: TypeAlias = Union[Dict[str, Any], "PowertoolsStackTrace"]

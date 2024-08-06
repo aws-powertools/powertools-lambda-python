@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from pydantic import BaseModel
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
@@ -19,7 +20,6 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Query,
     _create_model_field,
 )
-from aws_lambda_powertools.shared.types import Annotated
 
 JSON_CONTENT_TYPE = "application/json"
 

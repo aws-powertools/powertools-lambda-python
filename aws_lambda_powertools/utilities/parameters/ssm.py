@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union, overload
 
 import boto3
 from botocore.config import Config
@@ -18,7 +18,6 @@ from aws_lambda_powertools.shared.functions import (
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
-from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.parameters.base import (
     DEFAULT_MAX_AGE_SECS,
     DEFAULT_PROVIDERS,

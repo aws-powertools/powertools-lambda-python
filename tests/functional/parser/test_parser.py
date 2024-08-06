@@ -3,8 +3,8 @@ from typing import Any, Dict, Literal, Union
 
 import pydantic
 import pytest
+from typing_extensions import Annotated
 
-from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.parser import (
     event_parser,
     exceptions,

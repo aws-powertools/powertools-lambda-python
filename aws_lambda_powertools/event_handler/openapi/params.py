@@ -1,9 +1,10 @@
 import inspect
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
+from typing_extensions import Annotated, get_args, get_origin
 
 from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -16,7 +17,6 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     get_annotation_from_field_info,
 )
 from aws_lambda_powertools.event_handler.openapi.types import CacheKey
-from aws_lambda_powertools.shared.types import Annotated, Literal, get_args, get_origin
 
 """
 This turns the low-level function signature into typed, validated Pydantic models for consumption.

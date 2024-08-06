@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional, Tuple
 from botocore.config import Config
 from dateutil.tz import gettz
 
-from aws_lambda_powertools.shared.types import JSONType
 from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
 from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
 from aws_lambda_powertools.utilities.feature_flags.schema import (
@@ -19,6 +18,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
+from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 
 
 def evaluate_mocked_schema(

@@ -1,8 +1,8 @@
 import types
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, TypedDict, Union
 
-from aws_lambda_powertools.shared.types import NotRequired, TypedDict
+from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
     from pydantic import BaseModel  # noqa: F401

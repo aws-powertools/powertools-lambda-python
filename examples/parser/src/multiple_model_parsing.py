@@ -1,8 +1,8 @@
 from typing import Any, Literal, Union
 
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
-from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.parser import event_parser
 
 

@@ -9,9 +9,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from dateutil import tz
 
-from ... import Logger
-from .base import BaseValidator
-from .exceptions import SchemaValidationError
+from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.utilities.feature_flags.base import BaseValidator
+from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
 
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"

@@ -1,6 +1,5 @@
-from typing import Any
+from typing import Any, Protocol
 
-from aws_lambda_powertools.shared.types import Protocol
 from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
 
 

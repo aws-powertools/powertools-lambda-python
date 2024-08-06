@@ -1,10 +1,10 @@
 """Advanced feature flags utility"""
 
-from .appconfig import AppConfigStore
-from .base import StoreProvider
-from .exceptions import ConfigurationStoreError
-from .feature_flags import FeatureFlags
-from .schema import RuleAction, SchemaValidator
+from aws_lambda_powertools.utilities.feature_flags.appconfig import AppConfigStore
+from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
+from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
+from aws_lambda_powertools.utilities.feature_flags.feature_flags import FeatureFlags
+from aws_lambda_powertools.utilities.feature_flags.schema import RuleAction, SchemaValidator
 
 __all__ = [
     "ConfigurationStoreError",

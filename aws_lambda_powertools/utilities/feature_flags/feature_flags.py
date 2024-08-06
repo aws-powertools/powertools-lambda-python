@@ -5,11 +5,10 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
 from typing_extensions import ParamSpec
 
-from ... import Logger
-from ...shared.types import JSONType
-from . import schema
-from .base import StoreProvider
-from .comparators import (
+from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.utilities.feature_flags import schema
+from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
+from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_all_in_list,
     compare_any_in_list,
     compare_datetime_range,
@@ -18,7 +17,8 @@ from .comparators import (
     compare_none_in_list,
     compare_time_range,
 )
-from .exceptions import ConfigurationStoreError
+from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
+from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 
 T = TypeVar("T")
 P = ParamSpec("P")

@@ -1,15 +1,15 @@
 import json
 import warnings
-from typing import Optional
+from typing import Literal, Optional
 
 import pytest
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, Server
 from aws_lambda_powertools.event_handler.openapi.params import Query
 from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse
-from aws_lambda_powertools.shared.types import Annotated, Literal
 
 
 @pytest.mark.usefixtures("pydanticv2_only")

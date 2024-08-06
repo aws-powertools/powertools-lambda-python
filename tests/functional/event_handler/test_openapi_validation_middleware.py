@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 
 import pytest
 from pydantic import BaseModel
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
     ALBResolver,
@@ -17,7 +18,6 @@ from aws_lambda_powertools.event_handler import (
     VPCLatticeV2Resolver,
 )
 from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
-from aws_lambda_powertools.shared.types import Annotated
 
 
 def test_validate_scalars(gw_event):

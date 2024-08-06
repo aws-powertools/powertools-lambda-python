@@ -380,7 +380,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
 === "validating_query_strings.py"
 
-    ```python hl_lines="8 10 27"
+    ```python hl_lines="8 9 27"
     --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
     ```
 
@@ -418,7 +418,7 @@ Just like we learned in [query string validation](#validating-query-strings), we
 
 For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
 
-```python hl_lines="8 10 27" title="validating_path.py"
+```python hl_lines="8 9 27" title="validating_path.py"
 --8<-- "examples/event_handler_rest/src/validating_path.py"
 ```
 
@@ -440,7 +440,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
 === "validating_headers.py"
 
-    ```python hl_lines="8 10 27"
+    ```python hl_lines="5 9 27"
     --8<-- "examples/event_handler_rest/src/validating_headers.py"
     ```
 
