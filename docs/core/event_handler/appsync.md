@@ -61,7 +61,7 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
 === "getting_started_graphql_api_resolver.py"
 
-    ```python hl_lines="7 15 25 27 28 37 39 47 49 60"
+    ```python hl_lines="7 14 24 26 27 36 38 46 48 59"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 
@@ -123,7 +123,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 === "nested_mappings.py"
 
-    ```python hl_lines="4 11 21 22 24 31"
+    ```python hl_lines="4 10 20 21 23 30"
     --8<-- "examples/event_handler_graphql/src/nested_mappings.py"
     ```
 
@@ -137,7 +137,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-```python hl_lines="6 15 25 26 35 37" title="Resolving GraphQL resolvers async"
+```python hl_lines="7 14 24 25 34 36" title="Resolving GraphQL resolvers async"
 --8<-- "examples/event_handler_graphql/src/async_resolvers.py"
 ```
 
@@ -162,13 +162,13 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 
 === "graphql_transformer_merchant_info.py"
 
-    ```python hl_lines="4 7 23 24 29 30 37"
+    ```python hl_lines="4 6 23 24 29 30 36"
     --8<-- "examples/event_handler_graphql/src/graphql_transformer_merchant_info.py"
     ```
 
 === "graphql_transformer_search_merchant.py"
 
-    ```python hl_lines="4 7 22 23 37 43"
+    ```python hl_lines="4 6 21 22 36 42"
     --8<-- "examples/event_handler_graphql/src/graphql_transformer_search_merchant.py"
     ```
 
@@ -196,7 +196,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 
 === "custom_models.py.py"
 
-    ```python hl_lines="4 8-10 26-28 31 32 39 46"
+    ```python hl_lines="4 7-9 25-27 31 32 39 45"
     --8<-- "examples/event_handler_graphql/src/custom_models.py"
     ```
 
@@ -225,7 +225,7 @@ Let's assume you have `split_operation.py` as your Lambda function entrypoint an
 
     We import **Router** instead of **AppSyncResolver**; syntax wise is exactly the same.
 
-  	```python hl_lines="4 9 19 20"
+  	```python hl_lines="4 8 18 19"
     --8<-- "examples/event_handler_graphql/src/split_operation_module.py"
   	```
 
@@ -255,7 +255,7 @@ You can use `append_context` when you want to share data between your App and Ro
 
 === "split_route_append_context_module.py"
 
-	```python hl_lines="23"
+	```python hl_lines="22"
     --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
 	```
 
@@ -298,7 +298,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
 === "assert_async_graphql_response_module.py"
 
-    ```python hl_lines="15"
+    ```python hl_lines="14"
     --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response_module.py"
     ```
 

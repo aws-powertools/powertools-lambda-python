@@ -9,8 +9,8 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.exceptions import InternalServerError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.shared.types import JSONType
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
+from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate

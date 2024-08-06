@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 from dateutil.tz import gettz
 
-from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
+from aws_lambda_powertools.utilities.feature_flags.schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
 
 
 def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
