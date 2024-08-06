@@ -20,7 +20,6 @@ from aws_cdk.aws_lambda import (
     Tracing,
 )
 from filelock import FileLock
-from mypy_boto3_cloudformation import CloudFormationClient
 
 from tests.e2e.utils.base import InfrastructureProvider
 from tests.e2e.utils.constants import (
@@ -43,8 +42,8 @@ class BaseInfrastructure(InfrastructureProvider):
         self.stack_outputs: Dict[str, str] = {}
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
-        self.session = boto3.Session()
-        self.cfn: CloudFormationClient = self.session.client("cloudformation")
+        self.session = boto3.session.Session()
+        self.cfn = self.session.client("cloudformation")
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.region = self.session.region_name
 

@@ -10,34 +10,22 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     NamedTuple,
     Optional,
     Tuple,
-    Type,
     Union,
     cast,
     overload,
 )
-
-import boto3
-from botocore.config import Config
 
 from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
-
-if TYPE_CHECKING:
-    from mypy_boto3_appconfigdata import AppConfigDataClient
-    from mypy_boto3_dynamodb import DynamoDBServiceResource
-    from mypy_boto3_secretsmanager import SecretsManagerClient
-    from mypy_boto3_ssm import SSMClient
-
 
 DEFAULT_MAX_AGE_SECS = "300"
 
@@ -46,7 +34,6 @@ DEFAULT_PROVIDERS: Dict[str, Any] = {}
 TRANSFORM_METHOD_JSON = "json"
 TRANSFORM_METHOD_BINARY = "binary"
 SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
-ParameterClients = Union["AppConfigDataClient", "SecretsManagerClient", "SSMClient"]
 
 TRANSFORM_METHOD_MAPPING = {
     TRANSFORM_METHOD_JSON: json.loads,
@@ -69,10 +56,14 @@ class BaseProvider(ABC):
 
     store: Dict[Tuple, ExpirableValue]
 
-    def __init__(self):
+    def __init__(self, *, client=None, resource=None):
         """
         Initialize the base provider
         """
+        if client is not None:
+            user_agent.register_feature_to_client(client=client, feature="parameters")
+        if resource is not None:
+            user_agent.register_feature_to_resource(resource=resource, feature="parameters")
 
         self.store: Dict[Tuple, ExpirableValue] = {}
 
@@ -261,78 +252,6 @@ class BaseProvider(ABC):
             Cache key
         """
         return (name, transform, is_nested)
-
-    @staticmethod
-    def _build_boto3_client(
-        service_name: str,
-        client: Optional[ParameterClients] = None,
-        session: Optional[Type[boto3.Session]] = None,
-        config: Optional[Type[Config]] = None,
-    ) -> Type[ParameterClients]:
-        """Builds a low level boto3 client with session and config provided
-
-        Parameters
-        ----------
-        service_name : str
-            AWS service name to instantiate a boto3 client, e.g. ssm
-        client : Optional[ParameterClients], optional
-            boto3 client instance, by default None
-        session : Optional[Type[boto3.Session]], optional
-            boto3 session instance, by default None
-        config : Optional[Type[Config]], optional
-            botocore config instance to configure client with, by default None
-
-        Returns
-        -------
-        Type[ParameterClients]
-            Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
-        """
-        if client is not None:
-            user_agent.register_feature_to_client(client=client, feature="parameters")
-            return client
-
-        session = session or boto3.Session()
-        config = config or Config()
-        client = session.client(service_name=service_name, config=config)
-        user_agent.register_feature_to_client(client=client, feature="parameters")
-        return client
-
-    # maintenance: change DynamoDBServiceResource type to ParameterResourceClients when we expand
-    @staticmethod
-    def _build_boto3_resource_client(
-        service_name: str,
-        client: Optional["DynamoDBServiceResource"] = None,
-        session: Optional[Type[boto3.Session]] = None,
-        config: Optional[Type[Config]] = None,
-        endpoint_url: Optional[str] = None,
-    ) -> "DynamoDBServiceResource":
-        """Builds a high level boto3 resource client with session, config and endpoint_url provided
-
-        Parameters
-        ----------
-        service_name : str
-            AWS service name to instantiate a boto3 client, e.g. ssm
-        client : Optional[DynamoDBServiceResource], optional
-            boto3 client instance, by default None
-        session : Optional[Type[boto3.Session]], optional
-            boto3 session instance, by default None
-        config : Optional[Type[Config]], optional
-            botocore config instance to configure client, by default None
-
-        Returns
-        -------
-        Type[DynamoDBServiceResource]
-            Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
-        """
-        if client is not None:
-            user_agent.register_feature_to_resource(resource=client, feature="parameters")
-            return client
-
-        session = session or boto3.Session()
-        config = config or Config()
-        client = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
-        user_agent.register_feature_to_resource(resource=client, feature="parameters")
-        return client
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:

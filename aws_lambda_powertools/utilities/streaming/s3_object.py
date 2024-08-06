@@ -29,7 +29,7 @@ from aws_lambda_powertools.utilities.streaming.transformations.base import (
 if TYPE_CHECKING:
     from mmap import mmap
 
-    from mypy_boto3_s3 import Client
+    from mypy_boto3_s3.client import S3Client
 
     _CData = TypeVar("_CData")
 
@@ -75,7 +75,7 @@ class S3Object(IO[bytes]):
         bucket: str,
         key: str,
         version_id: Optional[str] = None,
-        boto3_client: Optional["Client"] = None,
+        boto3_client: Optional[S3Client] = None,
         is_gzip: Optional[bool] = False,
         is_csv: Optional[bool] = False,
         **sdk_options,

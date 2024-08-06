@@ -7,20 +7,21 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Union, overload
 
 import boto3
 from botocore.config import Config
 
 if TYPE_CHECKING:
-    from mypy_boto3_secretsmanager import SecretsManagerClient
+    from mypy_boto3_secretsmanager.client import SecretsManagerClient
+    from mypy_boto3_secretsmanager.type_defs import CreateSecretResponseTypeDef
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
-from aws_lambda_powertools.utilities.parameters.types import SetSecretResponse, TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 logger = logging.getLogger(__name__)
 
@@ -74,28 +75,23 @@ class SecretsProvider(BaseProvider):
         My parameter value
     """
 
-    client: Any = None
-
     def __init__(
         self,
         config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional["SecretsManagerClient"] = None,
+        boto3_client: Optional[SecretsManagerClient] = None,
     ):
         """
         Initialize the Secrets Manager client
         """
+        if boto3_client is None:
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.client("secretsmanager", config=config)
+        self.client = boto3_client
 
-        super().__init__()
+        super().__init__(client=self.client)
 
-        self.client: "SecretsManagerClient" = self._build_boto3_client(
-            service_name="secretsmanager",
-            client=boto3_client,
-            session=boto3_session,
-            config=config,
-        )
-
-    def _get(self, name: str, **sdk_options) -> str:
+    def _get(self, name: str, **sdk_options) -> Union[str, bytes]:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
 
@@ -123,7 +119,7 @@ class SecretsProvider(BaseProvider):
         """
         raise NotImplementedError()
 
-    def _create_secret(self, name: str, **sdk_options):
+    def _create_secret(self, name: str, **sdk_options) -> CreateSecretResponseTypeDef:
         """
         Create a secret with the given name.
 
@@ -164,7 +160,7 @@ class SecretsProvider(BaseProvider):
         *,  # force keyword arguments
         client_request_token: Optional[str] = None,
         **sdk_options,
-    ) -> SetSecretResponse:
+    ) -> CreateSecretResponseTypeDef:
         """
         Modify the details of a secret or create a new secret if it doesn't already exist.
 
@@ -366,7 +362,7 @@ def set_secret(
     *,  # force keyword arguments
     client_request_token: Optional[str] = None,
     **sdk_options,
-) -> SetSecretResponse:
+) -> CreateSecretResponseTypeDef:
     """
     Modify the details of a secret or create a new secret if it doesn't already exist.
 

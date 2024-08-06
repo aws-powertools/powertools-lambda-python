@@ -220,7 +220,7 @@ class S3ObjectLambdaEvent(DictWrapper):
         import requests
         from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
 
-        session = boto3.Session()
+        session = boto3.session.Session()
         s3 = session.client("s3")
 
         def lambda_handler(event, context):
