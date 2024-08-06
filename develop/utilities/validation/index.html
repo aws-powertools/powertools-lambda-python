@@ -2057,6 +2057,11 @@
 </details>
 <h3 id="validate-function">Validate function<a class="headerlink" href="#validate-function" title="Permanent link">&para;</a></h3>
 <p><strong>Validate</strong> standalone function is typically used within the Lambda handler, or any other methods that perform data validation.</p>
+<details class="info" open="open">
+<summary>Info</summary>
+<p>This function returns the validated event as a JSON object. If the schema specifies <code>default</code> values for omitted fields,
+those default values will be included in the response.</p>
+</details>
 <p>You can also gracefully handle schema validation errors by catching <code>SchemaValidationError</code> exception.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="getting_started_validator_standalone_functionpy" name="__tabbed_2" type="radio" /><input id="getting_started_validator_standalone_schemapy" name="__tabbed_2" type="radio" /><input id="getting_started_validator_standalone_payloadjson" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="getting_started_validator_standalone_functionpy">getting_started_validator_standalone_function.py</label><label for="getting_started_validator_standalone_schemapy">getting_started_validator_standalone_schema.py</label><label for="getting_started_validator_standalone_payloadjson">getting_started_validator_standalone_payload.json</label></div>
 <div class="tabbed-content">
@@ -2969,7 +2974,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-06-19
+    2024-08-06
   </span>
 
     
