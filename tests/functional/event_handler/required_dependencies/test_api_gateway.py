@@ -323,15 +323,15 @@ def test_no_matches():
 
 
 def test_cors():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
     app = ApiGatewayResolver(cors=CORSConfig("https://aws.amazon.com", allow_credentials=True))
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
-    @app.get("/without-cors")
+    @app.get("/without-cors", cors=False)
     def without_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -350,17 +350,17 @@ def test_cors():
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
-    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    mock_event = {"path": "/without-cors", "httpMethod": "GET"}
     result = handler(mock_event, None)
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
 def test_cors_no_request_origin():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
-    app = ApiGatewayResolver()
+    app = ApiGatewayResolver(cors=CORSConfig())
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -381,7 +381,7 @@ def test_cors_no_request_origin():
 
 
 def test_cors_allow_all_request_origins():
-    # GIVEN a function with cors=True
+    # GIVEN a function
     # AND http method set to GET
     app = ApiGatewayResolver(
         cors=CORSConfig(
@@ -390,11 +390,11 @@ def test_cors_allow_all_request_origins():
         ),
     )
 
-    @app.get("/my/path", cors=True)
+    @app.get("/my/path")
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
-    @app.get("/without-cors")
+    @app.get("/without-cors", cors=False)
     def without_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -413,7 +413,7 @@ def test_cors_allow_all_request_origins():
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
-    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    mock_event = {"path": "/without-cors", "httpMethod": "GET"}
     result = handler(mock_event, None)
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
@@ -811,7 +811,7 @@ def test_custom_preflight_response():
     # AND the request matches this custom preflight route
     app = ApiGatewayResolver(cors=CORSConfig())
 
-    @app.route(method="OPTIONS", rule="/some-call", cors=True)
+    @app.route(method="OPTIONS", rule="/some-call")
     def custom_preflight():
         return Response(
             status_code=200,
@@ -820,7 +820,7 @@ def test_custom_preflight_response():
             headers={"Access-Control-Allow-Methods": ["CUSTOM"]},
         )
 
-    @app.route(method="CUSTOM", rule="/some-call", cors=True)
+    @app.route(method="CUSTOM", rule="/some-call")
     def custom_method(): ...
 
     # AND the request includes an origin
@@ -903,7 +903,7 @@ def test_service_error_responses(json_dump):
     assert result["body"] == json_dump(expected)
 
     # GIVEN an ServiceError with a custom status code
-    @app.get(rule="/service-error", cors=True)
+    @app.get(rule="/service-error")
     def service_error():
         raise ServiceError(502, "Something went wrong!")
 
@@ -964,7 +964,8 @@ def test_debug_unhandled_exceptions_debug_off():
 def test_powertools_dev_sets_debug_mode(monkeypatch):
     # GIVEN a debug mode environment variable is set
     monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
-    app = ApiGatewayResolver()
+    with pytest.warns(UserWarning, match="POWERTOOLS_DEV environment variable is enabled."):
+        app = ApiGatewayResolver()
 
     # WHEN calling app._debug
     # THEN the debug mode is enabled
@@ -1428,7 +1429,8 @@ def test_duplicate_routes():
     def get_func_another_duplicate():
         raise RuntimeError()
 
-    app.include_router(router)
+    with pytest.warns(UserWarning, match="A route like this was already registered"):
+        app.include_router(router)
 
     # WHEN calling the handler
     result = app(LOAD_GW_EVENT, None)
@@ -1707,7 +1709,12 @@ def test_event_source_compatibility():
     @event_source(data_class=APIGatewayProxyEventV2)
     def handler(event: APIGatewayProxyEventV2, context):
         assert isinstance(event, APIGatewayProxyEventV2)
-        return app.resolve(event, context)
+
+        with pytest.warns(
+            UserWarning,
+            match="You don't need to serialize event to Event Source Data Class when using Event Handler",
+        ):
+            return app.resolve(event, context)
 
     # THEN
     result = handler(load_event("apiGatewayProxyV2Event.json"), None)
