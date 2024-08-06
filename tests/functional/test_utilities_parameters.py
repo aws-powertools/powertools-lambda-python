@@ -17,12 +17,13 @@ from botocore.config import Config
 from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities import parameters
+from aws_lambda_powertools.utilities.parameters import AppConfigProvider, DynamoDBProvider, SecretsProvider, SSMProvider
 from aws_lambda_powertools.utilities.parameters.base import (
     TRANSFORM_METHOD_MAPPING,
     BaseProvider,
     ExpirableValue,
 )
-from aws_lambda_powertools.utilities.parameters.ssm import SSMProvider
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 
 @pytest.fixture(scope="function")
@@ -2946,3 +2947,31 @@ def test_base_provider_single_and_nested_parameters_cached(mock_name, mock_value
     # see #2438
     with pytest.raises(parameters.exceptions.GetParameterError):
         provider.get(mock_name)
+
+
+def test_raise_warning_when_using_config_parameter_ssm(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        SSMProvider(config=config)
+
+
+def test_raise_warning_when_using_config_parameter_dynamodb(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        DynamoDBProvider(table_name="test", config=config)
+
+
+def test_raise_warning_when_using_config_parameter_appconfig(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        AppConfigProvider(environment="test", config=config)
+
+
+def test_raise_warning_when_using_config_parameter_secrets(config):
+    # GIVEN an instance of the provider with config
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsDeprecationWarning, match="The 'config' parameter is deprecated in V3*"):
+        SecretsProvider(config=config)
