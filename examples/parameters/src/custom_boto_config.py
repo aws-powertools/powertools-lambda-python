@@ -3,7 +3,7 @@ from botocore.config import Config
 from aws_lambda_powertools.utilities import parameters
 
 boto_config = Config()
-ssm_provider = parameters.SSMProvider(config=boto_config)
+ssm_provider = parameters.SSMProvider(boto_config=boto_config)
 
 
 def handler(event, context):
