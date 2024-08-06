@@ -3747,6 +3747,17 @@ doc = ["sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
 test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
+name = "types-aws-xray-sdk"
+version = "2.14.0.20240606"
+description = "Typing stubs for aws-xray-sdk"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-aws-xray-sdk-2.14.0.20240606.tar.gz", hash = "sha256:3215f8f80b48c9da9f7ff16021234cd631b538095933d5432e3fa4c5e2d76a22"},
+    {file = "types_aws_xray_sdk-2.14.0.20240606-py3-none-any.whl", hash = "sha256:c238ad639bb50896f1326c12bcc36b7832b5bc7c4b5e2b19a7efcd89d7d28b94"},
+]
+
+[[package]]
 name = "types-awscrt"
 version = "0.21.0"
 description = "Type annotations and code completion for awscrt"
@@ -4196,4 +4207,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "e6a93ae2514bd23686e766fcf06cd42cba18822272b07e116436edcaf9b3bfa7"
+content-hash = "3b7bb5f4264d95c47b306fa4187235e0662c5ed2cf6c318c8f5b6fe722b8d56e"
