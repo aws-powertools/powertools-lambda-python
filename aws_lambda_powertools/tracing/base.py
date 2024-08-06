@@ -1,14 +1,14 @@
-import abc
 import numbers
 import traceback
+from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from typing import Any, Generator, List, Optional, Sequence, Union
 
 
-class BaseSegment(abc.ABC):
+class BaseSegment(ABC):
     """Holds common properties and methods on segment and subsegment."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def close(self, end_time: Optional[int] = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
@@ -19,15 +19,15 @@ class BaseSegment(abc.ABC):
             Time in epoch seconds, by default current time will be used.
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def add_subsegment(self, subsegment: Any):
         """Add input subsegment as a child subsegment."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def remove_subsegment(self, subsegment: Any):
         """Remove input subsegment from child subsegments."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
         """Annotate segment or subsegment with a key-value pair.
 
@@ -41,7 +41,7 @@ class BaseSegment(abc.ABC):
             Annotation value
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
         """Add metadata to segment or subsegment. Metadata is not indexed
         but can be later retrieved by BatchGetTraces API.
@@ -56,7 +56,7 @@ class BaseSegment(abc.ABC):
             Metadata namespace, by default 'default'
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def add_exception(self, exception: BaseException, stack: List[traceback.StackSummary], remote: bool = False):
         """Add an exception to trace entities.
 
@@ -73,8 +73,8 @@ class BaseSegment(abc.ABC):
         """
 
 
-class BaseProvider(abc.ABC):
-    @abc.abstractmethod
+class BaseProvider(ABC):
+    @abstractmethod
     @contextmanager
     def in_subsegment(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment context manger.
@@ -87,7 +87,7 @@ class BaseProvider(abc.ABC):
             Optional parameters to be propagated to segment
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     @contextmanager
     def in_subsegment_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment async context manger.
@@ -100,7 +100,7 @@ class BaseProvider(abc.ABC):
             Optional parameters to be propagated to segment
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
         """Annotate current active trace entity with a key-value pair.
 
@@ -114,7 +114,7 @@ class BaseProvider(abc.ABC):
             Annotation value
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
         """Add metadata to the current active trace entity.
 
@@ -130,7 +130,7 @@ class BaseProvider(abc.ABC):
             Metadata namespace, by default 'default'
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def patch(self, modules: Sequence[str]) -> None:
         """Instrument a set of supported libraries
 
@@ -140,6 +140,6 @@ class BaseProvider(abc.ABC):
             Set of modules to be patched
         """
 
-    @abc.abstractmethod
+    @abstractmethod
     def patch_all(self) -> None:
         """Instrument all supported libraries"""

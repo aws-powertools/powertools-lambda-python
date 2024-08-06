@@ -15,7 +15,8 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
+from aws_lambda_powertools.tracing.provider.aws_xray.aws_xray_tracer import AwsXrayProvider
+from aws_lambda_powertools.tracing.provider.base import BaseProvider, BaseSpan
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -154,7 +155,7 @@ class Tracer:
         disabled: Optional[bool] = None,
         auto_patch: Optional[bool] = None,
         patch_modules: Optional[Sequence[str]] = None,
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[AwsXrayProvider] = None,
     ):
         self.__build_config(
             service=service,
@@ -163,7 +164,7 @@ class Tracer:
             patch_modules=patch_modules,
             provider=provider,
         )
-        self.provider: BaseProvider = self._config["provider"]
+        self.provider: AwsXrayProvider = self._config["provider"]
         self.disabled = self._config["disabled"]
         self.service = self._config["service"]
         self.auto_patch = self._config["auto_patch"]
@@ -176,6 +177,36 @@ class Tracer:
 
         if self._is_xray_provider():
             self._disable_xray_trace_batching()
+
+    def set_attribute(self, key: str, value: Any, **kwargs):
+        """Set an attribute on current active span with a key-value pair.
+
+        Parameters
+        ----------
+        key: str
+            attribute key
+        value: Any
+            Value for attribute
+        kwargs: Optional[dict]
+            Optional parameters to be passed to provider.set_attributes
+
+        Example
+        -------
+        Set an attribute for a pseudo service named payment
+
+            tracer = Tracer(service="payment")
+            tracer.set_attribute("PaymentStatus", "CONFIRMED")
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting set_attribute")
+            return
+
+        logger.debug(f"setting attribute on key '{key}' with '{value}'")
+
+        namespace = kwargs.get("namespace") or self.service
+        kwargs["namespace"] = namespace
+
+        self.provider.set_attribute(key=key, value=value, **kwargs)
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
@@ -199,7 +230,8 @@ class Tracer:
             return
 
         logger.debug(f"Annotating on key '{key}' with '{value}'")
-        self.provider.put_annotation(key=key, value=value)
+
+        self.provider.set_attribute(key=key, value=value, category="Annotation")
 
     def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
@@ -227,7 +259,8 @@ class Tracer:
 
         namespace = namespace or self.service
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
-        self.provider.put_metadata(key=key, value=value, namespace=namespace)
+
+        self.provider.set_attribute(key=key, value=value, namespace=namespace, category="Metadata")
 
     def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
@@ -311,7 +344,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, **kwargs):
-            with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
+            with self.provider.trace(name=f"## {lambda_handler_name}") as subsegment:
                 try:
                     logger.debug("Calling lambda handler")
                     response = lambda_handler(event, context, **kwargs)
@@ -335,13 +368,13 @@ class Tracer:
                 finally:
                     global is_cold_start
                     logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+                    subsegment.set_attribute(key="ColdStart", value=is_cold_start)
 
                     if is_cold_start:
                         is_cold_start = False
 
                     if self.service:
-                        subsegment.put_annotation(key="Service", value=self.service)
+                        subsegment.set_attribute(key="Service", value=self.service)
 
                 return response
 
@@ -575,7 +608,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
-            async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+            async with self.provider.trace_async(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = await method(*args, **kwargs)
@@ -608,7 +641,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     result = yield from method(*args, **kwargs)
@@ -642,7 +675,7 @@ class Tracer:
         @functools.wraps(method)
         @contextlib.contextmanager
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     with method(*args, **kwargs) as return_val:
@@ -675,7 +708,7 @@ class Tracer:
     ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = method(*args, **kwargs)
@@ -703,7 +736,7 @@ class Tracer:
         self,
         method_name: Optional[str] = None,
         data: Optional[Any] = None,
-        subsegment: Optional[BaseSegment] = None,
+        subsegment: Optional[BaseSpan] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -714,21 +747,20 @@ class Tracer:
             method name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
-        subsegment : BaseSegment, optional
+        subsegment : BaseSpan, optional
             existing subsegment to add metadata on, by default None
         capture_response : bool, optional
             Do not include response as metadata
         """
         if data is None or not capture_response or subsegment is None:
             return
-
-        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)
+        subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service, category="Metadata")
 
     def _add_full_exception_as_metadata(
         self,
         method_name: str,
         error: Exception,
-        subsegment: BaseSegment,
+        subsegment: BaseSpan,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -739,7 +771,7 @@ class Tracer:
             method name to add as metadata key, by default None
         error : Exception
             error to add as subsegment metadata, by default None
-        subsegment : BaseSegment
+        subsegment : BaseSpan
             existing subsegment to add metadata on, by default None
         capture_error : bool, optional
             Do not include error as metadata, by default True
@@ -747,7 +779,12 @@ class Tracer:
         if not capture_error:
             return
 
-        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)
+        subsegment.set_attribute(
+            key=f"{method_name} error",
+            value=error,
+            namespace=self.service,
+            category="Metadata",
+        )
 
     @staticmethod
     def _disable_tracer_provider():
@@ -809,16 +846,7 @@ class Tracer:
         cls._config = copy.copy(cls._default_config)
 
     def _patch_xray_provider(self):
-        # Due to Lazy Import, we need to activate `core` attrib via import
-        # we also need to include `patch`, `patch_all` methods
-        # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder  # type: ignore
-
-        provider = xray_recorder
-        provider.patch = aws_xray_sdk.core.patch
-        provider.patch_all = aws_xray_sdk.core.patch_all
-
-        return provider
+        return AwsXrayProvider()
 
     def _disable_xray_trace_batching(self):
         """Configure X-Ray SDK to send subsegment individually over batching
@@ -831,7 +859,7 @@ class Tracer:
         aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def _is_xray_provider(self):
-        return "aws_xray_sdk" in self.provider.__module__
+        return isinstance(self.provider, AwsXrayProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
