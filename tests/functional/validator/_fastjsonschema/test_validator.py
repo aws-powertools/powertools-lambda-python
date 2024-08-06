@@ -16,6 +16,12 @@ def test_validate_raw_event(schema, raw_event):
     validate(event=raw_event, schema=schema)
 
 
+def test_validate_raw_event_default(schema_default, raw_event_default):
+    resp = validate(event=raw_event_default, schema=schema_default)
+    assert resp["username"] == "blah blah"
+    assert resp["message"] == "The default message"
+
+
 def test_validate_wrapped_event_raw_envelope(schema, wrapped_event):
     validate(event=wrapped_event, schema=schema, envelope="data.payload")
 

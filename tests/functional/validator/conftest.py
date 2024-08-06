@@ -6,8 +6,8 @@ import pytest
 @pytest.fixture
 def schema():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
-        "$id": "http://example.com/example.json",
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "$id": "https://example.com/example.json",
         "type": "object",
         "title": "Sample schema",
         "description": "The root schema comprises the entire JSON document.",
@@ -31,10 +31,38 @@ def schema():
 
 
 @pytest.fixture
+def schema_default():
+    return {
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "$id": "https://example.com/example.json",
+        "type": "object",
+        "title": "Sample schema",
+        "description": "The root schema comprises the entire JSON document.",
+        "examples": [{"message": "hello world", "username": "lessa"}, {"username": "lessa"}],
+        "required": ["username"],
+        "properties": {
+            "message": {
+                "$id": "#/properties/message",
+                "type": "string",
+                "title": "The message",
+                "examples": ["hello world"],
+                "default": "The default message",
+            },
+            "username": {
+                "$id": "#/properties/username",
+                "type": "string",
+                "title": "The username",
+                "examples": ["lessa"],
+            },
+        },
+    }
+
+
+@pytest.fixture
 def schema_array():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
-        "$id": "http://example.com/example.json",
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "$id": "https://example.com/example.json",
         "type": "array",
         "title": "Sample schema",
         "description": "Sample JSON Schema for dummy data in an array",
@@ -71,8 +99,8 @@ def schema_array():
 @pytest.fixture
 def schema_response():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
-        "$id": "http://example.com/example.json",
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "$id": "https://example.com/example.json",
         "type": "object",
         "title": "Sample outgoing schema",
         "description": "The root schema comprises the entire JSON document.",
@@ -89,7 +117,7 @@ def schema_response():
 def schema_refs():
     return {
         "ParentSchema": {
-            "$schema": "http://json-schema.org/draft-07/schema",
+            "$schema": "https://json-schema.org/draft-07/schema",
             "$id": "testschema://ParentSchema",
             "type": "object",
             "title": "Sample schema",
@@ -104,7 +132,7 @@ def schema_refs():
             },
         },
         "ChildSchema": {
-            "$schema": "http://json-schema.org/draft-07/schema",
+            "$schema": "https://json-schema.org/draft-07/schema",
             "$id": "testschema://ChildSchema",
             "type": "object",
             "title": "Sample schema",
@@ -135,6 +163,11 @@ def schema_ref_handlers(schema_refs):
 @pytest.fixture
 def raw_event():
     return {"message": "hello hello", "username": "blah blah"}
+
+
+@pytest.fixture
+def raw_event_default():
+    return {"username": "blah blah"}
 
 
 @pytest.fixture
@@ -407,7 +440,7 @@ def cloudwatch_logs_event():
 @pytest.fixture
 def cloudwatch_logs_schema():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
+        "$schema": "https://json-schema.org/draft-07/schema",
         "$id": "http://example.com/example.json",
         "type": "array",
         "title": "Sample schema",
@@ -622,7 +655,7 @@ def eventbridge_schema_registry_cloudtrail_v2_s3():
 @pytest.fixture
 def schema_datetime_format():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
+        "$schema": "https://json-schema.org/draft-07/schema",
         "$id": "http://example.com/example.json",
         "type": "object",
         "title": "Sample schema with string date-time format",

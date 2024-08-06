@@ -67,6 +67,10 @@ It will fail fast with `SchemaValidationError` exception if event or response do
 
 **Validate** standalone function is typically used within the Lambda handler, or any other methods that perform data validation.
 
+???+ info
+    This function returns the validated event as a JSON object. If the schema specifies `default` values for omitted fields,
+    those default values will be included in the response.
+
 You can also gracefully handle schema validation errors by catching `SchemaValidationError` exception.
 
 === "getting_started_validator_standalone_function.py"
