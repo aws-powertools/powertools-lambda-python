@@ -79,7 +79,8 @@ class AppConfigProvider(BaseProvider):
         Initialize the App Config client
         """
         if boto3_client is None:
-            boto3_client = (boto3_session or boto3.session.Session()).client("appconfigdata", config=config)
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.client("appconfigdata", config=config)
         self.client = boto3_client
 
         self.application = resolve_env_var_choice(

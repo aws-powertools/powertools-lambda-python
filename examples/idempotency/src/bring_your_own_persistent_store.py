@@ -27,7 +27,8 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
     ):
-        self._ddb_resource = (boto3_session or boto3.session.Session()).resource("dynamodb", config=boto_config)
+        boto3_session = boto3_session or boto3.session.Session()
+        self._ddb_resource = boto3_session.resource("dynamodb", config=boto_config)
         self.table_name = table_name
         self.table = self._ddb_resource.Table(self.table_name)
         self.key_attr = key_attr

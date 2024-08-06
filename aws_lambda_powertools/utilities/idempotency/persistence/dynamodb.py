@@ -91,7 +91,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             >>>     return {"StatusCode": 200}
         """
         if boto3_client is None:
-            boto3_client = (boto3_session or boto3.session.Session()).client("dynamodb", config=boto_config)
+            boto3_session = boto3_session or boto3.session.Session()
+            boto3_client = boto3_session.client("dynamodb", config=boto_config)
         self.client = boto3_client
 
         user_agent.register_feature_to_client(client=self.client, feature="idempotency")
