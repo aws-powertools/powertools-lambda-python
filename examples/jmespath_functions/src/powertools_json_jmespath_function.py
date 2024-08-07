@@ -34,7 +34,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
         validate(event=event, schema=schemas.INPUT, envelope="powertools_json(payload)")
 
         # Deserialize JSON string order as dict
-        # alternatively, extract_data_from_envelope works here too
+        # alternatively, query works here too
         order_payload: dict = json.loads(event.get("payload"))
 
         return {

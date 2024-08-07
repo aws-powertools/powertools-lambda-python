@@ -102,7 +102,7 @@ class AppConfigStore(StoreProvider):
 
         if self.envelope:
             self.logger.debug("Envelope enabled; extracting data from config", extra={"envelope": self.envelope})
-            config = jmespath_utils.extract_data_from_envelope(
+            config = jmespath_utils.query(
                 data=config,
                 envelope=self.envelope,
                 jmespath_options=self.jmespath_options,

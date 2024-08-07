@@ -119,7 +119,7 @@ def validator(
         When JMESPath expression to unwrap event is invalid
     """  # noqa: E501
     if envelope:
-        event = jmespath_utils.extract_data_from_envelope(
+        event = jmespath_utils.query(
             data=event,
             envelope=envelope,
             jmespath_options=jmespath_options,
@@ -223,7 +223,7 @@ def validate(
         When JMESPath expression to unwrap event is invalid
     """  # noqa: E501
     if envelope:
-        event = jmespath_utils.extract_data_from_envelope(
+        event = jmespath_utils.query(
             data=event,
             envelope=envelope,
             jmespath_options=jmespath_options,

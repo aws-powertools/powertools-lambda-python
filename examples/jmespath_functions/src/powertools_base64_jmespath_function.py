@@ -35,7 +35,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     try:
         validate(event=event, schema=schemas.INPUT, envelope="powertools_json(powertools_base64(payload))")
 
-        # alternatively, extract_data_from_envelope works here too
+        # alternatively, query works here too
         payload_decoded = base64.b64decode(event["payload"]).decode()
 
         order_payload: dict = json.loads(payload_decoded)
