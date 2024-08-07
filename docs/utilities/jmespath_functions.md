@@ -30,14 +30,14 @@ Powertools for AWS Lambda (Python) also have utilities like [validation](validat
 
 ### Extracting data
 
-You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
+You can use the `query` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
 
 ???+ tip
 	Another common use case is to fetch deeply nested data, filter, flatten, and more.
 
-=== "extract_data_from_envelope.py"
+=== "query.py"
     ```python hl_lines="1 6 10"
-    --8<-- "examples/jmespath_functions/src/extract_data_from_envelope.py"
+    --8<-- "examples/jmespath_functions/src/query.py"
     ```
 
 === "extract_data_from_envelope.json"
@@ -52,7 +52,7 @@ We provide built-in envelopes for popular AWS Lambda event sources to easily dec
 
 === "extract_data_from_builtin_envelope.py"
 
-	```python hl_lines="1-4 9"
+	```python hl_lines="4-7 14"
     --8<-- "examples/jmespath_functions/src/extract_data_from_builtin_envelope.py"
 	```
 
@@ -64,21 +64,21 @@ We provide built-in envelopes for popular AWS Lambda event sources to easily dec
 
 These are all built-in envelopes you can use along with their expression as a reference:
 
-| Envelope                          | JMESPath expression                                                                       |
-| --------------------------------- | ----------------------------------------------------------------------------------------- |
-| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                                   |
-| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                                   |
-| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                                  |
+| Envelope                          | JMESPath expression                                                                       | |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |-|
+| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                                   | |
+| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                                   | |
+| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                                  | |
 | **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                                                     | powertools_json(@).logEvents[*]` |
-| **`EVENTBRIDGE`**                 | `detail`                                                                                  |
-| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`                             |
-| **`S3_EVENTBRIDGE_SQS`**          | `Records[*].powertools_json(body).detail`                                                 |
-| **`S3_KINESIS_FIREHOSE`**         | `records[*].powertools_json(powertools_base64(data)).Records[0]`                          |
-| **`S3_SNS_KINESIS_FIREHOSE`**     | `records[*].powertools_json(powertools_base64(data)).powertools_json(Message).Records[0]` |
-| **`S3_SNS_SQS`**                  | `Records[*].powertools_json(body).powertools_json(Message).Records[0]`                    |
-| **`S3_SQS`**                      | `Records[*].powertools_json(body).Records[0]`                                             |
+| **`EVENTBRIDGE`**                 | `detail`                                                                                  | |
+| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`                             | |
+| **`S3_EVENTBRIDGE_SQS`**          | `Records[*].powertools_json(body).detail`                                                 | |
+| **`S3_KINESIS_FIREHOSE`**         | `records[*].powertools_json(powertools_base64(data)).Records[0]`                          | |
+| **`S3_SNS_KINESIS_FIREHOSE`**     | `records[*].powertools_json(powertools_base64(data)).powertools_json(Message).Records[0]` | |
+| **`S3_SNS_SQS`**                  | `Records[*].powertools_json(body).powertools_json(Message).Records[0]`                    | |
+| **`S3_SQS`**                      | `Records[*].powertools_json(body).Records[0]`                                             | |
 | **`SNS`**                         | `Records[0].Sns.Message                                                                   | powertools_json(@)`              |
-| **`SQS`**                         | `Records[*].powertools_json(body)`                                                        |
+| **`SQS`**                         | `Records[*].powertools_json(body)`                                                        | |
 
 ???+ tip "Using SNS?"
     If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html). It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
@@ -102,7 +102,7 @@ This sample will deserialize the JSON string within the `data` key before valida
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="5 8 34 45 48 51"
+    ```python hl_lines="5 6 34 45 48 51"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_function.py"
     ```
 
@@ -142,7 +142,7 @@ This sample will decode the base64 value within the `data` key, and deserialize 
 
 === "powertools_base64_jmespath_function.py"
 
-    ```python hl_lines="7 10 37 49 53 55 57"
+    ```python hl_lines="7 11 36 48 52 54 56"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_function.py"
     ```
 

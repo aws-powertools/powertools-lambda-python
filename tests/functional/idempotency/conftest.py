@@ -11,7 +11,7 @@ from jmespath import functions
 
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
-from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
+from aws_lambda_powertools.utilities.jmespath_utils import query
 from aws_lambda_powertools.utilities.validation import envelopes
 from tests.functional.idempotency.utils import hash_idempotency_key
 from tests.functional.utils import json_serialize, load_event
@@ -195,7 +195,7 @@ def hashed_idempotency_key(request, lambda_apigw_event, default_jmespath, lambda
 
 @pytest.fixture
 def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
-    event = extract_data_from_envelope(
+    event = query(
         data=lambda_apigw_event,
         envelope=envelopes.API_GATEWAY_HTTP,
         jmespath_options={},

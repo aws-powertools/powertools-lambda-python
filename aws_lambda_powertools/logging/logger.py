@@ -440,7 +440,7 @@ class Logger:
 
             if correlation_id_path:
                 self.set_correlation_id(
-                    jmespath_utils.extract_data_from_envelope(envelope=correlation_id_path, data=event),
+                    jmespath_utils.query(envelope=correlation_id_path, data=event),
                 )
 
             if log_event:

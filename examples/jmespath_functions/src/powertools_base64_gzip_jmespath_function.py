@@ -14,7 +14,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
     try:
         validate(event=event, schema=schemas.INPUT, envelope="powertools_base64_gzip(payload) | powertools_json(@)")
 
-        # Alternatively, extract_data_from_envelope works here too
+        # Alternatively, query works here too
         encoded_payload = base64.b64decode(event["payload"])
         uncompressed_payload = gzip.decompress(encoded_payload).decode()
         log: dict = json.loads(uncompressed_payload)
