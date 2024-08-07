@@ -35,9 +35,9 @@ You can use the `query` function with any [JMESPath expression](https://jmespath
 ???+ tip
 	Another common use case is to fetch deeply nested data, filter, flatten, and more.
 
-=== "extract_data_from_envelope.py"
+=== "query.py"
     ```python hl_lines="1 6 10"
-    --8<-- "examples/jmespath_functions/src/extract_data_from_envelope.py"
+    --8<-- "examples/jmespath_functions/src/query.py"
     ```
 
 === "extract_data_from_envelope.json"
@@ -52,7 +52,7 @@ We provide built-in envelopes for popular AWS Lambda event sources to easily dec
 
 === "extract_data_from_builtin_envelope.py"
 
-	```python hl_lines="1-4 9"
+	```python hl_lines="4-7 14"
     --8<-- "examples/jmespath_functions/src/extract_data_from_builtin_envelope.py"
 	```
 
@@ -102,7 +102,7 @@ This sample will deserialize the JSON string within the `data` key before valida
 
 === "powertools_json_jmespath_function.py"
 
-    ```python hl_lines="5 8 34 45 48 51"
+    ```python hl_lines="5 6 34 45 48 51"
     --8<-- "examples/jmespath_functions/src/powertools_json_jmespath_function.py"
     ```
 
@@ -142,7 +142,7 @@ This sample will decode the base64 value within the `data` key, and deserialize 
 
 === "powertools_base64_jmespath_function.py"
 
-    ```python hl_lines="7 10 37 49 53 55 57"
+    ```python hl_lines="7 11 36 48 52 54 56"
     --8<-- "examples/jmespath_functions/src/powertools_base64_jmespath_function.py"
     ```
 
