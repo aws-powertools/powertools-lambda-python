@@ -8,8 +8,10 @@ from typing import Any, Dict, Optional, Union
 import jmespath
 from jmespath.exceptions import LexerError
 from jmespath.functions import Functions, signature
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.exceptions import InvalidEnvelopeExpressionError
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 logger = logging.getLogger(__name__)
 
@@ -29,29 +31,6 @@ class PowertoolsFunctions(Functions):
         uncompressed = gzip.decompress(encoded)
 
         return uncompressed.decode()
-
-
-def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
-    """Searches and extracts data using JMESPath
-
-    *Deprecated*: Use query instead
-    """
-    warnings.warn(
-        "The extract_data_from_envelope method is deprecated and will be "
-        "removed in the next major version. Use query instead.",
-        category=DeprecationWarning,
-        stacklevel=2,
-    )
-
-    if not jmespath_options:
-        jmespath_options = {"custom_functions": PowertoolsFunctions()}
-
-    try:
-        logger.debug(f"Envelope detected: {envelope}. JMESPath options: {jmespath_options}")
-        return jmespath.search(envelope, data, options=jmespath.Options(**jmespath_options))
-    except (LexerError, TypeError, UnicodeError) as e:
-        message = f"Failed to unwrap event from envelope using expression. Error: {e} Exp: {envelope}, Data: {data}"  # noqa: B306, E501
-        raise InvalidEnvelopeExpressionError(message)
 
 
 def query(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
@@ -100,3 +79,19 @@ def query(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict
     except (LexerError, TypeError, UnicodeError) as e:
         message = f"Failed to unwrap event from envelope using expression. Error: {e} Exp: {envelope}, Data: {data}"  # noqa: B306, E501
         raise InvalidEnvelopeExpressionError(message)
+
+
+@deprecated("`extract_data_from_envelope` is deprecated; use `query` instead.", category=None)
+def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
+    """Searches and extracts data using JMESPath
+
+    *Deprecated*: Use query instead
+    """
+    warnings.warn(
+        "The extract_data_from_envelope method is deprecated in V3 "
+        "and will be removed in the next major version. Use query instead.",
+        category=PowertoolsDeprecationWarning,
+        stacklevel=2,
+    )
+
+    return query(data=data, envelope=envelope, jmespath_options=jmespath_options)
