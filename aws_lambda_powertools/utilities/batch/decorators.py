@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import warnings
 from typing import Any, Awaitable, Callable, Dict, List
+
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.batch import (
@@ -11,9 +14,14 @@ from aws_lambda_powertools.utilities.batch import (
 )
 from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 
 @lambda_handler_decorator
+@deprecated(
+    "`async_batch_processor` decorator is deprecated; use `async_process_partial_response` function instead.",
+    category=None,
+)
 def async_batch_processor(
     handler: Callable,
     event: Dict,
@@ -61,6 +69,14 @@ def async_batch_processor(
     -----------
     * Sync batch processors. Use `batch_processor` instead.
     """
+
+    warnings.warn(
+        "The `async_batch_processor` decorator is deprecated in V3 "
+        "and will be removed in the next major version. Use `async_process_partial_response` function instead.",
+        category=PowertoolsDeprecationWarning,
+        stacklevel=2,
+    )
+
     records = event["Records"]
 
     with processor(records, record_handler, lambda_context=context):
@@ -70,6 +86,10 @@ def async_batch_processor(
 
 
 @lambda_handler_decorator
+@deprecated(
+    "`batch_processor` decorator is deprecated; use `process_partial_response` function instead.",
+    category=None,
+)
 def batch_processor(
     handler: Callable,
     event: Dict,
@@ -117,6 +137,14 @@ def batch_processor(
     -----------
     * Async batch processors. Use `async_batch_processor` instead.
     """
+
+    warnings.warn(
+        "The `batch_processor` decorator is deprecated in V3 "
+        "and will be removed in the next major version. Use `process_partial_response` function instead.",
+        category=PowertoolsDeprecationWarning,
+        stacklevel=2,
+    )
+
     records = event["Records"]
 
     with processor(records, record_handler, lambda_context=context):
