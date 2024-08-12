@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
+from typing import Any, Iterator, Literal
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 # list of valid result code. Used both in S3BatchOperationResponse and S3BatchOperationResponseRecord
-VALID_RESULT_CODES: Tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
+VALID_RESULT_CODES: tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
 RESULT_CODE_TYPE = Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
 
 
@@ -14,9 +16,9 @@ RESULT_CODE_TYPE = Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
 class S3BatchOperationResponseRecord:
     task_id: str
     result_code: RESULT_CODE_TYPE
-    result_string: Optional[str] = None
+    result_string: str | None = None
 
-    def asdict(self) -> Dict[str, Any]:
+    def asdict(self) -> dict[str, Any]:
         if self.result_code not in VALID_RESULT_CODES:
             warnings.warn(
                 stacklevel=2,
@@ -53,7 +55,7 @@ class S3BatchOperationResponse:
     treat_missing_keys_as : Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
         Undocumented parameter, defaults to "Succeeded"
 
-    results : List[S3BatchOperationResult]
+    results : list[S3BatchOperationResult]
         Results of each S3 Batch Operations task,
         optional parameter at start. Can be added later using `add_result` function.
 
@@ -112,7 +114,7 @@ class S3BatchOperationResponse:
     invocation_schema_version: str
     invocation_id: str
     treat_missing_keys_as: RESULT_CODE_TYPE = "Succeeded"
-    results: List[S3BatchOperationResponseRecord] = field(default_factory=list)
+    results: list[S3BatchOperationResponseRecord] = field(default_factory=list)
 
     def __post_init__(self):
         if self.treat_missing_keys_as not in VALID_RESULT_CODES:
@@ -125,7 +127,7 @@ class S3BatchOperationResponse:
     def add_result(self, result: S3BatchOperationResponseRecord):
         self.results.append(result)
 
-    def asdict(self) -> Dict:
+    def asdict(self) -> dict:
         result_count = len(self.results)
 
         if result_count != 1:
@@ -146,7 +148,7 @@ class S3BatchOperationJob(DictWrapper):
         return self["id"]
 
     @property
-    def user_arguments(self) -> Dict[str, str]:
+    def user_arguments(self) -> dict[str, str]:
         """Get user arguments provided for this job (only for invocation schema 2.0)"""
         return self.get("userArguments") or {}
 
@@ -163,12 +165,12 @@ class S3BatchOperationTask(DictWrapper):
         return unquote_plus(self["s3Key"])
 
     @property
-    def s3_version_id(self) -> Optional[str]:
+    def s3_version_id(self) -> str | None:
         """Object version if bucket is versioning-enabled, otherwise null"""
         return self.get("s3VersionId")
 
     @property
-    def s3_bucket_arn(self) -> Optional[str]:
+    def s3_bucket_arn(self) -> str | None:
         """Get the s3 bucket arn (present only for invocationSchemaVersion '1.0')"""
         return self.get("s3BucketArn")
 

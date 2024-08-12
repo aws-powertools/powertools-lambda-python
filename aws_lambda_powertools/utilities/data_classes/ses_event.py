@@ -1,4 +1,6 @@
-from typing import Iterator, List, Optional
+from __future__ import annotations
+
+from typing import Iterator
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -20,7 +22,7 @@ class SESMailCommonHeaders(DictWrapper):
         return self["returnPath"]
 
     @property
-    def get_from(self) -> List[str]:
+    def get_from(self) -> list[str]:
         """The values in the From header of the email."""
         # Note: this name conflicts with existing python builtins
         return self["from"]
@@ -31,7 +33,7 @@ class SESMailCommonHeaders(DictWrapper):
         return self["date"]
 
     @property
-    def to(self) -> List[str]:
+    def to(self) -> list[str]:
         """The values in the To header of the email."""
         return self["to"]
 
@@ -46,22 +48,22 @@ class SESMailCommonHeaders(DictWrapper):
         return str(self["subject"])
 
     @property
-    def cc(self) -> List[str]:
+    def cc(self) -> list[str]:
         """The values in the CC header of the email."""
         return self.get("cc") or []
 
     @property
-    def bcc(self) -> List[str]:
+    def bcc(self) -> list[str]:
         """The values in the BCC header of the email."""
         return self.get("bcc") or []
 
     @property
-    def sender(self) -> List[str]:
+    def sender(self) -> list[str]:
         """The values in the Sender header of the email."""
         return self.get("sender") or []
 
     @property
-    def reply_to(self) -> List[str]:
+    def reply_to(self) -> list[str]:
         """The values in the replyTo header of the email."""
         return self.get("replyTo") or []
 
@@ -87,7 +89,7 @@ class SESMail(DictWrapper):
         return self["messageId"]
 
     @property
-    def destination(self) -> List[str]:
+    def destination(self) -> list[str]:
         """A complete list of all recipient addresses (including To: and CC: recipients)
         from the MIME headers of the incoming email."""
         return self["destination"]
@@ -131,7 +133,7 @@ class SESReceiptAction(DictWrapper):
         return self["type"]
 
     @property
-    def topic_arn(self) -> Optional[str]:
+    def topic_arn(self) -> str | None:
         """String that contains the Amazon Resource Name (ARN) of the Amazon SNS topic to which the
         notification was published."""
         return self.get("topicArn")
@@ -162,7 +164,7 @@ class SESReceipt(DictWrapper):
         return int(self["processingTimeMillis"])
 
     @property
-    def recipients(self) -> List[str]:
+    def recipients(self) -> list[str]:
         """A list of recipients (specifically, the envelope RCPT TO addresses) that were matched by the
         active receipt rule. The addresses listed here may differ from those listed by the destination
         field in the mail object."""
@@ -195,7 +197,7 @@ class SESReceipt(DictWrapper):
         return SESReceiptStatus(self["dmarcVerdict"])
 
     @property
-    def dmarc_policy(self) -> Optional[str]:
+    def dmarc_policy(self) -> str | None:
         """Indicates the Domain-based Message Authentication, Reporting & Conformance (DMARC) settings for
         the sending domain. This field only appears if the message fails DMARC authentication.
         Possible values for this field are: none, quarantine, reject"""

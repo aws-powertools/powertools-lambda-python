@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import base64
 from functools import cached_property
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Iterator
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
@@ -57,12 +59,12 @@ class KafkaEventRecord(DictWrapper):
         return self._json_deserializer(self.decoded_value.decode("utf-8"))
 
     @property
-    def headers(self) -> List[Dict[str, List[int]]]:
+    def headers(self) -> list[dict[str, list[int]]]:
         """The raw Kafka record headers."""
         return self["headers"]
 
     @cached_property
-    def decoded_headers(self) -> Dict[str, bytes]:
+    def decoded_headers(self) -> dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
         return CaseInsensitiveDict((k, bytes(v)) for chunk in self.headers for k, v in chunk.items())
 
@@ -75,9 +77,9 @@ class KafkaEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         super().__init__(data)
-        self._records: Optional[Iterator[KafkaEventRecord]] = None
+        self._records: Iterator[KafkaEventRecord] | None = None
 
     @property
     def event_source(self) -> str:
@@ -85,7 +87,7 @@ class KafkaEvent(DictWrapper):
         return self["eventSource"]
 
     @property
-    def event_source_arn(self) -> Optional[str]:
+    def event_source_arn(self) -> str | None:
         """The AWS service ARN from which the Kafka event record originated, mandatory for AWS MSK."""
         return self.get("eventSourceArn")
 
@@ -95,7 +97,7 @@ class KafkaEvent(DictWrapper):
         return self["bootstrapServers"]
 
     @property
-    def decoded_bootstrap_servers(self) -> List[str]:
+    def decoded_bootstrap_servers(self) -> list[str]:
         """The decoded Kafka bootstrap URL."""
         return self.bootstrap_servers.split(",")
 

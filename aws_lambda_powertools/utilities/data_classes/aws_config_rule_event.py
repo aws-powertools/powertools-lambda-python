@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -36,7 +36,7 @@ def get_invoke_event(
 
 class AWSConfigConfigurationChanged(DictWrapper):
     @property
-    def configuration_item_diff(self) -> Dict:
+    def configuration_item_diff(self) -> dict:
         """The configuration item diff of the ConfigurationItemChangeNotification event."""
         return self["configurationItemDiff"]
 
@@ -46,7 +46,7 @@ class AWSConfigConfigurationChanged(DictWrapper):
         return AWSConfigConfigurationItemChanged(self["configurationItem"])
 
     @property
-    def raw_configuration_item(self) -> Dict:
+    def raw_configuration_item(self) -> dict:
         """The raw configuration item of the ConfigurationItemChangeNotification event."""
         return self["configurationItem"]
 
@@ -68,27 +68,27 @@ class AWSConfigConfigurationChanged(DictWrapper):
 
 class AWSConfigConfigurationItemChanged(DictWrapper):
     @property
-    def related_events(self) -> List:
+    def related_events(self) -> list:
         """The related events of the ConfigurationItemChangeNotification event."""
         return self["relatedEvents"]
 
     @property
-    def relationships(self) -> List:
+    def relationships(self) -> list:
         """The relationships of the ConfigurationItemChangeNotification event."""
         return self["relationships"]
 
     @property
-    def configuration(self) -> Dict:
+    def configuration(self) -> dict:
         """The configuration of the ConfigurationItemChangeNotification event."""
         return self["configuration"]
 
     @property
-    def supplementary_configuration(self) -> Dict:
+    def supplementary_configuration(self) -> dict:
         """The supplementary configuration of the ConfigurationItemChangeNotification event."""
         return self["supplementaryConfiguration"]
 
     @property
-    def tags(self) -> Dict:
+    def tags(self) -> dict:
         """The tags of the ConfigurationItemChangeNotification event."""
         return self["tags"]
 
@@ -286,10 +286,10 @@ class AWSConfigRuleEvent(DictWrapper):
     - https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules_lambda-functions.html
     """
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         super().__init__(data)
-        self._invoking_event: Optional[Any] = None
-        self._rule_parameters: Optional[Any] = None
+        self._invoking_event: Any | None = None
+        self._rule_parameters: Any | None = None
 
     @property
     def version(self) -> str:
@@ -312,7 +312,7 @@ class AWSConfigRuleEvent(DictWrapper):
         return self["invokingEvent"]
 
     @property
-    def rule_parameters(self) -> Dict:
+    def rule_parameters(self) -> dict:
         """The parameters of the event."""
         if self._rule_parameters is None:
             self._rule_parameters = self._json_deserializer(self["ruleParameters"])
@@ -355,6 +355,6 @@ class AWSConfigRuleEvent(DictWrapper):
         return self["accountId"]
 
     @property
-    def evalution_mode(self) -> Optional[str]:
+    def evalution_mode(self) -> str | None:
         """The evalution mode of the event."""
         return self.get("evaluationMode")

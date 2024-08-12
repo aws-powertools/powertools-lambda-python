@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -27,12 +29,12 @@ class AppSyncAuthorizerEventRequestContext(DictWrapper):
         return self["requestContext"]["queryString"]
 
     @property
-    def operation_name(self) -> Optional[str]:
+    def operation_name(self) -> str | None:
         """GraphQL operation name, optional"""
         return self["requestContext"].get("operationName")
 
     @property
-    def variables(self) -> Dict:
+    def variables(self) -> dict:
         """GraphQL variables"""
         return self["requestContext"]["variables"]
 
@@ -73,13 +75,13 @@ class AppSyncAuthorizerResponse:
         cached for. If no value is returned, the value from the API (if configured)
         or the default of 300 seconds (five minutes) is used. If this is 0, the response
         is not cached.
-    resolver_context: Dict[str, Any], optional
+    resolver_context: dict[str, Any], optional
         A JSON object visible as `$ctx.identity.resolverContext` in resolver templates
 
         The resolverContext object only supports key-value pairs. Nested keys are not supported.
 
         Warning: The total size of this JSON object must not exceed 5MB.
-    deny_fields: List[str], optional
+    deny_fields: list[str], optional
         A list of fields that will be set to `null` regardless of the resolver's return.
 
         A field is either `TypeName.FieldName`, or an ARN such as
@@ -91,9 +93,9 @@ class AppSyncAuthorizerResponse:
     def __init__(
         self,
         authorize: bool = False,
-        max_age: Optional[int] = None,
-        resolver_context: Optional[Dict[str, Any]] = None,
-        deny_fields: Optional[List[str]] = None,
+        max_age: int | None = None,
+        resolver_context: dict[str, Any] | None = None,
+        deny_fields: list[str] | None = None,
     ):
         self.authorize = authorize
         self.max_age = max_age
@@ -102,7 +104,7 @@ class AppSyncAuthorizerResponse:
 
     def asdict(self) -> dict:
         """Return the response as a dict"""
-        response: Dict = {"isAuthorized": self.authorize}
+        response: dict = {"isAuthorized": self.authorize}
 
         if self.max_age is not None:
             response["ttlOverride"] = self.max_age

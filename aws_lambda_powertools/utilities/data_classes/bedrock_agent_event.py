@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
@@ -38,13 +40,13 @@ class BedrockAgentProperty(DictWrapper):
 
 class BedrockAgentRequestMedia(DictWrapper):
     @property
-    def properties(self) -> List[BedrockAgentProperty]:
+    def properties(self) -> list[BedrockAgentProperty]:
         return [BedrockAgentProperty(x) for x in self["properties"]]
 
 
 class BedrockAgentRequestBody(DictWrapper):
     @property
-    def content(self) -> Dict[str, BedrockAgentRequestMedia]:
+    def content(self) -> dict[str, BedrockAgentRequestMedia]:
         return {k: BedrockAgentRequestMedia(v) for k, v in self["content"].items()}
 
 
@@ -80,12 +82,12 @@ class BedrockAgentEvent(BaseProxyEvent):
         return self["httpMethod"]
 
     @property
-    def parameters(self) -> List[BedrockAgentProperty]:
+    def parameters(self) -> list[BedrockAgentProperty]:
         parameters = self.get("parameters") or []
         return [BedrockAgentProperty(x) for x in parameters]
 
     @property
-    def request_body(self) -> Optional[BedrockAgentRequestBody]:
+    def request_body(self) -> BedrockAgentRequestBody | None:
         return BedrockAgentRequestBody(self["requestBody"]) if self.get("requestBody") else None
 
     @property
@@ -93,11 +95,11 @@ class BedrockAgentEvent(BaseProxyEvent):
         return BedrockAgentInfo(self["agent"])
 
     @property
-    def session_attributes(self) -> Dict[str, str]:
+    def session_attributes(self) -> dict[str, str]:
         return self["sessionAttributes"]
 
     @property
-    def prompt_session_attributes(self) -> Dict[str, str]:
+    def prompt_session_attributes(self) -> dict[str, str]:
         return self["promptSessionAttributes"]
 
     # The following methods add compatibility with BaseProxyEvent
@@ -106,14 +108,14 @@ class BedrockAgentEvent(BaseProxyEvent):
         return self["apiPath"]
 
     @cached_property
-    def query_string_parameters(self) -> Dict[str, str]:
+    def query_string_parameters(self) -> dict[str, str]:
         # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
         # together with the other parameters. So we just return all parameters here.
         parameters = self.get("parameters") or []
         return {x["name"]: x["value"] for x in parameters}
 
     @property
-    def resolved_headers_field(self) -> Dict[str, Any]:
+    def resolved_headers_field(self) -> dict[str, Any]:
         return {}
 
     @cached_property
