@@ -6,13 +6,14 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 2.43.1a1 ([#4926](https://github.com/aws-powertools/powertools-lambda-python/issues/4926))
 * **ci:** new pre-release 2.42.1a9 ([#4912](https://github.com/aws-powertools/powertools-lambda-python/issues/4912))
 * **ci:** new pre-release 2.43.1a0 ([#4920](https://github.com/aws-powertools/powertools-lambda-python/issues/4920))
-* **deps-dev:** bump cfn-lint from 1.9.6 to 1.9.7 ([#4923](https://github.com/aws-powertools/powertools-lambda-python/issues/4923))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.234 to 0.1.238 ([#4917](https://github.com/aws-powertools/powertools-lambda-python/issues/4917))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.238 to 0.1.242 ([#4922](https://github.com/aws-powertools/powertools-lambda-python/issues/4922))
-* **deps-dev:** bump mypy-boto3-ssm from 1.34.132 to 1.34.158 in the boto-typing group ([#4921](https://github.com/aws-powertools/powertools-lambda-python/issues/4921))
 * **deps-dev:** bump cfn-lint from 1.9.5 to 1.9.6 ([#4916](https://github.com/aws-powertools/powertools-lambda-python/issues/4916))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.234 to 0.1.238 ([#4917](https://github.com/aws-powertools/powertools-lambda-python/issues/4917))
+* **deps-dev:** bump mypy-boto3-ssm from 1.34.132 to 1.34.158 in the boto-typing group ([#4921](https://github.com/aws-powertools/powertools-lambda-python/issues/4921))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.238 to 0.1.242 ([#4922](https://github.com/aws-powertools/powertools-lambda-python/issues/4922))
+* **deps-dev:** bump cfn-lint from 1.9.6 to 1.9.7 ([#4923](https://github.com/aws-powertools/powertools-lambda-python/issues/4923))
 * **deps-dev:** bump ruff from 0.5.6 to 0.5.7 ([#4918](https://github.com/aws-powertools/powertools-lambda-python/issues/4918))
 
 
