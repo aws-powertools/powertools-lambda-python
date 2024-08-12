@@ -75,6 +75,22 @@ def test_dynamodb_stream_record_deserialization_large_int_without_trailing_zeros
     }
 
 
+def test_dynamodb_stream_record_deserialization_zero_value():
+
+    data = {
+        "Keys": {"key1": {"attr1": "value1"}},
+        "NewImage": {
+            "Name": {"S": "Joe"},
+            "Age": {"N": "0"},
+        },
+    }
+    record = StreamRecord(data)
+    assert record.new_image == {
+        "Name": "Joe",
+        "Age": DECIMAL_CONTEXT.create_decimal("0"),
+    }
+
+
 def test_dynamodb_stream_record_deserialization():
     byte_list = [s.encode("utf-8") for s in ["item1", "item2"]]
     decimal_context = Context(

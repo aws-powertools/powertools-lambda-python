@@ -73,7 +73,12 @@ class TypeDeserializer:
         return value
 
     def _deserialize_n(self, value: str) -> Decimal:
+        # value is None or "."? It's zero
+        # then return early
         value = value.lstrip("0")
+        if not value or value == ".":
+            return DYNAMODB_CONTEXT.create_decimal(0)
+
         if len(value) > 38:
             # See: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes.Number
             # Calculate the number of trailing zeros after the 38th character
