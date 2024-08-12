@@ -7,7 +7,7 @@ from jmespath.functions import signature
 
 from aws_lambda_powertools.utilities.jmespath_utils import (
     PowertoolsFunctions,
-    extract_data_from_envelope,
+    query,
 )
 
 
@@ -27,7 +27,7 @@ def lambda_handler(event, context) -> dict:
     try:
         logs = []
         logs.append(
-            extract_data_from_envelope(
+            query(
                 data=event,
                 # NOTE: Use the prefix `_func_` before the name of the function
                 envelope="Records[*].decode_zlib_compression(log)",

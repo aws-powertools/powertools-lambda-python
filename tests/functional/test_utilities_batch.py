@@ -32,6 +32,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     SqsRecordModel,
 )
 from aws_lambda_powertools.utilities.parser.types import Literal
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from tests.functional.batch.sample_models import (
     OrderDynamoDBRecord,
     OrderKinesisRecord,
@@ -857,10 +858,11 @@ def test_async_batch_processor_middleware_success_only(sqs_event_factory, async_
         return processor.response()
 
     # WHEN
-    result = lambda_handler(event, {})
+    with pytest.warns(PowertoolsDeprecationWarning, match="The `async_batch_processor` decorator is deprecated in V3*"):
+        result = lambda_handler(event, {})
 
-    # THEN
-    assert result["batchItemFailures"] == []
+        # THEN
+        assert result["batchItemFailures"] == []
 
 
 def test_async_batch_processor_middleware_with_failure(sqs_event_factory, async_record_handler):
@@ -877,10 +879,11 @@ def test_async_batch_processor_middleware_with_failure(sqs_event_factory, async_
         return processor.response()
 
     # WHEN
-    result = lambda_handler(event, {})
+    with pytest.warns(PowertoolsDeprecationWarning, match="The `async_batch_processor` decorator is deprecated in V3*"):
+        result = lambda_handler(event, {})
 
-    # THEN
-    assert len(result["batchItemFailures"]) == 2
+        # THEN
+        assert len(result["batchItemFailures"]) == 2
 
 
 def test_async_batch_processor_context_success_only(sqs_event_factory, async_record_handler):

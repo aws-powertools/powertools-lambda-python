@@ -5,7 +5,7 @@ from uuid import uuid4
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.jmespath_utils import (
     envelopes,
-    extract_data_from_envelope,
+    query,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -19,8 +19,7 @@ class Payment:
     payment_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @lambda_handler_decorator
@@ -30,7 +29,7 @@ def middleware_before(
     context: LambdaContext,
 ) -> dict:
     # extract payload from a EventBridge event
-    detail: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
+    detail: dict = query(data=event, envelope=envelopes.EVENTBRIDGE)
 
     # check if status_id exists in payload, otherwise add default state before processing payment
     if "status_id" not in detail:
@@ -44,7 +43,7 @@ def middleware_before(
 @middleware_before
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     try:
-        payment_payload: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
+        payment_payload: dict = query(data=event, envelope=envelopes.EVENTBRIDGE)
         return {
             "order": Payment(**payment_payload).__dict__,
             "message": "payment created",

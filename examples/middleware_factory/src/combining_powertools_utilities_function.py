@@ -11,7 +11,7 @@ from aws_lambda_powertools.event_handler.exceptions import InternalServerError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
 from aws_lambda_powertools.utilities.feature_flags.types import JSONType
-from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
+from aws_lambda_powertools.utilities.jmespath_utils import query
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
 
@@ -42,8 +42,8 @@ def middleware_custom(
         }
 
     # extracting headers and requestContext from event
-    headers = extract_data_from_envelope(data=event, envelope="headers")
-    request_context = extract_data_from_envelope(data=event, envelope="requestContext")
+    headers = query(data=event, envelope="headers")
+    request_context = query(data=event, envelope="requestContext")
 
     logger.debug(f"X-Customer-Id => {headers.get('X-Customer-Id')}")
     tracer.put_annotation(key="CustomerId", value=headers.get("X-Customer-Id"))
