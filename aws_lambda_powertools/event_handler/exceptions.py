@@ -39,7 +39,7 @@ class NotFoundError(ServiceError):
 
 
 class InternalServerError(ServiceError):
-    """API Gateway and ALB Not Found Internal Server Error (500)"""
+    """API Gateway and ALB Internal Server Error (500)"""
 
     def __init__(self, message: str):
         super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, message)
