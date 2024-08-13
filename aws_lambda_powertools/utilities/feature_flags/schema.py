@@ -5,13 +5,15 @@ import re
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from dateutil import tz
 
-from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.feature_flags.base import BaseValidator
 from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging import Logger
 
 RULES_KEY = "rules"
 FEATURE_DEFAULT_VAL_KEY = "default"
@@ -111,11 +113,11 @@ class SchemaValidator(BaseValidator):
     A dictionary containing default value and rules for matching.
     The value MUST be an object and MIGHT contain the following members:
 
-    * **default**: `Union[bool, JSONType]`. Defines default feature value. This MUST be present
+    * **default**: `bool | JSONType`. Defines default feature value. This MUST be present
     * **boolean_type**: bool. Defines whether feature has non-boolean value (`JSONType`). This MIGHT be present
-    * **rules**: `Dict[str, Dict]`. Rules object. This MIGHT be present
+    * **rules**: `dict[str, dict]`. Rules object. This MIGHT be present
 
-    `JSONType` being any JSON primitive value: `Union[str, int, float, bool, None, Dict[str, Any], List[Any]]`
+    `JSONType` being any JSON primitive value: `str | int | float | bool | None | dict[str, Any] | list[Any]`
 
     ```json
     {
@@ -136,8 +138,8 @@ class SchemaValidator(BaseValidator):
     A dictionary with each rule and their conditions that a feature might have.
     The value MIGHT be present, and when defined it MUST contain the following members:
 
-    * **when_match**: `Union[bool, JSONType]`. Defines value to return when context matches conditions
-    * **conditions**: `List[Dict]`. Conditions object. This MUST be present
+    * **when_match**: `bool | JSONType`. Defines value to return when context matches conditions
+    * **conditions**: `list[dict]`. Conditions object. This MUST be present
 
     ```json
     {
@@ -196,7 +198,7 @@ class SchemaValidator(BaseValidator):
     ```
     """
 
-    def __init__(self, schema: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
+    def __init__(self, schema: dict[str, Any], logger: logging.Logger | Logger | None = None):
         self.schema = schema
         self.logger = logger or LOGGER
 
@@ -222,7 +224,7 @@ class SchemaValidator(BaseValidator):
 class FeaturesValidator(BaseValidator):
     """Validates each feature and calls RulesValidator to validate its rules"""
 
-    def __init__(self, schema: Dict, logger: Optional[Union[logging.Logger, Logger]] = None):
+    def __init__(self, schema: dict, logger: logging.Logger | Logger | None = None):
         self.schema = schema
         self.logger = logger or LOGGER
 
@@ -255,13 +257,13 @@ class RulesValidator(BaseValidator):
 
     def __init__(
         self,
-        feature: Dict[str, Any],
+        feature: dict[str, Any],
         boolean_feature: bool,
-        logger: Optional[Union[logging.Logger, Logger]] = None,
+        logger: logging.Logger | Logger | None = None,
     ):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
-        self.rules: Optional[Dict] = self.feature.get(RULES_KEY)
+        self.rules: dict | None = self.feature.get(RULES_KEY)
         self.logger = logger or LOGGER
         self.boolean_feature = boolean_feature
 
@@ -286,7 +288,7 @@ class RulesValidator(BaseValidator):
             conditions.validate()
 
     @staticmethod
-    def validate_rule(rule: Dict, rule_name: str, feature_name: str, boolean_feature: bool = True):
+    def validate_rule(rule: dict, rule_name: str, feature_name: str, boolean_feature: bool = True):
         if not rule or not isinstance(rule, dict):
             raise SchemaValidationError(f"Feature rule must be a dictionary, feature={feature_name}")
 
@@ -299,15 +301,15 @@ class RulesValidator(BaseValidator):
             raise SchemaValidationError(f"Rule name key must have a non-empty string, feature={feature_name}")
 
     @staticmethod
-    def validate_rule_default_value(rule: Dict, rule_name: str, boolean_feature: bool):
+    def validate_rule_default_value(rule: dict, rule_name: str, boolean_feature: bool):
         rule_default_value = rule.get(RULE_MATCH_VALUE)
         if boolean_feature and not isinstance(rule_default_value, bool):
             raise SchemaValidationError(f"'rule_default_value' key must have be bool, rule={rule_name}")
 
 
 class ConditionsValidator(BaseValidator):
-    def __init__(self, rule: Dict[str, Any], rule_name: str, logger: Optional[Union[logging.Logger, Logger]] = None):
-        self.conditions: List[Dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
+    def __init__(self, rule: dict[str, Any], rule_name: str, logger: logging.Logger | Logger | None = None):
+        self.conditions: list[dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
         self.logger = logger or LOGGER
 
@@ -322,7 +324,7 @@ class ConditionsValidator(BaseValidator):
             self.validate_condition(rule_name=self.rule_name, condition=condition)
 
     @staticmethod
-    def validate_condition(rule_name: str, condition: Dict[str, str]) -> None:
+    def validate_condition(rule_name: str, condition: dict[str, str]) -> None:
         if not condition or not isinstance(condition, dict):
             raise SchemaValidationError(f"Feature rule condition must be a dictionary, rule={rule_name}")
 
@@ -331,7 +333,7 @@ class ConditionsValidator(BaseValidator):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
     @staticmethod
-    def validate_condition_action(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_action(condition: dict[str, Any], rule_name: str):
         action = condition.get(CONDITION_ACTION, "")
         if action not in RuleAction.__members__:
             allowed_values = [_action.value for _action in RuleAction]
@@ -340,7 +342,7 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def validate_condition_key(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_key(condition: dict[str, Any], rule_name: str):
         key = condition.get(CONDITION_KEY, "")
         if not key or not isinstance(key, str):
             raise SchemaValidationError(f"'key' value must be a non empty string, rule={rule_name}")
@@ -367,7 +369,7 @@ class ConditionsValidator(BaseValidator):
         custom_validator(key, rule_name)
 
     @staticmethod
-    def validate_condition_value(condition: Dict[str, Any], rule_name: str):
+    def validate_condition_value(condition: dict[str, Any], rule_name: str):
         value = condition.get(CONDITION_VALUE)
         if value is None:
             raise SchemaValidationError(f"'value' key must not be null, rule={rule_name}")
@@ -427,7 +429,7 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def _validate_schedule_between_time_range_value(value: Dict, rule_name: str):
+    def _validate_schedule_between_time_range_value(value: dict, rule_name: str):
         if not isinstance(value, dict):
             raise SchemaValidationError(
                 f"{RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value} action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
