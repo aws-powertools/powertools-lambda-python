@@ -1958,7 +1958,6 @@ class ApiGatewayResolver(BaseRouter):
 
             body = generate_swagger_html(
                 escaped_spec,
-                f"{base_path}{path}",
                 swagger_js,
                 swagger_css,
                 swagger_base_url,
