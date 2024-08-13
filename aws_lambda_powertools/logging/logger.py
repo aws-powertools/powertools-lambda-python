@@ -12,13 +12,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Iterable,
-    List,
     Mapping,
-    Optional,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -33,7 +29,6 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.utilities import jmespath_utils
 
-from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
 from .formatter import (
@@ -42,6 +37,9 @@ from .formatter import (
     LambdaPowertoolsFormatter,
 )
 from .lambda_context import build_lambda_context_model
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.types import AnyCallableT
 
 logger = logging.getLogger(__name__)
 
@@ -206,20 +204,20 @@ class Logger:
 
     def __init__(
         self,
-        service: Optional[str] = None,
-        level: Union[str, int, None] = None,
+        service: str | None = None,
+        level: str | int | None = None,
         child: bool = False,
-        sampling_rate: Optional[float] = None,
-        stream: Optional[IO[str]] = None,
-        logger_formatter: Optional[PowertoolsFormatter] = None,
-        logger_handler: Optional[logging.Handler] = None,
+        sampling_rate: float | None = None,
+        stream: IO[str] | None = None,
+        logger_formatter: PowertoolsFormatter | None = None,
+        logger_handler: logging.Handler | None = None,
         log_uncaught_exceptions: bool = False,
-        json_serializer: Optional[Callable[[Dict], str]] = None,
-        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
-        json_default: Optional[Callable[[Any], Any]] = None,
-        datefmt: Optional[str] = None,
+        json_serializer: Callable[[dict], str] | None = None,
+        json_deserializer: Callable[[dict | str | bool | int | float], str] | None = None,
+        json_default: Callable[[Any], Any] | None = None,
+        datefmt: str | None = None,
         use_datetime_directive: bool = False,
-        log_record_order: Optional[List[str]] = None,
+        log_record_order: list[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
         serialize_stacktrace: bool = True,
@@ -284,8 +282,8 @@ class Logger:
 
     def _init_logger(
         self,
-        formatter_options: Optional[Dict] = None,
-        log_level: Union[str, int, None] = None,
+        formatter_options: dict | None = None,
+        log_level: str | int | None = None,
         **kwargs,
     ) -> None:
         """Configures new logger"""
@@ -345,26 +343,26 @@ class Logger:
     def inject_lambda_context(
         self,
         lambda_handler: AnyCallableT,
-        log_event: Optional[bool] = None,
-        correlation_id_path: Optional[str] = None,
-        clear_state: Optional[bool] = False,
+        log_event: bool | None = None,
+        correlation_id_path: str | None = None,
+        clear_state: bool | None = False,
     ) -> AnyCallableT: ...
 
     @overload
     def inject_lambda_context(
         self,
         lambda_handler: None = None,
-        log_event: Optional[bool] = None,
-        correlation_id_path: Optional[str] = None,
-        clear_state: Optional[bool] = False,
+        log_event: bool | None = None,
+        correlation_id_path: str | None = None,
+        clear_state: bool | None = False,
     ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
         self,
-        lambda_handler: Optional[AnyCallableT] = None,
-        log_event: Optional[bool] = None,
-        correlation_id_path: Optional[str] = None,
-        clear_state: Optional[bool] = False,
+        lambda_handler: AnyCallableT | None = None,
+        log_event: bool | None = None,
+        correlation_id_path: str | None = None,
+        clear_state: bool | None = False,
     ) -> Any:
         """Decorator to capture Lambda contextual info and inject into logger
 
@@ -458,7 +456,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -480,7 +478,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -502,7 +500,7 @@ class Logger:
         exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -524,7 +522,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -546,7 +544,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -568,7 +566,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
-        extra: Optional[Mapping[str, object]] = None,
+        extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
         extra = extra or {}
@@ -586,13 +584,13 @@ class Logger:
     def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
-    def get_current_keys(self) -> Dict[str, Any]:
+    def get_current_keys(self) -> dict[str, Any]:
         return self.registered_formatter.get_current_keys()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
 
-    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys) -> None:
+    def structure_logs(self, append: bool = False, formatter_options: dict | None = None, **keys) -> None:
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
@@ -638,7 +636,7 @@ class Logger:
         self.registered_formatter.clear_state()
         self.registered_formatter.append_keys(**log_keys)
 
-    def set_correlation_id(self, value: Optional[str]) -> None:
+    def set_correlation_id(self, value: str | None) -> None:
         """Sets the correlation_id in the logging json
 
         Parameters
@@ -648,7 +646,7 @@ class Logger:
         """
         self.append_keys(correlation_id=value)
 
-    def get_correlation_id(self) -> Optional[str]:
+    def get_correlation_id(self) -> str | None:
         """Gets the correlation_id in the logging json
 
         Returns
@@ -660,7 +658,7 @@ class Logger:
             return self.registered_formatter.log_format.get("correlation_id")
         return None
 
-    def setLevel(self, level: Union[str, int, None]) -> None:
+    def setLevel(self, level: str | int | None) -> None:
         return self._logger.setLevel(self._determine_log_level(level))
 
     def addHandler(self, handler: logging.Handler) -> None:
@@ -694,7 +692,7 @@ class Logger:
         return self._logger.name
 
     @property
-    def handlers(self) -> List[logging.Handler]:
+    def handlers(self) -> list[logging.Handler]:
         """List of registered logging handlers
 
         Notes
@@ -704,22 +702,22 @@ class Logger:
         """
         return self._logger.handlers
 
-    def _get_aws_lambda_log_level(self) -> Optional[str]:
+    def _get_aws_lambda_log_level(self) -> str | None:
         """
         Retrieve the log level for AWS Lambda from the Advanced Logging Controls feature.
         Returns:
-            Optional[str]: The corresponding logging level.
+            str | None: The corresponding logging level.
         """
 
         return constants.LAMBDA_ADVANCED_LOGGING_LEVELS.get(os.getenv(constants.LAMBDA_LOG_LEVEL_ENV))
 
-    def _get_powertools_log_level(self, level: Union[str, int, None]) -> Optional[str]:
+    def _get_powertools_log_level(self, level: str | int | None) -> str | None:
         """Retrieve the log level for Powertools from the environment variable or level parameter.
         If log level is an integer, we convert to its respective string level `logging.getLevelName()`.
         If no log level is provided, we check env vars for the log level: POWERTOOLS_LOG_LEVEL_ENV and POWERTOOLS_LOG_LEVEL_LEGACY_ENV.
         Parameters:
         -----------
-        level : Union[str, int, None]
+        level : str | int | None
             The specified log level as a string, integer, or None.
         Environment variables
         ---------------------
@@ -729,7 +727,7 @@ class Logger:
             log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
         Returns:
         --------
-        Optional[str]:
+        str | None:
             The corresponding logging level. Returns None if the log level is not explicitly specified.
         """  # noqa E501
 
@@ -743,16 +741,16 @@ class Logger:
 
         return level or log_level_env
 
-    def _determine_log_level(self, level: Union[str, int, None]) -> Union[str, int]:
+    def _determine_log_level(self, level: str | int | None) -> str | int:
         """Determine the effective log level considering Lambda and Powertools preferences.
         It emits an UserWarning if Lambda ALC log level is lower than Logger log level.
         Parameters:
         -----------
-        level: Union[str, int, None]
+        level: str | int | None
             The specified log level as a string, integer, or None.
         Returns:
         ----------
-            Union[str, int]: The effective logging level.
+            str | int: The effective logging level.
         """
 
         # This function consider the following order of precedence:
@@ -789,9 +787,9 @@ class Logger:
 
 
 def set_package_logger(
-    level: Union[str, int] = logging.DEBUG,
-    stream: Optional[IO[str]] = None,
-    formatter: Optional[logging.Formatter] = None,
+    level: str | int = logging.DEBUG,
+    stream: IO[str] | None = None,
+    formatter: logging.Formatter | None = None,
 ) -> None:
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
