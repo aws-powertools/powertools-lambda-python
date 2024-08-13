@@ -1,6 +1,9 @@
-from typing import Any, Protocol
+from __future__ import annotations
 
-from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
 
 
 class IdempotentHookFunction(Protocol):
