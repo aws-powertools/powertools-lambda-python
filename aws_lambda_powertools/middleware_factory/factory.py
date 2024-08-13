@@ -6,10 +6,10 @@ import logging
 import os
 from typing import Any, Callable
 
-from ..shared import constants
-from ..shared.functions import resolve_truthy_env_var_choice
-from ..tracing import Tracer
-from .exceptions import MiddlewareInvalidArgumentError
+from aws_lambda_powertools.middleware_factory.exceptions import MiddlewareInvalidArgumentError
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+from aws_lambda_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
 
