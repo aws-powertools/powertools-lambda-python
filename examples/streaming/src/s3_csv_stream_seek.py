@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import io
-from typing import Dict
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.streaming.s3_object import S3Object
 from aws_lambda_powertools.utilities.streaming.transformations import CsvTransform
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 """
 Assuming the CSV files contains rows after the header always has 8 bytes + 1 byte newline:
@@ -21,7 +25,7 @@ HEADER_SIZE = 21 + 1  # 1 byte newline
 LINES_TO_JUMP = 100
 
 
-def lambda_handler(event: Dict[str, str], context: LambdaContext):
+def lambda_handler(event: dict[str, str], context: LambdaContext):
     sample_csv = S3Object(bucket=event["bucket"], key=event["key"])
 
     # Skip the header line

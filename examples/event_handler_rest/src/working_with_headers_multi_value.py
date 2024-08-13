@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import List
+from typing import TYPE_CHECKING
 
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.params import Header
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.params import Header
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver(enable_validation=True)
 
@@ -21,7 +25,7 @@ class CountriesAllowed(Enum):
 @app.get("/hello")
 def get(
     cloudfront_viewer_country: Annotated[
-        List[CountriesAllowed],  # (1)!
+        list[CountriesAllowed],  # (1)!
         Header(
             description="This is multi value header parameter.",
         ),

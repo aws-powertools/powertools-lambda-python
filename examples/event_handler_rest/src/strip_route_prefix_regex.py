@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import re
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # This will support:
 # /v1/dev/subscriptions/<subscription>

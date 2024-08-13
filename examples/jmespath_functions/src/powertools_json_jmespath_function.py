@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import json
 from dataclasses import asdict, dataclass, field, is_dataclass
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import powertools_json_jmespath_schema as schemas
 from jmespath.exceptions import JMESPathTypeError
 
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @dataclass

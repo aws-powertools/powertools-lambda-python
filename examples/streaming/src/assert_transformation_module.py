@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import io
-from typing import IO, Optional
+from typing import IO
 
 from aws_lambda_powertools.utilities.streaming.transformations import BaseTransform
 
@@ -9,7 +11,7 @@ class UpperIO(io.RawIOBase):
         self.encoding = encoding
         self.input_stream = io.TextIOWrapper(input_stream, encoding=encoding)
 
-    def read(self, size: int = -1) -> Optional[bytes]:
+    def read(self, size: int = -1) -> bytes | None:
         data = self.input_stream.read(size)
         return data.upper().encode(self.encoding)
 

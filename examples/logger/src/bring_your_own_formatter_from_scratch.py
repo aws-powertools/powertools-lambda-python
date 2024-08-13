@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import json
-import logging
-from typing import Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Iterable
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
 
+if TYPE_CHECKING:
+    import logging
+
 
 class CustomFormatter(BasePowertoolsFormatter):
-    def __init__(self, log_record_order: Optional[List[str]] = None, *args, **kwargs):
+    def __init__(self, log_record_order: list[str] | None = None, *args, **kwargs):
         self.log_record_order = log_record_order or ["level", "location", "message", "timestamp"]
         self.log_format = dict.fromkeys(self.log_record_order)
         super().__init__(*args, **kwargs)
@@ -16,7 +20,7 @@ class CustomFormatter(BasePowertoolsFormatter):
         # also used by `inject_lambda_context` decorator
         self.log_format.update(additional_keys)
 
-    def current_keys(self) -> Dict[str, Any]:
+    def current_keys(self) -> dict[str, Any]:
         return self.log_format
 
     def remove_keys(self, keys: Iterable[str]):

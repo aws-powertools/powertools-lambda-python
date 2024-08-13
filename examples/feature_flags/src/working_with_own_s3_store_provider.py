@@ -1,9 +1,13 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from custom_s3_store_provider import S3StoreProvider
 
 from aws_lambda_powertools.utilities.feature_flags import FeatureFlags
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 s3_config_store = S3StoreProvider("your-bucket-name", "working_with_own_s3_store_provider_features.json")
 

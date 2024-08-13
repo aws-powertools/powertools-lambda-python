@@ -1,4 +1,6 @@
-from typing import List, TypedDict
+from __future__ import annotations
+
+from typing import TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
@@ -18,6 +20,6 @@ class Location(TypedDict, total=False):
 @router.resolver(field_name="listLocations")
 @router.resolver(field_name="locations")
 @tracer.capture_method
-def get_locations(name: str, description: str = "") -> List[Location]:  # match GraphQL Query arguments
+def get_locations(name: str, description: str = "") -> list[Location]:  # match GraphQL Query arguments
     is_admin: bool = router.context.get("is_admin", False)
     return [{"name": name, "description": description}] if is_admin else []

@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import boto3
 
 from aws_lambda_powertools.utilities.idempotency import (
@@ -5,7 +9,9 @@ from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
     idempotent,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # See: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session
 boto3_session = boto3.session.Session()

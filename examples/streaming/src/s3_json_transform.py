@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import io
-from typing import IO, Optional
+from typing import IO
 
 import ijson
 
@@ -11,10 +13,10 @@ class JsonDeserializer(io.RawIOBase):
     def __init__(self, input_stream: IO[bytes]):
         self.input = ijson.items(input_stream, "", multiple_values=True)
 
-    def read(self, size: int = -1) -> Optional[bytes]:
+    def read(self, size: int = -1) -> bytes | None:
         raise NotImplementedError(f"{__name__} does not implement read")
 
-    def readline(self, size: Optional[int] = None) -> bytes:
+    def readline(self, size: int | None = None) -> bytes:
         raise NotImplementedError(f"{__name__} does not implement readline")
 
     def read_object(self) -> dict:

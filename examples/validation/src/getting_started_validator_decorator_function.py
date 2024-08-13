@@ -1,19 +1,23 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import getting_started_validator_decorator_schema as schemas
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # we can get list of allowed IPs from AWS Parameter Store using Parameters Utility
 # See: https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/
 ALLOWED_IPS = parameters.get_parameter("/lambda-powertools/allowed_ips")
 
 
-class UserPermissionsError(Exception):
-    ...
+class UserPermissionsError(Exception): ...
 
 
 @dataclass

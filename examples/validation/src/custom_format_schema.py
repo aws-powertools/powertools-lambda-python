@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 INPUT = {
     "definitions": {},
     "$schema": "http://json-schema.org/draft-07/schema#",

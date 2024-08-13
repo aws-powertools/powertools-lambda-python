@@ -1,11 +1,15 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import requests
 from pydantic import BaseModel, EmailStr, Field
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver(enable_validation=True)
 
@@ -29,7 +33,7 @@ class Todo(BaseModel):
 
 
 @app.get("/todos")
-def get_todos_by_email(email: EmailStr) -> List[Todo]:
+def get_todos_by_email(email: EmailStr) -> list[Todo]:
     todos = requests.get(f"https://jsonplaceholder.typicode.com/todos?email={email}")
     todos.raise_for_status()
 

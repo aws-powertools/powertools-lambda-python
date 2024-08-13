@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import copy
 import os
 import sys
 from random import randint
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import boto3
 
@@ -11,7 +13,9 @@ from aws_lambda_powertools.utilities.batch import (
     BasePartialProcessor,
     process_partial_response,
 )
-from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
 
 table_name = os.getenv("TABLE_NAME", "table_store_batch")
 

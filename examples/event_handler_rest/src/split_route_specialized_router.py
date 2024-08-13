@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.router import APIGatewayRouter
 

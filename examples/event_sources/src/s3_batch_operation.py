@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import boto3
 from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.utilities.data_classes import S3BatchOperationEvent, S3BatchOperationResponse, event_source
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @event_source(data_class=S3BatchOperationEvent)
@@ -33,5 +39,4 @@ def lambda_handler(event: S3BatchOperationEvent, context: LambdaContext):
     return response.asdict()
 
 
-def do_some_work(s3_client, src_bucket: str, src_key: str):
-    ...
+def do_some_work(s3_client, src_bucket: str, src_key: str): ...

@@ -1,4 +1,6 @@
-from typing import Dict, Type
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -6,7 +8,9 @@ from aws_lambda_powertools.utilities.idempotency import (
     idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(event_key_jmespath="order_id")  # see Choosing a payload subset section
@@ -29,11 +33,11 @@ class OrderOutput:
         self.order_id = order_id
 
 
-def order_to_dict(x: Type[OrderOutput]) -> Dict:  # (1)!
+def order_to_dict(x: type[OrderOutput]) -> dict:  # (1)!
     return dict(x.__dict__)
 
 
-def dict_to_order(x: Dict) -> OrderOutput:  # (2)!
+def dict_to_order(x: dict) -> OrderOutput:  # (2)!
     return OrderOutput(**x)
 
 

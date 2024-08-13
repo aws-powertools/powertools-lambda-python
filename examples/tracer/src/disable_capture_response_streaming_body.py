@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import boto3
-from botocore.response import StreamingBody
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from botocore.response import StreamingBody
+
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 BUCKET = os.getenv("BUCKET_NAME", "")
 REPORT_KEY = os.getenv("REPORT_KEY", "")

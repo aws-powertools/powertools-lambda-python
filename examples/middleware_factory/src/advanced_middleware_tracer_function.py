@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import time
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import requests
 from requests import Response
@@ -7,7 +9,9 @@ from requests import Response
 from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 app = APIGatewayRestResolver()

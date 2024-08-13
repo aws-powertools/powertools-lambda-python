@@ -1,11 +1,15 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import requests
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -29,7 +33,7 @@ def create_todo(todo: Todo) -> str:
 
 
 @app.get("/todos")
-def get_todos() -> List[Todo]:
+def get_todos() -> list[Todo]:
     todo = requests.get("https://jsonplaceholder.typicode.com/todos")
     todo.raise_for_status()
 

@@ -1,4 +1,6 @@
-from typing import Any, Literal, Union
+from __future__ import annotations
+
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -19,7 +21,7 @@ class Dog(BaseModel):
 
 
 Animal = Annotated[
-    Union[Cat, Dog],
+    Cat | Dog,
     Field(discriminator="animal"),
 ]
 

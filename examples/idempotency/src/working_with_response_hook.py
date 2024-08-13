@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import datetime
 import uuid
-from typing import Dict
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.idempotency import (
@@ -8,15 +10,17 @@ from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
     idempotent_function,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
-    DataRecord,
-)
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
+        DataRecord,
+    )
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
 
-def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
+def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
     # Return inserted Header data into the Idempotent Response
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 

@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import Union
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
@@ -36,7 +40,7 @@ class User:
     active: bool
 
 
-def get_user_by_id(user_id: str) -> Union[User, None]:
+def get_user_by_id(user_id: str) -> User | None:
     for user_data in users:
         if user_data["user_id"] == user_id:
             return User(

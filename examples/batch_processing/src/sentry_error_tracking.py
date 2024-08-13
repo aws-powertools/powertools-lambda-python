@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sentry_sdk import capture_exception
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, FailureResponse

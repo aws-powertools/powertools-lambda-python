@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import middleware_global_middlewares_module  # (1)!
 import requests
 

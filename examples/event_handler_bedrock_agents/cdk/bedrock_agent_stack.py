@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_cdk import (
     Stack,
 )
@@ -10,7 +14,9 @@ from cdklabs.generative_ai_cdk_constructs.bedrock import (
     ApiSchema,
     BedrockFoundationModel,
 )
-from constructs import Construct
+
+if TYPE_CHECKING:
+    from constructs import Construct
 
 
 class AgentsCdkStack(Stack):

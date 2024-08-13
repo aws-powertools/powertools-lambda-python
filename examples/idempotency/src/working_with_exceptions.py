@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import requests
 
 from aws_lambda_powertools.utilities.idempotency import (
@@ -5,7 +9,9 @@ from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
     idempotent_function,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 

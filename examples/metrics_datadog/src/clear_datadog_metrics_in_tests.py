@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from aws_lambda_powertools.metrics.provider import cold_start

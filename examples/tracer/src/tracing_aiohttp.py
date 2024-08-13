@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import asyncio
 import os
+from typing import TYPE_CHECKING
 
 import aiohttp
 
 from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.tracing import aiohttp_trace_config
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 ENDPOINT = os.getenv("PAYMENT_API", "")
 

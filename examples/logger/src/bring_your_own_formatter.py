@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
-from aws_lambda_powertools.logging.types import LogRecord
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.types import LogRecord
 
 
 class CustomFormatter(LambdaPowertoolsFormatter):

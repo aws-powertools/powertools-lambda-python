@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import requests
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
 from aws_lambda_powertools.event_handler.openapi.models import Contact, Server
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = BedrockAgentResolver()
 

@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_cdk import Stack, aws_lambda, aws_sam
-from constructs import Construct
+
+if TYPE_CHECKING:
+    from constructs import Construct
 
 POWERTOOLS_BASE_NAME = "AWSLambdaPowertools"
 # Find latest from github.com/aws-powertools/powertools-lambda-python/releases

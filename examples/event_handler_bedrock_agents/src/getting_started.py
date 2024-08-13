@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 from time import time
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()

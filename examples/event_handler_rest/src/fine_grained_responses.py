@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import requests
@@ -11,7 +14,9 @@ from aws_lambda_powertools.event_handler import (
 )
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.shared.cookies import Cookie
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()

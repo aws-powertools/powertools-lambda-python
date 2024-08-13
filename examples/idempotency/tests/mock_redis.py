@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import time as t
-from typing import Dict
+from typing import dict
 
 
 # Mock redis class that includes all operations we used in Idempotency
 class MockRedis:
-    def __init__(self, decode_responses, cache: Dict, **kwargs):
+    def __init__(self, decode_responses, cache: dict, **kwargs):
         self.cache = cache or {}
-        self.expire_dict: Dict = {}
+        self.expire_dict: dict = {}
         self.decode_responses = decode_responses
-        self.acl: Dict = {}
+        self.acl: dict = {}
         self.username = ""
 
     def hset(self, name, mapping):

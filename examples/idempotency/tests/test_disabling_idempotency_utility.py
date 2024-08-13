@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 import app_test_disabling_idempotency_utility
@@ -20,7 +22,7 @@ def lambda_context():
 
 
 def test_idempotent_lambda_handler(monkeypatch, lambda_context):
-    # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
+    # set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
     monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
 
     result = app_test_disabling_idempotency_utility.lambda_handler({}, lambda_context)

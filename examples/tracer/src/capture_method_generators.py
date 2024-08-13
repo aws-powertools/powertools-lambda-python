@@ -1,7 +1,13 @@
-from collections.abc import Generator
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 

@@ -1,10 +1,14 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import requests
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # changing region_name, connect_timeout and retrie configurations
 # see: https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html

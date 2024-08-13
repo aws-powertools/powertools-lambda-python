@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     idempotent,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
@@ -17,8 +22,7 @@ class Payment:
     payment_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @idempotent(persistence_store=persistence_layer)

@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
-from typing import List, Tuple
+from typing import TYPE_CHECKING
 
 from typing_extensions import Literal
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
@@ -28,7 +30,7 @@ def record_handler(record: SQSRecord):
 def lambda_handler(event, context: LambdaContext):
     batch = event["Records"]  # (1)!
     with processor(records=batch, handler=record_handler):
-        processed_messages: List[Tuple] = processor.process()
+        processed_messages: list[tuple] = processor.process()
 
     for message in processed_messages:
         status: Literal["success", "fail"] = message[0]
