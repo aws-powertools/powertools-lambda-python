@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import base64
 import gzip
 import json
 import logging
 import warnings
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import jmespath
 from jmespath.exceptions import LexerError
@@ -33,7 +35,7 @@ class PowertoolsFunctions(Functions):
         return uncompressed.decode()
 
 
-def query(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
+def query(data: dict | str, envelope: str, jmespath_options: dict | None = None) -> Any:
     """Searches and extracts data using JMESPath
 
     Envelope being the JMESPath expression to extract the data you're after
@@ -57,11 +59,11 @@ def query(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict
 
     Parameters
     ----------
-    data : Dict
+    data : dict | str
         Data set to be filtered
     envelope : str
         JMESPath expression to filter data against
-    jmespath_options : Dict
+    jmespath_options : dict | None
         Alternative JMESPath options to be included when filtering expr
 
 
@@ -82,7 +84,7 @@ def query(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict
 
 
 @deprecated("`extract_data_from_envelope` is deprecated; use `query` instead.", category=None)
-def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_options: Optional[Dict] = None) -> Any:
+def extract_data_from_envelope(data: dict | str, envelope: str, jmespath_options: dict | None = None) -> Any:
     """Searches and extracts data using JMESPath
 
     *Deprecated*: Use query instead
