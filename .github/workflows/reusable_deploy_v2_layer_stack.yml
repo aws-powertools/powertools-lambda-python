@@ -105,7 +105,7 @@ jobs:
           - region: "ca-central-1"
             has_arm64_support: "true"
           - region: "ca-west-1"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "eu-central-1"
             has_arm64_support: "true"
           - region: "eu-central-2"
