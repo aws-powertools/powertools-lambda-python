@@ -4,6 +4,17 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **event_handler:** correct typo in exception docstring ([#4948](https://github.com/aws-powertools/powertools-lambda-python/issues/4948))
+
+## Maintenance
+
+* **ci:** new pre-release 2.43.2a0 ([#4946](https://github.com/aws-powertools/powertools-lambda-python/issues/4946))
+* **ci:** new pre-release 2.43.1a2 ([#4933](https://github.com/aws-powertools/powertools-lambda-python/issues/4933))
+* **deps:** bump datadog-lambda from 6.97.0 to 6.98.0 ([#4938](https://github.com/aws-powertools/powertools-lambda-python/issues/4938))
+* **deps-dev:** bump mypy-boto3-s3 from 1.34.138 to 1.34.158 in the boto-typing group ([#4936](https://github.com/aws-powertools/powertools-lambda-python/issues/4936))
+
 
 <a name="v2.43.1"></a>
 ## [v2.43.1] - 2024-08-12
@@ -14,6 +25,15 @@
 ## Maintenance
 
 * version bump
+* **ci:** new pre-release 2.43.1a0 ([#4920](https://github.com/aws-powertools/powertools-lambda-python/issues/4920))
+* **ci:** new pre-release 2.43.1a1 ([#4926](https://github.com/aws-powertools/powertools-lambda-python/issues/4926))
+* **ci:** new pre-release 2.42.1a9 ([#4912](https://github.com/aws-powertools/powertools-lambda-python/issues/4912))
+* **deps-dev:** bump ruff from 0.5.6 to 0.5.7 ([#4918](https://github.com/aws-powertools/powertools-lambda-python/issues/4918))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.234 to 0.1.238 ([#4917](https://github.com/aws-powertools/powertools-lambda-python/issues/4917))
+* **deps-dev:** bump mypy-boto3-ssm from 1.34.132 to 1.34.158 in the boto-typing group ([#4921](https://github.com/aws-powertools/powertools-lambda-python/issues/4921))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.238 to 0.1.242 ([#4922](https://github.com/aws-powertools/powertools-lambda-python/issues/4922))
+* **deps-dev:** bump cfn-lint from 1.9.6 to 1.9.7 ([#4923](https://github.com/aws-powertools/powertools-lambda-python/issues/4923))
+* **deps-dev:** bump cfn-lint from 1.9.5 to 1.9.6 ([#4916](https://github.com/aws-powertools/powertools-lambda-python/issues/4916))
 
 
 <a name="v2.43.0"></a>
