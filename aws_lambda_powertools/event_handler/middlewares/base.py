@@ -1,8 +1,12 @@
-from abc import ABC, abstractmethod
-from typing import Generic, Protocol
+from __future__ import annotations
 
-from aws_lambda_powertools.event_handler.api_gateway import Response
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Generic, Protocol
+
 from aws_lambda_powertools.event_handler.types import EventHandlerInstance
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.api_gateway import Response
 
 
 class NextMiddleware(Protocol):

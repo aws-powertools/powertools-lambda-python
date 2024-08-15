@@ -9,7 +9,7 @@ import os
 import warnings
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator
 
 from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,
@@ -24,9 +24,11 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties imp
 from aws_lambda_powertools.metrics.provider.cold_start import (
     reset_cold_start_flag,  # noqa: F401  # backwards compatibility
 )
-from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 
 logger = logging.getLogger(__name__)
 
@@ -66,10 +68,10 @@ class MetricManager:
 
     def __init__(
         self,
-        metric_set: Dict[str, Any] | None = None,
-        dimension_set: Dict | None = None,
+        metric_set: dict[str, Any] | None = None,
+        dimension_set: dict | None = None,
         namespace: str | None = None,
-        metadata_set: Dict[str, Any] | None = None,
+        metadata_set: dict[str, Any] | None = None,
         service: str | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
@@ -110,11 +112,11 @@ class MetricManager:
         ----------
         name : str
             Metric name
-        unit : Union[MetricUnit, str]
+        unit : MetricUnit | str
             `aws_lambda_powertools.helper.models.MetricUnit`
         value : float
             Metric value
-        resolution : Union[MetricResolution, int]
+        resolution : MetricResolution | int
             `aws_lambda_powertools.helper.models.MetricResolution`
 
         Raises
@@ -129,7 +131,7 @@ class MetricManager:
 
         unit = self._extract_metric_unit_value(unit=unit)
         resolution = self._extract_metric_resolution_value(resolution=resolution)
-        metric: Dict = self.metric_set.get(name, defaultdict(list))
+        metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
         metric["Value"].append(float(value))
@@ -147,19 +149,19 @@ class MetricManager:
 
     def serialize_metric_set(
         self,
-        metrics: Dict | None = None,
-        dimensions: Dict | None = None,
-        metadata: Dict | None = None,
-    ) -> Dict:
+        metrics: dict | None = None,
+        dimensions: dict | None = None,
+        metadata: dict | None = None,
+    ) -> dict:
         """Serializes metric and dimensions set
 
         Parameters
         ----------
-        metrics : Dict, optional
+        metrics : dict, optional
             Dictionary of metrics to serialize, by default None
-        dimensions : Dict, optional
+        dimensions : dict, optional
             Dictionary of dimensions to serialize, by default None
-        metadata: Dict, optional
+        metadata: dict, optional
             Dictionary of metadata to serialize, by default None
 
         Example
@@ -172,7 +174,7 @@ class MetricManager:
 
         Returns
         -------
-        Dict
+        dict
             Serialized metrics following EMF specification
 
         Raises
@@ -206,8 +208,8 @@ class MetricManager:
         #
         # In case using high-resolution metrics, add StorageResolution field
         # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa ERA001
-        metric_definition: List[MetricNameUnitResolution] = []
-        metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
+        metric_definition: list[MetricNameUnitResolution] = []
+        metric_names_and_values: dict[str, float] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: dict = metrics[metric_name]
@@ -354,10 +356,10 @@ class MetricManager:
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: Callable[[dict, Any], Any] | Callable[[dict, Any, dict | None], Any] | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
+        default_dimensions: dict[str, str] | None = None,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -385,7 +387,7 @@ class MetricManager:
             captures cold start metric, by default False
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
-        default_dimensions: Dict[str, str], optional
+        default_dimensions: dict[str, str], optional
             metric dimensions as key=value that will always be present
 
         Raises
@@ -420,12 +422,12 @@ class MetricManager:
 
         return decorate
 
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
+    def _extract_metric_resolution_value(self, resolution: int | MetricResolution) -> int:
         """Return metric value from metric unit whether that's str or MetricResolution enum
 
         Parameters
         ----------
-        unit : Union[int, MetricResolution]
+        unit : int | MetricResolution
             Metric resolution
 
         Returns
@@ -448,12 +450,12 @@ class MetricManager:
             f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}",  # noqa: E501
         )
 
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
+    def _extract_metric_unit_value(self, unit: str | MetricUnit) -> str:
         """Return metric value from metric unit whether that's str or MetricUnit enum
 
         Parameters
         ----------
-        unit : Union[str, MetricUnit]
+        unit : str | MetricUnit
             Metric unit
 
         Returns
@@ -566,7 +568,7 @@ def single_metric(
     value: float,
     resolution: MetricResolution | int = 60,
     namespace: str | None = None,
-    default_dimensions: Dict[str, str] | None = None,
+    default_dimensions: dict[str, str] | None = None,
 ) -> Generator[SingleMetric, None, None]:
     """Context manager to simplify creation of a single metric
 
@@ -604,7 +606,7 @@ def single_metric(
         Metric value
     namespace: str
         Namespace for metrics
-    default_dimensions: Dict[str, str], optional
+    default_dimensions: dict[str, str], optional
         Metric dimensions as key=value that will always be present
 
 
@@ -624,7 +626,7 @@ def single_metric(
     SchemaValidationError
         When metric object fails EMF schema validation
     """  # noqa: E501
-    metric_set: Dict | None = None
+    metric_set: dict | None = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)

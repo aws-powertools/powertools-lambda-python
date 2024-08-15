@@ -1,10 +1,12 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.provider.datadog.datadog import DatadogProvider
-from aws_lambda_powertools.shared.types import AnyCallableT
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.types import AnyCallableT
 
 
 class DatadogMetrics:
@@ -53,8 +55,8 @@ class DatadogMetrics:
     # and not get caught by accident with metrics data loss, or data deduplication
     # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
     # Result: ProductCreated is created twice as we now have 2 different EMF blobs
-    _metrics: List = []
-    _default_tags: Dict[str, Any] = {}
+    _metrics: list = []
+    _default_tags: dict[str, Any] = {}
 
     def __init__(
         self,
@@ -83,7 +85,7 @@ class DatadogMetrics:
     ) -> None:
         self.provider.add_metric(name=name, value=value, timestamp=timestamp, **tags)
 
-    def serialize_metric_set(self, metrics: List | None = None) -> List:
+    def serialize_metric_set(self, metrics: list | None = None) -> list:
         return self.provider.serialize_metric_set(metrics=metrics)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
@@ -94,7 +96,7 @@ class DatadogMetrics:
         lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_tags: Dict[str, Any] | None = None,
+        default_tags: dict[str, Any] | None = None,
     ):
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,
