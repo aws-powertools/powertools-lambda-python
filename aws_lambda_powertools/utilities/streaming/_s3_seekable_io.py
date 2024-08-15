@@ -8,6 +8,7 @@ import boto3
 
 from aws_lambda_powertools.shared import user_agent
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
+from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 
 if TYPE_CHECKING:
     from mmap import mmap
@@ -93,7 +94,7 @@ class _S3SeekableIO(IO[bytes]):
     @property
     def raw_stream(self) -> PowertoolsStreamingBody:
         """
-        Returns the boto3 StreamingBody, starting the stream from the seeked position.
+        Returns the boto3 StreamingBody, starting the stream from the sought position.
         """
         if self._raw_stream is None:
             range_header = f"bytes={self._position}-"
@@ -185,19 +186,19 @@ class _S3SeekableIO(IO[bytes]):
         raise NotImplementedError("this stream is not backed by a file descriptor")
 
     def flush(self) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def isatty(self) -> bool:
         return False
 
     def truncate(self, size: int | None = 0) -> int:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def write(self, data: bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData) -> int:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def writelines(
         self,
         data: Iterable[bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData],
     ) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)

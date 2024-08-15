@@ -4,6 +4,7 @@ import io
 from typing import IO, TYPE_CHECKING, Any, Iterable, Literal, Sequence, TypeVar, cast, overload
 
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
+from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
     GzipTransform,
@@ -243,19 +244,19 @@ class S3Object(IO[bytes]):
         raise NotImplementedError("this stream is not backed by a file descriptor")
 
     def flush(self) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def isatty(self) -> bool:
         return False
 
     def truncate(self, size: int | None = 0) -> int:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def write(self, data: bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData) -> int:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def writelines(
         self,
         data: Iterable[bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData],
     ) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
