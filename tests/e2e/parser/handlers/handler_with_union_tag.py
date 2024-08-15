@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -24,7 +25,7 @@ class PartialFailureCallback(BaseModel):
     error_msg: str
 
 
-OrderCallback = Annotated[Union[SuccessCallback, ErrorCallback, PartialFailureCallback], Field(discriminator="status")]
+OrderCallback = Annotated[SuccessCallback | ErrorCallback | PartialFailureCallback, Field(discriminator="status")]
 
 
 @event_parser
