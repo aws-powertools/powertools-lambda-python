@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Optional, Union
 
 import fastjsonschema  # type: ignore
 
@@ -8,16 +9,16 @@ from .exceptions import InvalidSchemaFormatError, SchemaValidationError
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None):
+def validate_data_against_schema(data: dict | str, schema: dict, formats: dict | None = None):
     """Validate dict data against given JSON Schema
 
     Parameters
     ----------
-    data : Dict
+    data : dict
         Data set to be validated
-    schema : Dict
+    schema : dict
         JSON Schema to validate against
-    formats: Dict
+    formats: dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
 
     Raises

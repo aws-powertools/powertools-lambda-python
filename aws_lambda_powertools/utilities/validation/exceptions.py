@@ -1,4 +1,6 @@
-from typing import Any, List, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from ...exceptions import InvalidEnvelopeExpressionError
 
@@ -8,14 +10,14 @@ class SchemaValidationError(Exception):
 
     def __init__(
         self,
-        message: Optional[str] = None,
-        validation_message: Optional[str] = None,
-        name: Optional[str] = None,
-        path: Optional[List] = None,
-        value: Optional[Any] = None,
-        definition: Optional[Any] = None,
-        rule: Optional[str] = None,
-        rule_definition: Optional[Any] = None,
+        message: str | None = None,
+        validation_message: str | None = None,
+        name: str | None = None,
+        path: list | None = None,
+        value: Any | None = None,
+        definition: Any | None = None,
+        rule: str | None = None,
+        rule_definition: Any | None = None,
     ):
         """
 
@@ -29,7 +31,7 @@ class SchemaValidationError(Exception):
         name : str, optional
             name of a path in the data structure
             (e.g. `data.property[index]`)
-        path: List, optional
+        path: list, optional
             `path` as an array in the data structure
             (e.g. `['data', 'property', 'index']`),
         value : Any, optional
