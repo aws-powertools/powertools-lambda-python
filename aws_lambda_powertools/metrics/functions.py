@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -11,12 +10,12 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties imp
 from aws_lambda_powertools.shared import constants
 
 
-def extract_cloudwatch_metric_resolution_value(metric_resolutions: List, resolution: int | MetricResolution) -> int:
+def extract_cloudwatch_metric_resolution_value(metric_resolutions: list, resolution: int | MetricResolution) -> int:
     """Return metric value from CloudWatch metric unit whether that's str or MetricResolution enum
 
     Parameters
     ----------
-    unit : Union[int, MetricResolution]
+    resolution : int | MetricResolution
         Metric resolution
 
     Returns
@@ -40,12 +39,12 @@ def extract_cloudwatch_metric_resolution_value(metric_resolutions: List, resolut
     )
 
 
-def extract_cloudwatch_metric_unit_value(metric_units: List, metric_valid_options: List, unit: str | MetricUnit) -> str:
+def extract_cloudwatch_metric_unit_value(metric_units: list, metric_valid_options: list, unit: str | MetricUnit) -> str:
     """Return metric value from CloudWatch metric unit whether that's str or MetricUnit enum
 
     Parameters
     ----------
-    unit : Union[str, MetricUnit]
+    unit : str | MetricUnit
         Metric unit
 
     Returns
