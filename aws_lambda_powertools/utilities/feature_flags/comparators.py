@@ -5,7 +5,8 @@ from typing import Any
 
 from dateutil.tz import gettz
 
-from aws_lambda_powertools.utilities.feature_flags.schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
+from aws_lambda_powertools.utilities.feature_flags.constants import HOUR_MIN_SEPARATOR
+from aws_lambda_powertools.utilities.feature_flags.schema import ModuloRangeValues, TimeValues
 
 
 def _get_now_from_timezone(timezone: tzinfo | None) -> datetime:

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache
@@ -15,17 +14,18 @@ from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValid
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging import Logger
 
-RULES_KEY = "rules"
-FEATURE_DEFAULT_VAL_KEY = "default"
-CONDITIONS_KEY = "conditions"
-RULE_MATCH_VALUE = "when_match"
-CONDITION_KEY = "key"
-CONDITION_VALUE = "value"
-CONDITION_ACTION = "action"
-FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
-TIME_RANGE_FORMAT = "%H:%M"  # hour:min 24 hours clock
-TIME_RANGE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour clock
-HOUR_MIN_SEPARATOR = ":"
+from aws_lambda_powertools.utilities.feature_flags.constants import (
+    CONDITION_ACTION,
+    CONDITION_KEY,
+    CONDITION_VALUE,
+    CONDITIONS_KEY,
+    FEATURE_DEFAULT_VAL_KEY,
+    FEATURE_DEFAULT_VAL_TYPE_KEY,
+    RULE_MATCH_VALUE,
+    RULES_KEY,
+    TIME_RANGE_FORMAT,
+    TIME_RANGE_PATTERN,
+)
 
 LOGGER: logging.Logger | Logger = logging.getLogger(__name__)
 

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
-
-from typing_extensions import ParamSpec
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from aws_lambda_powertools.utilities.feature_flags import schema
 from aws_lambda_powertools.utilities.feature_flags.comparators import (
@@ -16,14 +14,13 @@ from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_time_range,
 )
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
+from aws_lambda_powertools.utilities.feature_flags.types import P, T
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging import Logger
     from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
     from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 
-T = TypeVar("T")
-P = ParamSpec("P")
 
 RULE_ACTION_MAPPING = {
     schema.RuleAction.EQUALS.value: lambda a, b: a == b,
