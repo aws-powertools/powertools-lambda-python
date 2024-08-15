@@ -8,23 +8,23 @@ import json
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 import boto3
-from botocore.config import Config
-
-from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
-
-if TYPE_CHECKING:
-    from mypy_boto3_secretsmanager.client import SecretsManagerClient
-    from mypy_boto3_secretsmanager.type_defs import CreateSecretResponseTypeDef
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
-from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
+
+if TYPE_CHECKING:
+    from botocore.config import Config
+    from mypy_boto3_secretsmanager.client import SecretsManagerClient
+    from mypy_boto3_secretsmanager.type_defs import CreateSecretResponseTypeDef
+
+    from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 logger = logging.getLogger(__name__)
 
@@ -80,10 +80,10 @@ class SecretsProvider(BaseProvider):
 
     def __init__(
         self,
-        config: Optional[Config] = None,
-        boto_config: Optional[Config] = None,
-        boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[SecretsManagerClient] = None,
+        config: Config | None = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
+        boto3_client: SecretsManagerClient | None = None,
     ):
         """
         Initialize the Secrets Manager client
@@ -103,7 +103,7 @@ class SecretsProvider(BaseProvider):
 
         super().__init__(client=self.client)
 
-    def _get(self, name: str, **sdk_options) -> Union[str, bytes]:
+    def _get(self, name: str, **sdk_options) -> str | bytes:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
 
@@ -125,7 +125,7 @@ class SecretsProvider(BaseProvider):
 
         return secret_value["SecretBinary"]
 
-    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
         Retrieving multiple parameter values is not supported with AWS Secrets Manager
         """
@@ -168,9 +168,9 @@ class SecretsProvider(BaseProvider):
     def set(
         self,
         name: str,
-        value: Union[str, dict, bytes],
+        value: str | bytes | dict,
         *,  # force keyword arguments
-        client_request_token: Optional[str] = None,
+        client_request_token: str | None = None,
         **sdk_options,
     ) -> CreateSecretResponseTypeDef:
         """
@@ -265,7 +265,7 @@ def get_secret(
     name: str,
     transform: None = None,
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
 ) -> str: ...
 
@@ -275,7 +275,7 @@ def get_secret(
     name: str,
     transform: Literal["json"],
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
 ) -> dict: ...
 
@@ -285,9 +285,9 @@ def get_secret(
     name: str,
     transform: Literal["binary"],
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
-) -> Union[str, dict, bytes]: ...
+) -> str | bytes | dict: ...
 
 
 @overload
@@ -295,7 +295,7 @@ def get_secret(
     name: str,
     transform: Literal["auto"],
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
 ) -> bytes: ...
 
@@ -304,9 +304,9 @@ def get_secret(
     name: str,
     transform: TransformOptions = None,
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
-) -> Union[str, dict, bytes]:
+) -> str | bytes | dict:
     """
     Retrieve a parameter value from AWS Secrets Manager
 
@@ -370,9 +370,9 @@ def get_secret(
 
 def set_secret(
     name: str,
-    value: Union[str, bytes],
+    value: str | bytes,
     *,  # force keyword arguments
-    client_request_token: Optional[str] = None,
+    client_request_token: str | None = None,
     **sdk_options,
 ) -> CreateSecretResponseTypeDef:
     """
