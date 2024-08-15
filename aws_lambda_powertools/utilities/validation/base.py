@@ -4,7 +4,7 @@ import logging
 
 import fastjsonschema  # type: ignore
 
-from .exceptions import InvalidSchemaFormatError, SchemaValidationError
+from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
 

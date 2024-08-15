@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...exceptions import InvalidEnvelopeExpressionError
+from aws_lambda_powertools.exceptions import InvalidEnvelopeExpressionError
 
 
 class SchemaValidationError(Exception):
