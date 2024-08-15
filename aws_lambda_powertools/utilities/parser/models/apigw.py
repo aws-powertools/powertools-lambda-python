@@ -1,10 +1,10 @@
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, Union
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
+from typing import Any, Literal
 
 from pydantic import BaseModel, model_validator
-from pydantic.networks import IPvAnyNetwork
-
-from aws_lambda_powertools.utilities.parser.types import Literal
+from pydantic.networks import IPvAnyNetwork  # noqa: TCH002
 
 
 class ApiGatewayUserCertValidity(BaseModel):
@@ -21,54 +21,54 @@ class ApiGatewayUserCert(BaseModel):
 
 
 class APIGatewayEventIdentity(BaseModel):
-    accessKey: Optional[str] = None
-    accountId: Optional[str] = None
-    apiKey: Optional[str] = None
-    apiKeyId: Optional[str] = None
-    caller: Optional[str] = None
-    cognitoAuthenticationProvider: Optional[str] = None
-    cognitoAuthenticationType: Optional[str] = None
-    cognitoIdentityId: Optional[str] = None
-    cognitoIdentityPoolId: Optional[str] = None
-    principalOrgId: Optional[str] = None
+    accessKey: str | None = None
+    accountId: str | None = None
+    apiKey: str | None = None
+    apiKeyId: str | None = None
+    caller: str | None = None
+    cognitoAuthenticationProvider: str | None = None
+    cognitoAuthenticationType: str | None = None
+    cognitoIdentityId: str | None = None
+    cognitoIdentityPoolId: str | None = None
+    principalOrgId: str | None = None
     # see #1562, temp workaround until API Gateway fixes it the Test button payload
     # removing it will not be considered a regression in the future
-    sourceIp: Union[IPvAnyNetwork, Literal["test-invoke-source-ip"]]
-    user: Optional[str] = None
-    userAgent: Optional[str] = None
-    userArn: Optional[str] = None
-    clientCert: Optional[ApiGatewayUserCert] = None
+    sourceIp: IPvAnyNetwork | Literal["test-invoke-source-ip"]
+    user: str | None = None
+    userAgent: str | None = None
+    userArn: str | None = None
+    clientCert: ApiGatewayUserCert | None = None
 
 
 class APIGatewayEventAuthorizer(BaseModel):
-    claims: Optional[Dict[str, Any]] = None
-    scopes: Optional[List[str]] = None
+    claims: dict[str, Any] | None = None
+    scopes: list[str] | None = None
 
 
 class APIGatewayEventRequestContext(BaseModel):
     accountId: str
     apiId: str
-    authorizer: Optional[APIGatewayEventAuthorizer] = None
+    authorizer: APIGatewayEventAuthorizer | None = None
     stage: str
     protocol: str
     identity: APIGatewayEventIdentity
     requestId: str
     requestTime: str
     requestTimeEpoch: datetime
-    resourceId: Optional[str] = None
+    resourceId: str | None = None
     resourcePath: str
-    domainName: Optional[str] = None
-    domainPrefix: Optional[str] = None
-    extendedRequestId: Optional[str] = None
+    domainName: str | None = None
+    domainPrefix: str | None = None
+    extendedRequestId: str | None = None
     httpMethod: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     path: str
-    connectedAt: Optional[datetime] = None
-    connectionId: Optional[str] = None
-    eventType: Optional[Literal["CONNECT", "MESSAGE", "DISCONNECT"]] = None
-    messageDirection: Optional[str] = None
-    messageId: Optional[str] = None
-    routeKey: Optional[str] = None
-    operationName: Optional[str] = None
+    connectedAt: datetime | None = None
+    connectionId: str | None = None
+    eventType: Literal["CONNECT", "MESSAGE", "DISCONNECT"] | None = None
+    messageDirection: str | None = None
+    messageId: str | None = None
+    routeKey: str | None = None
+    operationName: str | None = None
 
     @model_validator(mode="before")
     def check_message_id(cls, values):
@@ -79,16 +79,16 @@ class APIGatewayEventRequestContext(BaseModel):
 
 
 class APIGatewayProxyEventModel(BaseModel):
-    version: Optional[str] = None
+    version: str | None = None
     resource: str
     path: str
     httpMethod: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    headers: Dict[str, str]
-    multiValueHeaders: Dict[str, List[str]]
-    queryStringParameters: Optional[Dict[str, str]] = None
-    multiValueQueryStringParameters: Optional[Dict[str, List[str]]] = None
+    headers: dict[str, str]
+    multiValueHeaders: dict[str, list[str]]
+    queryStringParameters: dict[str, str] | None = None
+    multiValueQueryStringParameters: dict[str, list[str]] | None = None
     requestContext: APIGatewayEventRequestContext
-    pathParameters: Optional[Dict[str, str]] = None
-    stageVariables: Optional[Dict[str, str]] = None
+    pathParameters: dict[str, str] | None = None
+    stageVariables: dict[str, str] | None = None
     isBase64Encoded: bool
-    body: Optional[Union[str, Type[BaseModel]]] = None
+    body: str | type[BaseModel] | None = None

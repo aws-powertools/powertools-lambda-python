@@ -1,28 +1,28 @@
-from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Type, Union
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
+from typing import Literal, Sequence
 
 from pydantic import BaseModel
-
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class SqsAttributesModel(BaseModel):
     ApproximateReceiveCount: str
     ApproximateFirstReceiveTimestamp: datetime
-    MessageDeduplicationId: Optional[str] = None
-    MessageGroupId: Optional[str] = None
+    MessageDeduplicationId: str | None = None
+    MessageGroupId: str | None = None
     SenderId: str
     SentTimestamp: datetime
-    SequenceNumber: Optional[str] = None
-    AWSTraceHeader: Optional[str] = None
-    DeadLetterQueueSourceArn: Optional[str] = None
+    SequenceNumber: str | None = None
+    AWSTraceHeader: str | None = None
+    DeadLetterQueueSourceArn: str | None = None
 
 
 class SqsMsgAttributeModel(BaseModel):
-    stringValue: Optional[str] = None
-    binaryValue: Optional[str] = None
-    stringListValues: List[str] = []
-    binaryListValues: List[str] = []
+    stringValue: str | None = None
+    binaryValue: str | None = None
+    stringListValues: list[str] = []
+    binaryListValues: list[str] = []
     dataType: str
 
     # context on why it's commented: https://github.com/aws-powertools/powertools-lambda-python/pull/118
@@ -53,11 +53,11 @@ class SqsMsgAttributeModel(BaseModel):
 class SqsRecordModel(BaseModel):
     messageId: str
     receiptHandle: str
-    body: Union[str, Type[BaseModel], BaseModel]
+    body: str | type[BaseModel] | BaseModel
     attributes: SqsAttributesModel
-    messageAttributes: Dict[str, SqsMsgAttributeModel]
+    messageAttributes: dict[str, SqsMsgAttributeModel]
     md5OfBody: str
-    md5OfMessageAttributes: Optional[str] = None
+    md5OfMessageAttributes: str | None = None
     eventSource: Literal["aws:sqs"]
     eventSourceARN: str
     awsRegion: str

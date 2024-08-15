@@ -1,37 +1,37 @@
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, Union
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from pydantic.networks import IPvAnyNetwork
-
-from aws_lambda_powertools.utilities.parser.types import Literal
+from pydantic.networks import IPvAnyNetwork  # noqa: TCH002
 
 
 class RequestContextV2AuthorizerIamCognito(BaseModel):
-    amr: List[str]
+    amr: list[str]
     identityId: str
     identityPoolId: str
 
 
 class RequestContextV2AuthorizerIam(BaseModel):
-    accessKey: Optional[str] = None
-    accountId: Optional[str] = None
-    callerId: Optional[str] = None
-    principalOrgId: Optional[str] = None
-    userArn: Optional[str] = None
-    userId: Optional[str] = None
-    cognitoIdentity: Optional[RequestContextV2AuthorizerIamCognito] = None
+    accessKey: str | None = None
+    accountId: str | None = None
+    callerId: str | None = None
+    principalOrgId: str | None = None
+    userArn: str | None = None
+    userId: str | None = None
+    cognitoIdentity: RequestContextV2AuthorizerIamCognito | None = None
 
 
 class RequestContextV2AuthorizerJwt(BaseModel):
-    claims: Dict[str, Any]
-    scopes: Optional[List[str]] = None
+    claims: dict[str, Any]
+    scopes: list[str] | None = None
 
 
 class RequestContextV2Authorizer(BaseModel):
-    jwt: Optional[RequestContextV2AuthorizerJwt] = None
-    iam: Optional[RequestContextV2AuthorizerIam] = None
-    lambda_value: Optional[Dict[str, Any]] = Field(None, alias="lambda")
+    jwt: RequestContextV2AuthorizerJwt | None = None
+    iam: RequestContextV2AuthorizerIam | None = None
+    lambda_value: dict[str, Any] | None = Field(None, alias="lambda")
 
 
 class RequestContextV2Http(BaseModel):
@@ -45,7 +45,7 @@ class RequestContextV2Http(BaseModel):
 class RequestContextV2(BaseModel):
     accountId: str
     apiId: str
-    authorizer: Optional[RequestContextV2Authorizer] = None
+    authorizer: RequestContextV2Authorizer | None = None
     domainName: str
     domainPrefix: str
     requestId: str
@@ -61,11 +61,11 @@ class APIGatewayProxyEventV2Model(BaseModel):
     routeKey: str
     rawPath: str
     rawQueryString: str
-    cookies: Optional[List[str]] = None
-    headers: Dict[str, str]
-    queryStringParameters: Optional[Dict[str, str]] = None
-    pathParameters: Optional[Dict[str, str]] = None
-    stageVariables: Optional[Dict[str, str]] = None
+    cookies: list[str] | None = None
+    headers: dict[str, str]
+    queryStringParameters: dict[str, str] | None = None
+    pathParameters: dict[str, str] | None = None
+    stageVariables: dict[str, str] | None = None
     requestContext: RequestContextV2
-    body: Optional[Union[str, Type[BaseModel]]] = None
+    body: str | type[BaseModel] | None = None
     isBase64Encoded: bool

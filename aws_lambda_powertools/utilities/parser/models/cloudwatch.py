@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import base64
 import json
 import logging
 import zlib
-from datetime import datetime
-from typing import List, Optional, Type, Union
+from datetime import datetime  # noqa: TCH003
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 class CloudWatchLogsLogEvent(BaseModel):
     id: str  # noqa AA03 VNE003
     timestamp: datetime
-    message: Union[str, Type[BaseModel]]
+    message: str | type[BaseModel]
 
 
 class CloudWatchLogsDecode(BaseModel):
@@ -21,9 +22,9 @@ class CloudWatchLogsDecode(BaseModel):
     owner: str
     logGroup: str
     logStream: str
-    subscriptionFilters: List[str]
-    logEvents: List[CloudWatchLogsLogEvent]
-    policyLevel: Optional[str] = None
+    subscriptionFilters: list[str]
+    logEvents: list[CloudWatchLogsLogEvent]
+    policyLevel: str | None = None
 
 
 class CloudWatchLogsData(BaseModel):

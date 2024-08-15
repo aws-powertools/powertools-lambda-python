@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -17,11 +17,11 @@ class BedrockAgentPropertyModel(BaseModel):
 
 
 class BedrockAgentRequestMediaModel(BaseModel):
-    properties: List[BedrockAgentPropertyModel]
+    properties: list[BedrockAgentPropertyModel]
 
 
 class BedrockAgentRequestBodyModel(BaseModel):
-    content: Dict[str, BedrockAgentRequestMediaModel]
+    content: dict[str, BedrockAgentRequestMediaModel]
 
 
 class BedrockAgentEventModel(BaseModel):
@@ -31,8 +31,8 @@ class BedrockAgentEventModel(BaseModel):
     action_group: str = Field(..., alias="actionGroup")
     api_path: str = Field(..., alias="apiPath")
     http_method: str = Field(..., alias="httpMethod")
-    session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
-    prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")
+    session_attributes: dict[str, str] = Field({}, alias="sessionAttributes")
+    prompt_session_attributes: dict[str, str] = Field({}, alias="promptSessionAttributes")
     agent: BedrockAgentModel
-    parameters: Optional[List[BedrockAgentPropertyModel]] = None
-    request_body: Optional[BedrockAgentRequestBodyModel] = Field(None, alias="requestBody")
+    parameters: list[BedrockAgentPropertyModel] | None = None
+    request_body: BedrockAgentRequestBodyModel | None = Field(None, alias="requestBody")

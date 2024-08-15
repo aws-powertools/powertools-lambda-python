@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Type, Union
+from __future__ import annotations
 
 from pydantic import BaseModel, HttpUrl
 
@@ -12,17 +12,17 @@ class S3ObjectContext(BaseModel):
 class S3ObjectConfiguration(BaseModel):
     accessPointArn: str
     supportingAccessPointArn: str
-    payload: Union[str, Type[BaseModel]]
+    payload: str | type[BaseModel]
 
 
 class S3ObjectUserRequest(BaseModel):
     url: str
-    headers: Dict[str, str]
+    headers: dict[str, str]
 
 
 class S3ObjectSessionIssuer(BaseModel):
     type: str  # noqa: A003, VNE003
-    userName: Optional[str] = None
+    userName: str | None = None
     principalId: str
     arn: str
     accountId: str
@@ -42,10 +42,10 @@ class S3ObjectUserIdentity(BaseModel):
     type: str  # noqa: A003
     accountId: str
     accessKeyId: str
-    userName: Optional[str] = None
+    userName: str | None = None
     principalId: str
     arn: str
-    sessionContext: Optional[S3ObjectSessionContext] = None
+    sessionContext: S3ObjectSessionContext | None = None
 
 
 class S3ObjectLambdaEvent(BaseModel):

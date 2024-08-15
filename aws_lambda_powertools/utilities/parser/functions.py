@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pydantic import TypeAdapter
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
-from aws_lambda_powertools.utilities.parser.types import T
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.parser.types import T
 
 CACHE_TYPE_ADAPTER = LRUDict(max_items=1024)
 

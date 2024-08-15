@@ -1,19 +1,19 @@
+from __future__ import annotations
+
 import json
-from typing import List, Optional
 
 from pydantic import BaseModel, PositiveInt, field_validator
 
 from aws_lambda_powertools.shared.functions import base64_decode
-from aws_lambda_powertools.utilities.parser.models import KinesisFirehoseRecordMetadata
-
-from .sqs import SqsRecordModel
+from aws_lambda_powertools.utilities.parser.models import KinesisFirehoseRecordMetadata  # noqa: TCH001
+from aws_lambda_powertools.utilities.parser.models.sqs import SqsRecordModel  # noqa: TCH001
 
 
 class KinesisFirehoseSqsRecord(BaseModel):
     data: SqsRecordModel
     recordId: str
     approximateArrivalTimestamp: PositiveInt
-    kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata] = None
+    kinesisRecordMetadata: KinesisFirehoseRecordMetadata | None = None
 
     @field_validator("data", mode="before")
     def data_base64_decode(cls, value):
@@ -25,5 +25,5 @@ class KinesisFirehoseSqsModel(BaseModel):
     invocationId: str
     deliveryStreamArn: str
     region: str
-    sourceKinesisStreamArn: Optional[str] = None
-    records: List[KinesisFirehoseSqsRecord]
+    sourceKinesisStreamArn: str | None = None
+    records: list[KinesisFirehoseSqsRecord]

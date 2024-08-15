@@ -1,9 +1,10 @@
-from datetime import datetime
-from typing import List, Optional
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
 
 from pydantic import BaseModel, Field
 
-from aws_lambda_powertools.utilities.parser.types import RawDictOrModel
+from aws_lambda_powertools.utilities.parser.types import RawDictOrModel  # noqa: TCH001
 
 
 class EventBridgeModel(BaseModel):
@@ -13,7 +14,7 @@ class EventBridgeModel(BaseModel):
     account: str
     time: datetime
     region: str
-    resources: List[str]
+    resources: list[str]
     detail_type: str = Field(None, alias="detail-type")
     detail: RawDictOrModel
-    replay_name: Optional[str] = Field(None, alias="replay-name")
+    replay_name: str | None = Field(None, alias="replay-name")

@@ -1,11 +1,10 @@
-from datetime import datetime
-from typing import Dict, List, Optional, Union
-from typing import Type as TypingType
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
+from typing import Literal
 
 from pydantic import BaseModel, model_validator
-from pydantic.networks import HttpUrl
-
-from aws_lambda_powertools.utilities.parser.types import Literal
+from pydantic.networks import HttpUrl  # noqa: TCH002
 
 
 class SnsMsgAttributeModel(BaseModel):
@@ -14,17 +13,17 @@ class SnsMsgAttributeModel(BaseModel):
 
 
 class SnsNotificationModel(BaseModel):
-    Subject: Optional[str] = None
+    Subject: str | None = None
     TopicArn: str
     UnsubscribeUrl: HttpUrl
     Type: Literal["Notification"]
-    MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]] = None
-    Message: Union[str, TypingType[BaseModel]]
+    MessageAttributes: dict[str, SnsMsgAttributeModel] | None = None
+    Message: str | type[BaseModel]
     MessageId: str
-    SigningCertUrl: Optional[HttpUrl] = None  # NOTE: FIFO opt-in removes attribute
-    Signature: Optional[str] = None  # NOTE: FIFO opt-in removes attribute
+    SigningCertUrl: HttpUrl | None = None  # NOTE: FIFO opt-in removes attribute
+    Signature: str | None = None  # NOTE: FIFO opt-in removes attribute
     Timestamp: datetime
-    SignatureVersion: Optional[str] = None  # NOTE: FIFO opt-in removes attribute
+    SignatureVersion: str | None = None  # NOTE: FIFO opt-in removes attribute
 
     @model_validator(mode="before")
     def check_sqs_protocol(cls, values):
@@ -46,4 +45,4 @@ class SnsRecordModel(BaseModel):
 
 
 class SnsModel(BaseModel):
-    Records: List[SnsRecordModel]
+    Records: list[SnsRecordModel]
