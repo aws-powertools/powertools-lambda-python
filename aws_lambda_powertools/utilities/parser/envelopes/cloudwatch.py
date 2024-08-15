@@ -1,15 +1,19 @@
-import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from __future__ import annotations
 
-from ..models import CloudWatchLogsModel
-from ..types import Model
-from .base import BaseEnvelope
+import logging
+from typing import TYPE_CHECKING, Any
+
+from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
+from aws_lambda_powertools.utilities.parser.models import CloudWatchLogsModel
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.parser.types import Model
 
 logger = logging.getLogger(__name__)
 
 
 class CloudWatchLogsEnvelope(BaseEnvelope):
-    """CloudWatch Envelope to extract a List of log records.
+    """CloudWatch Envelope to extract a list of log records.
 
     The record's body parameter is a string (after being base64 decoded and gzipped),
     though it can also be a JSON encoded string.
@@ -18,19 +22,19 @@ class CloudWatchLogsEnvelope(BaseEnvelope):
     Note: The record will be parsed the same way so if model is str
     """
 
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Optional[Model]]:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[Model]) -> list[Model | None]:
         """Parses records found with model provided
 
         Parameters
         ----------
-        data : Dict
+        data : dict
             Lambda event to be parsed
-        model : Type[Model]
+        model : type[Model]
             Data model provided to parse after extracting data using envelope
 
         Returns
         -------
-        List
+        list
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with SNS model {CloudWatchLogsModel}")
