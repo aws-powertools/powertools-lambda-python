@@ -1,35 +1,21 @@
 from __future__ import annotations
 
 import io
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import IO, TYPE_CHECKING, Any, Iterable, Literal, Sequence, TypeVar, cast, overload
 
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
     GzipTransform,
 )
-from aws_lambda_powertools.utilities.streaming.transformations.base import (
-    BaseTransform,
-    T,
-)
+from aws_lambda_powertools.utilities.streaming.transformations.base import T
 
 if TYPE_CHECKING:
     from mmap import mmap
 
     from mypy_boto3_s3.client import S3Client
+
+    from aws_lambda_powertools.utilities.streaming.transformations.base import BaseTransform
 
     _CData = TypeVar("_CData")
 
@@ -74,10 +60,10 @@ class S3Object(IO[bytes]):
         self,
         bucket: str,
         key: str,
-        version_id: Optional[str] = None,
-        boto3_client: Optional[S3Client] = None,
-        is_gzip: Optional[bool] = False,
-        is_csv: Optional[bool] = False,
+        version_id: str | None = None,
+        boto3_client: S3Client | None = None,
+        is_gzip: bool | None = False,
+        is_csv: bool | None = False,
         **sdk_options,
     ):
         self.bucket = bucket
@@ -94,14 +80,14 @@ class S3Object(IO[bytes]):
         )
 
         # Stores the list of data transformations
-        self._data_transformations: List[BaseTransform] = []
+        self._data_transformations: list[BaseTransform] = []
         if is_gzip:
             self._data_transformations.append(GzipTransform())
         if is_csv:
             self._data_transformations.append(CsvTransform())
 
         # Stores the cached transformed stream
-        self._transformed_stream: Optional[IO[bytes]] = None
+        self._transformed_stream: IO[bytes] | None = None
 
     @property
     def size(self) -> int:
@@ -152,8 +138,8 @@ class S3Object(IO[bytes]):
     def transform(
         self,
         transformations: BaseTransform[T] | Sequence[BaseTransform[T]],
-        in_place: Optional[bool] = False,
-    ) -> Optional[T]:
+        in_place: bool | None = False,
+    ) -> T | None:
         """
         Applies one or more data transformations to the stream.
 
@@ -241,10 +227,10 @@ class S3Object(IO[bytes]):
     def read(self, size: int = -1) -> bytes:
         return self.transformed_stream.read(size)
 
-    def readline(self, size: Optional[int] = -1) -> bytes:
+    def readline(self, size: int | None = -1) -> bytes:
         return self.transformed_stream.readline()
 
-    def readlines(self, hint: int = -1) -> List[bytes]:
+    def readlines(self, hint: int = -1) -> list[bytes]:
         return self.transformed_stream.readlines(hint)
 
     def __next__(self):
@@ -262,14 +248,14 @@ class S3Object(IO[bytes]):
     def isatty(self) -> bool:
         return False
 
-    def truncate(self, size: Optional[int] = 0) -> int:
+    def truncate(self, size: int | None = 0) -> int:
         raise NotImplementedError("this stream is not writable")
 
-    def write(self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]) -> int:
+    def write(self, data: bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData) -> int:
         raise NotImplementedError("this stream is not writable")
 
     def writelines(
         self,
-        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]],
+        data: Iterable[bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData],
     ) -> None:
         raise NotImplementedError("this stream is not writable")
