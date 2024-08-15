@@ -10,9 +10,8 @@ from typing import TYPE_CHECKING
 import boto3
 from boto3.dynamodb.conditions import Key
 
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
-
-from .base import BaseProvider
 
 if TYPE_CHECKING:
     from botocore.config import Config

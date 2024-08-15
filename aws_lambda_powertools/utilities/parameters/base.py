@@ -4,8 +4,6 @@ Base for Parameter providers
 
 from __future__ import annotations
 
-import base64
-import json
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
@@ -19,21 +17,12 @@ from .exceptions import GetParameterError, TransformParameterError
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
-DEFAULT_MAX_AGE_SECS = "300"
 
-# These providers will be dynamically initialized on first use of the helper functions
-DEFAULT_PROVIDERS: dict[str, Any] = {}
-TRANSFORM_METHOD_JSON = "json"
-TRANSFORM_METHOD_BINARY = "binary"
-SUPPORTED_TRANSFORM_METHODS = [TRANSFORM_METHOD_JSON, TRANSFORM_METHOD_BINARY]
-
-TRANSFORM_METHOD_MAPPING = {
-    TRANSFORM_METHOD_JSON: json.loads,
-    TRANSFORM_METHOD_BINARY: base64.b64decode,
-    ".json": json.loads,
-    ".binary": base64.b64decode,
-    None: lambda x: x,
-}
+from aws_lambda_powertools.utilities.parameters.constants import (
+    DEFAULT_MAX_AGE_SECS,
+    DEFAULT_PROVIDERS,
+    TRANSFORM_METHOD_MAPPING,
+)
 
 
 class ExpirableValue(NamedTuple):

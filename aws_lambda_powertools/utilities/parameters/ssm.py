@@ -18,10 +18,14 @@ from aws_lambda_powertools.shared.functions import (
     slice_dictionary,
 )
 from aws_lambda_powertools.utilities.parameters.base import (
-    DEFAULT_MAX_AGE_SECS,
-    DEFAULT_PROVIDERS,
     BaseProvider,
     transform_value,
+)
+from aws_lambda_powertools.utilities.parameters.constants import (
+    DEFAULT_MAX_AGE_SECS,
+    DEFAULT_PROVIDERS,
+    SSM_PARAMETER_TIER,
+    SSM_PARAMETER_TYPES,
 )
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
@@ -32,9 +36,6 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef, PutParameterResultTypeDef
 
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
-
-SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
-SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
 
 logger = logging.getLogger(__name__)
 

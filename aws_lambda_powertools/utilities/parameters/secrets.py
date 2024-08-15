@@ -15,7 +15,8 @@ import boto3
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider
+from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
 from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
