@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal, TypeVar
+from typing import Any, Dict, Literal, TypeVar, Union
 
 from pydantic import BaseModel, Json
 
 Model = TypeVar("Model", bound=BaseModel)
 EnvelopeModel = TypeVar("EnvelopeModel")
 EventParserReturnType = TypeVar("EventParserReturnType")
-AnyInheritedModel = type[BaseModel] | BaseModel
-RawDictOrModel = dict[str, Any] | AnyInheritedModel
+AnyInheritedModel = Union[type[BaseModel], BaseModel]
+RawDictOrModel = Union[Dict[str, Any], AnyInheritedModel]
 T = TypeVar("T")
 
 __all__ = ["Json", "Literal"]
