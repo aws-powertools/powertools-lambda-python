@@ -1,22 +1,14 @@
+from __future__ import annotations
+
 import io
 import logging
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import IO, TYPE_CHECKING, Any, Iterable, Sequence, TypeVar, cast
 
 import boto3
 
 from aws_lambda_powertools.shared import user_agent
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
+from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 
 if TYPE_CHECKING:
     from mmap import mmap
@@ -51,8 +43,8 @@ class _S3SeekableIO(IO[bytes]):
         self,
         bucket: str,
         key: str,
-        version_id: Optional[str] = None,
-        boto3_client: Optional["S3Client"] = None,
+        version_id: str | None = None,
+        boto3_client: S3Client | None = None,
         **sdk_options,
     ):
         self.bucket = bucket
@@ -65,10 +57,10 @@ class _S3SeekableIO(IO[bytes]):
         self._closed: bool = False
 
         # Caches the size of the object
-        self._size: Optional[int] = None
+        self._size: int | None = None
 
         self._s3_client = boto3_client
-        self._raw_stream: Optional[PowertoolsStreamingBody] = None
+        self._raw_stream: PowertoolsStreamingBody | None = None
 
         self._sdk_options = sdk_options
         self._sdk_options["Bucket"] = bucket
@@ -78,7 +70,7 @@ class _S3SeekableIO(IO[bytes]):
             self._sdk_options["VersionId"] = version_id
 
     @property
-    def s3_client(self) -> "S3Client":
+    def s3_client(self) -> S3Client:
         """
         Returns a boto3 S3 client
         """
@@ -102,7 +94,7 @@ class _S3SeekableIO(IO[bytes]):
     @property
     def raw_stream(self) -> PowertoolsStreamingBody:
         """
-        Returns the boto3 StreamingBody, starting the stream from the seeked position.
+        Returns the boto3 StreamingBody, starting the stream from the sought position.
         """
         if self._raw_stream is None:
             range_header = f"bytes={self._position}-"
@@ -152,19 +144,19 @@ class _S3SeekableIO(IO[bytes]):
     def tell(self) -> int:
         return self._position
 
-    def read(self, size: Optional[int] = -1) -> bytes:
+    def read(self, size: int | None = -1) -> bytes:
         size = None if size == -1 else size
         data = self.raw_stream.read(size)
         if data is not None:
             self._position += len(data)
         return data
 
-    def readline(self, size: Optional[int] = None) -> bytes:
+    def readline(self, size: int | None = None) -> bytes:
         data = self.raw_stream.readline(size)
         self._position += len(data)
         return data
 
-    def readlines(self, hint: int = -1) -> List[bytes]:
+    def readlines(self, hint: int = -1) -> list[bytes]:
         # boto3's StreamingResponse doesn't implement the "hint" parameter
         data = self.raw_stream.readlines()
         self._position += sum(len(line) for line in data)
@@ -194,19 +186,19 @@ class _S3SeekableIO(IO[bytes]):
         raise NotImplementedError("this stream is not backed by a file descriptor")
 
     def flush(self) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def isatty(self) -> bool:
         return False
 
-    def truncate(self, size: Optional[int] = 0) -> int:
-        raise NotImplementedError("this stream is not writable")
+    def truncate(self, size: int | None = 0) -> int:
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
-    def write(self, data: Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]) -> int:
-        raise NotImplementedError("this stream is not writable")
+    def write(self, data: bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData) -> int:
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)
 
     def writelines(
         self,
-        data: Iterable[Union[bytes, Union[bytearray, memoryview, Sequence[Any], "mmap", "_CData"]]],
+        data: Iterable[bytes | bytearray | memoryview | Sequence[Any] | mmap | _CData],
     ) -> None:
-        raise NotImplementedError("this stream is not writable")
+        raise NotImplementedError(MESSAGE_STREAM_NOT_WRITABLE)

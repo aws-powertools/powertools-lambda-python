@@ -4,7 +4,7 @@ import functools
 import json
 import logging
 from binascii import Error
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import botocore
 from aws_encryption_sdk import (
@@ -18,7 +18,6 @@ from aws_encryption_sdk.exceptions import (
     GenerateKeyError,
     NotSupportedError,
 )
-from aws_encryption_sdk.structures import MessageHeader
 
 from aws_lambda_powertools.shared.functions import (
     base64_decode,
@@ -76,7 +75,7 @@ class AWSEncryptionSDKProvider(BaseProvider):
 
     def __init__(
         self,
-        keys: List[str],
+        keys: list[str],
         key_provider=None,
         local_cache_capacity: int = CACHE_CAPACITY,
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
@@ -112,7 +111,7 @@ class KMSKeyProvider:
 
     def __init__(
         self,
-        keys: List[str],
+        keys: list[str],
         json_serializer: Callable[..., str],
         json_deserializer: Callable[[str], Any],
         local_cache_capacity: int = CACHE_CAPACITY,
@@ -143,7 +142,7 @@ class KMSKeyProvider:
 
         Parameters
         -------
-            data : Union[bytes, str]
+            data : Any
                 The data to be encrypted.
             provider_options : dict
                 Additional options for the aws_encryption_sdk.EncryptionSDKClient
@@ -180,7 +179,7 @@ class KMSKeyProvider:
 
         Parameters
         -------
-            data : Union[bytes, str]
+            data : str
                 The encrypted data, as a base64-encoded string
             provider_options
                 Additional options for the aws_encryption_sdk.EncryptionSDKClient
@@ -201,8 +200,6 @@ class KMSKeyProvider:
             )
 
         try:
-            decryptor_header: MessageHeader
-
             ciphertext, decryptor_header = self.client.decrypt(
                 source=ciphertext_decoded,
                 key_provider=self.key_provider,

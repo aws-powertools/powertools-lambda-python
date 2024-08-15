@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from aws_lambda_powertools.utilities.parser.functions import _retrieve_or_set_model_from_cache
-from aws_lambda_powertools.utilities.parser.types import T
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +16,12 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: type[T]) -> Union[T, None]:
+    def _parse(data: dict[str, Any] | Any | None, model: type[T]) -> T | None:
         """Parses envelope data against model provided
 
         Parameters
         ----------
-        data : Dict
+        data : dict
             Data to be parsed and validated
         model : type[T]
             Data model to parse and validate data against
@@ -43,7 +45,7 @@ class BaseEnvelope(ABC):
         return adapter.validate_python(data)
 
     @abstractmethod
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: type[T]):
+    def parse(self, data: dict[str, Any] | Any | None, model: type[T]):
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.
