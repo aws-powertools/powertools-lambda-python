@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from typing import IO, Generic, TypeVar
+from typing import IO, Generic
 
-T = TypeVar("T", bound=IO[bytes])
+from aws_lambda_powertools.utilities.streaming.types import T
 
 
 class BaseTransform(Generic[T]):
