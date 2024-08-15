@@ -2,26 +2,28 @@
 AWS App Config configuration retrieval and caching utility
 """
 
+from __future__ import annotations
+
 import os
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING
 
 import boto3
-from botocore.config import Config
-
-from aws_lambda_powertools.utilities.parameters.types import TransformOptions
-from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
-
-if TYPE_CHECKING:
-    from mypy_boto3_appconfigdata.client import AppConfigDataClient
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     resolve_env_var_choice,
     resolve_max_age,
 )
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider
+from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
-from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+if TYPE_CHECKING:
+    from botocore.config import Config
+    from mypy_boto3_appconfigdata.client import AppConfigDataClient
+
+    from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 
 class AppConfigProvider(BaseProvider):
@@ -72,11 +74,11 @@ class AppConfigProvider(BaseProvider):
     def __init__(
         self,
         environment: str,
-        application: Optional[str] = None,
-        config: Optional[Config] = None,
-        boto_config: Optional[Config] = None,
-        boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional["AppConfigDataClient"] = None,
+        application: str | None = None,
+        config: Config | None = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
+        boto3_client: AppConfigDataClient | None = None,
     ):
         """
         Initialize the App Config client
@@ -105,9 +107,9 @@ class AppConfigProvider(BaseProvider):
         self.environment = environment
         self.current_version = ""
 
-        self._next_token: Dict[str, str] = {}  # nosec - token for get_latest_configuration executions
+        self._next_token: dict[str, str] = {}  # nosec - token for get_latest_configuration executions
         # Dict to store the recently retrieved value for a specific configuration.
-        self.last_returned_value: Dict[str, bytes] = {}
+        self.last_returned_value: dict[str, bytes] = {}
 
         super().__init__(client=self.client)
 
@@ -145,7 +147,7 @@ class AppConfigProvider(BaseProvider):
 
         return self.last_returned_value[name]
 
-    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
         Retrieving multiple parameter values is not supported with AWS App Config Provider
         """
@@ -155,12 +157,12 @@ class AppConfigProvider(BaseProvider):
 def get_app_config(
     name: str,
     environment: str,
-    application: Optional[str] = None,
+    application: str | None = None,
     transform: TransformOptions = None,
     force_fetch: bool = False,
-    max_age: Optional[int] = None,
+    max_age: int | None = None,
     **sdk_options,
-) -> Union[str, list, dict, bytes]:
+) -> str | bytes | list | dict:
     """
     Retrieve a configuration value from AWS App Config.
 
