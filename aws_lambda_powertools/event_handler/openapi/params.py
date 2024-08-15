@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import inspect
 from enum import Enum
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
@@ -16,7 +18,9 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     field_annotation_is_scalar,
     get_annotation_from_field_info,
 )
-from aws_lambda_powertools.event_handler.openapi.types import CacheKey
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
 """
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
@@ -42,21 +46,21 @@ class Dependant:
     def __init__(
         self,
         *,
-        path_params: Optional[List[ModelField]] = None,
-        query_params: Optional[List[ModelField]] = None,
-        header_params: Optional[List[ModelField]] = None,
-        cookie_params: Optional[List[ModelField]] = None,
-        body_params: Optional[List[ModelField]] = None,
-        return_param: Optional[ModelField] = None,
-        response_extra_models: Optional[List[ModelField]] = None,
-        name: Optional[str] = None,
-        call: Optional[Callable[..., Any]] = None,
-        request_param_name: Optional[str] = None,
-        websocket_param_name: Optional[str] = None,
-        http_connection_param_name: Optional[str] = None,
-        response_param_name: Optional[str] = None,
-        background_tasks_param_name: Optional[str] = None,
-        path: Optional[str] = None,
+        path_params: list[ModelField] | None = None,
+        query_params: list[ModelField] | None = None,
+        header_params: list[ModelField] | None = None,
+        cookie_params: list[ModelField] | None = None,
+        body_params: list[ModelField] | None = None,
+        return_param: ModelField | None = None,
+        response_extra_models: list[ModelField] | None = None,
+        name: str | None = None,
+        call: Callable[..., Any] | None = None,
+        request_param_name: str | None = None,
+        websocket_param_name: str | None = None,
+        http_connection_param_name: str | None = None,
+        response_param_name: str | None = None,
+        background_tasks_param_name: str | None = None,
+        path: str | None = None,
     ) -> None:
         self.path_params = path_params or []
         self.query_params = query_params or []
@@ -89,33 +93,33 @@ class Param(FieldInfo):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # MAINTENANCE: validation_alias: str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         """
@@ -167,13 +171,13 @@ class Param(FieldInfo):
             Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
         decimal_places: int, optional
             Only applies to Decimals, requires the field to have at most a number of decimal places
-        examples: List[Any], optional
+        examples: list[Any], optional
             A list of examples for the parameter
         deprecated: bool, optional
             If `True`, the parameter will be marked as deprecated
         include_in_schema: bool, optional
             If `False`, the parameter will be excluded from the generated OpenAPI schema
-        json_schema_extra: Dict[str, Any], optional
+        json_schema_extra: dict[str, Any], optional
             Extra values to include in the generated OpenAPI schema
         """
         self.deprecated = deprecated
@@ -234,33 +238,33 @@ class Path(Param):
         self,
         default: Any = ...,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # MAINTENANCE: validation_alias: str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         """
@@ -312,13 +316,13 @@ class Path(Param):
             Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
         decimal_places: int, optional
             Only applies to Decimals, requires the field to have at most a number of decimal places
-        examples: List[Any], optional
+        examples: list[Any], optional
             A list of examples for the parameter
         deprecated: bool, optional
             If `True`, the parameter will be marked as deprecated
         include_in_schema: bool, optional
             If `False`, the parameter will be excluded from the generated OpenAPI schema
-        json_schema_extra: Dict[str, Any], optional
+        json_schema_extra: dict[str, Any], optional
             Extra values to include in the generated OpenAPI schema
         """
         if default is not ...:
@@ -366,31 +370,31 @@ class Query(Param):
         self,
         default: Any = _Unset,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         """
@@ -442,13 +446,13 @@ class Query(Param):
             Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
         decimal_places: int, optional
             Only applies to Decimals, requires the field to have at most a number of decimal places
-        examples: List[Any], optional
+        examples: list[Any], optional
             A list of examples for the parameter
         deprecated: bool, optional
             If `True`, the parameter will be marked as deprecated
         include_in_schema: bool, optional
             If `False`, the parameter will be excluded from the generated OpenAPI schema
-        json_schema_extra: Dict[str, Any], optional
+        json_schema_extra: dict[str, Any], optional
             Extra values to include in the generated OpenAPI schema
         """
         super().__init__(
@@ -493,34 +497,34 @@ class Header(Param):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
         convert_underscores: bool = True,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         """
@@ -575,13 +579,13 @@ class Header(Param):
             Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
         decimal_places: int, optional
             Only applies to Decimals, requires the field to have at most a number of decimal places
-        examples: List[Any], optional
+        examples: list[Any], optional
             A list of examples for the parameter
         deprecated: bool, optional
             If `True`, the parameter will be marked as deprecated
         include_in_schema: bool, optional
             If `False`, the parameter will be excluded from the generated OpenAPI schema
-        json_schema_extra: Dict[str, Any], optional
+        json_schema_extra: dict[str, Any], optional
             Extra values to include in the generated OpenAPI schema
         """
         self.convert_underscores = convert_underscores
@@ -622,7 +626,7 @@ class Header(Param):
         return self._alias
 
     @alias.setter
-    def alias(self, value: Optional[str] = None):
+    def alias(self, value: str | None = None):
         if value is not None:
             # Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the parameter name
             # This ensures that customers can access headers with any casing, as per the RFC guidelines.
@@ -639,35 +643,35 @@ class Body(FieldInfo):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
         embed: bool = False,
         media_type: str = "application/json",
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         self.embed = embed
@@ -726,34 +730,34 @@ class _Form(Body):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
         media_type: str = "application/x-www-form-urlencoded",
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         super().__init__(
@@ -798,34 +802,34 @@ class _File(_Form):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
-        annotation: Optional[Any] = None,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
         media_type: str = "multipart/form-data",
-        alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: Union[str, None] = None,
-        serialization_alias: Union[str, None] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
-        discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
-        examples: Optional[List[Any]] = None,
-        deprecated: Optional[bool] = None,
+        validation_alias: str | None = None,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        deprecated: bool | None = None,
         include_in_schema: bool = True,
-        json_schema_extra: Union[Dict[str, Any], None] = None,
+        json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
         super().__init__(
@@ -862,7 +866,7 @@ class _File(_Form):
 
 def get_flat_dependant(
     dependant: Dependant,
-    visited: Optional[List[CacheKey]] = None,
+    visited: list[CacheKey] | None = None,
 ) -> Dependant:
     """
     Flatten a recursive Dependant model structure.
@@ -877,7 +881,7 @@ def get_flat_dependant(
         The dependant model to flatten
     skip_repeats: bool
         If True, child Dependents already visited will be skipped to avoid duplicates
-    visited: List[CacheKey], optional
+    visited: list[CacheKey], optional
         Keeps track of visited Dependents to avoid infinite recursion. Defaults to empty list.
 
     Returns
@@ -906,7 +910,7 @@ def analyze_param(
     value: Any,
     is_path_param: bool,
     is_response_param: bool,
-) -> Optional[ModelField]:
+) -> ModelField | None:
     """
     Analyze a parameter annotation and value to determine the type and default value of the parameter.
 
@@ -925,7 +929,7 @@ def analyze_param(
 
     Returns
     -------
-    Optional[ModelField]
+    ModelField | None
         The type annotation and the Pydantic field representing the parameter
     """
     field_info, type_annotation = get_field_info_and_type_annotation(annotation, value, is_path_param)
@@ -958,11 +962,11 @@ def analyze_param(
     return field
 
 
-def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> tuple[FieldInfo | None, Any]:
     """
     Get the FieldInfo and type annotation from an annotation and value.
     """
-    field_info: Optional[FieldInfo] = None
+    field_info: FieldInfo | None = None
     type_annotation: Any = Any
 
     if annotation is not inspect.Signature.empty:
@@ -979,7 +983,7 @@ def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -
     return field_info, type_annotation
 
 
-def get_field_info_response_type(annotation, value) -> Tuple[Optional[FieldInfo], Any]:
+def get_field_info_response_type(annotation, value) -> tuple[FieldInfo | None, Any]:
     # Example: get_args(Response[inner_type]) == (inner_type,)  # noqa: ERA001
     (inner_type,) = get_args(annotation)
 
@@ -987,11 +991,11 @@ def get_field_info_response_type(annotation, value) -> Tuple[Optional[FieldInfo]
     return get_field_info_and_type_annotation(inner_type, value, False)
 
 
-def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tuple[FieldInfo | None, Any]:
     """
     Get the FieldInfo and type annotation from an Annotated type.
     """
-    field_info: Optional[FieldInfo] = None
+    field_info: FieldInfo | None = None
     annotated_args = get_args(annotation)
     type_annotation = annotated_args[0]
     powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
@@ -1022,12 +1026,12 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tup
 
 def create_response_field(
     name: str,
-    type_: Type[Any],
-    default: Optional[Any] = Undefined,
-    required: Union[bool, UndefinedType] = Undefined,
-    model_config: Type[BaseConfig] = BaseConfig,
-    field_info: Optional[FieldInfo] = None,
-    alias: Optional[str] = None,
+    type_: type[Any],
+    default: Any | None = Undefined,
+    required: bool | UndefinedType = Undefined,
+    model_config: type[BaseConfig] = BaseConfig,
+    field_info: FieldInfo | None = None,
+    alias: str | None = None,
     mode: Literal["validation", "serialization"] = "validation",
 ) -> ModelField:
     """
@@ -1045,11 +1049,11 @@ def create_response_field(
 
 
 def _create_model_field(
-    field_info: Optional[FieldInfo],
+    field_info: FieldInfo | None,
     type_annotation: Any,
     param_name: str,
     is_path_param: bool,
-) -> Optional[ModelField]:
+) -> ModelField | None:
     """
     Create a new ModelField from a FieldInfo and type annotation.
     """

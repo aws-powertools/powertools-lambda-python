@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import inspect
 import re
-from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, Tuple, Type, cast
-
-from pydantic import BaseModel
+from typing import TYPE_CHECKING, Any, Callable, ForwardRef, cast
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
@@ -25,6 +25,9 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     get_flat_dependant,
 )
 from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse, OpenAPIResponseContentModel
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
 
 """
 This turns the opaque function signature into typed, validated models.
@@ -76,7 +79,7 @@ def add_param_to_fields(
         raise AssertionError(f"Unsupported param type: {field_info.in_}")
 
 
-def get_typed_annotation(annotation: Any, globalns: Dict[str, Any]) -> Any:
+def get_typed_annotation(annotation: Any, globalns: dict[str, Any]) -> Any:
     """
     Evaluates a type annotation, which can be a string or a ForwardRef.
     """
@@ -128,7 +131,7 @@ def get_typed_signature(call: Callable[..., Any]) -> inspect.Signature:
         return inspect.Signature(typed_params)
 
 
-def get_path_param_names(path: str) -> Set[str]:
+def get_path_param_names(path: str) -> set[str]:
     """
     Returns the path parameter names from a path template. Those are the strings between { and }.
 
@@ -139,7 +142,7 @@ def get_path_param_names(path: str) -> Set[str]:
 
     Returns
     -------
-    Set[str]
+    set[str]
         The path parameter names
 
     """
@@ -150,8 +153,8 @@ def get_dependant(
     *,
     path: str,
     call: Callable[..., Any],
-    name: Optional[str] = None,
-    responses: Optional[Dict[int, OpenAPIResponse]] = None,
+    name: str | None = None,
+    responses: dict[int, OpenAPIResponse] | None = None,
 ) -> Dependant:
     """
     Returns a dependant model for a handler function. A dependant model is a model that contains
@@ -165,7 +168,7 @@ def get_dependant(
         The handler function
     name: str, optional
         The name of the handler function
-    responses: List[Dict[int, OpenAPIResponse]], optional
+    responses: list[dict[int, OpenAPIResponse]], optional
         The list of extra responses for the handler function
 
     Returns
@@ -210,7 +213,7 @@ def get_dependant(
     return dependant
 
 
-def _add_extra_responses(dependant: Dependant, responses: Optional[Dict[int, OpenAPIResponse]]):
+def _add_extra_responses(dependant: Dependant, responses: dict[int, OpenAPIResponse] | None):
     # Also add the optional extra responses to the dependant model.
     if not responses:
         return
@@ -278,7 +281,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return True
 
 
-def get_flat_params(dependant: Dependant) -> List[ModelField]:
+def get_flat_params(dependant: Dependant) -> list[ModelField]:
     """
     Get a list of all the parameters from a Dependant object.
 
@@ -289,7 +292,7 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
 
     Returns
     -------
-    List[ModelField]
+    list[ModelField]
         A list of ModelField objects containing the flat parameters from the Dependant object.
 
     """
@@ -302,7 +305,7 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
     )
 
 
-def get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
+def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
     """
     Get the Body field for a given Dependant object.
     """
@@ -348,24 +351,24 @@ def get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
 
 def get_body_field_info(
     *,
-    body_model: Type[BaseModel],
+    body_model: type[BaseModel],
     flat_dependant: Dependant,
     required: bool,
-) -> Tuple[Type[Body], Dict[str, Any]]:
+) -> tuple[type[Body], dict[str, Any]]:
     """
     Get the Body field info and kwargs for a given body model.
     """
 
-    body_field_info_kwargs: Dict[str, Any] = {"annotation": body_model, "alias": "body"}
+    body_field_info_kwargs: dict[str, Any] = {"annotation": body_model, "alias": "body"}
 
     if not required:
         body_field_info_kwargs["default"] = None
 
     if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
-        # MAINTENANCE: body_field_info: Type[Body] = _File
+        # MAINTENANCE: body_field_info: type[Body] = _File
         raise NotImplementedError("_File fields are not supported in request bodies")
     elif any(isinstance(f.field_info, _Form) for f in flat_dependant.body_params):
-        # MAINTENANCE: body_field_info: Type[Body] = _Form
+        # MAINTENANCE: body_field_info: type[Body] = _Form
         raise NotImplementedError("_Form fields are not supported in request bodies")
     else:
         body_field_info = Body
