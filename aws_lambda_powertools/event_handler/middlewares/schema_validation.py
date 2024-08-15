@@ -1,12 +1,16 @@
-import logging
-from typing import Dict, Optional
+from __future__ import annotations
 
-from aws_lambda_powertools.event_handler.api_gateway import Response
+import logging
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError, InternalServerError
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
-from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from aws_lambda_powertools.utilities.validation import validate
 from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.api_gateway import Response
+    from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
 logger = logging.getLogger(__name__)
 
@@ -48,21 +52,21 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
 
     def __init__(
         self,
-        inbound_schema: Dict,
-        inbound_formats: Optional[Dict] = None,
-        outbound_schema: Optional[Dict] = None,
-        outbound_formats: Optional[Dict] = None,
+        inbound_schema: dict,
+        inbound_formats: dict | None = None,
+        outbound_schema: dict | None = None,
+        outbound_formats: dict | None = None,
     ):
         """See [Validation utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/validation/) docs for examples on all parameters.
 
         Parameters
         ----------
-        inbound_schema : Dict
+        inbound_schema : dict
             JSON Schema to validate incoming event
-        inbound_formats : Optional[Dict], optional
+        inbound_formats : dict | None, optional
             Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool, by default None
             JSON Schema to validate outbound event, by default None
-        outbound_formats : Optional[Dict], optional
+        outbound_formats : dict | None, optional
             Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool, by default None
         """  # noqa: E501
         super().__init__()
