@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
     GzipTransform,
 )
-from aws_lambda_powertools.utilities.streaming.transformations.base import T
+from aws_lambda_powertools.utilities.streaming.types import T
 
 if TYPE_CHECKING:
     from mmap import mmap
