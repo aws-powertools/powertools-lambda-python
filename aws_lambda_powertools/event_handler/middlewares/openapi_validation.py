@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequen
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
+from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
-    ModelField,
     _model_dump,
     _normalize_errors,
     _regenerate_error_with_loc,
@@ -24,6 +23,8 @@ from aws_lambda_powertools.event_handler.openapi.params import Param
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler import Response
     from aws_lambda_powertools.event_handler.api_gateway import Route
+    from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
+    from aws_lambda_powertools.event_handler.openapi.compat import ModelField
     from aws_lambda_powertools.event_handler.openapi.types import IncEx
     from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
