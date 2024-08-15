@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -25,7 +25,7 @@ class PartialFailureCallback(BaseModel):
     error_msg: str
 
 
-OrderCallback = Annotated[SuccessCallback | ErrorCallback | PartialFailureCallback, Field(discriminator="status")]
+OrderCallback = Annotated[Union[SuccessCallback, ErrorCallback, PartialFailureCallback], Field(discriminator="status")]
 
 
 @event_parser
