@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-from aws_lambda_powertools.utilities.typing.lambda_client_context import (
-    LambdaClientContext,
-)
-from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import (
-    LambdaCognitoIdentity,
-)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing.lambda_client_context import (
+        LambdaClientContext,
+    )
+    from aws_lambda_powertools.utilities.typing.lambda_cognito_identity import (
+        LambdaCognitoIdentity,
+    )
 
 
 class LambdaContext(object):
@@ -14,10 +19,10 @@ class LambdaContext(object):
     -------
     **A Lambda function using LambdaContext**
 
-        >>> from typing import Any, Dict
+        >>> from typing import Any
         >>> from aws_lambda_powertools.utilities.typing import LambdaContext
         >>>
-        >>> def handler(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
+        >>> def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
         >>>     # Insert business logic
         >>>     return event
 

@@ -8,7 +8,7 @@ import re
 import warnings
 from binascii import Error as BinAsciiError
 from pathlib import Path
-from typing import Any, Dict, Generator, Optional, Union, overload
+from typing import Any, Generator, overload
 
 from aws_lambda_powertools.shared import constants
 
@@ -32,7 +32,7 @@ def strtobool(value: str) -> bool:
     raise ValueError(f"invalid truth value {value!r}")
 
 
-def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bool:
+def resolve_truthy_env_var_choice(env: str, choice: bool | None = None) -> bool:
     """Pick explicit choice over truthy env value, if available, otherwise return truthy env value
 
     NOTE: Environment variable should be resolved by the caller.
@@ -52,27 +52,27 @@ def resolve_truthy_env_var_choice(env: str, choice: Optional[bool] = None) -> bo
     return choice if choice is not None else strtobool(env)
 
 
-def resolve_max_age(env: str, choice: Optional[int]) -> int:
+def resolve_max_age(env: str, choice: int | None) -> int:
     """Resolve max age value"""
     return choice if choice is not None else int(env)
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: float) -> float: ...
+def resolve_env_var_choice(env: str | None, choice: float) -> float: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: str) -> str: ...
+def resolve_env_var_choice(env: str | None, choice: str) -> str: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str: ...
+def resolve_env_var_choice(env: str | None, choice: str | None) -> str: ...
 
 
 def resolve_env_var_choice(
-    env: Optional[str] = None,
-    choice: Optional[Union[str, float]] = None,
-) -> Optional[Union[str, float]]:
+    env: str | None = None,
+    choice: str | float | None = None,
+) -> str | float | None:
     """Pick explicit choice over env, if available, otherwise return env value received
 
     NOTE: Environment variable should be resolved by the caller.
@@ -136,12 +136,12 @@ def powertools_debug_is_set() -> bool:
     return False
 
 
-def slice_dictionary(data: Dict, chunk_size: int) -> Generator[Dict, None, None]:
+def slice_dictionary(data: dict, chunk_size: int) -> Generator[dict, None, None]:
     for _ in range(0, len(data), chunk_size):
         yield {dict_key: data[dict_key] for dict_key in itertools.islice(data, chunk_size)}
 
 
-def extract_event_from_common_models(data: Any) -> Dict | Any:
+def extract_event_from_common_models(data: Any) -> dict | Any:
     """Extract raw event from common types used in Powertools
 
     If event cannot be extracted, return received data as is.
