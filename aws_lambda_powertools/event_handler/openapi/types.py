@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import types
 from enum import Enum
-from typing import Any, Callable, Dict, Set, TypedDict, Union
+from typing import Any, Callable, Dict, Set, Type, TypedDict, Union
 
 from pydantic import BaseModel
 from typing_extensions import NotRequired
 
 CacheKey = Union[Callable[..., Any], None]
 IncEx = Union[Set[int], Set[str], Dict[int, Any], Dict[str, Any]]
-TypeModelOrEnum = Union[type[BaseModel], type[Enum]]
+TypeModelOrEnum = Union[Type[BaseModel], Type[Enum]]
 ModelNameMap = Dict[TypeModelOrEnum, str]
 UnionType = getattr(types, "UnionType", Union)
 

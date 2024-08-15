@@ -1,8 +1,6 @@
-# ruff: noqa: E501
-from __future__ import annotations
-
+# ruff: noqa: E501 FA100
 import warnings
-from typing import Sequence
+from typing import Dict, Optional, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -19,14 +17,14 @@ class OAuth2Config(BaseModel):
     """
 
     # The client ID for the OAuth2 application
-    clientId: str | None = Field(alias="client_id", default=None)
+    clientId: Optional[str] = Field(alias="client_id", default=None)
 
     # The client secret for the OAuth2 application. This is sensitive information and requires the explicit presence
     # of the POWERTOOLS_DEV environment variable.
-    clientSecret: str | None = Field(alias="client_secret", default=None)
+    clientSecret: Optional[str] = Field(alias="client_secret", default=None)
 
     # The realm in which the OAuth2 application is registered. Optional.
-    realm: str | None = Field(default=None)
+    realm: Optional[str] = Field(default=None)
 
     # The name of the OAuth2 application
     appName: str = Field(alias="app_name")
@@ -35,7 +33,7 @@ class OAuth2Config(BaseModel):
     scopes: Sequence[str] = Field(default=[])
 
     # Additional query string parameters to be included in the OAuth2 request. Defaults to an empty dictionary.
-    additionalQueryStringParams: dict[str, str] = Field(alias="additional_query_string_params", default={})
+    additionalQueryStringParams: Dict[str, str] = Field(alias="additional_query_string_params", default={})
 
     # Whether to use basic authentication with the access code grant type. Defaults to False.
     useBasicAuthenticationWithAccessCodeGrant: bool = Field(
@@ -49,7 +47,7 @@ class OAuth2Config(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
     @field_validator("clientSecret")
-    def client_secret_only_on_dev(cls, v: str | None) -> str | None:
+    def client_secret_only_on_dev(cls, v: Optional[str]) -> Optional[str]:
         if not v:
             return None
 
