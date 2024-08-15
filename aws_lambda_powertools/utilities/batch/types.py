@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import sys
-from typing import List, Optional, Type, TypedDict, Union
+from typing import Optional, TypedDict, Union
 
 has_pydantic = "pydantic" in sys.modules
 
@@ -12,9 +14,9 @@ if has_pydantic:  # pragma: no cover
     )
 
     BatchTypeModels = Optional[
-        Union[Type[SqsRecordModel], Type[DynamoDBStreamRecordModel], Type[KinesisDataStreamRecordModel]]
+        Union[type[SqsRecordModel], type[DynamoDBStreamRecordModel], type[KinesisDataStreamRecordModel]]
     ]
-    BatchSqsTypeModel = Optional[Type[SqsRecordModel]]
+    BatchSqsTypeModel = Optional[type[SqsRecordModel]]
 else:  # pragma: no cover
     BatchTypeModels = "BatchTypeModels"  # type: ignore
     BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore
@@ -25,4 +27,4 @@ class PartialItemFailures(TypedDict):
 
 
 class PartialItemFailureResponse(TypedDict):
-    batchItemFailures: List[PartialItemFailures]
+    batchItemFailures: list[PartialItemFailures]

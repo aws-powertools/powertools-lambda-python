@@ -6,13 +6,13 @@ from __future__ import annotations
 
 import traceback
 from types import TracebackType
-from typing import List, Optional, Tuple, Type
+from typing import Optional, Tuple
 
-ExceptionInfo = Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]]
+ExceptionInfo = Tuple[Optional[type[BaseException]], Optional[BaseException], Optional[TracebackType]]
 
 
 class BaseBatchProcessingError(Exception):
-    def __init__(self, msg="", child_exceptions: List[ExceptionInfo] | None = None):
+    def __init__(self, msg="", child_exceptions: list[ExceptionInfo] | None = None):
         super().__init__(msg)
         self.msg = msg
         self.child_exceptions = child_exceptions or []
@@ -30,7 +30,7 @@ class BaseBatchProcessingError(Exception):
 class BatchProcessingError(BaseBatchProcessingError):
     """When all batch records failed to be processed"""
 
-    def __init__(self, msg="", child_exceptions: List[ExceptionInfo] | None = None):
+    def __init__(self, msg="", child_exceptions: list[ExceptionInfo] | None = None):
         super().__init__(msg, child_exceptions)
 
     def __str__(self):
