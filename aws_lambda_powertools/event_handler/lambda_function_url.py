@@ -1,11 +1,15 @@
-from typing import Callable, Dict, List, Optional, Pattern, Union
+from __future__ import annotations
 
-from aws_lambda_powertools.event_handler import CORSConfig
+from typing import TYPE_CHECKING, Callable, Pattern
+
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     ProxyEventType,
 )
-from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler import CORSConfig
+    from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
 
 
 class LambdaFunctionUrlResolver(ApiGatewayResolver):
@@ -48,10 +52,10 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
 
     def __init__(
         self,
-        cors: Optional[CORSConfig] = None,
-        debug: Optional[bool] = None,
-        serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        cors: CORSConfig | None = None,
+        debug: bool | None = None,
+        serializer: Callable[[dict], str] | None = None,
+        strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
     ):
         super().__init__(
