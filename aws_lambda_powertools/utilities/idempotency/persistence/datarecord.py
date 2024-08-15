@@ -2,11 +2,12 @@
 Data Class for idempotency records.
 """
 
+from __future__ import annotations
+
 import datetime
 import json
 import logging
 from types import MappingProxyType
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,8 @@ class DataRecord:
         self,
         idempotency_key: str,
         status: str = "",
-        expiry_timestamp: Optional[int] = None,
-        in_progress_expiry_timestamp: Optional[int] = None,
+        expiry_timestamp: int | None = None,
+        in_progress_expiry_timestamp: int | None = None,
         response_data: str = "",
         payload_hash: str = "",
     ) -> None:
@@ -81,13 +82,13 @@ class DataRecord:
 
         raise IdempotencyInvalidStatusError(self._status)
 
-    def response_json_as_dict(self) -> Optional[dict]:
+    def response_json_as_dict(self) -> dict | None:
         """
         Get response data deserialized to python dict
 
         Returns
         -------
-        Optional[dict]
+        dict | None
             previous response data deserialized
         """
         return json.loads(self.response_data) if self.response_data else None
