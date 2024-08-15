@@ -1,7 +1,11 @@
-from datetime import datetime
+from __future__ import annotations
+
 from enum import Enum
 from io import StringIO
-from typing import List, Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class SameSite(Enum):
@@ -41,10 +45,10 @@ class Cookie:
         domain: str = "",
         secure: bool = True,
         http_only: bool = False,
-        max_age: Optional[int] = None,
-        expires: Optional[datetime] = None,
-        same_site: Optional[SameSite] = None,
-        custom_attributes: Optional[List[str]] = None,
+        max_age: int | None = None,
+        expires: datetime | None = None,
+        same_site: SameSite | None = None,
+        custom_attributes: list[str] | None = None,
     ):
         """
 
@@ -62,13 +66,13 @@ class Cookie:
             Marks the cookie as secure, only sendable to the server with an encrypted request over the HTTPS protocol
         http_only: bool
             Enabling this attribute makes the cookie inaccessible to the JavaScript `Document.cookie` API
-        max_age: Optional[int]
+        max_age: int | None
             Defines the period of time after which the cookie is invalid. Use negative values to force cookie deletion.
-        expires: Optional[datetime]
+        expires: datetime | None
             Defines a date where the permanent cookie expires.
-        same_site: Optional[SameSite]
+        same_site: SameSite | None
             Determines if the cookie should be sent to third party websites
-        custom_attributes: Optional[List[str]]
+        custom_attributes: list[str] | None
             List of additional custom attributes to set on the cookie
         """
         self.name = name
