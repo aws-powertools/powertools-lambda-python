@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Callable, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +21,7 @@ class BaseRouter:
     def __init__(self):
         self._resolvers: dict = {}
 
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
+    def resolver(self, type_name: str = "*", field_name: str | None = None):
         """Registers the resolver for field_name
 
         Parameters
@@ -83,7 +87,7 @@ class AppSyncResolver(BaseRouter):
         self,
         event: dict,
         context: LambdaContext,
-        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
+        data_model: type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Resolve field_name
 
@@ -189,12 +193,12 @@ class AppSyncResolver(BaseRouter):
         self,
         event: dict,
         context: LambdaContext,
-        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
+        data_model: type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context, data_model)
 
-    def include_router(self, router: "Router") -> None:
+    def include_router(self, router: Router) -> None:
         """Adds all resolvers defined in a router
 
         Parameters

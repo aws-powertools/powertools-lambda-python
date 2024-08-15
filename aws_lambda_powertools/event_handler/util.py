@@ -1,4 +1,6 @@
-from typing import Any, Mapping, Optional
+from __future__ import annotations
+
+from typing import Any, Mapping
 
 
 class _FrozenDict(dict):
@@ -16,7 +18,7 @@ class _FrozenDict(dict):
         return hash(frozenset(self.keys()))
 
 
-def extract_origin_header(resolved_headers: Mapping[str, Any]) -> Optional[str]:
+def extract_origin_header(resolved_headers: Mapping[str, Any]) -> str | None:
     """
     Extracts the 'origin' or 'Origin' header from the provided resolver headers.
 
@@ -26,7 +28,7 @@ def extract_origin_header(resolved_headers: Mapping[str, Any]) -> Optional[str]:
         resolved_headers (Mapping): A dictionary containing the headers.
 
     Returns:
-        Optional[str]: The value(s) of the origin header or None.
+        str | None: The value(s) of the origin header or None.
     """
     resolved_header = resolved_headers.get("origin")
     if isinstance(resolved_header, list):
