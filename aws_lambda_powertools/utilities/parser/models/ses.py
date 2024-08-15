@@ -1,10 +1,9 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
-from typing import Literal
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
-from pydantic.types import PositiveInt  # noqa: TCH002
+from pydantic.types import PositiveInt
 
 
 class SesReceiptVerdict(BaseModel):
@@ -20,7 +19,7 @@ class SesReceiptAction(BaseModel):
 class SesReceipt(BaseModel):
     timestamp: datetime
     processingTimeMillis: PositiveInt
-    recipients: list[str]
+    recipients: List[str]
     spamVerdict: SesReceiptVerdict
     virusVerdict: SesReceiptVerdict
     spfVerdict: SesReceiptVerdict
@@ -34,12 +33,12 @@ class SesMailHeaders(BaseModel):
 
 
 class SesMailCommonHeaders(BaseModel):
-    header_from: list[str] = Field(None, alias="from")
-    to: list[str]
-    cc: list[str] | None = None
-    bcc: list[str] | None = None
-    sender: list[str] | None = None
-    reply_to: list[str] | None = Field(None, alias="reply-to")
+    header_from: List[str] = Field(None, alias="from")
+    to: List[str]
+    cc: Optional[List[str]] = None
+    bcc: Optional[List[str]] = None
+    sender: Optional[List[str]] = None
+    reply_to: Optional[List[str]] = Field(None, alias="reply-to")
     returnPath: str
     messageId: str
     date: str
@@ -50,9 +49,9 @@ class SesMail(BaseModel):
     timestamp: datetime
     source: str
     messageId: str
-    destination: list[str]
+    destination: List[str]
     headersTruncated: bool
-    headers: list[SesMailHeaders]
+    headers: List[SesMailHeaders]
     commonHeaders: SesMailCommonHeaders
 
 
@@ -68,4 +67,4 @@ class SesRecordModel(BaseModel):
 
 
 class SesModel(BaseModel):
-    Records: list[SesRecordModel]
+    Records: List[SesRecordModel]

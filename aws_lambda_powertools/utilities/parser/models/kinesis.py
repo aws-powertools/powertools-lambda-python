@@ -1,8 +1,7 @@
-from __future__ import annotations
-
+# ruff: noqa: FA100
 import json
 import zlib
-from typing import Literal
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -16,7 +15,7 @@ class KinesisDataStreamRecordPayload(BaseModel):
     kinesisSchemaVersion: str
     partitionKey: str
     sequenceNumber: str
-    data: bytes | type[BaseModel] | BaseModel  # base64 encoded str is parsed into bytes
+    data: Union[bytes, Type[BaseModel], BaseModel]  # base64 encoded str is parsed into bytes
     approximateArrivalTimestamp: float
 
     @field_validator("data", mode="before")
@@ -34,7 +33,7 @@ class KinesisDataStreamRecord(BaseModel):
     eventSourceARN: str
     kinesis: KinesisDataStreamRecordPayload
 
-    def decompress_zlib_record_data_as_json(self) -> dict:
+    def decompress_zlib_record_data_as_json(self) -> Dict:
         """Decompress Kinesis Record bytes data zlib compressed to JSON"""
         if not isinstance(self.kinesis.data, bytes):
             raise ValueError("We can only decompress bytes data, not custom models.")
@@ -43,10 +42,10 @@ class KinesisDataStreamRecord(BaseModel):
 
 
 class KinesisDataStreamModel(BaseModel):
-    Records: list[KinesisDataStreamRecord]
+    Records: List[KinesisDataStreamRecord]
 
 
-def extract_cloudwatch_logs_from_event(event: KinesisDataStreamModel) -> list[CloudWatchLogsDecode]:
+def extract_cloudwatch_logs_from_event(event: KinesisDataStreamModel) -> List[CloudWatchLogsDecode]:
     return [CloudWatchLogsDecode(**record.decompress_zlib_record_data_as_json()) for record in event.Records]
 
 

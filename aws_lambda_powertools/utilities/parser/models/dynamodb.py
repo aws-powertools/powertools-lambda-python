@@ -1,7 +1,6 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
-from typing import Any, Literal
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -11,10 +10,10 @@ _DESERIALIZER = TypeDeserializer()
 
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
-    ApproximateCreationDateTime: datetime | None = None
-    Keys: dict[str, Any]
-    NewImage: dict[str, Any] | type[BaseModel] | BaseModel | None = None
-    OldImage: dict[str, Any] | type[BaseModel] | BaseModel | None = None
+    ApproximateCreationDateTime: Optional[datetime] = None
+    Keys: Dict[str, Any]
+    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
+    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     SequenceNumber: str
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
@@ -48,8 +47,8 @@ class DynamoDBStreamRecordModel(BaseModel):
     awsRegion: str
     eventSourceARN: str
     dynamodb: DynamoDBStreamChangedRecordModel
-    userIdentity: UserIdentity | None = None
+    userIdentity: Optional[UserIdentity] = None
 
 
 class DynamoDBStreamModel(BaseModel):
-    Records: list[DynamoDBStreamRecordModel]
+    Records: List[DynamoDBStreamRecordModel]

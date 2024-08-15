@@ -1,21 +1,21 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import Dict, Optional, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
 
 class VpcLatticeV2RequestContextIdentity(BaseModel):
-    source_vpc_arn: str | None = Field(None, alias="sourceVpcArn")
-    get_type: str | None = Field(None, alias="type")
-    principal: str | None = Field(None, alias="principal")
-    principal_org_id: str | None = Field(None, alias="principalOrgID")
-    session_name: str | None = Field(None, alias="sessionName")
-    x509_subject_cn: str | None = Field(None, alias="X509SubjectCn")
-    x509_issuer_ou: str | None = Field(None, alias="X509IssuerOu")
-    x509_san_dns: str | None = Field(None, alias="x509SanDns")
-    x509_san_uri: str | None = Field(None, alias="X509SanUri")
-    x509_san_name_cn: str | None = Field(None, alias="X509SanNameCn")
+    source_vpc_arn: Optional[str] = Field(None, alias="sourceVpcArn")
+    get_type: Optional[str] = Field(None, alias="type")
+    principal: Optional[str] = Field(None, alias="principal")
+    principal_org_id: Optional[str] = Field(None, alias="principalOrgID")
+    session_name: Optional[str] = Field(None, alias="sessionName")
+    x509_subject_cn: Optional[str] = Field(None, alias="X509SubjectCn")
+    x509_issuer_ou: Optional[str] = Field(None, alias="X509IssuerOu")
+    x509_san_dns: Optional[str] = Field(None, alias="x509SanDns")
+    x509_san_uri: Optional[str] = Field(None, alias="X509SanUri")
+    x509_san_name_cn: Optional[str] = Field(None, alias="X509SanNameCn")
 
 
 class VpcLatticeV2RequestContext(BaseModel):
@@ -36,8 +36,8 @@ class VpcLatticeV2Model(BaseModel):
     version: str
     path: str
     method: str
-    headers: dict[str, str]
-    query_string_parameters: dict[str, str] | None = Field(None, alias="queryStringParameters")
-    body: str | type[BaseModel] | None = None
-    is_base64_encoded: bool | None = Field(None, alias="isBase64Encoded")
+    headers: Dict[str, str]
+    query_string_parameters: Optional[Dict[str, str]] = Field(None, alias="queryStringParameters")
+    body: Optional[Union[str, Type[BaseModel]]] = None
+    is_base64_encoded: Optional[bool] = Field(None, alias="isBase64Encoded")
     request_context: VpcLatticeV2RequestContext = Field(None, alias="requestContext")

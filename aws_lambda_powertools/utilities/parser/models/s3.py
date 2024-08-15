@@ -1,12 +1,11 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
-from typing import Literal
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
-from pydantic.networks import IPvAnyNetwork  # noqa: TCH002
-from pydantic.types import NonNegativeFloat  # noqa: TCH002
+from pydantic.networks import IPvAnyNetwork
+from pydantic.types import NonNegativeFloat
 
 from .event_bridge import EventBridgeModel
 
@@ -45,10 +44,10 @@ class S3Bucket(BaseModel):
 
 class S3Object(BaseModel):
     key: str
-    size: NonNegativeFloat | None = None
-    eTag: str | None = None
+    size: Optional[NonNegativeFloat] = None
+    eTag: Optional[str] = None
     sequencer: str
-    versionId: str | None = None
+    versionId: Optional[str] = None
 
 
 class S3Message(BaseModel):
@@ -60,10 +59,10 @@ class S3Message(BaseModel):
 
 class S3EventNotificationObjectModel(BaseModel):
     key: str
-    size: NonNegativeFloat | None = None
+    size: Optional[NonNegativeFloat] = None
     etag: str = Field(default="")
     version_id: str = Field(None, alias="version-id")
-    sequencer: str | None = None
+    sequencer: Optional[str] = None
 
 
 class S3EventNotificationEventBridgeBucketModel(BaseModel):
@@ -77,12 +76,12 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
     request_id: str = Field(None, alias="request-id")
     requester: str
     source_ip_address: str = Field(None, alias="source-ip-address")
-    reason: str | None = None
-    deletion_type: str | None = Field(None, alias="deletion-type")
-    restore_expiry_time: str | None = Field(None, alias="restore-expiry-time")
-    source_storage_class: str | None = Field(None, alias="source-storage-class")
-    destination_storage_class: str | None = Field(None, alias="destination-storage-class")
-    destination_access_tier: str | None = Field(None, alias="destination-access-tier")
+    reason: Optional[str] = None
+    deletion_type: Optional[str] = Field(None, alias="deletion-type")
+    restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
+    source_storage_class: Optional[str] = Field(None, alias="source-storage-class")
+    destination_storage_class: Optional[str] = Field(None, alias="destination-storage-class")
+    destination_access_tier: Optional[str] = Field(None, alias="destination-access-tier")
 
 
 class S3EventNotificationEventBridgeModel(EventBridgeModel):
@@ -99,7 +98,7 @@ class S3RecordModel(BaseModel):
     requestParameters: S3RequestParameters
     responseElements: S3ResponseElements
     s3: S3Message
-    glacierEventData: S3EventRecordGlacierEventData | None = None
+    glacierEventData: Optional[S3EventRecordGlacierEventData] = None
 
     @model_validator(mode="before")
     def validate_s3_object(cls, values):
@@ -111,4 +110,4 @@ class S3RecordModel(BaseModel):
 
 
 class S3Model(BaseModel):
-    Records: list[S3RecordModel]
+    Records: List[S3RecordModel]

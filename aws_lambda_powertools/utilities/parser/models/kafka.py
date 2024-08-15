@@ -1,7 +1,6 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
-from typing import Literal
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -17,8 +16,8 @@ class KafkaRecordModel(BaseModel):
     timestamp: datetime
     timestampType: str
     key: bytes
-    value: str | type[BaseModel]
-    headers: list[dict[str, bytes]]
+    value: Union[str, Type[BaseModel]]
+    headers: List[Dict[str, bytes]]
 
     # Added type ignore to keep compatibility between Pydantic v1 and v2
     _decode_key = field_validator("key")(base64_decode)  # type: ignore[type-var, unused-ignore]
@@ -37,8 +36,8 @@ class KafkaRecordModel(BaseModel):
 
 
 class KafkaBaseEventModel(BaseModel):
-    bootstrapServers: list[str]
-    records: dict[str, list[KafkaRecordModel]]
+    bootstrapServers: List[str]
+    records: Dict[str, List[KafkaRecordModel]]
 
     @field_validator("bootstrapServers", mode="before")
     def split_servers(cls, value):

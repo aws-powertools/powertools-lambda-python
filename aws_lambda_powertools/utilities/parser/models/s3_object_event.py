@@ -1,4 +1,5 @@
-from __future__ import annotations
+# ruff: noqa: FA100
+from typing import Dict, Optional, Type, Union
 
 from pydantic import BaseModel, HttpUrl
 
@@ -12,17 +13,17 @@ class S3ObjectContext(BaseModel):
 class S3ObjectConfiguration(BaseModel):
     accessPointArn: str
     supportingAccessPointArn: str
-    payload: str | type[BaseModel]
+    payload: Union[str, Type[BaseModel]]
 
 
 class S3ObjectUserRequest(BaseModel):
     url: str
-    headers: dict[str, str]
+    headers: Dict[str, str]
 
 
 class S3ObjectSessionIssuer(BaseModel):
     type: str  # noqa: A003, VNE003
-    userName: str | None = None
+    userName: Optional[str] = None
     principalId: str
     arn: str
     accountId: str
@@ -42,10 +43,10 @@ class S3ObjectUserIdentity(BaseModel):
     type: str  # noqa: A003
     accountId: str
     accessKeyId: str
-    userName: str | None = None
+    userName: Optional[str] = None
     principalId: str
     arn: str
-    sessionContext: S3ObjectSessionContext | None = None
+    sessionContext: Optional[S3ObjectSessionContext] = None
 
 
 class S3ObjectLambdaEvent(BaseModel):

@@ -1,4 +1,5 @@
-from __future__ import annotations
+# ruff: noqa: FA100
+from typing import List, Optional, Type, Union
 
 from pydantic import BaseModel, PositiveInt, field_validator
 
@@ -14,10 +15,10 @@ class KinesisFirehoseRecordMetadata(BaseModel):
 
 
 class KinesisFirehoseRecord(BaseModel):
-    data: bytes | type[BaseModel]  # base64 encoded str is parsed into bytes
+    data: Union[bytes, Type[BaseModel]]  # base64 encoded str is parsed into bytes
     recordId: str
     approximateArrivalTimestamp: PositiveInt
-    kinesisRecordMetadata: KinesisFirehoseRecordMetadata | None = None
+    kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata] = None
 
     @field_validator("data", mode="before")
     def data_base64_decode(cls, value):
@@ -28,5 +29,5 @@ class KinesisFirehoseModel(BaseModel):
     invocationId: str
     deliveryStreamArn: str
     region: str
-    sourceKinesisStreamArn: str | None = None
-    records: list[KinesisFirehoseRecord]
+    sourceKinesisStreamArn: Optional[str] = None
+    records: List[KinesisFirehoseRecord]

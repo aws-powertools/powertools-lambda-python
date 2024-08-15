@@ -1,4 +1,5 @@
-from __future__ import annotations
+# ruff: noqa: FA100
+from typing import Dict, Type, Union
 
 from pydantic import BaseModel
 
@@ -14,8 +15,8 @@ class AlbRequestContext(BaseModel):
 class AlbModel(BaseModel):
     httpMethod: str
     path: str
-    body: str | type[BaseModel]
+    body: Union[str, Type[BaseModel]]
     isBase64Encoded: bool
-    headers: dict[str, str]
-    queryStringParameters: dict[str, str]
+    headers: Dict[str, str]
+    queryStringParameters: Dict[str, str]
     requestContext: AlbRequestContext

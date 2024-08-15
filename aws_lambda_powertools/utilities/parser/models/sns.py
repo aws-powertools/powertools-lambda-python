@@ -1,10 +1,10 @@
-from __future__ import annotations
-
-from datetime import datetime  # noqa: TCH003
-from typing import Literal
+# ruff: noqa: FA100
+from datetime import datetime
+from typing import Dict, List, Literal, Optional, Union
+from typing import Type as TypingType
 
 from pydantic import BaseModel, model_validator
-from pydantic.networks import HttpUrl  # noqa: TCH002
+from pydantic.networks import HttpUrl
 
 
 class SnsMsgAttributeModel(BaseModel):
@@ -13,17 +13,17 @@ class SnsMsgAttributeModel(BaseModel):
 
 
 class SnsNotificationModel(BaseModel):
-    Subject: str | None = None
+    Subject: Optional[str] = None
     TopicArn: str
     UnsubscribeUrl: HttpUrl
     Type: Literal["Notification"]
-    MessageAttributes: dict[str, SnsMsgAttributeModel] | None = None
-    Message: str | type[BaseModel]
+    MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]] = None
+    Message: Union[str, TypingType[BaseModel]]
     MessageId: str
-    SigningCertUrl: HttpUrl | None = None  # NOTE: FIFO opt-in removes attribute
-    Signature: str | None = None  # NOTE: FIFO opt-in removes attribute
+    SigningCertUrl: Optional[HttpUrl] = None  # NOTE: FIFO opt-in removes attribute
+    Signature: Optional[str] = None  # NOTE: FIFO opt-in removes attribute
     Timestamp: datetime
-    SignatureVersion: str | None = None  # NOTE: FIFO opt-in removes attribute
+    SignatureVersion: Optional[str] = None  # NOTE: FIFO opt-in removes attribute
 
     @model_validator(mode="before")
     def check_sqs_protocol(cls, values):
@@ -45,4 +45,4 @@ class SnsRecordModel(BaseModel):
 
 
 class SnsModel(BaseModel):
-    Records: list[SnsRecordModel]
+    Records: List[SnsRecordModel]
