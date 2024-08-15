@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Literal
+from typing import Any, Literal, Union
 
 from pydantic import AnyUrl, BaseModel, Field
 
@@ -181,7 +181,7 @@ class Schema(BaseModel):
 
 # Ref: https://json-schema.org/draft/2020-12/json-schema-core.html#name-json-schema-documents
 # A JSON Schema MUST be an object or a boolean.
-SchemaOrBool = Schema | bool
+SchemaOrBool = Union[Schema, bool]
 
 
 # https://swagger.io/specification/#example-object
@@ -408,7 +408,7 @@ class OpenIdConnect(SecurityBase):
     openIdConnectUrl: str
 
 
-SecurityScheme = APIKey | HTTPBase | OAuth2 | OpenIdConnect | HTTPBearer
+SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer]
 
 
 # https://swagger.io/specification/#components-object
