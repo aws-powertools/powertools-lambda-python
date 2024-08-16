@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import datetime
 from collections import defaultdict, deque
@@ -6,14 +8,16 @@ from enum import Enum
 from pathlib import Path, PurePath
 from re import Pattern
 from types import GeneratorType
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable
 from uuid import UUID
 
 from pydantic import BaseModel
 from pydantic.types import SecretBytes, SecretStr
 
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
-from aws_lambda_powertools.event_handler.openapi.types import IncEx
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
 """
 This module contains the encoders used by jsonable_encoder to convert Python objects to JSON serializable data types.
@@ -22,13 +26,13 @@ This module contains the encoders used by jsonable_encoder to convert Python obj
 
 def jsonable_encoder(  # noqa: PLR0911
     obj: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
+    include: IncEx | None = None,
+    exclude: IncEx | None = None,
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_defaults: bool = False,
     exclude_none: bool = False,
-    custom_serializer: Optional[Callable[[Any], str]] = None,
+    custom_serializer: Callable[[Any], str] | None = None,
 ) -> Any:
     """
     JSON encodes an arbitrary Python object into JSON serializable data types.
@@ -40,10 +44,10 @@ def jsonable_encoder(  # noqa: PLR0911
     ----------
     obj : Any
         The object to encode
-    include : Optional[IncEx], optional
+    include : IncEx | None, optional
         A set or dictionary of strings that specifies which properties should be included, by default None,
         meaning everything is included
-    exclude : Optional[IncEx], optional
+    exclude : IncEx | None, optional
         A set or dictionary of strings that specifies which properties should be excluded, by default None,
         meaning nothing is excluded
     by_alias : bool, optional
@@ -155,8 +159,8 @@ def jsonable_encoder(  # noqa: PLR0911
 def _dump_base_model(
     *,
     obj: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
+    include: IncEx | None = None,
+    exclude: IncEx | None = None,
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
@@ -188,12 +192,12 @@ def _dump_base_model(
 def _dump_dict(
     *,
     obj: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
+    include: IncEx | None = None,
+    exclude: IncEx | None = None,
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Dump a dict to a dict, using the same parameters as jsonable_encoder
     """
@@ -228,13 +232,13 @@ def _dump_dict(
 def _dump_sequence(
     *,
     obj: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
+    include: IncEx | None = None,
+    exclude: IncEx | None = None,
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
-) -> List[Any]:
+) -> list[Any]:
     """
     Dump a sequence to a list, using the same parameters as jsonable_encoder
     """
@@ -257,8 +261,8 @@ def _dump_sequence(
 def _dump_other(
     *,
     obj: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
+    include: IncEx | None = None,
+    exclude: IncEx | None = None,
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
@@ -270,7 +274,7 @@ def _dump_other(
     try:
         data = dict(obj)
     except Exception as e:
-        errors: List[Exception] = [e]
+        errors: list[Exception] = [e]
         try:
             data = vars(obj)
         except Exception as e:
@@ -287,14 +291,14 @@ def _dump_other(
     )
 
 
-def iso_format(o: Union[datetime.date, datetime.time]) -> str:
+def iso_format(o: datetime.date | datetime.time) -> str:
     """
     ISO format for date and time
     """
     return o.isoformat()
 
 
-def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
+def decimal_encoder(dec_value: Decimal) -> int | float:
     """
     Encodes a Decimal as int of there's no exponent, otherwise float
 
@@ -315,7 +319,7 @@ def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
 
 
 # Encoders for types that are not JSON serializable
-ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
+ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
     bytes: lambda o: o.decode(),
     datetime.date: iso_format,
     datetime.datetime: iso_format,
@@ -337,9 +341,9 @@ ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
 
 # Generates a mapping of encoders to a tuple of classes that they can encode
 def generate_encoders_by_class_tuples(
-    type_encoder_map: Dict[Any, Callable[[Any], Any]],
-) -> Dict[Callable[[Any], Any], Tuple[Any, ...]]:
-    encoders: Dict[Callable[[Any], Any], Tuple[Any, ...]] = defaultdict(tuple)
+    type_encoder_map: dict[Any, Callable[[Any], Any]],
+) -> dict[Callable[[Any], Any], tuple[Any, ...]]:
+    encoders: dict[Callable[[Any], Any], tuple[Any, ...]] = defaultdict(tuple)
     for type_, encoder in type_encoder_map.items():
         encoders[encoder] += (type_,)
     return encoders
