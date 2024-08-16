@@ -2,9 +2,12 @@
 Idempotency errors
 """
 
-from typing import Optional, Union
+from __future__ import annotations
 
-from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
 
 
 class BaseError(Exception):
@@ -13,7 +16,7 @@ class BaseError(Exception):
     See https://github.com/aws-powertools/powertools-lambda-python/issues/1772
     """
 
-    def __init__(self, *args: Optional[Union[str, Exception]]):
+    def __init__(self, *args: str | Exception | None):
         self.message = str(args[0]) if args else ""
         self.details = "".join(str(arg) for arg in args[1:]) if args[1:] else None
 
@@ -31,7 +34,7 @@ class IdempotencyItemAlreadyExistsError(BaseError):
     Item attempting to be inserted into persistence store already exists and is not expired
     """
 
-    def __init__(self, *args: Optional[Union[str, Exception]], old_data_record: Optional[DataRecord] = None):
+    def __init__(self, *args: str | Exception | None, old_data_record: DataRecord | None = None):
         self.old_data_record = old_data_record
         super().__init__(*args)
 

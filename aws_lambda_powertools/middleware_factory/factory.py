@@ -1,19 +1,21 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import logging
 import os
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
-from ..shared import constants
-from ..shared.functions import resolve_truthy_env_var_choice
-from ..tracing import Tracer
-from .exceptions import MiddlewareInvalidArgumentError
+from aws_lambda_powertools.middleware_factory.exceptions import MiddlewareInvalidArgumentError
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+from aws_lambda_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
 
 
 # Maintenance: we can't yet provide an accurate return type without ParamSpec etc. see #1066
-def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_execution: Optional[bool] = None) -> Callable:
+def lambda_handler_decorator(decorator: Callable | None = None, trace_execution: bool | None = None) -> Callable:
     """Decorator factory for decorating Lambda handlers.
 
     You can use lambda_handler_decorator to create your own middlewares,
@@ -112,7 +114,7 @@ def lambda_handler_decorator(decorator: Optional[Callable] = None, trace_executi
     )
 
     @functools.wraps(decorator)
-    def final_decorator(func: Optional[Callable] = None, **kwargs: Any):
+    def final_decorator(func: Callable | None = None, **kwargs: Any):
         # If called with kwargs return new func with kwargs
         if func is None:
             return functools.partial(final_decorator, **kwargs)

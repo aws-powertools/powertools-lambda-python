@@ -9,11 +9,13 @@ import traceback
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
-from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 
 RESERVED_LOG_ATTRS = (
     "name",
@@ -48,7 +50,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
-    def get_current_keys(self) -> Dict[str, Any]:
+    def get_current_keys(self) -> dict[str, Any]:
         return {}
 
     def remove_keys(self, keys: Iterable[str]) -> None:
@@ -74,11 +76,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def __init__(
         self,
         json_serializer: Callable[[LogRecord], str] | None = None,
-        json_deserializer: Callable[[Dict | str | bool | int | float], str] | None = None,
+        json_deserializer: Callable[[dict | str | bool | int | float], str] | None = None,
         json_default: Callable[[Any], Any] | None = None,
         datefmt: str | None = None,
         use_datetime_directive: bool = False,
-        log_record_order: List[str] | None = None,
+        log_record_order: list[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
         serialize_stacktrace: bool = True,
@@ -182,7 +184,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         return self.serialize(log=formatted_log)
 
-    def formatTime(self, record: logging.LogRecord, datefmt: Optional[str] = None) -> str:
+    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
         # As of Py3.7, we can infer milliseconds directly from any datetime
         # saving processing time as we can shortcircuit early
         # Maintenance: In V3, we (and Java) should move to this format by default
@@ -234,7 +236,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
 
-    def get_current_keys(self) -> Dict[str, Any]:
+    def get_current_keys(self) -> dict[str, Any]:
         return self.log_format
 
     def remove_keys(self, keys: Iterable[str]) -> None:
@@ -246,14 +248,14 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.log_format.update(**self.keys_combined)
 
     @staticmethod
-    def _build_default_keys() -> Dict[str, str]:
+    def _build_default_keys() -> dict[str, str]:
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
             "timestamp": "%(asctime)s",
         }
 
-    def _get_latest_trace_id(self) -> Optional[str]:
+    def _get_latest_trace_id(self) -> str | None:
         xray_trace_id_key = self.log_format.get("xray_trace_id", "")
         if xray_trace_id_key is None:
             # key is explicitly disabled; ignore it. e.g., Logger(xray_trace_id=None)
@@ -262,7 +264,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 
-    def _extract_log_message(self, log_record: logging.LogRecord) -> Union[Dict[str, Any], str, bool, Iterable]:
+    def _extract_log_message(self, log_record: logging.LogRecord) -> dict[str, Any] | str | bool | Iterable:
         """Extract message from log record and attempt to JSON decode it if str
 
         Parameters
@@ -272,7 +274,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         Returns
         -------
-        message: Union[Dict, str, bool, Iterable]
+        message: dict[str, Any] | str | bool | Iterable
             Extracted message
         """
         message = log_record.msg
@@ -308,7 +310,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         return None
 
-    def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
+    def _extract_log_exception(self, log_record: logging.LogRecord) -> tuple[str, str] | tuple[None, None]:
         """Format traceback information, if available
 
         Parameters
@@ -318,7 +320,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         Returns
         -------
-        log_record: Optional[Tuple[str, str]]
+        log_record: tuple[str, str] | tuple[None, None]
             Log record with constant traceback info and exception name
         """
         if log_record.exc_info:
@@ -326,7 +328,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         return None, None
 
-    def _extract_log_keys(self, log_record: logging.LogRecord) -> Dict[str, Any]:
+    def _extract_log_keys(self, log_record: logging.LogRecord) -> dict[str, Any]:
         """Extract and parse custom and reserved log keys
 
         Parameters
@@ -336,7 +338,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         Returns
         -------
-        formatted_log: Dict
+        formatted_log: dict[str, Any]
             Structured log as dictionary
         """
         record_dict = log_record.__dict__.copy()
@@ -358,7 +360,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return formatted_log
 
     @staticmethod
-    def _strip_none_records(records: Dict[str, Any]) -> Dict[str, Any]:
+    def _strip_none_records(records: dict[str, Any]) -> dict[str, Any]:
         """Remove any key with None as value"""
         return {k: v for k, v in records.items() if v is not None}
 
@@ -367,4 +369,4 @@ JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
 
 
 # Fetch current and future parameters from PowertoolsFormatter that should be reserved
-RESERVED_FORMATTER_CUSTOM_KEYS: List[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]
+RESERVED_FORMATTER_CUSTOM_KEYS: list[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]

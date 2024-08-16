@@ -2,25 +2,29 @@
 Primary interface for idempotent Lambda functions utility
 """
 
+from __future__ import annotations
+
 import functools
 import logging
 import os
 from inspect import isclass
-from typing import Any, Callable, Dict, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    BasePersistenceLayer,
-)
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencyModelSerializer,
     BaseIdempotencySerializer,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+        BasePersistenceLayer,
+    )
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +32,10 @@ logger = logging.getLogger(__name__)
 @lambda_handler_decorator
 def idempotent(
     handler: Callable[[Any, LambdaContext], Any],
-    event: Dict[str, Any],
+    event: dict[str, Any],
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
-    config: Optional[IdempotencyConfig] = None,
+    config: IdempotencyConfig | None = None,
     **kwargs,
 ) -> Any:
     """
@@ -41,9 +45,9 @@ def idempotent(
     ----------
     handler: Callable
         Lambda's handler
-    event: Dict
+    event: dict
         Lambda's Event
-    context: Dict
+    context: dict
         Lambda's Context
     persistence_store: BasePersistenceLayer
         Instance of BasePersistenceLayer to store data
@@ -86,12 +90,12 @@ def idempotent(
 
 
 def idempotent_function(
-    function: Optional[AnyCallableT] = None,
+    function: AnyCallableT | None = None,
     *,
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
-    config: Optional[IdempotencyConfig] = None,
-    output_serializer: Optional[Union[BaseIdempotencySerializer, Type[BaseIdempotencyModelSerializer]]] = None,
+    config: IdempotencyConfig | None = None,
+    output_serializer: BaseIdempotencySerializer | type[BaseIdempotencyModelSerializer] | None = None,
     **kwargs: Any,
 ) -> Any:
     """
@@ -107,7 +111,7 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    output_serializer: Optional[Union[BaseIdempotencySerializer, Type[BaseIdempotencyModelSerializer]]]
+    output_serializer: BaseIdempotencySerializer | type[BaseIdempotencyModelSerializer] | None
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done via the NoOpSerializer.
             In case a serializer of type inheriting BaseIdempotencyModelSerializer is given,

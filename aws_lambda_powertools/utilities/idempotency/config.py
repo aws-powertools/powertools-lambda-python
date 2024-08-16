@@ -1,7 +1,10 @@
-from typing import Dict, Optional
+from __future__ import annotations
 
-from aws_lambda_powertools.utilities.idempotency import IdempotentHookFunction
-from aws_lambda_powertools.utilities.typing import LambdaContext
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency import IdempotentHookFunction
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class IdempotencyConfig:
@@ -9,14 +12,14 @@ class IdempotencyConfig:
         self,
         event_key_jmespath: str = "",
         payload_validation_jmespath: str = "",
-        jmespath_options: Optional[Dict] = None,
+        jmespath_options: dict | None = None,
         raise_on_no_idempotency_key: bool = False,
         expires_after_seconds: int = 60 * 60,  # 1 hour default
         use_local_cache: bool = False,
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
-        lambda_context: Optional[LambdaContext] = None,
-        response_hook: Optional[IdempotentHookFunction] = None,
+        lambda_context: LambdaContext | None = None,
+        response_hook: IdempotentHookFunction | None = None,
     ):
         """
         Initialize the base persistence layer
@@ -50,8 +53,8 @@ class IdempotencyConfig:
         self.use_local_cache = use_local_cache
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
-        self.lambda_context: Optional[LambdaContext] = lambda_context
-        self.response_hook: Optional[IdempotentHookFunction] = response_hook
+        self.lambda_context: LambdaContext | None = lambda_context
+        self.response_hook: IdempotentHookFunction | None = response_hook
 
     def register_lambda_context(self, lambda_context: LambdaContext):
         """Captures the Lambda context, to calculate the remaining time before the invocation times out"""

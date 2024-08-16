@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 import abc
-import numbers
-import traceback
 from contextlib import contextmanager
-from typing import Any, Generator, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Generator, Sequence
+
+if TYPE_CHECKING:
+    import numbers
+    import traceback
 
 
 class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
     @abc.abstractmethod
-    def close(self, end_time: Optional[int] = None):
+    def close(self, end_time: int | None = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
 
@@ -28,7 +32,7 @@ class BaseSegment(abc.ABC):
         """Remove input subsegment from child subsegments."""
 
     @abc.abstractmethod
-    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
+    def put_annotation(self, key: str, value: str | numbers.Number | bool) -> None:
         """Annotate segment or subsegment with a key-value pair.
 
         Note: Annotations will be indexed for later search query.
@@ -37,7 +41,7 @@ class BaseSegment(abc.ABC):
         ----------
         key: str
             Metadata key
-        value: Union[str, numbers.Number, bool]
+        value: str | numbers.Number | bool
             Annotation value
         """
 
@@ -52,19 +56,19 @@ class BaseSegment(abc.ABC):
             Metadata key
         value: Any
             Any object that can be serialized into a JSON string
-        namespace: Set[str]
+        namespace: set[str]
             Metadata namespace, by default 'default'
         """
 
     @abc.abstractmethod
-    def add_exception(self, exception: BaseException, stack: List[traceback.StackSummary], remote: bool = False):
+    def add_exception(self, exception: BaseException, stack: list[traceback.StackSummary], remote: bool = False):
         """Add an exception to trace entities.
 
         Parameters
         ----------
         exception: Exception
             Caught exception
-        stack: List[traceback.StackSummary]
+        stack: list[traceback.StackSummary]
             List of traceback summaries
 
             Output from `traceback.extract_stack()`.
@@ -83,7 +87,7 @@ class BaseProvider(abc.ABC):
         ----------
         name: str
             Subsegment name
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters to be propagated to segment
         """
 
@@ -96,12 +100,12 @@ class BaseProvider(abc.ABC):
         ----------
         name: str
             Subsegment name
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters to be propagated to segment
         """
 
     @abc.abstractmethod
-    def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
+    def put_annotation(self, key: str, value: str | numbers.Number | bool) -> None:
         """Annotate current active trace entity with a key-value pair.
 
         Note: Annotations will be indexed for later search query.
@@ -110,7 +114,7 @@ class BaseProvider(abc.ABC):
         ----------
         key: str
             Metadata key
-        value: Union[str, numbers.Number, bool]
+        value: str | numbers.Number | bool
             Annotation value
         """
 
@@ -126,7 +130,7 @@ class BaseProvider(abc.ABC):
             Metadata key
         value: Any
             Any object that can be serialized into a JSON string
-        namespace: Set[str]
+        namespace: set[str]
             Metadata namespace, by default 'default'
         """
 
@@ -136,7 +140,7 @@ class BaseProvider(abc.ABC):
 
         Parameters
         ----------
-        modules: Set[str]
+        modules: set[str]
             Set of modules to be patched
         """
 

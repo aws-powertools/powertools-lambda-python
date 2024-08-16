@@ -3,11 +3,13 @@ from __future__ import annotations
 import functools
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.provider import cold_start
-from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.types import AnyCallableT
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ class BaseProvider(ABC):
 
         Returns
         ----------
-        Dict
+        dict
             A combined metrics dictionary.
 
         Raises
@@ -66,7 +68,7 @@ class BaseProvider(ABC):
 
         Returns
         ----------
-        Dict
+        dict
             Serialized metrics
 
         Raises
@@ -172,7 +174,7 @@ class BaseProvider(ABC):
             captures cold start metric, by default False
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
-        default_dimensions: Dict[str, str], optional
+        default_dimensions: dict[str, str], optional
             metric dimensions as key=value that will always be present
 
         Raises

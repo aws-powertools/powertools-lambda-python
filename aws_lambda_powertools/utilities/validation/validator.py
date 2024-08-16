@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable
 
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities import jmespath_utils
-
-from ...middleware_factory import lambda_handler_decorator
-from .base import validate_data_against_schema
+from aws_lambda_powertools.utilities.validation.base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -12,14 +13,14 @@ logger = logging.getLogger(__name__)
 @lambda_handler_decorator
 def validator(
     handler: Callable,
-    event: Union[Dict, str],
+    event: dict | str,
     context: Any,
-    inbound_schema: Optional[Dict] = None,
-    inbound_formats: Optional[Dict] = None,
-    outbound_schema: Optional[Dict] = None,
-    outbound_formats: Optional[Dict] = None,
+    inbound_schema: dict | None = None,
+    inbound_formats: dict | None = None,
+    outbound_schema: dict | None = None,
+    outbound_formats: dict | None = None,
     envelope: str = "",
-    jmespath_options: Optional[Dict] = None,
+    jmespath_options: dict | None = None,
     **kwargs: Any,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
@@ -28,21 +29,21 @@ def validator(
     ----------
     handler : Callable
         Method to annotate on
-    event : Dict
+    event : dict
         Lambda event to be validated
     context : Any
         Lambda context object
-    inbound_schema : Dict
+    inbound_schema : dict
         JSON Schema to validate incoming event
-    outbound_schema : Dict
+    outbound_schema : dict
         JSON Schema to validate outbound event
-    envelope : Dict
+    envelope : dict
         JMESPath expression to filter data against
-    jmespath_options : Dict
+    jmespath_options : dict
         Alternative JMESPath options to be included when filtering expr
-    inbound_formats: Dict
+    inbound_formats: dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
-    outbound_formats: Dict
+    outbound_formats: dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
 
     Example
@@ -140,10 +141,10 @@ def validator(
 
 def validate(
     event: Any,
-    schema: Dict,
-    formats: Optional[Dict] = None,
-    envelope: Optional[str] = None,
-    jmespath_options: Optional[Dict] = None,
+    schema: dict,
+    formats: dict | None = None,
+    envelope: str | None = None,
+    jmespath_options: dict | None = None,
 ):
     """Standalone function to validate event data using a JSON Schema
 
@@ -151,15 +152,15 @@ def validate(
 
     Parameters
     ----------
-    event : Dict
+    event : dict
         Lambda event to be validated
-    schema : Dict
+    schema : dict
         JSON Schema to validate incoming event
-    envelope : Dict
+    envelope : dict
         JMESPath expression to filter data against
-    jmespath_options : Dict
+    jmespath_options : dict
         Alternative JMESPath options to be included when filtering expr
-    formats: Dict
+    formats: dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
 
     Example

@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.shared.cookies import Cookie
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.cookies import Cookie
 
 
 class BaseHeadersSerializer:
@@ -11,23 +14,23 @@ class BaseHeadersSerializer:
     ALB and Lambda Function URL response payload.
     """
 
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
+    def serialize(self, headers: dict[str, str | list[str]], cookies: list[Cookie]) -> dict[str, Any]:
         """
         Serializes headers and cookies according to the request type.
         Returns a dict that can be merged with the response payload.
 
         Parameters
         ----------
-        headers: Dict[str, List[str]]
+        headers: dict[str, str | list[str]]
             A dictionary of headers to set in the response
-        cookies: List[str]
+        cookies: list[Cookie]
             A list of cookies to set in the response
         """
         raise NotImplementedError()
 
 
 class HttpApiHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
+    def serialize(self, headers: dict[str, str | list[str]], cookies: list[Cookie]) -> dict[str, Any]:
         """
         When using HTTP APIs or LambdaFunctionURLs, everything is taken care automatically for us.
         We can directly assign a list of cookies and a dict of headers to the response payload, and the
@@ -39,7 +42,7 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
 
         # Format 2.0 doesn't have multiValueHeaders or multiValueQueryStringParameters fields.
         # Duplicate headers are combined with commas and included in the headers field.
-        combined_headers: Dict[str, str] = {}
+        combined_headers: dict[str, str] = {}
         for key, values in headers.items():
             # omit headers with explicit null values
             if values is None:
@@ -54,7 +57,7 @@ class HttpApiHeadersSerializer(BaseHeadersSerializer):
 
 
 class MultiValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
+    def serialize(self, headers: dict[str, str | list[str]], cookies: list[Cookie]) -> dict[str, Any]:
         """
         When using REST APIs, headers can be encoded using the `multiValueHeaders` key on the response.
         This is also the case when using an ALB integration with the `multiValueHeaders` option enabled.
@@ -63,7 +66,7 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
         https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format
         https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers-response
         """
-        payload: Dict[str, List[str]] = defaultdict(list)
+        payload: dict[str, list[str]] = defaultdict(list)
         for key, values in headers.items():
             # omit headers with explicit null values
             if values is None:
@@ -83,14 +86,14 @@ class MultiValueHeadersSerializer(BaseHeadersSerializer):
 
 
 class SingleValueHeadersSerializer(BaseHeadersSerializer):
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
+    def serialize(self, headers: dict[str, str | list[str]], cookies: list[Cookie]) -> dict[str, Any]:
         """
         The ALB integration has `multiValueHeaders` disabled by default.
         If we try to set multiple headers with the same key, or more than one cookie, print a warning.
 
         https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#respond-to-load-balancer
         """
-        payload: Dict[str, Dict[str, str]] = {}
+        payload: dict[str, dict[str, str]] = {}
         payload.setdefault("headers", {})
 
         if cookies:

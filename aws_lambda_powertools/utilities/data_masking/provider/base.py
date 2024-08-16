@@ -24,7 +24,7 @@ class BaseProvider:
         def decrypt(self, data) -> Any:
             # Implementation logic for data decryption
 
-        def erase(self, data) -> Union[str, Iterable]:
+        def erase(self, data) -> str | Iterable:
             # Implementation logic for data masking
             pass
 

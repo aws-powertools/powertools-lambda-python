@@ -3,11 +3,10 @@ from __future__ import annotations
 import datetime
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
-from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.shared import constants, user_agent
@@ -23,6 +22,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
 )
 
 if TYPE_CHECKING:
+    from botocore.config import Config
     from mypy_boto3_dynamodb.client import DynamoDBClient
     from mypy_boto3_dynamodb.type_defs import AttributeValueTypeDef
 
@@ -34,16 +34,16 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
-        static_pk_value: Optional[str] = None,
-        sort_key_attr: Optional[str] = None,
+        static_pk_value: str | None = None,
+        sort_key_attr: str | None = None,
         expiry_attr: str = "expiration",
         in_progress_expiry_attr: str = "in_progress_expiration",
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
-        boto_config: Optional[Config] = None,
-        boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional[DynamoDBClient] = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
+        boto3_client: DynamoDBClient | None = None,
     ):
         """
         Initialize the DynamoDB client
@@ -145,13 +145,13 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             return {self.key_attr: {"S": self.static_pk_value}, self.sort_key_attr: {"S": idempotency_key}}
         return {self.key_attr: {"S": idempotency_key}}
 
-    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
+    def _item_to_data_record(self, item: dict[str, Any]) -> DataRecord:
         """
         Translate raw item records from DynamoDB to DataRecord
 
         Parameters
         ----------
-        item: Dict[str, Union[str, int]]
+        item: dict[str, str | int]
             Item format from dynamodb response
 
         Returns
@@ -297,7 +297,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
-        expression_attr_values: Dict[str, AttributeValueTypeDef] = {
+        expression_attr_values: dict[str, AttributeValueTypeDef] = {
             ":expiry": {"N": str(data_record.expiry_timestamp)},
             ":response_data": {"S": data_record.response_data},
             ":status": {"S": data_record.status},
