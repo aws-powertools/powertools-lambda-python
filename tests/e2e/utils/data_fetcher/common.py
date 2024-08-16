@@ -8,7 +8,7 @@ import boto3
 import requests
 from mypy_boto3_lambda.client import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from requests import Request, Response
 from requests.exceptions import RequestException
 from retry import retry
@@ -22,9 +22,9 @@ class GetLambdaResponseOptions(BaseModel):
     client: Optional[LambdaClient] = None
     raise_on_error: bool = True
 
-    # Maintenance: Pydantic v2 deprecated it; we should update in v3
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
 
 def get_lambda_response(
@@ -106,7 +106,7 @@ def get_lambda_response_in_parallel(
             # we can assert on the correct output.
             time.sleep(0.5 * len(running_tasks))
 
-            get_lambda_response_callback = functools.partial(get_lambda_response, **options.dict())
+            get_lambda_response_callback = functools.partial(get_lambda_response, **options.model_dump())
             running_tasks.append(
                 executor.submit(get_lambda_response_callback),
             )

@@ -7,15 +7,17 @@ import os
 import re
 import time
 import warnings
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
-from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.types import AnyCallableT
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 METRIC_NAME_REGEX = re.compile(r"^[a-zA-Z0-9_.]+$")
 
@@ -51,10 +53,10 @@ class DatadogProvider(BaseProvider):
 
     def __init__(
         self,
-        metric_set: List | None = None,
+        metric_set: list | None = None,
         namespace: str | None = None,
         flush_to_log: bool | None = None,
-        default_tags: Dict[str, Any] | None = None,
+        default_tags: dict[str, Any] | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else []
         self.namespace = (
@@ -83,8 +85,8 @@ class DatadogProvider(BaseProvider):
             Value for the metrics
         timestamp: int
             Timestamp in int for the metrics, default = time.time()
-        tags: List[str]
-            In format like List["tag:value","tag2:value2"]
+        tags: list[str]
+            In format like ["tag:value", "tag2:value2"]
         args: Any
             extra args will be dropped for compatibility
         kwargs: Any
@@ -122,7 +124,7 @@ class DatadogProvider(BaseProvider):
         logger.debug({"details": "Appending metric", "metrics": name})
         self.metric_set.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
-    def serialize_metric_set(self, metrics: List | None = None) -> List:
+    def serialize_metric_set(self, metrics: list | None = None) -> list:
         """Serializes metrics
 
         Example
@@ -135,7 +137,7 @@ class DatadogProvider(BaseProvider):
 
         Returns
         -------
-        List
+        list
             Serialized metrics following Datadog specification
 
         Raises
@@ -150,7 +152,7 @@ class DatadogProvider(BaseProvider):
         if len(metrics) == 0:
             raise SchemaValidationError("Must contain at least one metric.")
 
-        output_list: List = []
+        output_list: list = []
 
         logger.debug({"details": "Serializing metrics", "metrics": metrics})
 
@@ -304,7 +306,7 @@ class DatadogProvider(BaseProvider):
         self.default_tags.update(**tags)
 
     @staticmethod
-    def _serialize_datadog_tags(metric_tags: Dict[str, Any], default_tags: Dict[str, Any]) -> List[str]:
+    def _serialize_datadog_tags(metric_tags: dict[str, Any], default_tags: dict[str, Any]) -> list[str]:
         """
         Serialize metric tags into a list of formatted strings for Datadog integration.
 
@@ -313,14 +315,14 @@ class DatadogProvider(BaseProvider):
 
         Parameters
         ----------
-        metric_tags: Dict[str, Any]
+        metric_tags: dict[str, Any]
             A dictionary containing metric-specific tags.
-        default_tags: Dict[str, Any]
+        default_tags: dict[str, Any]
             A dictionary containing default tags applicable to all metrics.
 
         Returns:
         -------
-        List[str]
+        list[str]
             A list of formatted tag strings, each in the "tag_key:tag_value" format.
 
         Example:
@@ -337,7 +339,7 @@ class DatadogProvider(BaseProvider):
         return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]
 
     @staticmethod
-    def _validate_datadog_tags_name(tags: Dict):
+    def _validate_datadog_tags_name(tags: dict):
         """
         Validate a metric tag according to specific requirements.
 
@@ -348,7 +350,7 @@ class DatadogProvider(BaseProvider):
 
         Parameters:
         ----------
-        tags: Dict
+        tags: dict
             The metric tags to be validated.
         """
         for tag_key, tag_value in tags.items():

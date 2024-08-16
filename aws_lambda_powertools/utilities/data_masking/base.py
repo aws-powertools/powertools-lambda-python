@@ -3,8 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import warnings
-from numbers import Number
-from typing import Any, Callable, Mapping, Optional, Sequence, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
 
 from jsonpath_ng.ext import parse
 
@@ -13,6 +12,9 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+
+if TYPE_CHECKING:
+    from numbers import Number
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ class DataMasking:
 
     def __init__(
         self,
-        provider: Optional[BaseProvider] = None,
+        provider: BaseProvider | None = None,
         raise_on_missing_field: bool = True,
     ):
         self.provider = provider or BaseProvider()
@@ -111,7 +113,7 @@ class DataMasking:
         ----------
         data : str | dict
             The input data to process.
-        fields : Optional[List[str]]
+        fields : list[str] | None
             A list of fields to apply the action to. If 'None', the action is applied to the entire 'data'.
         action : Callable
             The action to apply to the data. It should be a callable that performs an operation on the data
@@ -142,21 +144,21 @@ class DataMasking:
 
     def _apply_action_to_fields(
         self,
-        data: Union[dict, str],
+        data: dict | str,
         fields: list,
         action: Callable,
         provider_options: dict | None = None,
         **encryption_context: str,
-    ) -> Union[dict, str]:
+    ) -> dict | str:
         """
         This method takes the input data, which can be either a dictionary or a JSON string,
         and erases, encrypts, or decrypts the specified fields.
 
         Parameters
         ----------
-            data : Union[dict, str])
+            data : dict | str)
                 The input data to process. It can be either a dictionary or a JSON string.
-            fields : List
+            fields : list
                 A list of fields to apply the action to. Each field can be specified as a string or
                 a list of strings representing nested keys in the dictionary.
             action : Callable

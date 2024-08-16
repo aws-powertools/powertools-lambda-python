@@ -1,12 +1,14 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
-from aws_lambda_powertools.shared.types import AnyCallableT
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
+    from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
+    from aws_lambda_powertools.shared.types import AnyCallableT
 
 
 class Metrics:
@@ -72,10 +74,10 @@ class Metrics:
     # and not get caught by accident with metrics data loss, or data deduplication
     # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
     # Result: ProductCreated is created twice as we now have 2 different EMF blobs
-    _metrics: Dict[str, Any] = {}
-    _dimensions: Dict[str, str] = {}
-    _metadata: Dict[str, Any] = {}
-    _default_dimensions: Dict[str, Any] = {}
+    _metrics: dict[str, Any] = {}
+    _dimensions: dict[str, str] = {}
+    _metadata: dict[str, Any] = {}
+    _default_dimensions: dict[str, Any] = {}
 
     def __init__(
         self,
@@ -116,9 +118,9 @@ class Metrics:
 
     def serialize_metric_set(
         self,
-        metrics: Dict | None = None,
-        dimensions: Dict | None = None,
-        metadata: Dict | None = None,
+        metrics: dict | None = None,
+        dimensions: dict | None = None,
+        metadata: dict | None = None,
     ) -> CloudWatchEMFOutput:
         return self.provider.serialize_metric_set(metrics=metrics, dimensions=dimensions, metadata=metadata)
 
@@ -146,7 +148,7 @@ class Metrics:
         lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
+        default_dimensions: dict[str, str] | None = None,
         **kwargs,
     ):
         return self.provider.log_metrics(
@@ -163,7 +165,7 @@ class Metrics:
 
         Parameters
         ----------
-        dimensions : Dict[str, Any], optional
+        dimensions : dict[str, Any], optional
             metric dimensions as key=value
 
         Example
