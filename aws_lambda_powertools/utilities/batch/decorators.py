@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Any, Awaitable, Callable, Dict, List
+from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
 from typing_extensions import deprecated
 
@@ -12,9 +12,11 @@ from aws_lambda_powertools.utilities.batch import (
     BatchProcessor,
     EventType,
 )
-from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @lambda_handler_decorator
@@ -24,7 +26,7 @@ from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 )
 def async_batch_processor(
     handler: Callable,
-    event: Dict,
+    event: dict,
     context: LambdaContext,
     record_handler: Callable[..., Awaitable[Any]],
     processor: AsyncBatchProcessor,
@@ -40,7 +42,7 @@ def async_batch_processor(
     ----------
     handler: Callable
         Lambda's handler
-    event: Dict
+    event: dict
         Lambda's Event
     context: LambdaContext
         Lambda's Context
@@ -92,7 +94,7 @@ def async_batch_processor(
 )
 def batch_processor(
     handler: Callable,
-    event: Dict,
+    event: dict,
     context: LambdaContext,
     record_handler: Callable,
     processor: BatchProcessor,
@@ -108,7 +110,7 @@ def batch_processor(
     ----------
     handler: Callable
         Lambda's handler
-    event: Dict
+    event: dict
         Lambda's Event
     context: LambdaContext
         Lambda's Context
@@ -154,7 +156,7 @@ def batch_processor(
 
 
 def process_partial_response(
-    event: Dict,
+    event: dict,
     record_handler: Callable,
     processor: BasePartialBatchProcessor,
     context: LambdaContext | None = None,
@@ -164,7 +166,7 @@ def process_partial_response(
 
     Parameters
     ----------
-    event: Dict
+    event: dict
         Lambda's original event
     record_handler: Callable
         Callable to process each record from the batch
@@ -202,7 +204,7 @@ def process_partial_response(
     * Async batch processors. Use `async_process_partial_response` instead.
     """
     try:
-        records: List[Dict] = event.get("Records", [])
+        records: list[dict] = event.get("Records", [])
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
@@ -218,7 +220,7 @@ def process_partial_response(
 
 
 def async_process_partial_response(
-    event: Dict,
+    event: dict,
     record_handler: Callable,
     processor: AsyncBatchProcessor,
     context: LambdaContext | None = None,
@@ -228,7 +230,7 @@ def async_process_partial_response(
 
     Parameters
     ----------
-    event: Dict
+    event: dict
         Lambda's original event
     record_handler: Callable
         Callable to process each record from the batch
@@ -266,7 +268,7 @@ def async_process_partial_response(
     * Sync batch processors. Use `process_partial_response` instead.
     """
     try:
-        records: List[Dict] = event.get("Records", [])
+        records: list[dict] = event.get("Records", [])
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
