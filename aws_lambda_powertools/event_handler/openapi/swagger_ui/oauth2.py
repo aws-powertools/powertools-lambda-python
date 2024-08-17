@@ -1,4 +1,4 @@
-# ruff: noqa: E501
+# ruff: noqa: E501 FA100
 import warnings
 from typing import Dict, Optional, Sequence
 

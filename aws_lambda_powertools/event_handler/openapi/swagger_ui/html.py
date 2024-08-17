@@ -1,6 +1,9 @@
-from typing import Optional
+from __future__ import annotations
 
-from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import OAuth2Config
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import OAuth2Config
 
 
 def generate_swagger_html(
@@ -9,7 +12,7 @@ def generate_swagger_html(
     swagger_js: str,
     swagger_css: str,
     swagger_base_url: str,
-    oauth2_config: Optional[OAuth2Config],
+    oauth2_config: OAuth2Config | None,
     persist_authorization: bool = False,
 ) -> str:
     """

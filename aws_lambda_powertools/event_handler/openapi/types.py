@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import types
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, TypedDict, Union
+from typing import Any, Callable, Dict, Set, Type, TypedDict, Union
 
+from pydantic import BaseModel
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from pydantic import BaseModel  # noqa: F401
-
-CacheKey = Optional[Callable[..., Any]]
+CacheKey = Union[Callable[..., Any], None]
 IncEx = Union[Set[int], Set[str], Dict[int, Any], Dict[str, Any]]
-ModelNameMap = Dict[Union[Type["BaseModel"], Type[Enum]], str]
-TypeModelOrEnum = Union[Type["BaseModel"], Type[Enum]]
+TypeModelOrEnum = Union[Type[BaseModel], Type[Enum]]
+ModelNameMap = Dict[TypeModelOrEnum, str]
 UnionType = getattr(types, "UnionType", Union)
 
 
@@ -48,7 +48,7 @@ validation_error_response_definition = {
 
 
 class OpenAPIResponseContentSchema(TypedDict, total=False):
-    schema: Dict
+    schema: dict
 
 
 class OpenAPIResponseContentModel(TypedDict):
@@ -57,4 +57,4 @@ class OpenAPIResponseContentModel(TypedDict):
 
 class OpenAPIResponse(TypedDict):
     description: str
-    content: NotRequired[Dict[str, Union[OpenAPIResponseContentSchema, OpenAPIResponseContentModel]]]
+    content: NotRequired[dict[str, OpenAPIResponseContentSchema | OpenAPIResponseContentModel]]
