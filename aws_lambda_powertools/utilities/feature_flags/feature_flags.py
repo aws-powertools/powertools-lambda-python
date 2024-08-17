@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable, List, cast
 
 from aws_lambda_powertools.utilities.feature_flags import schema
 from aws_lambda_powertools.utilities.feature_flags.comparators import (
@@ -104,7 +104,7 @@ class FeatureFlags:
     ) -> bool:
         """Evaluates whether context matches conditions, return False otherwise"""
         rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
-        conditions = cast(list[dict], rule.get(schema.CONDITIONS_KEY))
+        conditions = cast(List[dict], rule.get(schema.CONDITIONS_KEY))
 
         if not conditions:
             self.logger.debug(
