@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 import json
 from typing import List, Optional
 

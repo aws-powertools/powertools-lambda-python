@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Type, Union
 

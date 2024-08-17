@@ -90,3 +90,6 @@ split-on-trailing-comma = true
 "aws_lambda_powertools/event_handler/openapi/compat.py" = ["F401"]
 # Maintenance: we're keeping EphemeralMetrics code in case of Hyrum's law so we can quickly revert it
 "aws_lambda_powertools/metrics/metrics.py" = ["ERA001"]
+"examples/*" = ["FA100"]
+"tests/*" = ["FA100"]
+"aws_lambda_powertools/utilities/parser/models/*" = ["FA100"]

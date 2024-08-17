@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 import base64
 import json
 import logging

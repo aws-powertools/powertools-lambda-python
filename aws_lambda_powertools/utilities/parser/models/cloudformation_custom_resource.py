@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 from typing import Any, Dict, Literal, Union
 
 from pydantic import BaseModel, Field, HttpUrl

@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 from typing import List
 
 from pydantic import Json

@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 import json
 import zlib
 from typing import Dict, List, Literal, Type, Union

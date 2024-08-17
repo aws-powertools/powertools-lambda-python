@@ -1,4 +1,3 @@
-# ruff: noqa: FA100
 from typing import List, Optional, Type, Union
 
 from pydantic import BaseModel, PositiveInt, field_validator
