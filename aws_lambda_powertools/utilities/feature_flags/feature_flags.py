@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, List, cast
 
-from typing_extensions import ParamSpec
-
-from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.feature_flags import schema
-from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
 from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_all_in_list,
     compare_any_in_list,
@@ -18,10 +14,13 @@ from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_time_range,
 )
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
-from aws_lambda_powertools.utilities.feature_flags.types import JSONType
+from aws_lambda_powertools.utilities.feature_flags.types import P, T
 
-T = TypeVar("T")
-P = ParamSpec("P")
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging import Logger
+    from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
+    from aws_lambda_powertools.utilities.feature_flags.types import JSONType
+
 
 RULE_ACTION_MAPPING = {
     schema.RuleAction.EQUALS.value: lambda a, b: a == b,
@@ -49,7 +48,7 @@ RULE_ACTION_MAPPING = {
 
 
 class FeatureFlags:
-    def __init__(self, store: StoreProvider, logger: Optional[Union[logging.Logger, Logger]] = None):
+    def __init__(self, store: StoreProvider, logger: logging.Logger | Logger | None = None):
         """Evaluates whether feature flags should be enabled based on a given context.
 
         It uses the provided store to fetch feature flag rules before evaluating them.
@@ -100,12 +99,12 @@ class FeatureFlags:
         self,
         rule_name: str,
         feature_name: str,
-        rule: Dict[str, Any],
-        context: Dict[str, Any],
+        rule: dict[str, Any],
+        context: dict[str, Any],
     ) -> bool:
         """Evaluates whether context matches conditions, return False otherwise"""
         rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
-        conditions = cast(List[Dict], rule.get(schema.CONDITIONS_KEY))
+        conditions = cast(List[dict], rule.get(schema.CONDITIONS_KEY))
 
         if not conditions:
             self.logger.debug(
@@ -141,9 +140,9 @@ class FeatureFlags:
         self,
         *,
         feature_name: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         feat_default: Any,
-        rules: Dict[str, Any],
+        rules: dict[str, Any],
         boolean_feature: bool,
     ) -> bool:
         """Evaluates whether context matches rules and conditions, otherwise return feature default"""
@@ -164,7 +163,7 @@ class FeatureFlags:
         )
         return feat_default
 
-    def get_configuration(self) -> Dict:
+    def get_configuration(self) -> dict:
         """Get validated feature flag schema from configured store.
 
         Largely used to aid testing, since it's called by `evaluate` and `get_enabled_features` methods.
@@ -178,7 +177,7 @@ class FeatureFlags:
 
         Returns
         ------
-        Dict[str, Dict]
+        dict[str, dict]
             parsed JSON dictionary
 
             **Example**
@@ -208,13 +207,13 @@ class FeatureFlags:
         """
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
-        config: Dict = self.store.get_configuration()
+        config: dict = self.store.get_configuration()
         validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
 
         return config
 
-    def evaluate(self, *, name: str, context: Optional[Dict[str, Any]] = None, default: JSONType) -> JSONType:
+    def evaluate(self, *, name: str, context: dict[str, Any] | None = None, default: JSONType) -> JSONType:
         """Evaluate whether a feature flag should be enabled according to stored schema and input context
 
         **Logic when evaluating a feature flag**
@@ -243,7 +242,7 @@ class FeatureFlags:
         ----------
         name: str
             feature name to evaluate
-        context: Optional[Dict[str, Any]]
+        context: dict[str, Any] | None
             Attributes that should be evaluated against the stored schema.
 
             for example: `{"tenant_id": "X", "username": "Y", "region": "Z"}`
@@ -306,7 +305,7 @@ class FeatureFlags:
         # Maintenance: Revisit before going GA. We might to simplify customers on-boarding by not requiring it
         # for non-boolean flags. It'll need minor implementation changes, docs changes, and maybe refactor
         # get_enabled_features. We can minimize breaking change, despite Beta label, by having a new
-        # method `get_matching_features` returning Dict[feature_name, feature_value]
+        # method `get_matching_features` returning dict[feature_name, feature_value]
         boolean_feature = feature.get(
             schema.FEATURE_DEFAULT_VAL_TYPE_KEY,
             True,
@@ -330,19 +329,19 @@ class FeatureFlags:
             boolean_feature=boolean_feature,
         )
 
-    def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
+    def get_enabled_features(self, *, context: dict[str, Any] | None = None) -> list[str]:
         """Get all enabled feature flags while also taking into account context
         (when a feature has defined rules)
 
         Parameters
         ----------
-        context: Optional[Dict[str, Any]]
+        context: dict[str, Any] | None
             dict of attributes that you would like to match the rules
             against, can be `{'tenant_id: 'X', 'username':' 'Y', 'region': 'Z'}` etc.
 
         Returns
         ----------
-        List[str]
+        list[str]
             list of all feature names that either matches context or have True as default
 
             **Example**
@@ -359,10 +358,10 @@ class FeatureFlags:
         if context is None:
             context = {}
 
-        features_enabled: List[str] = []
+        features_enabled: list[str] = []
 
         try:
-            features: Dict[str, Any] = self.get_configuration()
+            features: dict[str, Any] = self.get_configuration()
         except ConfigurationStoreError as err:
             self.logger.debug(f"Failed to fetch feature flags from store, returning empty list, reason={err}")
             return features_enabled

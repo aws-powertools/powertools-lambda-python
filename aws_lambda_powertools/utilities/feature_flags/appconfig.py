@@ -1,10 +1,9 @@
+from __future__ import annotations
+
 import logging
 import traceback
-from typing import Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from botocore.config import Config
-
-from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError, StoreClientError
@@ -14,6 +13,11 @@ from aws_lambda_powertools.utilities.parameters import (
     TransformParameterError,
 )
 
+if TYPE_CHECKING:
+    from botocore.config import Config
+
+    from aws_lambda_powertools.logging import Logger
+
 
 class AppConfigStore(StoreProvider):
     def __init__(
@@ -22,10 +26,10 @@ class AppConfigStore(StoreProvider):
         application: str,
         name: str,
         max_age: int = 5,
-        sdk_config: Optional[Config] = None,
-        envelope: Optional[str] = "",
-        jmespath_options: Optional[Dict] = None,
-        logger: Optional[Union[logging.Logger, Logger]] = None,
+        sdk_config: Config | None = None,
+        envelope: str | None = "",
+        jmespath_options: dict | None = None,
+        logger: logging.Logger | Logger | None = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -39,11 +43,11 @@ class AppConfigStore(StoreProvider):
             AppConfig configuration name e.g. `my_conf`
         max_age: int
             cache expiration time in seconds, or how often to call AppConfig to fetch latest configuration
-        sdk_config: Optional[Config]
+        sdk_config: Config | None
             Botocore Config object to pass during client initialization
-        envelope : Optional[str]
+        envelope : str | None
             JMESPath expression to pluck feature flags data from config
-        jmespath_options : Optional[Dict]
+        jmespath_options : dict | None
             Alternative JMESPath options to be included when filtering expr
         logger: A logging object
             Used to log messages. If None is supplied, one will be created.
@@ -60,7 +64,7 @@ class AppConfigStore(StoreProvider):
         self._conf_store = AppConfigProvider(environment=environment, application=application, boto_config=sdk_config)
 
     @property
-    def get_raw_configuration(self) -> Dict[str, Any]:
+    def get_raw_configuration(self) -> dict[str, Any]:
         """Fetch feature schema configuration from AWS AppConfig"""
         try:
             # parse result conf as JSON, keep in cache for self.max_age seconds
@@ -82,7 +86,7 @@ class AppConfigStore(StoreProvider):
                 raise StoreClientError(err_msg) from exc
             raise ConfigurationStoreError("Unable to get AWS AppConfig configuration file") from exc
 
-    def get_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> dict[str, Any]:
         """Fetch feature schema configuration from AWS AppConfig
 
         If envelope is set, it'll extract and return feature flags from configuration,
@@ -95,7 +99,7 @@ class AppConfigStore(StoreProvider):
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             parsed JSON dictionary
         """
         config = self.get_raw_configuration
