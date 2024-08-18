@@ -1,6 +1,6 @@
 import json
 import zlib
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -8,7 +8,6 @@ from aws_lambda_powertools.shared.functions import base64_decode
 from aws_lambda_powertools.utilities.parser.models.cloudwatch import (
     CloudWatchLogsDecode,
 )
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class KinesisDataStreamRecordPayload(BaseModel):

@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Type, Union
+from typing import Dict, List, Literal, Optional, Sequence, Type, Union
 
 from pydantic import BaseModel
-
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class SqsAttributesModel(BaseModel):

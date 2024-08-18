@@ -1,10 +1,10 @@
+# ruff: noqa: FA100
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from pydantic import BaseModel, field_validator
 
 from aws_lambda_powertools.shared.dynamodb_deserializer import TypeDeserializer
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 _DESERIALIZER = TypeDeserializer()
 

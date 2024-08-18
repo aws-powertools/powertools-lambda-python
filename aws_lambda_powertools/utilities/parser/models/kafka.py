@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, field_validator
 
 from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_string
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 SERVERS_DELIMITER = ","
 
