@@ -1,12 +1,10 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import NonNegativeFloat
-
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 from .event_bridge import EventBridgeModel
 

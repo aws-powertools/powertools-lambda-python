@@ -2,6 +2,8 @@
 Persistence layers supporting idempotency
 """
 
+from __future__ import annotations
+
 import datetime
 import hashlib
 import json
@@ -9,14 +11,13 @@ import logging
 import os
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import jmespath
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyKeyError,
@@ -27,6 +28,9 @@ from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     DataRecord,
 )
 from aws_lambda_powertools.utilities.jmespath_utils import PowertoolsFunctions
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +46,7 @@ class BasePersistenceLayer(ABC):
         self.configured = False
         self.event_key_jmespath: str = ""
         self.event_key_compiled_jmespath = None
-        self.jmespath_options: Optional[dict] = None
+        self.jmespath_options: dict | None = None
         self.payload_validation_enabled = False
         self.validation_key_jmespath = None
         self.raise_on_no_idempotency_key = False
@@ -50,7 +54,7 @@ class BasePersistenceLayer(ABC):
         self.use_local_cache = False
         self.hash_function = hashlib.md5
 
-    def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
+    def configure(self, config: IdempotencyConfig, function_name: str | None = None) -> None:
         """
         Initialize the base persistence layer from the configuration settings
 
@@ -84,13 +88,13 @@ class BasePersistenceLayer(ABC):
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
 
-    def _get_hashed_idempotency_key(self, data: Dict[str, Any]) -> Optional[str]:
+    def _get_hashed_idempotency_key(self, data: dict[str, Any]) -> str | None:
         """
         Extract idempotency key and return a hashed representation
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Incoming data
 
         Returns
@@ -123,13 +127,13 @@ class BasePersistenceLayer(ABC):
             return False
         return not data
 
-    def _get_hashed_payload(self, data: Dict[str, Any]) -> str:
+    def _get_hashed_payload(self, data: dict[str, Any]) -> str:
         """
         Extract payload using validation key jmespath and return a hashed representation
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Payload
 
         Returns
@@ -163,7 +167,7 @@ class BasePersistenceLayer(ABC):
 
     def _validate_payload(
         self,
-        data_payload: Union[Dict[str, Any], DataRecord],
+        data_payload: dict[str, Any] | DataRecord,
         stored_data_record: DataRecord,
     ) -> None:
         """
@@ -171,7 +175,7 @@ class BasePersistenceLayer(ABC):
 
         Parameters
         ----------
-        data_payload: Union[Dict[str, Any], DataRecord]
+        data_payload: dict[str, Any] | DataRecord
             Payload
         stored_data_record: DataRecord
             DataRecord fetched from Dynamo or cache
@@ -242,13 +246,13 @@ class BasePersistenceLayer(ABC):
         if idempotency_key in self._cache:
             del self._cache[idempotency_key]
 
-    def save_success(self, data: Dict[str, Any], result: dict) -> None:
+    def save_success(self, data: dict[str, Any], result: dict) -> None:
         """
         Save record of function's execution completing successfully
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Payload
         result: dict
             The response from function
@@ -276,15 +280,15 @@ class BasePersistenceLayer(ABC):
 
         self._save_to_cache(data_record=data_record)
 
-    def save_inprogress(self, data: Dict[str, Any], remaining_time_in_millis: Optional[int] = None) -> None:
+    def save_inprogress(self, data: dict[str, Any], remaining_time_in_millis: int | None = None) -> None:
         """
         Save record of function's execution being in progress
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Payload
-        remaining_time_in_millis: Optional[int]
+        remaining_time_in_millis: int | None
             If expiry of in-progress invocations is enabled, this will contain the remaining time available in millis
         """
 
@@ -320,13 +324,13 @@ class BasePersistenceLayer(ABC):
 
         self._put_record(data_record=data_record)
 
-    def delete_record(self, data: Dict[str, Any], exception: Exception):
+    def delete_record(self, data: dict[str, Any], exception: Exception):
         """
         Delete record from the persistence store
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Payload
         exception
             The exception raised by the function
@@ -348,13 +352,13 @@ class BasePersistenceLayer(ABC):
 
         self._delete_from_cache(idempotency_key=data_record.idempotency_key)
 
-    def get_record(self, data: Dict[str, Any]) -> Optional[DataRecord]:
+    def get_record(self, data: dict[str, Any]) -> DataRecord | None:
         """
         Retrieve idempotency key for data provided, fetch from persistence store, and convert to DataRecord.
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data: dict[str, Any]
             Payload
 
         Returns

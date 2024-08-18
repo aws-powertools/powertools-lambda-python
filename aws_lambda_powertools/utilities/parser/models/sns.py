@@ -1,11 +1,9 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 from typing import Type as TypingType
 
 from pydantic import BaseModel, model_validator
 from pydantic.networks import HttpUrl
-
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class SnsMsgAttributeModel(BaseModel):

@@ -7,7 +7,7 @@ class SchemaValidationError(Exception):
 
 
 class StoreClientError(Exception):
-    """When a store raises an exception that should be propagated to the client to fix
+    """When a store raises an exception that should be propagated to the client
 
     For example, Access Denied errors when the client doesn't permissions to fetch config
     """

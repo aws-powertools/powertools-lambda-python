@@ -1,17 +1,20 @@
-import logging
-from typing import Callable, List, Optional, Set, Union
+from __future__ import annotations
 
-from .logger import Logger
+import logging
+from typing import TYPE_CHECKING, Callable
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.logger import Logger
 
 PACKAGE_LOGGER = "aws_lambda_powertools"
 
 
 def copy_config_to_registered_loggers(
     source_logger: Logger,
-    log_level: Optional[Union[int, str]] = None,
+    log_level: int | str | None = None,
     ignore_log_level=False,
-    exclude: Optional[Set[str]] = None,
-    include: Optional[Set[str]] = None,
+    exclude: set[str] | None = None,
+    include: set[str] | None = None,
 ) -> None:
     """Copies source Logger level and handler to all registered loggers for consistent formatting.
 
@@ -20,13 +23,13 @@ def copy_config_to_registered_loggers(
     ignore_log_level
     source_logger : Logger
         Powertools for AWS Lambda (Python) Logger to copy configuration from
-    log_level : Union[int, str], optional
+    log_level : int | str, optional
         Logging level to set to registered loggers, by default uses source_logger logging level
     ignore_log_level: bool
         Whether to not touch log levels for discovered loggers. log_level param is disregarded when this is set.
-    include : Optional[Set[str]], optional
+    include : set[str] | None, optional
         List of logger names to include, by default all registered loggers are included
-    exclude : Optional[Set[str]], optional
+    exclude : set[str] | None, optional
         List of logger names to exclude, by default None
     """
     level = log_level or source_logger.log_level
@@ -61,11 +64,11 @@ def copy_config_to_registered_loggers(
         _configure_logger(source_logger=source_logger, logger=logger, level=level, ignore_log_level=ignore_log_level)
 
 
-def _include_registered_loggers_filter(loggers: Set[str]):
+def _include_registered_loggers_filter(loggers: set[str]):
     return [logging.getLogger(name) for name in logging.root.manager.loggerDict if "." not in name and name in loggers]
 
 
-def _exclude_registered_loggers_filter(loggers: Set[str]) -> List[logging.Logger]:
+def _exclude_registered_loggers_filter(loggers: set[str]) -> list[logging.Logger]:
     return [
         logging.getLogger(name) for name in logging.root.manager.loggerDict if "." not in name and name not in loggers
     ]
@@ -73,9 +76,9 @@ def _exclude_registered_loggers_filter(loggers: Set[str]) -> List[logging.Logger
 
 def _find_registered_loggers(
     source_logger: Logger,
-    loggers: Set[str],
-    filter_func: Callable[[Set[str]], List[logging.Logger]],
-) -> List[logging.Logger]:
+    loggers: set[str],
+    filter_func: Callable[[set[str]], list[logging.Logger]],
+) -> list[logging.Logger]:
     """Filter root loggers based on provided parameters."""
     root_loggers = filter_func(loggers)
     source_logger.debug(f"Filtered root loggers: {root_loggers}")
@@ -85,7 +88,7 @@ def _find_registered_loggers(
 def _configure_logger(
     source_logger: Logger,
     logger: logging.Logger,
-    level: Union[int, str],
+    level: int | str,
     ignore_log_level: bool = False,
 ) -> None:
     # customers may not want to copy the same log level from Logger to discovered loggers

@@ -2,18 +2,19 @@
 Amazon DynamoDB parameter retrieval and caching utility
 """
 
+from __future__ import annotations
+
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING
 
 import boto3
 from boto3.dynamodb.conditions import Key
-from botocore.config import Config
 
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
-from .base import BaseProvider
-
 if TYPE_CHECKING:
+    from botocore.config import Config
     from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource
 
 
@@ -156,11 +157,11 @@ class DynamoDBProvider(BaseProvider):
         key_attr: str = "id",
         sort_attr: str = "sk",
         value_attr: str = "value",
-        endpoint_url: Optional[str] = None,
-        config: Optional[Config] = None,
-        boto_config: Optional[Config] = None,
-        boto3_session: Optional[boto3.session.Session] = None,
-        boto3_client: Optional["DynamoDBServiceResource"] = None,
+        endpoint_url: str | None = None,
+        config: Config | None = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
+        boto3_client: DynamoDBServiceResource | None = None,
     ):
         """
         Initialize the DynamoDB client
@@ -203,7 +204,7 @@ class DynamoDBProvider(BaseProvider):
         # without a breaking change within ABC return type
         return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]
 
-    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
         Retrieve multiple parameter values from Amazon DynamoDB
 

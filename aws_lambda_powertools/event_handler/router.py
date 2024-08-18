@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools.event_handler.api_gateway import Router
-from aws_lambda_powertools.utilities.data_classes import (
-    ALBEvent,
-    APIGatewayProxyEvent,
-    APIGatewayProxyEventV2,
-    LambdaFunctionUrlEvent,
-)
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes import (
+        ALBEvent,
+        APIGatewayProxyEvent,
+        APIGatewayProxyEventV2,
+        LambdaFunctionUrlEvent,
+    )
 
 
 class APIGatewayRouter(Router):

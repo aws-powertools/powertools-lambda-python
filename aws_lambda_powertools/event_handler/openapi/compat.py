@@ -1,5 +1,7 @@
 # mypy: ignore-errors
 # flake8: noqa
+from __future__ import annotations
+
 from collections import deque
 from copy import copy
 
@@ -8,7 +10,7 @@ from copy import copy
 
 from dataclasses import dataclass, is_dataclass
 from enum import Enum
-from typing import Any, Dict, List, Set, Tuple, Type, Union, FrozenSet, Deque, Sequence, Mapping
+from typing import Any, Deque, FrozenSet, List, Mapping, Sequence, Set, Tuple, Union
 
 from typing_extensions import Annotated, Literal, get_origin, get_args
 
@@ -56,7 +58,7 @@ sequence_annotation_to_type = {
 
 sequence_types = tuple(sequence_annotation_to_type.keys())
 
-RequestErrorModel: Type[BaseModel] = create_model("Request")
+RequestErrorModel: type[BaseModel] = create_model("Request")
 
 
 class ErrorWrapper(Exception):
@@ -101,8 +103,8 @@ class ModelField:
         value: Any,
         *,
         mode: Literal["json", "python"] = "json",
-        include: Union[IncEx, None] = None,
-        exclude: Union[IncEx, None] = None,
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
         by_alias: bool = True,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
@@ -120,8 +122,8 @@ class ModelField:
         )
 
     def validate(
-        self, value: Any, values: Dict[str, Any] = {}, *, loc: Tuple[Union[int, str], ...] = ()
-    ) -> Tuple[Any, Union[List[Dict[str, Any]], None]]:
+        self, value: Any, values: dict[str, Any] = {}, *, loc: tuple[int | str, ...] = ()
+    ) -> tuple[Any, list[dict[str, Any]] | None]:
         try:
             return (self._type_adapter.validate_python(value, from_attributes=True), None)
         except ValidationError as exc:
@@ -136,11 +138,11 @@ def get_schema_from_model_field(
     *,
     field: ModelField,
     model_name_map: ModelNameMap,
-    field_mapping: Dict[
-        Tuple[ModelField, Literal["validation", "serialization"]],
+    field_mapping: dict[
+        tuple[ModelField, Literal["validation", "serialization"]],
         JsonSchemaValue,
     ],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     json_schema = field_mapping[(field, field.mode)]
     if "$ref" not in json_schema:
         # MAINTENANCE: remove when deprecating Pydantic v1
@@ -151,15 +153,15 @@ def get_schema_from_model_field(
 
 def get_definitions(
     *,
-    fields: List[ModelField],
+    fields: list[ModelField],
     schema_generator: GenerateJsonSchema,
     model_name_map: ModelNameMap,
-) -> Tuple[
-    Dict[
-        Tuple[ModelField, Literal["validation", "serialization"]],
-        Dict[str, Any],
+) -> tuple[
+    dict[
+        tuple[ModelField, Literal["validation", "serialization"]],
+        dict[str, Any],
     ],
-    Dict[str, Dict[str, Any]],
+    dict[str, dict[str, Any]],
 ]:
     inputs = [(field, field.mode, field._type_adapter.core_schema) for field in fields]
     field_mapping, definitions = schema_generator.generate_definitions(inputs=inputs)
@@ -167,7 +169,7 @@ def get_definitions(
     return field_mapping, definitions
 
 
-def get_compat_model_name_map(fields: List[ModelField]) -> ModelNameMap:
+def get_compat_model_name_map(fields: list[ModelField]) -> ModelNameMap:
     return {}
 
 
@@ -175,7 +177,7 @@ def get_annotation_from_field_info(annotation: Any, field_info: FieldInfo, field
     return annotation
 
 
-def model_rebuild(model: Type[BaseModel]) -> None:
+def model_rebuild(model: type[BaseModel]) -> None:
     model.model_rebuild()
 
 
@@ -183,7 +185,7 @@ def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
     return type(field_info).from_annotation(annotation)
 
 
-def get_missing_field_error(loc: Tuple[str, ...]) -> Dict[str, Any]:
+def get_missing_field_error(loc: tuple[str, ...]) -> dict[str, Any]:
     error = ValidationError.from_exception_data(
         "Field required", [{"type": "missing", "loc": loc, "input": {}}]
     ).errors()[0]
@@ -220,13 +222,13 @@ def serialize_sequence_value(*, field: ModelField, value: Any) -> Sequence[Any]:
     return sequence_annotation_to_type[origin_type](value)  # type: ignore[no-any-return]
 
 
-def _normalize_errors(errors: Sequence[Any]) -> List[Dict[str, Any]]:
+def _normalize_errors(errors: Sequence[Any]) -> list[dict[str, Any]]:
     return errors  # type: ignore[return-value]
 
 
-def create_body_model(*, fields: Sequence[ModelField], model_name: str) -> Type[BaseModel]:
+def create_body_model(*, fields: Sequence[ModelField], model_name: str) -> type[BaseModel]:
     field_params = {f.name: (f.field_info.annotation, f.field_info) for f in fields}
-    model: Type[BaseModel] = create_model(model_name, **field_params)
+    model: type[BaseModel] = create_model(model_name, **field_params)
     return model
 
 
@@ -241,7 +243,7 @@ def model_json(model: BaseModel, **kwargs: Any) -> Any:
 # Common code for both versions
 
 
-def field_annotation_is_complex(annotation: Union[Type[Any], None]) -> bool:
+def field_annotation_is_complex(annotation: type[Any] | None) -> bool:
     origin = get_origin(annotation)
     if origin is Union or origin is UnionType:
         return any(field_annotation_is_complex(arg) for arg in get_args(annotation))
@@ -258,11 +260,11 @@ def field_annotation_is_scalar(annotation: Any) -> bool:
     return annotation is Ellipsis or not field_annotation_is_complex(annotation)
 
 
-def field_annotation_is_sequence(annotation: Union[Type[Any], None]) -> bool:
+def field_annotation_is_sequence(annotation: type[Any] | None) -> bool:
     return _annotation_is_sequence(annotation) or _annotation_is_sequence(get_origin(annotation))
 
 
-def field_annotation_is_scalar_sequence(annotation: Union[Type[Any], None]) -> bool:
+def field_annotation_is_scalar_sequence(annotation: type[Any] | None) -> bool:
     origin = get_origin(annotation)
     if origin is Union or origin is UnionType:
         at_least_one_scalar_sequence = False
@@ -307,7 +309,7 @@ def value_is_sequence(value: Any) -> bool:
     return isinstance(value, sequence_types) and not isinstance(value, (str, bytes))  # type: ignore[arg-type]
 
 
-def _annotation_is_complex(annotation: Union[Type[Any], None]) -> bool:
+def _annotation_is_complex(annotation: type[Any] | None) -> bool:
     return (
         lenient_issubclass(annotation, (BaseModel, Mapping))  # TODO: UploadFile
         or _annotation_is_sequence(annotation)
@@ -315,16 +317,14 @@ def _annotation_is_complex(annotation: Union[Type[Any], None]) -> bool:
     )
 
 
-def _annotation_is_sequence(annotation: Union[Type[Any], None]) -> bool:
+def _annotation_is_sequence(annotation: type[Any] | None) -> bool:
     if lenient_issubclass(annotation, (str, bytes)):
         return False
     return lenient_issubclass(annotation, sequence_types)
 
 
-def _regenerate_error_with_loc(
-    *, errors: Sequence[Any], loc_prefix: Tuple[Union[str, int], ...]
-) -> List[Dict[str, Any]]:
-    updated_loc_errors: List[Any] = [
+def _regenerate_error_with_loc(*, errors: Sequence[Any], loc_prefix: tuple[str | int, ...]) -> list[dict[str, Any]]:
+    updated_loc_errors: list[Any] = [
         {**err, "loc": loc_prefix + err.get("loc", ())} for err in _normalize_errors(errors)
     ]
 

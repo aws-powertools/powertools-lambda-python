@@ -7,7 +7,7 @@ import numbers
 import os
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
@@ -20,12 +20,14 @@ from aws_lambda_powertools.metrics.functions import (
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
-from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
-from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
+    from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
+    from aws_lambda_powertools.shared.types import AnyCallableT
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +64,12 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
     def __init__(
         self,
-        metric_set: Dict[str, Any] | None = None,
-        dimension_set: Dict | None = None,
+        metric_set: dict[str, Any] | None = None,
+        dimension_set: dict | None = None,
         namespace: str | None = None,
-        metadata_set: Dict[str, Any] | None = None,
+        metadata_set: dict[str, Any] | None = None,
         service: str | None = None,
-        default_dimensions: Dict[str, Any] | None = None,
+        default_dimensions: dict[str, Any] | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
@@ -110,11 +112,11 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         ----------
         name : str
             Metric name
-        unit : Union[MetricUnit, str]
+        unit : MetricUnit | str
             `aws_lambda_powertools.helper.models.MetricUnit`
         value : float
             Metric value
-        resolution : Union[MetricResolution, int]
+        resolution : MetricResolution | int
             `aws_lambda_powertools.helper.models.MetricResolution`
 
         Raises
@@ -136,7 +138,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             metric_resolutions=self._metric_resolutions,
             resolution=resolution,
         )
-        metric: Dict = self.metric_set.get(name, defaultdict(list))
+        metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
         metric["Value"].append(float(value))
@@ -154,19 +156,19 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
     def serialize_metric_set(
         self,
-        metrics: Dict | None = None,
-        dimensions: Dict | None = None,
-        metadata: Dict | None = None,
+        metrics: dict | None = None,
+        dimensions: dict | None = None,
+        metadata: dict | None = None,
     ) -> CloudWatchEMFOutput:
         """Serializes metric and dimensions set
 
         Parameters
         ----------
-        metrics : Dict, optional
+        metrics : dict, optional
             Dictionary of metrics to serialize, by default None
-        dimensions : Dict, optional
+        dimensions : dict, optional
             Dictionary of dimensions to serialize, by default None
-        metadata: Dict, optional
+        metadata: dict, optional
             Dictionary of metadata to serialize, by default None
 
         Example
@@ -179,7 +181,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         Returns
         -------
-        Dict
+        CloudWatchEMFOutput
             Serialized metrics following EMF specification
 
         Raises
@@ -213,8 +215,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         #
         # In case using high-resolution metrics, add StorageResolution field
         # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa ERA001
-        metric_definition: List[MetricNameUnitResolution] = []
-        metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
+        metric_definition: list[MetricNameUnitResolution] = []
+        metric_names_and_values: dict[str, float] = {}  # { "metric_name": 1.0 }
 
         for metric_name in metrics:
             metric: dict = metrics[metric_name]
@@ -433,7 +435,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         Parameters
         ----------
-        dimensions : Dict[str, Any], optional
+        dimensions : dict[str, Any], optional
             metric dimensions as key=value
 
         Example

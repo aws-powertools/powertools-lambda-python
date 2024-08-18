@@ -2,16 +2,18 @@ from __future__ import annotations
 
 import logging
 import typing
-from typing import Any, Callable, Dict, Optional, Type, overload
+from typing import TYPE_CHECKING, Any, Callable, overload
 
 from pydantic import PydanticSchemaGenerationError, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
 from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
 from aws_lambda_powertools.utilities.parser.functions import _retrieve_or_set_model_from_cache
-from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, T
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
+    from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, T
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +21,10 @@ logger = logging.getLogger(__name__)
 @lambda_handler_decorator
 def event_parser(
     handler: Callable[..., EventParserReturnType],
-    event: Dict[str, Any],
+    event: dict[str, Any],
     context: LambdaContext,
-    model: Optional[type[T]] = None,
-    envelope: Optional[Type[Envelope]] = None,
+    model: type[T] | None = None,
+    envelope: type[Envelope] | None = None,
     **kwargs: Any,
 ) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
@@ -67,11 +69,11 @@ def event_parser(
     ----------
     handler:  Callable
         Method to annotate on
-    event:    Dict
+    event:    dict
         Lambda event to be parsed & validated
     context:  LambdaContext
         Lambda context object
-    model:   Optional[type[T]]
+    model:   type[T] | None
         Your data model that will replace the event.
     envelope: Envelope
         Optional envelope to extract the model from
@@ -111,14 +113,14 @@ def event_parser(
 
 
 @overload
-def parse(event: Dict[str, Any], model: type[T]) -> T: ...  # pragma: no cover
+def parse(event: dict[str, Any], model: type[T]) -> T: ...  # pragma: no cover
 
 
 @overload
-def parse(event: Dict[str, Any], model: type[T], envelope: Type[Envelope]) -> T: ...  # pragma: no cover
+def parse(event: dict[str, Any], model: type[T], envelope: type[Envelope]) -> T: ...  # pragma: no cover
 
 
-def parse(event: Dict[str, Any], model: type[T], envelope: Optional[Type[Envelope]] = None):
+def parse(event: dict[str, Any], model: type[T], envelope: type[Envelope] | None = None):
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
@@ -156,7 +158,7 @@ def parse(event: Dict[str, Any], model: type[T], envelope: Optional[Type[Envelop
 
     Parameters
     ----------
-    event:    Dict
+    event:    dict
         Lambda event to be parsed & validated
     model:   Model
         Your data model that will replace the event

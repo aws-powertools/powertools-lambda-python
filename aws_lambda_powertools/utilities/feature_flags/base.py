@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 
 class StoreProvider(ABC):
     @property
     @abstractmethod
-    def get_raw_configuration(self) -> Dict[str, Any]:
+    def get_raw_configuration(self) -> dict[str, Any]:
         """Get configuration from any store and return the parsed JSON dictionary"""
         raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
-    def get_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> dict[str, Any]:
         """Get configuration from any store and return the parsed JSON dictionary
 
         If envelope is set, it'll extract and return feature flags from configuration,
@@ -23,7 +25,7 @@ class StoreProvider(ABC):
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             parsed JSON dictionary
 
             **Example**
