@@ -1,4 +1,6 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 from hvac import Client
 
@@ -12,13 +14,13 @@ class VaultProvider(BaseProvider):
         self.vault_client = Client(url=vault_url, verify=False, timeout=10)
         self.vault_client.token = vault_token
 
-    def _get(self, name: str, **sdk_options) -> Dict[str, Any]:
+    def _get(self, name: str, **sdk_options) -> dict[str, Any]:
         # for example proposal, the mountpoint is always /secret
         kv_configuration = self.vault_client.secrets.kv.v2.read_secret(path=name)
 
         return kv_configuration["data"]["data"]
 
-    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         list_secrets = {}
         all_secrets = self.vault_client.secrets.kv.v2.list_secrets(path=path)
 

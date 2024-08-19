@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import asyncio
-from typing import List, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 import aiohttp
 
@@ -7,7 +9,9 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.tracing import aiohttp_trace_config
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -22,10 +26,10 @@ class Todo(TypedDict, total=False):
 
 
 @app.resolver(type_name="Query", field_name="listTodos")
-async def list_todos() -> List[Todo]:
+async def list_todos() -> list[Todo]:
     async with aiohttp.ClientSession(trace_configs=[aiohttp_trace_config()]) as session:
         async with session.get("https://jsonplaceholder.typicode.com/todos") as resp:
-            result: List[Todo] = await resp.json()
+            result: list[Todo] = await resp.json()
             return result[:2]  # first two results to demo assertion
 
 

@@ -1,4 +1,6 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import (
@@ -6,8 +8,10 @@ from aws_lambda_powertools.utilities.batch import (
     EventType,
     batch_processor,
 )
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
@@ -15,7 +19,7 @@ logger = Logger()
 
 
 @tracer.capture_method
-def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
+def record_handler(record: SQSRecord, lambda_context: LambdaContext | None = None):
     if lambda_context is not None:
         remaining_time = lambda_context.get_remaining_time_in_millis()
         logger.info(remaining_time)

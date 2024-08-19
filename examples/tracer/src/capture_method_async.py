@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import asyncio
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.streaming import S3Object
 from aws_lambda_powertools.utilities.streaming.transformations import ZipTransform
 

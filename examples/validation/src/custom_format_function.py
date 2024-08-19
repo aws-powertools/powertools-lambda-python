@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import json
 import re
+from typing import TYPE_CHECKING
 
 import boto3
 import custom_format_schema as schemas
 
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # awsaccountid must have 12 digits
 custom_format = {"awsaccountid": lambda value: re.match(r"^(\d{12})$", value)}

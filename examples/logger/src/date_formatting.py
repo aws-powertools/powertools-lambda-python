@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools import Logger
 
 date_format = "%m/%d/%Y %I:%M:%S %p"

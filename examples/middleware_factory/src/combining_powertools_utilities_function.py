@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import boto3
 import combining_powertools_utilities_schema as schemas
@@ -14,6 +16,10 @@ from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 from aws_lambda_powertools.utilities.jmespath_utils import query
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.feature_flags.types import JSONType
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver()
 tracer = Tracer()

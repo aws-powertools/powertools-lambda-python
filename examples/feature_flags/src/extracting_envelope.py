@@ -1,7 +1,11 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app_config = AppConfigStore(
     environment="dev",

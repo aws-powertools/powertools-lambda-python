@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 import requests
@@ -8,8 +10,7 @@ ENDPOINT = os.getenv("PAYMENT_API", "")
 logger = Logger(service="payment")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 def lambda_handler(event, context):

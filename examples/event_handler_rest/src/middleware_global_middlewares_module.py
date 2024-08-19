@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
 
 logger = Logger()
 

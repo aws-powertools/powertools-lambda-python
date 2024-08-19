@@ -1,4 +1,6 @@
-from typing import List, TypedDict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
@@ -7,7 +9,9 @@ from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_ut
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncResolverEvent,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -33,7 +37,7 @@ class MyCustomModel(AppSyncResolverEvent):
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
-def list_locations(page: int = 0, size: int = 10) -> List[Location]:
+def list_locations(page: int = 0, size: int = 10) -> list[Location]:
     # additional properties/methods will now be available under current_event
     logger.debug(f"Request country origin: {app.current_event.country_viewer}")  # type: ignore[attr-defined]
     return [{"id": scalar_types_utils.make_id(), "name": "Perry, James and Carroll"}]

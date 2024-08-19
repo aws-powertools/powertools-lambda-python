@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 INPUT = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://example.com/object1660222326.json",

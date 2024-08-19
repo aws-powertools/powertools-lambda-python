@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import List
+from typing import TYPE_CHECKING
 
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.params import Query
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.params import Query
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver(enable_validation=True)
 
@@ -21,7 +25,7 @@ class ExampleEnum(Enum):
 @app.get("/todos")
 def get(
     example_multi_value_param: Annotated[
-        List[ExampleEnum],  # (1)!
+        list[ExampleEnum],  # (1)!
         Query(
             description="This is multi value query parameter.",
         ),

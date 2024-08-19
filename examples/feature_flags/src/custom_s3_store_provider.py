@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, Dict
+from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
@@ -20,7 +22,7 @@ class S3StoreProvider(StoreProvider):
         self.object_key = object_key
         self.client = boto3.client("s3")
 
-    def _get_s3_object(self) -> Dict[str, Any]:
+    def _get_s3_object(self) -> dict[str, Any]:
         # Retrieve the object content
         try:
             response = self.client.get_object(Bucket=self.bucket_name, Key=self.object_key)
@@ -28,9 +30,9 @@ class S3StoreProvider(StoreProvider):
         except ClientError as exc:
             raise ConfigurationStoreError("Unable to get S3 Store Provider configuration file") from exc
 
-    def get_configuration(self) -> Dict[str, Any]:
+    def get_configuration(self) -> dict[str, Any]:
         return self._get_s3_object()
 
     @property
-    def get_raw_configuration(self) -> Dict[str, Any]:
+    def get_raw_configuration(self) -> dict[str, Any]:
         return self._get_s3_object()

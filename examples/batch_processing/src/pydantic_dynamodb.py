@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Dict, Optional
+from typing import TYPE_CHECKING
 
 from typing_extensions import Literal
 
@@ -14,7 +16,9 @@ from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamRecordModel,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class Order(BaseModel):
@@ -27,13 +31,13 @@ class OrderDynamoDB(BaseModel):
     # auto transform json string
     # so Pydantic can auto-initialize nested Order model
     @field_validator("Message", mode="before")
-    def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+    def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
         return json.loads(value["S"])
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[OrderDynamoDB]
-    OldImage: Optional[OrderDynamoDB]
+    NewImage: OrderDynamoDB | None
+    OldImage: OrderDynamoDB | None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):

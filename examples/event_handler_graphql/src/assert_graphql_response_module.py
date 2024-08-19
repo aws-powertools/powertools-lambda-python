@@ -1,9 +1,13 @@
-from typing import List, TypedDict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -20,7 +24,7 @@ class Location(TypedDict, total=False):
 @app.resolver(field_name="listLocations")
 @app.resolver(field_name="locations")
 @tracer.capture_method
-def get_locations(name: str, description: str = "") -> List[Location]:  # match GraphQL Query arguments
+def get_locations(name: str, description: str = "") -> list[Location]:  # match GraphQL Query arguments
     return [{"name": name, "description": description}]
 
 

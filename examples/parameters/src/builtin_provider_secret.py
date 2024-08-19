@@ -1,10 +1,14 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import requests
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 config = Config(region_name="sa-east-1", connect_timeout=1, retries={"total_max_attempts": 2, "max_attempts": 5})
 ssm_provider = parameters.SecretsProvider(config=config)

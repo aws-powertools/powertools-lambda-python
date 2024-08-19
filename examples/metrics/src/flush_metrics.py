@@ -1,11 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools import Metrics
 from aws_lambda_powertools.metrics import MetricUnit
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 metrics = Metrics()
 
 
-def book_flight(flight_id: str, **kwargs): 
+def book_flight(flight_id: str, **kwargs):
     # logic to book flight
     ...
     metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)

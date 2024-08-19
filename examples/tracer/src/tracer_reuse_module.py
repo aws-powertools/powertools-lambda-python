@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools import Tracer
 
 tracer = Tracer()

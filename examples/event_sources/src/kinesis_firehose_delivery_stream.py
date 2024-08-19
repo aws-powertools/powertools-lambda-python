@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_lambda_powertools.utilities.data_classes import (
     KinesisFirehoseDataTransformationResponse,
     KinesisFirehoseEvent,
     event_source,
 )
 from aws_lambda_powertools.utilities.serialization import base64_from_json
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @event_source(data_class=KinesisFirehoseEvent)

@@ -1,4 +1,6 @@
-from typing import List, TypedDict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, TypedDict
 
 import requests
 from requests import Response
@@ -7,7 +9,9 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.data_classes.appsync import scalar_types_utils
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -35,7 +39,7 @@ def get_todo(
 
 @app.resolver(type_name="Query", field_name="listTodos")
 @tracer.capture_method
-def list_todos() -> List[Todo]:
+def list_todos() -> list[Todo]:
     todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 

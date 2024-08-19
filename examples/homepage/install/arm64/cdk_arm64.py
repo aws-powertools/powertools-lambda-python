@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_cdk import Aws, Stack, aws_lambda
-from constructs import Construct
+
+if TYPE_CHECKING:
+    from constructs import Construct
 
 
 class SampleApp(Stack):

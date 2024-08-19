@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from json import JSONDecodeError
-from typing import Dict
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.data_classes import (
     KinesisFirehoseDataTransformationRecord,
@@ -8,7 +10,9 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from aws_lambda_powertools.utilities.serialization import base64_from_json
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @event_source(data_class=KinesisFirehoseEvent)
@@ -17,7 +21,7 @@ def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
 
     for record in event.records:
         try:
-            payload: Dict = record.data_as_json  # decodes and deserialize base64 JSON string
+            payload: dict = record.data_as_json  # decodes and deserialize base64 JSON string
 
             ## generate data to return
             transformed_data = {"tool_used": "powertools_dataclass", "original_payload": payload}

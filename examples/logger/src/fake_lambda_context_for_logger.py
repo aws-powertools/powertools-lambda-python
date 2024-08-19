@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 import fake_lambda_context_for_logger_module  # sample module for completeness

@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import boto3
 import unwrapping_popular_event_source_schema as schemas
 from botocore.exceptions import ClientError
@@ -5,8 +9,10 @@ from botocore.exceptions import ClientError
 from aws_lambda_powertools.utilities.data_classes.event_bridge_event import (
     EventBridgeEvent,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import envelopes, validator
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 # extracting detail from EventBridge custom event

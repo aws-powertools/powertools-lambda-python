@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes.appsync.scalar_types_utils import (
     aws_date,
     aws_datetime,

@@ -1,4 +1,6 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import requests
 from requests import Response
@@ -6,7 +8,9 @@ from requests import Response
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -18,13 +22,13 @@ app = APIGatewayRestResolver()
 def get_todos():
     todo_id: str = app.current_event.query_string_parameters["id"]
     # alternatively
-    _: Optional[str] = app.current_event.query_string_parameters.get("id")
+    _: str | None = app.current_event.query_string_parameters.get("id")
 
     # or multi-value query string parameters; ?category="red"&?category="blue"
-    _: List[str] = app.current_event.multi_value_query_string_parameters["category"]
+    _: list[str] = app.current_event.multi_value_query_string_parameters["category"]
 
     # Payload
-    _: Optional[str] = app.current_event.body  # raw str | None
+    _: str | None = app.current_event.body  # raw str | None
 
     endpoint = "https://jsonplaceholder.typicode.com/todos"
     if todo_id:

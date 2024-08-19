@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import pytest
 from mock_redis import MockRedis
@@ -9,7 +12,9 @@ from aws_lambda_powertools.utilities.idempotency import (
 from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
     RedisCachePersistenceLayer,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @pytest.fixture

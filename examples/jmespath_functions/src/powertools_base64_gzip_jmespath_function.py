@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import base64
 import binascii
 import gzip
 import json
+from typing import TYPE_CHECKING
 
 import powertools_base64_gzip_jmespath_schema as schemas
 from jmespath.exceptions import JMESPathTypeError
 
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:

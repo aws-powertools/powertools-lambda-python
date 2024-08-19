@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 processor = SqsFifoPartialProcessor()
 tracer = Tracer()
@@ -23,6 +28,6 @@ def record_handler(record: SQSRecord):
 def lambda_handler(event, context: LambdaContext):
     batch = event["Records"]
     with processor(records=batch, handler=record_handler):
-        processor.process()  # kick off processing, return List[Tuple]
+        processor.process()  # kick off processing, return list[tuple]
 
     return processor.response()

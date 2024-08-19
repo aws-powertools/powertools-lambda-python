@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import requests
 from typing_extensions import Annotated
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
-from aws_lambda_powertools.event_handler.openapi.params import Body, Query
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.params import Body, Query
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = BedrockAgentResolver()
 

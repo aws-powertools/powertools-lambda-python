@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import base64
 from dataclasses import dataclass, field
-from typing import Any, Callable, List
+from typing import TYPE_CHECKING, Any, Callable
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -8,7 +10,9 @@ from aws_lambda_powertools.utilities.jmespath_utils import (
     envelopes,
     query,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @dataclass
@@ -31,7 +35,7 @@ def obfuscate_sensitive_data(
     handler: Callable[[dict, LambdaContext], dict],
     event: dict,
     context: LambdaContext,
-    fields: List,
+    fields: list,
 ) -> dict:
     # extracting payload from a EventBridge event
     detail: dict = query(data=event, envelope=envelopes.EVENTBRIDGE)

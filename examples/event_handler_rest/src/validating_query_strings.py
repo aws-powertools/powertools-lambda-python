@@ -1,4 +1,6 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import requests
 from pydantic import BaseModel, Field
@@ -6,9 +8,11 @@ from typing_extensions import Annotated  # (1)!
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.params import Query  # (2)!
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.params import Query  # (2)!
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
@@ -17,14 +21,14 @@ app = APIGatewayRestResolver(enable_validation=True)
 
 class Todo(BaseModel):
     userId: int
-    id_: Optional[int] = Field(alias="id", default=None)
+    id_: int | None = Field(alias="id", default=None)
     title: str
     completed: bool
 
 
 @app.get("/todos")
 @tracer.capture_method
-def get_todos(completed: Annotated[Optional[str], Query(min_length=4)] = None) -> List[Todo]:  # (3)!
+def get_todos(completed: Annotated[str | None, Query(min_length=4)] = None) -> list[Todo]:  # (3)!
     url = "https://jsonplaceholder.typicode.com/todos"
 
     if completed is not None:

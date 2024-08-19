@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -7,7 +9,9 @@ from aws_lambda_powertools.utilities.jmespath_utils import (
     envelopes,
     query,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @dataclass

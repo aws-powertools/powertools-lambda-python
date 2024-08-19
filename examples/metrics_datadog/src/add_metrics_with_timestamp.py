@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import time
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 metrics = DatadogMetrics()
 

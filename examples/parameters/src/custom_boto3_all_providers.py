@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import boto3
 from botocore.config import Config
 

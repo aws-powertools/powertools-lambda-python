@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -6,7 +9,9 @@ from aws_lambda_powertools.utilities.idempotency import (
     idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import DataclassSerializer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(event_key_jmespath="order_id")  # see Choosing a payload subset section

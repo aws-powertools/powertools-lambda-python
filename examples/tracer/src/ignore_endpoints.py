@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 import requests
 
 from aws_lambda_powertools import Tracer
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 ENDPOINT = os.getenv("PAYMENT_API", "")
 IGNORE_URLS = ["/collect", "/refund"]
@@ -13,8 +18,7 @@ tracer.ignore_endpoint(hostname=ENDPOINT, urls=IGNORE_URLS)
 tracer.ignore_endpoint(hostname=f"*.{ENDPOINT}", urls=IGNORE_URLS)  # `<stage>.ENDPOINT`
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @tracer.capture_method(capture_error=False)
