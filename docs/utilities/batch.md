@@ -119,7 +119,7 @@ Processing batches from SQS works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_sqs_context_manager.py"
     ```
 
-=== "As a decorator (legacy)"
+=== "As a decorator (deprecated)"
 
     ```python hl_lines="4-9 12 18 27 29"
     --8<-- "examples/batch_processing/src/getting_started_sqs_decorator.py"
@@ -161,7 +161,7 @@ Enable the `skip_group_on_error` option for seamless processing of messages from
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_context_manager.py"
     ```
 
-=== "As a decorator (legacy)"
+=== "As a decorator (deprecated)"
 
     ```python hl_lines="5-6 11 26"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_decorator.py"
@@ -197,7 +197,7 @@ Processing batches from Kinesis works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_kinesis_context_manager.py"
     ```
 
-=== "As a decorator (legacy)"
+=== "As a decorator (deprecated)"
 
     ```python hl_lines="2-9 12 18 26"
     --8<-- "examples/batch_processing/src/getting_started_kinesis_decorator.py"
@@ -241,7 +241,7 @@ Processing batches from DynamoDB Streams works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_dynamodb_context_manager.py"
     ```
 
-=== "As a decorator (legacy)"
+=== "As a decorator (deprecated)"
 
     ```python hl_lines="4-11 14 20 31"
     --8<-- "examples/batch_processing/src/getting_started_dynamodb_decorator.py"
@@ -502,7 +502,7 @@ Use the context manager to access a list of all returned values from your `recor
 
 === "Accessing raw processed messages"
 
-    ```python hl_lines="29-36"
+    ```python hl_lines="28-35"
     --8<-- "examples/batch_processing/src/context_manager_access.py"
     ```
 
@@ -538,7 +538,7 @@ We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lam
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context.py"
     ```
 
-=== "As a decorator (legacy)"
+=== "As a decorator (deprecated)"
 
     ```python hl_lines="18 26"
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context_decorator.py"
@@ -673,7 +673,7 @@ Use context manager when you want access to the processed messages or handle `Ba
 
 ### What's the difference between the decorator and process_partial_response functions?
 
-`batch_processor` and `async_batch_processor` decorators are now considered legacy. Historically, they were kept due to backwards compatibility and to minimize code changes between V1 and V2.
+`batch_processor` and `async_batch_processor` decorators are now marked as deprecated. Historically, they were kept due to backwards compatibility and to minimize code changes between V2 and V3. We will remove both in the next major release.
 
 As 2.12.0, `process_partial_response` and `async_process_partial_response` are the recommended instead. It reduces boilerplate, smaller memory/CPU cycles, and it makes it less error prone - e.g., decorators required an additional return.
 

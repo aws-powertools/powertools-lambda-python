@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, List, Literal, Optional
+from typing import Any, Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -30,7 +30,7 @@ class CloudWatchAlarmState(DictWrapper):
         return self["reasonData"]
 
     @cached_property
-    def reason_data_decoded(self) -> Optional[Any]:
+    def reason_data_decoded(self) -> Any | None:
         """
         Deserialized version of reason_data.
         """
@@ -38,7 +38,7 @@ class CloudWatchAlarmState(DictWrapper):
         return self._json_deserializer(self.reason_data) if self.reason_data else None
 
     @property
-    def actions_suppressed_by(self) -> Optional[Literal["Alarm", "ExtensionPeriod", "WaitPeriod"]]:
+    def actions_suppressed_by(self) -> Literal["Alarm", "ExtensionPeriod", "WaitPeriod"] | None:
         """
         Describes why the actions when the value is `ALARM` are suppressed in a composite
         alarm.
@@ -46,7 +46,7 @@ class CloudWatchAlarmState(DictWrapper):
         return self.get("actionsSuppressedBy", None)
 
     @property
-    def actions_suppressed_reason(self) -> Optional[str]:
+    def actions_suppressed_reason(self) -> str | None:
         """
         Captures the reason for action suppression.
         """
@@ -69,14 +69,14 @@ class CloudWatchAlarmMetric(DictWrapper):
         return self["id"]
 
     @property
-    def expression(self) -> Optional[str]:
+    def expression(self) -> str | None:
         """
         Optional expression of the alarm metric.
         """
         return self.get("expression", None)
 
     @property
-    def label(self) -> Optional[str]:
+    def label(self) -> str | None:
         """
         Optional label of the alarm metric.
         """
@@ -96,21 +96,21 @@ class CloudWatchAlarmMetric(DictWrapper):
 
 class CloudWatchAlarmMetricStat(DictWrapper):
     @property
-    def period(self) -> Optional[int]:
+    def period(self) -> int | None:
         """
         Metric evaluation period, in seconds.
         """
         return self.get("period", None)
 
     @property
-    def stat(self) -> Optional[str]:
+    def stat(self) -> str | None:
         """
         Statistical aggregation of metric points, e.g. Average, SampleCount, etc.
         """
         return self.get("stat", None)
 
     @property
-    def unit(self) -> Optional[str]:
+    def unit(self) -> str | None:
         """
         Unit for metric.
         """
@@ -156,42 +156,42 @@ class CloudWatchAlarmData(DictWrapper):
 
 class CloudWatchAlarmConfiguration(DictWrapper):
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         """
         Optional description for the Alarm.
         """
         return self.get("description", None)
 
     @property
-    def alarm_rule(self) -> Optional[str]:
+    def alarm_rule(self) -> str | None:
         """
         Optional description for the Alarm rule in case of composite alarm.
         """
         return self.get("alarmRule", None)
 
     @property
-    def alarm_actions_suppressor(self) -> Optional[str]:
+    def alarm_actions_suppressor(self) -> str | None:
         """
         Optional action suppression for the Alarm rule in case of composite alarm.
         """
         return self.get("actionsSuppressor", None)
 
     @property
-    def alarm_actions_suppressor_wait_period(self) -> Optional[str]:
+    def alarm_actions_suppressor_wait_period(self) -> str | None:
         """
         Optional action suppression wait period for the Alarm rule in case of composite alarm.
         """
         return self.get("actionsSuppressorWaitPeriod", None)
 
     @property
-    def alarm_actions_suppressor_extension_period(self) -> Optional[str]:
+    def alarm_actions_suppressor_extension_period(self) -> str | None:
         """
         Optional action suppression extension period for the Alarm rule in case of composite alarm.
         """
         return self.get("actionsSuppressorExtensionPeriod", None)
 
     @property
-    def metrics(self) -> List[CloudWatchAlarmMetric]:
+    def metrics(self) -> list[CloudWatchAlarmMetric]:
         """
         The metrics evaluated for the Alarm.
         """

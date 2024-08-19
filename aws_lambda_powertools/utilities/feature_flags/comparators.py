@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime, tzinfo
-from typing import Any, Dict, Optional
+from typing import Any
 
 from dateutil.tz import gettz
 
-from aws_lambda_powertools.utilities.feature_flags.schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
+from aws_lambda_powertools.utilities.feature_flags.constants import HOUR_MIN_SEPARATOR
+from aws_lambda_powertools.utilities.feature_flags.schema import ModuloRangeValues, TimeValues
 
 
-def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
+def _get_now_from_timezone(timezone: tzinfo | None) -> datetime:
     """
     Returns now in the specified timezone. Defaults to UTC if not present.
     At this stage, we already validated that the passed timezone string is valid, so we assume that
@@ -18,7 +19,7 @@ def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
     return datetime.now(timezone)
 
 
-def compare_days_of_week(context_value: Any, condition_value: Dict) -> bool:
+def compare_days_of_week(context_value: Any, condition_value: dict) -> bool:
     timezone_name = condition_value.get(TimeValues.TIMEZONE.value, "UTC")
 
     # %A = Weekday as locale’s full name.
@@ -28,7 +29,7 @@ def compare_days_of_week(context_value: Any, condition_value: Dict) -> bool:
     return current_day in days
 
 
-def compare_datetime_range(context_value: Any, condition_value: Dict) -> bool:
+def compare_datetime_range(context_value: Any, condition_value: dict) -> bool:
     timezone_name = condition_value.get(TimeValues.TIMEZONE.value, "UTC")
     timezone = gettz(timezone_name)
     current_time: datetime = _get_now_from_timezone(timezone)
@@ -44,7 +45,7 @@ def compare_datetime_range(context_value: Any, condition_value: Dict) -> bool:
     return start_date <= current_time <= end_date
 
 
-def compare_time_range(context_value: Any, condition_value: Dict) -> bool:
+def compare_time_range(context_value: Any, condition_value: dict) -> bool:
     timezone_name = condition_value.get(TimeValues.TIMEZONE.value, "UTC")
     current_time: datetime = _get_now_from_timezone(gettz(timezone_name))
 
@@ -75,7 +76,7 @@ def compare_time_range(context_value: Any, condition_value: Dict) -> bool:
         return start_time <= current_time <= end_time
 
 
-def compare_modulo_range(context_value: int, condition_value: Dict) -> bool:
+def compare_modulo_range(context_value: int, condition_value: dict) -> bool:
     """
     Returns for a given context 'a' and modulo condition 'b' -> b.start <= a % b.base <= b.end
     """

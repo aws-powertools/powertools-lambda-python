@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import base64
 import functools
 import json
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 import pytest
 from aws_encryption_sdk.identifiers import Algorithm
@@ -24,7 +22,7 @@ class FakeEncryptionKeyProvider(BaseProvider):
     ) -> None:
         super().__init__(json_serializer, json_deserializer)
 
-    def encrypt(self, data: bytes | str, **kwargs) -> str:
+    def encrypt(self, data: Union[bytes, str], **kwargs) -> str:
         encoded_data: str = self.json_serializer(data)
         ciphertext = base64.b64encode(encoded_data.encode("utf-8")).decode()
         return ciphertext

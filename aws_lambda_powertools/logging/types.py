@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, TypedDict, Union
 
-from typing_extensions import NotRequired, TypeAlias
-
-LogRecord: TypeAlias = Union[Dict[str, Any], "PowertoolsLogRecord"]
-LogStackTrace: TypeAlias = Union[Dict[str, Any], "PowertoolsStackTrace"]
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired, TypeAlias
 
 
 class PowertoolsLogRecord(TypedDict):
     # Base fields (required)
     level: str
     location: str
-    message: Dict[str, Any] | str | bool | List[Any]
+    message: dict[str, Any] | str | bool | list[Any]
     timestamp: str | int
     service: str
 
@@ -34,11 +32,15 @@ class PowertoolsLogRecord(TypedDict):
     # Fields from logger.exception
     exception_name: NotRequired[str]
     exception: NotRequired[str]
-    stack_trace: NotRequired[Dict[str, Any]]
+    stack_trace: NotRequired[dict[str, Any]]
 
 
 class PowertoolsStackTrace(TypedDict):
     type: str
     value: str
     module: str
-    frames: List[Dict[str, Any]]
+    frames: list[dict[str, Any]]
+
+
+LogRecord: TypeAlias = Union[Dict[str, Any], PowertoolsLogRecord]
+LogStackTrace: TypeAlias = Union[Dict[str, Any], PowertoolsStackTrace]

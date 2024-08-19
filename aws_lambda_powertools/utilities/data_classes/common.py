@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import base64
 import json
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Callable, Iterator, Mapping
 
-from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+if TYPE_CHECKING:
+    from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
 
 class CaseInsensitiveDict(dict):
@@ -52,11 +55,11 @@ class CaseInsensitiveDict(dict):
 class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
 
-    def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
         """
         Parameters
         ----------
-        data : Dict[str, Any]
+        data : dict[str, Any]
             Lambda Event Source Event payload
         json_deserializer : Callable, optional
             function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `obj`,
@@ -83,7 +86,7 @@ class DictWrapper(Mapping):
     def __str__(self) -> str:
         return str(self._str_helper())
 
-    def _str_helper(self) -> Dict[str, Any]:
+    def _str_helper(self) -> dict[str, Any]:
         """
         Recursively get a Dictionary of DictWrapper properties primarily
         for use by __str__ for debugging purposes.
@@ -98,7 +101,7 @@ class DictWrapper(Mapping):
         if hasattr(self, "_sensitive_properties"):
             sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for property_key in properties:
             if property_key in sensitive_properties:
                 result[property_key] = "[SENSITIVE]"
@@ -120,33 +123,33 @@ class DictWrapper(Mapping):
 
         return result
 
-    def _properties(self) -> List[str]:
+    def _properties(self) -> list[str]:
         return [p for p in dir(self.__class__) if isinstance(getattr(self.__class__, p), property)]
 
-    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+    def get(self, key: str, default: Any | None = None) -> Any | None:
         return self._data.get(key, default)
 
     @property
-    def raw_event(self) -> Dict[str, Any]:
+    def raw_event(self) -> dict[str, Any]:
         """The original raw event dict"""
         return self._data
 
 
 class BaseProxyEvent(DictWrapper):
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         return CaseInsensitiveDict(self.get("headers"))
 
     @property
-    def query_string_parameters(self) -> Dict[str, str]:
+    def query_string_parameters(self) -> dict[str, str]:
         return self.get("queryStringParameters") or {}
 
     @property
-    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+    def multi_value_query_string_parameters(self) -> dict[str, list[str]]:
         return self.get("multiValueQueryStringParameters") or {}
 
     @cached_property
-    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
+    def resolved_query_string_parameters(self) -> dict[str, list[str]]:
         """
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
@@ -157,7 +160,7 @@ class BaseProxyEvent(DictWrapper):
         return {k: v.split(",") for k, v in self.query_string_parameters.items()}
 
     @property
-    def resolved_headers_field(self) -> Dict[str, str]:
+    def resolved_headers_field(self) -> dict[str, str]:
         """
         This property determines the appropriate header to be used
         as a trusted source for validating OpenAPI.
@@ -172,11 +175,11 @@ class BaseProxyEvent(DictWrapper):
         return self.headers
 
     @property
-    def is_base64_encoded(self) -> Optional[bool]:
+    def is_base64_encoded(self) -> bool | None:
         return self.get("isBase64Encoded")
 
     @property
-    def body(self) -> Optional[str]:
+    def body(self) -> str | None:
         """Submitted body of the request as a string"""
         return self.get("body")
 
@@ -189,9 +192,9 @@ class BaseProxyEvent(DictWrapper):
         return None
 
     @cached_property
-    def decoded_body(self) -> Optional[str]:
+    def decoded_body(self) -> str | None:
         """Decode the body from base64 if encoded, otherwise return it as is."""
-        body: Optional[str] = self.body
+        body: str | None = self.body
         if self.is_base64_encoded and body:
             return base64.b64decode(body.encode()).decode()
         return body
@@ -247,56 +250,56 @@ class RequestContextClientCert(DictWrapper):
 
 class APIGatewayEventIdentity(DictWrapper):
     @property
-    def access_key(self) -> Optional[str]:
+    def access_key(self) -> str | None:
         return self["requestContext"]["identity"].get("accessKey")
 
     @property
-    def account_id(self) -> Optional[str]:
+    def account_id(self) -> str | None:
         """The AWS account ID associated with the request."""
         return self["requestContext"]["identity"].get("accountId")
 
     @property
-    def api_key(self) -> Optional[str]:
+    def api_key(self) -> str | None:
         """For API methods that require an API key, this variable is the API key associated with the method request.
         For methods that don't require an API key, this variable is null."""
         return self["requestContext"]["identity"].get("apiKey")
 
     @property
-    def api_key_id(self) -> Optional[str]:
+    def api_key_id(self) -> str | None:
         """The API key ID associated with an API request that requires an API key."""
         return self["requestContext"]["identity"].get("apiKeyId")
 
     @property
-    def caller(self) -> Optional[str]:
+    def caller(self) -> str | None:
         """The principal identifier of the caller making the request."""
         return self["requestContext"]["identity"].get("caller")
 
     @property
-    def cognito_authentication_provider(self) -> Optional[str]:
+    def cognito_authentication_provider(self) -> str | None:
         """A comma-separated list of the Amazon Cognito authentication providers used by the caller
         making the request. Available only if the request was signed with Amazon Cognito credentials."""
         return self["requestContext"]["identity"].get("cognitoAuthenticationProvider")
 
     @property
-    def cognito_authentication_type(self) -> Optional[str]:
+    def cognito_authentication_type(self) -> str | None:
         """The Amazon Cognito authentication type of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
         return self["requestContext"]["identity"].get("cognitoAuthenticationType")
 
     @property
-    def cognito_identity_id(self) -> Optional[str]:
+    def cognito_identity_id(self) -> str | None:
         """The Amazon Cognito identity ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
         return self["requestContext"]["identity"].get("cognitoIdentityId")
 
     @property
-    def cognito_identity_pool_id(self) -> Optional[str]:
+    def cognito_identity_pool_id(self) -> str | None:
         """The Amazon Cognito identity pool ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
         return self["requestContext"]["identity"].get("cognitoIdentityPoolId")
 
     @property
-    def principal_org_id(self) -> Optional[str]:
+    def principal_org_id(self) -> str | None:
         """The AWS organization ID."""
         return self["requestContext"]["identity"].get("principalOrgId")
 
@@ -306,22 +309,22 @@ class APIGatewayEventIdentity(DictWrapper):
         return self["requestContext"]["identity"]["sourceIp"]
 
     @property
-    def user(self) -> Optional[str]:
+    def user(self) -> str | None:
         """The principal identifier of the user making the request."""
         return self["requestContext"]["identity"].get("user")
 
     @property
-    def user_agent(self) -> Optional[str]:
+    def user_agent(self) -> str | None:
         """The User Agent of the API caller."""
         return self["requestContext"]["identity"].get("userAgent")
 
     @property
-    def user_arn(self) -> Optional[str]:
+    def user_arn(self) -> str | None:
         """The Amazon Resource Name (ARN) of the effective user identified after authentication."""
         return self["requestContext"]["identity"].get("userArn")
 
     @property
-    def client_cert(self) -> Optional[RequestContextClientCert]:
+    def client_cert(self) -> RequestContextClientCert | None:
         client_cert = self["requestContext"]["identity"].get("clientCert")
         return None if client_cert is None else RequestContextClientCert(client_cert)
 
@@ -338,16 +341,16 @@ class BaseRequestContext(DictWrapper):
         return self["requestContext"]["apiId"]
 
     @property
-    def domain_name(self) -> Optional[str]:
+    def domain_name(self) -> str | None:
         """A domain name"""
         return self["requestContext"].get("domainName")
 
     @property
-    def domain_prefix(self) -> Optional[str]:
+    def domain_prefix(self) -> str | None:
         return self["requestContext"].get("domainPrefix")
 
     @property
-    def extended_request_id(self) -> Optional[str]:
+    def extended_request_id(self) -> str | None:
         """An automatically generated ID for the API call, which contains more useful information
         for debugging/troubleshooting."""
         return self["requestContext"].get("extendedRequestId")
@@ -381,7 +384,7 @@ class BaseRequestContext(DictWrapper):
         return self["requestContext"]["requestId"]
 
     @property
-    def request_time(self) -> Optional[str]:
+    def request_time(self) -> str | None:
         """The CLF-formatted request time (dd/MMM/yyyy:HH:mm:ss +-hhmm)"""
         return self["requestContext"].get("requestTime")
 
@@ -474,7 +477,7 @@ class BaseRequestContextV2(DictWrapper):
         return self["requestContext"]["timeEpoch"]
 
     @property
-    def authentication(self) -> Optional[RequestContextClientCert]:
+    def authentication(self) -> RequestContextClientCert | None:
         """Optional when using mutual TLS authentication"""
         # FunctionURL might have NONE as AuthZ
         authentication = self["requestContext"].get("authentication") or {}

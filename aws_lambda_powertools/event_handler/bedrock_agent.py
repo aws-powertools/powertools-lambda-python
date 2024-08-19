@@ -1,5 +1,6 @@
-from re import Match
-from typing import Any, Callable, Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable
 
 from typing_extensions import override
 
@@ -9,8 +10,12 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ProxyEventType,
     ResponseBuilder,
 )
-from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse
-from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
+
+if TYPE_CHECKING:
+    from re import Match
+
+    from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse
+    from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 
 
 class BedrockResponseBuilder(ResponseBuilder):
@@ -21,7 +26,7 @@ class BedrockResponseBuilder(ResponseBuilder):
     """
 
     @override
-    def build(self, event: BedrockAgentEvent, *args) -> Dict[str, Any]:
+    def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, None)
 
@@ -91,20 +96,20 @@ class BedrockAgentResolver(ApiGatewayResolver):
         self,
         rule: str,
         description: str,
-        cors: Optional[bool] = None,
+        cors: bool | None = None,
         compress: bool = False,
-        cache_control: Optional[str] = None,
-        summary: Optional[str] = None,
-        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        cache_control: str | None = None,
+        summary: str | None = None,
+        responses: dict[int, OpenAPIResponse] | None = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        operation_id: str | None = None,
         include_in_schema: bool = True,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         security = None
 
-        return super(BedrockAgentResolver, self).get(
+        return super().get(
             rule,
             cors,
             compress,
@@ -126,16 +131,16 @@ class BedrockAgentResolver(ApiGatewayResolver):
         self,
         rule: str,
         description: str,
-        cors: Optional[bool] = None,
+        cors: bool | None = None,
         compress: bool = False,
-        cache_control: Optional[str] = None,
-        summary: Optional[str] = None,
-        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        cache_control: str | None = None,
+        summary: str | None = None,
+        responses: dict[int, OpenAPIResponse] | None = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        operation_id: str | None = None,
         include_in_schema: bool = True,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
 
@@ -161,16 +166,16 @@ class BedrockAgentResolver(ApiGatewayResolver):
         self,
         rule: str,
         description: str,
-        cors: Optional[bool] = None,
+        cors: bool | None = None,
         compress: bool = False,
-        cache_control: Optional[str] = None,
-        summary: Optional[str] = None,
-        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        cache_control: str | None = None,
+        summary: str | None = None,
+        responses: dict[int, OpenAPIResponse] | None = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        operation_id: str | None = None,
         include_in_schema: bool = True,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
 
@@ -196,16 +201,16 @@ class BedrockAgentResolver(ApiGatewayResolver):
         self,
         rule: str,
         description: str,
-        cors: Optional[bool] = None,
+        cors: bool | None = None,
         compress: bool = False,
-        cache_control: Optional[str] = None,
-        summary: Optional[str] = None,
-        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        cache_control: str | None = None,
+        summary: str | None = None,
+        responses: dict[int, OpenAPIResponse] | None = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        operation_id: str | None = None,
         include_in_schema: bool = True,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: list[Callable] | None = None,
     ):
         security = None
 
@@ -231,16 +236,16 @@ class BedrockAgentResolver(ApiGatewayResolver):
         self,
         rule: str,
         description: str,
-        cors: Optional[bool] = None,
+        cors: bool | None = None,
         compress: bool = False,
-        cache_control: Optional[str] = None,
-        summary: Optional[str] = None,
-        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        cache_control: str | None = None,
+        summary: str | None = None,
+        responses: dict[int, OpenAPIResponse] | None = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        operation_id: str | None = None,
         include_in_schema: bool = True,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
 
@@ -261,10 +266,10 @@ class BedrockAgentResolver(ApiGatewayResolver):
         )
 
     @override
-    def _convert_matches_into_route_keys(self, match: Match) -> Dict[str, str]:
+    def _convert_matches_into_route_keys(self, match: Match) -> dict[str, str]:
         # In Bedrock Agents, all the parameters come inside the "parameters" key, not on the apiPath
         # So we have to search for route parameters in the parameters key
-        parameters: Dict[str, str] = {}
+        parameters: dict[str, str] = {}
         if match.groupdict() and self.current_event.parameters:
             parameters = {parameter["name"]: parameter["value"] for parameter in self.current_event.parameters}
         return parameters

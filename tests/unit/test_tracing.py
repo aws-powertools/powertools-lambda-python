@@ -447,7 +447,7 @@ def test_tracer_yield_from_nested_context_manager(mocker, provider_stub, in_subs
     tracer = Tracer(provider=provider, service="booking")
 
     # WHEN capture_method decorator is used on a context manager nesting another context manager
-    class NestedContextManager(object):
+    class NestedContextManager:
         def __enter__(self):
             self._value = {"result": "test result"}
             return self._value

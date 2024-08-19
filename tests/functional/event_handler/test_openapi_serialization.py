@@ -48,7 +48,7 @@ def test_openapi_serialize_other(gw_event):
     app = APIGatewayRestResolver(enable_validation=True, serializer=serializer)
 
     # GIVEN a custom class
-    class CustomClass(object):
+    class CustomClass:
         __slots__ = []
 
     # GIVEN a handler that returns an instance of that class

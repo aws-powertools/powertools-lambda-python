@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -17,11 +19,11 @@ from aws_lambda_powertools.utilities.data_classes.common import (
 
 class APIGatewayEventAuthorizer(DictWrapper):
     @property
-    def claims(self) -> Dict[str, Any]:
+    def claims(self) -> dict[str, Any]:
         return self.get("claims") or {}  # key might exist but can be `null`
 
     @property
-    def scopes(self) -> List[str]:
+    def scopes(self) -> list[str]:
         return self.get("scopes") or []  # key might exist but can be `null`
 
     @property
@@ -31,11 +33,11 @@ class APIGatewayEventAuthorizer(DictWrapper):
         return self.get("principalId") or ""  # key might exist but can be `null`
 
     @property
-    def integration_latency(self) -> Optional[int]:
+    def integration_latency(self) -> int | None:
         """The authorizer latency in ms."""
         return self.get("integrationLatency")
 
-    def get_context(self) -> Dict[str, Any]:
+    def get_context(self) -> dict[str, Any]:
         """Retrieve the authorization context details injected by a Lambda Authorizer.
 
         Example
@@ -49,7 +51,7 @@ class APIGatewayEventAuthorizer(DictWrapper):
 
         Returns:
         --------
-        Dict[str, Any]
+        dict[str, Any]
             A dictionary containing Lambda authorization context details.
         """
         return self._data
@@ -57,37 +59,37 @@ class APIGatewayEventAuthorizer(DictWrapper):
 
 class APIGatewayEventRequestContext(BaseRequestContext):
     @property
-    def connected_at(self) -> Optional[int]:
+    def connected_at(self) -> int | None:
         """The Epoch-formatted connection time. (WebSocket API)"""
         return self["requestContext"].get("connectedAt")
 
     @property
-    def connection_id(self) -> Optional[str]:
+    def connection_id(self) -> str | None:
         """A unique ID for the connection that can be used to make a callback to the client. (WebSocket API)"""
         return self["requestContext"].get("connectionId")
 
     @property
-    def event_type(self) -> Optional[str]:
+    def event_type(self) -> str | None:
         """The event type: `CONNECT`, `MESSAGE`, or `DISCONNECT`. (WebSocket API)"""
         return self["requestContext"].get("eventType")
 
     @property
-    def message_direction(self) -> Optional[str]:
+    def message_direction(self) -> str | None:
         """Message direction (WebSocket API)"""
         return self["requestContext"].get("messageDirection")
 
     @property
-    def message_id(self) -> Optional[str]:
+    def message_id(self) -> str | None:
         """A unique server-side ID for a message. Available only when the `eventType` is `MESSAGE`."""
         return self["requestContext"].get("messageId")
 
     @property
-    def operation_name(self) -> Optional[str]:
+    def operation_name(self) -> str | None:
         """The name of the operation being performed"""
         return self["requestContext"].get("operationName")
 
     @property
-    def route_key(self) -> Optional[str]:
+    def route_key(self) -> str | None:
         """The selected route key."""
         return self["requestContext"].get("routeKey")
 
@@ -114,22 +116,22 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return self["resource"]
 
     @property
-    def multi_value_headers(self) -> Dict[str, List[str]]:
+    def multi_value_headers(self) -> dict[str, list[str]]:
         return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
-    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+    def multi_value_query_string_parameters(self) -> dict[str, list[str]]:
         return self.get("multiValueQueryStringParameters") or {}  # key might exist but can be `null`
 
     @property
-    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
+    def resolved_query_string_parameters(self) -> dict[str, list[str]]:
         if self.multi_value_query_string_parameters:
             return self.multi_value_query_string_parameters
 
         return super().resolved_query_string_parameters
 
     @property
-    def resolved_headers_field(self) -> Dict[str, Any]:
+    def resolved_headers_field(self) -> dict[str, Any]:
         return self.multi_value_headers or self.headers
 
     @property
@@ -137,11 +139,11 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return APIGatewayEventRequestContext(self._data)
 
     @property
-    def path_parameters(self) -> Dict[str, str]:
+    def path_parameters(self) -> dict[str, str]:
         return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Dict[str, str]:
+    def stage_variables(self) -> dict[str, str]:
         return self.get("stageVariables") or {}
 
     def header_serializer(self) -> BaseHeadersSerializer:
@@ -164,11 +166,11 @@ class RequestContextV2AuthorizerIam(DictWrapper):
         """The principal identifier of the caller making the request."""
         return self.get("callerId") or ""  # key might exist but can be `null`
 
-    def _cognito_identity(self) -> Dict:
+    def _cognito_identity(self) -> dict:
         return self.get("cognitoIdentity") or {}  # not available in FunctionURL; key might exist but can be `null`
 
     @property
-    def cognito_amr(self) -> List[str]:
+    def cognito_amr(self) -> list[str]:
         """This represents how the user was authenticated.
         AMR stands for  Authentication Methods References as per the openid spec"""
         return self._cognito_identity().get("amr", [])
@@ -203,21 +205,21 @@ class RequestContextV2AuthorizerIam(DictWrapper):
 
 class RequestContextV2Authorizer(DictWrapper):
     @property
-    def jwt_claim(self) -> Dict[str, Any]:
+    def jwt_claim(self) -> dict[str, Any]:
         jwt = self.get("jwt") or {}  # not available in FunctionURL; key might exist but can be `null`
         return jwt.get("claims") or {}  # key might exist but can be `null`
 
     @property
-    def jwt_scopes(self) -> List[str]:
+    def jwt_scopes(self) -> list[str]:
         jwt = self.get("jwt") or {}  # not available in FunctionURL; key might exist but can be `null`
         return jwt.get("scopes", [])
 
     @property
-    def get_lambda(self) -> Dict[str, Any]:
+    def get_lambda(self) -> dict[str, Any]:
         """Lambda authorization context details"""
         return self.get("lambda") or {}  # key might exist but can be `null`
 
-    def get_context(self) -> Dict[str, Any]:
+    def get_context(self) -> dict[str, Any]:
         """Retrieve the authorization context details injected by a Lambda Authorizer.
 
         Example
@@ -231,7 +233,7 @@ class RequestContextV2Authorizer(DictWrapper):
 
         Returns:
         --------
-        Dict[str, Any]
+        dict[str, Any]
             A dictionary containing Lambda authorization context details.
         """
         return self.get_lambda
@@ -284,7 +286,7 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return self["rawQueryString"]
 
     @property
-    def cookies(self) -> List[str]:
+    def cookies(self) -> list[str]:
         return self.get("cookies") or []
 
     @property
@@ -292,11 +294,11 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return RequestContextV2(self._data)
 
     @property
-    def path_parameters(self) -> Dict[str, str]:
+    def path_parameters(self) -> dict[str, str]:
         return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Dict[str, str]:
+    def stage_variables(self) -> dict[str, str]:
         return self.get("stageVariables") or {}
 
     @property
@@ -315,5 +317,5 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return HttpApiHeadersSerializer()
 
     @cached_property
-    def resolved_headers_field(self) -> Dict[str, Any]:
+    def resolved_headers_field(self) -> dict[str, Any]:
         return CaseInsensitiveDict((k, v.split(",") if "," in v else v) for k, v in self.headers.items())

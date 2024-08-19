@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import sys
-from typing import List, Optional, Type, TypedDict, Union
+from typing import Optional, Type, TypedDict, Union
 
 has_pydantic = "pydantic" in sys.modules
 
@@ -25,4 +27,4 @@ class PartialItemFailures(TypedDict):
 
 
 class PartialItemFailureResponse(TypedDict):
-    batchItemFailures: List[PartialItemFailures]
+    batchItemFailures: list[PartialItemFailures]

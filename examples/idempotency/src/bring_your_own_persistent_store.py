@@ -36,7 +36,7 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
-        super(MyOwnPersistenceLayer, self).__init__()
+        super().__init__()
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """

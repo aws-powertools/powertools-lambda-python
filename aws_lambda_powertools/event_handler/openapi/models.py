@@ -1,3 +1,4 @@
+# ruff: noqa: FA100
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Set, Union
 

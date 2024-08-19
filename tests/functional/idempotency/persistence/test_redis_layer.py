@@ -100,7 +100,7 @@ class MockRedis(MockRedisBase):
         self.closed = False
         self.mock_latency_ms = mock_latency_ms
         self.nx_lock = Lock()
-        super(MockRedis, self).__init__()
+        super().__init__()
 
     # check_closed is called before every mock redis operation
     def check_closed(self):

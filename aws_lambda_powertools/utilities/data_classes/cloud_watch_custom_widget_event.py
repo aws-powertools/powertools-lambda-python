@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -37,17 +39,17 @@ class TimeRange(DictWrapper):
         return self["end"]
 
     @property
-    def relative_start(self) -> Optional[int]:
+    def relative_start(self) -> int | None:
         """The relative start time within the time range"""
         return self.get("relativeStart")
 
     @property
-    def zoom_start(self) -> Optional[int]:
+    def zoom_start(self) -> int | None:
         """The start time within the zoomed time range"""
         return (self.get("zoom") or {}).get("start")
 
     @property
-    def zoom_end(self) -> Optional[int]:
+    def zoom_end(self) -> int | None:
         """The end time within the zoomed time range"""
         return (self.get("zoom") or {}).get("end")
 
@@ -114,12 +116,12 @@ class CloudWatchWidgetContext(DictWrapper):
         return self["title"]
 
     @property
-    def params(self) -> Dict[str, Any]:
+    def params(self) -> dict[str, Any]:
         """Get widget parameters"""
         return self["params"]
 
     @property
-    def forms(self) -> Dict[str, Any]:
+    def forms(self) -> dict[str, Any]:
         """Get widget form data"""
         return self["forms"]["all"]
 
@@ -150,7 +152,7 @@ class CloudWatchDashboardCustomWidgetEvent(DictWrapper):
         return bool(self.get("describe", False))
 
     @property
-    def widget_context(self) -> Optional[CloudWatchWidgetContext]:
+    def widget_context(self) -> CloudWatchWidgetContext | None:
         """The widget context"""
         if self.get("widgetContext"):
             return CloudWatchWidgetContext(self["widgetContext"])

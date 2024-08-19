@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import base64
 import zlib
-from typing import Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -23,7 +24,7 @@ class CloudWatchLogsLogEvent(DictWrapper):
         return self["message"]
 
     @property
-    def extracted_fields(self) -> Dict[str, str]:
+    def extracted_fields(self) -> dict[str, str]:
         """Get the `extractedFields` property"""
         return self.get("extractedFields") or {}
 
@@ -45,7 +46,7 @@ class CloudWatchLogsDecodedData(DictWrapper):
         return self["logStream"]
 
     @property
-    def subscription_filters(self) -> List[str]:
+    def subscription_filters(self) -> list[str]:
         """The list of subscription filter names that matched with the originating log data."""
         return self["subscriptionFilters"]
 
@@ -59,12 +60,12 @@ class CloudWatchLogsDecodedData(DictWrapper):
         return self["messageType"]
 
     @property
-    def policy_level(self) -> Optional[str]:
+    def policy_level(self) -> str | None:
         """The level at which the policy was enforced."""
         return self.get("policyLevel")
 
     @property
-    def log_events(self) -> List[CloudWatchLogsLogEvent]:
+    def log_events(self) -> list[CloudWatchLogsLogEvent]:
         """The actual log data, represented as an array of log event records.
 
         The ID property is a unique identifier for every log event.

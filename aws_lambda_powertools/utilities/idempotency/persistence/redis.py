@@ -5,7 +5,7 @@ import json
 import logging
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any, Dict, Literal, Protocol
+from typing import Any, Literal, Protocol
 
 import redis
 
@@ -185,7 +185,7 @@ class RedisConnection:
                 return client.from_url(url=self.url)
             else:
                 # Redis in cluster mode doesn't support db parameter
-                extra_param_connection: Dict[str, Any] = {}
+                extra_param_connection: dict[str, Any] = {}
                 if self.mode != "cluster":
                     extra_param_connection = {"db": self.db_index}
 
@@ -310,7 +310,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         self._json_serializer = json.dumps
         self._json_deserializer = json.loads
-        super(RedisCachePersistenceLayer, self).__init__()
+        super().__init__()
         self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
     def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:
@@ -321,7 +321,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             return expiry_timestamp - int(datetime.datetime.now().timestamp())
         return self.expires_after_seconds
 
-    def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
+    def _item_to_data_record(self, idempotency_key: str, item: dict[str, Any]) -> DataRecord:
         in_progress_expiry_timestamp = item.get(self.in_progress_expiry_attr)
 
         return DataRecord(
@@ -357,7 +357,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         return self._item_to_data_record(idempotency_key, item)
 
     def _put_in_progress_record(self, data_record: DataRecord) -> None:
-        item: Dict[str, Any] = {
+        item: dict[str, Any] = {
             "name": data_record.idempotency_key,
             "mapping": {
                 self.status_attr: data_record.status,
@@ -480,7 +480,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             raise NotImplementedError
 
     def _update_record(self, data_record: DataRecord) -> None:
-        item: Dict[str, Any] = {
+        item: dict[str, Any] = {
             "name": data_record.idempotency_key,
             "mapping": {
                 self.data_attr: data_record.response_data,

@@ -1,11 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import logging
 from copy import deepcopy
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable
 
-from aws_lambda_powertools.utilities.idempotency.config import (
-    IdempotencyConfig,
-)
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -15,19 +14,24 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    BasePersistenceLayer,
-)
 from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     STATUS_CONSTANTS,
     DataRecord,
 )
-from aws_lambda_powertools.utilities.idempotency.serialization.base import (
-    BaseIdempotencySerializer,
-)
 from aws_lambda_powertools.utilities.idempotency.serialization.no_op import (
     NoOpSerializer,
 )
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.config import (
+        IdempotencyConfig,
+    )
+    from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+        BasePersistenceLayer,
+    )
+    from aws_lambda_powertools.utilities.idempotency.serialization.base import (
+        BaseIdempotencySerializer,
+    )
 
 MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
@@ -69,9 +73,9 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
-        output_serializer: Optional[BaseIdempotencySerializer] = None,
-        function_args: Optional[Tuple] = None,
-        function_kwargs: Optional[Dict] = None,
+        output_serializer: BaseIdempotencySerializer | None = None,
+        function_args: tuple | None = None,
+        function_kwargs: dict | None = None,
     ):
         """
         Initialize the IdempotencyHandler
@@ -84,12 +88,12 @@ class IdempotencyHandler:
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
-        output_serializer: Optional[BaseIdempotencySerializer]
+        output_serializer: BaseIdempotencySerializer | None
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done via the NoOpSerializer
-        function_args: Optional[Tuple]
+        function_args: tuple | None
             Function arguments
-        function_kwargs: Optional[Dict]
+        function_kwargs: dict | None
             Function keyword arguments
         """
         self.function = function
@@ -150,7 +154,7 @@ class IdempotencyHandler:
 
         return self._get_function_response()
 
-    def _get_remaining_time_in_millis(self) -> Optional[int]:
+    def _get_remaining_time_in_millis(self) -> int | None:
         """
         Tries to determine the remaining time available for the current lambda invocation.
 
@@ -160,7 +164,7 @@ class IdempotencyHandler:
 
         Returns
         -------
-        Optional[int]
+        int | None
             Remaining time in millis, or None if the remaining time cannot be determined.
         """
 
@@ -169,7 +173,7 @@ class IdempotencyHandler:
 
         return None
 
-    def _get_idempotency_record(self) -> Optional[DataRecord]:
+    def _get_idempotency_record(self) -> DataRecord | None:
         """
         Retrieve the idempotency record from the persistence layer.
 
@@ -198,7 +202,7 @@ class IdempotencyHandler:
 
         return data_record
 
-    def _handle_for_status(self, data_record: DataRecord) -> Optional[Any]:
+    def _handle_for_status(self, data_record: DataRecord) -> Any | None:
         """
         Take appropriate action based on data_record's status
 
@@ -208,7 +212,7 @@ class IdempotencyHandler:
 
         Returns
         -------
-        Optional[Any]
+        Any | None
             Function's response previously used for this idempotency key, if it has successfully executed already.
             In case an output serializer is configured, the response is deserialized.
 
@@ -235,7 +239,7 @@ class IdempotencyHandler:
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
-        response_dict: Optional[dict] = data_record.response_json_as_dict()
+        response_dict: dict | None = data_record.response_json_as_dict()
         if response_dict is not None:
             serialized_response = self.output_serializer.from_dict(response_dict)
             if self.config.response_hook is not None:

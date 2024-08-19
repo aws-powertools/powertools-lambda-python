@@ -1,16 +1,20 @@
-from typing import Any, Callable, Dict, Type
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @lambda_handler_decorator
 def event_source(
     handler: Callable[[Any, LambdaContext], Any],
-    event: Dict[str, Any],
+    event: dict[str, Any],
     context: LambdaContext,
-    data_class: Type[DictWrapper],
+    data_class: type[DictWrapper],
 ):
     """Middleware to create an instance of the passed in event source data class
 
@@ -18,11 +22,11 @@ def event_source(
     ----------
     handler: Callable
         Lambda's handler
-    event: Dict
+    event: dict[str, Any]
         Lambda's Event
-    context: Dict
+    context: LambdaContext
         Lambda's Context
-    data_class: Type[DictWrapper]
+    data_class: type[DictWrapper]
         Data class type to instantiate
 
     Example

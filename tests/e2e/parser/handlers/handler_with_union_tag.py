@@ -1,8 +1,7 @@
-from __future__ import annotations
-
-from typing import Annotated, Literal, Union
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext

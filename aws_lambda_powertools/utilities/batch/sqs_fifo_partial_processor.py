@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional, Set
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, ExceptionInfo, FailureResponse
 from aws_lambda_powertools.utilities.batch.exceptions import (
     SQSFifoCircuitBreakerError,
     SQSFifoMessageGroupCircuitBreakerError,
 )
-from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
 
 logger = logging.getLogger(__name__)
 
@@ -62,13 +66,13 @@ class SqsFifoPartialProcessor(BatchProcessor):
         None,
     )
 
-    def __init__(self, model: Optional["BatchSqsTypeModel"] = None, skip_group_on_error: bool = False):
+    def __init__(self, model: BatchSqsTypeModel | None = None, skip_group_on_error: bool = False):
         """
         Initialize the SqsFifoProcessor.
 
         Parameters
         ----------
-        model: Optional["BatchSqsTypeModel"]
+        model: BatchSqsTypeModel | None
             An optional model for batch processing.
         skip_group_on_error: bool
             Determines whether to exclusively skip messages from the MessageGroupID that encountered processing failures
@@ -77,7 +81,7 @@ class SqsFifoPartialProcessor(BatchProcessor):
         """
         self._skip_group_on_error: bool = skip_group_on_error
         self._current_group_id = None
-        self._failed_group_ids: Set[str] = set()
+        self._failed_group_ids: set[str] = set()
         super().__init__(EventType.SQS, model)
 
     def _process_record(self, record):

@@ -1,9 +1,11 @@
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 
-def get_identity_object(identity: Optional[dict]) -> Any:
+def get_identity_object(identity: dict | None) -> Any:
     """Get the identity object based on the best detected type"""
     # API_KEY authorization
     if identity is None:
@@ -21,7 +23,7 @@ class AppSyncIdentityIAM(DictWrapper):
     """AWS_IAM authorization"""
 
     @property
-    def source_ip(self) -> List[str]:
+    def source_ip(self) -> list[str]:
         """The source IP address of the caller received by AWS AppSync."""
         return self["sourceIp"]
 
@@ -66,7 +68,7 @@ class AppSyncIdentityCognito(DictWrapper):
     """AMAZON_COGNITO_USER_POOLS authorization"""
 
     @property
-    def source_ip(self) -> List[str]:
+    def source_ip(self) -> list[str]:
         """The source IP address of the caller received by AWS AppSync."""
         return self["sourceIp"]
 
@@ -81,7 +83,7 @@ class AppSyncIdentityCognito(DictWrapper):
         return self["sub"]
 
     @property
-    def claims(self) -> Dict[str, str]:
+    def claims(self) -> dict[str, str]:
         """The claims that the user has."""
         return self["claims"]
 
@@ -91,7 +93,7 @@ class AppSyncIdentityCognito(DictWrapper):
         return self["defaultAuthStrategy"]
 
     @property
-    def groups(self) -> List[str]:
+    def groups(self) -> list[str]:
         """List of OIDC groups"""
         return self["groups"]
 
@@ -115,18 +117,18 @@ class AppSyncResolverEventInfo(DictWrapper):
         return self["parentTypeName"]
 
     @property
-    def variables(self) -> Dict[str, str]:
+    def variables(self) -> dict[str, str]:
         """A map which holds all variables that are passed into the GraphQL request."""
         return self.get("variables") or {}
 
     @property
-    def selection_set_list(self) -> List[str]:
+    def selection_set_list(self) -> list[str]:
         """A list representation of the fields in the GraphQL selection set. Fields that are aliased will
         only be referenced by the alias name, not the field name."""
         return self.get("selectionSetList") or []
 
     @property
-    def selection_set_graphql(self) -> Optional[str]:
+    def selection_set_graphql(self) -> str | None:
         """A string representation of the selection set, formatted as GraphQL schema definition language (SDL).
         Although fragments are not be merged into the selection set, inline fragments are preserved."""
         return self.get("selectionSetGraphQL")
@@ -147,7 +149,7 @@ class AppSyncResolverEvent(DictWrapper):
     def __init__(self, data: dict):
         super().__init__(data)
 
-        info: Optional[dict] = data.get("info")
+        info: dict | None = data.get("info")
         if not info:
             info = {"fieldName": self.get("fieldName"), "parentTypeName": self.get("typeName")}
 
@@ -164,12 +166,12 @@ class AppSyncResolverEvent(DictWrapper):
         return self.info.field_name
 
     @property
-    def arguments(self) -> Dict[str, Any]:
+    def arguments(self) -> dict[str, Any]:
         """A map that contains all GraphQL arguments for this field."""
         return self["arguments"]
 
     @property
-    def identity(self) -> Union[None, AppSyncIdentityIAM, AppSyncIdentityCognito]:
+    def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | None:
         """An object that contains information about the caller.
 
         Depending on the type of identify found:
@@ -181,17 +183,17 @@ class AppSyncResolverEvent(DictWrapper):
         return get_identity_object(self.get("identity"))
 
     @property
-    def source(self) -> Dict[str, Any]:
+    def source(self) -> dict[str, Any]:
         """A map that contains the resolution of the parent field."""
         return self.get("source") or {}
 
     @property
-    def request_headers(self) -> Dict[str, str]:
+    def request_headers(self) -> dict[str, str]:
         """Request headers"""
         return CaseInsensitiveDict(self["request"]["headers"])
 
     @property
-    def prev_result(self) -> Optional[Dict[str, Any]]:
+    def prev_result(self) -> dict[str, Any] | None:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         prev = self.get("prev")
         if not prev:

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from enum import Enum, auto
-from typing import Dict, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -47,19 +48,19 @@ class ConnectContactFlowQueue(DictWrapper):
 
 class ConnectContactFlowMediaStreamAudio(DictWrapper):
     @property
-    def start_fragment_number(self) -> Optional[str]:
+    def start_fragment_number(self) -> str | None:
         """The number that identifies the Kinesis Video Streams fragment, in the stream used for Live media streaming,
         in which the customer audio stream started.
         """
         return self["StartFragmentNumber"]
 
     @property
-    def start_timestamp(self) -> Optional[str]:
+    def start_timestamp(self) -> str | None:
         """When the customer audio stream started."""
         return self["StartTimestamp"]
 
     @property
-    def stream_arn(self) -> Optional[str]:
+    def stream_arn(self) -> str | None:
         """The ARN of the Kinesis Video stream used for Live media streaming that includes the customer data to
         reference.
         """
@@ -80,7 +81,7 @@ class ConnectContactFlowMediaStreams(DictWrapper):
 
 class ConnectContactFlowData(DictWrapper):
     @property
-    def attributes(self) -> Dict[str, str]:
+    def attributes(self) -> dict[str, str]:
         """These are attributes that have been previously associated with a contact,
         such as when using a Set contact attributes block in a contact flow.
         This map may be empty if there aren't any saved attributes.
@@ -98,7 +99,7 @@ class ConnectContactFlowData(DictWrapper):
         return self["ContactId"]
 
     @property
-    def customer_endpoint(self) -> Optional[ConnectContactFlowEndpoint]:
+    def customer_endpoint(self) -> ConnectContactFlowEndpoint | None:
         """Contains the customer’s address (number) and type of address."""
         if self["CustomerEndpoint"] is not None:
             return ConnectContactFlowEndpoint(self["CustomerEndpoint"])
@@ -129,14 +130,14 @@ class ConnectContactFlowData(DictWrapper):
         return self["PreviousContactId"]
 
     @property
-    def queue(self) -> Optional[ConnectContactFlowQueue]:
+    def queue(self) -> ConnectContactFlowQueue | None:
         """The current queue."""
         if self["Queue"] is not None:
             return ConnectContactFlowQueue(self["Queue"])
         return None
 
     @property
-    def system_endpoint(self) -> Optional[ConnectContactFlowEndpoint]:
+    def system_endpoint(self) -> ConnectContactFlowEndpoint | None:
         """Contains the address (number) the customer dialed to call your contact center and type of address."""
         if self["SystemEndpoint"] is not None:
             return ConnectContactFlowEndpoint(self["SystemEndpoint"])
@@ -161,6 +162,6 @@ class ConnectContactFlowEvent(DictWrapper):
         return ConnectContactFlowData(self["Details"]["ContactData"])
 
     @property
-    def parameters(self) -> Dict[str, str]:
+    def parameters(self) -> dict[str, str]:
         """These are parameters specific to this call that were defined when you created the Lambda function."""
         return self["Details"]["Parameters"]
