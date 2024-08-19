@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
-class LambdaCognitoIdentity(object):
+class LambdaCognitoIdentity:
     """Information about the Amazon Cognito identity that authorized the request."""
 
     _cognito_identity_id: str

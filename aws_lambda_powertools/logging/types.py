@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, TypedDict, Union
 
-from typing_extensions import NotRequired, TypeAlias
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired, TypeAlias
 
 
 class PowertoolsLogRecord(TypedDict):

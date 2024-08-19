@@ -34,7 +34,7 @@ class BatchProcessingError(BaseBatchProcessingError):
         super().__init__(msg, child_exceptions)
 
     def __str__(self):
-        parent_exception_str = super(BatchProcessingError, self).__str__()
+        parent_exception_str = super().__str__()
         return self.format_exceptions(parent_exception_str)
 
 

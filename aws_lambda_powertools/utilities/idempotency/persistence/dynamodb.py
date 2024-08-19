@@ -123,7 +123,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
         self._deserializer = TypeDeserializer()
 
-        super(DynamoDBPersistenceLayer, self).__init__()
+        super().__init__()
 
     def _get_key(self, idempotency_key: str) -> dict:
         """Build primary key attribute simple or composite based on params.

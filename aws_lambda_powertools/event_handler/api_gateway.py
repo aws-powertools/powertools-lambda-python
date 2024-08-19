@@ -1870,7 +1870,7 @@ class ApiGatewayResolver(BaseRouter):
 
         def register_resolver(func: Callable):
             methods = (method,) if isinstance(method, str) else method
-            logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
+            logger.debug(f"Adding route using rule {rule} and methods: {','.join(m.upper() for m in methods)}")
 
             cors_enabled = self._cors_enabled if cors is None else cors
 

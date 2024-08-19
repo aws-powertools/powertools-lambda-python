@@ -502,7 +502,7 @@ Use the context manager to access a list of all returned values from your `recor
 
 === "Accessing raw processed messages"
 
-    ```python hl_lines="29-36"
+    ```python hl_lines="28-35"
     --8<-- "examples/batch_processing/src/context_manager_access.py"
     ```
 

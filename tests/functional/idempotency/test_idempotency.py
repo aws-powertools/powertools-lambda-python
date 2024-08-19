@@ -1179,7 +1179,7 @@ def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersiste
 class MockPersistenceLayer(BasePersistenceLayer):
     def __init__(self, expected_idempotency_key: str):
         self.expected_idempotency_key = expected_idempotency_key
-        super(MockPersistenceLayer, self).__init__()
+        super().__init__()
 
     def _put_record(self, data_record: DataRecord) -> None:
         assert data_record.idempotency_key == self.expected_idempotency_key

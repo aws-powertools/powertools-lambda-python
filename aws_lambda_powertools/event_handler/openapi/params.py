@@ -328,7 +328,7 @@ class Path(Param):
         if default is not ...:
             raise AssertionError("Path parameters cannot have a default value")
 
-        super(Path, self).__init__(
+        super().__init__(
             default=default,
             default_factory=default_factory,
             annotation=annotation,

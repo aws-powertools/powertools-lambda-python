@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -12,7 +11,7 @@ if TYPE_CHECKING:
     )
 
 
-class LambdaContext(object):
+class LambdaContext:
     """The LambdaContext static object can be used to ease the development by providing the IDE type hints.
 
     Example

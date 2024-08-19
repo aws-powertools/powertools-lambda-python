@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from typing import List, Tuple
 
 from typing_extensions import Literal
 
@@ -28,7 +27,7 @@ def record_handler(record: SQSRecord):
 def lambda_handler(event, context: LambdaContext):
     batch = event["Records"]  # (1)!
     with processor(records=batch, handler=record_handler):
-        processed_messages: List[Tuple] = processor.process()
+        processed_messages: list[tuple] = processor.process()
 
     for message in processed_messages:
         status: Literal["success", "fail"] = message[0]

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import base64
 import json
 import random
@@ -7,7 +5,7 @@ import string
 import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import boto3
 import pytest
@@ -53,7 +51,10 @@ def mock_binary_value() -> str:
     return "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnpkV0lpT2lJeE1qTTBOVFkzT0Rrd0lpd2libUZ0WlNJNklrcHZhRzRnUkc5bElpd2lhV0YwSWpveE5URTJNak01TURJeWZRLlNmbEt4d1JKU01lS0tGMlFUNGZ3cE1lSmYzNlBPazZ5SlZfYWRRc3N3NWMK"  # noqa: E501
 
 
-def build_get_parameters_stub(params: Dict[str, Any], invalid_parameters: List[str] | None = None) -> Dict[str, List]:
+def build_get_parameters_stub(
+    params: Dict[str, Any],
+    invalid_parameters: Optional[List[str]] = None,
+) -> Dict[str, List]:
     invalid_parameters = invalid_parameters or []
     version = random.randrange(1, 1000)
     return {
@@ -2217,7 +2218,7 @@ def test_get_parameters_by_name(monkeypatch, mock_name, mock_value, config):
         def __init__(self, boto_config: Config = config, **kwargs):
             super().__init__(boto_config=boto_config, **kwargs)
 
-        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+        def get_parameters_by_name(self, *args, **kwargs) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
             return {mock_name: mock_value}
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -2453,7 +2454,7 @@ def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value, config):
         def __init__(self, boto_config: Config = config, **kwargs):
             super().__init__(boto_config=boto_config, **kwargs)
 
-        def get_parameters_by_name(self, *args, **kwargs) -> Dict[str, str] | Dict[str, bytes] | Dict[str, dict]:
+        def get_parameters_by_name(self, *args, **kwargs) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
             return {mock_name: mock_value}
 
     monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})

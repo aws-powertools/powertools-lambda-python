@@ -310,7 +310,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         self._json_serializer = json.dumps
         self._json_deserializer = json.loads
-        super(RedisCachePersistenceLayer, self).__init__()
+        super().__init__()
         self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
     def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:

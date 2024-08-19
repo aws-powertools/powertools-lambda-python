@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import hashlib
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from botocore import stub
 from pytest import FixtureRequest
@@ -90,7 +88,7 @@ def build_idempotency_put_item_response_stub(
     expiration: int,
     status: str,
     request: FixtureRequest,
-    validation_data: Any | None,
+    validation_data: Optional[Any],
 ):
     response = {
         "Item": {

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 Batch processing utilities
 """
+
 from __future__ import annotations
 
 import asyncio

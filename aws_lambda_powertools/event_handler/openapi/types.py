@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import types
 from enum import Enum
-from typing import Any, Callable, Dict, Set, Type, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Set, Type, TypedDict, Union
 
 from pydantic import BaseModel
-from typing_extensions import NotRequired
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 CacheKey = Union[Callable[..., Any], None]
 IncEx = Union[Set[int], Set[str], Dict[int, Any], Dict[str, Any]]

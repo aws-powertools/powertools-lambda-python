@@ -109,7 +109,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         security = None
 
-        return super(BedrockAgentResolver, self).get(
+        return super().get(
             rule,
             cors,
             compress,
