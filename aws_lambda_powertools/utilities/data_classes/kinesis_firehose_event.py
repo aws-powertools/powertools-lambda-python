@@ -5,11 +5,12 @@ import json
 import warnings
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Any, Callable, ClassVar, Iterator
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Iterator
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 
 @dataclass(repr=False, order=False, frozen=True)
