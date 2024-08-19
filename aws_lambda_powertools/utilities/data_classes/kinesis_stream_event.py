@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import base64
 import json
 import zlib
-from typing import Iterator, List
+from typing import Iterator
 
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
     CloudWatchLogsDecodedData,
@@ -109,7 +111,7 @@ class KinesisStreamEvent(DictWrapper):
             yield KinesisStreamRecord(record)
 
 
-def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> List[CloudWatchLogsDecodedData]:
+def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> list[CloudWatchLogsDecodedData]:
     return [CloudWatchLogsDecodedData(record.kinesis.data_zlib_compressed_as_json()) for record in event.records]
 
 

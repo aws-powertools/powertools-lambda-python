@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from __future__ import annotations
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
@@ -62,7 +62,7 @@ class S3ObjectUserRequest(DictWrapper):
         return self["url"]
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> dict[str, str]:
         """A map of string to strings containing the HTTP headers and their values from the original call,
         excluding any authorization-related headers.
 
@@ -194,7 +194,7 @@ class S3ObjectUserIdentity(DictWrapper):
         return self["arn"]
 
     @property
-    def session_context(self) -> Optional[S3ObjectSessionContext]:
+    def session_context(self) -> S3ObjectSessionContext | None:
         """If the request was made with temporary security credentials,
         this element provides information about the session that was created for those credentials."""
         session_context = self.get("sessionContext")

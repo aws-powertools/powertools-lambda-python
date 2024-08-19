@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import tempfile
 import zipfile
 from functools import cached_property
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -14,12 +16,12 @@ class CodePipelineConfiguration(DictWrapper):
         return self["FunctionName"]
 
     @property
-    def user_parameters(self) -> Optional[str]:
+    def user_parameters(self) -> str | None:
         """User parameters"""
         return self.get("UserParameters", None)
 
     @cached_property
-    def decoded_user_parameters(self) -> Dict[str, Any]:
+    def decoded_user_parameters(self) -> dict[str, Any]:
         """Json Decoded user parameters"""
         if self.user_parameters is not None:
             return self._json_deserializer(self.user_parameters)
@@ -69,7 +71,7 @@ class CodePipelineArtifact(DictWrapper):
         return self["name"]
 
     @property
-    def revision(self) -> Optional[str]:
+    def revision(self) -> str | None:
         return self.get("revision")
 
     @property
@@ -93,7 +95,7 @@ class CodePipelineArtifactCredentials(DictWrapper):
         return self["sessionToken"]
 
     @property
-    def expiration_time(self) -> Optional[int]:
+    def expiration_time(self) -> int | None:
         return self.get("expirationTime")
 
 
@@ -116,12 +118,12 @@ class CodePipelineData(DictWrapper):
         return CodePipelineActionConfiguration(self["actionConfiguration"])
 
     @property
-    def input_artifacts(self) -> List[CodePipelineArtifact]:
+    def input_artifacts(self) -> list[CodePipelineArtifact]:
         """Represents a CodePipeline input artifact"""
         return [CodePipelineArtifact(item) for item in self["inputArtifacts"]]
 
     @property
-    def output_artifacts(self) -> List[CodePipelineArtifact]:
+    def output_artifacts(self) -> list[CodePipelineArtifact]:
         """Represents a CodePipeline output artifact"""
         return [CodePipelineArtifact(item) for item in self["outputArtifacts"]]
 
@@ -131,12 +133,12 @@ class CodePipelineData(DictWrapper):
         return CodePipelineArtifactCredentials(self["artifactCredentials"])
 
     @property
-    def continuation_token(self) -> Optional[str]:
+    def continuation_token(self) -> str | None:
         """A continuation token if continuing job"""
         return self.get("continuationToken")
 
     @property
-    def encryption_key(self) -> Optional[CodePipelineEncryptionKey]:
+    def encryption_key(self) -> CodePipelineEncryptionKey | None:
         """Represents a CodePipeline encryption key"""
         key_data = self.get("encryptionKey")
         return CodePipelineEncryptionKey(key_data) if key_data is not None else None
@@ -151,7 +153,7 @@ class CodePipelineJobEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/services-codepipeline.html
     """
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         super().__init__(data)
         self._job = self["CodePipeline.job"]
 
@@ -171,12 +173,12 @@ class CodePipelineJobEvent(DictWrapper):
         return CodePipelineData(self._job["data"])
 
     @property
-    def user_parameters(self) -> Optional[str]:
+    def user_parameters(self) -> str | None:
         """Action configuration user parameters"""
         return self.data.action_configuration.configuration.user_parameters
 
     @property
-    def decoded_user_parameters(self) -> Dict[str, Any]:
+    def decoded_user_parameters(self) -> dict[str, Any]:
         """Json Decoded action configuration user parameters"""
         return self.data.action_configuration.configuration.decoded_user_parameters
 
@@ -216,7 +218,7 @@ class CodePipelineJobEvent(DictWrapper):
         user_agent.register_feature_to_client(client=s3, feature="data_classes")
         return s3
 
-    def find_input_artifact(self, artifact_name: str) -> Optional[CodePipelineArtifact]:
+    def find_input_artifact(self, artifact_name: str) -> CodePipelineArtifact | None:
         """Find an input artifact by artifact name
 
         Parameters
@@ -234,7 +236,7 @@ class CodePipelineJobEvent(DictWrapper):
                 return artifact
         return None
 
-    def get_artifact(self, artifact_name: str, filename: str) -> Optional[str]:
+    def get_artifact(self, artifact_name: str, filename: str) -> str | None:
         """Get a file within an artifact zip on s3
 
         Parameters

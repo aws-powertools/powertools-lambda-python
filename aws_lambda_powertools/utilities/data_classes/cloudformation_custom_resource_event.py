@@ -1,4 +1,6 @@
-from typing import Any, Dict, Literal
+from __future__ import annotations
+
+from typing import Any, Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -37,9 +39,9 @@ class CloudFormationCustomResourceEvent(DictWrapper):
         return self["ResourceType"]
 
     @property
-    def resource_properties(self) -> Dict[str, Any]:
+    def resource_properties(self) -> dict[str, Any]:
         return self.get("ResourceProperties") or {}
 
     @property
-    def old_resource_properties(self) -> Dict[str, Any]:
+    def old_resource_properties(self) -> dict[str, Any]:
         return self.get("OldResourceProperties") or {}

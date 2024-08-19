@@ -1,4 +1,6 @@
-from typing import Dict, Iterator, Optional
+from __future__ import annotations
+
+from typing import Iterator
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -32,7 +34,7 @@ class S3EventBridgeNotificationObject(DictWrapper):
         return unquote_plus(self["key"])
 
     @property
-    def size(self) -> Optional[int]:
+    def size(self) -> int | None:
         """Object size. Object deletion event doesn't contain size."""
         return self.get("size")
 
@@ -79,12 +81,12 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self["requester"]
 
     @property
-    def source_ip_address(self) -> Optional[str]:
+    def source_ip_address(self) -> str | None:
         """Get the source IP address of S3 request. Only present for events triggered by an S3 request."""
         return self.get("source-ip-address")
 
     @property
-    def reason(self) -> Optional[str]:
+    def reason(self) -> str | None:
         """Get the reason for the S3 notification.
 
         For 'Object Created events', the S3 API used to create the object: `PutObject`, `POST Object`, `CopyObject`, or
@@ -94,7 +96,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self.get("reason")
 
     @property
-    def deletion_type(self) -> Optional[str]:
+    def deletion_type(self) -> str | None:
         """Get the deletion type for the S3 object in this notification.
 
         For 'Object Deleted' events, when an unversioned object is deleted, or a versioned object is permanently deleted
@@ -104,7 +106,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self.get("deletion-type")
 
     @property
-    def restore_expiry_time(self) -> Optional[str]:
+    def restore_expiry_time(self) -> str | None:
         """Get the restore expiry time for the S3 object in this notification.
 
         For 'Object Restore Completed' events, the time when the temporary copy of the object will be deleted from S3.
@@ -112,7 +114,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self.get("restore-expiry-time")
 
     @property
-    def source_storage_class(self) -> Optional[str]:
+    def source_storage_class(self) -> str | None:
         """Get the source storage class of the S3 object in this notification.
 
         For 'Object Restore Initiated' and 'Object Restore Completed' events, the storage class of the object being
@@ -121,7 +123,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self.get("source-storage-class")
 
     @property
-    def destination_storage_class(self) -> Optional[str]:
+    def destination_storage_class(self) -> str | None:
         """Get the destination storage class of the S3 object in this notification.
 
         For 'Object Storage Class Changed' events, the new storage class of the object.
@@ -129,7 +131,7 @@ class S3EventBridgeNotificationDetail(DictWrapper):
         return self.get("destination-storage-class")
 
     @property
-    def destination_access_tier(self) -> Optional[str]:
+    def destination_access_tier(self) -> str | None:
         """Get the destination access tier of the S3 object in this notification.
 
         For 'Object Access Tier Changed' events, the new access tier of the object.
@@ -182,7 +184,7 @@ class S3Object(DictWrapper):
         return self["s3"]["object"].get("eTag", "")
 
     @property
-    def version_id(self) -> Optional[str]:
+    def version_id(self) -> str | None:
         """Object version if bucket is versioning-enabled, otherwise null"""
         return self["s3"]["object"].get("versionId")
 
@@ -273,7 +275,7 @@ class S3EventRecord(DictWrapper):
         return S3RequestParameters(self._data)
 
     @property
-    def response_elements(self) -> Dict[str, str]:
+    def response_elements(self) -> dict[str, str]:
         """The responseElements key value is useful if you want to trace a request by following up with AWS Support.
 
         Both x-amz-request-id and x-amz-id-2 help Amazon S3 trace an individual request. These values are the same
@@ -287,7 +289,7 @@ class S3EventRecord(DictWrapper):
         return S3Message(self._data)
 
     @property
-    def glacier_event_data(self) -> Optional[S3EventRecordGlacierEventData]:
+    def glacier_event_data(self) -> S3EventRecordGlacierEventData | None:
         """The glacierEventData key is only visible for s3:ObjectRestore:Completed events."""
         item = self.get("glacierEventData")
         return None if item is None else S3EventRecordGlacierEventData(item)

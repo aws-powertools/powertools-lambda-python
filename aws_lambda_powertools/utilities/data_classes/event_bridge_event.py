@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -43,7 +45,7 @@ class EventBridgeEvent(DictWrapper):
         return self["region"]
 
     @property
-    def resources(self) -> List[str]:
+    def resources(self) -> list[str]:
         """This JSON array contains ARNs that identify resources that are involved in the event.
         Inclusion of these ARNs is at the discretion of the service."""
         return self["resources"]
@@ -59,11 +61,11 @@ class EventBridgeEvent(DictWrapper):
         return self["detail-type"]
 
     @property
-    def detail(self) -> Dict[str, Any]:
+    def detail(self) -> dict[str, Any]:
         """A JSON object, whose content is at the discretion of the service originating the event."""
         return self["detail"]
 
     @property
-    def replay_name(self) -> Optional[str]:
+    def replay_name(self) -> str | None:
         """Identifies whether the event is being replayed and what is the name of the replay."""
         return self["replay-name"]
