@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
-from typing import Any, AsyncGenerator, Generator, Literal, Optional, Sequence, Union
+from typing import Any, AsyncGenerator, Generator, Literal, Sequence
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
@@ -73,9 +73,9 @@ class AwsXrayProvider(BaseProvider):
     def __init__(
         self,
         service: str = "",
-        disabled: Optional[bool] = None,
-        auto_patch: Optional[bool] = None,
-        patch_modules: Optional[Sequence[str]] = None,
+        disabled: bool | None = None,
+        auto_patch: bool | None = None,
+        patch_modules: Sequence[str] | None = None,
     ):
         from aws_xray_sdk.core import xray_recorder  # type: ignore
 
@@ -141,7 +141,7 @@ class AwsXrayProvider(BaseProvider):
         # Auto & not in (str, Number, bool)
         self.put_metadata(key=key, value=value, namespace=kwargs.get("namespace", "dafault"))
 
-    def put_annotation(self, key: str, value: Union[str, Number, bool]) -> None:
+    def put_annotation(self, key: str, value: str | Number | bool) -> None:
         return self.recorder.put_annotation(key=key, value=value)
 
     def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:

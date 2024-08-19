@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import functools
 import inspect
@@ -5,12 +7,14 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager, contextmanager
-from typing import Any, AsyncGenerator, Callable, Generator, Optional, Sequence, Union, cast, overload
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Generator, Sequence, cast, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice, sanitize_xray_segment_name
 from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.tracing.base import BaseSegment
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.tracing.base import BaseSegment
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +36,7 @@ class BaseSpan(ABC):
             Attribute key
         value: Any
             Attribute value
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters
         """
 
@@ -43,8 +47,8 @@ class BaseSpan(ABC):
         Parameters
         ----------
         exception: Exception
-            Caught exception during the exectution of this Span
-        kwargs: Optional[dict]
+            Caught exception during the execution of this Span
+        kwargs: dict | None
             Optional parameters
         """
 
@@ -71,7 +75,7 @@ class BaseProvider(ABC):
         ----------
         name: str
             Span name
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters to be propagated to the span
         """
 
@@ -89,7 +93,7 @@ class BaseProvider(ABC):
         ----------
         name: str
             Span name
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters to be propagated to the span
         """
 
@@ -103,7 +107,7 @@ class BaseProvider(ABC):
             attribute key
         value: Any
             attribute value
-        kwargs: Optional[dict]
+        kwargs: dict | None
             Optional parameters to be propagated to the span
         """
 
@@ -132,8 +136,8 @@ class BaseProvider(ABC):
     def capture_lambda_handler(
         self,
         lambda_handler: Any = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        capture_response: bool | None = None,
+        capture_error: bool | None = None,
     ):
         """Decorator to create subsegment for lambda handlers
 
@@ -230,21 +234,21 @@ class BaseProvider(ABC):
 
     # see #465
     @overload
-    def capture_method(self, method: "AnyCallableT") -> "AnyCallableT": ...  # pragma: no cover
+    def capture_method(self, method: AnyCallableT) -> AnyCallableT: ...  # pragma: no cover
 
     @overload
     def capture_method(
         self,
         method: None = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
-    ) -> Callable[["AnyCallableT"], "AnyCallableT"]: ...  # pragma: no cover
+        capture_response: bool | None = None,
+        capture_error: bool | None = None,
+    ) -> Callable[[AnyCallableT], AnyCallableT]: ...  # pragma: no cover
 
     def capture_method(
         self,
-        method: Optional[AnyCallableT] = None,
-        capture_response: Optional[bool] = None,
-        capture_error: Optional[bool] = None,
+        method: AnyCallableT | None = None,
+        capture_response: bool | None = None,
+        capture_error: bool | None = None,
     ) -> AnyCallableT:
         """Decorator to create subsegment for arbitrary functions
 
@@ -450,9 +454,9 @@ class BaseProvider(ABC):
     def _decorate_async_function(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool | str | None = None,
+        capture_error: bool | str | None = None,
+        method_name: str | None = None,
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
@@ -483,9 +487,9 @@ class BaseProvider(ABC):
     def _decorate_generator_function(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool | str | None = None,
+        capture_error: bool | str | None = None,
+        method_name: str | None = None,
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -516,9 +520,9 @@ class BaseProvider(ABC):
     def _decorate_generator_function_with_context_manager(
         self,
         method: Callable,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool | str | None = None,
+        capture_error: bool | str | None = None,
+        method_name: str | None = None,
     ):
         @functools.wraps(method)
         @contextlib.contextmanager
@@ -550,9 +554,9 @@ class BaseProvider(ABC):
     def _decorate_sync_function(
         self,
         method: AnyCallableT,
-        capture_response: Optional[Union[bool, str]] = None,
-        capture_error: Optional[Union[bool, str]] = None,
-        method_name: Optional[str] = None,
+        capture_response: bool | str | None = None,
+        capture_error: bool | str | None = None,
+        method_name: str | None = None,
     ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
@@ -582,10 +586,10 @@ class BaseProvider(ABC):
 
     def _add_response_as_metadata(
         self,
-        method_name: Optional[str] = None,
-        data: Optional[Any] = None,
-        subsegment: Optional[BaseSegment] = None,
-        capture_response: Optional[Union[bool, str]] = None,
+        method_name: str | None = None,
+        data: Any | None = None,
+        subsegment: BaseSegment | None = None,
+        capture_response: bool | str | None = None,
     ):
         """Add response as metadata for given subsegment
 
@@ -610,7 +614,7 @@ class BaseProvider(ABC):
         method_name: str,
         error: Exception,
         subsegment: BaseSegment,
-        capture_error: Optional[bool] = None,
+        capture_error: bool | None = None,
     ):
         """Add full exception object as metadata for given subsegment
 
