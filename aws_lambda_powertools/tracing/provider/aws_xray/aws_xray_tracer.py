@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
-from typing import Any, AsyncGenerator, Generator, Literal, Sequence, Union
+from typing import Any, AsyncGenerator, Generator, Literal, Optional, Sequence, Union
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
@@ -69,13 +69,25 @@ class XraySpan(BaseSpan):
 
 
 class AwsXrayProvider(BaseProvider):
-    def __init__(self, xray_recorder=None):
-        if not xray_recorder:
-            from aws_xray_sdk.core import xray_recorder
+
+    def __init__(
+        self,
+        service: str = "",
+        disabled: Optional[bool] = None,
+        auto_patch: Optional[bool] = None,
+        patch_modules: Optional[Sequence[str]] = None,
+    ):
+        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
         self.recorder = xray_recorder
         self.in_subsegment = self.recorder.in_subsegment
         self.in_subsegment_async = self.recorder.in_subsegment_async
+
+        self.service = service
+
+        super().__init__(
+            service=self.service,
+        )
 
     @contextmanager
     def trace(self, name: str, **kwargs) -> Generator[XraySpan, None, None]:

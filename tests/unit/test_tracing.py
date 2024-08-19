@@ -1,5 +1,4 @@
 import contextlib
-from numbers import Number
 from typing import NamedTuple
 from unittest import mock
 from unittest.mock import MagicMock
@@ -32,24 +31,10 @@ def provider_stub(mocker):
         ):
             self.put_metadata_mock = put_metadata_mock or mocker.MagicMock()
             self.put_annotation_mock = put_annotation_mock or mocker.MagicMock()
-            self.trace = self.in_subsegment
             self.in_subsegment = in_subsegment or mocker.MagicMock()
             self.patch_mock = patch_mock or mocker.MagicMock()
             self.disable_tracing_provider_mock = disable_tracing_provider_mock or mocker.MagicMock()
             self.in_subsegment_async = in_subsegment_async or mocker.MagicMock(spec=True)
-            self.trace_async = self.in_subsegment_async
-
-        def set_attribute(self, *args, **kwargs):
-            if kwargs.get("category") == "Metadata":
-                return self.put_metadata(*args, **kwargs)
-
-            if kwargs.get("category") == "Annotation":
-                return self.put_annotation(*args, **kwargs)
-
-            if isinstance(kwargs.get("value"), (str, Number, bool)):
-                return self.put_annotation(*args, **kwargs)
-
-            return self.put_metadata(*args, **kwargs)
 
         def put_metadata(self, *args, **kwargs):
             return self.put_metadata_mock(*args, **kwargs)
@@ -80,8 +65,8 @@ def reset_tracing_config(mocker):
 
 
 @pytest.fixture
-def in_subsegment_mock(mocker):
-    class AsyncContextManager(mocker.MagicMock):
+def in_subsegment_mock():
+    class AsyncContextManager(mock.MagicMock):
         async def __aenter__(self, *args, **kwargs):
             return self.__enter__()
 
@@ -93,26 +78,10 @@ def in_subsegment_mock(mocker):
         put_annotation: mock.MagicMock = mock.MagicMock()
         put_metadata: mock.MagicMock = mock.MagicMock()
 
-        def set_attribute(self, *args, **kwargs):
-            if kwargs.get("category") == "Metadata":
-                kwargs.pop("category")
-                return self.put_metadata(*args, **kwargs)
-
-            if kwargs.get("category") == "Annotation":
-                kwargs.pop("category")
-                return self.put_annotation(*args, **kwargs)
-
-            if isinstance(kwargs.get("value"), (str, Number, bool)):
-                return self.put_annotation(*args, **kwargs)
-
-            return self.put_metadata(*args, **kwargs)
-
     in_subsegment = InSubsegment()
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
     in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
-    in_subsegment.in_subsegment.return_value.__enter__.return_value.set_attribute = in_subsegment.set_attribute
-    in_subsegment.in_subsegment.return_value.__aenter__.return_value.set_attribute = in_subsegment.set_attribute
 
     yield in_subsegment
 
@@ -186,7 +155,6 @@ def test_tracer_custom_metadata(monkeypatch, mocker, dummy_response, provider_st
         key=annotation_key,
         value=annotation_value,
         namespace="booking",
-        category="Metadata",
     )
 
 
@@ -204,11 +172,7 @@ def test_tracer_custom_annotation(monkeypatch, mocker, dummy_response, provider_
 
     # THEN we should have an annotation as expected
     assert put_annotation_mock.call_count == 1
-    assert put_annotation_mock.call_args == mocker.call(
-        key=annotation_key,
-        value=annotation_value,
-        category="Annotation",
-    )
+    assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
 
 
 @mock.patch("aws_lambda_powertools.tracing.Tracer.patch")

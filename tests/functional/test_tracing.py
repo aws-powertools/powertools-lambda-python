@@ -3,6 +3,7 @@ import contextlib
 import pytest
 
 from aws_lambda_powertools import Tracer
+from aws_lambda_powertools.tracing.provider.aws_xray.aws_xray_tracer import AwsXrayProvider
 
 
 @pytest.fixture
@@ -23,7 +24,7 @@ def service_name():
 
 def test_capture_lambda_handler(dummy_response):
     # GIVEN tracer lambda handler decorator is used
-    tracer = Tracer(disabled=True)
+    tracer = AwsXrayProvider(disabled=True)
 
     # WHEN a lambda handler is run
     @tracer.capture_lambda_handler
