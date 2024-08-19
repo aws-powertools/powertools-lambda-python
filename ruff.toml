@@ -23,7 +23,9 @@ lint.select = [
     "Q",   # flake8-quotes - https://beta.ruff.rs/docs/rules/#flake8-quotes-q
     "PTH", # flake8-use-pathlib - https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "T10", # flake8-debugger https://beta.ruff.rs/docs/rules/#flake8-debugger-t10
+    "TCH", # flake8-type-checking - https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
     "TD",  # flake8-todo - https://beta.ruff.rs/docs/rules/#flake8-todos-td
+    "UP",  # pyupgrade - https://docs.astral.sh/ruff/rules/#pyupgrade-up
     "W",   # pycodestyle warning - https://beta.ruff.rs/docs/rules/#warning-w
 ]
 
@@ -36,7 +38,6 @@ lint.ignore = [
     "B904",    # raise-without-from-inside-except - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
     "PYI024",
-    "FA100",   # Enable this rule when drop support to Python 3.7
 ]
 
 # Exclude files and directories
@@ -58,6 +59,7 @@ exclude = [
 # Maximum line length
 line-length = 120
 
+target-version = "py38"
 
 fix = true
 lint.fixable = ["I", "COM812", "W"]
@@ -81,6 +83,9 @@ max-statements = 70
 [lint.isort]
 split-on-trailing-comma = true
 
+[lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
 [lint.per-file-ignores]
 # Ignore specific rules for specific files
 "tests/e2e/utils/data_builder/__init__.py" = ["F401"]
@@ -90,6 +95,6 @@ split-on-trailing-comma = true
 "aws_lambda_powertools/event_handler/openapi/compat.py" = ["F401"]
 # Maintenance: we're keeping EphemeralMetrics code in case of Hyrum's law so we can quickly revert it
 "aws_lambda_powertools/metrics/metrics.py" = ["ERA001"]
-"examples/*" = ["FA100"]
-"tests/*" = ["FA100"]
+"examples/*" = ["FA100", "TCH"]
+"tests/*" = ["FA100", "TCH"]
 "aws_lambda_powertools/utilities/parser/models/*" = ["FA100"]

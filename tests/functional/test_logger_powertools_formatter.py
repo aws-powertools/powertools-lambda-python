@@ -257,7 +257,7 @@ def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch, s
 
     logger.info("foo bar")
 
-    log_dict, log_dict_2 = [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
+    log_dict, log_dict_2 = (json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line)
 
     # THEN `xray_trace_id`` key should be different in both invocations
     assert log_dict["xray_trace_id"] == trace_id

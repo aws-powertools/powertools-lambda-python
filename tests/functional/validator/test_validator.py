@@ -69,7 +69,7 @@ def test_validate_accept_schema_custom_format(
     )
 
 
-@pytest.mark.parametrize("invalid_format", [None, bool(), {}, [], object])
+@pytest.mark.parametrize("invalid_format", [None, False, {}, [], object])
 def test_validate_invalid_custom_format(
     eventbridge_schema_registry_cloudtrail_v2_s3,
     eventbridge_cloudtrail_s3_head_object_event,

@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
-class LambdaClientContextMobileClient(object):
+class LambdaClientContextMobileClient:
     """Mobile Client context that's provided to Lambda by the client application."""
 
     _installation_id: str

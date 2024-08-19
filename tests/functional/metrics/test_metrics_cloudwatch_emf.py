@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import datetime
 import json
 import warnings
 from collections import namedtuple
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 import pytest
 
@@ -34,7 +32,7 @@ def serialize_metrics(
     metrics: List[Dict],
     dimensions: List[Dict],
     namespace: str,
-    metadatas: List[Dict] | None = None,
+    metadatas: Optional[List[Dict]] = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a list of metrics, dimensions"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -56,8 +54,8 @@ def serialize_single_metric(
     metric: Dict,
     dimension: Dict,
     namespace: str,
-    metadata: Dict | None = None,
-    timestamp: int | datetime.datetime | None = None,
+    metadata: Optional[Dict] = None,
+    timestamp: Union[int, datetime.datetime, None] = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)

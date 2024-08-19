@@ -25,7 +25,7 @@ class LRUDict(OrderedDict):
             del self[oldest]
 
     def get(self, key, *args, **kwargs):
-        item = super(LRUDict, self).get(key, *args, **kwargs)
+        item = super().get(key, *args, **kwargs)
         if item:
             self.move_to_end(key=key)
         return item

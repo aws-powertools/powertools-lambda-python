@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Typing for developer ease in the IDE
 """

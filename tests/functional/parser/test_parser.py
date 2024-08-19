@@ -12,7 +12,7 @@ from aws_lambda_powertools.utilities.parser import (
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
-@pytest.mark.parametrize("invalid_value", [None, bool(), [], (), object])
+@pytest.mark.parametrize("invalid_value", [None, False, [], (), object])
 def test_parser_unsupported_event(dummy_schema, invalid_value):
     @event_parser(model=dummy_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
@@ -75,7 +75,7 @@ def test_pydanticv2_validation():
     assert event_parsed.version == int(event_raw["version"])
 
 
-@pytest.mark.parametrize("invalid_schema", [str, bool(), [], ()])
+@pytest.mark.parametrize("invalid_schema", [str, False, [], ()])
 def test_parser_with_invalid_schema_type(dummy_event, invalid_schema):
     @event_parser(model=invalid_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):

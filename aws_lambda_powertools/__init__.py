@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Top-level package for Lambda Python Powertools."""
 
 from pathlib import Path
