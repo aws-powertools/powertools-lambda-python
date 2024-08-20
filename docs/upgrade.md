@@ -17,7 +17,7 @@ We've made minimal breaking changes to make your transition to v3 as smooth as p
 | **Parser**                         | Replaced [DynamoDBStreamModel](#dynamodbstreammodel-in-parser) `AttributeValue` with native Python types                 | Yes                  |
 | **Lambda layer**                   | [Lambda layers](#new-lambda-layers-arn) are now compiled according to the specific Python version and architecture       | No                   |
 | **Batch Processor**                | `@batch_processor` and `@async_batch_processor` decorators [are now deprecated](#deprecated-batch-processing-decorators) | Yes                  |
-| **Event Source Data Classes**      | New default values for optional fields                                                                                   | Yes                  |
+| **Event Source Data Classes**      | Updated [default values](#event-source-default-values) for optional fields.                                                                              | Yes                  |
 | **Parameters**                     | The [default cache TTL](#parameters-default-cache-ttl-updated-to-5-minutes) is now set to **5 minutes**                                                                            | No                   |
 | **Parameters**                     | The `config` parameter [is deprecated](#parameters-using-the-new-boto_config-parameter) in favor of `boto_config`                                                                   | Yes                   |
 | **JMESPath Functions**             | The `extract_data_from_envelope` function is [deprecated in favor](#utilizing-the-new-query-function-in-jmespath-functions) of `query` | Yes                   |
@@ -37,7 +37,7 @@ Before you start, we suggest making a copy of your current working project or cr
 
 As of June 30, 2024, Pydantic v1 has reached its end-of-life, and we have discontinued support for this version. We now exclusively support Pydantic v2.
 
-You don't need to make any changes related to Powertools for AWS Lambda (Python) on your end.
+You don't need to make any changes to your code regarding Powertools for AWS Lambda (Python), as we fully support Pydantic V2 features.
 
 ## DynamoDBStreamModel in parser
 
@@ -147,6 +147,14 @@ def lambda_handler(event, context: LambdaContext):
         context=context,
     )
 ```
+
+## Event source default values
+
+We've modified the **Event Source Data classes** so that optional dictionaries and lists now return empty dictionaries or lists instead of None. This improvement simplifies your code by eliminating the need for conditional checks when accessing these fields, while maintaining backward compatibility with previous implementations.
+
+We've applied this change broadly across various event source data classes, ensuring a more consistent and streamlined coding experience for you.
+
+**MISSING BEFORE AND AFTER**
 
 ## Parameters: default cache TTL updated to 5 minutes
 
