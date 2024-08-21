@@ -37,7 +37,7 @@ permissions:
 env:
   NODE_VERSION: 18.20.4
   AWS_REGION: eu-west-1
-  SAR_NAME: aws-lambda-powertools-python-layer-v3 # PROBLEM - WE NEED TO TALK
+  SAR_NAME: aws-lambda-powertools-python-layer-v3
   TEST_STACK_NAME: serverlessrepo-v3-powertools-layer-test-stack
   RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
 
