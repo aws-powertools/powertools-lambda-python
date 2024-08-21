@@ -131,15 +131,15 @@ class Canary(Construct):
             PolicyStatement(effect=Effect.ALLOW, actions=["lambda:GetFunction"], resources=["*"]),
         )
 
-        if python_version == "3.8":
+        if python_version == "python3.8":
             runtime = Runtime.PYTHON_3_8
-        elif python_version == "3.9":
+        elif python_version == "python3.9":
             runtime = Runtime.PYTHON_3_9
-        elif python_version == "3.10":
+        elif python_version == "python3.10":
             runtime = Runtime.PYTHON_3_10
-        elif python_version == "3.11":
+        elif python_version == "python3.11":
             runtime = Runtime.PYTHON_3_11
-        elif python_version == "3.12":
+        elif python_version == "python3.12":
             runtime = Runtime.PYTHON_3_12
         else:
             raise ValueError("Unsupported Python version")
