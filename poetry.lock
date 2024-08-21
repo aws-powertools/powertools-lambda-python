@@ -208,13 +208,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.152.0"
+version = "2.153.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.152.0.tar.gz", hash = "sha256:e7f6e2429301314190355f18e2bf47ce0c8ae55c50b48153922feb1b63f64c40"},
-    {file = "aws_cdk_lib-2.152.0-py3-none-any.whl", hash = "sha256:4e711582187ee31f550c831666384a790cef1f289551c52fa4bbbee12a0349f7"},
+    {file = "aws-cdk-lib-2.153.0.tar.gz", hash = "sha256:7cda51150c3615e9429329dc08fa0403822e64a749940ab032d65506fb88ff62"},
+    {file = "aws_cdk_lib-2.153.0-py3-none-any.whl", hash = "sha256:1357ccb460a5340c4135307e9d03be3dc09294c14f89881968e9104583be110f"},
 ]
 
 [package.dependencies]
@@ -479,13 +479,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.251"
+version = "0.1.252"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.251-py3-none-any.whl", hash = "sha256:33f4b43fc6a99e14975b90f862286758901472ecd1d73cc62ce6cf7362eb0e88"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.251.tar.gz", hash = "sha256:45b78d454c8375b29284d22fcd028e4e93f859c80ebf59e7f02d187d8195d832"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.252-py3-none-any.whl", hash = "sha256:f47d3597227151151bea2135e3e21a299aa9f19899cba52343693d9ad45368c7"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.252.tar.gz", hash = "sha256:f5be8623bf9bb58ff34df214b9a7272c4cfb9089f793ab437845824971b0eaab"},
 ]
 
 [package.dependencies]
@@ -2089,13 +2089,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.35.0"
-description = "Type annotations for boto3.Lambda 1.35.0 service generated with mypy-boto3-builder 7.26.0"
+version = "1.35.1"
+description = "Type annotations for boto3.Lambda 1.35.1 service generated with mypy-boto3-builder 7.26.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_lambda-1.35.0-py3-none-any.whl", hash = "sha256:46f1af343592dfa6997050bc84b3cdf5487d0716c05a4e5b20f7b37935c3e6be"},
-    {file = "mypy_boto3_lambda-1.35.0.tar.gz", hash = "sha256:422e935adaa2b74fa1237f1bb54edf70d215efd6bc0b9a0474f8fabf2ca6a60c"},
+    {file = "mypy_boto3_lambda-1.35.1-py3-none-any.whl", hash = "sha256:ad5217045006bebb8523ca4822c8c45bf91182b52369862abdb9387328270ef1"},
+    {file = "mypy_boto3_lambda-1.35.1.tar.gz", hash = "sha256:f26e3ecd0b05a1fa2241bded7878d06fabc4d162cf259f5d868b567bbcd1c517"},
 ]
 
 [package.dependencies]
@@ -2117,13 +2117,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.35.0"
-description = "Type annotations for boto3.S3 1.35.0 service generated with mypy-boto3-builder 7.26.0"
+version = "1.35.2"
+description = "Type annotations for boto3.S3 1.35.2 service generated with mypy-boto3-builder 7.26.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_s3-1.35.0-py3-none-any.whl", hash = "sha256:4377af0181f8fb1373f68e8c84a7cbbad2e3c84209b8ff0e3f2bd608d06d85b1"},
-    {file = "mypy_boto3_s3-1.35.0.tar.gz", hash = "sha256:5f86a9ebd0fbf63088590c7c49148f60ac6a2236603ce7df975dd5016461131d"},
+    {file = "mypy_boto3_s3-1.35.2-py3-none-any.whl", hash = "sha256:f7300b559dee5435872625448becf159abe36b19cd7006dd78e0d51610312183"},
+    {file = "mypy_boto3_s3-1.35.2.tar.gz", hash = "sha256:74d8f3492eeff768ff6f69ac6d40bf68b40aa6e54ebe10a8d098fc3d24a54abf"},
 ]
 
 [package.dependencies]
@@ -3724,4 +3724,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "53748e8730b446f5e23d4c094aa3a9b9bdf006be360ba929a15bfa89997cf222"
+content-hash = "5240f8f7852994e9a4bc12477a23aa1e61ea6200da72cff5c36e03a42e7d9b85"
