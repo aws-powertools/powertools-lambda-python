@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 import jsii
 from aws_cdk import (
@@ -14,7 +14,7 @@ from aws_cdk import (
 )
 from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission
 from aws_cdk.aws_ssm import StringParameter
-from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayer
+from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayerPythonV3
 from constructs import Construct
 
 
@@ -38,12 +38,12 @@ class Layer(Construct):
         layer_version_name: str,
         powertools_version: str,
         python_version: str,
-        architecture: Optional[Architecture] = None,
+        architecture: Architecture | None = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        layer = LambdaPowertoolsLayer(
+        layer = LambdaPowertoolsLayerPythonV3(
             self,
             "Layer",
             layer_version_name=layer_version_name,
