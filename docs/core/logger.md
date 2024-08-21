@@ -298,7 +298,7 @@ We support the following log levels:
 | `ERROR`    | 40            | `logging.ERROR`    |
 | `CRITICAL` | 50            | `logging.CRITICAL` |
 
-If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `10`.
+If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `20`.
 
 === "setting_log_level_constructor.py"
 
