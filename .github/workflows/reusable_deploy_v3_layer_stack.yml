@@ -72,71 +72,12 @@ jobs:
       matrix:
         # To get a list of current regions, use:
         # aws ec2 describe-regions --all-regions --query "Regions[].RegionName" --output text | tr "\t" "\n" | sort
-        region: ["af-south-1", "ap-east-1", "ap-northeast-1", "ap-northeast-2", "ap-northeast-3",
-                 "ap-south-1", "ap-south-2", "ap-southeast-1", "ap-southeast-2", "ap-southeast-3",
-                 "ap-southeast-4", "ca-central-1", "ca-west-1", "eu-central-1", "eu-central-2",
-                 "eu-north-1", "eu-south-1", "eu-south-2", "eu-west-1", "eu-west-2", "eu-west-3",
-                 "il-central-1", "me-central-1", "me-south-1", "sa-east-1", "us-east-1",
-                 "us-east-2", "us-west-1", "us-west-2"]
+        region: ["af-south-1", "ap-east-1"]
         python-version: ["3.8","3.9","3.10","3.11","3.12"]
         include:
           - region: "af-south-1"
             has_arm64_support: "true"
           - region: "ap-east-1"
-            has_arm64_support: "true"
-          - region: "ap-northeast-1"
-            has_arm64_support: "true"
-          - region: "ap-northeast-2"
-            has_arm64_support: "true"
-          - region: "ap-northeast-3"
-            has_arm64_support: "true"
-          - region: "ap-south-1"
-            has_arm64_support: "true"
-          - region: "ap-south-2"
-            has_arm64_support: "true"
-          - region: "ap-southeast-1"
-            has_arm64_support: "true"
-          - region: "ap-southeast-2"
-            has_arm64_support: "true"
-          - region: "ap-southeast-3"
-            has_arm64_support: "true"
-          - region: "ap-southeast-4"
-            has_arm64_support: "true"
-          - region: "ca-central-1"
-            has_arm64_support: "true"
-          - region: "ca-west-1"
-            has_arm64_support: "false"
-          - region: "eu-central-1"
-            has_arm64_support: "true"
-          - region: "eu-central-2"
-            has_arm64_support: "true"
-          - region: "eu-north-1"
-            has_arm64_support: "true"
-          - region: "eu-south-1"
-            has_arm64_support: "true"
-          - region: "eu-south-2"
-            has_arm64_support: "true"
-          - region: "eu-west-1"
-            has_arm64_support: "true"
-          - region: "eu-west-2"
-            has_arm64_support: "true"
-          - region: "eu-west-3"
-            has_arm64_support: "true"
-          - region: "il-central-1"
-            has_arm64_support: "true"
-          - region: "me-central-1"
-            has_arm64_support: "true"
-          - region: "me-south-1"
-            has_arm64_support: "true"
-          - region: "sa-east-1"
-            has_arm64_support: "true"
-          - region: "us-east-1"
-            has_arm64_support: "true"
-          - region: "us-east-2"
-            has_arm64_support: "true"
-          - region: "us-west-1"
-            has_arm64_support: "true"
-          - region: "us-west-2"
             has_arm64_support: "true"
     steps:
       - name: checkout
@@ -183,7 +124,7 @@ jobs:
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
-          path: layer
+          path: layer_v3
       - name: unzip artefact
         run: unzip cdk.py${{ matrix.python-version }}.out.zip
       - name: Define constants
