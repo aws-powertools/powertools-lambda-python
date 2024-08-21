@@ -68,6 +68,7 @@ The following companies, among others, use Powertools:
 * [Jit Security](https://www.jit.io/)
 * [LocalStack](https://www.localstack.cloud/)
 * [Propellor.ai](https://www.propellor.ai/)
+* [Pushpay](https://pushpay.com/)
 * [Recast](https://getrecast.com/)
 * [TopSport](https://www.topsport.com.au/)
 * [Transformity](https://transformity.tech/)
