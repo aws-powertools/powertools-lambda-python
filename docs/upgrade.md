@@ -37,7 +37,7 @@ Before you start, we suggest making a copy of your current working project or cr
 
 As of June 30, 2024, Pydantic v1 has reached its end-of-life, and we have discontinued support for this version. We now exclusively support Pydantic v2.
 
-You don't need to make any changes to your code regarding Powertools for AWS Lambda (Python), as we fully support Pydantic V2 features.
+If you are defining your own Pydantic models and want to learn how to migrate them to Pydantic v2, please refer to the [Pydantic v2 Migration Guide](https://docs.pydantic.dev/latest/migration/){target="_blank"} for detailed instructions.
 
 ## DynamoDBStreamModel in parser
 
