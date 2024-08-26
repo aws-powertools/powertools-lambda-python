@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from typing import Dict
 
@@ -20,11 +19,10 @@ def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
     # Return inserted Header data into the Idempotent Response
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 
-    # expiry_timestamp could be None so include if set
-    expiry_timestamp = idempotent_data.expiry_timestamp
+    # expiry_timestamp can be None so include if set
+    expiry_timestamp = idempotent_data.get_expiration_datetime()
     if expiry_timestamp:
-        expiry_time = datetime.datetime.fromtimestamp(int(expiry_timestamp))
-        response["x-idempotent-expiration"] = expiry_time.isoformat()
+        response["x-idempotent-expiration"] = expiry_timestamp.isoformat()
 
     # Must return the response here
     return response

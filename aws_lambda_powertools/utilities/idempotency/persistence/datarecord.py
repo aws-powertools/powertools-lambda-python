@@ -92,3 +92,24 @@ class DataRecord:
             previous response data deserialized
         """
         return json.loads(self.response_data) if self.response_data else None
+
+    def get_expiration_datetime(self) -> datetime.datetime | None:
+        """
+        Converts the expiry timestamp to a datetime object.
+
+        This method checks if an expiry timestamp exists and converts it to a
+        datetime object. If no timestamp is present, it returns None.
+
+        Returns:
+        -------
+        datetime.datetime | None
+            A datetime object representing the expiration time, or None if no expiry timestamp is set.
+
+        Note:
+        ----
+        The returned datetime object is timezone-naive and assumes the timestamp
+        is in the system's local timezone. Lambda default timezone is UTC.
+        """
+        if self.expiry_timestamp:
+            return datetime.datetime.fromtimestamp(int(self.expiry_timestamp))
+        return None

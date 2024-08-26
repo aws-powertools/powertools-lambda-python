@@ -2045,6 +2045,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
     def idempotent_response_hook(response: Any, idempotent_data: DataRecord) -> Any:
         """Modify the response provided by adding a new key"""
         response["idempotent_response"] = True
+        response["idempotent_expiration"] = idempotent_data.get_expiration_datetime()
 
         return response
 
@@ -2070,6 +2071,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
 
     # Then idempotent_response value will be added to the response
     assert lambda_resp["idempotent_response"]
+    assert lambda_resp["idempotent_expiration"] == datetime.datetime.fromtimestamp(int(timestamp_future))
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
