@@ -142,6 +142,7 @@ extra_css:
 extra_javascript:
   - javascript/aws-amplify.min.js
   - javascript/extra.js
+  - https://docs.powertools.aws.dev/shared/mermaid.min.js
 
 extra:
   version:
