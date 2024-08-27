@@ -119,12 +119,6 @@ Processing batches from SQS works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_sqs_context_manager.py"
     ```
 
-=== "As a decorator (deprecated)"
-
-    ```python hl_lines="4-9 12 18 27 29"
-    --8<-- "examples/batch_processing/src/getting_started_sqs_decorator.py"
-    ```
-
 === "Sample response"
 
     The second record failed to be processed, therefore the processor added its message ID in the response.
@@ -161,12 +155,6 @@ Enable the `skip_group_on_error` option for seamless processing of messages from
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_context_manager.py"
     ```
 
-=== "As a decorator (deprecated)"
-
-    ```python hl_lines="5-6 11 26"
-    --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_decorator.py"
-    ```
-
 === "Enabling skip_group_on_error flag"
 
     ```python hl_lines="2-6 9 23"
@@ -195,12 +183,6 @@ Processing batches from Kinesis works in three stages:
 
     ```python hl_lines="3-5 8 14 23-25 28"
     --8<-- "examples/batch_processing/src/getting_started_kinesis_context_manager.py"
-    ```
-
-=== "As a decorator (deprecated)"
-
-    ```python hl_lines="2-9 12 18 26"
-    --8<-- "examples/batch_processing/src/getting_started_kinesis_decorator.py"
     ```
 
 === "Sample response"
@@ -239,12 +221,6 @@ Processing batches from DynamoDB Streams works in three stages:
 
     ```python hl_lines="5-7 10 16 28-30 33"
     --8<-- "examples/batch_processing/src/getting_started_dynamodb_context_manager.py"
-    ```
-
-=== "As a decorator (deprecated)"
-
-    ```python hl_lines="4-11 14 20 31"
-    --8<-- "examples/batch_processing/src/getting_started_dynamodb_decorator.py"
     ```
 
 === "Sample response"
@@ -538,12 +514,6 @@ We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lam
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context.py"
     ```
 
-=== "As a decorator (deprecated)"
-
-    ```python hl_lines="18 26"
-    --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context_decorator.py"
-    ```
-
 === "As a context manager"
 
     ```python hl_lines="14 24"
@@ -670,12 +640,6 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
 ### Choosing between method and context manager
 
 Use context manager when you want access to the processed messages or handle `BatchProcessingError` exception when all records within the batch fail to be processed.
-
-### What's the difference between the decorator and process_partial_response functions?
-
-`batch_processor` and `async_batch_processor` decorators are now marked as deprecated. Historically, they were kept due to backwards compatibility and to minimize code changes between V2 and V3. We will remove both in the next major release.
-
-As 2.12.0, `process_partial_response` and `async_process_partial_response` are the recommended instead. It reduces boilerplate, smaller memory/CPU cycles, and it makes it less error prone - e.g., decorators required an additional return.
 
 ### Integrating exception handling with Sentry.io
 

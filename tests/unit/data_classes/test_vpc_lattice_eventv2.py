@@ -1,4 +1,7 @@
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes.vpc_lattice import VPCLatticeEventV2
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from tests.functional.utils import load_event
 
 
@@ -14,6 +17,12 @@ def test_vpc_lattice_v2_event():
     assert parsed_event.method == raw_event["method"]
     assert parsed_event.headers == raw_event["headers"]
     assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
+    assert parsed_event.get_query_string_value("order-id") == "1"
+
+    # DEPRECATED METHOD - Remove in V4
+    with pytest.warns(PowertoolsDeprecationWarning):
+        assert parsed_event.get_header_value("user_agent") == "curl/7.64.1"
+
     assert parsed_event.body == raw_event["body"]
     assert parsed_event.is_base64_encoded == raw_event["isBase64Encoded"]
     assert parsed_event.request_context.region == raw_event["requestContext"]["region"]

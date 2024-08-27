@@ -35,9 +35,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
     def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
-        if self.is_base64_encoded:
-            return base64_decode(body)
-        return body
+        return base64_decode(body) if self.is_base64_encoded else body
 
     @property
     def method(self) -> str:
