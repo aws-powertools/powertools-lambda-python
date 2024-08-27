@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import enum
 import re
-from typing import Any
+import warnings
+from typing import Any, overload
+
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
@@ -10,6 +13,10 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     CaseInsensitiveDict,
     DictWrapper,
 )
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+)
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 
 class APIGatewayRouteArn:
@@ -162,6 +169,55 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
     def request_context(self) -> BaseRequestContext:
         return BaseRequestContext(self._data)
 
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: bool = False,
+    ) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None: ...
+
+    @deprecated(
+        "`get_header_value` function is deprecated; Access headers directly using event.headers.get('HeaderName')",
+        category=None,
+    )
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None:
+        """Get header value by name
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case-sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        warnings.warn(
+            "The `get_header_value` function is deprecated in V3 and the `case_sensitive` parameter "
+            "no longer has any effect. This function will be removed in the next major version. "
+            "Instead, access headers directly using event.headers.get('HeaderName'), which is case insensitive.",
+            category=PowertoolsDeprecationWarning,
+            stacklevel=2,
+        )
+        return get_header_value(self.headers, name, default_value, case_sensitive)
+
 
 class APIGatewayAuthorizerEventV2(DictWrapper):
     """API Gateway Authorizer Event Format 2.0
@@ -243,6 +299,50 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
     @property
     def stage_variables(self) -> dict[str, str]:
         return self.get("stageVariables") or {}
+
+    @overload
+    def get_header_value(self, name: str, default_value: str, case_sensitive: bool = False) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None: ...
+
+    @deprecated(
+        "`get_header_value` function is deprecated; Access headers directly using event.headers.get('HeaderName')",
+        category=None,
+    )
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None:
+        """Get header value by name
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case-sensitive look up
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        warnings.warn(
+            "The `get_header_value` function is deprecated in V3 and the `case_sensitive` parameter "
+            "no longer has any effect. This function will be removed in the next major version. "
+            "Instead, access headers directly using event.headers.get('HeaderName'), which is case insensitive.",
+            category=PowertoolsDeprecationWarning,
+            stacklevel=2,
+        )
+        return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
 class APIGatewayAuthorizerResponseV2:

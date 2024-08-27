@@ -4,7 +4,7 @@ from typing import Dict, Optional, Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
-from aws_lambda_powertools.event_handler.openapi.constants import (
+from aws_lambda_powertools.event_handler.openapi.models import (
     MODEL_CONFIG_ALLOW,
 )
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
