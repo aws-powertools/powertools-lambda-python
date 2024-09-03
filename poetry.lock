@@ -224,13 +224,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.154.1"
+version = "2.155.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk_lib-2.154.1-py3-none-any.whl", hash = "sha256:c77cc400e3fad4ca9a00bd5ef024a96d9977c2fdb3b4b9593259d329ddf7e6a9"},
-    {file = "aws_cdk_lib-2.154.1.tar.gz", hash = "sha256:44f973ce9d865e6c19de550e20e9fc0cfee6a56bdf9a28faf549f36c91c45341"},
+    {file = "aws_cdk_lib-2.155.0-py3-none-any.whl", hash = "sha256:260e6b237f7e916700d18402d811c0dbabb36b0d90275ee73810ce9746650961"},
+    {file = "aws_cdk_lib-2.155.0.tar.gz", hash = "sha256:4156ec3f6bd6fce09285a7309ca1f62b3ed95ef0a9e902eab4f649e118911771"},
 ]
 
 [package.dependencies]
@@ -496,13 +496,13 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.261"
+version = "0.1.262"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.261-py3-none-any.whl", hash = "sha256:abb091a7e1390415a0a0ec6fb6b4c379e38c61ff5f3c727a0a00bd7bc0a9a3ac"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.261.tar.gz", hash = "sha256:cf3cb95782e1056b7a62e05c6e23c7e85bc716101ab9d51bbab4c6c0accc1d6a"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.262-py3-none-any.whl", hash = "sha256:f94822fb6d5243d962283aacd44bdf29f58d1f645f8e218bf1906d3f12feee70"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.262.tar.gz", hash = "sha256:83dcf1af1e2cc96c781bbdf0306ef8e719b6d9f797038fea5572d7a8e0bcb08b"},
 ]
 
 [package.dependencies]
@@ -1909,13 +1909,13 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.33"
+version = "9.5.34"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.33-py3-none-any.whl", hash = "sha256:dbc79cf0fdc6e2c366aa987de8b0c9d4e2bb9f156e7466786ba2fd0f9bf7ffca"},
-    {file = "mkdocs_material-9.5.33.tar.gz", hash = "sha256:d23a8b5e3243c9b2f29cdfe83051104a8024b767312dc8fde05ebe91ad55d89d"},
+    {file = "mkdocs_material-9.5.34-py3-none-any.whl", hash = "sha256:54caa8be708de2b75167fd4d3b9f3d949579294f49cb242515d4653dbee9227e"},
+    {file = "mkdocs_material-9.5.34.tar.gz", hash = "sha256:1e60ddf716cfb5679dfd65900b8a25d277064ed82d9a53cd5190e3f894df7840"},
 ]
 
 [package.dependencies]
@@ -3742,4 +3742,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "5233362bcca5bd00d2c7d6be926c651fe43348541c1582ba930d28c39ad5c8d5"
+content-hash = "e74a931b3a481df174210ec81ce3177e2c0f34f6c8fa05b3ce49c6e868531308"

@@ -42,6 +42,29 @@ env:
   RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
 
 on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Deployment stage (BETA, PROD)"
+        required: true
+        type: string
+      package-version:
+        description: "The version of the package to deploy"
+        required: true
+        type: string
+      environment:
+        description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
   workflow_call:
     inputs:
       stage:
