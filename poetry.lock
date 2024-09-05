@@ -478,38 +478,38 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.191"
+version = "2.28.195"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk_nag-2.28.191-py3-none-any.whl", hash = "sha256:254db0e5c2429d6e285cd3dd6e101fe1908d184a6bf95e0de70e1ae8c007d9e7"},
-    {file = "cdk_nag-2.28.191.tar.gz", hash = "sha256:4e1aecf4b1250e81cef0b4557779ee1e8b5ce3f3d0726d38a48c02ed03851fa9"},
+    {file = "cdk_nag-2.28.195-py3-none-any.whl", hash = "sha256:6a33dbad938b66946f2d89a8a010a6e2b9cb42c8703aa3b4991b6ad572596b8a"},
+    {file = "cdk_nag-2.28.195.tar.gz", hash = "sha256:c96ead451197dde434451c5bfef2c63edd0c7e766dd4a39268d9a8b8632da612"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.116.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.103.0,<2.0.0"
+jsii = ">=1.103.1,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.262"
+version = "0.1.263"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.262-py3-none-any.whl", hash = "sha256:f94822fb6d5243d962283aacd44bdf29f58d1f645f8e218bf1906d3f12feee70"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.262.tar.gz", hash = "sha256:83dcf1af1e2cc96c781bbdf0306ef8e719b6d9f797038fea5572d7a8e0bcb08b"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.263-py3-none-any.whl", hash = "sha256:a3f12a4d749de634def064c538af329b26a7c6a717b7c348dce66a2d116b3f9a"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.263.tar.gz", hash = "sha256:c5c462acea6eef4f07fa0d83bd2cafd601dbc5e74c26b1d227a2b9710082bf35"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.154.1,<3.0.0"
-cdk-nag = ">=2.28.190,<3.0.0"
+cdk-nag = ">=2.28.195,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.103.0,<2.0.0"
+jsii = ">=1.103.1,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<5.0.0"
 
@@ -1550,13 +1550,13 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.103.0"
+version = "1.103.1"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "jsii-1.103.0-py3-none-any.whl", hash = "sha256:7d9691757d8a072c67ab0fa7e315e8dfa0d9022fa82c7197f0cd00f549b7f864"},
-    {file = "jsii-1.103.0.tar.gz", hash = "sha256:0cd33c1e92ffb2c4ef0fb313e0e9dc7a085c5a8c5698d01310153fafff96c198"},
+    {file = "jsii-1.103.1-py3-none-any.whl", hash = "sha256:24b96349230ca22f50fcd69c501e69b6c486acf37bbe0b5869f4c185572b079e"},
+    {file = "jsii-1.103.1.tar.gz", hash = "sha256:7eaa46e8cd9546edc6bba81d0b32df9f8ed8f5848305277d261cccfe00b9c1eb"},
 ]
 
 [package.dependencies]
@@ -2116,13 +2116,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-logs"
-version = "1.35.10"
-description = "Type annotations for boto3.CloudWatchLogs 1.35.10 service generated with mypy-boto3-builder 7.26.1"
+version = "1.35.12"
+description = "Type annotations for boto3.CloudWatchLogs 1.35.12 service generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_logs-1.35.10-py3-none-any.whl", hash = "sha256:8e5bbfe4fb44e08472af2ff43c8cce3a46f91400f49491746e70eadbe39e28ac"},
-    {file = "mypy_boto3_logs-1.35.10.tar.gz", hash = "sha256:a11d0192078cf8c8529ec5e7b9ba33147e4efe0961aeeaa0903f0617cf557934"},
+    {file = "mypy_boto3_logs-1.35.12-py3-none-any.whl", hash = "sha256:1209e54d53d60876a0a7e7265eac9d8220006c56233f65d0ee4f2efdbe8fb09f"},
+    {file = "mypy_boto3_logs-1.35.12.tar.gz", hash = "sha256:1fe075771686000c00a96539fd628a633d474fdc0a9af8d5120e7b906bd30e1d"},
 ]
 
 [package.dependencies]
@@ -3737,4 +3737,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "5d16e3d9496e6aaf5dc123dadc26fcc1dd6e92ee0890a519f40560c8bc71bc1f"
+content-hash = "67e175eade39ac24c8e5e205bcbb87949c1334a7701287b575bf04748b103752"
