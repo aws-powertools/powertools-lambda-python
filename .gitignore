@@ -301,7 +301,7 @@ TMP_CHANGELOG.md
 docs/.cache/
 docs/public
 node_modules
-api/
+# api/
 site/
 !404.html
 !docs/overrides/*.html
