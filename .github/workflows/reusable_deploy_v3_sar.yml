@@ -145,7 +145,7 @@ jobs:
           # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
           # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
           PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
-          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' "cdk.out/LayerV3Stack-${PYTHON_VERSION}.template.json")
+          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' "cdk.out/LayerV3Stack-python${PYTHON_VERSION}.template.json")
 
           # fill in the SAR SAM template
           sed \

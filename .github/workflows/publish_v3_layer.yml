@@ -187,22 +187,22 @@ jobs:
   #    source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
   #    source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
-  #sar-beta:
-  #  needs: beta  # canaries run on Layer Beta env
-  #  permissions:
-  #    # lower privilege propagated from parent workflow (release.yml)
-  #    id-token: write
-  #    contents: read
-  #    pull-requests: none
-  #    pages: none
-  #  uses: ./.github/workflows/reusable_deploy_v3_sar.yml
-  #  secrets: inherit
-  #  with:
-  #    stage: "BETA"
-  #    environment: "layer-beta"
-  #    package-version: ${{ inputs.latest_published_version }}
-  #    source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
-  #    source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+  sar-beta:
+    needs: beta  # canaries run on Layer Beta env
+    permissions:
+      # lower privilege propagated from parent workflow (release.yml)
+      id-token: write
+      contents: read
+      pull-requests: none
+      pages: none
+    uses: ./.github/workflows/reusable_deploy_v3_sar.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      environment: "layer-beta"
+      package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   # UNCOMMENT sar-prod JOB
   #sar-prod:
