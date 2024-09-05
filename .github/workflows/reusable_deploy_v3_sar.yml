@@ -72,7 +72,8 @@ jobs:
     strategy:
       matrix:
         architecture: ["x86_64", "arm64"]
-        python-version: ["3.8","3.9","3.10","3.11","3.12"]
+        #python-version: ["3.8","3.9","3.10","3.11","3.12"]
+        python-version: ["3.8","3.9"]
     steps:
       - name: checkout
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
@@ -164,7 +165,7 @@ jobs:
           cat template.yml
 
           # Package the SAR to our SAR S3 bucket, and publish it
-          sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET }}
+          sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET_V3 }}
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
