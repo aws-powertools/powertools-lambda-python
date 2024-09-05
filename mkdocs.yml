@@ -62,6 +62,64 @@ nav:
           #     - Overview: contributing/tracks/overview.md
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
+  - API:
+    - Event Handler:
+      - api/event_handler.md
+      - api/event_handler/api_gateway.md
+      - api/event_handler/appsync.md
+      - api/event_handler/bedrock_agent.md
+      - api/event_handler/content_types.md
+      - api/event_handler/exceptions.md
+      - api/event_handler/lambda_function_url.md
+      - api/event_handler/router.md
+      - api/event_handler/types.md
+      - api/event_handler/util.md
+      - api/event_handler/vpc_lattice.md
+    - Exceptions: api/exceptions.md
+    - Logging:
+      - api/logging.md
+      - api/logging/constants.md
+      - api/logging/correlation_paths.md
+      - api/logging/exceptions.md
+      - api/logging/filters.md
+      - api/logging/formatter.md
+      - api/logging/lambda_context.md
+      - api/logging/logger.md
+      - api/logging/types.md
+      - api/logging/utils.md
+    - Metrics:
+      - api/metrics.md
+      - api/metrics/base.md
+      - api/metrics/exceptions.md
+      - api/metrics/functions.md
+      - api/metrics/metric.md
+      - api/metrics/metrics.md
+      - api/metrics/types.md
+    - Middleware Factory:
+      - api/middleware_factory.md
+      - api/middleware_factory/exceptions.md
+      - api/middleware_factory/factory.md
+    - Shared:
+      - api/shared.md
+      - api/shared/cache_dict.md
+      - api/shared/constants.md
+      - api/shared/cookies.md
+      - api/shared/functions.md
+      - api/shared/headers_serializer.md
+      - api/shared/json_encoder.md
+      - api/shared/lazy_import.md
+      - api/shared/types.md
+      - api/shared/user_agent.md
+      - api/shared/version.md
+    - Tracing:
+      - api/tracing.md
+      - api/tracing/base.md
+      - api/tracing/extensions.md
+      - api/tracing/tracer.md
+    - Utilities:
+      - api/utilities.md
+      - api/utilities/serialization.md
+    - Warnings: api/warnings.md
 
 theme:
   name: material
@@ -136,6 +194,43 @@ copyright: Copyright &copy; 2023 Amazon Web Services
 plugins:
   - git-revision-date
   - search
+  - mkdocstrings:
+      default_handler: python
+      enable_inventory: true
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+          options:
+            # General
+            allow_inspection: true
+            show_source: true
+            show_bases: true
+            # Headings
+            heading_level: 2
+            show_root_heading: false
+            show_root_toc_entry: true
+            show_root_full_path: true
+            show_root_members_full_path: false
+            show_object_full_path: false
+            show_category_heading: true
+            # Members
+            filters: ["!^_[^_]"]
+            group_by_category: true
+            show_submodules: false
+            # Docstrings
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: spacy
+            merge_init_into_class: true
+            show_if_no_docstring: true
+            # Signature
+            annotations_path: brief
+            show_signature: true
+            show_signature_annotations: true
+            separate_signature: true
+
 
 extra_css:
   - stylesheets/extra.css
