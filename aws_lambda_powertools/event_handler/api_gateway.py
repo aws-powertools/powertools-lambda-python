@@ -1360,7 +1360,7 @@ class BaseRouter(ABC):
         """Reset the Processed Stack Frames"""
         self.processed_stack_frames.clear()
 
-    def append_context(self, **additional_context):
+    def append_context(self, **additional_context) -> None:
         """Append key=value data as routing context"""
         self.context.update(**additional_context)
 
