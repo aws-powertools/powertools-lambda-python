@@ -434,8 +434,7 @@ def test_thread_keys_encapsulation(service_name, stdout):
     thread2_keys = {"exampleThread2Key": "thread2"}
     Thread(target=send_thread_message_with_key, args=("thread2", thread2_keys)).start()
 
-    final_log_message = "final log, all thread keys gone"
-    logger.info(final_log_message)
+    logger.info("final log, all thread keys gone")
 
     logs = capture_logging_output(stdout)
 
@@ -455,16 +454,6 @@ def test_thread_keys_encapsulation(service_name, stdout):
 
 
 def test_remove_thread_key(service_name, stdout):
-    """
-    Tests that global and thread safe logger keys work as expected
-    1. Log with no keys attached
-    2. Log with only global key
-    3. Create two threads and validate:
-        - Keys added in one thread isn't in another
-        - Global keys are still present
-    4. After threading is done, thread keys don't show up
-    """
-
     logger = Logger(
         service=service_name,
         stream=stdout,
@@ -486,7 +475,6 @@ def test_remove_thread_key(service_name, stdout):
 
 
 def test_clear_thread_key(service_name, stdout):
-
     logger = Logger(
         service=service_name,
         stream=stdout,
@@ -506,3 +494,23 @@ def test_clear_thread_key(service_name, stdout):
 
     assert logs[0].get("exampleThread1Key") == "thread1"
     assert logs[1].get("exampleThread1Key") is None
+
+
+def test_get_thread_key(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    def send_message_with_key_and_get(message, keys):
+        logger.append_thread_local_keys(**keys)
+        logger.info(logger.get_current_thread_keys())
+
+    thread1_keys = {"exampleThread1Key": "thread1"}
+    Thread(target=send_message_with_key_and_get, args=("msg", thread1_keys)).start()
+
+    logs = capture_logging_output(stdout)
+    print(logs)
+
+    assert logs[0].get("exampleThread1Key") == "thread1"
+    assert logs[0].get("message") == thread1_keys
