@@ -279,7 +279,7 @@ Use the `remove_thread_local_keys` method to remove a list of thread-local keys 
 
 === "remove_thread_local_keys.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="13"
     --8<-- "examples/logger/src/remove_thread_local_keys.py"
     ```
 
@@ -295,7 +295,7 @@ Use the `clear_thread_local_keys` method to remove all thread-local keys that we
 
 === "clear_thread_local_keys.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="13"
     --8<-- "examples/logger/src/clear_thread_local_keys.py"
     ```
 
@@ -348,7 +348,7 @@ You can view all currently configured keys from the Logger state using the `get_
     ```
 
 ???+ info
-    For thread-local additional logging keys, `use get_current_thread_keys` instead
+    For thread-local additional logging keys, use `get_current_thread_keys` instead
 
 ### Log levels
 
