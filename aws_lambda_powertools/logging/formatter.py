@@ -7,6 +7,7 @@ import os
 import time
 import traceback
 from abc import ABCMeta, abstractmethod
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Iterable
@@ -50,15 +51,28 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
+    def append_thread_local_keys(self, **additional_keys) -> None:
+        raise NotImplementedError()
+
     def get_current_keys(self) -> dict[str, Any]:
+        return {}
+
+    def get_current_thread_keys(self) -> Dict[str, Any]:
         return {}
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
 
+    def remove_thread_local_keys(self, keys: Iterable[str]) -> None:
+        raise NotImplementedError()
+
     @abstractmethod
     def clear_state(self) -> None:
         """Removes any previously added logging keys"""
+        raise NotImplementedError()
+
+    def clear_thread_local_keys(self) -> None:
+        """Removes any previously added logging keys in a specific thread"""
         raise NotImplementedError()
 
 
@@ -236,16 +250,28 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
 
+    def append_thread_local_keys(self, **additional_keys) -> None:
+        set_context_keys(**additional_keys)
+
     def get_current_keys(self) -> dict[str, Any]:
         return self.log_format
+
+    def get_current_thread_keys(self) -> Dict[str, Any]:
+        return _get_context().get()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         for key in keys:
             self.log_format.pop(key, None)
 
+    def remove_thread_local_keys(self, keys: Iterable[str]) -> None:
+        remove_context_keys(keys)
+
     def clear_state(self) -> None:
         self.log_format = dict.fromkeys(self.log_record_order)
         self.log_format.update(**self.keys_combined)
+
+    def clear_thread_local_keys(self) -> None:
+        clear_context_keys()
 
     @staticmethod
     def _build_default_keys() -> dict[str, str]:
@@ -349,10 +375,29 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
+        # check if the value is a str if the key is a reserved attribute, the modulo operator only supports string
         # lastly add or replace incoming keys (those added within the constructor or .structure_logs method)
         for key, value in self.log_format.items():
             if value and key in RESERVED_LOG_ATTRS:
-                formatted_log[key] = value % record_dict
+                if isinstance(value, str):
+                    formatted_log[key] = value % record_dict
+                else:
+                    raise ValueError(
+                        "Logging keys that override reserved log attributes need to be type 'str', "
+                        f"instead got '{type(value).__name__}'",
+                    )
+            else:
+                formatted_log[key] = value
+
+        for key, value in _get_context().get().items():
+            if value and key in RESERVED_LOG_ATTRS:
+                if isinstance(value, str):
+                    formatted_log[key] = value % record_dict
+                else:
+                    raise ValueError(
+                        "Logging keys that override reserved log attributes need to be type 'str', "
+                        f"instead got '{type(value).__name__}'",
+                    )
             else:
                 formatted_log[key] = value
 
@@ -370,3 +415,29 @@ JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
 
 # Fetch current and future parameters from PowertoolsFormatter that should be reserved
 RESERVED_FORMATTER_CUSTOM_KEYS: list[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]
+
+# ContextVar for thread local keys
+THREAD_LOCAL_KEYS = ContextVar("THREAD_LOCAL_KEYS", default={})
+
+
+def _get_context() -> ContextVar[dict[Any, Any]]:
+    return THREAD_LOCAL_KEYS
+
+
+def clear_context_keys() -> None:
+    _get_context().set({})
+
+
+def set_context_keys(**kwargs: Dict[str, Any]) -> None:
+    context = _get_context()
+    context.set(context.get() | kwargs)
+
+
+def remove_context_keys(keys: List[str]) -> None:
+    context = _get_context()
+    context_values = context.get()
+
+    for k in keys:
+        context_values.pop(k, None)
+
+    context.set(context_values)

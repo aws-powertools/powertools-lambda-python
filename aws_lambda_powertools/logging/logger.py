@@ -583,11 +583,23 @@ class Logger:
     def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
+    def append_thread_local_keys(self, **additional_keys: object) -> None:
+        self.registered_formatter.append_thread_local_keys(**additional_keys)
+
     def get_current_keys(self) -> dict[str, Any]:
         return self.registered_formatter.get_current_keys()
 
+    def get_current_thread_keys(self) -> Dict[str, Any]:
+        return self.registered_formatter.get_current_thread_keys()
+
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
+
+    def remove_thread_local_keys(self, keys: Iterable[str]) -> None:
+        self.registered_formatter.remove_thread_local_keys(keys)
+
+    def clear_thread_local_keys(self) -> None:
+        self.registered_formatter.clear_thread_local_keys()
 
     def structure_logs(self, append: bool = False, formatter_options: dict | None = None, **keys) -> None:
         """Sets logging formatting to JSON.
