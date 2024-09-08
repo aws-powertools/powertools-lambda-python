@@ -159,9 +159,8 @@ To ease routine tasks like extracting correlation ID from popular event sources,
 
 You can append additional keys using either mechanism:
 
-* Persist new keys across all future log messages via `append_keys` method
-* Persist new keys across all future logs in a specific thread via `append_thread_local_keys` method
-
+* New keys persist across all future log messages via `append_keys` method
+* New keys persist across all future logs in a specific thread via `append_thread_local_keys` method
 * Add additional keys on a per log message basis as a keyword=value, or via `extra` parameter
 
 #### append_keys method
@@ -194,7 +193,7 @@ You can append your own thread-local keys in your existing Logger via the `appen
 
 === "append_thread_local_keys.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="11"
     --8<-- "examples/logger/src/append_thread_local_keys.py"
     ```
 
