@@ -645,6 +645,7 @@ class Logger:
 
         # Mode 3
         self.registered_formatter.clear_state()
+        self.registered_formatter.clear_thread_local_keys()
         self.registered_formatter.append_keys(**log_keys)
 
     def set_correlation_id(self, value: str | None) -> None:
