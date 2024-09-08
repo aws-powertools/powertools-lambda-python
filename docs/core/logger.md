@@ -160,12 +160,14 @@ To ease routine tasks like extracting correlation ID from popular event sources,
 You can append additional keys using either mechanism:
 
 * Persist new keys across all future log messages via `append_keys` method
+* Persist new keys across all future logs in a specific thread via `append_thread_local_keys` method
+
 * Add additional keys on a per log message basis as a keyword=value, or via `extra` parameter
 
 #### append_keys method
 
 ???+ warning
-	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank"}.
+    `append_keys` is not thread-safe, use `append_thread_local_keys` instead
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -185,6 +187,22 @@ You can append your own keys to your existing Logger via `append_keys(**addition
     If you conditionally add keys depending on the payload, you can follow the example above.
 
     This example will add `order_id` if its value is not empty, and in subsequent invocations where `order_id` might not be present it'll remove it from the Logger.
+
+#### append_thread_local_keys method
+
+You can append your own thread-local keys in your existing Logger via the `append_thread_local_keys` method
+
+=== "append_thread_local_keys.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/logger/src/append_thread_local_keys.py"
+    ```
+
+=== "append_thread_local_keys_output.json"
+
+    ```json hl_lines="8 9 17 18"
+    --8<-- "examples/logger/src/append_thread_local_keys_output.json"
+    ```
 
 #### ephemeral metadata
 
@@ -228,6 +246,17 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 
 ### Removing additional keys
 
+You can remove additional keys using either mechanism:
+
+* Remove new keys across all future log messages via `remove_keys` method
+* Remove new keys across all future logs in a specific thread via `remove_thread_local_keys` method
+* Remove **all** new keys across all future logs in a specific thread via `clear_thread_local_keys` method
+
+???+ danger
+    Keys added by `append_keys` can only be removed by `remove_keys` and thread-local keys added by `append_thread_local_key` can only be removed by `remove_thread_local_keys` or `clear_thread_local_keys`. Thread-local and normal logger keys are distinct values and can't be manipulated interchangably.
+
+#### remove_keys method
+
 You can remove any additional key from Logger state using `remove_keys`.
 
 === "remove_keys.py"
@@ -240,6 +269,40 @@ You can remove any additional key from Logger state using `remove_keys`.
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/remove_keys_output.json"
+    ```
+
+#### remove_thread_local_keys method
+
+You can remove any additional thread-local keys from Logger using either `remove_thread_local_keys` or `clear_thread_local_keys`.
+
+Use the `remove_thread_local_keys` method to remove a list of thread-local keys that were previously added using the `append_thread_local_keys` method.
+
+=== "remove_thread_local_keys.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/logger/src/remove_thread_local_keys.py"
+    ```
+
+=== "remove_thread_local_keys_output.json"
+
+    ```json hl_lines="8 9 17 18 26 34"
+    --8<-- "examples/logger/src/remove_thread_local_keys_output.json"
+    ```
+
+#### clear_thread_local_keys method
+
+Use the `clear_thread_local_keys` method to remove all thread-local keys that were previously added using the `append_thread_local_keys` method.
+
+=== "clear_thread_local_keys.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/logger/src/clear_thread_local_keys.py"
+    ```
+
+=== "clear_thread_local_keys_output.json"
+
+    ```json hl_lines="8 9 17 18"
+    --8<-- "examples/logger/src/clear_thread_local_keys_output.json"
     ```
 
 #### Clearing all state
@@ -283,6 +346,9 @@ You can view all currently configured keys from the Logger state using the `get_
     ```python hl_lines="4 11"
     --8<-- "examples/logger/src/get_current_keys.py"
     ```
+
+???+ info
+    For thread-local additional logging keys, `use get_current_thread_keys` instead
 
 ### Log levels
 
