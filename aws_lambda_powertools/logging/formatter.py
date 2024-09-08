@@ -371,7 +371,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         record_dict["asctime"] = self.formatTime(record=log_record)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log = {}
+        formatted_log: Dict[str, Any] = {}
 
         # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
@@ -417,7 +417,7 @@ JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
 RESERVED_FORMATTER_CUSTOM_KEYS: list[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]
 
 # ContextVar for thread local keys
-THREAD_LOCAL_KEYS = ContextVar("THREAD_LOCAL_KEYS", default={})
+THREAD_LOCAL_KEYS: ContextVar[dict[Any, Any]] = ContextVar("THREAD_LOCAL_KEYS", default={})
 
 
 def _get_context() -> ContextVar[dict[Any, Any]]:
@@ -433,7 +433,7 @@ def set_context_keys(**kwargs: Dict[str, Any]) -> None:
     context.set(context.get() | kwargs)
 
 
-def remove_context_keys(keys: List[str]) -> None:
+def remove_context_keys(keys: Iterable[str]) -> None:
     context = _get_context()
     context_values = context.get()
 
