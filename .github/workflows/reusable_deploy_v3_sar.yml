@@ -137,7 +137,8 @@ jobs:
         env:
           VERSION: ${{ inputs.package-version }}
         run: |
-          VERSION="${VERSION/a/-a}"
+          # VERSION="${VERSION/a/-a}"
+          VERSION="3.0.0"
           echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Prepare SAR App
         env:
