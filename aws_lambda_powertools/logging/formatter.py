@@ -430,7 +430,7 @@ def clear_context_keys() -> None:
 
 def set_context_keys(**kwargs: Dict[str, Any]) -> None:
     context = _get_context()
-    context.set(context.get() | kwargs)
+    context.set({**context.get(), **kwargs})
 
 
 def remove_context_keys(keys: Iterable[str]) -> None:
