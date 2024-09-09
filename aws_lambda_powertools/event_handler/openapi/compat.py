@@ -10,18 +10,14 @@ from copy import copy
 
 from dataclasses import dataclass, is_dataclass
 from enum import Enum
-from typing import Any, Deque, FrozenSet, List, Mapping, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Mapping, Sequence, Set, Tuple, Union
 
 from typing_extensions import Annotated, Literal, get_origin, get_args
 
 from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
 
-from aws_lambda_powertools.event_handler.openapi.types import (
-    COMPONENT_REF_PREFIX,
-    ModelNameMap,
-    UnionType,
-)
+from aws_lambda_powertools.event_handler.openapi.types import COMPONENT_REF_PREFIX, UnionType
 
 from pydantic import TypeAdapter, ValidationError
 
@@ -34,7 +30,8 @@ from pydantic._internal._utils import lenient_issubclass
 from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
-from aws_lambda_powertools.event_handler.openapi.types import IncEx
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.types import IncEx, ModelNameMap
 
 Undefined = PydanticUndefined
 Required = PydanticUndefined
