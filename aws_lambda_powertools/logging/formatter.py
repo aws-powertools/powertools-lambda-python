@@ -417,10 +417,10 @@ JsonFormatter = LambdaPowertoolsFormatter  # alias to previous formatter
 RESERVED_FORMATTER_CUSTOM_KEYS: list[str] = inspect.getfullargspec(LambdaPowertoolsFormatter).args[1:]
 
 # ContextVar for thread local keys
-THREAD_LOCAL_KEYS: ContextVar[dict[Any, Any]] = ContextVar("THREAD_LOCAL_KEYS", default={})
+THREAD_LOCAL_KEYS: ContextVar[dict[str, Any]] = ContextVar("THREAD_LOCAL_KEYS", default={})
 
 
-def _get_context() -> ContextVar[dict[Any, Any]]:
+def _get_context() -> ContextVar[dict[str, Any]]:
     return THREAD_LOCAL_KEYS
 
 
