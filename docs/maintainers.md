@@ -30,7 +30,7 @@ Previous active maintainers who contributed to this project.
 | Michal Ploski     | [mploski](https://github.com/mploski){target="_blank" rel="nofollow"}           | Splunk      |
 | Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen){target="_blank" rel="nofollow"}     | Apollo      |
 | Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca){target="_blank" rel="nofollow"} | N/A         |
-| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | N/A         |
+| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | MongoDB     |
 
 ## Labels
 
