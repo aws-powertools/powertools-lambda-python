@@ -1,9 +1,12 @@
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     APIGatewayAuthorizerEventV2,
     APIGatewayAuthorizerRequestEvent,
     APIGatewayAuthorizerResponseV2,
     APIGatewayAuthorizerTokenEvent,
 )
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from tests.functional.utils import load_event
 
 
@@ -52,9 +55,16 @@ def test_api_gateway_authorizer_v2():
     assert parsed_event.path_parameters == raw_event["pathParameters"]
     assert parsed_event.stage_variables == raw_event["stageVariables"]
 
+    # NEW METHOD
     assert parsed_event.headers["Authorization"] == "value"
     assert parsed_event.headers["authorization"] == "value"
     assert parsed_event.headers.get("missing") is None
+
+    # DEPRECATED METHOD - Remove in V4
+    with pytest.warns(PowertoolsDeprecationWarning):
+        assert parsed_event.get_header_value("Authorization") == "value"
+        assert parsed_event.get_header_value("authorization") == "value"
+        assert parsed_event.get_header_value("missing") is None
 
     # Check for optionals
     event_optionals = APIGatewayAuthorizerEventV2({"requestContext": {}})
@@ -90,6 +100,11 @@ def test_api_gateway_authorizer_request_event():
     assert parsed_event.path == raw_event["path"]
     assert parsed_event.http_method == raw_event["httpMethod"]
     assert parsed_event.headers == raw_event["headers"]
+
+    # DEPRECATED METHOD - Remove in V4
+    with pytest.warns(PowertoolsDeprecationWarning):
+        assert parsed_event.get_header_value("accept") == "*/*"
+
     assert parsed_event.headers["accept"] == "*/*"
     assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
     assert parsed_event.path_parameters == raw_event["pathParameters"]

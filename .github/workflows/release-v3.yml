@@ -252,75 +252,77 @@ jobs:
   # we need to add this into git before pushing the tag
   # otherwise the release commit will be used as the basis for the tag.
   # Later, we create a PR to update trunk with our newest release version (e.g., bump_version job)
-  create_tag:
-    needs: [release, seal, provenance]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
+  # UNCOMMENT CREATE_TAG JOB
+  #create_tag:
+  #  needs: [release, seal, provenance]
+  #  runs-on: ubuntu-latest
+  #  permissions:
+  #    contents: write
+  #  steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
-        with:
-          ref: ${{ env.RELEASE_COMMIT }}
+  #    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+  #      with:
+  #        ref: ${{ env.RELEASE_COMMIT }}
 
-      - name: Restore sealed source code
-        uses: ./.github/actions/seal-restore
-        with:
-          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
-          artifact_name: ${{ needs.seal.outputs.artifact_name }}
+  #    - name: Restore sealed source code
+  #      uses: ./.github/actions/seal-restore
+  #      with:
+  #        integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+  #        artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
-      - id: setup-git
-        name: Git client setup and refresh tip
-        run: |
-          git config user.name "Powertools for AWS Lambda (Python) bot"
-          git config user.email "151832416+aws-powertools-bot@users.noreply.github.com"
-          git config remote.origin.url >&-
+  #    - id: setup-git
+  #      name: Git client setup and refresh tip
+  #      run: |
+  #        git config user.name "Powertools for AWS Lambda (Python) bot"
+  #        git config user.email "151832416+aws-powertools-bot@users.noreply.github.com"
+  #        git config remote.origin.url >&-
 
-      - name: Create Git Tag
-        run: |
-          git add pyproject.toml aws_lambda_powertools/shared/version.py
-          git commit -m "chore: version bump"
-          git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
-          git push origin v"${RELEASE_VERSION}"
-        env:
-          RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
+  #    - name: Create Git Tag
+  #      run: |
+  #        git add pyproject.toml aws_lambda_powertools/shared/version.py
+  #        git commit -m "chore: version bump"
+  #        git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
+  #        git push origin v"${RELEASE_VERSION}"
+  #      env:
+  #        RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
 
-      - name: Upload provenance
-        id: upload-provenance
-        uses: ./.github/actions/upload-release-provenance
-        with:
-          release_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
-          provenance_name: ${{needs.provenance.outputs.provenance-name}}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #    - name: Upload provenance
+  #      id: upload-provenance
+  #      uses: ./.github/actions/upload-release-provenance
+  #      with:
+  #        release_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+  #        provenance_name: ${{needs.provenance.outputs.provenance-name}}
+  #        github_token: ${{ secrets.GITHUB_TOKEN }}
 
   # Creates a PR with the latest version we've just released
   # since our trunk is protected against any direct pushes from automation
-  bump_version:
-    needs: [release, seal]
-    permissions:
-      contents: write  # create-pr action creates a temporary branch
-      pull-requests: write # create-pr action creates a PR using the temporary branch
-    runs-on: ubuntu-latest
-    steps:
+  # UNCOMMENT BUMP_VERSION JOB
+  #bump_version:
+  #  needs: [release, seal]
+  #  permissions:
+  #    contents: write  # create-pr action creates a temporary branch
+  #    pull-requests: write # create-pr action creates a PR using the temporary branch
+  #  runs-on: ubuntu-latest
+  #  steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
-        with:
-          ref: ${{ env.RELEASE_COMMIT }}
+  #    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+  #      with:
+  #        ref: ${{ env.RELEASE_COMMIT }}
 
-      - name: Restore sealed source code
-        uses: ./.github/actions/seal-restore
-        with:
-          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
-          artifact_name: ${{ needs.seal.outputs.artifact_name }}
+  #    - name: Restore sealed source code
+  #      uses: ./.github/actions/seal-restore
+  #      with:
+  #        integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+  #        artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
-      - name: Create PR
-        id: create-pr
-        uses: ./.github/actions/create-pr
-        with:
-          files: "pyproject.toml aws_lambda_powertools/shared/version.py"
-          temp_branch_prefix: "ci-bump"
-          pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #    - name: Create PR
+  #      id: create-pr
+  #      uses: ./.github/actions/create-pr
+  #      with:
+  #        files: "pyproject.toml aws_lambda_powertools/shared/version.py"
+  #        temp_branch_prefix: "ci-bump"
+  #        pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
+  #        github_token: ${{ secrets.GITHUB_TOKEN }}
 
   # This job compiles a Lambda Layer optimized for space and speed (e.g., Cython)
   # It then deploys to Layer's Beta and Prod account, including SAR Beta and Prod account.
@@ -332,7 +334,9 @@ jobs:
   # Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_3_layer -> reusable_deploy_v3_layer_stack
   publish_layer:
-    needs: [seal, release, create_tag]
+    # UNCOMMENT THE LINE
+    #needs: [seal, release, create_tag]
+    needs: [seal, release]
     secrets: inherit
     permissions:
       id-token: write
@@ -346,31 +350,30 @@ jobs:
       source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
       source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
 
-  post_release:
-    needs: [seal, release, publish_layer]
-    permissions:
-      contents: read
-      issues: write
-      discussions: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
-    steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
-        with:
-          ref: ${{ env.RELEASE_COMMIT }}
-
-      - name: Restore sealed source code
-        uses: ./.github/actions/seal-restore
-        with:
-          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
-          artifact_name: ${{ needs.seal.outputs.artifact_name }}
-
-      - name: Close issues related to this release
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const post_release = require('.github/scripts/post_release.js')
-            await post_release({github, context, core})
+  # UNCOMMENT POST_RELEASE JOB
+  #post_release:
+  #  needs: [seal, release, publish_layer]
+  #  permissions:
+  #    contents: read
+  #    issues: write
+  #    discussions: write
+  #    pull-requests: write
+  #  runs-on: ubuntu-latest
+  #  env:
+  #    RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
+  #  steps:
+  #    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+  #      with:
+  #        ref: ${{ env.RELEASE_COMMIT }}
+  #    - name: Restore sealed source code
+  #      uses: ./.github/actions/seal-restore
+  #      with:
+  #        integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+  #        artifact_name: ${{ needs.seal.outputs.artifact_name }}
+  #    - name: Close issues related to this release
+  #      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+  #      with:
+  #        github-token: ${{ secrets.GITHUB_TOKEN }}
+  #        script: |
+  #          const post_release = require('.github/scripts/post_release.js')
+  #          await post_release({github, context, core})

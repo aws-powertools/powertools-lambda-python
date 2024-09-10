@@ -1,3 +1,5 @@
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
@@ -5,6 +7,7 @@ from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import 
     AppSyncResolverEventInfo,
     get_identity_object,
 )
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from tests.functional.utils import load_event
 
 
@@ -17,9 +20,16 @@ def test_appsync_resolver_event():
     assert parsed_event.arguments.get("name") == raw_event["arguments"]["name"]
     assert parsed_event.identity.claims.get("token_use") == raw_event["identity"]["claims"]["token_use"]
     assert parsed_event.source.get("name") == raw_event["source"]["name"]
+
+    # NEW METHOD
     assert parsed_event.request_headers["X-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
-    assert parsed_event.request_headers["x-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
     assert parsed_event.request_headers.get("missing", "Foo") == "Foo"
+
+    # DEPRECATED METHOD - Remove in V4
+    with pytest.warns(PowertoolsDeprecationWarning):
+        assert parsed_event.get_header_value("X-amzn-trace-id") == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+        assert parsed_event.get_header_value("missing", default_value="Foo") == "Foo"
+
     assert parsed_event.prev_result == {}
     assert parsed_event.stash == {}
 

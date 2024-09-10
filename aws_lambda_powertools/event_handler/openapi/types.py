@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 import types
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Set, Type, TypedDict, Union
 
-from pydantic import BaseModel
-
 if TYPE_CHECKING:
+    from enum import Enum
+
+    from pydantic import BaseModel
     from typing_extensions import NotRequired
 
-CacheKey = Union[Callable[..., Any], None]
-IncEx = Union[Set[int], Set[str], Dict[int, Any], Dict[str, Any]]
-TypeModelOrEnum = Union[Type[BaseModel], Type[Enum]]
-ModelNameMap = Dict[TypeModelOrEnum, str]
+    CacheKey = Union[Callable[..., Any], None]
+    IncEx = Union[Set[int], Set[str], Dict[int, Any], Dict[str, Any]]
+    TypeModelOrEnum = Union[Type[BaseModel], Type[Enum]]
+    ModelNameMap = Dict[TypeModelOrEnum, str]
+
 UnionType = getattr(types, "UnionType", Union)
 
 

@@ -2,11 +2,22 @@ from __future__ import annotations
 
 import base64
 import json
+import warnings
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Iterator, Mapping
+from typing import TYPE_CHECKING, Any, Callable, Iterator, Mapping, overload
+
+from typing_extensions import deprecated
+
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+    get_multi_value_query_string_values,
+    get_query_string_value,
+)
 
 
 class CaseInsensitiveDict(dict):
@@ -207,6 +218,108 @@ class BaseProxyEvent(DictWrapper):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: str | None = None) -> str | None: ...
+
+    def get_query_string_value(self, name: str, default_value: str | None = None) -> str | None:
+        """Get query string value by name
+        Parameters
+        ----------
+        name: str
+            Query string parameter name
+        default_value: str, optional
+            Default value if no value was found by name
+        Returns
+        -------
+        str, optional
+            Query string parameter value
+        """
+        return get_query_string_value(
+            query_string_parameters=self.query_string_parameters,
+            name=name,
+            default_value=default_value,
+        )
+
+    def get_multi_value_query_string_values(
+        self,
+        name: str,
+        default_values: list[str] | None = None,
+    ) -> list[str]:
+        """Get multi-value query string parameter values by name
+        Parameters
+        ----------
+        name: str
+            Multi-Value query string parameter name
+        default_values: List[str], optional
+            Default values is no values are found by name
+        Returns
+        -------
+        List[str], optional
+            List of query string values
+        """
+        return get_multi_value_query_string_values(
+            multi_value_query_string_parameters=self.multi_value_query_string_parameters,
+            name=name,
+            default_values=default_values,
+        )
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: bool = False,
+    ) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None: ...
+
+    @deprecated(
+        "`get_header_value` function is deprecated; Access headers directly using event.headers.get('HeaderName')",
+        category=None,
+    )
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str | None = None,
+        case_sensitive: bool = False,
+    ) -> str | None:
+        """Get header value by name
+        Parameters
+        ----------
+        name: str
+            Header name
+        default_value: str, optional
+            Default value if no value was found by name
+        case_sensitive: bool
+            Whether to use a case-sensitive look up. By default we make a case-insensitive lookup.
+        Returns
+        -------
+        str, optional
+            Header value
+        """
+        warnings.warn(
+            "The `get_header_value` function is deprecated in V3 and the `case_sensitive` parameter "
+            "no longer has any effect. This function will be removed in the next major version. "
+            "Instead, access headers directly using event.headers.get('HeaderName'), which is case insensitive.",
+            category=PowertoolsDeprecationWarning,
+            stacklevel=2,
+        )
+        return get_header_value(
+            headers=self.headers,
+            name=name,
+            default_value=default_value,
+            case_sensitive=case_sensitive,
+        )
 
     def header_serializer(self) -> BaseHeadersSerializer:
         raise NotImplementedError()

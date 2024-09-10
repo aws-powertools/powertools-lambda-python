@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 import jsii
 from aws_cdk import (
@@ -12,9 +12,9 @@ from aws_cdk import (
     RemovalPolicy,
     Stack,
 )
-from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission
+from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission, Runtime
 from aws_cdk.aws_ssm import StringParameter
-from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayer
+from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayerPythonV3
 from constructs import Construct
 
 
@@ -38,12 +38,12 @@ class Layer(Construct):
         layer_version_name: str,
         powertools_version: str,
         python_version: str,
-        architecture: Optional[Architecture] = None,
+        architecture: Architecture | None = None,
         **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        layer = LambdaPowertoolsLayer(
+        layer = LambdaPowertoolsLayerPythonV3(
             self,
             "Layer",
             layer_version_name=layer_version_name,
@@ -82,6 +82,17 @@ class LayerStack(Stack):
         python_version_normalized = python_version.replace(".", "")
         layer_name_x86 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-x86"
         layer_name_arm64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-arm64"
+
+        if python_version == "python3.8":
+            python_version = Runtime.PYTHON_3_8
+        if python_version == "python3.9":
+            python_version = Runtime.PYTHON_3_9
+        if python_version == "python3.10":
+            python_version = Runtime.PYTHON_3_10
+        if python_version == "python3.11":
+            python_version = Runtime.PYTHON_3_11
+        if python_version == "python3.12":
+            python_version = Runtime.PYTHON_3_12
 
         has_arm64_support = CfnParameter(
             self,
