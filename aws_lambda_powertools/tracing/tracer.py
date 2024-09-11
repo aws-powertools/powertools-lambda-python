@@ -819,7 +819,7 @@ class Tracer:
         # Due to Lazy Import, we need to activate `core` attrib via import
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder
+        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
         provider = xray_recorder
         provider.patch = aws_xray_sdk.core.patch

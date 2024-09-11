@@ -345,7 +345,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
 
         openapi_extensions = None
-        security = None
 
         schema = super().get_openapi_schema(
             title=title,
