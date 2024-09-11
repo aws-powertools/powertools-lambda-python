@@ -193,3 +193,10 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
         """
         params = self.get("queryStringParameters") or {}
         return {k: ",".join(v) for k, v in params.items()}
+
+    @property
+    def resolved_headers_field(self) -> dict[str, str]:
+        if self.headers is not None:
+            return {key.lower(): value for key, value in self.headers.items()}
+
+        return {}

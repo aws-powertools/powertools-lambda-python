@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.logging.logger import Logger
 
 PACKAGE_LOGGER = "aws_lambda_powertools"
+LOGGER = logging.getLogger(__name__)
 
 
 def copy_config_to_registered_loggers(
@@ -59,7 +60,7 @@ def copy_config_to_registered_loggers(
         loggers = exclude
         filter_func = _exclude_registered_loggers_filter
 
-    registered_loggers = _find_registered_loggers(source_logger, loggers, filter_func)
+    registered_loggers = _find_registered_loggers(loggers=loggers, filter_func=filter_func)
     for logger in registered_loggers:
         _configure_logger(source_logger=source_logger, logger=logger, level=level, ignore_log_level=ignore_log_level)
 
@@ -75,13 +76,12 @@ def _exclude_registered_loggers_filter(loggers: set[str]) -> list[logging.Logger
 
 
 def _find_registered_loggers(
-    source_logger: Logger,
     loggers: set[str],
     filter_func: Callable[[set[str]], list[logging.Logger]],
 ) -> list[logging.Logger]:
     """Filter root loggers based on provided parameters."""
     root_loggers = filter_func(loggers)
-    source_logger.debug(f"Filtered root loggers: {root_loggers}")
+    LOGGER.debug(f"Filtered root loggers: {root_loggers}")
     return root_loggers
 
 
@@ -94,7 +94,7 @@ def _configure_logger(
     # customers may not want to copy the same log level from Logger to discovered loggers
     if not ignore_log_level:
         logger.setLevel(level)
-        source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
+        LOGGER.debug(f"Logger {logger} reconfigured to use logging level {level}")
 
     logger.handlers = []
     logger.propagate = False  # ensure we don't propagate logs to existing loggers, #1073
@@ -102,4 +102,4 @@ def _configure_logger(
 
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)
-        source_logger.debug(f"Logger {logger} reconfigured to use {source_handler}")
+        LOGGER.debug(f"Logger {logger} reconfigured to use {source_handler}")

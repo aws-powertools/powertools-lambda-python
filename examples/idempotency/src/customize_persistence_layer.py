@@ -1,11 +1,14 @@
+import os
+
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     idempotent,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
+table = os.getenv("IDEMPOTENCY_TABLE", "")
 persistence_layer = DynamoDBPersistenceLayer(
-    table_name="IdempotencyTable",
+    table_name=table,
     key_attr="idempotency_key",
     expiry_attr="expires_at",
     in_progress_expiry_attr="in_progress_expires_at",

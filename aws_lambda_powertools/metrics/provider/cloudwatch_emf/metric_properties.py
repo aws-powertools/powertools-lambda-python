@@ -30,6 +30,7 @@ class MetricUnit(Enum):
     GigabitsPerSecond = "Gigabits/Second"
     TerabitsPerSecond = "Terabits/Second"
     CountPerSecond = "Count/Second"
+    NoUnit = "None"
 
 
 class MetricResolution(Enum):

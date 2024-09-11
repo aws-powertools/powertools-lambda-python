@@ -19,6 +19,8 @@ from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
+from aws_lambda_powertools.event_handler.openapi.exceptions import SerializationError
+
 """
 This module contains the encoders used by jsonable_encoder to convert Python objects to JSON serializable data types.
 """
@@ -72,88 +74,98 @@ def jsonable_encoder(  # noqa: PLR0911
     if exclude is not None and not isinstance(exclude, (set, dict)):
         exclude = set(exclude)
 
-    # Pydantic models
-    if isinstance(obj, BaseModel):
-        return _dump_base_model(
+    try:
+        # Pydantic models
+        if isinstance(obj, BaseModel):
+            return _dump_base_model(
+                obj=obj,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+                exclude_defaults=exclude_defaults,
+            )
+
+        # Dataclasses
+        if dataclasses.is_dataclass(obj):
+            obj_dict = dataclasses.asdict(obj)  # type: ignore[call-overload]
+            return jsonable_encoder(
+                obj_dict,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
+            )
+
+        # Enums
+        if isinstance(obj, Enum):
+            return obj.value
+
+        # Paths
+        if isinstance(obj, PurePath):
+            return str(obj)
+
+        # Scalars
+        if isinstance(obj, (str, int, float, type(None))):
+            return obj
+
+        # Dictionaries
+        if isinstance(obj, dict):
+            return _dump_dict(
+                obj=obj,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
+            )
+
+        # Sequences
+        if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
+            return _dump_sequence(
+                obj=obj,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_none=exclude_none,
+                exclude_defaults=exclude_defaults,
+                exclude_unset=exclude_unset,
+                custom_serializer=custom_serializer,
+            )
+
+        # Other types
+        if type(obj) in ENCODERS_BY_TYPE:
+            return ENCODERS_BY_TYPE[type(obj)](obj)
+
+        for encoder, classes_tuple in encoders_by_class_tuples.items():
+            if isinstance(obj, classes_tuple):
+                return encoder(obj)
+
+        # Use custom serializer if present
+        if custom_serializer:
+            return custom_serializer(obj)
+
+        # Default
+        return _dump_other(
             obj=obj,
             include=include,
             exclude=exclude,
             by_alias=by_alias,
-            exclude_unset=exclude_unset,
             exclude_none=exclude_none,
-            exclude_defaults=exclude_defaults,
-        )
-
-    # Dataclasses
-    if dataclasses.is_dataclass(obj):
-        obj_dict = dataclasses.asdict(obj)
-        return jsonable_encoder(
-            obj_dict,
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
+            custom_serializer=custom_serializer,
         )
-
-    # Enums
-    if isinstance(obj, Enum):
-        return obj.value
-
-    # Paths
-    if isinstance(obj, PurePath):
-        return str(obj)
-
-    # Scalars
-    if isinstance(obj, (str, int, float, type(None))):
-        return obj
-
-    # Dictionaries
-    if isinstance(obj, dict):
-        return _dump_dict(
-            obj=obj,
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            exclude_none=exclude_none,
-            exclude_unset=exclude_unset,
-        )
-
-    # Sequences
-    if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
-        return _dump_sequence(
-            obj=obj,
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            exclude_none=exclude_none,
-            exclude_defaults=exclude_defaults,
-            exclude_unset=exclude_unset,
-        )
-
-    # Other types
-    if type(obj) in ENCODERS_BY_TYPE:
-        return ENCODERS_BY_TYPE[type(obj)](obj)
-
-    for encoder, classes_tuple in encoders_by_class_tuples.items():
-        if isinstance(obj, classes_tuple):
-            return encoder(obj)
-
-    # Use custom serializer if present
-    if custom_serializer:
-        return custom_serializer(obj)
-
-    # Default
-    return _dump_other(
-        obj=obj,
-        include=include,
-        exclude=exclude,
-        by_alias=by_alias,
-        exclude_none=exclude_none,
-        exclude_unset=exclude_unset,
-        exclude_defaults=exclude_defaults,
-    )
+    except ValueError as exc:
+        raise SerializationError(
+            f"Unable to serialize the object {obj} as it is not a supported type. Error details: {exc}",
+            "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#serializing-objects",
+        ) from exc
 
 
 def _dump_base_model(
@@ -197,9 +209,15 @@ def _dump_dict(
     by_alias: bool = True,
     exclude_unset: bool = False,
     exclude_none: bool = False,
+    custom_serializer: Callable[[Any], str] | None = None,
 ) -> dict[str, Any]:
     """
     Dump a dict to a dict, using the same parameters as jsonable_encoder
+
+    Parameters
+    ----------
+    custom_serializer : Callable, optional
+        A custom serializer to use for encoding the object, when everything else fails.
     """
     encoded_dict = {}
     allowed_keys = set(obj.keys())
@@ -218,12 +236,14 @@ def _dump_dict(
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_value = jsonable_encoder(
                 value,
                 by_alias=by_alias,
                 exclude_unset=exclude_unset,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             )
             encoded_dict[encoded_key] = encoded_value
     return encoded_dict
@@ -238,9 +258,10 @@ def _dump_sequence(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Callable[[Any], str] | None = None,
 ) -> list[Any]:
     """
-    Dump a sequence to a list, using the same parameters as jsonable_encoder
+    Dump a sequence to a list, using the same parameters as jsonable_encoder.
     """
     encoded_list = []
     for item in obj:
@@ -253,6 +274,7 @@ def _dump_sequence(
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=custom_serializer,
             ),
         )
     return encoded_list
@@ -267,6 +289,7 @@ def _dump_other(
     exclude_unset: bool = False,
     exclude_none: bool = False,
     exclude_defaults: bool = False,
+    custom_serializer: Callable[[Any], str] | None = None,
 ) -> Any:
     """
     Dump an object to a hashable object, using the same parameters as jsonable_encoder
@@ -288,6 +311,7 @@ def _dump_other(
         exclude_unset=exclude_unset,
         exclude_defaults=exclude_defaults,
         exclude_none=exclude_none,
+        custom_serializer=custom_serializer,
     )
 
 

@@ -6,7 +6,7 @@ import functools
 import inspect
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Callable, Sequence, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Sequence, TypeVar, cast, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -26,6 +26,8 @@ is_cold_start = True
 logger = logging.getLogger(__name__)
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
+
+T = TypeVar("T")
 
 
 class Tracer:
@@ -255,7 +257,7 @@ class Tracer:
 
     def capture_lambda_handler(
         self,
-        lambda_handler: Callable[[dict, Any], Any] | Callable[[dict, Any, dict | None], Any] | None = None,
+        lambda_handler: Callable[[T, Any], Any] | Callable[[T, Any, Any], Any] | None = None,
         capture_response: bool | None = None,
         capture_error: bool | None = None,
     ):
@@ -817,7 +819,7 @@ class Tracer:
         # Due to Lazy Import, we need to activate `core` attrib via import
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder  # type: ignore
+        from aws_xray_sdk.core import xray_recorder
 
         provider = xray_recorder
         provider.patch = aws_xray_sdk.core.patch

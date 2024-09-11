@@ -1,0 +1,12 @@
+query MyQuery {
+  getPost(post_id: "2") {
+    relatedPosts {
+      post_id
+      author
+      relatedPosts {
+        post_id
+        author
+      }
+    }
+  }
+}

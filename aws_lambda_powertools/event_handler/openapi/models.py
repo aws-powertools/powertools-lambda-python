@@ -2,10 +2,11 @@
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Set, Union
 
-from pydantic import AnyUrl, BaseModel, ConfigDict, Field
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, model_validator
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
+from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
 
 MODEL_CONFIG_ALLOW = ConfigDict(extra="allow")
 MODEL_CONFIG_IGNORE = ConfigDict(extra="ignore")
@@ -14,6 +15,38 @@ MODEL_CONFIG_IGNORE = ConfigDict(extra="ignore")
 The code defines Pydantic models for the various OpenAPI objects like OpenAPI, PathItem, Operation, Parameter etc.
 These models can be used to parse OpenAPI JSON/YAML files into Python objects, or generate OpenAPI from Python data.
 """
+
+
+class OpenAPIExtensions(BaseModel):
+    """
+    This class serves as a Pydantic proxy model to add OpenAPI extensions.
+
+    OpenAPI extensions are arbitrary fields, so we remove openapi_extensions when dumping
+    and add only the provided value in the schema.
+    """
+
+    openapi_extensions: Optional[Dict[str, Any]] = None
+
+    # If the 'openapi_extensions' field is present in the 'values' dictionary,
+    # And if the extension starts with x- (must respect the RFC)
+    # update the 'values' dictionary with the contents of 'openapi_extensions',
+    # and then remove the 'openapi_extensions' field from the 'values' dictionary
+    model_config = {"extra": "allow"}
+
+    @model_validator(mode="before")
+    def serialize_openapi_extension_v2(self):
+        if isinstance(self, dict) and self.get("openapi_extensions"):
+
+            openapi_extension_value = self.get("openapi_extensions")
+
+            for extension_key in openapi_extension_value:
+                if not str(extension_key).startswith("x-"):
+                    raise SchemaValidationError("An OpenAPI extension key must start with x-")
+
+            self.update(openapi_extension_value)
+            self.pop("openapi_extensions", None)
+
+        return self
 
 
 # https://swagger.io/specification/#contact-object
@@ -57,7 +90,7 @@ class ServerVariable(BaseModel):
 
 
 # https://swagger.io/specification/#server-object
-class Server(BaseModel):
+class Server(OpenAPIExtensions):
     url: Union[AnyUrl, str]
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
@@ -287,7 +320,7 @@ class Tag(BaseModel):
 
 
 # https://swagger.io/specification/#operation-object
-class Operation(BaseModel):
+class Operation(OpenAPIExtensions):
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -332,7 +365,7 @@ class SecuritySchemeType(Enum):
     openIdConnect = "openIdConnect"
 
 
-class SecurityBase(BaseModel):
+class SecurityBase(OpenAPIExtensions):
     type_: SecuritySchemeType = Field(alias="type")
     description: Optional[str] = None
 
@@ -428,7 +461,7 @@ class Components(BaseModel):
 
 
 # https://swagger.io/specification/#openapi-object
-class OpenAPI(BaseModel):
+class OpenAPI(OpenAPIExtensions):
     openapi: str
     info: Info
     jsonSchemaDialect: Optional[str] = None

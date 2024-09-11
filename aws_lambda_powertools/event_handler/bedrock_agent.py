@@ -110,6 +110,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+
+        openapi_extensions = None
         security = None
 
         return super().get(
@@ -125,6 +127,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -145,6 +148,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().post(
@@ -160,6 +164,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -180,6 +185,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().put(
@@ -195,6 +201,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -215,6 +222,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: list[Callable] | None = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().patch(
@@ -230,6 +238,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -250,6 +259,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
+        openapi_extensions = None
         security = None
 
         return super().delete(
@@ -265,6 +275,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             operation_id,
             include_in_schema,
             security,
+            openapi_extensions,
             middlewares,
         )
 
@@ -278,7 +289,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         return parameters
 
     @override
-    def get_openapi_json_schema(
+    def get_openapi_json_schema(  # type: ignore[override]
         self,
         *,
         title: str = "Powertools API",
@@ -333,6 +344,9 @@ class BedrockAgentResolver(ApiGatewayResolver):
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
 
+        openapi_extensions = None
+        security = None
+
         schema = super().get_openapi_schema(
             title=title,
             version=version,
@@ -346,6 +360,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             license_info=license_info,
             security_schemes=security_schemes,
             security=security,
+            openapi_extensions=openapi_extensions,
         )
         schema.openapi = "3.0.3"
 

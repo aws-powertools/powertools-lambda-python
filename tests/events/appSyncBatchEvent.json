@@ -1,0 +1,46 @@
+[
+  {
+    "arguments": {
+      "user_id": "1"
+    },
+    "identity": {
+      "sub": "192879fc-a240-4bf1-ab5a-d6a00f3063f9",
+      "username": "jdoe"
+    },
+    "prev": null,
+    "info": {
+      "selectionSetList": [
+        "id",
+        "field1",
+        "field2"
+      ],
+      "selectionSetGraphQL": "{\n  id\n  field1\n  field2\n}",
+      "parentTypeName": "Mutation",
+      "fieldName": "createSomething",
+      "variables": {}
+    },
+    "stash": {}
+  },
+  {
+    "arguments": {
+      "user_id": "2"
+    },
+    "identity": {
+      "sub": "192879fc-a240-4bf1-ab5a-d6a00f3063f9",
+      "username": "jdoe"
+    },
+    "prev": null,
+    "info": {
+      "selectionSetList": [
+        "id",
+        "field1",
+        "field2"
+      ],
+      "selectionSetGraphQL": "{\n  id\n  field1\n  field2\n}",
+      "parentTypeName": "Mutation",
+      "fieldName": "createSomething",
+      "variables": {}
+    },
+    "stash": {}
+  }
+]

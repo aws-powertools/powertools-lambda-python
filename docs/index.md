@@ -63,14 +63,23 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Lambda Layer"
 
-    You can add our layer both in the [AWS Lambda Console _(under `Layers`)_](https://eu-west-1.console.aws.amazon.com/lambda/home#/add/layer){target="_blank"}, or via your favorite infrastructure as code framework with the ARN value.
+    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `312` for `Python 3.12`.
 
-    * <u>x86 architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}:1__{: .copyMe}:clipboard:
-    * <u>ARM architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-Arm64:1__{: .copyMe}:clipboard:
+    * <u>x86 architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-x86:1__{: .copyMe}:clipboard:
+    * <u>ARM architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-arm64:1__{: .copyMe}:clipboard:
 
-    ???+ note "Code snippets for popular infrastructure as code frameworks"
+        You can add our layer using the [AWS Lambda Console _(direct link)_](https://console.aws.amazon.com/lambda/home#/add/layer){target="_blank"}:
+
+        * Under Layers, choose `AWS layers` or `Specify an ARN`
+        * Click to copy the [correct ARN](#lambda-layer) value based on your AWS Lambda function architecture and region
+
+    === "Infrastructure as Code (IaC)"
+
+        > Are we missing a framework? please create [a documentation request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE){target="_blank" rel="nofollow"}.
+
+        Thanks to the community, we've covered most popular frameworks on how to add a Lambda Layer to an existing function.
 
         === "x86_64"
 
@@ -147,6 +156,73 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 ```zsh hl_lines="9"
                 --8<-- "examples/homepage/install/arm64/amplify.txt"
                 ```
+
+    === "Inspect Lambda Layer contents"
+
+        You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
+
+        ```bash title="AWS CLI command to download Lambda Layer content"
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:1 --region eu-west-1
+        ```
+
+        You'll find the pre-signed URL under `Location` key as part of the CLI command output.
+
+=== "Serverless Application Repository (SAR)"
+
+    We provide a SAR App that deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
+
+    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version.
+
+    | App                                                                                                                                                                                 |     |     | ARN                                                                                                                           |
+    | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer__{: .copyMe}:clipboard:       |
+    | [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64__{: .copyMe}:clipboard: |
+
+    ??? question "Don't have enough permissions? Expand for a least-privilege IAM policy example"
+
+        Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank" rel="nofollow"} for providing the scoped down IAM permissions.
+
+        ```yaml hl_lines="21-52" title="Least-privileged IAM permissions SAM example"
+        --8<-- "examples/homepage/install/sar/scoped_down_iam.yaml"
+        ```
+
+    If you're using Infrastructure as Code, here are some excerpts on how to use SAR:
+
+    === "SAM"
+
+        ```yaml hl_lines="6 9 10 17-19"
+        --8<-- "examples/homepage/install/sar/sam.yaml"
+        ```
+
+    === "Serverless framework"
+
+        ```yaml hl_lines="11 12 19 20"
+        --8<-- "examples/homepage/install/sar/serverless.yml"
+        ```
+
+    === "CDK"
+
+        ```python hl_lines="7 16-20 23-27"
+        --8<-- "examples/homepage/install/sar/cdk_sar.py"
+        ```
+
+    === "Terraform"
+
+        > Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank" rel="nofollow"} for providing the Terraform equivalent.
+
+        ```terraform hl_lines="12-13 15-20 23-25 40"
+        --8<-- "examples/homepage/install/sar/terraform.tf"
+        ```
+
+=== "Alpha releases"
+
+    Every morning during business days _(~8am UTC)_, we publish a `prerelease` to PyPi to accelerate customer feedback on **unstable** releases / bugfixes until they become production ready.
+
+    Here's how you can use them:
+
+    - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+    - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}:clipboard:
+    - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
 
 ### Local development
 
@@ -312,7 +388,7 @@ There are many ways you can help us gain future investments to improve everyone'
 
     Add your company name and logo on our [landing page](https://powertools.aws.dev).
 
-    [:octicons-arrow-right-24: GitHub Issue template]((https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"})
+    [:octicons-arrow-right-24: GitHub Issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}
 
 - :mega:{ .lg .middle } __Share your work__
 
@@ -338,7 +414,25 @@ Knowing which companies are using this library is important to help prioritize t
 
 <div class="grid" style="text-align:center;" markdown>
 
+[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Banxware**](https://www.banxware.com){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Brsk**](https://www.brsk.co.uk/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**BusPatrol**](https://buspatrol.com/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**Capital One**](https://www.capitalone.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Caylent**](https://caylent.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**CHS Inc.**](https://www.chsinc.com/){target="_blank" rel="nofollow"}
 { .card }
 
 [**CPQi (Exadel Financial Services)**](https://cpqi.com/){target="_blank" rel="nofollow"}
@@ -359,7 +453,16 @@ Knowing which companies are using this library is important to help prioritize t
 [**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
 { .card }
 
+[**LocalStack**](https://www.localstack.cloud/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**Propellor.ai**](https://www.propellor.ai/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Pushpay**](https://pushpay.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Recast**](https://getrecast.com/){target="_blank" rel="nofollow"}
 { .card }
 
 [**TopSport**](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
@@ -374,16 +477,17 @@ Knowing which companies are using this library is important to help prioritize t
 [**Vertex Pharmaceuticals**](https://www.vrtx.com/){target="_blank" rel="nofollow"}
 { .card }
 
-[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow}
-{ .card }
-
 </div>
 
 ### Using Lambda Layers
 
 !!! note "Layers help us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way."
 
+<!-- markdownlint-disable MD051 -->
+
 When [using Layers](#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86 and ARM architecture.
+
+<!-- markdownlint-enable MD051 -->
 
 ## Tenets
 
