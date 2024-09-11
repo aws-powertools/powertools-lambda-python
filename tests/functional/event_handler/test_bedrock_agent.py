@@ -1,6 +1,7 @@
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+import pytest
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
@@ -181,3 +182,21 @@ def test_bedrock_agent_with_post():
     # THEN return the correct result
     body = result["response"]["responseBody"]["application/json"]["body"]
     assert json.loads(body) is True
+
+
+@pytest.mark.usefixtures("pydanticv2_only")
+def test_openapi_schema_for_pydanticv2(openapi30_schema):
+    # GIVEN BedrockAgentResolver is initialized with enable_validation=True
+    app = BedrockAgentResolver(enable_validation=True)
+
+    # WHEN we have a simple handler
+    @app.get("/", description="Testing")
+    def handler() -> Optional[Dict]:
+        pass
+
+    # WHEN we get the schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the schema must be a valid 3.0.3 version
+    assert openapi30_schema(schema)
+    assert schema.get("openapi") == "3.0.3"
