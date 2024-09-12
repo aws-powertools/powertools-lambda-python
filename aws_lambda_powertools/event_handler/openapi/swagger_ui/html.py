@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 
 def generate_swagger_html(
     spec: str,
-    path: str,
     swagger_js: str,
     swagger_css: str,
     swagger_base_url: str,
@@ -22,8 +21,6 @@ def generate_swagger_html(
     ----------
     spec: str
         The OpenAPI spec
-    path: str
-        The path to the Swagger documentation
     swagger_js: str
        Swagger UI JavaScript source code or URL
     swagger_css: str
@@ -97,7 +94,7 @@ def generate_swagger_html(
   }}
 
   var ui = SwaggerUIBundle(swaggerUIOptions)
-  ui.specActions.updateUrl('{path}?format=json');
+  ui.specActions.updateUrl(currentUrl.pathname + "?format=json");
   {oauth2_content}
 </script>
 </html>

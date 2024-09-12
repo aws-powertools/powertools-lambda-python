@@ -1,0 +1,22 @@
+schema {
+    query: Query
+}
+
+type Query {
+    getPost(post_id:ID!): Post
+    allPosts: [Post]
+}
+
+type Post {
+    post_id: ID!
+    author: String!
+    title: String
+    content: String
+    url: String
+    ups: Int
+    downs: Int
+    relatedPosts: [Post]
+    relatedPostsAsync: [Post]
+    relatedPostsAggregate: [Post]
+    relatedPostsAsyncAggregate: [Post]
+}

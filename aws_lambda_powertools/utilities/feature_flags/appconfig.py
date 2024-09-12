@@ -4,6 +4,8 @@ import logging
 import traceback
 from typing import TYPE_CHECKING, Any, cast
 
+from botocore.config import Config
+
 from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError, StoreClientError
@@ -14,7 +16,9 @@ from aws_lambda_powertools.utilities.parameters import (
 )
 
 if TYPE_CHECKING:
+    import boto3
     from botocore.config import Config
+    from mypy_boto3_appconfigdata import AppConfigDataClient
 
     from aws_lambda_powertools.logging import Logger
 
@@ -30,6 +34,9 @@ class AppConfigStore(StoreProvider):
         envelope: str | None = "",
         jmespath_options: dict | None = None,
         logger: logging.Logger | Logger | None = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
+        boto3_client: AppConfigDataClient | None = None,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -51,6 +58,12 @@ class AppConfigStore(StoreProvider):
             Alternative JMESPath options to be included when filtering expr
         logger: A logging object
             Used to log messages. If None is supplied, one will be created.
+        boto_config: botocore.config.Config, optional
+            Botocore configuration to pass during client initialization
+        boto3_session : boto3.Session, optional
+            Boto3 session to use for AWS API communication
+        boto3_client : AppConfigDataClient, optional
+            Boto3 AppConfigDataClient Client to use, boto3_session and boto_config will be ignored if both are provided
         """
         super().__init__()
         self.logger = logger or logging.getLogger(__name__)
@@ -58,10 +71,16 @@ class AppConfigStore(StoreProvider):
         self.application = application
         self.name = name
         self.cache_seconds = max_age
-        self.config = sdk_config
+        self.config = sdk_config or boto_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
-        self._conf_store = AppConfigProvider(environment=environment, application=application, boto_config=sdk_config)
+        self._conf_store = AppConfigProvider(
+            environment=environment,
+            application=application,
+            config=sdk_config or boto_config,
+            boto3_client=boto3_client,
+            boto3_session=boto3_session,
+        )
 
     @property
     def get_raw_configuration(self) -> dict[str, Any]:

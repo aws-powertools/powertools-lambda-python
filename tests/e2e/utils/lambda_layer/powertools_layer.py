@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 from aws_cdk.aws_lambda import Architecture
-from checksumdir import dirhash
+from dirhash import dirhash
 
 from aws_lambda_powertools import PACKAGE_PATH
 from tests.e2e.utils.constants import CDK_OUT_PATH, SOURCE_CODE_ROOT_PATH
@@ -56,7 +56,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
             Whether source code hash has changed
         """
         diff = self.source_diff_file.read_text() if self.source_diff_file.exists() else ""
-        new_diff = dirhash(dirname=PACKAGE_PATH, excluded_extensions=self.IGNORE_EXTENSIONS)
+        new_diff = dirhash(directory=PACKAGE_PATH, algorithm="md5", ignore=self.IGNORE_EXTENSIONS)
         if new_diff != diff or not self.output_dir.exists():
             self.source_diff_file.write_text(new_diff)
             return True

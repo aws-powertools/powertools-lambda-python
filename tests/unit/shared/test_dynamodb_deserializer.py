@@ -27,8 +27,8 @@ def test_deserializer():
         {
             "Id": {"S": "Id-123"},
             "Name": {"S": "John Doe"},
-            "ZipCode": {"N": 12345},
-            "Things": {"L": [{"N": 0}, {"N": 1}, {"N": 2}, {"N": 3}]},
+            "ZipCode": {"N": "12345"},
+            "Things": {"L": [{"N": "0"}, {"N": "1"}, {"N": "2"}, {"N": "3"}]},
             "MoreThings": {"M": {"a": {"S": "foo"}, "b": {"S": "bar"}}},
         },
     )

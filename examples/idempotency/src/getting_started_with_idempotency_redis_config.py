@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 
@@ -9,7 +10,8 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379)
+redis_endpoint = os.getenv("REDIS_CLUSTER_ENDPOINT", "localhost")
+persistence_layer = RedisCachePersistenceLayer(host=redis_endpoint, port=6379)
 
 
 @dataclass
@@ -19,8 +21,7 @@ class Payment:
     payment_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @idempotent(persistence_store=persistence_layer)

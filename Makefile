@@ -13,7 +13,6 @@ dev:
 
 dev-gitpod:
 	pip install --upgrade pip poetry
-	@$(MAKE) dev-version-plugin
 	poetry install --extras "all redis datamasking"
 	pre-commit install
 
@@ -32,6 +31,9 @@ lint-docs-fix:
 test:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
+
+test-dependencies:
+	poetry run nox --error-on-external-run --reuse-venv=yes --non-interactive
 
 test-pydanticv2:
 	poetry run pytest -m "not perf" --ignore tests/e2e
@@ -84,7 +86,7 @@ complexity-baseline:
 	$(info Maintenability index)
 	poetry run radon mi aws_lambda_powertools
 	$(info Cyclomatic complexity index)
-	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py
+	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py,aws_lambda_powertools/utilities/validation/base.py
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump

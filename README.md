@@ -53,14 +53,23 @@ Knowing which companies are using this library is important to help prioritize t
 
 The following companies, among others, use Powertools:
 
+* [Alma Media](https://www.almamedia.fi/en/)
+* [Banxware](https://www.banxware.com/)
+* [Brsk](https://www.brsk.co.uk/)
+* [BusPatrol](https://buspatrol.com/)
 * [Capital One](https://www.capitalone.com/)
+* [Caylent](https://caylent.com/)
+* [CHS Inc.](https://www.chsinc.com/)
 * [CPQi (Exadel Financial Services)](https://cpqi.com/)
 * [CloudZero](https://www.cloudzero.com/)
 * [CyberArk](https://www.cyberark.com/)
 * [globaldatanet](https://globaldatanet.com/)
 * [IMS](https://ims.tech/)
 * [Jit Security](https://www.jit.io/)
+* [LocalStack](https://www.localstack.cloud/)
 * [Propellor.ai](https://www.propellor.ai/)
+* [Pushpay](https://pushpay.com/)
+* [Recast](https://getrecast.com/)
 * [TopSport](https://www.topsport.com.au/)
 * [Transformity](https://transformity.tech/)
 * [Trek10](https://www.trek10.com/)

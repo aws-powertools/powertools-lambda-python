@@ -5,26 +5,26 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which are safe to retry.
+The idempotency utility allows you to retry operations within a time window with the same input, producing the same output.
 
 ## Key features
 
-* Prevent Lambda handler from executing more than once on the same event payload during a time window
-* Ensure Lambda handler returns the same result when called with the same payload
-* Select a subset of the event as the idempotency key using JMESPath expressions
-* Set a time window in which records with the same payload should be considered duplicates
-* Expires in-progress executions if the Lambda function times out halfway through
-* Support Amazon DynamoDB and Redis as persistence layers
+* Produces the previous successful result when a function is called repeatedly with the same idempotency key
+* Choose your idempotency key from one or more fields, or entire payload
+* Safeguard concurrent requests, timeouts, missing idempotency keys, and payload tampering
+* Support for Amazon DynamoDB, Redis, bring your own persistence layer, and in-memory caching
 
 ## Terminology
 
 The property of idempotency means that an operation does not cause additional side effects if it is called more than once with the same input parameters.
 
-**Idempotent operations will return the same result when they are called multiple times with the same parameters**. This makes idempotent operations safe to retry.
+**Idempotency key** is a combination of **(a)** Lambda function name, **(b)** fully qualified name of your function, and **(c)** a hash of the entire payload or part(s) of the payload you specify.
 
-**Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
+**Idempotent request** is an operation with the same input previously processed that is not expired in your persistent storage or in-memory cache.
 
-**Idempotency record** is the data representation of an idempotent request saved in your preferred  storage layer. We use it to coordinate whether a request is idempotent, whether it's still valid or expired based on timestamps, etc.
+**Persistence layer** is a storage we use to create, read, expire, and delete idempotency records.
+
+**Idempotency record** is the data representation of an idempotent request saved in the persistent layer and in its various status. We use it to coordinate  whether **(a)** a request is idempotent, **(b)** it's not expired, **(c)** JSON response to return, and more.
 
 <center>
 ```mermaid
@@ -35,7 +35,7 @@ classDiagram
         status Status
         expiry_timestamp int
         in_progress_expiry_timestamp int
-        response_data Json~str~
+        response_data str~JSON~
         payload_hash str
     }
     class Status {
@@ -52,33 +52,64 @@ classDiagram
 
 ## Getting started
 
-???+ note
-    This section uses DynamoDB as the default idempotent persistence storage layer. If you are interested in using Redis as the persistence storage layer, check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
+We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-database).
 
 ### IAM Permissions
 
-Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
+When using Amazon DynamoDB as the persistence layer, you will need the following IAM permissions:
 
-???+ note
-    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), [AWS Cloud Development Kit (CDK)](#required-resources), or [Terraform](#required-resources) it already adds the required permissions.
+| IAM Permission                       | Operation                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| **`dynamodb:GetItem`**{: .copyMe}    | Retrieve idempotent record _(strong consistency)_                        |
+| **`dynamodb:PutItem`**{: .copyMe}    | New idempotent records, replace expired idempotent records               |
+| **`dynamodb:UpdateItem`**{: .copyMe} | Complete idempotency transaction, and/or update idempotent records state |
+| **`dynamodb:DeleteItem`**{: .copyMe} | Delete idempotent records for unsuccessful idempotency transactions      |
+
+**First time setting it up?**
+
+We provide Infrastrucure as Code examples with [AWS Serverless Application Model (SAM)](#aws-serverless-application-model-sam-example), [AWS Cloud Development Kit (CDK)](#aws-cloud-development-kit-cdk), and [Terraform](#terraform) with the required permissions.
 
 ### Required resources
 
-Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
+To start, you'll need:
 
-We currently support Amazon DynamoDB and Redis as a storage layer. The following example demonstrates how to create a table in DynamoDB. If you prefer to use Redis, refer go to the section [RedisPersistenceLayer](#redispersistencelayer) section.
+<!-- markdownlint-disable MD030 -->
 
-**Default table configuration**
+<div class="grid cards" markdown>
+*   :octicons-database-16:{ .lg .middle } __Persistent storage__
 
-If you're not [changing the default configuration for the DynamoDB persistence layer](#dynamodbpersistencelayer), this is the expected default configuration:
+    ---
 
-| Configuration      | Value        | Notes                                                                               |
-| ------------------ | ------------ |-------------------------------------------------------------------------------------|
-| Partition key      | `id`         |                                                                                     |
-| TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
+    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-database)
 
-???+ tip "Tip: You can share a single state table for all functions"
-    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} in addition to the idempotency key as a hash key.
+*   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
+
+    ---
+
+    With permissions to use your persistent storage
+
+</div>
+
+<!-- markdownlint-enable MD030 -->
+
+!!! note "Primary key for any persistence storage"
+    We combine the Lambda function name and the [fully qualified name](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} for classes/functions to
+    prevent accidental reuse for similar code sharing input/output.
+
+    Primary key sample: `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}`
+
+#### DynamoDB table
+
+Unless you're looking to use an [existing table or customize each attribute](#dynamodbpersistencelayer), you only need the following:
+
+| Configuration      | Value        | Notes                                                        |
+| ------------------ | ------------ | ------------------------------------------------------------ |
+| Partition key      | `id`         |                                                              |
+| TTL attribute name | `expiration` | Using AWS Console? This is configurable after table creation |
+
+You **can** use a single DynamoDB table for all functions annotated with Idempotency.
+
+##### DynamoDB IaC examples
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -96,67 +127,82 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```terraform hl_lines="14-26 64-70"
     --8<-- "examples/idempotency/templates/terraform.tf"
     ```
+`
 
-???+ warning "Warning: Large responses with DynamoDB persistence layer"
-    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
+##### Limitations
 
-    Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-database) as an alternative.
 
-<!-- markdownlint-disable MD013 -->
-???+ info "Info: DynamoDB"
+* **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
-    During the first invocation with a payload, the Lambda function executes both a `PutItem` and an `UpdateItem` operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.
+* **Old boto3 versions can increase costs**. For cost optimization, we use a conditional `PutItem` to always lock a new idempotency record. If locking fails, it means we already have an idempotency record saving us an additional `GetItem` call. However, this is only supported in boto3 `1.26.194` and higher _([June 30th 2023](https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-dynamodb-cost-failed-conditional-writes/){target="_blank"})_.
 
-    On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
+#### Redis database
 
-    **Note:** While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than `1.26.194`, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate the cost.
+We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
+
+In both services, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
+
+##### Redis IaC examples
+
+=== "AWS CloudFormation example"
+
+    !!! tip inline end "Prefer AWS Console/CLI?"
+
+        Follow the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)
+
+    ```yaml hl_lines="5 21"
+    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
+    ```
+
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
+    2. Replace the Security Group ID and Subnet ID to match your VPC settings.
+
+Once setup, you can find a quick start and advanced examples for Redis in [the persistent layers section](#redispersistencelayer).
 
 <!-- markdownlint-enable MD013 -->
+
 ### Idempotent decorator
 
-You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
+For simple use cases, you can use the `idempotent` decorator on your Lambda handler function.
 
-???+ note
-    In this example, the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, or you're only interested in making a specific logic idempotent, use [`idempotent_function`](#idempotent_function-decorator) instead.
-
-!!! tip "See [Choosing a payload subset for idempotency](#choosing-a-payload-subset-for-idempotency) for more elaborate use cases."
+It will treat the entire event as an idempotency key. That is, the same event will return the previously stored result within a [configurable time window](#adjusting-expiration-window) _(1 hour, by default)_.
 
 === "Idempotent decorator"
 
-    ```python hl_lines="4-7 10 24"
+    !!! tip "You can also choose [one or more fields](#choosing-a-payload-subset) as an idempotency key."
+
+    ```python title="getting_started_with_idempotency.py" hl_lines="5-8 12 25"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency.py"
     ```
 
 === "Sample event"
 
-    ```json
+    ```json title="getting_started_with_idempotency_payload.json"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
     ```
 
-After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
-
-!!! question "New to idempotency concept? Please review our [Terminology](#terminology) section if you haven't yet."
-
 ### Idempotent_function decorator
 
-Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
+For full flexibility, you can use the `idempotent_function` decorator for any synchronous Python function.
 
-When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
+When using this decorator, you **must** call your decorated function using keyword arguments.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
-
-???+ warning "Limitation"
-    Make sure to call your decorated function using keyword arguments.
+You can use `data_keyword_argument` to tell us the argument to extract an idempotency key.  We support JSON serializable data, [Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, Pydantic Models, and [Event Source Data Classes](./data_classes.md){target="_blank"}
 
 === "Using Dataclasses"
 
-    ```python hl_lines="3-7 11 26 37"
+    ```python title="working_with_idempotent_function_dataclass.py" hl_lines="4-8 12 28 41"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass.py"
     ```
 
+    1. Notice how **`data_keyword_argument`** matches the name of the parameter.
+    <br><br> This allows us to extract one or all fields as idempotency key.
+    2. Different from `idempotent` decorator, we must explicitly register the Lambda context to [protect against timeouts](#lambda-timeouts).
+
 === "Using Pydantic"
 
-    ```python hl_lines="1-5 10 23 34"
+    ```python title="working_with_idempotent_function_pydantic.py" hl_lines="3-7 12 26 37"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
@@ -166,15 +212,15 @@ By default, `idempotent_function` serializes, stores, and returns your annotated
 
 The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
 
-!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in your persistent storage as a JSON string."
 
 === "Pydantic"
 
-    You can use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+    Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
-        ```python hl_lines="6 24 25 32 36 45"
+        ```python hl_lines="8 27 35 38 48"
         --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
         ```
 
@@ -184,17 +230,17 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
         Alternatively, you can provide an explicit model as an input to `PydanticSerializer`.
 
-        ```python hl_lines="6 24 25 32 35 44"
+        ```python hl_lines="8 27 35 35 47"
         --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
         ```
 
 === "Dataclasses"
 
-     You can use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+     Use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
-        ```python hl_lines="8 27-29 36 40 49"
+        ```python hl_lines="9 30 38 41 51"
         --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
         ```
 
@@ -204,18 +250,18 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
         Alternatively, you can provide an explicit model as an input to `DataclassSerializer`.
 
-        ```python hl_lines="8 27-29 36 39 48"
+        ```python hl_lines="8 30 38 40 50"
         --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
         ```
 
 === "Any type"
 
-    You can use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
+    Use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
 
     * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
     * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
 
-    ```python hl_lines="8 32 36 40 50 53"
+    ```python hl_lines="9 34 38 42 52 54 64"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 
@@ -223,42 +269,42 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     2. This function does the following <br><br>**1**. Receives the dictionary saved into the persistent storage <br>**1** Serializes to `OrderOutput` before `@idempotent` returns back to the caller.
     3. This serializer receives both functions so it knows who to call when to serialize to and from dictionary.
 
-#### Batch integration
+### Using in-memory cache
 
-You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
+!!! note "In-memory cache is local to each Lambda execution environment."
 
-???+ "Choosing an unique batch record attribute"
-    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
+You can enable caching with the `use_local_cache` parameter in `IdempotencyConfig`. When enabled, you can adjust cache capacity _(256)_ with `local_cache_max_items`.
 
-    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
+By default, caching is disabled since we don't know how big your response could be in relation to your configured memory size.
 
-=== "Integration with Batch Processor"
+=== "Enabling cache"
 
-    ```python hl_lines="2 12 16 20 31 35 37"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
+    ```python hl_lines="15"
+    --8<-- "examples/idempotency/src/working_with_local_cache.py"
     ```
+
+    1. You can adjust cache capacity with [`local_cache_max_items`](#customizing-the-default-behavior) parameter.
 
 === "Sample event"
 
-    ```json hl_lines="4"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
+    ```json
+    --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
     ```
 
-### Choosing a payload subset for idempotency
+### Choosing a payload subset
 
 ???+ tip "Tip: Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
 
-Use [`IdempotencyConfig`](#customizing-the-default-behavior) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
+Use **`event_key_jmespath`** parameter in [`IdempotencyConfig`](#customizing-the-default-behavior) to select one or more payload parts as your idempotency key.
 
-> **Payment scenario**
+> **Example scenario**
 
 In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure that we don't accidentally charge our customer by subscribing them more than once.
 
-Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
+Imagine the function runs successfully, but the client never receives the response due to a connection issue. It is safe to immediately retry in this instance, as the idempotent decorator will return a previously saved response.
 
-**What we want here** is to instruct Idempotency to use `user_id` and `product_id` fields from our incoming payload as our idempotency key.
-If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
+We want to use `user_id` and `product_id` fields as our idempotency key. **If we were** to treat the entire request as our idempotency key, a simple HTTP header change would cause our function to run again.
 
 ???+ tip "Deserializing JSON strings in payloads for increased accuracy."
     The payload extracted by the `event_key_jmespath` is treated as a string by default.
@@ -268,7 +314,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 
 === "Payment function"
 
-    ```python hl_lines="5-9 16 30"
+    ```python hl_lines="6-10 18 31"
     --8<-- "examples/idempotency/src/working_with_payload_subset.py"
     ```
 
@@ -278,68 +324,64 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
     --8<-- "examples/idempotency/src/working_with_payload_subset_payload.json"
     ```
 
+### Adjusting expiration window
+
+!!! note "By default, we expire idempotency records after **an hour** (3600 seconds). After that, a transaction with the same payload [will not be considered idempotent](#expired-idempotency-records)."
+
+You can change this expiration window with the **`expires_after_seconds`** parameter. There is no limit on how long this expiration window can be set to.
+
+=== "Adjusting expiration window"
+
+    ```python hl_lines="14"
+    --8<-- "examples/idempotency/src/working_with_record_expiration.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_record_expiration_payload.json"
+    ```
+
+???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
+    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
+
+    We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
+
+    Instead, Idempotency records saved in the storage layer contain timestamps that can be verified upon retrieval and double checked within Idempotency feature.
+
+    **Why?**
+
+    A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
+
 ### Lambda timeouts
 
-???+ note
-    This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
+!!! note "You can skip this section if you are using the [`@idempotent` decorator](#idempotent-decorator)"
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
-Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
+By default, we protect against [concurrent executions](#handling-concurrent-executions-with-the-same-payload) with the same payload using a locking mechanism. However, if your Lambda function times out before completing the first invocation it will only accept the same request when the [idempotency record expire](#adjusting-expiration-window).
 
-???+ example
-    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
+To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
+
+```python title="working_with_lambda_timeout.py" hl_lines="14 23"
+--8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
+```
+
+???+ example "Mechanics"
+    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will run the invocation again as if it was in the `EXPIRED` state.
 
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
 
-???+ important
-    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code,
-    you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
-
-Here is an example on how you register the Lambda context in your handler:
-
-=== "Registering the Lambda context"
-
-    ```python hl_lines="11 20"
-    --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
-    ```
-
 ### Handling exceptions
 
-If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
-This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
+There are two failure modes that can cause new invocations to execute your code again despite having the same payload:
 
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    Client->>Lambda: Invoke (event)
-    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-    activate Persistence Layer
-    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-    Lambda--xLambda: Call handler (event).<br/>Raises exception
-    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
-    deactivate Persistence Layer
-    Lambda-->>Client: Return error response
+* **Unhandled exception**. We catch them to delete the idempotency record to prevent inconsistencies, then propagate them.
+* **Persistent layer errors**. We raise **`IdempotencyPersistenceLayerError`** for any persistence layer errors _e.g., remove idempotency record_.
+
+If an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
+
+```python title="working_with_exceptions.py" hl_lines="21 32 38"
+--8<-- "examples/idempotency/src/working_with_exceptions.py"
 ```
-<i>Idempotent sequence exception</i>
-</center>
-
-If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
-
-If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
-
-=== "Handling exceptions"
-
-    ```python hl_lines="18-22 28 31"
-    --8<-- "examples/idempotency/src/working_with_exceptions.py"
-    ```
-
-???+ warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
-
-    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
 ### Persistence layers
 
@@ -347,13 +389,41 @@ If an Exception is raised _outside_ the scope of the decorated function and afte
 
 This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
 
-=== "Customizing DynamoDBPersistenceLayer to suit your table structure"
+```python title="customize_persistence_layer.py" hl_lines="10-18"
+--8<-- "examples/idempotency/src/customize_persistence_layer.py"
+```
 
-    ```python hl_lines="7-15"
-    --8<-- "examples/idempotency/src/customize_persistence_layer.py"
+##### Using a composite primary key
+
+Use `sort_key_attr` parameter when your table is configured with a composite primary key _(hash+range key)_.
+
+When enabled, we will save the idempotency key in the sort key instead. By default, the primary key will now be set to `idempotency#{LAMBDA_FUNCTION_NAME}`.
+
+You can optionally set a static value for the partition key using the `static_pk_value` parameter.
+
+=== "Reusing a DynamoDB table that uses a composite primary key"
+
+    ```python hl_lines="10"
+    --8<-- "examples/idempotency/src/working_with_composite_key.py"
     ```
 
-When using DynamoDB as the persistence layer, you can customize the attribute names by passing the following parameters during the initialization of the persistence layer:
+=== "Sample Event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_composite_key_payload.json"
+    ```
+
+??? note "Click to expand and learn how table items would look like"
+
+    | id                           | sort_key                         | expiration | status      | data                                      |
+    | ---------------------------- | -------------------------------- | ---------- | ----------- | ----------------------------------------- |
+    | idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"user_id": 12391, "message": "success"}  |
+    | idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"user_id": 527212, "message": "success"} |
+    | idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                           |
+
+##### DynamoDB attributes
+
+You can customize the attribute names during initialization:
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
 | --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -369,22 +439,102 @@ When using DynamoDB as the persistence layer, you can customize the attribute na
 
 #### RedisPersistenceLayer
 
-This persistence layer is built-in, allowing you to use an existing Redis service. For optimal performance and compatibility, it is strongly recommended to use a Redis service version 7 or higher.
+!!! info "We recommend Redis version 7 or higher for optimal performance."
 
-=== "Customizing RedisPersistenceLayer to suit your data structure"
+For simple setups, initialize `RedisCachePersistenceLayer` with your Redis endpoint and port to connect.
 
-    ```python hl_lines="9-16"
-    --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
+
+=== "Redis quick start"
+    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="8-10 14 27"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
-When using Redis as the persistence layer, you can customize the attribute names by providing the following parameters upon initialization of the persistence layer:
+=== "Using an existing Redis client"
+    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="5 10-11 16 24 38"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
+    ```
 
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
-| **status_attr**             |                    | `status`                             | Stores status of the Lambda execution during and after invocation                                        |
-| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
-| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation |
+=== "Sample event"
+
+    ```json title="getting_started_with_idempotency_payload.json"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
+
+##### Redis SSL connections
+
+We recommend using AWS Secrets Manager to store and rotate certificates safely, and the [Parameters feature](./parameters.md){target="_blank"} to fetch and cache optimally.
+
+For advanced configurations, we recommend using an existing Redis client for optimal compatibility like SSL certificates and timeout.
+
+=== "Advanced configuration using AWS Secrets"
+    ```python title="using_redis_client_with_aws_secrets.py" hl_lines="9-11 13 15 25"
+    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+
+=== "Advanced configuration with local certificates"
+    ```python title="using_redis_client_with_local_certs.py" hl_lines="14 25-27"
+    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+    2. redis_user.crt file stored in the "certs" directory of your Lambda function
+    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
+    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
+
+##### Redis attributes
+
+You can customize the attribute names during initialization:
+
+| Parameter                   | Required | Default                  | Description                                                                                   |
+| --------------------------- | -------- | ------------------------ | --------------------------------------------------------------------------------------------- |
+| **in_progress_expiry_attr** |          | `in_progress_expiration` | Unix timestamp of when record expires while in progress (in case of the invocation times out) |
+| **status_attr**             |          | `status`                 | Stores status of the Lambda execution during and after invocation                             |
+| **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
+| **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
+
+```python title="customize_persistence_layer_redis.py" hl_lines="15-18"
+--8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+```
+
+### Common use cases
+
+#### Batch processing
+
+You can can easily integrate with [Batch](batch.md){target="_blank"} using the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
+
+???+ "Choosing an unique batch record attribute"
+    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
+
+    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset) your producer intentionally set to define uniqueness.
+
+=== "Integration with Batch Processor"
+
+    ```python title="integrate_idempotency_with_batch_processor.py" hl_lines="3 16 19 25 27"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
+    ```
+
+=== "Sample event"
+
+    ```json title="integrate_idempotency_with_batch_processor_payload.json" hl_lines="4"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
+    ```
 
 ### Idempotency request flow
 
@@ -551,6 +701,26 @@ sequenceDiagram
 <i>Concurrent identical in-flight requests</i>
 </center>
 
+#### Unhandled exception
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+    activate Persistence Layer
+    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+    Lambda--xLambda: Call handler (event).<br/>Raises exception
+    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
+    deactivate Persistence Layer
+    Lambda-->>Client: Return error response
+```
+<i>Idempotent sequence exception</i>
+</center>
+
 #### Lambda request timeout
 
 <center>
@@ -638,110 +808,21 @@ graph TD;
 <i>Race condition with Redis</i>
 </center>
 
-## Redis as persistent storage layer provider
-
-### Redis resources
-
-Before setting up Redis as the persistent storage layer provider, you must have an existing Redis service. We recommend you to use Redis compatible services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as your persistent storage layer provider.
-
-???+ tip "No existing Redis service?"
-    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as the persistent storage layer provider.
-
-=== "AWS CloudFormation example"
-
-    ```yaml hl_lines="5"
-    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
-    ```
-
-    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
-
-### VPC Access
-
-Your Lambda Function must have network access to the Redis endpoint before using it as the idempotency persistent storage layer. In most cases, you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
-
-???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
-    If you plan to use Amazon ElastiCache for Redis as the idempotency persistent storage layer, you may find [this AWS tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"} helpful.
-    For those using Amazon MemoryDB for Redis, refer to [this AWS tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} specifically for the VPC setup guidance.
-
-After completing the VPC setup, you can use the templates provided below to set up Lambda functions with access to VPC internal subnets.
-
-=== "AWS Serverless Application Model (SAM) example"
-
-    ```yaml hl_lines="9"
-    --8<-- "examples/idempotency/templates/sam_redis_vpc.yaml"
-    ```
-
-    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
-
-### Configuring Redis persistence layer
-
-You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
-
-???+ info
-    We enforce security best practices by using SSL connections in the `RedisCachePersistenceLayer`; to disable it, set `ssl=False`
-
-=== "Use Persistence Layer with Redis config variables"
-    ```python hl_lines="7-9 12 26"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
-    ```
-
-=== "Use established Redis Client"
-    ```python hl_lines="4 9-11 14 22 36"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
-    ```
-
-### Custom advanced settings
-
-For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.
-
-=== "Advanced configuration using AWS Secrets"
-    ```python hl_lines="7-9 11 13 23"
-    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
-    ```
-
-    1. JSON stored:
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-
-=== "Advanced configuration with local certificates"
-    ```python hl_lines="12 23-25"
-    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
-    ```
-
-    1. JSON stored:
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-    2. redis_user.crt file stored in the "certs" directory of your Lambda function
-    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
-    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
-
 ## Advanced
 
 ### Customizing the default behavior
 
-Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
+You can override and further extend idempotency behavior via **`IdempotencyConfig`** with the following options:
 
-| Parameter                       | Default | Description                                                                                                                                                                                                                                  |
-|---------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                                    |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                                                                                                 |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                               |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                                                                                     |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                                 |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                  |
-| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                    |
+| Parameter                       | Default | Description                                                                                                                                                                                                                                |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                                  |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload _e.g., payload tampering._                                                                                                    |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                             |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired, allowing a new transaction with the same idempotency key                                                                                                                         |
+| **use_local_cache**             | `False` | Whether to cache idempotency results in-memory to save on persistence storage latency and costs                                                                                                                                            |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                  |
 | **response_hook**               | `None`  | Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
 ### Handling concurrent executions with the same payload
@@ -752,62 +833,6 @@ This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if 
     If you receive `IdempotencyAlreadyInProgressError`, you can safely retry the operation.
 
 This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
-
-### Using in-memory cache
-
-**By default, in-memory local caching is disabled**, since we don't know how much memory you consume per invocation compared to the maximum configured in your Lambda function.
-
-???+ note "Note: This in-memory cache is local to each Lambda execution environment"
-    This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.
-
-You can enable in-memory caching with the **`use_local_cache`** parameter:
-
-=== "Caching idempotent transactions in-memory to prevent multiple calls to storage"
-
-    ```python hl_lines="11"
-    --8<-- "examples/idempotency/src/working_with_local_cache.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
-    ```
-
-When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
-
-### Expiring idempotency records
-
-!!! note "By default, we expire idempotency records after **an hour** (3600 seconds)."
-
-In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.
-
-You can change this window with the **`expires_after_seconds`** parameter:
-
-=== "Adjusting idempotency record expiration"
-
-    ```python hl_lines="11"
-    --8<-- "examples/idempotency/src/working_with_record_expiration.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_record_expiration_payload.json"
-    ```
-
-This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
-
-???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
-    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
-
-    We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
-
-    Instead, Idempotency records saved in the storage layer contain timestamps that can be verified upon retrieval and double checked within Idempotency feature.
-
-    **Why?**
-
-    A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
 
 ### Payload validation
 
@@ -820,7 +845,7 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 === "Payload validation"
 
-    ```python hl_lines="12 20 28"
+    ```python hl_lines="20 29 36"
     --8<-- "examples/idempotency/src/working_with_validation_payload.py"
     ```
 
@@ -856,7 +881,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 === "Idempotency key required"
 
-    ```python hl_lines="11"
+    ```python hl_lines="14"
     --8<-- "examples/idempotency/src/working_with_idempotency_key_required.py"
     ```
 
@@ -878,13 +903,13 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
 
 === "Custom session"
 
-    ```python hl_lines="1 11 13"
+    ```python hl_lines="3 13 16"
     --8<-- "examples/idempotency/src/working_with_custom_session.py"
     ```
 
 === "Custom config"
 
-    ```python hl_lines="1 11 13"
+    ```python hl_lines="3 13 16"
     --8<-- "examples/idempotency/src/working_with_custom_config.py"
     ```
 
@@ -893,34 +918,6 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
     ```json
     --8<-- "examples/idempotency/src/working_with_custom_config_payload.json"
     ```
-
-### Using a DynamoDB table with a composite primary key
-
-When using a composite primary key table (hash+range key), use `sort_key_attr` parameter when initializing your persistence layer.
-
-With this setting, we will save the idempotency key in the sort key instead of the primary key. By default, the primary key will now be set to `idempotency#{LAMBDA_FUNCTION_NAME}`.
-
-You can optionally set a static value for the partition key using the `static_pk_value` parameter.
-
-=== "Reusing a DynamoDB table that uses a composite primary key"
-
-    ```python hl_lines="7"
-    --8<-- "examples/idempotency/src/working_with_composite_key.py"
-    ```
-
-=== "Sample Event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_composite_key_payload.json"
-    ```
-
-The example function above would cause data to be stored in DynamoDB like this:
-
-| id                           | sort_key                         | expiration | status      | data                                      |
-| ---------------------------- | -------------------------------- | ---------- | ----------- | ----------------------------------------- |
-| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"user_id": 12391, "message": "success"}  |
-| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"user_id": 527212, "message": "success"} |
-| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                           |
 
 ### Bring your own persistent store
 
@@ -933,11 +930,9 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 * **`_update_record()`** – Updates an item in the persistence store.
 * **`_delete_record()`** – Removes an item from the persistence store.
 
-=== "Bring your own persistent store"
-
-    ```python hl_lines="8 18 65 74 96 124"
-    --8<-- "examples/idempotency/src/bring_your_own_persistent_store.py"
-    ```
+```python title="bring_your_own_persistent_store.py" hl_lines="8 18 65 74 96 124"
+--8<-- "examples/idempotency/src/bring_your_own_persistent_store.py"
+```
 
 ???+ danger
     Pay attention to the documentation for each - you may need to perform additional checks inside these methods to ensure the idempotency guarantees remain intact.
@@ -950,7 +945,7 @@ You can set up a `response_hook` in the `IdempotentConfig` class to manipulate t
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="19 21 27 34"
+    ```python hl_lines="20 22 28 36"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 
@@ -976,11 +971,7 @@ When using response hooks to manipulate returned data from idempotent operations
 
 ## Compatibility with other utilities
 
-### Batch
-
-See [Batch integration](#batch-integration) above.
-
-### Validation utility
+### JSON Schema Validation
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
 
@@ -990,9 +981,9 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 	Make sure to account for this behavior, if you set the `event_key_jmespath`.
 
-=== "Using Idempotency with JSONSchema Validation utility"
+=== "Using Idempotency with validation utility"
 
-    ```python hl_lines="13"
+    ```python hl_lines="16"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
     ```
 

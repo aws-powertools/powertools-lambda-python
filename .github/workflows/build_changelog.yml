@@ -17,8 +17,8 @@ on:
 #    branches:
 #      - develop
   schedule:
-    # Note: run daily at 7am UTC time until upstream git-chlog uses stable sorting
-    - cron: "0 7 * * *"
+    # Note: run daily at 10am UTC time until upstream git-chlog uses stable sorting
+    - cron: "0 10 * * *"
 
 permissions:
   contents: read

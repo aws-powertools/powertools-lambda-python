@@ -204,7 +204,7 @@ class DataMasking:
             self._call_action,
             action=action,
             provider_options=provider_options,
-            **encryption_context,
+            **encryption_context,  # type: ignore[arg-type]
         )
 
         # Iterate over each field to be parsed.
@@ -229,12 +229,12 @@ class DataMasking:
                 self._call_action,
                 action=action,
                 provider_options=provider_options,
-                **encryption_context,
+                **encryption_context,  # type: ignore[arg-type]
             )
 
             json_parse.update(
                 data_parsed,
-                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),  # noqa: B023
+                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),  # type: ignore[misc] # noqa: B023
             )
 
         return data_parsed
@@ -245,7 +245,7 @@ class DataMasking:
         fields: dict[str, Any],
         field_name: str,
         action: Callable,
-        provider_options: dict | None = None,
+        provider_options: dict[str, Any] | None = None,
         **encryption_context,
     ) -> None:
         """

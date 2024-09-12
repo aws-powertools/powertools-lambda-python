@@ -7,11 +7,13 @@ from __future__ import annotations
 import functools
 import logging
 import os
+import warnings
 from inspect import isclass
 from typing import TYPE_CHECKING, Any, Callable, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import strtobool
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -25,6 +27,8 @@ if TYPE_CHECKING:
         BasePersistenceLayer,
     )
     from aws_lambda_powertools.utilities.typing import LambdaContext
+
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +74,15 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
+    # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
+    # Raises a warning if not running in development mode
+    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+        warnings.warn(
+            message="Disabling idempotency is intended for development environments only "
+            "and should not be used in production.",
+            category=PowertoolsUserWarning,
+            stacklevel=2,
+        )
         return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
@@ -154,7 +166,15 @@ def idempotent_function(
 
     @functools.wraps(function)
     def decorate(*args, **kwargs):
-        if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
+        # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
+        # Raises a warning if not running in development mode
+        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+            warnings.warn(
+                message="Disabling idempotency is intended for development environments only "
+                "and should not be used in production.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
             return function(*args, **kwargs)
 
         if data_keyword_argument not in kwargs:

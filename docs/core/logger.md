@@ -298,7 +298,7 @@ We support the following log levels:
 | `ERROR`    | 40            | `logging.ERROR`    |
 | `CRITICAL` | 50            | `logging.CRITICAL` |
 
-If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `10`.
+If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `20`.
 
 === "setting_log_level_constructor.py"
 
@@ -496,7 +496,6 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
     ```json hl_lines="12"
     --8<-- "examples/logger/src/logger_reuse_output.json"
     ```
-
 ???+ note "Note: About Child Loggers"
     Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
 
@@ -607,6 +606,29 @@ stateDiagram-v2
 
 > Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
 For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
+
+For child Loggers, we introspect the name of your module where `Logger(child=True, service="name")` is called, and we name your Logger as **{service}.{filename}**.
+
+???+ danger
+    A common issue when migrating from other Loggers is that `service` might be defined in the parent Logger (no child param), and not defined in the child Logger:
+
+=== "logging_inheritance_bad.py"
+
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_bad.py"
+    ```
+
+=== "logging_inheritance_module.py"
+    ```python hl_lines="1 9"
+    --8<-- "examples/logger/src/logging_inheritance_module.py"
+    ```
+
+In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
+
+???+ tip
+    This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
+
+Do this instead:
 
 === "logging_inheritance_good.py"
 
@@ -779,7 +801,6 @@ When unit testing your code that makes use of `inject_lambda_context` decorator,
 This is a Pytest sample that provides the minimum information necessary for Logger to succeed:
 
 === "fake_lambda_context_for_logger.py"
-    Note that dataclasses are available in Python 3.7+ only.
 
     ```python
     --8<-- "examples/logger/src/fake_lambda_context_for_logger.py"

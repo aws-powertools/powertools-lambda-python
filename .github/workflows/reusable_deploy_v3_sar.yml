@@ -129,9 +129,6 @@ jobs:
           ARCH_NAME=$(echo ${{ matrix.architecture }} | tr -d '_')
           SAR_NAME="${SAR_NAME}-python${{env.PYTHON_VERSION}}-${ARCH_NAME}"
           echo SAR_NAME="${SAR_NAME}" >> "$GITHUB_ENV"
-      - name: Adds arm64 suffix to SAR name
-        if: ${{ matrix.architecture == 'arm64' }}
-        run: echo SAR_NAME="${SAR_NAME}-arm64" >> "$GITHUB_ENV"
       - name: Normalize semantic version
         id: semantic-version # v2.0.0a0 -> v2.0.0-a0
         env:

@@ -1,6 +1,6 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from aws_cdk import CfnOutput
+from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_apigateway as apigwv1
 from aws_cdk import aws_apigatewayv2_alpha as apigwv2
 from aws_cdk import aws_apigatewayv2_authorizers_alpha as apigwv2authorizers
@@ -15,14 +15,14 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 class EventHandlerStack(BaseInfrastructure):
     def create_resources(self):
-        functions = self.create_lambda_functions()
+        functions = self.create_lambda_functions(function_props={"timeout": Duration.seconds(10)})
 
-        self._create_alb(function=functions["AlbHandler"])
-        self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
+        self._create_alb(function=[functions["AlbHandler"], functions["AlbHandlerWithBodyNone"]])
+        self._create_api_gateway_rest(function=[functions["ApiGatewayRestHandler"], functions["OpenapiHandler"]])
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
-    def _create_alb(self, function: Function):
+    def _create_alb(self, function: List[Function]):
         vpc = ec2.Vpc.from_lookup(
             self.stack,
             "VPC",
@@ -33,14 +33,18 @@ class EventHandlerStack(BaseInfrastructure):
         alb = elbv2.ApplicationLoadBalancer(self.stack, "ALB", vpc=vpc, internet_facing=True)
         CfnOutput(self.stack, "ALBDnsName", value=alb.load_balancer_dns_name)
 
-        self._create_alb_listener(alb=alb, name="Basic", port=80, function=function)
+        # Function with Body
+        self._create_alb_listener(alb=alb, name="Basic", port=80, function=function[0])
         self._create_alb_listener(
             alb=alb,
             name="MultiValueHeader",
             port=8080,
-            function=function,
+            function=function[0],
             attributes={"lambda.multi_value_headers.enabled": "true"},
         )
+
+        # Function without Body
+        self._create_alb_listener(alb=alb, name="BasicWithoutBody", port=8081, function=function[1])
 
     def _create_alb_listener(
         self,
@@ -72,7 +76,7 @@ class EventHandlerStack(BaseInfrastructure):
 
         CfnOutput(self.stack, "APIGatewayHTTPUrl", value=(apigw.url or ""))
 
-    def _create_api_gateway_rest(self, function: Function):
+    def _create_api_gateway_rest(self, function: List[Function]):
         apigw = apigwv1.RestApi(
             self.stack,
             "APIGatewayRest",
@@ -83,7 +87,10 @@ class EventHandlerStack(BaseInfrastructure):
         )
 
         todos = apigw.root.add_resource("todos")
-        todos.add_method("POST", apigwv1.LambdaIntegration(function, proxy=True))
+        todos.add_method("POST", apigwv1.LambdaIntegration(function[0], proxy=True))
+
+        openapi_schema = apigw.root.add_resource("openapi_schema")
+        openapi_schema.add_method("GET", apigwv1.LambdaIntegration(function[1], proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 
