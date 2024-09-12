@@ -11,19 +11,17 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
-* Support for Pydantic v2
+* Support only Pydantic v2
 
 ## Getting started
 
 ### Install
 
-Powertools for AWS Lambda (Python) supports Pydantic v2.
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-#### Using Pydantic v2
+You need to bring Pydantic v2.0.3 or later as an external dependency.
 
-You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank"} to reduce noise and optimize log costs.
-
-Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ### Defining models
 
