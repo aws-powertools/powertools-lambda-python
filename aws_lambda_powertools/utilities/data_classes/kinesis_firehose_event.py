@@ -7,7 +7,7 @@ from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tupl
 
 from typing_extensions import Literal
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
 @dataclass(repr=False, order=False, frozen=True)
@@ -208,7 +208,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
         return self._metadata["subsequenceNumber"]
 
 
-class KinesisFirehoseRecord(DictWrapper):
+class KinesisFirehoseRecord(EventWrapper):
     @property
     def approximate_arrival_timestamp(self) -> int:
         """The approximate time that the record was inserted into the delivery stream"""
@@ -271,7 +271,7 @@ class KinesisFirehoseRecord(DictWrapper):
         )
 
 
-class KinesisFirehoseEvent(DictWrapper):
+class KinesisFirehoseEvent(EventWrapper):
     """Kinesis Data Firehose event
 
     Documentation:
@@ -303,3 +303,9 @@ class KinesisFirehoseEvent(DictWrapper):
     def records(self) -> Iterator[KinesisFirehoseRecord]:
         for record in self["records"]:
             yield KinesisFirehoseRecord(data=record, json_deserializer=self._json_deserializer)
+
+    def nested_event_contents(self):
+        for record in self.get("records"):
+            body = record.get("data")
+            body = base64.b64decode(body).decode("utf-8")
+            yield body

@@ -1,9 +1,10 @@
+import json
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import EventWrapper
 
 
-class EventBridgeEvent(DictWrapper):
+class EventBridgeEvent(EventWrapper):
     """Amazon EventBridge Event
 
     Documentation:
@@ -67,3 +68,6 @@ class EventBridgeEvent(DictWrapper):
     def replay_name(self) -> Optional[str]:
         """Identifies whether the event is being replayed and what is the name of the replay."""
         return self["replay-name"]
+
+    def nested_event_contents(self):
+        yield json.dumps(self.get("detail"))

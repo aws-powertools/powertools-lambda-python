@@ -1,9 +1,9 @@
 from typing import Iterator, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import EventWrapper
 
 
-class SESMailHeader(DictWrapper):
+class SESMailHeader(EventWrapper):
     @property
     def name(self) -> str:
         return self["name"]
@@ -13,7 +13,7 @@ class SESMailHeader(DictWrapper):
         return self["value"]
 
 
-class SESMailCommonHeaders(DictWrapper):
+class SESMailCommonHeaders(EventWrapper):
     @property
     def return_path(self) -> str:
         """The values in the Return-Path header of the email."""
@@ -66,7 +66,7 @@ class SESMailCommonHeaders(DictWrapper):
         return self.get("replyTo")
 
 
-class SESMail(DictWrapper):
+class SESMail(EventWrapper):
     @property
     def timestamp(self) -> str:
         """String that contains the time at which the email was received, in ISO8601 format."""
@@ -111,7 +111,7 @@ class SESMail(DictWrapper):
         return SESMailCommonHeaders(self["commonHeaders"])
 
 
-class SESReceiptStatus(DictWrapper):
+class SESReceiptStatus(EventWrapper):
     @property
     def status(self) -> str:
         """Receipt status
@@ -120,7 +120,7 @@ class SESReceiptStatus(DictWrapper):
         return str(self["status"])
 
 
-class SESReceiptAction(DictWrapper):
+class SESReceiptAction(EventWrapper):
     @property
     def get_type(self) -> str:
         """String that indicates the type of action that was executed.
@@ -149,7 +149,7 @@ class SESReceiptAction(DictWrapper):
         return self["invocationType"]
 
 
-class SESReceipt(DictWrapper):
+class SESReceipt(EventWrapper):
     @property
     def timestamp(self) -> str:
         """String that specifies the date and time at which the action was triggered, in ISO 8601 format."""
@@ -207,7 +207,7 @@ class SESReceipt(DictWrapper):
         return SESReceiptAction(self["action"])
 
 
-class SESMessage(DictWrapper):
+class SESMessage(EventWrapper):
     @property
     def mail(self) -> SESMail:
         return SESMail(self["ses"]["mail"])
@@ -217,7 +217,7 @@ class SESMessage(DictWrapper):
         return SESReceipt(self["ses"]["receipt"])
 
 
-class SESEventRecord(DictWrapper):
+class SESEventRecord(EventWrapper):
     @property
     def event_source(self) -> str:
         """The AWS service from which the SES event record originated. For SES, this is aws:ses"""
@@ -233,7 +233,7 @@ class SESEventRecord(DictWrapper):
         return SESMessage(self._data)
 
 
-class SESEvent(DictWrapper):
+class SESEvent(EventWrapper):
     """Amazon SES to receive message event trigger
 
     NOTE: There is a 30-second timeout on RequestResponse invocations.
@@ -260,3 +260,8 @@ class SESEvent(DictWrapper):
     @property
     def receipt(self) -> SESReceipt:
         return self.record.ses.receipt
+
+    def nested_event_contents(self):
+        for record in self.get("Records"):
+            body = record.get("ses")
+            yield body

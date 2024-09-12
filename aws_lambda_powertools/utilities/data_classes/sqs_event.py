@@ -2,7 +2,7 @@ from functools import cached_property
 from typing import Any, Dict, ItemsView, Iterator, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 
 
@@ -93,10 +93,10 @@ class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
         return {k: SQSMessageAttribute(v) for k, v in super().items()}.items()  # type: ignore
 
 
-class SQSRecord(DictWrapper):
+class SQSRecord(EventWrapper):
     """An Amazon SQS message"""
 
-    NestedEvent = TypeVar("NestedEvent", bound=DictWrapper)
+    NestedEvent = TypeVar("NestedEvent", bound=EventWrapper)
 
     @property
     def message_id(self) -> str:
@@ -245,7 +245,7 @@ class SQSRecord(DictWrapper):
         return nested_event_class(self.json_body)
 
 
-class SQSEvent(DictWrapper):
+class SQSEvent(EventWrapper):
     """SQS Event
 
     Documentation:

@@ -1,6 +1,6 @@
 from typing import Dict, Iterator
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
 class SNSMessageAttribute(DictWrapper):
@@ -16,7 +16,7 @@ class SNSMessageAttribute(DictWrapper):
         return self["Value"]
 
 
-class SNSMessage(DictWrapper):
+class SNSMessage(EventWrapper):
     @property
     def signature_version(self) -> str:
         """Version of the Amazon SNS signature used."""
@@ -78,8 +78,11 @@ class SNSMessage(DictWrapper):
         """The Subject parameter specified when the notification was published to the topic."""
         return self["Subject"]
 
+    def nested_event_contents(self):
+        yield self.message
 
-class SNSEventRecord(DictWrapper):
+
+class SNSEventRecord(EventWrapper):
     @property
     def event_version(self) -> str:
         """Event version"""
@@ -99,7 +102,7 @@ class SNSEventRecord(DictWrapper):
         return SNSMessage(self._data["Sns"])
 
 
-class SNSEvent(DictWrapper):
+class SNSEvent(EventWrapper):
     """SNS Event
 
     Documentation:
@@ -121,3 +124,8 @@ class SNSEvent(DictWrapper):
     def sns_message(self) -> str:
         """Return the message for the first sns event record"""
         return self.record.sns.message
+
+    def nested_event_contents(self):
+        for record in self.get("Records"):
+            body = record.get("Sns").get("Message")
+            yield body
