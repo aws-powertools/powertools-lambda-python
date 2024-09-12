@@ -7,10 +7,12 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 class IdempotencyDynamoDBStack(BaseInfrastructure):
     def create_resources(self):
-        table = self._create_dynamodb_table(function_props={"timeout": Duration.seconds(10)})
+        table = self._create_dynamodb_table()
 
         env_vars = {"IdempotencyTable": table.table_name}
-        functions = self.create_lambda_functions(function_props={"environment": env_vars})
+        functions = self.create_lambda_functions(
+            function_props={"environment": env_vars, "timeout": Duration.seconds(10)},
+        )
 
         table.grant_read_write_data(functions["TtlCacheExpirationHandler"])
         table.grant_read_write_data(functions["TtlCacheTimeoutHandler"])
