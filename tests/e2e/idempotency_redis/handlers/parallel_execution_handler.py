@@ -12,6 +12,6 @@ persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379)
 
 @idempotent(persistence_store=persistence_layer)
 def lambda_handler(event, context):
-    time.sleep(5)
+    time.sleep(15)
 
     return event
