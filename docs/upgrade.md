@@ -7,6 +7,8 @@ description: Guide to update between major Powertools for AWS Lambda (Python) ve
 
 ## Migrate to v3 from v2
 
+!!! info "We strongly encourage you to migrate to v3. However, if you still need to upgrade from v1 to v2, you can find the [upgrade guide](/lambda/python/2.43.1/upgrade/)."
+
 We've made minimal breaking changes to make your transition to v3 as smooth as possible.
 
 ### Quick summary
