@@ -7,7 +7,7 @@ Resources:
       Properties:
           Location:
               ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86
-              SemanticVersion: 2.0.0 # change to latest semantic version available in SAR
+              SemanticVersion: 3.0.0 # change to latest semantic version available in SAR
 
   MyLambdaFunction:
       Type: AWS::Serverless::Function

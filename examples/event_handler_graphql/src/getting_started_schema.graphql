@@ -4,7 +4,7 @@ schema {
 }
 
 type Query {
-    # these are fields you can attach resolvers to (field: Query, field: getTodo)
+    # these are fields you can attach resolvers to (type_name: Query, field_name: getTodo)
     getTodo(id: ID!): Todo
     listTodos: [Todo]
 }

@@ -1,7 +1,7 @@
 from typing import List, TypedDict
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler.appsync import Router
+from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 
 tracer = Tracer()
 logger = Logger()

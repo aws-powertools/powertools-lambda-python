@@ -1,3 +1,4 @@
+import os
 import uuid
 from typing import Dict
 
@@ -28,7 +29,8 @@ def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
     return response
 
 
-dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+table = os.getenv("IDEMPOTENCY_TABLE", "")
+dynamodb = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(response_hook=my_response_hook)
 
 

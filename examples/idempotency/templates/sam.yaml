@@ -21,11 +21,14 @@ Resources:
       Handler: app.py
       Policies:
         - Statement:
-          - Sid: AllowDynamodbReadWrite
-            Effect: Allow
-            Action:
-              - dynamodb:PutItem
-              - dynamodb:GetItem
-              - dynamodb:UpdateItem
-              - dynamodb:DeleteItem
-            Resource: !GetAtt IdempotencyTable.Arn
+            - Sid: AllowDynamodbReadWrite
+              Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+              Resource: !GetAtt IdempotencyTable.Arn
+      Environment:
+        Variables:
+          IDEMPOTENCY_TABLE: !Ref IdempotencyTable

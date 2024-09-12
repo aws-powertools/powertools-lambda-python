@@ -88,5 +88,16 @@ class APIGatewayProxyEventModel(BaseModel):
     requestContext: APIGatewayEventRequestContext
     pathParameters: Optional[Dict[str, str]] = None
     stageVariables: Optional[Dict[str, str]] = None
-    isBase64Encoded: bool
+    isBase64Encoded: Optional[bool] = None
     body: Optional[Union[str, Type[BaseModel]]] = None
+
+
+class ApiGatewayAuthorizerToken(BaseModel):
+    type: Literal["TOKEN"]
+    methodArn: str
+    authorizationToken: str
+
+
+class ApiGatewayAuthorizerRequest(APIGatewayProxyEventModel):
+    type: Literal["REQUEST"]
+    methodArn: str

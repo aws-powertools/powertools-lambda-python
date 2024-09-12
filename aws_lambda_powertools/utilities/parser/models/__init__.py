@@ -1,11 +1,14 @@
 from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
 from .apigw import (
+    ApiGatewayAuthorizerRequest,
+    ApiGatewayAuthorizerToken,
     APIGatewayEventAuthorizer,
     APIGatewayEventIdentity,
     APIGatewayEventRequestContext,
     APIGatewayProxyEventModel,
 )
 from .apigwv2 import (
+    ApiGatewayAuthorizerRequestV2,
     APIGatewayProxyEventV2Model,
     RequestContextV2,
     RequestContextV2Authorizer,
@@ -101,6 +104,7 @@ from .vpc_latticev2 import VpcLatticeV2Model
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
+    "ApiGatewayAuthorizerRequestV2",
     "RequestContextV2",
     "RequestContextV2Http",
     "RequestContextV2Authorizer",
@@ -161,6 +165,8 @@ __all__ = [
     "APIGatewayEventRequestContext",
     "APIGatewayEventAuthorizer",
     "APIGatewayEventIdentity",
+    "ApiGatewayAuthorizerRequest",
+    "ApiGatewayAuthorizerToken",
     "KafkaSelfManagedEventModel",
     "KafkaRecordModel",
     "KafkaMskEventModel",

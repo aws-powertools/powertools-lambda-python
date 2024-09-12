@@ -26,7 +26,7 @@ app_config = AppConfigStore(
     name="features",
     max_age=120,
     envelope="special_decoder(features)",  # using a custom function defined in CustomFunctions Class
-    sdk_config=boto_config,
+    boto_config=boto_config,
     jmespath_options=custom_jmespath_options,
 )
 

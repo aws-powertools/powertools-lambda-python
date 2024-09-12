@@ -9,7 +9,7 @@ from typing_extensions import Annotated
 from aws_lambda_powertools.utilities.parser import parse
 
 # adjusted for slower machines in CI too
-PARSER_VALIDATION_SLA: float = 0.005
+PARSER_VALIDATION_SLA: float = 0.010
 
 
 @contextmanager
