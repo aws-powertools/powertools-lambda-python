@@ -1,6 +1,7 @@
 import time
 from typing import Tuple
 
+from aws_cdk import Duration
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk.aws_ec2 import (
     SecurityGroup,
@@ -30,6 +31,7 @@ class IdempotencyRedisServerlessStack(BaseInfrastructure):
                 "environment": env_vars,
                 "vpc": vpc_stack,
                 "security_groups": [security_groups[1]],
+                "timeout": Duration.seconds(10),
             },
         )
 

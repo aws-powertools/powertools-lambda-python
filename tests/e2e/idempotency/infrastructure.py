@@ -1,4 +1,4 @@
-from aws_cdk import CfnOutput, RemovalPolicy
+from aws_cdk import CfnOutput, Duration, RemovalPolicy
 from aws_cdk import aws_dynamodb as dynamodb
 from aws_cdk.aws_dynamodb import Table
 
@@ -7,7 +7,7 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 class IdempotencyDynamoDBStack(BaseInfrastructure):
     def create_resources(self):
-        table = self._create_dynamodb_table()
+        table = self._create_dynamodb_table(function_props={"timeout": Duration.seconds(10)})
 
         env_vars = {"IdempotencyTable": table.table_name}
         functions = self.create_lambda_functions(function_props={"environment": env_vars})

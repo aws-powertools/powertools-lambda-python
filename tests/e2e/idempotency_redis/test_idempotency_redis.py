@@ -69,7 +69,7 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
     payload_timeout_execution = json.dumps(
-        {"sleep": 5, "message": "Powertools for AWS Lambda (Python) - TTL 1s"},
+        {"sleep": 12, "message": "Powertools for AWS Lambda (Python) - TTL 1s"},
         sort_keys=True,
     )
     payload_working_execution = json.dumps(
