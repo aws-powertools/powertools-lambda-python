@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from aws_cdk import CfnOutput
+from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_apigateway as apigwv1
 from aws_cdk import aws_apigatewayv2_alpha as apigwv2
 from aws_cdk import aws_apigatewayv2_authorizers_alpha as apigwv2authorizers
@@ -15,7 +15,7 @@ from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 class EventHandlerStack(BaseInfrastructure):
     def create_resources(self):
-        functions = self.create_lambda_functions()
+        functions = self.create_lambda_functions(function_props={"timeout": Duration.seconds(10)})
 
         self._create_alb(function=[functions["AlbHandler"], functions["AlbHandlerWithBodyNone"]])
         self._create_api_gateway_rest(function=[functions["ApiGatewayRestHandler"], functions["OpenapiHandler"]])

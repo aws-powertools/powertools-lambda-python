@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import boto3
 import pytest
-from aws_cdk import App, CfnOutput, Duration, Environment, RemovalPolicy, Stack, aws_logs
+from aws_cdk import App, CfnOutput, Environment, RemovalPolicy, Stack, aws_logs
 from aws_cdk.aws_lambda import (
     Architecture,
     Code,
@@ -148,7 +148,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 **function_settings_override,
             }
 
-            function = Function(self.stack, **function_settings, memory_size=512, timeout=Duration.seconds(10))
+            function = Function(self.stack, **function_settings)
 
             aws_logs.LogGroup(
                 self.stack,
