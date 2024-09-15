@@ -1,5 +1,5 @@
 """Advanced feature flags utility"""
 
-from .aws_auth import AuthProvider, AWSServicePrefix, AWSSigV4Auth, JWTAuth
+from .aws_auth import ServicePrefix, SigV4aAuth, SigV4Auth
 
-__all__ = ["AuthProvider", "AWSServicePrefix", "AWSSigV4Auth", "JWTAuth"]
+__all__ = ["ServicePrefix", "SigV4Auth", "SigV4aAuth"]

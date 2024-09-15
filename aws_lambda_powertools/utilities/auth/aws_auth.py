@@ -1,19 +1,18 @@
 from __future__ import annotations
 
+import json
+import os
 from enum import Enum
 from typing import Optional
 
 import botocore.session
 from botocore import crt
-from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-from botocore.credentials import Credentials, ReadOnlyCredentials
 
 
-class AWSServicePrefix(Enum):
+class ServicePrefix(Enum):
     """
     AWS Service Prefixes - Enumerations of the supported service proxy types
-
     URLs:
         https://docs.aws.amazon.com/service-authorization/latest/reference/reference_policies_actions-resources-contextkeys.html
     """
@@ -24,22 +23,19 @@ class AWSServicePrefix(Enum):
     APPSYNC = "appsync"
 
 
-class AWSSigV4Auth:
+class SigV4Auth:
     """
     Authenticating Requests (AWS Signature Version 4)
     Requests that were signed with SigV4 will have SignatureVersion set to AWS4-HMAC-SHA256
 
     Args:
         url (str): URL
-        region (str): AWS region
-        body (str, optional): Request body
+        service (ServicePrefix): AWS service Prefix
+        region (str, Optional): AWS region
+        body (dict, optional): Request body
         params (dict, optional): Request parameters
         headers (dict, optional): Request headers
         method (str, optional): Request method
-        service (str, optional): AWS service
-        access_key (str, optional): AWS access key
-        secret_key (str, optional): AWS secret key
-        token (str, optional): AWS session token
 
     Returns:
         SigV4Auth: SigV4Auth instance
@@ -47,76 +43,58 @@ class AWSSigV4Auth:
     Examples
     --------
     **Using default credentials**
-    >>> from aws_lambda_powertools.utilities.iam import AWSSigV4Auth
-    >>> auth = AWSSigV4Auth(region="us-east-2", service=AWSServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
+    >>> from aws_lambda_powertools.utilities.auth import SigV4Auth
+    >>> prepped = SigV4Auth.prepare_request(region="us-east-2", service=ServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
-    def __init__(
-        self,
+    @staticmethod
+    def prepare_request(
         url: str,
-        region: str,
-        body: Optional[str] = None,
+        service: ServicePrefix,
+        region: Optional[str],
+        body: Optional[dict] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
         method: Optional[str] = "GET",
-        service: Enum = AWSServicePrefix.LATTICE,
-        access_key: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        token: Optional[str] = None,
     ):
-        self.service = service.value
-        self.region = region
-        self.method = method
-        self.url = url
-        self.data = body
-        self.params = params
-        self.headers = headers
+        if region is None:
+            region = os.environ.get("AWS_REGION")
 
-        self.credentials: Credentials | ReadOnlyCredentials
-
-        if access_key and secret_key and token:
-            self.access_key = access_key
-            self.secret_key = secret_key
-            self.token = token
-            self.credentials = Credentials(access_key=self.access_key, secret_key=self.secret_key, token=self.token)
+        if body is not None:
+            body = json.dumps(body)
         else:
-            credentials = botocore.session.Session().get_credentials()
-            self.credentials = credentials.get_frozen_credentials()
+            body = json.dumps({})
 
-        if self.headers is None:
-            self.headers = {"Content-Type": "application/json"}
+        credentials = botocore.session.Session().get_credentials()
 
-        sigv4 = SigV4Auth(credentials=self.credentials, service_name=self.service, region_name=self.region)
+        signer = crt.auth.CrtSigV4Auth(credentials, service.value, region)
 
-        request = AWSRequest(method=self.method, url=self.url, data=self.data, params=self.params, headers=self.headers)
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
 
-        if self.service == AWSServicePrefix.LATTICE.value:
+        request = AWSRequest(method=method, url=url, data=body, params=params, headers=headers)
+
+        if service.value == "vpc-lattice-svcs":
             # payload signing is not supported for vpc-lattice-svcs
             request.context["payload_signing_enabled"] = False
 
-        sigv4.add_auth(request)
-        self.signed_request = request.prepare()
-
-        def __call__(self):
-            return self.signed_request
+        signer.add_auth(request)
+        return request.prepare()
 
 
-class AWSSigV4aAuth:
+class SigV4aAuth:
     """
     Authenticating Requests (AWS Signature Version 4a)
     Requests that were signed with SigV4A will have a SignatureVersion set to AWS4-ECDSA-P256-SHA256
 
     Args:
         url (str): URL
-        region (str): AWS region
-        body (str, optional): Request body
+        service (ServicePrefix): AWS service Prefix
+        region (str, Optional): AWS region
+        body (dict, optional): Request body
         params (dict, optional): Request parameters
         headers (dict, optional): Request headers
         method (str, optional): Request method
-        service (str, optional): AWS service
-        access_key (str, optional): AWS access key
-        secret_key (str, optional): AWS secret key
-        token (str, optional): AWS session token
 
     Returns:
         SigV4aAuth: SigV4aAuth instance
@@ -124,55 +102,40 @@ class AWSSigV4aAuth:
     Examples
     --------
     **Using default credentials**
-    >>> from aws_lambda_powertools.utilities.iam import AWSSigV4aAuth
-    >>> auth = AWSSigV4aAuth(region="us-east-2", service=AWSServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
+    >>> from aws_lambda_powertools.utilities.iam import SigV4aAuth
+    >>> prepped = SigV4aAuth.prepare_request(region="us-east-2", service=ServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
-    def __init__(
-        self,
+    @staticmethod
+    def prepare_request(
         url: str,
-        region: str,
-        body: Optional[str] = None,
+        service: ServicePrefix,
+        region: Optional[str],
+        body: Optional[dict] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
         method: Optional[str] = "GET",
-        service: Enum = AWSServicePrefix.LATTICE,
-        access_key: Optional[str] = None,
-        secret_key: Optional[str] = None,
-        token: Optional[str] = None,
     ):
-        self.service = service.value
-        self.region = region
-        self.method = method
-        self.url = url
-        self.data = body
-        self.params = params
-        self.headers = headers
+        if region is None:
+            region = os.environ.get("AWS_REGION")
 
-        self.credentials: Credentials | ReadOnlyCredentials
-
-        if access_key and secret_key and token:
-            self.access_key = access_key
-            self.secret_key = secret_key
-            self.token = token
-            self.credentials = Credentials(access_key=self.access_key, secret_key=self.secret_key, token=self.token)
+        if body is not None:
+            body = json.dumps(body)
         else:
-            credentials = botocore.session.Session().get_credentials()
-            self.credentials = credentials.get_frozen_credentials()
+            body = json.dumps({})
 
-        if self.headers is None:
-            self.headers = {"Content-Type": "application/json"}
+        credentials = botocore.session.Session().get_credentials()
 
-        signer = crt.auth.CrtSigV4AsymAuth(self.credentials, self.service, self.region)
+        signer = crt.auth.CrtSigV4AsymAuth(credentials, service.value, region)
 
-        request = AWSRequest(method=self.method, url=self.url, data=self.data, params=self.params, headers=self.headers)
+        if headers is None:
+            headers = {"Content-Type": "application/json"}
 
-        if self.service == AWSServicePrefix.LATTICE.value:
+        request = AWSRequest(method=method, url=url, data=body, params=params, headers=headers)
+
+        if service.value == "vpc-lattice-svcs":
             # payload signing is not supported for vpc-lattice-svcs
             request.context["payload_signing_enabled"] = False
 
         signer.add_auth(request)
-        self.signed_request = request.prepare()
-
-        def __call__(self):
-            return self.signed_request
+        return request.prepare()
