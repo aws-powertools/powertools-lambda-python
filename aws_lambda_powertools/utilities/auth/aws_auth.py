@@ -110,7 +110,7 @@ class SigV4aAuth:
     def prepare_request(
         url: str,
         service: ServicePrefix,
-        region: Optional[str],
+        region: Optional[str] = "*",
         body: Optional[dict] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
