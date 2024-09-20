@@ -116,9 +116,6 @@ class SigV4aAuth:
         headers: Optional[dict] = None,
         method: Optional[str] = "GET",
     ):
-        if region is None:
-            region = os.environ.get("AWS_REGION")
-
         if body is not None:
             body = json.dumps(body)
         else:
