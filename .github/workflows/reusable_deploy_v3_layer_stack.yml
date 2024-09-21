@@ -207,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
-          path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
+          path: ./layer_v3/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
