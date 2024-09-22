@@ -42,8 +42,7 @@ class SigV4Auth:
 
     Examples
     --------
-    **Using default credentials**
-    >>> from aws_lambda_powertools.utilities.auth import SigV4Auth
+    >>> from aws_lambda_powertools.utilities.auth import SigV4Auth, ServicePrefix
     >>> prepped = SigV4Auth.prepare_request(region="us-east-2", service=ServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
@@ -101,8 +100,7 @@ class SigV4aAuth:
 
     Examples
     --------
-    **Using default credentials**
-    >>> from aws_lambda_powertools.utilities.iam import SigV4aAuth
+    >>> from aws_lambda_powertools.utilities.iam import SigV4aAuth, ServicePrefix
     >>> prepped = SigV4aAuth.prepare_request(region="us-east-2", service=ServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
