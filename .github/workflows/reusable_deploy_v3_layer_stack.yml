@@ -204,7 +204,7 @@ jobs:
           cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
           path: ./layer_v3/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
