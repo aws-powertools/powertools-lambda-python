@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -2119,7 +2119,7 @@
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Retrieve one or multiple parameters from the underlying provider</li>
-<li>Cache parameter values for a given amount of time (defaults to 5 seconds)</li>
+<li>Cache parameter values for a given amount of time (defaults to 5 minutes)</li>
 <li>Transform parameter values from JSON or base 64 encoded strings</li>
 <li>Bring Your Own Parameter Store Provider</li>
 </ul>
@@ -2675,7 +2675,7 @@
 <td><strong>Max Age</strong></td>
 <td>Adjusts for how long values are kept in cache (in seconds).</td>
 <td><code>POWERTOOLS_PARAMETERS_MAX_AGE</code></td>
-<td><code>5</code></td>
+<td><code>300</code></td>
 </tr>
 <tr>
 <td><strong>Debug Sample Rate</strong></td>
@@ -2692,7 +2692,7 @@
 <summary>Tip</summary>
 <p><code>max_age</code> parameter is also available in underlying provider functions like <code>get()</code>, <code>get_multiple()</code>, etc.</p>
 </details>
-<p>By default, we cache parameters retrieved in-memory for 5 seconds. If you want to change this default value and set the same TTL for all parameters, you can set the <code>POWERTOOLS_PARAMETERS_MAX_AGE</code> environment variable. <strong>You can still set <code>max_age</code> for individual parameters</strong>.</p>
+<p>By default, we cache parameters retrieved in-memory for 300 seconds (5 minutes). If you want to change this default value and set the same TTL for all parameters, you can set the <code>POWERTOOLS_PARAMETERS_MAX_AGE</code> environment variable. <strong>You can still set <code>max_age</code> for individual parameters</strong>.</p>
 <p>You can adjust how long we should keep values in cache by using the param <code>max_age</code>, when using  <code>get_parameter()</code>, <code>get_parameters()</code> and <code>get_secret()</code> methods across all providers.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="single_ssm_parameter_with_cachepy" name="__tabbed_7" type="radio" /><input id="recursive_ssm_parameter_with_cachepy" name="__tabbed_7" type="radio" /><input id="secret_with_cachepy" name="__tabbed_7" type="radio" /><input id="appconfig_with_cachepy" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="single_ssm_parameter_with_cachepy">single_ssm_parameter_with_cache.py</label><label for="recursive_ssm_parameter_with_cachepy">recursive_ssm_parameter_with_cache.py</label><label for="secret_with_cachepy">secret_with_cache.py</label><label for="appconfig_with_cachepy">appconfig_with_cache.py</label></div>
 <div class="tabbed-content">
@@ -4662,7 +4662,7 @@
 </span>
 <span class="c1"># construct boto clients with any custom configuration</span>
 <span class="n">ssm</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;ssm&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
-<span class="n">secrets</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;secrets&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="n">secrets</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;secretsmanager&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 <span class="n">appconfig</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;appconfigdata&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 <span class="n">dynamodb</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;dynamodb&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 
@@ -4679,7 +4679,7 @@
 <p>Injecting a custom boto3 client can make unit/snapshot testing easier, including SDK customizations.</p>
 </details>
 <h3 id="customizing-boto-configuration">Customizing boto configuration<a class="headerlink" href="#customizing-boto-configuration" title="Permanent link">&para;</a></h3>
-<p>The <strong><code>config</code></strong> , <strong><code>boto3_session</code></strong>, and <strong><code>boto3_client</code></strong>  parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a>, <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a>, or  a <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html" target="_blank">boto3 client</a> when constructing any of the built-in provider classes.</p>
+<p>The <strong><code>boto_config</code></strong> , <strong><code>boto3_session</code></strong>, and <strong><code>boto3_client</code></strong>  parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a>, <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a>, or  a <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html" target="_blank">boto3 client</a> when constructing any of the built-in provider classes.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.</p>
@@ -4733,7 +4733,7 @@
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities</span> <span class="kn">import</span> <span class="n">parameters</span>
 
 <span class="hll"><span class="n">boto_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
-</span><span class="hll"><span class="n">ssm_provider</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">SSMProvider</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">)</span>
+</span><span class="hll"><span class="n">ssm_provider</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">SSMProvider</span><span class="p">(</span><span class="n">boto_config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">)</span>
 </span>
 
 <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -5038,7 +5038,7 @@ object named <code>get_parameter_mock</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-03-22
+    2024-08-06
   </span>
 
     

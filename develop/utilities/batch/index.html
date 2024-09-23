@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -1230,15 +1230,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#whats-the-difference-between-the-decorator-and-process_partial_response-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's the difference between the decorator and process_partial_response functions?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#integrating-exception-handling-with-sentryio" class="md-nav__link">
     <span class="md-ellipsis">
       Integrating exception handling with Sentry.io
@@ -2102,15 +2093,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#whats-the-difference-between-the-decorator-and-process_partial_response-functions" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's the difference between the decorator and process_partial_response functions?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#integrating-exception-handling-with-sentryio" class="md-nav__link">
     <span class="md-ellipsis">
       Integrating exception handling with Sentry.io
@@ -2552,7 +2534,7 @@
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="recommended" name="__tabbed_2" type="radio" /><input id="as-a-context-manager" name="__tabbed_2" type="radio" /><input id="as-a-decorator-legacy" name="__tabbed_2" type="radio" /><input id="sample-response" name="__tabbed_2" type="radio" /><input id="sample-event" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="recommended">Recommended</label><label for="as-a-context-manager">As a context manager</label><label for="as-a-decorator-legacy">As a decorator (legacy)</label><label for="sample-response">Sample response</label><label for="sample-event">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="recommended" name="__tabbed_2" type="radio" /><input id="as-a-context-manager" name="__tabbed_2" type="radio" /><input id="sample-response" name="__tabbed_2" type="radio" /><input id="sample-event" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="recommended">Recommended</label><label for="as-a-context-manager">As a context manager</label><label for="sample-response">Sample response</label><label for="sample-event">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2680,66 +2662,6 @@
 </span></code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">BatchProcessor</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">EventType</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">batch_processor</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-
-
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
-</span>    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">body</span>
-    <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
-        <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
 <p>The second record failed to be processed, therefore the processor added its message ID in the response.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -2836,7 +2758,7 @@
 <p>When working with <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" target="_blank">SQS FIFO queues</a>, a batch may include messages from different group IDs.</p>
 <p>By default, we will stop processing at the first failure and mark unprocessed messages as failed to preserve ordering. However, this behavior may not be optimal for customers who wish to proceed with processing messages from a different group ID.</p>
 <p>Enable the <code>skip_group_on_error</code> option for seamless processing of messages from various group IDs. This setup ensures that messages from a failed group ID are sent back to SQS, enabling uninterrupted processing of messages from the subsequent group ID.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:4"><input checked="checked" id="recommended_1" name="__tabbed_3" type="radio" /><input id="as-a-context-manager_1" name="__tabbed_3" type="radio" /><input id="as-a-decorator-legacy_1" name="__tabbed_3" type="radio" /><input id="enabling-skip_group_on_error-flag" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="recommended_1">Recommended</label><label for="as-a-context-manager_1">As a context manager</label><label for="as-a-decorator-legacy_1">As a decorator (legacy)</label><label for="enabling-skip_group_on_error-flag">Enabling skip_group_on_error flag</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="recommended_1" name="__tabbed_3" type="radio" /><input id="as-a-context-manager_1" name="__tabbed_3" type="radio" /><input id="enabling-skip_group_on_error-flag" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="recommended_1">Recommended</label><label for="as-a-context-manager_1">As a context manager</label><label for="enabling-skip_group_on_error-flag">Enabling skip_group_on_error flag</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2970,64 +2892,6 @@
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-<span class="hll">    <span class="n">SqsFifoPartialProcessor</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">batch_processor</span><span class="p">,</span>
-</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">SqsFifoPartialProcessor</span><span class="p">()</span>
-</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-
-
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">body</span>
-    <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
-        <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
 <span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span class="hll">    <span class="n">SqsFifoPartialProcessor</span><span class="p">,</span>
@@ -3065,7 +2929,7 @@
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:5"><input checked="checked" id="recommended_2" name="__tabbed_4" type="radio" /><input id="as-a-context-manager_2" name="__tabbed_4" type="radio" /><input id="as-a-decorator-legacy_2" name="__tabbed_4" type="radio" /><input id="sample-response_1" name="__tabbed_4" type="radio" /><input id="sample-event_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="recommended_2">Recommended</label><label for="as-a-context-manager_2">As a context manager</label><label for="as-a-decorator-legacy_2">As a decorator (legacy)</label><label for="sample-response_1">Sample response</label><label for="sample-event_1">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:4"><input checked="checked" id="recommended_2" name="__tabbed_4" type="radio" /><input id="as-a-context-manager_2" name="__tabbed_4" type="radio" /><input id="sample-response_1" name="__tabbed_4" type="radio" /><input id="sample-event_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="recommended_2">Recommended</label><label for="as-a-context-manager_2">As a context manager</label><label for="sample-response_1">Sample response</label><label for="sample-event_1">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3185,64 +3049,6 @@
 </span></code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">BatchProcessor</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">EventType</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">batch_processor</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.kinesis_stream_event</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">KinesisStreamRecord</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">KinesisDataStreams</span><span class="p">)</span>
-</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-
-
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">KinesisStreamRecord</span><span class="p">):</span>
-</span>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">kinesis</span><span class="o">.</span><span class="n">data_as_text</span><span class="p">)</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">kinesis</span><span class="o">.</span><span class="n">data_as_json</span><span class="p">()</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-
-
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
 <p>The second record failed to be processed, therefore the processor added its sequence number in the response.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -3345,7 +3151,7 @@
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:5"><input checked="checked" id="recommended_3" name="__tabbed_5" type="radio" /><input id="as-a-context-manager_3" name="__tabbed_5" type="radio" /><input id="as-a-decorator-legacy_3" name="__tabbed_5" type="radio" /><input id="sample-response_2" name="__tabbed_5" type="radio" /><input id="sample-event_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="recommended_3">Recommended</label><label for="as-a-context-manager_3">As a context manager</label><label for="as-a-decorator-legacy_3">As a decorator (legacy)</label><label for="sample-response_2">Sample response</label><label for="sample-event_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:4"><input checked="checked" id="recommended_3" name="__tabbed_5" type="radio" /><input id="as-a-context-manager_3" name="__tabbed_5" type="radio" /><input id="sample-response_2" name="__tabbed_5" type="radio" /><input id="sample-event_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="recommended_3">Recommended</label><label for="as-a-context-manager_3">As a context manager</label><label for="sample-response_2">Sample response</label><label for="sample-event_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3483,74 +3289,6 @@
 
 <span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
 </span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">BatchProcessor</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">EventType</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">batch_processor</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">DynamoDBRecord</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">DynamoDBStreams</span><span class="p">)</span>
-</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-
-
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">DynamoDBRecord</span><span class="p">):</span>
-</span>    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span><span class="p">)</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Message&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
-            <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-
-
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <p>The second record failed to be processed, therefore the processor added its sequence number in the response.</p>
@@ -4353,7 +4091,7 @@
     <span class="n">EventType</span><span class="p">,</span>
     <span class="n">process_partial_response</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">validator</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">field_validator</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="p">(</span>
 <span class="hll">    <span class="n">DynamoDBStreamChangedRecordModel</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">DynamoDBStreamRecordModel</span><span class="p">,</span>
@@ -4370,7 +4108,7 @@
 
     <span class="c1"># auto transform json string</span>
     <span class="c1"># so Pydantic can auto-initialize nested Order model</span>
-    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;Message&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;Message&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">transform_message_to_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">])</span>
 
@@ -4624,11 +4362,9 @@
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -4655,7 +4391,7 @@
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="n">batch</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>  <span class="c1"># (1)!</span>
 </span><span class="hll">    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">):</span>
-</span><span class="hll">        <span class="n">processed_messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+</span><span class="hll">        <span class="n">processed_messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
 </span><span class="hll">
 </span><span class="hll">    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">processed_messages</span><span class="p">:</span>
 </span><span class="hll">        <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -4745,7 +4481,7 @@
 <h3 id="accessing-lambda-context">Accessing Lambda Context<a class="headerlink" href="#accessing-lambda-context" title="Permanent link">&para;</a></h3>
 <p>Within your <code>record_handler</code> function, you might need access to the Lambda context to determine how much time you have left before your function times out.</p>
 <p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" rel="nofollow" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="recommended_4" name="__tabbed_10" type="radio" /><input id="as-a-decorator-legacy_4" name="__tabbed_10" type="radio" /><input id="as-a-context-manager_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="recommended_4">Recommended</label><label for="as-a-decorator-legacy_4">As a decorator (legacy)</label><label for="as-a-context-manager_4">As a context manager</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="recommended_4" name="__tabbed_10" type="radio" /><input id="as-a-context-manager_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="recommended_4">Recommended</label><label for="as-a-context-manager_4">As a context manager</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4802,64 +4538,6 @@
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BatchProcessor</span><span class="p">,</span>
-    <span class="n">EventType</span><span class="p">,</span>
-    <span class="n">batch_processor</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-
-
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LambdaContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-</span>    <span class="k">if</span> <span class="n">lambda_context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">remaining_time</span> <span class="o">=</span> <span class="n">lambda_context</span><span class="o">.</span><span class="n">get_remaining_time_in_millis</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">remaining_time</span><span class="p">)</span>
-
-
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
-<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5580,9 +5258,6 @@
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <h3 id="choosing-between-method-and-context-manager">Choosing between method and context manager<a class="headerlink" href="#choosing-between-method-and-context-manager" title="Permanent link">&para;</a></h3>
 <p>Use context manager when you want access to the processed messages or handle <code>BatchProcessingError</code> exception when all records within the batch fail to be processed.</p>
-<h3 id="whats-the-difference-between-the-decorator-and-process_partial_response-functions">What's the difference between the decorator and process_partial_response functions?<a class="headerlink" href="#whats-the-difference-between-the-decorator-and-process_partial_response-functions" title="Permanent link">&para;</a></h3>
-<p><code>batch_processor</code> and <code>async_batch_processor</code> decorators are now considered legacy. Historically, they were kept due to backwards compatibility and to minimize code changes between V1 and V2.</p>
-<p>As 2.12.0, <code>process_partial_response</code> and <code>async_process_partial_response</code> are the recommended instead. It reduces boilerplate, smaller memory/CPU cycles, and it makes it less error prone - e.g., decorators required an additional return.</p>
 <h3 id="integrating-exception-handling-with-sentryio">Integrating exception handling with Sentry.io<a class="headerlink" href="#integrating-exception-handling-with-sentryio" title="Permanent link">&para;</a></h3>
 <p>When using Sentry.io for error monitoring, you can override <code>failure_handler</code> to capture each processing exception with Sentry SDK:</p>
 <blockquote>
@@ -5626,7 +5301,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-07-10
+    2024-09-12
   </span>
 
     

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -2013,7 +2013,7 @@
 </span><span class="w">    </span><span class="nt">Layers</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Find the latest Layer version in the official documentation</span>
 <span class="w">      </span><span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:79</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:1</span>
 
 <span class="nt">Resources</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">CaptureLambdaHandlerExample</span><span class="p">:</span>
@@ -2480,7 +2480,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
-<span class="n">session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
 <span class="n">s3</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
 
 
@@ -2488,7 +2488,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 </span><span class="k">def</span> <span class="nf">fetch_payment_report</span><span class="p">(</span><span class="n">payment_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StreamingBody</span><span class="p">:</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">BUCKET</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">REPORT_KEY</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">payment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Returning streaming body from S3 object....&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span><span class="p">(</span><span class="n">capture_response</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -1809,12 +1809,12 @@
 <p><strong>Envelope</strong> is the terminology we use for the <strong>JMESPath expression</strong> to extract your JSON object from your data input. We might use those two terms interchangeably.</p>
 </details>
 <h3 id="extracting-data">Extracting data<a class="headerlink" href="#extracting-data" title="Permanent link">&para;</a></h3>
-<p>You can use the <code>extract_data_from_envelope</code> function with any <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expression</a>.</p>
+<p>You can use the <code>query</code> function with any <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expression</a>.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>Another common use case is to fetch deeply nested data, filter, flatten, and more.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="extract_data_from_envelopepy" name="__tabbed_1" type="radio" /><input id="extract_data_from_envelopejson" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="extract_data_from_envelopepy">extract_data_from_envelope.py</label><label for="extract_data_from_envelopejson">extract_data_from_envelope.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="querypy" name="__tabbed_1" type="radio" /><input id="extract_data_from_envelopejson" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="querypy">query.py</label><label for="extract_data_from_envelopejson">extract_data_from_envelope.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1828,16 +1828,16 @@
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
-<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="n">extract_data_from_envelope</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="n">query</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 
 <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="hll">    <span class="n">payload</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(body)&quot;</span><span class="p">)</span>
+<span class="hll">    <span class="n">payload</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(body)&quot;</span><span class="p">)</span>
 </span>    <span class="n">customer_id</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customerId&quot;</span><span class="p">)</span>  <span class="c1"># now deserialized</span>
 
     <span class="c1"># also works for fetching and flattening deeply nested data</span>
-<span class="hll">    <span class="n">some_data</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;deeply_nested[*].some_data[]&quot;</span><span class="p">)</span>
+<span class="hll">    <span class="n">some_data</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;deeply_nested[*].some_data[]&quot;</span><span class="p">)</span>
 </span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;customer_id&quot;</span><span class="p">:</span> <span class="n">customer_id</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="n">some_data</span><span class="p">,</span> <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -1892,21 +1892,21 @@
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
-<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-</span><span class="hll">
-</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="p">(</span>
-</span>    <span class="n">envelopes</span><span class="p">,</span>
-    <span class="n">extract_data_from_envelope</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-<span class="hll">
-</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span class="hll">    <span class="n">envelopes</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">query</span><span class="p">,</span>
+</span><span class="hll"><span class="p">)</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="n">records</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>  <span class="c1"># records is a list</span>
+<span class="hll">    <span class="n">records</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
+</span>    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>  <span class="c1"># records is a list</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customerId&quot;</span><span class="p">))</span>  <span class="c1"># now deserialized</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">}</span>
@@ -1962,60 +1962,74 @@
 <tr>
 <th>Envelope</th>
 <th>JMESPath expression</th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong><code>API_GATEWAY_HTTP</code></strong></td>
 <td><code>powertools_json(body)</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>API_GATEWAY_REST</code></strong></td>
 <td><code>powertools_json(body)</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>CLOUDWATCH_EVENTS_SCHEDULED</code></strong></td>
 <td><code>detail</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>CLOUDWATCH_LOGS</code></strong></td>
 <td><code>awslogs.powertools_base64_gzip(data)                                                     | powertools_json(@).logEvents[*]</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>EVENTBRIDGE</code></strong></td>
 <td><code>detail</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>KINESIS_DATA_STREAM</code></strong></td>
 <td><code>Records[*].kinesis.powertools_json(powertools_base64(data))</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>S3_EVENTBRIDGE_SQS</code></strong></td>
 <td><code>Records[*].powertools_json(body).detail</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>S3_KINESIS_FIREHOSE</code></strong></td>
 <td><code>records[*].powertools_json(powertools_base64(data)).Records[0]</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>S3_SNS_KINESIS_FIREHOSE</code></strong></td>
 <td><code>records[*].powertools_json(powertools_base64(data)).powertools_json(Message).Records[0]</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>S3_SNS_SQS</code></strong></td>
 <td><code>Records[*].powertools_json(body).powertools_json(Message).Records[0]</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>S3_SQS</code></strong></td>
 <td><code>Records[*].powertools_json(body).Records[0]</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>SNS</code></strong></td>
 <td><code>Records[0].Sns.Message                                                                   | powertools_json(@)</code></td>
+<td></td>
 </tr>
 <tr>
 <td><strong><code>SQS</code></strong></td>
 <td><code>Records[*].powertools_json(body)</code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -2099,10 +2113,10 @@
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="hll"><span class="kn">import</span> <span class="nn">powertools_json_jmespath_schema</span> <span class="k">as</span> <span class="nn">schemas</span>
-</span><span class="kn">from</span> <span class="nn">jmespath.exceptions</span> <span class="kn">import</span> <span class="n">JMESPathTypeError</span>
-
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
+</span><span class="hll"><span class="kn">from</span> <span class="nn">jmespath.exceptions</span> <span class="kn">import</span> <span class="n">JMESPathTypeError</span>
+</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
 
 
 <span class="nd">@dataclass</span>
@@ -2130,7 +2144,7 @@
 <span class="hll">        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(payload)&quot;</span><span class="p">)</span>
 </span>
         <span class="c1"># Deserialize JSON string order as dict</span>
-        <span class="c1"># alternatively, extract_data_from_envelope works here too</span>
+        <span class="c1"># alternatively, query works here too</span>
         <span class="n">order_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;payload&quot;</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="p">{</span>
@@ -2480,9 +2494,9 @@
 <span class="hll"><span class="kn">import</span> <span class="nn">powertools_base64_jmespath_schema</span> <span class="k">as</span> <span class="nn">schemas</span>
 </span><span class="kn">from</span> <span class="nn">jmespath.exceptions</span> <span class="kn">import</span> <span class="n">JMESPathTypeError</span>
 
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
-
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
+</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Order</span><span class="p">:</span>
@@ -2506,9 +2520,9 @@
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="c1"># Try to validate the schema</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(powertools_base64(payload))&quot;</span><span class="p">)</span>
-<span class="hll">
-</span>        <span class="c1"># alternatively, extract_data_from_envelope works here too</span>
+<span class="hll">        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(powertools_base64(payload))&quot;</span><span class="p">)</span>
+</span>
+        <span class="c1"># alternatively, query works here too</span>
         <span class="n">payload_decoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
 
         <span class="n">order_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload_decoded</span><span class="p">)</span>
@@ -2518,17 +2532,17 @@
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;order created&quot;</span><span class="p">,</span>
             <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
-    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
-<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span>
-</span>            <span class="s2">&quot;The powertools_json(powertools_base64()) envelope function must match a valid path.&quot;</span><span class="p">,</span>
+<span class="hll">    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
+</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span>
+            <span class="s2">&quot;The powertools_json(powertools_base64()) envelope function must match a valid path.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
-<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be a valid base64 encoded string&quot;</span><span class="p">)</span>
-</span>    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be valid JSON (base64 encoded).&quot;</span><span class="p">)</span>
-</span>    <span class="k">except</span> <span class="n">SchemaValidationError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-<span class="hll">        <span class="c1"># SchemaValidationError indicates where a data mismatch is</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exception</span><span class="p">))</span>
+<span class="hll">    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be a valid base64 encoded string&quot;</span><span class="p">)</span>
+<span class="hll">    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be valid JSON (base64 encoded).&quot;</span><span class="p">)</span>
+<span class="hll">    <span class="k">except</span> <span class="n">SchemaValidationError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+</span>        <span class="c1"># SchemaValidationError indicates where a data mismatch is</span>
+        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exception</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">return_error_message</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -2701,7 +2715,7 @@
     <span class="k">try</span><span class="p">:</span>
 <span class="hll">        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_base64_gzip(payload) | powertools_json(@)&quot;</span><span class="p">)</span>
 </span>
-        <span class="c1"># Alternatively, extract_data_from_envelope works here too</span>
+        <span class="c1"># Alternatively, query works here too</span>
         <span class="n">encoded_payload</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">])</span>
         <span class="n">uncompressed_payload</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">encoded_payload</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
         <span class="n">log</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">uncompressed_payload</span><span class="p">)</span>
@@ -2899,7 +2913,7 @@
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="p">(</span>
 <span class="hll">    <span class="n">PowertoolsFunctions</span><span class="p">,</span>
-</span>    <span class="n">extract_data_from_envelope</span><span class="p">,</span>
+</span>    <span class="n">query</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -2919,7 +2933,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">logs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">logs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">extract_data_from_envelope</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
                 <span class="c1"># NOTE: Use the prefix `_func_` before the name of the function</span>
                 <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;Records[*].decode_zlib_compression(log)&quot;</span><span class="p">,</span>
@@ -2981,7 +2995,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2023-07-28
+    2024-08-08
   </span>
 
     

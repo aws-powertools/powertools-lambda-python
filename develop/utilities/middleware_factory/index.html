@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -1867,15 +1867,14 @@
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">envelopes</span><span class="p">,</span>
-    <span class="n">extract_data_from_envelope</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -1889,32 +1888,31 @@
     <span class="n">payment_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">PaymentError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="o">...</span>
+<span class="k">class</span> <span class="nc">PaymentError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="o">...</span>
 
 
-<span class="hll"><span class="nd">@lambda_handler_decorator</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_before</span><span class="p">(</span>
-</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
-    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="nd">@lambda_handler_decorator</span>
+<span class="hll"><span class="k">def</span> <span class="nf">middleware_before</span><span class="p">(</span>
+</span><span class="hll">    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+</span>    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="c1"># extract payload from a EventBridge event</span>
-    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
 
     <span class="c1"># check if status_id exists in payload, otherwise add default state before processing payment</span>
-<span class="hll">    <span class="k">if</span> <span class="s2">&quot;status_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detail</span><span class="p">:</span>
-</span><span class="hll">        <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;status_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pending&quot;</span>
-</span>
-<span class="hll">    <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-</span>
-    <span class="k">return</span> <span class="n">response</span>
+    <span class="k">if</span> <span class="s2">&quot;status_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detail</span><span class="p">:</span>
+<span class="hll">        <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;status_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pending&quot;</span>
+</span><span class="hll">
+</span>    <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<span class="hll">
+</span>    <span class="k">return</span> <span class="n">response</span>
 
 
-<span class="hll"><span class="nd">@middleware_before</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span>    <span class="k">try</span><span class="p">:</span>
-        <span class="n">payment_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+<span class="nd">@middleware_before</span>
+<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">try</span><span class="p">:</span>
+</span>        <span class="n">payment_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">Payment</span><span class="p">(</span><span class="o">**</span><span class="n">payment_payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;payment created&quot;</span><span class="p">,</span>
@@ -2130,8 +2128,7 @@
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
@@ -2139,7 +2136,7 @@
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">envelopes</span><span class="p">,</span>
-    <span class="n">extract_data_from_envelope</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -2156,24 +2153,23 @@
     <span class="n">booking_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">BookingError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="o">...</span>
+<span class="k">class</span> <span class="nc">BookingError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span> <span class="o">...</span>
 
 
-<span class="hll"><span class="nd">@lambda_handler_decorator</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">obfuscate_sensitive_data</span><span class="p">(</span>
-</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
-    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="nd">@lambda_handler_decorator</span>
+<span class="hll"><span class="k">def</span> <span class="nf">obfuscate_sensitive_data</span><span class="p">(</span>
+</span><span class="hll">    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+</span>    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="c1"># extracting payload from a EventBridge event</span>
-    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
     <span class="n">guest_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">detail</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;guest&quot;</span><span class="p">)</span>
 
-<span class="hll">    <span class="c1"># Obfuscate fields (email, vat, passport) before calling Lambda handler</span>
-</span>    <span class="k">for</span> <span class="n">guest_field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">guest_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guest_field</span><span class="p">):</span>
+    <span class="c1"># Obfuscate fields (email, vat, passport) before calling Lambda handler</span>
+<span class="hll">    <span class="k">for</span> <span class="n">guest_field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+</span>        <span class="k">if</span> <span class="n">guest_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guest_field</span><span class="p">):</span>
             <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;guest&quot;</span><span class="p">][</span><span class="n">guest_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">obfuscate_data</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">guest_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guest_field</span><span class="p">)))</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
@@ -2186,10 +2182,10 @@
     <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
 
 
-<span class="hll"><span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span>    <span class="k">try</span><span class="p">:</span>
-        <span class="n">booking_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+<span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
+<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">try</span><span class="p">:</span>
+</span>        <span class="n">booking_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;book&quot;</span><span class="p">:</span> <span class="n">Booking</span><span class="p">(</span><span class="o">**</span><span class="n">booking_payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;booking created&quot;</span><span class="p">,</span>
@@ -2642,9 +2638,9 @@
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.exceptions</span> <span class="kn">import</span> <span class="n">InternalServerError</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">JSONType</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="n">extract_data_from_envelope</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags.types</span> <span class="kn">import</span> <span class="n">JSONType</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="n">query</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
 
@@ -2675,8 +2671,8 @@
         <span class="p">}</span>
 
     <span class="c1"># extracting headers and requestContext from event</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;headers&quot;</span><span class="p">)</span>
-    <span class="n">request_context</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;requestContext&quot;</span><span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;headers&quot;</span><span class="p">)</span>
+    <span class="n">request_context</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;requestContext&quot;</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X-Customer-Id =&gt; </span><span class="si">{</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;X-Customer-Id&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">tracer</span><span class="o">.</span><span class="n">put_annotation</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;CustomerId&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;X-Customer-Id&quot;</span><span class="p">))</span>

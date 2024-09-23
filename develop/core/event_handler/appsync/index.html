@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -2405,8 +2405,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
@@ -2414,7 +2413,6 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -2921,13 +2919,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
@@ -3038,16 +3034,14 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
 
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.tracing</span> <span class="kn">import</span> <span class="n">aiohttp_trace_config</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -3172,13 +3166,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -3195,16 +3187,16 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
     <span class="n">commonField</span><span class="p">:</span> <span class="nb">str</span>
 
 
-<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;listLocations&quot;</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">list_locations</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
-</span>    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Smooth Grooves&quot;</span><span class="p">}]</span>
-
+<span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;listLocations&quot;</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">list_locations</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
+</span><span class="hll">    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Smooth Grooves&quot;</span><span class="p">}]</span>
+</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;commonField&quot;</span><span class="p">)</span>
-<span class="hll"><span class="k">def</span> <span class="nf">common_field</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span class="hll">    <span class="c1"># Would match all fieldNames matching &#39;commonField&#39;</span>
-</span>    <span class="k">return</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">()</span>
-
+<span class="k">def</span> <span class="nf">common_field</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="hll">    <span class="c1"># Would match all fieldNames matching &#39;commonField&#39;</span>
+</span><span class="hll">    <span class="k">return</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">()</span>
+</span>
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">APPSYNC_RESOLVER</span><span class="p">)</span>
@@ -3254,13 +3246,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -3474,13 +3464,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync_resolver_event</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span class="hll">    <span class="n">AppSyncResolverEvent</span><span class="p">,</span>
@@ -3503,19 +3491,19 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="hll"><span class="k">class</span> <span class="nc">MyCustomModel</span><span class="p">(</span><span class="n">AppSyncResolverEvent</span><span class="p">):</span>
 </span><span class="hll">    <span class="nd">@property</span>
 </span><span class="hll">    <span class="k">def</span> <span class="nf">country_viewer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;cloudfront-viewer-country&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cloudfront-viewer-country&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
-<span class="hll">    <span class="nd">@property</span>
-</span><span class="hll">    <span class="k">def</span> <span class="nf">api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
+    <span class="nd">@property</span>
+<span class="hll">    <span class="k">def</span> <span class="nf">api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span class="hll">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">type_name</span><span class="o">=</span><span class="s2">&quot;Query&quot;</span><span class="p">,</span> <span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;listLocations&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">list_locations</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
     <span class="c1"># additional properties/methods will now be available under current_event</span>
-<span class="hll">    <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="p">:</span>
-</span>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request country origin: </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">country_viewer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
-    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Perry, James and Carroll&quot;</span><span class="p">}]</span>
+    <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="p">:</span>
+<span class="hll">        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request country origin: </span><span class="si">{</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">country_viewer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
+</span>    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Perry, James and Carroll&quot;</span><span class="p">}]</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
@@ -3648,13 +3636,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.graphql_appsync.router</span> <span class="kn">import</span> <span class="n">Router</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
+</span>
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 <span class="hll"><span class="n">router</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
@@ -3786,12 +3772,10 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.graphql_appsync.router</span> <span class="kn">import</span> <span class="n">Router</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.appsync</span> <span class="kn">import</span> <span class="n">Router</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
@@ -4966,20 +4950,18 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
-<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">AppSyncResolver</span><span class="p">()</span>
+<span class="hll">
 </span>
-
 <span class="k">class</span> <span class="nc">Location</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># noqa AA03 VNE003, required due to GraphQL Schema</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -5216,16 +5198,14 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypedDict</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.tracing</span> <span class="kn">import</span> <span class="n">aiohttp_trace_config</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -5367,7 +5347,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-06-26
+    2024-09-12
   </span>
 
     

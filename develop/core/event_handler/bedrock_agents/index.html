@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -3892,24 +3892,26 @@ use a combination of <a href="https://docs.pydantic.dev/latest/concepts/models/"
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">BedrockAgentResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.openapi.params</span> <span class="kn">import</span> <span class="n">Body</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">Annotated</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 <span class="n">app</span> <span class="o">=</span> <span class="n">BedrockAgentResolver</span><span class="p">()</span>
 
-
-<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_time&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Gets the current time&quot;</span><span class="p">)</span>
+<span class="hll">
+</span><span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_time&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Gets the current time&quot;</span><span class="p">)</span>
 </span><span class="hll"><span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
 </span><span class="hll"><span class="k">def</span> <span class="nf">current_time</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Body</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Current time in milliseconds&quot;</span><span class="p">)]:</span>
-</span><span class="hll">    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-</span>
+</span>    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>

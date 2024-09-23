@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -6173,10 +6173,7 @@ This means there could be differences in whitespace even when the JSON payload i
 <span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -6205,9 +6202,8 @@ This means there could be differences in whitespace even when the JSON payload i
         <span class="n">boto_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">boto3_session</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">boto_config</span> <span class="o">=</span> <span class="n">boto_config</span> <span class="ow">or</span> <span class="n">Config</span><span class="p">()</span>
-        <span class="n">session</span> <span class="o">=</span> <span class="n">boto3_session</span> <span class="ow">or</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ddb_resource</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;dynamodb&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">)</span>
+        <span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3_session</span> <span class="ow">or</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ddb_resource</span> <span class="o">=</span> <span class="n">boto3_session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;dynamodb&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">boto_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ddb_resource</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span> <span class="o">=</span> <span class="n">key_attr</span>
@@ -6215,7 +6211,7 @@ This means there could be differences in whitespace even when the JSON payload i
         <span class="bp">self</span><span class="o">.</span><span class="n">status_attr</span> <span class="o">=</span> <span class="n">status_attr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_attr</span> <span class="o">=</span> <span class="n">data_attr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validation_key_attr</span> <span class="o">=</span> <span class="n">validation_key_attr</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MyOwnPersistenceLayer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_item_to_data_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DataRecord</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -6240,18 +6236,18 @@ This means there could be differences in whitespace even when the JSON payload i
             <span class="n">payload_hash</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_key_attr</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
-<span class="hll">    <span class="k">def</span> <span class="nf">_get_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataRecord</span><span class="p">:</span>
-</span>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">idempotency_key</span><span class="p">},</span> <span class="n">ConsistentRead</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="nf">_get_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataRecord</span><span class="p">:</span>
+<span class="hll">        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">idempotency_key</span><span class="p">},</span> <span class="n">ConsistentRead</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;Item&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">IdempotencyItemNotFoundError</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_to_data_record</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-<span class="hll">    <span class="k">def</span> <span class="nf">_put_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span>        <span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_put_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="hll">        <span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
+</span>            <span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">expiry_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">expiry_timestamp</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">status_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
         <span class="p">}</span>
@@ -6271,9 +6267,9 @@ This means there could be differences in whitespace even when the JSON payload i
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to put record for already existing idempotency key: </span><span class="si">{</span><span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">IdempotencyItemAlreadyExistsError</span>
 
-<span class="hll">    <span class="k">def</span> <span class="nf">_update_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">):</span>
-</span>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating record for idempotency key: </span><span class="si">{</span><span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">update_expression</span> <span class="o">=</span> <span class="s2">&quot;SET #response_data = :response_data, #expiry = :expiry, #status = :status&quot;</span>
+    <span class="k">def</span> <span class="nf">_update_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">):</span>
+<span class="hll">        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating record for idempotency key: </span><span class="si">{</span><span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span>        <span class="n">update_expression</span> <span class="o">=</span> <span class="s2">&quot;SET #response_data = :response_data, #expiry = :expiry, #status = :status&quot;</span>
         <span class="n">expression_attr_values</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;:expiry&quot;</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">expiry_timestamp</span><span class="p">,</span>
             <span class="s2">&quot;:response_data&quot;</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">response_data</span><span class="p">,</span>
@@ -6290,20 +6286,18 @@ This means there could be differences in whitespace even when the JSON payload i
             <span class="n">expression_attr_values</span><span class="p">[</span><span class="s2">&quot;:validation_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_record</span><span class="o">.</span><span class="n">payload_hash</span>
             <span class="n">expression_attr_names</span><span class="p">[</span><span class="s2">&quot;#validation_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_key_attr</span>
 
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Key&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="p">},</span>
-            <span class="s2">&quot;UpdateExpression&quot;</span><span class="p">:</span> <span class="n">update_expression</span><span class="p">,</span>
-            <span class="s2">&quot;ExpressionAttributeValues&quot;</span><span class="p">:</span> <span class="n">expression_attr_values</span><span class="p">,</span>
-            <span class="s2">&quot;ExpressionAttributeNames&quot;</span><span class="p">:</span> <span class="n">expression_attr_names</span><span class="p">,</span>
-        <span class="p">}</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">update_item</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="hll">    <span class="k">def</span> <span class="nf">_delete_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleting record for idempotency key: </span><span class="si">{</span><span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">delete_item</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">update_item</span><span class="p">(</span>
             <span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="p">},</span>
+            <span class="n">UpdateExpression</span><span class="o">=</span><span class="n">update_expression</span><span class="p">,</span>
+            <span class="n">ExpressionAttributeValues</span><span class="o">=</span><span class="n">expression_attr_values</span><span class="p">,</span>
+            <span class="n">ExpressionAttributeNames</span><span class="o">=</span><span class="n">expression_attr_names</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_delete_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_record</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleting record for idempotency key: </span><span class="si">{</span><span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">delete_item</span><span class="p">(</span>
+<span class="hll">            <span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_attr</span><span class="p">:</span> <span class="n">data_record</span><span class="o">.</span><span class="n">idempotency_key</span><span class="p">},</span>
+</span>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <details class="danger" open="open">
 <summary>Danger</summary>
@@ -6370,10 +6364,7 @@ This means there could be differences in whitespace even when the JSON payload i
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
@@ -6391,26 +6382,25 @@ This means there could be differences in whitespace even when the JSON payload i
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
-<span class="hll"><span class="k">def</span> <span class="nf">my_response_hook</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">idempotent_data</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-</span>    <span class="c1"># Return inserted Header data into the Idempotent Response</span>
-<span class="hll">    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">idempotency_key</span>
-</span>
-    <span class="c1"># expiry_timestamp could be None so include if set</span>
-    <span class="n">expiry_timestamp</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">expiry_timestamp</span>
+<span class="k">def</span> <span class="nf">my_response_hook</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">idempotent_data</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="hll">    <span class="c1"># Return inserted Header data into the Idempotent Response</span>
+</span>    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">idempotency_key</span>
+<span class="hll">
+</span>    <span class="c1"># expiry_timestamp can be None so include if set</span>
+    <span class="n">expiry_timestamp</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">get_expiration_datetime</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">expiry_timestamp</span><span class="p">:</span>
-        <span class="n">expiry_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">expiry_timestamp</span><span class="p">))</span>
-<span class="hll">        <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-expiration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiry_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
-</span>
-    <span class="c1"># Must return the response here</span>
-    <span class="k">return</span> <span class="n">response</span>
+        <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-expiration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiry_timestamp</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+<span class="hll">    <span class="c1"># Must return the response here</span>
+</span>    <span class="k">return</span> <span class="n">response</span>
 
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;IDEMPOTENCY_TABLE&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="n">dynamodb</span> <span class="o">=</span> <span class="n">DynamoDBPersistenceLayer</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="n">table</span><span class="p">)</span>
-<span class="hll"><span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">response_hook</span><span class="o">=</span><span class="n">my_response_hook</span><span class="p">)</span>
-</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">response_hook</span><span class="o">=</span><span class="n">my_response_hook</span><span class="p">)</span>
 
-<span class="nd">@idempotent_function</span><span class="p">(</span><span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">)</span>
+<span class="hll">
+</span><span class="nd">@idempotent_function</span><span class="p">(</span><span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="c1"># create the order_id</span>
     <span class="n">order_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
@@ -7326,7 +7316,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-07-25
+    2024-09-12
   </span>
 
     

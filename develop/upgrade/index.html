@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
     
     
       
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#end-of-support-v1" class="md-skip">
+        <a href="#migrate-to-v3-from-v2" class="md-skip">
           Skip to content
         </a>
       
@@ -508,22 +508,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#end-of-support-v1" class="md-nav__link">
+  <a href="#migrate-to-v3-from-v2" class="md-nav__link">
     <span class="md-ellipsis">
-      End of support v1
+      Migrate to v3 from v2
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrate-to-v2-from-v1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Migrate to v2 from v1
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Migrate to v2 from v1">
+    <nav class="md-nav" aria-label="Migrate to v3 from v2">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -550,45 +541,90 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-sqs-batch-processor" class="md-nav__link">
+  <a href="#drop-support-for-pydantic-v1" class="md-nav__link">
     <span class="md-ellipsis">
-      Legacy SQS Batch Processor
+      Drop support for Pydantic v1
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#event-handler-headers-response-format" class="md-nav__link">
+  <a href="#dynamodbstreammodel-in-parser" class="md-nav__link">
     <span class="md-ellipsis">
-      Event Handler headers response format
+      DynamoDBStreamModel in parser
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dynamodbstreamevent-in-event-source-data-classes" class="md-nav__link">
+  <a href="#new-aws-lambda-layer-arns" class="md-nav__link">
     <span class="md-ellipsis">
-      DynamoDBStreamEvent in Event Source Data Classes
+      New AWS Lambda Layer ARNs
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-flags-and-appconfig-parameter-utility" class="md-nav__link">
+  <a href="#event-handler-headers-are-case-insensitive" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Flags and AppConfig Parameter utility
+      Event Handler: headers are case-insensitive
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#idempotency-partition-key-format" class="md-nav__link">
+  <a href="#deprecated-batch-processing-decorators" class="md-nav__link">
     <span class="md-ellipsis">
-      Idempotency partition key format
+      Deprecated Batch Processing decorators
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-source-default-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event source default values
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-default-cache-ttl-updated-to-5-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters: default cache TTL updated to 5 minutes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-using-the-new-boto_config-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters: using the new boto_config parameter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utilizing-the-new-query-function-in-jmespath-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utilizing the new query function in JMESPath Functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#importing-types-from-typing-and-typing_annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Importing types from typing and typing_annotations
     </span>
   </a>
   
@@ -1634,22 +1670,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#end-of-support-v1" class="md-nav__link">
+  <a href="#migrate-to-v3-from-v2" class="md-nav__link">
     <span class="md-ellipsis">
-      End of support v1
+      Migrate to v3 from v2
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrate-to-v2-from-v1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Migrate to v2 from v1
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Migrate to v2 from v1">
+    <nav class="md-nav" aria-label="Migrate to v3 from v2">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1676,45 +1703,90 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#legacy-sqs-batch-processor" class="md-nav__link">
+  <a href="#drop-support-for-pydantic-v1" class="md-nav__link">
     <span class="md-ellipsis">
-      Legacy SQS Batch Processor
+      Drop support for Pydantic v1
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#event-handler-headers-response-format" class="md-nav__link">
+  <a href="#dynamodbstreammodel-in-parser" class="md-nav__link">
     <span class="md-ellipsis">
-      Event Handler headers response format
+      DynamoDBStreamModel in parser
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dynamodbstreamevent-in-event-source-data-classes" class="md-nav__link">
+  <a href="#new-aws-lambda-layer-arns" class="md-nav__link">
     <span class="md-ellipsis">
-      DynamoDBStreamEvent in Event Source Data Classes
+      New AWS Lambda Layer ARNs
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-flags-and-appconfig-parameter-utility" class="md-nav__link">
+  <a href="#event-handler-headers-are-case-insensitive" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Flags and AppConfig Parameter utility
+      Event Handler: headers are case-insensitive
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#idempotency-partition-key-format" class="md-nav__link">
+  <a href="#deprecated-batch-processing-decorators" class="md-nav__link">
     <span class="md-ellipsis">
-      Idempotency partition key format
+      Deprecated Batch Processing decorators
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-source-default-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event source default values
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-default-cache-ttl-updated-to-5-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters: default cache TTL updated to 5 minutes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-using-the-new-boto_config-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters: using the new boto_config parameter
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utilizing-the-new-query-function-in-jmespath-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utilizing the new query function in JMESPath Functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#importing-types-from-typing-and-typing_annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Importing types from typing and typing_annotations
     </span>
   </a>
   
@@ -1742,13 +1814,11 @@
 
 <!-- markdownlint-disable MD043 -->
 
-<h2 id="end-of-support-v1">End of support v1<a class="headerlink" href="#end-of-support-v1" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">On March 31st, 2023, Powertools for AWS Lambda (Python) v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version.</p>
+<h2 id="migrate-to-v3-from-v2">Migrate to v3 from v2<a class="headerlink" href="#migrate-to-v3-from-v2" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">We strongly encourage you to migrate to v3. However, if you still need to upgrade from v1 to v2, you can find the <a href="/lambda/python/2.43.1/upgrade/">upgrade guide</a>.</p>
 </div>
-<p>Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep <a href="https://pypi.org/project/aws-lambda-powertools/" target="_blank">Pypi</a> v1 releases and documentation 1.x versions to prevent any disruption.</p>
-<h2 id="migrate-to-v2-from-v1">Migrate to v2 from v1<a class="headerlink" href="#migrate-to-v2-from-v1" title="Permanent link">&para;</a></h2>
-<p>We've made minimal breaking changes to make your transition to v2 as smooth as possible.</p>
+<p>We've made minimal breaking changes to make your transition to v3 as smooth as possible.</p>
 <h3 id="quick-summary">Quick summary<a class="headerlink" href="#quick-summary" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1756,224 +1826,80 @@
 <th>Area</th>
 <th>Change</th>
 <th>Code change required</th>
-<th>IAM Permissions change required</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Batch</strong></td>
-<td>Removed legacy <a href="#legacy-sqs-batch-processor">SQS batch processor</a> in favour of <strong><code>BatchProcessor</code></strong>.</td>
-<td>Yes</td>
-<td>-</td>
+<td><strong>Pydantic</strong></td>
+<td>We have removed support for <a href="#drop-support-for-pydantic-v1">Pydantic v1</a></td>
+<td>No</td>
 </tr>
 <tr>
-<td><strong>Environment variables</strong></td>
-<td>Removed legacy <strong><code>POWERTOOLS_EVENT_HANDLER_DEBUG</code></strong> in favour of <a href="../#optimizing-for-non-production-environments" target="_blank"><code>POWERTOOLS_DEV</code></a>.</td>
-<td>-</td>
-<td>-</td>
+<td><strong>Parser</strong></td>
+<td>We have replaced <a href="#dynamodbstreammodel-in-parser">DynamoDBStreamModel</a> <code>AttributeValue</code> with native Python types</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Lambda layer</strong></td>
+<td><a href="#new-aws-lambda-layer-arns">Lambda layers</a> are now compiled according to the specific Python version and architecture</td>
+<td>No</td>
 </tr>
 <tr>
 <td><strong>Event Handler</strong></td>
-<td>Updated <a href="#event-handler-headers-response-format">headers response format</a> due to <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">multi-value headers and cookie support</a>.</td>
-<td>Tests only</td>
-<td>-</td>
+<td>We <a href="#event-handler-headers-are-case-insensitive">have deprecated</a> the <code>get_header_value</code> function.</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Batch Processor</strong></td>
+<td><code>@batch_processor</code> and <code>@async_batch_processor</code> decorators <a href="#deprecated-batch-processing-decorators">are now deprecated</a></td>
+<td>Yes</td>
 </tr>
 <tr>
 <td><strong>Event Source Data Classes</strong></td>
-<td>Replaced <a href="#dynamodbstreamevent-in-event-source-data-classes">DynamoDBStreamEvent</a> <code>AttributeValue</code> with native Python types.</td>
-<td>Yes</td>
-<td>-</td>
-</tr>
-<tr>
-<td><strong>Feature Flags</strong> / <strong>Parameters</strong></td>
-<td>Updated <a href="#feature-flags-and-appconfig-parameter-utility">AppConfig API calls</a> due to <strong><code>GetConfiguration</code></strong> API deprecation.</td>
-<td>-</td>
+<td>We have updated <a href="#event-source-default-values">default values</a> for optional fields.</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td><strong>Idempotency</strong></td>
-<td>Updated <a href="#idempotency-partition-key-format">partition key</a> to include fully qualified function/method names.</td>
-<td>-</td>
-<td>-</td>
+<td><strong>Parameters</strong></td>
+<td>The <a href="#parameters-default-cache-ttl-updated-to-5-minutes">default cache TTL</a> is now set to <strong>5 minutes</strong></td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Parameters</strong></td>
+<td>The <code>config</code> parameter <a href="#parameters-using-the-new-boto_config-parameter">is deprecated</a> in favor of <code>boto_config</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>JMESPath Functions</strong></td>
+<td>The <code>extract_data_from_envelope</code> function is <a href="#utilizing-the-new-query-function-in-jmespath-functions">deprecated in favor</a> of <code>query</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Types file</strong></td>
+<td>We have removed the <a href="#importing-types-from-typing-and-typing_annotations">type imports</a> from the <code>shared/types.py</code> file</td>
+<td>Yes</td>
 </tr>
 </tbody>
 </table>
 <h3 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Permanent link">&para;</a></h3>
-<div class="admonition note">
-<p class="admonition-title">All dependencies are optional now. <a href="../core/tracer/#install" target="_blank">Tracer</a>, <a href="../utilities/validation/#install" target="_blank">Validation</a>, and <a href="../utilities/parser/" target="_blank">Parser</a> now require additional dependencies.</p>
-</div>
 <p>Before you start, we suggest making a copy of your current working project or create a new branch with git.</p>
 <ol>
-<li><strong>Upgrade</strong> Python to at least v3.8</li>
+<li><strong>Upgrade</strong> Python to at least v3.8.</li>
 <li><strong>Ensure</strong> you have the latest version via <a href="../#install" target="_blank">Lambda Layer or PyPi</a>.</li>
-<li><strong>Review</strong> the following sections to confirm whether they affect your code</li>
+<li><strong>Review</strong> the following sections to confirm if you need to make changes to your code.</li>
 </ol>
-<h2 id="legacy-sqs-batch-processor">Legacy SQS Batch Processor<a class="headerlink" href="#legacy-sqs-batch-processor" title="Permanent link">&para;</a></h2>
-<p>We removed the deprecated <code>PartialSQSProcessor</code> class and <code>sqs_batch_processor</code> decorator.</p>
-<p>You can migrate to <code>BatchProcessor</code> with the following changes:</p>
-<ol>
-<li>If you use <strong><code>sqs_batch_decorator</code></strong>, change to <strong><code>batch_processor</code></strong> decorator</li>
-<li>If you use <strong><code>PartialSQSProcessor</code></strong>, change to <strong><code>BatchProcessor</code></strong></li>
-<li><a href="../utilities/batch/#required-resources" target="_blank">Enable <strong><code>ReportBatchItemFailures</code></strong> in your Lambda Event Source</a></li>
-<li>Change your Lambda Handler to return the new response format</li>
-</ol>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="before-decorator" name="__tabbed_1" type="radio" /><input id="after-decorator" name="__tabbed_1" type="radio" /><input id="before-context-manager" name="__tabbed_1" type="radio" /><input id="after-context-manager" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="before-decorator">[Before] Decorator</label><label for="after-decorator">[After] Decorator</label><label for="before-context-manager">[Before] Context manager</label><label for="after-context-manager">[After] Context manager</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">sqs_batch_processor</span>
-</span>
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-
-<span class="hll"><span class="nd">@sqs_batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">BatchProcessor</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">batch_processor</span>
-</span>
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-</span>
-
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">PartialSQSProcessor</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">botocore.config</span> <span class="kn">import</span> <span class="n">Config</span>
-</span>
-<span class="hll"><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">region_name</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">)</span>
-</span>
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="n">return_value</span> <span class="o">=</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">return_value</span>
-
-
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="n">records</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>
-
-<span class="hll">    <span class="n">processor</span> <span class="o">=</span> <span class="n">PartialSQSProcessor</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
-</span>
-    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">record_handler</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
-
-<span class="hll">    <span class="k">return</span> <span class="n">result</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">BatchProcessor</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">batch_processor</span>
-</span>
-
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="n">return_value</span> <span class="o">=</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">return_value</span>
-
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="n">records</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>
-
-<span class="hll">    <span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-</span>
-    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">record_handler</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
-
-<span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-</div>
-</div>
-<h2 id="event-handler-headers-response-format">Event Handler headers response format<a class="headerlink" href="#event-handler-headers-response-format" title="Permanent link">&para;</a></h2>
+<h2 id="drop-support-for-pydantic-v1">Drop support for Pydantic v1<a class="headerlink" href="#drop-support-for-pydantic-v1" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">No code changes required</p>
 </div>
-<p>This only applies if you're using <code>APIGatewayRestResolver</code> and asserting custom header values in your tests.</p>
-<p>Previously, custom headers were available under <code>headers</code> key in the Event Handler response.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">V1 response headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
-<span class="hll">    <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span>        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-<p>In V2, we add all headers under <code>multiValueHeaders</code> key. This enables seamless support for multi-value headers and cookies in <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">fine grained responses</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">V2 response headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
-<span class="hll">    <span class="s2">&quot;multiValueHeaders&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span>        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-<h2 id="dynamodbstreamevent-in-event-source-data-classes">DynamoDBStreamEvent in Event Source Data Classes<a class="headerlink" href="#dynamodbstreamevent-in-event-source-data-classes" title="Permanent link">&para;</a></h2>
+<p>As of June 30, 2024, Pydantic v1 has reached its end-of-life, and we have discontinued support for this version. We now exclusively support Pydantic v2.</p>
+<p>Use <a href="https://docs.pydantic.dev/latest/migration/" target="_blank">Pydantic v2 Migration Guide</a> to migrate your custom Pydantic models to v2.</p>
+<h2 id="dynamodbstreammodel-in-parser">DynamoDBStreamModel in parser<a class="headerlink" href="#dynamodbstreammodel-in-parser" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">This also applies if you're using <a href="https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb" target="_blank"><strong>DynamoDB BatchProcessor</strong></a>.</p>
 </div>
-<p>You will now receive native Python types when accessing DynamoDB records via <code>keys</code>, <code>new_image</code>, and <code>old_image</code> attributes in <code>DynamoDBStreamEvent</code>.</p>
-<p>Previously, you'd receive a <code>AttributeValue</code> instance and need to deserialize each item to the type you'd want for convenience, or to the type DynamoDB stored via <code>get_value</code> method.</p>
+<p><code>DynamoDBStreamModel</code> now returns native Python types when you access DynamoDB records through <code>Keys</code>, <code>NewImage</code>, and <code>OldImage</code> attributes.</p>
+<p>Previously, you'd receive a raw JSON and need to deserialize each item to the type you'd want for convenience, or to the type DynamoDB stored via <code>get</code> method.</p>
 <p>With this change, you can access data deserialized as stored in DynamoDB, and no longer need to recursively deserialize nested objects (Maps) if you had them.</p>
 <details class="note" open="open">
 <summary>Note</summary>
@@ -2004,61 +1930,365 @@
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DynamoDBStreamEvent</span><span class="p">,</span>
-    <span class="n">DynamoDBRecordEventName</span>
-<span class="p">)</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code>from __future__ import annotations
 
-<span class="k">def</span> <span class="nf">send_to_sqs</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="o">...</span>
+import json
+from typing import Any
 
-<span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">DynamoDBStreamEvent</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">DynamoDBStreamEvent</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
+from aws_lambda_powertools.utilities.parser import event_parser
+from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamModel
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
-        <span class="c1"># BEFORE</span>
-<span class="hll">        <span class="n">new_image</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AttributeValue</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span>
-</span><span class="hll">        <span class="n">event_type</span><span class="p">:</span> <span class="n">AttributeValue</span> <span class="o">=</span> <span class="n">new_image</span><span class="p">[</span><span class="s2">&quot;eventType&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_value</span>
-</span><span class="hll">        <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">:</span>
-</span><span class="hll">            <span class="c1"># deserialize attribute value into Python native type</span>
-</span><span class="hll">            <span class="c1"># NOTE: nested objects would need additional logic</span>
-</span><span class="hll">            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">get_value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span>            <span class="n">send_to_sqs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="c1"># AFTER</span>
-<span class="hll">        <span class="n">new_image</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span>
-</span><span class="hll">        <span class="k">if</span> <span class="n">new_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;eventType&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">:</span>
-</span>            <span class="n">send_to_sqs</span><span class="p">(</span><span class="n">new_image</span><span class="p">)</span>  <span class="c1"># Here new_image is just a Python Dict type</span>
+def send_to_sqs(data: dict):
+<span class="w"> </span>   body = json.dumps(data)
+<span class="w"> </span>   ...
+
+<span class="gu">@event_parser</span>
+def lambda_handler(event: DynamoDBStreamModel, context: LambdaContext):
+
+<span class="w"> </span>   for record in event.Records:
+
+<span class="gd">-        # BEFORE - v2</span>
+<span class="gd">-        new_image: dict[str, Any] = record.dynamodb.NewImage</span>
+<span class="gd">-        event_type = new_image[&quot;eventType&quot;][&quot;S&quot;]</span>
+<span class="gd">-        if event_type == &quot;PENDING&quot;:</span>
+<span class="gd">-            # deserialize attribute value into Python native type</span>
+<span class="gd">-            # NOTE: nested objects would need additional logic</span>
+<span class="gd">-            data = dict(new_image)</span>
+<span class="gd">-            send_to_sqs(data)</span>
+
+<span class="gi">+        # NOW - v3</span>
+<span class="gi">+        new_image: dict[str, Any] = record.dynamodb.NewImage</span>
+<span class="gi">+        if new_image.get(&quot;eventType&quot;) == &quot;PENDING&quot;:</span>
+<span class="gi">+            send_to_sqs(new_image)  # Here new_image is just a Python Dict type</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="feature-flags-and-appconfig-parameter-utility">Feature Flags and AppConfig Parameter utility<a class="headerlink" href="#feature-flags-and-appconfig-parameter-utility" title="Permanent link">&para;</a></h2>
+<h2 id="new-aws-lambda-layer-arns">New AWS Lambda Layer ARNs<a class="headerlink" href="#new-aws-lambda-layer-arns" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">No code changes required</p>
 </div>
-<p>We replaced <code>GetConfiguration</code> API (<a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884" target="_blank">now deprecated</a>) with <code>GetLatestConfiguration</code> and <code>StartConfigurationSession</code>.</p>
-<p>As such, you must update your IAM Role permissions to allow the following IAM actions:</p>
-<ul>
-<li><code>appconfig:GetLatestConfiguration</code></li>
-<li><code>appconfig:StartConfigurationSession</code></li>
-</ul>
-<h2 id="idempotency-partition-key-format">Idempotency partition key format<a class="headerlink" href="#idempotency-partition-key-format" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">No code changes required</p>
-</div>
-<p>We replaced the DynamoDB partition key format to include fully qualified function/method names. This means that recent non-expired idempotent transactions will be ignored.</p>
-<p>Previously, we used the function/method name to generate the partition key value.</p>
-<blockquote>
-<p>e.g. <code>HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b</code></p>
-</blockquote>
-<p><img alt="Idempotency Before" src="../media/upgrade_idempotency_before.png" /></p>
-<p>In V2, we now distinguish between distinct classes or modules that may have the same function/method name.</p>
-<p><a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1330" target="_blank">For example</a>, an ABC or Protocol class may have multiple implementations of <code>process_payment</code> method and may have different results.</p>
-<!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
+<p>To give you better a better experience, we're now building Powertools for AWS Lambda (Python)'s Lambda layers for specific Python versions (<code>3.8-3.12</code>) and architectures (<code>x86_64</code> &amp; <code>arm64</code>).</p>
+<p>This also allows us to include architecture-specific versions of both Pydantic v2 and AWS Encryption SDK and give you a more streamlined setup.</p>
+<p>To take advantage of the new layers, you need to update your functions or deployment setup to include one of the new Lambda layer ARN from the table below:</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Python version</th>
+<th>Layer ARN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x86_64</td>
+<td>3.8</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-x86:{version}</td>
+</tr>
+<tr>
+<td>x86_64</td>
+<td>3.9</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-x86:{version}</td>
+</tr>
+<tr>
+<td>x86_64</td>
+<td>3.10</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86:{version}</td>
+</tr>
+<tr>
+<td>x86_64</td>
+<td>3.11</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86:{version}</td>
+</tr>
+<tr>
+<td>x86_64</td>
+<td>3.12</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:{version}</td>
+</tr>
+<tr>
+<td>arm64</td>
+<td>3.8</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-arm64:{version}</td>
+</tr>
+<tr>
+<td>arm64</td>
+<td>3.9</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:{version}</td>
+</tr>
+<tr>
+<td>arm64</td>
+<td>3.10</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:{version}</td>
+</tr>
+<tr>
+<td>arm64</td>
+<td>3.11</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:{version}</td>
+</tr>
+<tr>
+<td>arm64</td>
+<td>3.12</td>
+<td>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:{version}</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event-handler-headers-are-case-insensitive">Event Handler: headers are case-insensitive<a class="headerlink" href="#event-handler-headers-are-case-insensitive" title="Permanent link">&para;</a></h2>
+<p>According to the <a href="https://datatracker.ietf.org/doc/html/rfc9110#section-5.1" target="_blank">HTTP RFC</a>, HTTP headers are case-insensitive. As a result, we have deprecated the <code>get_header_value</code> function to align with this standard. Instead, we recommend using <code>app.current_event.headers.get</code> to access header values directly</p>
+<p>Consequently, the <code>case_sensitive</code> parameter in this function no longer has any effect, as we now ensure consistent casing by normalizing headers for you. This function will be removed in a future release, and we encourage users to adopt the new method to access header values.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code>import requests
+from requests import Response
 
-<blockquote>
-<p>e.g. <code>HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b</code></p>
-</blockquote>
-<p><img alt="Idempotency Before" src="../media/upgrade_idempotency_after.png" /></p>
+from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+tracer = Tracer()
+logger = Logger()
+app = APIGatewayRestResolver()
+
+
+<span class="gu">@app.get(&quot;/todos&quot;)</span>
+<span class="gu">@tracer.capture_method</span>
+def get_todos():
+<span class="w"> </span>   endpoint = &quot;https://jsonplaceholder.typicode.com/todos&quot;
+
+<span class="w"> </span>   # BEFORE - v2
+<span class="gd">-   api_key: str = app.current_event.get_header_value(name=&quot;X-Api-Key&quot;, case_sensitive=True, default_value=&quot;&quot;)</span>
+
+<span class="w"> </span>   # NOW - v3
+<span class="gi">+   api_key: str = app.current_event.headers.get(&quot;X-Api-Key&quot;, &quot;&quot;)</span>
+
+<span class="w"> </span>   todos: Response = requests.get(endpoint, headers={&quot;X-Api-Key&quot;: api_key})
+<span class="w"> </span>   todos.raise_for_status()
+
+<span class="w"> </span>   return {&quot;todos&quot;: todos.json()}
+
+
+# You can continue to use other utilities just as before
+<span class="gu">@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)</span>
+<span class="gu">@tracer.capture_lambda_handler</span>
+def lambda_handler(event: dict, context: LambdaContext) -&gt; dict:
+<span class="w"> </span>   return app.resolve(event, context)
+</code></pre></div></td></tr></table></div>
+<h2 id="deprecated-batch-processing-decorators">Deprecated Batch Processing decorators<a class="headerlink" href="#deprecated-batch-processing-decorators" title="Permanent link">&para;</a></h2>
+<p>In v2, we designated <code>@batch_processor</code> and <code>@async_batch_processor</code> as legacy modes for using the Batch Processing utility.</p>
+<p>In v3, these have been marked as deprecated. Continuing to use them will result in warnings in your IDE and during Lambda execution.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code>import json
+
+from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor, process_partial_response
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+processor = BatchProcessor(event_type=EventType.SQS)
+
+<span class="gu">@tracer.capture_method</span>
+def record_handler(record: SQSRecord):
+<span class="w"> </span>   payload: str = record.body
+<span class="w"> </span>   if payload:
+<span class="w"> </span>       item: dict = json.loads(payload)
+<span class="w"> </span>       logger.info(item)
+
+<span class="gd">-# BEFORE - v2</span>
+<span class="gd">-@batch_processor(record_handler=record_handler, processor=processor)</span>
+<span class="gd">-def lambda_handler(event, context: LambdaContext):</span>
+<span class="gd">-    return processor.response()</span>
+
+<span class="gi">+ # NOW - v3</span>
+<span class="gi">+def lambda_handler(event, context: LambdaContext):</span>
+<span class="gi">+ return process_partial_response(</span>
+<span class="gi">+      event=event,</span>
+<span class="gi">+      record_handler=record_handler,</span>
+<span class="gi">+      processor=processor,</span>
+<span class="gi">+      context=context,</span>
+<span class="gi">+   )</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="event-source-default-values">Event source default values<a class="headerlink" href="#event-source-default-values" title="Permanent link">&para;</a></h2>
+<p>We've modified the <strong>Event Source Data classes</strong> so that optional dictionaries and lists now return empty strings, dictionaries or lists instead of <code>None</code>. This improvement simplifies your code by eliminating the need for conditional checks when accessing these fields, while maintaining backward compatibility with previous implementations.</p>
+<p>We've applied this change broadly across various event source data classes, ensuring a more consistent and streamlined coding experience for you.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code>from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, event_source
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+<span class="gu">@event_source(data_class=DynamoDBStreamEvent)</span>
+def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
+<span class="w"> </span>   for record in event.records:
+
+<span class="gd">-        # BEFORE - v2</span>
+<span class="gd">-        old_image_type_return_v2 = type(record.dynamodb.old_image)</span>
+<span class="gd">-        # Output is &lt;class &#39;NoneType&#39;&gt;</span>
+
+<span class="gi">+        # NOW - v3</span>
+<span class="gi">+        old_image_type_return_v3 = type(record.dynamodb.old_image)</span>
+<span class="gi">+        # Output is &lt;class &#39;dict&#39;&gt;</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="parameters-default-cache-ttl-updated-to-5-minutes">Parameters: default cache TTL updated to 5 minutes<a class="headerlink" href="#parameters-default-cache-ttl-updated-to-5-minutes" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">No code changes required</p>
+</div>
+<p>We have updated the cache TTL from 5 seconds to 5 minutes to reduce the number of API calls to AWS, leading to improved performance and lower costs.</p>
+<p>No code changes are necessary for this update; however, if you prefer the previous behavior, you can set the <code>max_age</code> parameter back to 5 seconds.</p>
+<h2 id="parameters-using-the-new-boto_config-parameter">Parameters: using the new boto_config parameter<a class="headerlink" href="#parameters-using-the-new-boto_config-parameter" title="Permanent link">&para;</a></h2>
+<p>In v2, you could use the <code>config</code> parameter to modify the <strong>botocore Config</strong> session settings.</p>
+<p>In v3, we renamed this parameter to <code>boto_config</code> to standardize the name with other features, such as Idempotency, and introduced deprecation warnings for users still using <code>config</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code>from botocore.config import Config
+
+from aws_lambda_powertools.utilities import parameters
+
+<span class="gd">-# BEFORE - v2</span>
+<span class="gd">-ssm_provider = parameters.SSMProvider(config=Config(region_name=&quot;us-west-1&quot;))</span>
+
+<span class="gi">+# NOW - v3</span>
+<span class="gi">+ssm_provider = parameters.SSMProvider(boto_config=Config(region_name=&quot;us-west-1&quot;))</span>
+
+def handler(event, context):
+<span class="w"> </span>   value = ssm_provider.get(&quot;/my/parameter&quot;)
+<span class="w"> </span>   return {&quot;message&quot;: value}
+</code></pre></div></td></tr></table></div>
+<h2 id="utilizing-the-new-query-function-in-jmespath-functions">Utilizing the new query function in JMESPath Functions<a class="headerlink" href="#utilizing-the-new-query-function-in-jmespath-functions" title="Permanent link">&para;</a></h2>
+<p>In v2, you could use the <code>extract_data_from_envelope</code> function to search and extract data from dictionaries with JMESPath. This name was too generic and customers told us it was confusing.</p>
+<p>In v3, we renamed this function to <code>query</code> to align with similar frameworks in the ecosystem, and introduced deprecation warnings for users still using <code>extract_data_from_envelope</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code>from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope, query
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+def handler(event: dict, context: LambdaContext) -&gt; dict:
+<span class="gd">-   # BEFORE - v2</span>
+<span class="gd">-   some_data = extract_data_from_envelope(data=event, envelope=&quot;powertools_json(body)&quot;)</span>
+
+<span class="gi">+   # NOW - v3</span>
+<span class="gi">+   some_data = query(data=event, envelope=&quot;powertools_json(body)&quot;)</span>
+
+<span class="w"> </span>   return {&quot;data&quot;: some_data}
+</code></pre></div></td></tr></table></div>
+<h2 id="importing-types-from-typing-and-typing_annotations">Importing types from typing and typing_annotations<a class="headerlink" href="#importing-types-from-typing-and-typing_annotations" title="Permanent link">&para;</a></h2>
+<p>We refactored our codebase to align with Python guidelines and eliminated the use of <code>aws_lambda_powertools.shared.types</code> imports.</p>
+<p>Instead, we now utilize types from the standard <code>typing</code> library, which are compatible with Python versions 3.8 and above, or from <code>typing_extensions</code> (included as a required dependency) for additional type support.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="gd">-# BEFORE - v2</span>
+<span class="gd">-from aws_lambda_powertools.shared.types import Annotated</span>
+
+<span class="gi">+# NOW - v3</span>
+<span class="gi">+from typing_extensions import Annotated</span>
+
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+def handler(event: dict, context: LambdaContext) -&gt; dict:
+<span class="w"> </span>   ...
+</code></pre></div></td></tr></table></div>
 
 
 
@@ -2079,7 +2309,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-02-05
+    2024-09-12
   </span>
 
     
