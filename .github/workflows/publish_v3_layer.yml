@@ -268,16 +268,16 @@ jobs:
   #        ./layer_v3/scripts/update_layer_arn.sh cdk-layer-stack
       # NOTE: It felt unnecessary creating yet another PR to update changelog w/ latest tag
       # since this is the only step in the release where we update docs from a temp branch
-      - name: Update changelog with latest tag
-        run: make changelog
-      - name: Create PR
-        id: create-pr
-        uses: ./.github/actions/create-pr
-        with:
-          files: "docs/index.md examples CHANGELOG.md"
-          temp_branch_prefix: "ci-layer-docs"
-          pull_request_title: "chore(ci): layer docs update"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #    - name: Update changelog with latest tag
+  #      run: make changelog
+  #    - name: Create PR
+  #      id: create-pr
+  #      uses: ./.github/actions/create-pr
+  #      with:
+  #        files: "docs/index.md examples CHANGELOG.md"
+  #        temp_branch_prefix: "ci-layer-docs"
+  #        pull_request_title: "chore(ci): layer docs update"
+  #        github_token: ${{ secrets.GITHUB_TOKEN }}
 
   prepare_docs_alias:
     runs-on: ubuntu-latest
