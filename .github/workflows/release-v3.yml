@@ -131,7 +131,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Set up Python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
         with:
           python-version: "3.12"
           cache: "poetry"
@@ -169,7 +169,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Set up Python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
         with:
           python-version: "3.12"
           cache: "poetry"
@@ -237,12 +237,12 @@ jobs:
 
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
-        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 # v1.8.14
+        uses: pypa/gh-action-pypi-publish@897895f1e160c830e369f9779632ebc134688e1b # v1.10.2
 
       # PyPi test maintenance affected us numerous times, leaving for history purposes
       # - name: Upload to PyPi test
       #   if: ${{ !inputs.skip_pypi }}
-      #   uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 # v1.8.14
+      #   uses: pypa/gh-action-pypi-publish@897895f1e160c830e369f9779632ebc134688e1b # v1.10.2
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
