@@ -342,13 +342,13 @@ dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
 [[package]]
 name = "bandit"
-version = "1.7.9"
+version = "1.7.10"
 description = "Security oriented static analyser for python code."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "bandit-1.7.9-py3-none-any.whl", hash = "sha256:52077cb339000f337fb25f7e045995c4ad01511e716e5daac37014b9752de8ec"},
-    {file = "bandit-1.7.9.tar.gz", hash = "sha256:7c395a436743018f7be0a4cbb0a4ea9b902b6d87264ddecf8cfdc73b4f78ff61"},
+    {file = "bandit-1.7.10-py3-none-any.whl", hash = "sha256:665721d7bebbb4485a339c55161ac0eedde27d51e638000d91c8c2d68343ad02"},
+    {file = "bandit-1.7.10.tar.gz", hash = "sha256:59ed5caf5d92b6ada4bf65bc6437feea4a9da1093384445fed4d472acc6cff7b"},
 ]
 
 [package.dependencies]
@@ -862,8 +862,8 @@ files = [
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
 urllib3 = [
-    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
     {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
+    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
 ]
 
 [package.extras]
@@ -1477,8 +1477,8 @@ files = [
 
 [package.dependencies]
 bytecode = [
-    {version = ">=0.13.0", markers = "python_version < \"3.11.0\""},
     {version = ">=0.15.0", markers = "python_version >= \"3.12.0\""},
+    {version = ">=0.13.0", markers = "python_version < \"3.11.0\""},
     {version = ">=0.14.0", markers = "python_version ~= \"3.11.0\""},
 ]
 envier = ">=0.5,<1.0"
@@ -2884,8 +2884,8 @@ files = [
 annotated-types = ">=0.6.0"
 pydantic-core = "2.23.3"
 typing-extensions = [
-    {version = ">=4.6.1", markers = "python_version < \"3.13\""},
     {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
+    {version = ">=4.6.1", markers = "python_version < \"3.13\""},
 ]
 
 [package.extras]
@@ -3926,20 +3926,6 @@ files = [
 types-urllib3 = "*"
 
 [[package]]
-name = "types-requests"
-version = "2.32.0.20240907"
-description = "Typing stubs for requests"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "types-requests-2.32.0.20240907.tar.gz", hash = "sha256:ff33935f061b5e81ec87997e91050f7b4af4f82027a7a7a9d9aaea04a963fdf8"},
-    {file = "types_requests-2.32.0.20240907-py3-none-any.whl", hash = "sha256:1d1e79faeaf9d42def77f3c304893dea17a97cae98168ac69f3cb465516ee8da"},
-]
-
-[package.dependencies]
-urllib3 = ">=2"
-
-[[package]]
 name = "types-s3transfer"
 version = "0.10.2"
 description = "Type annotations and code completion for s3transfer"
@@ -4322,4 +4308,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "753ce71a827ea99e02f6309b4ba5cdbd86bc7229b6c0563b706bfb1e58b049a9"
+content-hash = "a874a5eb88eaef4e3c6cd7ac33b8a236c0f02aa43456c0e85ea7eccdda1b4fe5"
