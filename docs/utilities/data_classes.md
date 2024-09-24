@@ -628,7 +628,7 @@ to test applications at different stages of deployment.
     from aws_lambda_powertools import Logger
     from aws_lambda_powertools.utilities.data_classes import (
         event_source,
-        CodeDeployLifeCycleHookEvent,
+        CodeDeployLifecycleHookEvent,
     )
 
     logger = Logger()
