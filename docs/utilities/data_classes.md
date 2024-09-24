@@ -90,6 +90,7 @@ Log Data Event for Troubleshooting
 | [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
+| [CodeDeploy Lifecycle Hook](#codedeploy-lifecycle-hook)                       | `CodeDeployLifecycleHookEvent`                     |
 | [CodePipeline Job Event](#codepipeline-job)                                   | `CodePipelineJobEvent`                             |
 | [Cognito User Pool](#cognito-user-pool)                                       | Multiple available under `cognito_user_pool_event` |
 | [Connect Contact Flow](#connect-contact-flow)                                 | `ConnectContactFlowEvent`                          |
@@ -613,6 +614,30 @@ Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless int
     @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
         return processor.response()
+    ```
+
+### CodeDeploy LifeCycle Hook
+
+CodeDeploy triggers Lambdas with this event when defined in
+[AppSpec definitions](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html)
+to test applications at different stages of deployment.
+
+
+=== "app.py"
+    ```python
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.utilities.data_classes import (
+        event_source,
+        CodeDeployLifecycleHookEvent,
+    )
+
+    logger = Logger()
+
+    def lambda_handler(
+        event: CodeDeployLifecycleHookEvent, context: LambdaContext
+    ) -> None:
+        deployment_id = event.deployment_id
+        lifecycle_event_hook_execution_id = event.lifecycle_event_hook_execution_id
     ```
 
 ### CodePipeline Job
