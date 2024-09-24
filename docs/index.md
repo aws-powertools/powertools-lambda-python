@@ -65,10 +65,14 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `312` for `Python 3.12`.
+    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python312` for `Python 3.12`.
 
-    * <u>x86 architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-x86:1__{: .copyMe}:clipboard:
-    * <u>ARM architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-arm64:1__{: .copyMe}:clipboard:
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86:1__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:1__{: .copyMe}:clipboard: |
+
+    === "AWS Console"
 
         You can add our layer using the [AWS Lambda Console _(direct link)_](https://console.aws.amazon.com/lambda/home#/add/layer){target="_blank"}:
 
