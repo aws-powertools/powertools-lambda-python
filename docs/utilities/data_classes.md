@@ -634,7 +634,7 @@ to test applications at different stages of deployment.
     logger = Logger()
 
     def lambda_handler(
-        event: CodeDeployLifeCycleHookEvent, context: LambdaContext
+        event: CodeDeployLifecycleHookEvent, context: LambdaContext
     ) -> None:
         deployment_id = event.deployment_id
         lifecycle_event_hook_execution_id = event.lifecycle_event_hook_execution_id
