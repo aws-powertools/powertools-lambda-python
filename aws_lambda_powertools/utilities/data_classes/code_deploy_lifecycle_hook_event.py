@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-class CodeDeployLifeCycleHookLambdaEvent(DictWrapper):
+class CodeDeployLifecycleHookEvent(DictWrapper):
     @property
     def deployment_id(self) -> str:
         """The unique ID of the calling CodeDeploy Deployment."""
