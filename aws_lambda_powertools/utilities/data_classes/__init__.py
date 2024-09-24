@@ -62,7 +62,7 @@ __all__ = [
     "CloudWatchAlarmMetricStat",
     "CloudWatchDashboardCustomWidgetEvent",
     "CloudWatchLogsEvent",
-    "CodeDeployLifeCycleHookLambdaEvent",
+    "CodeDeployLifecycleHookEvent",
     "CodePipelineJobEvent",
     "ConnectContactFlowEvent",
     "DynamoDBStreamEvent",
