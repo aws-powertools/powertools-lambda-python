@@ -1,7 +1,7 @@
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes import (
-    CodeDeployLifeCycleHookLambdaEvent,
+    CodeDeployLifecycleHookEvent,
 )
 from tests.functional.utils import load_event
 
