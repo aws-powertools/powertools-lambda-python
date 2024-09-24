@@ -5,7 +5,7 @@ POWERTOOLS_BASE_NAME = "AWSLambdaPowertools"
 # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
 POWERTOOLS_VER = "3.0.0"
 POWERTOOLS_ARN = (
-    "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86"
+    "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64"
 )
 
 

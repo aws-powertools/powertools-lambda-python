@@ -2,7 +2,7 @@ name: Deploy v3 layer to all regions
 
 # PROCESS
 #
-# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for Python3.8-3.12 and x86/ARM architectures (uses custom runner as it's CPU heavy)
+# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for Python3.8-3.12 and x86_64/ARM architectures (uses custom runner as it's CPU heavy)
 # 2. Kick off pipeline for beta, prod, and canary releases
 # 3. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
 # 4. Builds and publishes docs with latest Layer ARN using given version (generally coming from release)
