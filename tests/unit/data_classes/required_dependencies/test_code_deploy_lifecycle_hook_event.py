@@ -14,7 +14,7 @@ from tests.functional.utils import load_event
 )
 def test_code_deploy_lifecycle_hook_event(event_file):
     raw_event = load_event(event_file)
-    parsed_event = CodeDeployLifeCycleHookLambdaEvent(raw_event)
+    parsed_event = CodeDeployLifecycleHookEvent(raw_event)
 
     assert parsed_event.deployment_id == raw_event["DeploymentId"]
     assert parsed_event.lifecycle_event_hook_execution_id == raw_event["LifecycleEventHookExecutionId"]
