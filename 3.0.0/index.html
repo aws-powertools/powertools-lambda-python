@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.36">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.35f28582.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.06209087.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
@@ -82,16 +82,6 @@
       
     </div>
     <div data-md-component="announce">
-      
-        <aside class="md-banner">
-          <div class="md-banner__inner md-grid md-typeset">
-            
-            
-🚨 The next major version (v3) is coming - <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/4189">come learn and discuss upcoming changes</a>!
-
-          </div>
-          
-        </aside>
       
     </div>
     
@@ -1761,20 +1751,34 @@
 </div>
 <div class="tabbed-block">
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize <a href="#install">all dependencies</a>, and remove duplicate dependencies <a href="https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36" target="_blank">already available in the Lambda runtime</a> to achieve the most optimal size.</p>
-<p>For the latter, make sure to replace <code>{region}</code> with your AWS region, e.g., <code>eu-west-1</code>, and the <code>{python_version}</code> without the period (.), e.g., <code>312</code> for <code>Python 3.12</code>.</p>
-<ul>
-<li><u>x86 architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-x86:1</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-<li>
-<p><u>ARM architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python{python_version}-arm64:1</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></p>
+<p>For the latter, make sure to replace <code>{region}</code> with your AWS region, e.g., <code>eu-west-1</code>, and the <code>{python_version}</code> without the period (.), e.g., <code>python312</code> for <code>Python 3.12</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Layer ARN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x86</td>
+<td><strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86:1</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>ARM</td>
+<td><strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:1</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+</tbody>
+</table>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="aws-console" name="__tabbed_2" type="radio" /><input id="infrastructure-as-code-iac" name="__tabbed_2" type="radio" /><input id="inspect-lambda-layer-contents" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="aws-console">AWS Console</label><label for="infrastructure-as-code-iac">Infrastructure as Code (IaC)</label><label for="inspect-lambda-layer-contents">Inspect Lambda Layer contents</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p>You can add our layer using the <a href="https://console.aws.amazon.com/lambda/home#/add/layer" target="_blank">AWS Lambda Console <em>(direct link)</em></a>:</p>
 <ul>
 <li>Under Layers, choose <code>AWS layers</code> or <code>Specify an ARN</code></li>
 <li>Click to copy the <a href="#lambda-layer">correct ARN</a> value based on your AWS Lambda function architecture and region</li>
 </ul>
-</li>
-</ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="infrastructure-as-code-iac" name="__tabbed_2" type="radio" /><input id="inspect-lambda-layer-contents" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="infrastructure-as-code-iac">Infrastructure as Code (IaC)</label><label for="inspect-lambda-layer-contents">Inspect Lambda Layer contents</label></div>
-<div class="tabbed-content">
+</div>
 <div class="tabbed-block">
 <blockquote>
 <p>Are we missing a framework? please create <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=documentation%2Ctriage&amp;projects=&amp;template=documentation_improvements.yml&amp;title=Docs%3A+TITLE" rel="nofollow" target="_blank">a documentation request</a>.</p>
@@ -4778,7 +4782,7 @@ General<span class="w"> </span>information
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-09-12
+    2024-09-24
   </span>
 
     
@@ -4865,7 +4869,7 @@ General<span class="w"> </span>information
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.56dfad97.min.js"></script>
