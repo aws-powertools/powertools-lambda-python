@@ -622,7 +622,6 @@ CodeDeploy triggers Lambdas with this event when defined in
 [AppSpec definitions](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html)
 to test applications at different stages of deployment.
 
-
 === "app.py"
     ```python
     from aws_lambda_powertools import Logger
