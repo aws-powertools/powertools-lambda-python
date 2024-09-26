@@ -103,8 +103,10 @@ class S3RecordModel(BaseModel):
     def validate_s3_object(cls, values):
         event_name = values.get("eventName")
         s3_object = values.get("s3").get("object")
-        if "ObjectRemoved" not in event_name and (s3_object.get("size") is None or s3_object.get("eTag") is None):
-            raise ValueError("S3Object.size and S3Object.eTag are required for non-ObjectRemoved events")
+        if ":Delete" not in event_name and (s3_object.get("size") is None or s3_object.get("eTag") is None):
+            raise ValueError(
+                "Size and eTag fields are required for all events except ObjectRemoved:* and LifecycleExpiration:*.",
+            )
         return values
 
 
