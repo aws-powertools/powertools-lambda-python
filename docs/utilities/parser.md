@@ -5,7 +5,7 @@ description: Utility
 
 <!-- markdownlint-disable MD043 -->
 
-The Parser utility in Powertools for AWS Lambda simplifies data parsing and validation using [Pydantic](https://pydantic-docs.helpmanual.io/){target="\_blank" rel="nofollow"}. Test It allows you to define data models in pure Python classes, parse and validate incoming events, and extract only the data you need.
+The Parser utility in Powertools for AWS Lambda simplifies data parsing and validation using [Pydantic](https://pydantic-docs.helpmanual.io/){target="\_blank" rel="nofollow"}. It allows you to define data models in pure Python classes, parse and validate incoming events, and extract only the data you need.
 
 ## Key features
 
