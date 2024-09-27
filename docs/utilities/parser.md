@@ -21,6 +21,10 @@ The Parser utility in Powertools for AWS Lambda simplifies data parsing and vali
 
 Powertools for AWS Lambda (Python) supports Pydantic v2. Each Pydantic version requires different dependencies before you can use Parser.
 
+```python
+pip install aws-lambda-powertools
+```
+
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="\_blank"}"
 
 ???+ warning
@@ -31,9 +35,7 @@ Powertools for AWS Lambda (Python) supports Pydantic v2. Each Pydantic version r
 
     Pip example:`SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
 
-```python
-pip install aws-lambda-powertools
-```
+
 
 You can also add as a dependency in your preferred tool: e.g., requirements.txt, pyproject.toml.
 
@@ -370,7 +372,7 @@ You can use the following test event:
 ### Data model validation
 
 ???+ warning
-This is radically different from the **Validator utility** which validates events against JSON Schema.
+    This is radically different from the **Validator utility** which validates events against JSON Schema.
 
 You can use Pydantic's validator for deep inspection of object values and complex relationships.
 
@@ -419,7 +421,6 @@ def lambda_handler(event: dict, context: LambdaContext):
 If you run using a test event `{"message": "hello universe"}` you should expect the following error with the message we provided in our exception:
 
 ```python
-message
   Message must be hello world! (type=value_error)
 ```
 
@@ -500,7 +501,7 @@ def lambda_handler(event: dict, context: LambdaContext):
 - The keyword argument `mode='after'` will cause the validator to be called after all field-level validation and parsing has been completed.
 
 ???+ info
-You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in [Pydantic&#39;s documentation](`https://pydantic-docs.helpmanual.io/usage/validators/`).
+    You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in [Pydantic&#39;s documentation](`https://pydantic-docs.helpmanual.io/usage/validators/`).
 
 **String fields that contain JSON data**
 
@@ -644,7 +645,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 ```
 
 ???+ info
-There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability){target="\_blank" rel="nofollow"}, [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value){target="\_blank" rel="nofollow"}.
+    There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability){target="\_blank" rel="nofollow"}, [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value){target="\_blank" rel="nofollow"}.
 
 ## FAQ
 
