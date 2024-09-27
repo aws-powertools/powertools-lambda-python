@@ -42,6 +42,11 @@ def payload_tampering_validation_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def response_hook_handler_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("ResponseHookArn", "")
+
+
+@pytest.fixture
 def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
@@ -219,3 +224,29 @@ def test_payload_tampering_validation(payload_tampering_validation_fn_arn: str):
             lambda_arn=payload_tampering_validation_fn_arn,
             payload=json.dumps(tampered_transaction),
         )
+
+
+@pytest.mark.xdist_group(name="idempotency")
+def test_response_hook_idempotency(response_hook_handler_fn_arn: str):
+    # GIVEN
+    payload = json.dumps({"message": "Powertools for AWS Lambda (Python)"})
+
+    # WHEN
+    # first execution
+    first_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=response_hook_handler_fn_arn,
+        payload=payload,
+    )
+    first_execution_response = first_execution["Payload"].read().decode("utf-8")
+
+    # the second execution should include response hook
+    second_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=response_hook_handler_fn_arn,
+        payload=payload,
+    )
+    second_execution_response = second_execution["Payload"].read().decode("utf-8")
+
+    # THEN first execution should not trigger response hook
+    # THEN seconde execution must trigger response hook
+    assert "x-response-hook" not in first_execution_response
+    assert "x-response-hook" in second_execution_response
