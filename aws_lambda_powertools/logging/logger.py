@@ -589,7 +589,7 @@ class Logger:
     def get_current_keys(self) -> dict[str, Any]:
         return self.registered_formatter.get_current_keys()
 
-    def get_current_thread_keys(self) -> Dict[str, Any]:
+    def get_current_thread_keys(self) -> dict[str, Any]:
         return self.registered_formatter.get_current_thread_keys()
 
     def remove_keys(self, keys: Iterable[str]) -> None:

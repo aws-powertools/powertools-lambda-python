@@ -57,7 +57,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def get_current_keys(self) -> dict[str, Any]:
         return {}
 
-    def get_current_thread_keys(self) -> Dict[str, Any]:
+    def get_current_thread_keys(self) -> dict[str, Any]:
         return {}
 
     def remove_keys(self, keys: Iterable[str]) -> None:
@@ -256,7 +256,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def get_current_keys(self) -> dict[str, Any]:
         return self.log_format
 
-    def get_current_thread_keys(self) -> Dict[str, Any]:
+    def get_current_thread_keys(self) -> dict[str, Any]:
         return _get_context().get()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
@@ -371,7 +371,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         record_dict["asctime"] = self.formatTime(record=log_record)
         extras = {k: v for k, v in record_dict.items() if k not in RESERVED_LOG_ATTRS}
 
-        formatted_log: Dict[str, Any] = {}
+        formatted_log: dict[str, Any] = {}
 
         # Iterate over a default or existing log structure
         # then replace any std log attribute e.g. '%(level)s' to 'INFO', '%(process)d to '4773'
@@ -428,7 +428,7 @@ def clear_context_keys() -> None:
     _get_context().set({})
 
 
-def set_context_keys(**kwargs: Dict[str, Any]) -> None:
+def set_context_keys(**kwargs: dict[str, Any]) -> None:
     context = _get_context()
     context.set({**context.get(), **kwargs})
 
