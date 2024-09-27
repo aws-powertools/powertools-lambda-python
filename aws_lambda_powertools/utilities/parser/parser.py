@@ -4,7 +4,7 @@ import logging
 import typing
 from typing import TYPE_CHECKING, Any, Callable, overload
 
-from pydantic import PydanticSchemaGenerationError, ValidationError
+from pydantic import PydanticSchemaGenerationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
@@ -108,7 +108,7 @@ def event_parser(
 
         logger.debug(f"Calling handler {handler.__name__}")
         return handler(parsed_event, context, **kwargs)
-    except (ValidationError, AttributeError) as exc:
+    except AttributeError as exc:
         raise InvalidModelTypeError(f"Error: {str(exc)}. Please ensure the type you're trying to parse into is correct")
 
 
@@ -199,7 +199,7 @@ def parse(event: dict[str, Any], model: type[T], envelope: type[Envelope] | None
     # when we pass a data structure that does not match the model (trying to parse a true/false/etc into a model)
     except PydanticSchemaGenerationError as exc:
         raise InvalidModelTypeError(f"The event supplied is unable to be validated into {type(model)}") from exc
-    except ValidationError as exc:
+    except AttributeError as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
             "and your payload adheres to the specified Input model structure.\n"

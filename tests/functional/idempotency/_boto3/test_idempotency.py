@@ -1963,3 +1963,54 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_already_completed_response_hook_is_called_with_none(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    """
+    Test idempotent decorator where event with matching event key has already been successfully processed
+    """
+
+    def idempotent_response_hook(response: Any, idempotent_data: DataRecord) -> Any:
+        """Modify the response provided by adding a new key"""
+        new_response: dict = {}
+        new_response["idempotent_response"] = True
+        new_response["response"] = response
+        new_response["idempotent_expiration"] = idempotent_data.get_expiration_datetime()
+
+        return new_response
+
+    idempotency_config.response_hook = idempotent_response_hook
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_future},
+            "data": {"S": "null"},
+            "status": {"S": "COMPLETED"},
+        },
+    }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        raise Exception
+
+    lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
+
+    # Then idempotent_response value will be added to the response
+    assert lambda_resp["idempotent_response"]
+    assert lambda_resp["response"] is None
+    assert lambda_resp["idempotent_expiration"] == datetime.datetime.fromtimestamp(int(timestamp_future))
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()

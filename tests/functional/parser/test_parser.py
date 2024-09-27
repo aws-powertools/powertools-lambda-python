@@ -3,6 +3,7 @@ from typing import Any, Dict, Literal, Union
 
 import pydantic
 import pytest
+from pydantic import ValidationError
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.utilities.parser import (
@@ -18,7 +19,7 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
     def handle_no_envelope(event: Dict, _: LambdaContext):
         return event
 
-    with pytest.raises(exceptions.InvalidModelTypeError):
+    with pytest.raises(ValidationError):
         handle_no_envelope(event=invalid_value, context=LambdaContext())
 
 
@@ -75,7 +76,7 @@ def test_pydanticv2_validation():
     assert event_parsed.version == int(event_raw["version"])
 
 
-@pytest.mark.parametrize("invalid_schema", [str, False, [], ()])
+@pytest.mark.parametrize("invalid_schema", [False, [], ()])
 def test_parser_with_invalid_schema_type(dummy_event, invalid_schema):
     @event_parser(model=invalid_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
@@ -118,6 +119,15 @@ def test_parser_event_with_type_hint_and_non_default_argument(dummy_event, dummy
         assert evt.message == "hello world"
 
     handler(dummy_event["payload"], LambdaContext())
+
+
+def test_parser_event_with_payload_not_match_schema(dummy_event, dummy_schema):
+    @event_parser(model=dummy_schema)
+    def handler(event, _):
+        assert event.message == "hello world"
+
+    with pytest.raises(ValidationError):
+        handler({"project": "powertools"}, LambdaContext())
 
 
 @pytest.mark.parametrize(
