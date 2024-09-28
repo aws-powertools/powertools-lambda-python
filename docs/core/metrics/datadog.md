@@ -257,4 +257,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for DatadogMetrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_datadog.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for DatadogMetrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/datadog/test_metrics_datadog.py){target="_blank"}
