@@ -1,3 +1,12 @@
+# GovCloud Layer Publish
+# ---
+# This workflow publishes a specific layer version in an AWS account based on the environment input.
+#
+# Using a matrix, we pull each architecture and python version of the layer and store them as artifacts
+# we upload them to each of the GovCloud AWS accounts.
+#
+# A number of safety checks are performed to ensure safety.
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,12 +22,23 @@ on:
         description: Layer version to duplicate
         type: number
         required: true
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: string
+        default: Gamma
+        required: true
+      version:
+        description: Layer version to duplicate
+        type: number
+        required: true
 
 name: Layer Deployment (GovCloud)
 run-name: Layer Deployment (GovCloud) - ${{ inputs.environment }}
 
 jobs:
-  stash:
+  download:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -45,6 +65,7 @@ jobs:
       - name: Grab Zip
         run: |
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_${{ matrix.arch }}.zip
+          
       - name: Store Zip
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
@@ -55,7 +76,7 @@ jobs:
 
   copy_east:
     name: Copy (East)
-    needs: stash
+    needs: download
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -98,7 +119,7 @@ jobs:
 
   copy_west:
     name: Copy (West)
-    needs: stash
+    needs: download
     runs-on: ubuntu-latest
     permissions:
       id-token: write
