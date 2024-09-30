@@ -18,6 +18,9 @@ from .cloud_watch_alarm_event import (
 from .cloud_watch_custom_widget_event import CloudWatchDashboardCustomWidgetEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
 from .cloudformation_custom_resource_event import CloudFormationCustomResourceEvent
+from .code_deploy_lifecycle_hook_event import (
+    CodeDeployLifecycleHookEvent,
+)
 from .code_pipeline_job_event import CodePipelineJobEvent
 from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
@@ -59,6 +62,7 @@ __all__ = [
     "CloudWatchAlarmMetricStat",
     "CloudWatchDashboardCustomWidgetEvent",
     "CloudWatchLogsEvent",
+    "CodeDeployLifecycleHookEvent",
     "CodePipelineJobEvent",
     "ConnectContactFlowEvent",
     "DynamoDBStreamEvent",
