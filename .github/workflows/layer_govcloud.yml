@@ -122,7 +122,7 @@ jobs:
       - name: Create Layer
         run: |
           aws --region us-gov-east-1 lambda publish-layer-version \
-            --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
+            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
@@ -130,7 +130,7 @@ jobs:
             --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-east-1 lambda add-layer-version-permission \
-              --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
+              --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
               --statement-id 'PublicLayer' \
               --action lambda:GetLayerVersion \
               --principal '*' \
@@ -178,7 +178,7 @@ jobs:
       - name: Create Layer
         run: |
           aws --region us-gov-west-1 lambda publish-layer-version \
-            --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
+            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq  -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
@@ -186,7 +186,7 @@ jobs:
             --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-west-1 lambda add-layer-version-permission \
-              --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
+              --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
               --statement-id 'PublicLayer' \
               --action lambda:GetLayerVersion \
               --principal '*' \
