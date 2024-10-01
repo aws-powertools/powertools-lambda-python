@@ -65,12 +65,19 @@ jobs:
       - name: Grab Zip
         run: |
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_${{ matrix.arch }}.zip
-          
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Store Zip
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
           path: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+          retention-days: 1
+          if-no-files-found: error
+      - name: Store Metadata
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.json
+          path: ${{ matrix.layer }}_${{ matrix.arch }}.json
           retention-days: 1
           if-no-files-found: error
 
@@ -98,6 +105,14 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+      - name: Download Metadata
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.json
+      - name: Verify Layer Signature
+        run: |
+          SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_${{ matrix.arch }}.json)
+          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
@@ -109,6 +124,10 @@ jobs:
           aws --region us-gov-east-1 lambda publish-layer-version \
             --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
+            --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
+            --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
+            --license-info "MIT-0" \
+            --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-east-1 lambda add-layer-version-permission \
               --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
@@ -142,6 +161,14 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+      - name: Download Metadata
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.json
+      - name: Verify Layer Signature
+        run: |
+          SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_${{ matrix.arch }}.json)
+          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
@@ -153,6 +180,10 @@ jobs:
           aws --region us-gov-west-1 lambda publish-layer-version \
             --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
+            --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
+            --compatible-architectures $(jq  -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
+            --license-info "MIT-0" \
+            --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-west-1 lambda add-layer-version-permission \
               --layer-name ${{ inputs.environment }}-${{ matrix.layer }}-${{ matrix.arch }} \
