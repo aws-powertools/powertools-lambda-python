@@ -33,7 +33,7 @@
                         - serverlessrepo:GetCloudFormationTemplate
                       Resource:
                         # this is arn of the Powertools for AWS Lambda (Python) SAR app
-                        - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86
+                        - arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64
                     - Sid: S3AccessLayer
                       Effect: Allow
                       Action:

@@ -2,7 +2,7 @@ name: Deploy v2 layer to all regions
 
 # PROCESS
 #
-# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for x86 and ARM (uses custom runner as it's CPU heavy)
+# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for x86_64 and ARM (uses custom runner as it's CPU heavy)
 # 2. Kick off pipeline for beta, prod, and canary releases
 # 3. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
 # 4. Builds and publishes docs with latest Layer ARN using given version (generally coming from release)
