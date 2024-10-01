@@ -53,7 +53,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
         arch:
           - arm64
-          - x86
+          - x86_64
     environment: Prod (Readonly)
     steps:
       - name: Configure AWS Credentials
@@ -98,7 +98,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
         arch:
           - arm64
-          - x86
+          - x86_64
     environment: GovCloud ${{ inputs.environment }} (East)
     steps:
       - name: Download Zip
@@ -153,7 +153,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
         arch:
           - arm64
-          - x86
+          - x86_64
     environment:
       name: GovCloud ${{ inputs.environment }} (West)
     steps:
