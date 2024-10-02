@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.29"
-description = "Type annotations for boto3 1.35.29 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.31"
+description = "Type annotations for boto3 1.35.31 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.29-py3-none-any.whl", hash = "sha256:048e664389c3fb53e8ab0f810eb280ba02c2f8213a63dc5d3da075ffd54b4504"},
-    {file = "boto3_stubs-1.35.29.tar.gz", hash = "sha256:6e5f082f7cd028bdf3bfc57c9db3b784e0f6ec2232b10482859a919d6cd6bfc9"},
+    {file = "boto3_stubs-1.35.31-py3-none-any.whl", hash = "sha256:d440ad57493534074024c999045929c617007712d395c86208b95b48f716269f"},
+    {file = "boto3_stubs-1.35.31.tar.gz", hash = "sha256:bc10fa6e0c0e46c2b7c664b2183bb524053eb7439d9ebf9ae66547b295b76675"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.29)", "botocore (==1.35.29)"]
+boto3 = ["boto3 (==1.35.31)", "botocore (==1.35.31)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -947,13 +947,13 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.270"
+version = "0.1.271"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.270-py3-none-any.whl", hash = "sha256:978940125159c2928cfcf79a95b1cb4337864417c186eead80e980905467e804"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.270.tar.gz", hash = "sha256:87fe0dd210f77b13be64dd4f2af8606a97e67b9fd40c19167d57746705f40b86"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.271-py3-none-any.whl", hash = "sha256:fd5cb5c24deb417bdc6e0a181826d3a1c062885659700fb1acc053a1b22789f2"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.271.tar.gz", hash = "sha256:f20bfcea83ba1c8985a8fc93d26e9832ddb9711d3abfb7efd33f58ac30a7a6b4"},
 ]
 
 [package.dependencies]
@@ -3677,13 +3677,13 @@ pathspec = ">=0.10.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.14.0"
+version = "2.15.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.14.0-py2.py3-none-any.whl", hash = "sha256:b8bc3dc51d06590df1291b7519b85c75e2ced4f28d9ea655b6d54033503b5bf4"},
-    {file = "sentry_sdk-2.14.0.tar.gz", hash = "sha256:1e0e2eaf6dad918c7d1e0edac868a7bf20017b177f242cefe2a6bcd47955961d"},
+    {file = "sentry_sdk-2.15.0-py2.py3-none-any.whl", hash = "sha256:8fb0d1a4e1a640172f31502e4503543765a1fe8a9209779134a4ac52d4677303"},
+    {file = "sentry_sdk-2.15.0.tar.gz", hash = "sha256:a599e7d3400787d6f43327b973e55a087b931ba2c592a7a7afa691f8eb5e75e2"},
 ]
 
 [package.dependencies]
@@ -4313,4 +4313,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c2dade79ed59cf1c8642a8014d2f04ceb5aef10ca775f93dbe4b7abf3220f8a9"
+content-hash = "435eafb89f4e86c26a9b4c024baeeeeec2b5ab1a4daf7f8fbd7e1973fd1d8320"
