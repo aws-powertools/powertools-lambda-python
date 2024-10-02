@@ -151,7 +151,7 @@ jobs:
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_x86_64.json) \
             --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_x86_64.json) \
             --license-info "MIT-0" \
-            --description "$(jq -r \".Description\" ${{ matrix.layer }}_x86_64.json)" \
+            --description "$(jq -r '.Description' ${{ matrix.layer }}_x86_64.json)" \
             --query 'Version' | \
             xargs aws --region ${{ matrix.region }} lambda add-layer-version-permission \
               --layer-name ${{ matrix.layer }}-x86_64 \
