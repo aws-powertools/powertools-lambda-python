@@ -127,7 +127,7 @@ jobs:
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --license-info "MIT-0" \
-            --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
+            --description "$(jq -r '.Description' ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-east-1 lambda add-layer-version-permission \
               --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
@@ -183,7 +183,7 @@ jobs:
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq  -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --license-info "MIT-0" \
-            --description "$(jq -r \".Description\" ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
+            --description "$(jq -r '.Description' ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
             --query 'Version' | \
             xargs aws --region us-gov-west-1 lambda add-layer-version-permission \
               --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
