@@ -190,17 +190,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.155.0a0"
+version = "2.156.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk.aws_lambda_python_alpha-2.155.0a0-py3-none-any.whl", hash = "sha256:cbbdaf6355c49ddb73f219918b1289d51a82bfa73f28c9af3dbbae45409831af"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.155.0a0.tar.gz", hash = "sha256:eb039ff13f0a37adfed7b796e340f478fb8e420f1b1f3fd0d6ee91efb95a69e0"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.156.0a0-py3-none-any.whl", hash = "sha256:21d3757e8946a8393e870e2ccfed499caa0ae44c82bebabee729108cfaa48980"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.156.0a0.tar.gz", hash = "sha256:20d7aebc1506bea33b90e8665f0f0d377b161839a34c551f9c16b87ac2154823"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.155.0,<3.0.0"
+aws-cdk-lib = ">=2.156.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.102.0,<2.0.0"
 publication = ">=0.0.3"
@@ -224,13 +224,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.155.0"
+version = "2.157.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk_lib-2.155.0-py3-none-any.whl", hash = "sha256:260e6b237f7e916700d18402d811c0dbabb36b0d90275ee73810ce9746650961"},
-    {file = "aws_cdk_lib-2.155.0.tar.gz", hash = "sha256:4156ec3f6bd6fce09285a7309ca1f62b3ed95ef0a9e902eab4f649e118911771"},
+    {file = "aws_cdk_lib-2.157.0-py3-none-any.whl", hash = "sha256:1e20addd72affcb8ad5f677c0f6ada46234b74842327546236376d4181b57781"},
+    {file = "aws_cdk_lib-2.157.0.tar.gz", hash = "sha256:da20df35555c0ecae0eac503c4333ef76bc1da9ed69a8e52d5ab5f9c44f4b5c8"},
 ]
 
 [package.dependencies]
@@ -496,13 +496,13 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.263"
+version = "0.1.264"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.263-py3-none-any.whl", hash = "sha256:a3f12a4d749de634def064c538af329b26a7c6a717b7c348dce66a2d116b3f9a"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.263.tar.gz", hash = "sha256:c5c462acea6eef4f07fa0d83bd2cafd601dbc5e74c26b1d227a2b9710082bf35"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.264-py3-none-any.whl", hash = "sha256:ee49486189c7e0540b482c5030c75c107bc47f95fd877f21abb20ff2ff86d65f"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.264.tar.gz", hash = "sha256:10414a52844db4d1252938edcb1fef7ed2d819756f994b2a277d3d7231ae1dc5"},
 ]
 
 [package.dependencies]
@@ -590,13 +590,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.12.3"
+version = "1.12.4"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "cfn_lint-1.12.3-py3-none-any.whl", hash = "sha256:529dadf23677c91d6427704101f6ab99b51f08b235a172f4863d2f2bdc4dd801"},
-    {file = "cfn_lint-1.12.3.tar.gz", hash = "sha256:b37f9613844467230f06632e2e583f5e8d6bb50666a24cb324b998e0c4be81f6"},
+    {file = "cfn_lint-1.12.4-py3-none-any.whl", hash = "sha256:14c2faa79b421c0ceeb09e201f225ff984efea39b1dd34ba98979e4107b709d9"},
+    {file = "cfn_lint-1.12.4.tar.gz", hash = "sha256:30fac1eec8acb1fb5f66300c8f2e17aaffad9788ccb7dc7f12bd0aee571300d1"},
 ]
 
 [package.dependencies]
@@ -1207,19 +1207,19 @@ devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benc
 
 [[package]]
 name = "filelock"
-version = "3.15.4"
+version = "3.16.0"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "filelock-3.15.4-py3-none-any.whl", hash = "sha256:6ca1fffae96225dab4c6eaf1c4f4f28cd2568d3ec2a44e15a08520504de468e7"},
-    {file = "filelock-3.15.4.tar.gz", hash = "sha256:2207938cbc1844345cb01a5a95524dae30f0ce089eba5b00378295a17e3e90cb"},
+    {file = "filelock-3.16.0-py3-none-any.whl", hash = "sha256:f6ed4c963184f4c84dd5557ce8fece759a3724b37b80c6c4f20a2f63a4dc6609"},
+    {file = "filelock-3.16.0.tar.gz", hash = "sha256:81de9eb8453c769b63369f87f11131a7ab04e367f8d97ad39dc230daa07e3bec"},
 ]
 
 [package.extras]
-docs = ["furo (>=2023.9.10)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
-testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", "pytest (>=7.4.3)", "pytest-asyncio (>=0.21)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)", "pytest-timeout (>=2.2)", "virtualenv (>=20.26.2)"]
-typing = ["typing-extensions (>=4.8)"]
+docs = ["furo (>=2024.8.6)", "sphinx (>=8.0.2)", "sphinx-autodoc-typehints (>=2.4)"]
+testing = ["covdefaults (>=2.3)", "coverage (>=7.6.1)", "diff-cover (>=9.1.1)", "pytest (>=8.3.2)", "pytest-asyncio (>=0.24)", "pytest-cov (>=5)", "pytest-mock (>=3.14)", "pytest-timeout (>=2.3.1)", "virtualenv (>=20.26.3)"]
+typing = ["typing-extensions (>=4.12.2)"]
 
 [[package]]
 name = "ghp-import"
@@ -2088,13 +2088,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.35.0"
-description = "Type annotations for boto3.DynamoDB 1.35.0 service generated with mypy-boto3-builder 7.26.0"
+version = "1.35.15"
+description = "Type annotations for boto3.DynamoDB 1.35.15 service generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_dynamodb-1.35.0-py3-none-any.whl", hash = "sha256:1e503c89a5aa65f2b90fc7c861d3630a21544822f30b38e67e4f52463111abb9"},
-    {file = "mypy_boto3_dynamodb-1.35.0.tar.gz", hash = "sha256:75f224d8b78f6d3126eead645aea6c0a8bc2828614f302c168de1d3dad490d11"},
+    {file = "mypy_boto3_dynamodb-1.35.15-py3-none-any.whl", hash = "sha256:ac7daacc874e00a5ece33d582916c180a5fac5b293abcc5def5336749769e9cf"},
+    {file = "mypy_boto3_dynamodb-1.35.15.tar.gz", hash = "sha256:7a913873e54289c5d392e18626ef379711530d406eda7766cb7e8d0114c2cbc1"},
 ]
 
 [package.dependencies]
@@ -2130,13 +2130,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.35.2"
-description = "Type annotations for boto3.S3 1.35.2 service generated with mypy-boto3-builder 7.26.0"
+version = "1.35.16"
+description = "Type annotations for boto3.S3 1.35.16 service generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_s3-1.35.2-py3-none-any.whl", hash = "sha256:f7300b559dee5435872625448becf159abe36b19cd7006dd78e0d51610312183"},
-    {file = "mypy_boto3_s3-1.35.2.tar.gz", hash = "sha256:74d8f3492eeff768ff6f69ac6d40bf68b40aa6e54ebe10a8d098fc3d24a54abf"},
+    {file = "mypy_boto3_s3-1.35.16-py3-none-any.whl", hash = "sha256:d62361c8f36fdbef2995f62c3f62fec820a489696806d4c356de90b107c0e166"},
+    {file = "mypy_boto3_s3-1.35.16.tar.gz", hash = "sha256:599567e327eaabe4cdd0c226c07cac850431d048166aba49c2a162031ec48934"},
 ]
 
 [package.dependencies]
@@ -2520,13 +2520,13 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "8.3.2"
+version = "8.3.3"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.3.2-py3-none-any.whl", hash = "sha256:4ba08f9ae7dcf84ded419494d229b48d0903ea6407b030eaec46df5e6a73bba5"},
-    {file = "pytest-8.3.2.tar.gz", hash = "sha256:c132345d12ce551242c87269de812483f5bcc87cdbb4722e48487ba194f9fdce"},
+    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
+    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
 ]
 
 [package.dependencies]
@@ -3115,13 +3115,13 @@ crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.13.0"
+version = "2.14.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.13.0-py2.py3-none-any.whl", hash = "sha256:6beede8fc2ab4043da7f69d95534e320944690680dd9a963178a49de71d726c6"},
-    {file = "sentry_sdk-2.13.0.tar.gz", hash = "sha256:8d4a576f7a98eb2fdb40e13106e41f330e5c79d72a68be1316e7852cf4995260"},
+    {file = "sentry_sdk-2.14.0-py2.py3-none-any.whl", hash = "sha256:b8bc3dc51d06590df1291b7519b85c75e2ced4f28d9ea655b6d54033503b5bf4"},
+    {file = "sentry_sdk-2.14.0.tar.gz", hash = "sha256:1e0e2eaf6dad918c7d1e0edac868a7bf20017b177f242cefe2a6bcd47955961d"},
 ]
 
 [package.dependencies]
@@ -3334,13 +3334,13 @@ types-cffi = "*"
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.9.0.20240821"
+version = "2.9.0.20240906"
 description = "Typing stubs for python-dateutil"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-python-dateutil-2.9.0.20240821.tar.gz", hash = "sha256:9649d1dcb6fef1046fb18bebe9ea2aa0028b160918518c34589a46045f6ebd98"},
-    {file = "types_python_dateutil-2.9.0.20240821-py3-none-any.whl", hash = "sha256:f5889fcb4e63ed4aaa379b44f93c32593d50b9a94c9a60a0c854d8cc3511cd57"},
+    {file = "types-python-dateutil-2.9.0.20240906.tar.gz", hash = "sha256:9706c3b68284c25adffc47319ecc7947e5bb86b3773f843c73906fd598bc176e"},
+    {file = "types_python_dateutil-2.9.0.20240906-py3-none-any.whl", hash = "sha256:27c8cc2d058ccb14946eebcaaa503088f4f6dbc4fb6093d3d456a49aef2753f6"},
 ]
 
 [[package]]
@@ -3737,4 +3737,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "0709a9788cc87bcaba3cfaa14cf8a1be17d68a873a4f3cab5edb4c56c94e5818"
+content-hash = "6083448a2f34a1b5cc5933174d289e48384ee37fee79bbc54383f1d1cd2ca4fb"

@@ -15,10 +15,9 @@ This is document explains who the maintainers are, their responsibilities, and h
 
 | Maintainer        | GitHub ID                                                                               | Affiliation |
 | ----------------- | --------------------------------------------------------------------------------------- | ----------- |
-| Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa){target="_blank" rel="nofollow"}           | Amazon      |
-| Simon Thulbourn   | [sthulb](https://github.com/sthulb){target="_blank" rel="nofollow"}                     | Amazon      |
-| Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca){target="_blank" rel="nofollow"}         | Amazon      |
+| Ana Falcão        | [anafalcao](https://github.com/anafalcao){target="_blank" rel="nofollow"}               | Amazon      |
 | Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena){target="_blank" rel="nofollow"} | Amazon      |
+| Simon Thulbourn   | [sthulb](https://github.com/sthulb){target="_blank" rel="nofollow"}                     | Amazon      |
 
 ## Emeritus
 
@@ -26,10 +25,12 @@ Previous active maintainers who contributed to this project.
 
 | Maintainer        | GitHub ID                                                                       | Affiliation |
 | ----------------- | ------------------------------------------------------------------------------- | ----------- |
-| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | MongoDB     |
+| Alexander Schueren| [am29d](https://github.com/am29d){target="_blank" rel="nofollow"}               | Amazon      |
+| Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa){target="_blank" rel="nofollow"}   | Adyen       |
+| Michal Ploski     | [mploski](https://github.com/mploski){target="_blank" rel="nofollow"}           | Splunk      |
 | Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen){target="_blank" rel="nofollow"}     | Apollo      |
-| Alexander Melnyk  | [am29d](https://github.com/am29d){target="_blank" rel="nofollow"}               | Amazon      |
-| Michal Ploski     | [mploski](https://github.com/mploski){target="_blank" rel="nofollow"}           | Amazon      |
+| Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca){target="_blank" rel="nofollow"} | N/A         |
+| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | MongoDB     |
 
 ## Labels
 
