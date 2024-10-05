@@ -238,13 +238,13 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.160.0"
+version = "2.161.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk_lib-2.160.0-py3-none-any.whl", hash = "sha256:c6775a7c5d02e4272147692a0560071f1bd232c1dc1bf74e84a69f7bdb418362"},
-    {file = "aws_cdk_lib-2.160.0.tar.gz", hash = "sha256:df6142440f9e2754344d9a8f240e0a467d9102261c46b9e133cd16fbdbcd8796"},
+    {file = "aws_cdk_lib-2.161.0-py3-none-any.whl", hash = "sha256:14505cbe63226251d31abb606e72f4d83eb49b8d9a57863bff319161af1e7f87"},
+    {file = "aws_cdk_lib-2.161.0.tar.gz", hash = "sha256:178d8842a17f58f878647a8c07a555a62043c7a72fce003253d45fca7f1c46cb"},
 ]
 
 [package.dependencies]
@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.33"
-description = "Type annotations for boto3 1.35.33 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.34"
+description = "Type annotations for boto3 1.35.34 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.33-py3-none-any.whl", hash = "sha256:06ad71b2d7766e7fde2db486e5d168c3d6dca8dbfbd761492f384586d3540402"},
-    {file = "boto3_stubs-1.35.33.tar.gz", hash = "sha256:840a3c7f7b4f68dcfffde97f26859f5040f3f49d27be166ca795688d8125c6fe"},
+    {file = "boto3_stubs-1.35.34-py3-none-any.whl", hash = "sha256:6a2379d8ce47ca704690dbb058c29b8900e77e6210bf8bcebfe876640522ee1c"},
+    {file = "boto3_stubs-1.35.34.tar.gz", hash = "sha256:5e9209b26901f8feba4f6bca47024ad1590f9e7e21423ce4d112928973a5e09c"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.33)", "botocore (==1.35.33)"]
+boto3 = ["boto3 (==1.35.34)", "botocore (==1.35.34)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -3904,13 +3904,13 @@ files = [
 
 [[package]]
 name = "types-redis"
-version = "4.6.0.20240903"
+version = "4.6.0.20241004"
 description = "Typing stubs for redis"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-redis-4.6.0.20240903.tar.gz", hash = "sha256:4bab1a378dbf23c2c95c370dfdb89a8f033957c4fd1a53fee71b529c182fe008"},
-    {file = "types_redis-4.6.0.20240903-py3-none-any.whl", hash = "sha256:0e7537e5c085fe96b7d468d5edae0cf667b4ba4b62c6e4a5dfc340bd3b868c23"},
+    {file = "types-redis-4.6.0.20241004.tar.gz", hash = "sha256:5f17d2b3f9091ab75384153bfa276619ffa1cf6a38da60e10d5e6749cc5b902e"},
+    {file = "types_redis-4.6.0.20241004-py3-none-any.whl", hash = "sha256:ef5da68cb827e5f606c8f9c0b49eeee4c2669d6d97122f301d3a55dc6a63f6ed"},
 ]
 
 [package.dependencies]
@@ -4314,4 +4314,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "22d5bd0f2367cf03fde9c2bf2b6dc7911ae830a869330342638c71f0a442fb95"
+content-hash = "4d443fdf04e0a8241589bd7763470566c9597909395a227f7a27ec2e890ac679"
