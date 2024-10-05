@@ -16,26 +16,28 @@ on:
         options:
           - beta
           - prod
-        default: Gamma
+        default: beta
         required: true
       version:
         description: Layer version to duplicate
-        type: number
+        type: string
         required: true
   workflow_call:
     inputs:
       environment:
         description: Deployment environment
         type: string
-        default: Gamma
         required: true
       version:
         description: Layer version to duplicate
-        type: number
+        type: string
         required: true
 
 name: Layer Rename
 run-name: Layer Rename - ${{ inputs.environment }}
+
+permissions:
+  contents: read
 
 jobs:
   download:
@@ -136,7 +138,7 @@ jobs:
       - name: Verify Layer Signature
         run: |
           SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_x86_64.json)
-          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_x86_64.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1 
+          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_x86_64.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
@@ -158,4 +160,4 @@ jobs:
               --statement-id 'PublicLayer' \
               --action lambda:GetLayerVersion \
               --principal '*' \
-              --version-number 
+              --version-number
