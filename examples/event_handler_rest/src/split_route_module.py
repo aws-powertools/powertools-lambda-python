@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import requests
 from requests import Response
 
@@ -27,6 +29,7 @@ def get_todos():
 def get_todo_by_id(todo_id: str):  # value come as str
     api_key = router.current_event.headers["X-Api-Key"]
 
+    todo_id = quote(todo_id, safe="")
     todos: Response = requests.get(f"{endpoint}/{todo_id}", headers={"X-Api-Key": api_key})
     todos.raise_for_status()
 
