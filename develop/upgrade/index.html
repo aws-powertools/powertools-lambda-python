@@ -562,6 +562,15 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 </li>
       
         <li class="md-nav__item">
+  <a href="#importing-pydantic-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Importing Pydantic objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#new-aws-lambda-layer-arns" class="md-nav__link">
     <span class="md-ellipsis">
       New AWS Lambda Layer ARNs
@@ -1724,6 +1733,15 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 </li>
       
         <li class="md-nav__item">
+  <a href="#importing-pydantic-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Importing Pydantic objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#new-aws-lambda-layer-arns" class="md-nav__link">
     <span class="md-ellipsis">
       New AWS Lambda Layer ARNs
@@ -1840,6 +1858,11 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 <tr>
 <td><strong>Parser</strong></td>
 <td>We have replaced <a href="#dynamodbstreammodel-in-parser">DynamoDBStreamModel</a> <code>AttributeValue</code> with native Python types</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Parser</strong></td>
+<td>We no longer export <a href="#importing-pydantic-objects">Pydantic objects</a> from <code>parser.pydantic</code>.</td>
 <td>Yes</td>
 </tr>
 <tr>
@@ -1971,6 +1994,18 @@ def lambda_handler(event: DynamoDBStreamModel, context: LambdaContext):
 <span class="gi">+        new_image: dict[str, Any] = record.dynamodb.NewImage</span>
 <span class="gi">+        if new_image.get(&quot;eventType&quot;) == &quot;PENDING&quot;:</span>
 <span class="gi">+            send_to_sqs(new_image)  # Here new_image is just a Python Dict type</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="importing-pydantic-objects">Importing Pydantic objects<a class="headerlink" href="#importing-pydantic-objects" title="Permanent link">&para;</a></h2>
+<p>We have stopped exporting Pydantic objects directly from <code>aws_lambda_powertools.utilities.parser.pydantic</code>. This change prevents customers from accidentally importing all of Pydantic, which could significantly slow down function startup times.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="gd">- #BEFORE - v2</span>
+<span class="gd">- from aws_lambda_powertools.utilities.parser.pydantic import EmailStr</span>
+
+<span class="gi">+ # NOW - v3</span>
+<span class="gi">+ from pydantic import EmailStr</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="new-aws-lambda-layer-arns">New AWS Lambda Layer ARNs<a class="headerlink" href="#new-aws-lambda-layer-arns" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
@@ -2312,7 +2347,7 @@ def handler(event: dict, context: LambdaContext) -&gt; dict:
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-09-12
+    2024-10-07
   </span>
 
     
