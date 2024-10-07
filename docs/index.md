@@ -448,6 +448,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**CyberArk**](https://www.cyberark.com/){target="_blank" rel="nofollow"}
 { .card }
 
+[**Flyweight**](https://flyweight.io/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**globaldatanet**](https://globaldatanet.com/){target="_blank" rel="nofollow"}
 { .card }
 
