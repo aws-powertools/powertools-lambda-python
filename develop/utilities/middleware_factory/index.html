@@ -1868,9 +1868,7 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
@@ -1904,18 +1902,16 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
     <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
 
     <span class="c1"># check if status_id exists in payload, otherwise add default state before processing payment</span>
-    <span class="k">if</span> <span class="s2">&quot;status_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detail</span><span class="p">:</span>
-<span class="hll">        <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;status_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pending&quot;</span>
-</span><span class="hll">
-</span>    <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-<span class="hll">
-</span>    <span class="k">return</span> <span class="n">response</span>
+<span class="hll">    <span class="k">if</span> <span class="s2">&quot;status_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detail</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;status_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pending&quot;</span>
+</span>
+<span class="hll">    <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</span>
 
-
-<span class="nd">@middleware_before</span>
-<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span class="hll">    <span class="k">try</span><span class="p">:</span>
-</span>        <span class="n">payment_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+<span class="hll"><span class="nd">@middleware_before</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">payment_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">Payment</span><span class="p">(</span><span class="o">**</span><span class="n">payment_payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;payment created&quot;</span><span class="p">,</span>
@@ -2129,9 +2125,7 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
@@ -2175,9 +2169,7 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 </span>        <span class="k">if</span> <span class="n">guest_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guest_field</span><span class="p">):</span>
             <span class="n">event</span><span class="p">[</span><span class="s2">&quot;detail&quot;</span><span class="p">][</span><span class="s2">&quot;guest&quot;</span><span class="p">][</span><span class="n">guest_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">obfuscate_data</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">guest_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guest_field</span><span class="p">)))</span>
 
-    <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">response</span>
+    <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">obfuscate_data</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
@@ -2185,10 +2177,10 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
     <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
 
 
-<span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
-<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span class="hll">    <span class="k">try</span><span class="p">:</span>
-</span>        <span class="n">booking_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+<span class="hll"><span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">booking_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;book&quot;</span><span class="p">:</span> <span class="n">Booking</span><span class="p">(</span><span class="o">**</span><span class="n">booking_payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;booking created&quot;</span><span class="p">,</span>
@@ -2630,8 +2622,11 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
-<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">quote</span>
 
 <span class="kn">import</span> <span class="nn">boto3</span>
 <span class="kn">import</span> <span class="nn">combining_powertools_utilities_schema</span> <span class="k">as</span> <span class="nn">schemas</span>
@@ -2639,9 +2634,9 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.exceptions</span> <span class="kn">import</span> <span class="n">InternalServerError</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.exceptions</span> <span class="kn">import</span> <span class="n">InternalServerError</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags.types</span> <span class="kn">import</span> <span class="n">JSONType</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.jmespath_utils</span> <span class="kn">import</span> <span class="n">query</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
@@ -2656,10 +2651,10 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 <span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">)</span>
 <span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
 
-
-<span class="hll"><span class="nd">@lambda_handler_decorator</span><span class="p">(</span><span class="n">trace_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_custom</span><span class="p">(</span>
-</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+<span class="hll">
+</span><span class="hll"><span class="nd">@lambda_handler_decorator</span><span class="p">(</span><span class="n">trace_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">middleware_custom</span><span class="p">(</span>
+    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -2684,17 +2679,17 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 
     <span class="c1"># automatically adding security headers to all responses</span>
     <span class="c1"># see: https://securityheaders.com/</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Injecting security headers&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;Referrer-Policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;no-referrer&quot;</span>
-</span>    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;max-age=15552000; includeSubDomains; preload&quot;</span>
+<span class="hll">    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Injecting security headers&quot;</span><span class="p">)</span>
+</span>    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;Referrer-Policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;no-referrer&quot;</span>
+    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;Strict-Transport-Security&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;max-age=15552000; includeSubDomains; preload&quot;</span>
     <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;X-DNS-Prefetch-Control&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;off&quot;</span>
     <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;X-Content-Type-Options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nosniff&quot;</span>
     <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;X-Permitted-Cross-Domain-Policies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
     <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;X-Download-Options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;noopen&quot;</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saving api call in history table&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="n">save_api_execution_history</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)),</span> <span class="n">headers</span><span class="p">,</span> <span class="n">request_context</span><span class="p">)</span>
-</span>
+<span class="hll">    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saving api call in history table&quot;</span><span class="p">)</span>
+</span>    <span class="n">save_api_execution_history</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)),</span> <span class="n">headers</span><span class="p">,</span> <span class="n">request_context</span><span class="p">)</span>
+
     <span class="c1"># return lambda execution</span>
     <span class="k">return</span> <span class="n">response</span>
 
@@ -2705,9 +2700,9 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
         <span class="c1"># using the feature flags utility to check if the new feature &quot;save api call to history&quot; is enabled by default</span>
         <span class="c1"># see: https://docs.powertools.aws.dev/lambda/python/latest/utilities/feature_flags/#static-flags</span>
         <span class="n">save_history</span><span class="p">:</span> <span class="n">JSONType</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;save_history&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">save_history</span><span class="p">:</span>
-<span class="hll">            <span class="c1"># saving history in dynamodb table</span>
-</span>            <span class="n">tracer</span><span class="o">.</span><span class="n">put_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;execution detail&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">request_context</span><span class="p">)</span>
+<span class="hll">        <span class="k">if</span> <span class="n">save_history</span><span class="p">:</span>
+</span>            <span class="c1"># saving history in dynamodb table</span>
+            <span class="n">tracer</span><span class="o">.</span><span class="n">put_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;execution detail&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">request_context</span><span class="p">)</span>
             <span class="n">table_historic</span><span class="o">.</span><span class="n">put_item</span><span class="p">(</span>
                 <span class="n">Item</span><span class="o">=</span><span class="p">{</span>
                     <span class="s2">&quot;customer_id&quot;</span><span class="p">:</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;X-Customer-Id&quot;</span><span class="p">),</span>
@@ -2735,25 +2730,26 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
 
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InternalServerError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">InternalServerError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">exc</span>
 
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/comments/&lt;comment_id&gt;&quot;</span><span class="p">)</span>
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
 <span class="k">def</span> <span class="nf">get_comments_by_id</span><span class="p">(</span><span class="n">comment_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
+        <span class="n">comment_id</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">comment_id</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/comments/</span><span class="si">{</span><span class="n">comment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">comments</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="o">.</span><span class="n">json</span><span class="p">()}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InternalServerError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">InternalServerError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">exc</span>
 
 
-<span class="nd">@middleware_custom</span>
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="hll">    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+<span class="hll"><span class="nd">@middleware_custom</span>
+</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3270,7 +3266,7 @@ On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2023-12-29
+    2024-10-07
   </span>
 
     
