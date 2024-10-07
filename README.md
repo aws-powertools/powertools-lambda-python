@@ -63,6 +63,7 @@ The following companies, among others, use Powertools:
 * [CPQi (Exadel Financial Services)](https://cpqi.com/)
 * [CloudZero](https://www.cloudzero.com/)
 * [CyberArk](https://www.cyberark.com/)
+* [Flyweight](https://flyweight.io/)
 * [globaldatanet](https://globaldatanet.com/)
 * [IMS](https://ims.tech/)
 * [Jit Security](https://www.jit.io/)

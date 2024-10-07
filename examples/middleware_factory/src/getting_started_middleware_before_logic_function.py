@@ -35,9 +35,7 @@ def middleware_before(
     if "status_id" not in detail:
         event["detail"]["status_id"] = "pending"
 
-    response = handler(event, context)
-
-    return response
+    return handler(event, context)
 
 
 @middleware_before
