@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Any, Dict, Literal, Union
 
 import pydantic
@@ -6,10 +7,10 @@ import pytest
 from pydantic import ValidationError
 from typing_extensions import Annotated
 
-from aws_lambda_powertools.utilities.parser import (
-    event_parser,
-    exceptions,
-)
+from aws_lambda_powertools.utilities.parser import event_parser, exceptions, parse
+from aws_lambda_powertools.utilities.parser.envelopes.sqs import SqsEnvelope
+from aws_lambda_powertools.utilities.parser.models import SqsModel
+from aws_lambda_powertools.utilities.parser.models.event_bridge import EventBridgeModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -161,3 +162,42 @@ def test_parser_unions(test_input, expected):
 
     ret = handler(test_input, None)
     assert ret == expected
+
+
+def test_parser_with_model_type_model_and_envelope():
+    event = {
+        "Records": [
+            {
+                "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
+                "receiptHandle": "MessageReceiptHandle",
+                "body": EventBridgeModel(
+                    version="version",
+                    id="id",
+                    source="source",
+                    account="account",
+                    time=datetime.now(),
+                    region="region",
+                    resources=[],
+                    detail={"key": "value"},
+                ).model_dump_json(),
+                "attributes": {
+                    "ApproximateReceiveCount": "1",
+                    "SentTimestamp": "1523232000000",
+                    "SenderId": "123456789012",
+                    "ApproximateFirstReceiveTimestamp": "1523232000001",
+                },
+                "messageAttributes": {},
+                "md5OfBody": "{{{md5_of_body}}}",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
+                "awsRegion": "us-east-1",
+            },
+        ],
+    }
+
+    def handler(event: SqsModel, _: LambdaContext):
+        parsed_event: EventBridgeModel = parse(event, model=EventBridgeModel, envelope=SqsEnvelope)
+        print(parsed_event)
+        assert parsed_event[0].version == "version"
+
+    handler(event, LambdaContext())
