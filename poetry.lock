@@ -930,17 +930,17 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.195"
+version = "2.29.0"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk_nag-2.28.195-py3-none-any.whl", hash = "sha256:6a33dbad938b66946f2d89a8a010a6e2b9cb42c8703aa3b4991b6ad572596b8a"},
-    {file = "cdk_nag-2.28.195.tar.gz", hash = "sha256:c96ead451197dde434451c5bfef2c63edd0c7e766dd4a39268d9a8b8632da612"},
+    {file = "cdk_nag-2.29.0-py3-none-any.whl", hash = "sha256:71ff01b971899662706c0032c8a9da2b75e00d656a810a40b4fcd8a0d9294fb2"},
+    {file = "cdk_nag-2.29.0.tar.gz", hash = "sha256:6ce9100efc04deb1b4b1c75e5de1c066239604c4266f71e9b1331c3d2103438b"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.116.0,<3.0.0"
+aws-cdk-lib = ">=2.156.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
 jsii = ">=1.103.1,<2.0.0"
 publication = ">=0.0.3"
@@ -948,18 +948,18 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.272"
+version = "0.1.273"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.272-py3-none-any.whl", hash = "sha256:5f940411e38a387832fdabad13918477dab6e2707ac3529dafa60a40b23ae8c7"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.272.tar.gz", hash = "sha256:a735035753ac86271512c341da38d746e011d41e1581385002e4029e67a99159"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.273-py3-none-any.whl", hash = "sha256:76cb3344613b81da36c700475ea0071bb23a9dde9b64fec0c2aa8256ba0e67da"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.273.tar.gz", hash = "sha256:ca48aba8212f54bcd3e333a2a2c209c60de5a6771b10e24a5302fb5d58583ff6"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.154.1,<3.0.0"
-cdk-nag = ">=2.28.195,<3.0.0"
+cdk-nag = ">=2.28.196,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.103.1,<2.0.0"
 publication = ">=0.0.3"
@@ -4314,4 +4314,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c0fdfb9e060e0d53b6427b15c0b1e9b70a30aa90833b12bdc4235e58720254d6"
+content-hash = "5d06f3136b5084e4187393ea9e7561487dbe3b699db79385ce45a3b0fe5d7fd1"
