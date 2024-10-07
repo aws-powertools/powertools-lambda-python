@@ -94,9 +94,7 @@ def lambda_handler(event: DynamoDBStreamModel, context: LambdaContext):
 
 ## Importing Pydantic objects
 
-We have stopped exporting Pydantic objects directly from `aws_lambda_powertools.utilities.parser.pydantic` to prevent potential confusion caused by Pydantic V2's significant changes in type, class, and method exports.
-
-This change prevents customers from accidentally importing all of Pydantic, which could significantly slow down function startup times.
+We have stopped exporting Pydantic objects directly from `aws_lambda_powertools.utilities.parser.pydantic`. This change prevents customers from accidentally importing all of Pydantic, which could significantly slow down function startup times.
 
 ```diff
 - #BEFORE - v2
