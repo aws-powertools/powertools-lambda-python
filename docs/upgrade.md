@@ -17,6 +17,7 @@ We've made minimal breaking changes to make your transition to v3 as smooth as p
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
 | **Pydantic**                       | We have removed support for [Pydantic v1](#drop-support-for-pydantic-v1)                                                 | No                   |
 | **Parser**                         | We have replaced [DynamoDBStreamModel](#dynamodbstreammodel-in-parser) `AttributeValue` with native Python types         | Yes                  |
+| **Parser**                         | We no longer export [Pydantic objects](#importing-pydantic-objects) from `parser.pydantic`.                              | Yes                  |
 | **Lambda layer**                   | [Lambda layers](#new-aws-lambda-layer-arns) are now compiled according to the specific Python version and architecture   | No                   |
 | **Event Handler**                  | We [have deprecated](#event-handler-headers-are-case-insensitive) the `get_header_value` function.	                    | Yes                  |
 | **Batch Processor**                | `@batch_processor` and `@async_batch_processor` decorators [are now deprecated](#deprecated-batch-processing-decorators) | Yes                  |
@@ -89,6 +90,18 @@ def lambda_handler(event: DynamoDBStreamModel, context: LambdaContext):
 +        if new_image.get("eventType") == "PENDING":
 +            send_to_sqs(new_image)  # Here new_image is just a Python Dict type
 
+```
+
+## Importing Pydantic objects
+
+We have stopped exporting Pydantic objects directly from `aws_lambda_powertools.utilities.parser.pydantic`. This change prevents customers from accidentally importing all of Pydantic, which could significantly slow down function startup times.
+
+```diff
+- #BEFORE - v2
+- from aws_lambda_powertools.utilities.parser.pydantic import EmailStr
+
++ # NOW - v3
++ from pydantic import EmailStr
 ```
 
 ## New AWS Lambda Layer ARNs
