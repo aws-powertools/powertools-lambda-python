@@ -1,0 +1,16 @@
+sequenceDiagram
+    Agent->>Lambda: input payload
+    activate Lambda
+    Lambda->>Parsing: parses input parameters
+    Parsing->>Validation: validates input
+    Validation-->Validation: failure
+    box BedrockAgentResolver
+    participant Lambda
+    participant Parsing
+    participant Validation
+    participant Routing
+    participant Your Code
+    end
+    Note right of Validation: Your code is never called
+    Validation->>Agent: 422 response
+    deactivate Lambda

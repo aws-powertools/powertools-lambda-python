@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor User
+
+    User->>Agent: What is the current time?
+    Agent->>OpenAPI schema: consults
+    OpenAPI schema-->>Agent: GET /current_time
+    Agent-->>Agent: LLM interaction
+
+    box Powertools
+        participant Lambda
+        participant Parsing
+        participant Validation
+        participant Routing
+        participant Your Code
+    end
+
+    Agent->>Lambda: GET /current_time
+    activate Lambda
+    Lambda->>Parsing: parses parameters
+    Parsing->>Validation: validates input
+    Validation->>Routing: finds method to call
+    Routing->>Your Code: executes
+    activate Your Code
+    Your Code->>Routing: 1709215709
+    deactivate Your Code
+    Routing->>Validation: returns output
+    Validation->>Parsing: validates output
+    Parsing->>Lambda: formats response
+    Lambda->>Agent: 1709215709
+    deactivate Lambda
+
+    Agent-->>Agent: LLM interaction
+    Agent->>User: "The current time is 14:08:29 GMT"

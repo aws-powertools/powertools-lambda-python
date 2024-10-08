@@ -1,0 +1,1964 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Automation practices and processes for Powertools for AWS Lambda (Python)">
+      
+      
+        <meta name="author" content="Amazon Web Services">
+      
+      
+      
+        <link rel="prev" href="../security/">
+      
+      
+        <link rel="next" href="../versioning/">
+      
+      
+      <link rel="icon" href="../media/aws-logo-light.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Automation - Powertools for AWS Lambda (Python)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#continuous-integration-practices" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+On March 25st, 2025 v2 of Powertools for AWS Lambda (Python) <a
+  href="https://github.com/aws-powertools/powertools-lambda-python/issues/5239" target="_blank">will reach
+  End-of-Life</a>. We recommend you to <a href="https://docs.powertools.aws.dev/lambda/python/latest/upgrade/"
+  target="_blank">upgrade to v3</a>.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Powertools for AWS Lambda (Python)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Automation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href=".." class="md-tabs__link">
+          
+  
+    
+  
+  Homepage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tutorial/" class="md-tabs__link">
+        
+  
+    
+  
+  Tutorial
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../security/" class="md-tabs__link">
+          
+  
+    
+  
+  Processes
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    Powertools for AWS Lambda (Python)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href=".." class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Homepage
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Homepage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upgrade guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../we_made_this/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    We Made This (Community)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workshop 🆕
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/tracer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tracer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/logger/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logger
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../core/metrics/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Metrics
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_8_3" id="__nav_1_8_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            Metrics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Amazon CloudWatch EMF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/metrics/datadog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Datadog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8_4" id="__nav_1_8_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Event Handler
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8_4">
+            <span class="md-nav__icon md-icon"></span>
+            Event Handler
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/event_handler/api_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/event_handler/appsync/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GraphQL API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/event_handler/bedrock_agents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Agents for Amazon Bedrock
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/batch/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Batch Processing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/typing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Typing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/data_classes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Event Source Data Classes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/parser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parser (Pydantic)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/idempotency/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Idempotency
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/data_masking/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Masking
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/feature_flags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature flags
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/streaming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Streaming
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/middleware_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Middleware factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/jmespath_functions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    JMESPath Functions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/aws-cloudformation/custom-resource-helper" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CloudFormation Custom Resources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Processes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Processes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Automation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Automation
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous integration practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Continuous integration practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-commit-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-commit checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-pull-request-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-Pull Request checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-request-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull Request checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-merge-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      After merge checks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-deployment-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous deployment practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lambda-layer-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lambda layer pipeline
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maintainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintainers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Your first contribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/conventions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Conventions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous integration practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Continuous integration practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-commit-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-commit checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-pull-request-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-Pull Request checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-request-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull Request checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-merge-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      After merge checks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-deployment-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous deployment practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lambda-layer-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lambda layer pipeline
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Automation</h1>
+
+<!-- markdownlint-disable MD043 MD013 -->
+
+<h2 id="continuous-integration-practices">Continuous integration practices<a class="headerlink" href="#continuous-integration-practices" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">We adhere to industry recommendations from the <a href="https://bestpractices.coreinfrastructure.org/en/criteria" rel="nofollow" target="_blank">OSSF Scorecard project</a>, among <a href="https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions" rel="nofollow" target="_blank">others</a>.</p>
+</div>
+<p>Since all code changes require a pull request (PR) along with one or more reviewers, we automate quality and security checks <strong>before</strong>, <strong>during</strong>, and <strong>after</strong> a PR is merged to trunk (<code>develop</code>).</p>
+<p>We use a combination of tools coupled with peer review to increase its compound effect in detecting issues early.</p>
+<p>This is a snapshot of our automated checks at a glance.</p>
+<!-- NOTE: mkdocs material doesn't render timeline mermaid diagrams hence png for now -->
+
+<p><img alt="Continuous Integration practices" src="../media/continuous_integration_practices.png" /></p>
+<h3 id="pre-commit-checks">Pre-commit checks<a class="headerlink" href="#pre-commit-checks" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.pre-commit-config.yaml" target="_blank"><strong>Pre-commit configuration</strong></a>.</p>
+</blockquote>
+<p>Pre-commit checks are crucial for a fast feedback loop while ensuring security practices at the individual change level.</p>
+<p>To prevent scenarios where these checks are intentionally omitted at the client side, we run at <a href="#pull-request-checks">CI level too</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">These run locally only for changed files</p>
+</div>
+<ul>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.pre-commit-config.yaml#L10" target="_blank"><strong>Merge conflict check</strong></a>. Checks for merge strings in each individual change accidentally left unresolved to prevent breakage.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/Makefile#L22" target="_blank"><strong>Code linting</strong></a>. Linter checks for industry quality standards and known bad practices that could lead to abuse.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.pre-commit-config.yaml#L34" target="_blank"><strong>CloudFormation linting</strong></a>. <code>cfn-lint</code> ensures <a _blank_="_blank&quot;" href="https://github.com/aws-cloudformation/cfn-lint/blob/86f0370bd43b400ed4c485180dbc2697f73367b2/docs/rules.md" target="">best practices</a> at our documentation examples.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.pre-commit-config.yaml#L25" target="&quot;_blank"><strong>Markdown linting</strong></a>. Primarily <a href="https://github.com/DavidAnson/markdownlint/blob/d01180ec5a014083ee9d574b693a8d7fbc1e566d/README.md#rules--aliases" target="_blank">industry markdown practices</a> at this stage.</li>
+<li><a href="https://github.com/rhysd/actionlint/blob/main/docs/checks.md" rel="nofollow" target="_blank"><strong>GitHub Actions linting</strong></a>. <code>actionlint</code> ensures workflows follow <a href="https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions" rel="nofollow" target="_blank">GitHub Actions security practices</a>. It  guards against numerous <a href="https://github.com/rhysd/actionlint/blob/main/docs/checks.md" rel="nofollow" target="_blank">leading practices</a> to prevent common configuration mistakes, insecure inline scripts, among many others.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.pre-commit-config.yaml#L43" target="_blank"><strong>Terraform linting</strong></a>. As of now, largely formatting until we increase our Terraform coverage in documentation examples.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/.pre-commit-config.yaml#L49" target="_blank"><strong>Secrets linting</strong></a>. Detects industry credentials that might be accidentally leaked in source code.</li>
+</ul>
+<h3 id="pre-pull-request-checks">Pre-Pull Request checks<a class="headerlink" href="#pre-pull-request-checks" title="Permanent link">&para;</a></h3>
+<p>For an improved contributing experience, most of our checks can run locally. For maintainers, this also means increased focus on reviewing actual value instead of standards and security malpractices that can be caught earlier.</p>
+<div class="admonition note">
+<p class="admonition-title">These are in addition to <a href="#pre-commit-checks">pre-commit checks</a>.</p>
+</div>
+<ul>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/Makefile#L108" target="_blank"><strong>Static typing analysis</strong></a>. <code>mypy</code> checks for static typing annotations to prevent common bugs in Python that may or may not lead to abuse.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/Makefile#L31" target="_blank"><strong>Tests</strong></a>. We run <code>unit</code>, <code>functional</code>, and <code>performance</code> tests (<a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/CONTRIBUTING.md#testing-definition" target="_blank"><em>see our definition</em></a>). Besides breaking changes, we are investing in mutation testing to find additional sources of bugs and potential abuse.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/CONTRIBUTING.md#testing-definition" target="_blank"><strong>Security baseline</strong></a>. <code>bandit</code> detects common security issues defined by Python Code Quality Authority (PyCQA).</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/Makefile#L79" target="_blank"><strong>Complexity baseline</strong></a>. We run a series of maintainability and cyclomatic checks to reduce code and logic complexity. This aids reviewers' cognitive overhead and long-term maintainers revisiting legacy code at a later date.</li>
+</ul>
+<h3 id="pull-request-checks">Pull Request checks<a class="headerlink" href="#pull-request-checks" title="Permanent link">&para;</a></h3>
+<p>While we trust contributors and maintainers do go through pre-commit and pre-pull request due diligence, we verify them at CI level.</p>
+<div class="admonition note">
+<p class="admonition-title">Checks described earlier are omitted to improve reading experience.</p>
+</div>
+<ul>
+<li><a href="https://github.com/Ezard/semantic-prs" rel="nofollow" target="_blank"><strong>Semantic PR title</strong></a>. We enforce PR titles follow semantic naming, for example <code>chore(category): change</code>. This benefits contributors with a lower entry bar, no need for semantic commits. It also benefits everyone looking for an <a href="https://docs.powertools.aws.dev/lambda/python/latest/changelog/" target="_blank">useful changelog message</a> on <strong>what</strong> changed and <strong>where</strong>.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/on_opened_pr.yml#L44" target="_blank"><strong>Related issue check</strong></a>. <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/CONTRIBUTING.md#contributing-via-pull-requests" target="_blank">Every change require an issue</a> describing its needs. This enforces a PR has a related issue by blocking merge operations if missing.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/on_opened_pr.yml#L63" target="_blank"><strong>Acknowledgment check</strong></a>. <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/PULL_REQUEST_TEMPLATE.md#L36" target="_blank">Ensures PR template</a> is used and every contributor is aware of code redistribution.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/quality_check.yml#L73" target="_blank"><strong>Code coverage diff</strong></a>. Educates contributors and maintainers about code coverage differences for a given change.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/on_label_added.yml#L44" target="_blank"><strong>Contribution size check</strong></a>. Suggests contributors and maintainers to break up large changes (100-499 LOC) in smaller PRs. It helps reduce overlooking security and other practices due to increased cognitive overhead.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/dependency-review.yml#L22" target="_blank"><strong>Dependency vulnerability check</strong></a>. Verifies any dependency changes for common vulnerability exposures (CVEs), in addition to our daily check on any dependencies used (e.g., Python, Docker, Go, etc.)</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/secure_workflows.yml#L35" target="_blank"><strong>GitHub Actions security check</strong></a>. Enforces use of immutable 3rd-party GitHub Actions (_e.g., <code>actions/checkout@&lt;git-SHA&gt;_</code>) to prevent abuse. Upgrades are handled by a <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/dependabot.yml#L4" target="_blank">separate automated process</a> that includes a maintainer review to also prevent unexpected behavior changes.</li>
+</ul>
+<h3 id="after-merge-checks">After merge checks<a class="headerlink" href="#after-merge-checks" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Checks described earlier are omitted to improve reading experience.</p>
+</div>
+<p>We strike a balance in security and contribution experience. These automated checks take several minutes to complete. Failures are reviewed by a maintainer on-call and before a release.</p>
+<ul>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/run-e2e-tests.yml#L41" target="_blank"><strong>End-to-end tests</strong></a>. We run E2E with a <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/MAINTAINERS.md#test-runner-parallelization">high degree of parallelization</a>. While it is designed to also run locally, it may incur AWS charges to contributors. For additional security, all infrastructure is ephemeral per change and per Python version.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/codeql-analysis.yml#L20" target="_blank"><strong>SAST check</strong></a>. GitHub CodeQL runs ~30m static analysis in the entire codebase.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/ossf_scorecard.yml#L14" target="_blank"><strong>Security posture check</strong></a>. OSSF Scorecard runs numerous automated checks upon changes, and raises security alerts if <a href="https://bestpractices.coreinfrastructure.org/en/criteria" rel="nofollow" target="_blank">OSSF security practices</a> are no longer followed.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/build_changelog.yml#L23" target="_blank"><strong>Rebuild Changelog</strong></a>. We rebuild our entire changelog upon changes and create a PR for maintainers. This has the added benefit in keeping a <a href="https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches" rel="nofollow" target="_blank">protected branch</a> while keeping removing error-prone tasks from maintainers.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/on_push_docs.yml#L27C16-L27C16" target="_blank"><strong>Stage documentation</strong></a>. We rebuild and deploy changes to the documentation to a <a href="https://docs.powertools.aws.dev/lambda/python/stage/" target="_blank">staged version</a>. This gives us safety that our docs can always be rebuilt, and ready to release to production when needed.</li>
+<li><a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/.github/workflows/release-drafter.yml#L25" target="_blank"><strong>Update draft release</strong></a>. We use <a href="https://github.com/release-drafter/release-drafter" rel="nofollow" target="_blank">Release Drafter</a> to generate a portion of our release notes and to always keep a fresh draft upon changes. You can read our <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/0523ff64606514ea3e59c07c8c69c83d751f61fa/MAINTAINERS.md#drafting-release-notes" target="_blank">thoughts on a good quality release notes here</a> (human readable changes + automation).</li>
+</ul>
+<h2 id="continuous-deployment-practices">Continuous deployment practices<a class="headerlink" href="#continuous-deployment-practices" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">We adhere to industry recommendations from the <a href="https://bestpractices.coreinfrastructure.org/en/criteria" rel="nofollow" target="_blank">OSSF Scorecard project</a>, among <a href="https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions" rel="nofollow" target="_blank">others</a>.</p>
+</div>
+<p>Releases are triggered by maintainers along with a reviewer - <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md#releasing-a-new-version" target="_blank">detailed info here</a>. In addition to <a href="#continuous-integration-practices">checks that run for every code change</a>, our pipeline requires a manual approval before releasing.</p>
+<p>We use a combination of provenance and signed attestation for our builds, source code sealing, SAST scanners, Python specific static code analysis, ephemeral credentials that last a given job step, and more.</p>
+<p>This is a snapshot of our automated checks at a glance.</p>
+<p><img alt="Continuous Deployment practices" src="../media/continuous_deployment_practices.png" /></p>
+<h2 id="lambda-layer-pipeline">Lambda layer pipeline<a class="headerlink" href="#lambda-layer-pipeline" title="Permanent link">&para;</a></h2>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data, or configuration files. It provides a way to efficiently include libraries and other resources in your Lambda functions, promoting code reusability and reducing deployment package sizes.</p>
+<p>To build and deploy the Lambda Layers, we run a pipeline with the following steps:</p>
+<ul>
+<li>We fetch the latest PyPi release and use it as the source for our layer.</li>
+<li>We build Python versions ranging from <strong>3.8 to 3.12</strong> for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like <strong>Pydantic</strong> and <strong>Cryptography</strong>, which require specific Python versions for each layer.</li>
+<li>We provide layer distributions for both the <strong>x86_64</strong> and <strong>arm64</strong> architectures.</li>
+<li>For each Python version, we create a single CDK package containing both x86_64 and arm64 assets to optimize deployment performance.</li>
+</ul>
+<p>Next, we deploy these CDK Assets to the beta account across all AWS regions. Once the beta deployment is complete, we run:</p>
+<ul>
+<li><strong>Canary Tests</strong>: Run thorough canary tests to assess stability and functionality</li>
+<li><strong>Successful?</strong>: Deploy previous CDK Asset to production across all regions</li>
+<li><strong>Failure?</strong>: Halt pipeline to investigate and remediate issues before redeploying</li>
+</ul>
+<pre class="mermaid"><code>graph LR
+    Fetch[Fetch PyPi release] --&gt; P38[&lt;strong&gt;Python 3.8&lt;/strong&gt;]
+    Fetch --&gt; P39[&lt;strong&gt;Python 3.9&lt;/strong&gt;]
+    Fetch --&gt; P310[&lt;strong&gt;Python 3.10&lt;/strong&gt;]
+    Fetch --&gt; P311[&lt;strong&gt;Python 3.11&lt;/strong&gt;]
+    Fetch --&gt; P312[&lt;strong&gt;Python 3.12&lt;/strong&gt;]
+
+    subgraph build ["LAYER BUILD"]
+      P38 --&gt; P38x86[build x86_64]
+      P38 --&gt; P38arm64[build arm64]
+
+      P39 --&gt; P39x86[build x86_64]
+      P39 --&gt; P39arm64[build arm64]
+      P310 --&gt; P310x86[build x86_64]
+      P310 --&gt; P310arm64[build arm64]
+      P311 --&gt; P311x86[build x86_64]
+      P311 --&gt; P311arm64[build arm64]
+      P312 --&gt; P312x86[build x86_64]
+      P312 --&gt; P312arm64[build arm64]
+      P38x86 --&gt; CDKP1[CDK Package]
+      P38arm64 --&gt; CDKP1[CDK Package]
+      P39x86 --&gt; CDKP2[CDK Package]
+      P39arm64 --&gt; CDKP2[CDK Package]
+      P310x86 --&gt; CDKP3[CDK Package]
+      P310arm64 --&gt; CDKP3[CDK Package]
+      P311x86 --&gt; CDKP4[CDK Package]
+      P311arm64 --&gt; CDKP4[CDK Package]
+      P312x86 --&gt; CDKP5[CDK Package]
+      P312arm64 --&gt; CDKP5[CDK Package]
+    end
+
+    subgraph beta ["BETA (all regions)"]
+      CDKP1 --&gt; DeployBeta[Deploy to Beta]
+      CDKP2 --&gt; DeployBeta
+      CDKP3 --&gt; DeployBeta
+      CDKP4 --&gt; DeployBeta
+      CDKP5 --&gt; DeployBeta
+      DeployBeta --&gt; RunBetaCanary["Beta canary tests&lt;br&gt; &lt;i&gt;(all packages)&lt;/i&gt;"]
+    end
+    subgraph prod ["PROD (all regions)"]
+        RunBetaCanary---|&lt;strong&gt;If successful&lt;/strong&gt;|DeployProd[Deploy to Prod]
+        DeployProd --&gt; RunProdCanary["Prod canary tests&lt;br&gt; &lt;i&gt;(all packages)&lt;/i&gt;"]
+    end</code></pre>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    2024-07-30
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Amazon Web Services
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://discord.gg/B8zZKbbyET" target="_blank" rel="noopener" title="Discord Server for Powertools for AWS" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485 485 0 0 0 404.081 32.03a1.82 1.82 0 0 0-1.923.91 338 338 0 0 0-14.9 30.6 447.9 447.9 0 0 0-134.426 0 310 310 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.7 483.7 0 0 0-119.688 37.107 1.7 1.7 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.02 2.02 0 0 0 .765 1.375 487.7 487.7 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348 348 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321 321 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251 251 0 0 0 9.109-7.137 1.82 1.82 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.81 1.81 0 0 1 1.924.233 235 235 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.4 301.4 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391 391 0 0 0 30.014 48.815 1.86 1.86 0 0 0 2.063.7A486 486 0 0 0 610.7 405.729a1.88 1.88 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541M222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241m195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://powertools.aws.dev/" target="_blank" rel="noopener" title="Official website for Powertools for AWS" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2m-5.15 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56M14.34 14H9.66c-.1-.66-.16-1.32-.16-2s.06-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2M12 19.96c-.83-1.2-1.5-2.53-1.91-3.96h3.82c-.41 1.43-1.08 2.76-1.91 3.96M8 8H5.08A7.92 7.92 0 0 1 9.4 4.44C8.8 5.55 8.35 6.75 8 8m-2.92 8H8c.35 1.25.8 2.45 1.4 3.56A8 8 0 0 1 5.08 16m-.82-2C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2M12 4.03c.83 1.2 1.5 2.54 1.91 3.97h-3.82c.41-1.43 1.08-2.77 1.91-3.97M18.92 8h-2.95a15.7 15.7 0 0 0-1.38-3.56c1.84.63 3.37 1.9 4.33 3.56M12 2C6.47 2 2 6.5 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://pypi.org/project/aws-lambda-powertools/" target="_blank" rel="noopener" title="PyPi package" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.25.18.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../javascript/aws-amplify.min.js"></script>
+      
+        <script src="../javascript/extra.js"></script>
+      
+        <script src="https://docs.powertools.aws.dev/shared/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
