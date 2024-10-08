@@ -204,17 +204,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.161.0a0"
+version = "2.161.1a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk.aws_lambda_python_alpha-2.161.0a0-py3-none-any.whl", hash = "sha256:0122fd9af094935250967531e474c15f3500990a46bef61c1529b48d14278b42"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.161.0a0.tar.gz", hash = "sha256:d7953d572867a71cd97ef2081312ecb4bae64555a86e0e052db673b5e0e5a846"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.161.1a0-py3-none-any.whl", hash = "sha256:bc50b108080d06c68d0d8468467b59751082e1a7b553452a92175bf03e38d0aa"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.161.1a0.tar.gz", hash = "sha256:3543cbaeabb6fb2c8e694cf5c2525ab5f1965130cc7db79a929c8c38be40db84"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.161.0,<3.0.0"
+aws-cdk-lib = ">=2.161.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.103.1,<2.0.0"
 publication = ">=0.0.3"
@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.35"
-description = "Type annotations for boto3 1.35.35 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.36"
+description = "Type annotations for boto3 1.35.36 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.35-py3-none-any.whl", hash = "sha256:f2e9131d038cf837d12e8865f36da17add93a9539cc6fbe69df3003b8dd386e9"},
-    {file = "boto3_stubs-1.35.35.tar.gz", hash = "sha256:08fcc63c7f72c60214668188ced405cf0ce1961c6e4cf64adfee03296cbc4c9c"},
+    {file = "boto3_stubs-1.35.36-py3-none-any.whl", hash = "sha256:2d5395cca1c9cbf996e5e15435a8934939b95cf4d5306dbd06e280875ded299d"},
+    {file = "boto3_stubs-1.35.36.tar.gz", hash = "sha256:ab22817be7861f8e2edcde64b2b1a5324f770fd7ea4d8e7a826c7aedd1261da6"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.35)", "botocore (==1.35.35)"]
+boto3 = ["boto3 (==1.35.36)", "botocore (==1.35.36)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -3678,13 +3678,13 @@ pathspec = ">=0.10.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.15.0"
+version = "2.16.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.15.0-py2.py3-none-any.whl", hash = "sha256:8fb0d1a4e1a640172f31502e4503543765a1fe8a9209779134a4ac52d4677303"},
-    {file = "sentry_sdk-2.15.0.tar.gz", hash = "sha256:a599e7d3400787d6f43327b973e55a087b931ba2c592a7a7afa691f8eb5e75e2"},
+    {file = "sentry_sdk-2.16.0-py2.py3-none-any.whl", hash = "sha256:49139c31ebcd398f4f6396b18910610a0c1602f6e67083240c33019d1f6aa30c"},
+    {file = "sentry_sdk-2.16.0.tar.gz", hash = "sha256:90f733b32e15dfc1999e6b7aca67a38688a567329de4d6e184154a73f96c6892"},
 ]
 
 [package.dependencies]
@@ -3707,6 +3707,7 @@ falcon = ["falcon (>=1.4)"]
 fastapi = ["fastapi (>=0.79.0)"]
 flask = ["blinker (>=1.1)", "flask (>=0.11)", "markupsafe"]
 grpcio = ["grpcio (>=1.21.1)", "protobuf (>=3.8.0)"]
+http2 = ["httpcore[http2] (==1.*)"]
 httpx = ["httpx (>=0.16.0)"]
 huey = ["huey (>=2)"]
 huggingface-hub = ["huggingface-hub (>=0.22)"]
@@ -4314,4 +4315,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "6fd0e09e06b80f5ce8ce3530ea80da71306269eccfc5c6f324c0fde8cc20f277"
+content-hash = "8b05a7e360a4b618599f189ead60227323948aa0eed11e5b37602fbbeb18898d"
