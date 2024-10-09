@@ -7,9 +7,13 @@
 ## Documentation
 
 * **layer:** update layer version number ([#5344](https://github.com/aws-powertools/powertools-lambda-python/issues/5344))
+* **upgrade_guide:** update Lambda layer name ([#5347](https://github.com/aws-powertools/powertools-lambda-python/issues/5347))
 
 ## Maintenance
 
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.161.0a0 to 2.161.1a0 ([#5349](https://github.com/aws-powertools/powertools-lambda-python/issues/5349))
+* **deps-dev:** bump boto3-stubs from 1.35.35 to 1.35.36 ([#5350](https://github.com/aws-powertools/powertools-lambda-python/issues/5350))
+* **deps-dev:** bump sentry-sdk from 2.15.0 to 2.16.0 ([#5348](https://github.com/aws-powertools/powertools-lambda-python/issues/5348))
 
 
 <a name="v3.1.0"></a>
