@@ -2588,8 +2588,8 @@ General<span class="w"> </span>information
 <span class="hll"><span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Application</span>
 </span><span class="w">      </span><span class="nt">Properties</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">Location</span><span class="p">:</span>
-<span class="hll"><span class="w">              </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64</span>
-</span><span class="hll"><span class="w">              </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0.0</span><span class="w"> </span><span class="c1"># change to latest semantic version available in SAR</span>
+<span class="hll"><span class="w">              </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
+</span><span class="hll"><span class="w">              </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.43.1</span><span class="w"> </span><span class="c1"># change to latest semantic version available in SAR</span>
 </span>
 <span class="w">  </span><span class="nt">MyLambdaFunction</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Function</span>
@@ -2639,8 +2639,8 @@ General<span class="w"> </span>information
 <span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Application</span>
 <span class="w">      </span><span class="nt">Properties</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">Location</span><span class="p">:</span>
-<span class="hll"><span class="w">          </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0.0</span>
+<span class="hll"><span class="w">          </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.43.1</span>
 </span></code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
@@ -2687,9 +2687,9 @@ General<span class="w"> </span>information
 
 <span class="n">POWERTOOLS_BASE_NAME</span> <span class="o">=</span> <span class="s2">&quot;AWSLambdaPowertools&quot;</span>
 <span class="c1"># Find latest from github.com/aws-powertools/powertools-lambda-python/releases</span>
-<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;3.0.0&quot;</span>
+<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;2.43.1&quot;</span>
 <span class="hll"><span class="n">POWERTOOLS_ARN</span> <span class="o">=</span> <span class="p">(</span>
-</span>    <span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64&quot;</span>
+</span>    <span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer&quot;</span>
 <span class="p">)</span>
 
 
@@ -2790,13 +2790,13 @@ General<span class="w"> </span>information
 </span><span class="p">}</span>
 
 <span class="hll"><span class="kr">data</span><span class="w"> </span><span class="nc">&quot;aws_serverlessapplicationrepository_application&quot;</span><span class="w"> </span><span class="nv">&quot;sar_app&quot;</span><span class="w"> </span><span class="p">{</span>
-</span><span class="hll"><span class="w">  </span><span class="na">application_id</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64&quot;</span>
+</span><span class="hll"><span class="w">  </span><span class="na">application_id</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer&quot;</span>
 </span><span class="hll"><span class="w">  </span><span class="na">semantic_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.aws_powertools_version</span>
 </span><span class="p">}</span>
 
 <span class="kr">variable</span><span class="w"> </span><span class="nv">&quot;aws_powertools_version&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">type</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span>
-<span class="w">  </span><span class="na">default</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2.0.0&quot;</span>
+<span class="w">  </span><span class="na">default</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2.43.1&quot;</span>
 <span class="w">  </span><span class="na">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The Powertools for AWS Lambda (Python) release version&quot;</span>
 <span class="p">}</span>
 
@@ -4166,8 +4166,8 @@ General<span class="w"> </span>information
 <span class="hll"><span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Application</span>
 </span><span class="w">      </span><span class="nt">Properties</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">Location</span><span class="p">:</span>
-<span class="hll"><span class="w">              </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64</span>
-</span><span class="hll"><span class="w">              </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0.0</span><span class="w"> </span><span class="c1"># change to latest semantic version available in SAR</span>
+<span class="hll"><span class="w">              </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
+</span><span class="hll"><span class="w">              </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.43.1</span><span class="w"> </span><span class="c1"># change to latest semantic version available in SAR</span>
 </span>
 <span class="w">  </span><span class="nt">MyLambdaFunction</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Function</span>
@@ -4217,8 +4217,8 @@ General<span class="w"> </span>information
 <span class="w">      </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Application</span>
 <span class="w">      </span><span class="nt">Properties</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">Location</span><span class="p">:</span>
-<span class="hll"><span class="w">          </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64</span>
-</span><span class="hll"><span class="w">          </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0.0</span>
+<span class="hll"><span class="w">          </span><span class="nt">ApplicationId</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
+</span><span class="hll"><span class="w">          </span><span class="nt">SemanticVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.43.1</span>
 </span></code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
@@ -4265,9 +4265,9 @@ General<span class="w"> </span>information
 
 <span class="n">POWERTOOLS_BASE_NAME</span> <span class="o">=</span> <span class="s2">&quot;AWSLambdaPowertools&quot;</span>
 <span class="c1"># Find latest from github.com/aws-powertools/powertools-lambda-python/releases</span>
-<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;3.0.0&quot;</span>
+<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;2.43.1&quot;</span>
 <span class="hll"><span class="n">POWERTOOLS_ARN</span> <span class="o">=</span> <span class="p">(</span>
-</span>    <span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64&quot;</span>
+</span>    <span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer&quot;</span>
 <span class="p">)</span>
 
 
@@ -4368,13 +4368,13 @@ General<span class="w"> </span>information
 </span><span class="p">}</span>
 
 <span class="hll"><span class="kr">data</span><span class="w"> </span><span class="nc">&quot;aws_serverlessapplicationrepository_application&quot;</span><span class="w"> </span><span class="nv">&quot;sar_app&quot;</span><span class="w"> </span><span class="p">{</span>
-</span><span class="hll"><span class="w">  </span><span class="na">application_id</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86_64&quot;</span>
+</span><span class="hll"><span class="w">  </span><span class="na">application_id</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer&quot;</span>
 </span><span class="hll"><span class="w">  </span><span class="na">semantic_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.aws_powertools_version</span>
 </span><span class="p">}</span>
 
 <span class="kr">variable</span><span class="w"> </span><span class="nv">&quot;aws_powertools_version&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">type</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="kt">string</span>
-<span class="w">  </span><span class="na">default</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2.0.0&quot;</span>
+<span class="w">  </span><span class="na">default</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;2.43.1&quot;</span>
 <span class="w">  </span><span class="na">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;The Powertools for AWS Lambda (Python) release version&quot;</span>
 <span class="p">}</span>
 
