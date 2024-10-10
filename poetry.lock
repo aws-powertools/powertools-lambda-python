@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.36"
-description = "Type annotations for boto3 1.35.36 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.37"
+description = "Type annotations for boto3 1.35.37 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.36-py3-none-any.whl", hash = "sha256:2d5395cca1c9cbf996e5e15435a8934939b95cf4d5306dbd06e280875ded299d"},
-    {file = "boto3_stubs-1.35.36.tar.gz", hash = "sha256:ab22817be7861f8e2edcde64b2b1a5324f770fd7ea4d8e7a826c7aedd1261da6"},
+    {file = "boto3_stubs-1.35.37-py3-none-any.whl", hash = "sha256:32b70602af1c34ddd244bbdafcc7f32b9824135c2f14dcf41d8e5a33b914b19a"},
+    {file = "boto3_stubs-1.35.37.tar.gz", hash = "sha256:dc12838481a10d65802f75b4ca1e4eb334e06dbb2f0d5c565f43e0363c2037d6"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.36)", "botocore (==1.35.36)"]
+boto3 = ["boto3 (==1.35.37)", "botocore (==1.35.37)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -2672,18 +2672,18 @@ test = ["codecov (>=2.1)", "pytest (>=7.2)", "pytest-cov (>=4.0)"]
 
 [[package]]
 name = "nox"
-version = "2024.4.15"
+version = "2024.10.9"
 description = "Flexible test automation."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "nox-2024.4.15-py3-none-any.whl", hash = "sha256:6492236efa15a460ecb98e7b67562a28b70da006ab0be164e8821177577c0565"},
-    {file = "nox-2024.4.15.tar.gz", hash = "sha256:ecf6700199cdfa9e5ea0a41ff5e6ef4641d09508eda6edb89d9987864115817f"},
+    {file = "nox-2024.10.9-py3-none-any.whl", hash = "sha256:1d36f309a0a2a853e9bccb76bbef6bb118ba92fa92674d15604ca99adeb29eab"},
+    {file = "nox-2024.10.9.tar.gz", hash = "sha256:7aa9dc8d1c27e9f45ab046ffd1c3b2c4f7c91755304769df231308849ebded95"},
 ]
 
 [package.dependencies]
-argcomplete = ">=1.9.4,<4.0"
-colorlog = ">=2.6.1,<7.0.0"
+argcomplete = ">=1.9.4,<4"
+colorlog = ">=2.6.1,<7"
 packaging = ">=20.9"
 tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 virtualenv = ">=20.14.1"
