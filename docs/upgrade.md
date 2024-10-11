@@ -17,6 +17,7 @@ We've made minimal breaking changes to make your transition to v3 as smooth as p
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
 | **Pydantic**                       | We have removed support for [Pydantic v1](#drop-support-for-pydantic-v1)                                                 | No                   |
 | **Parser**                         | We have replaced [DynamoDBStreamModel](#dynamodbstreammodel-in-parser) `AttributeValue` with native Python types         | Yes                  |
+| **Parser**                         | We no longer export [Pydantic objects](#importing-pydantic-objects) from `parser.pydantic`.                              | Yes                  |
 | **Lambda layer**                   | [Lambda layers](#new-aws-lambda-layer-arns) are now compiled according to the specific Python version and architecture   | No                   |
 | **Event Handler**                  | We [have deprecated](#event-handler-headers-are-case-insensitive) the `get_header_value` function.	                    | Yes                  |
 | **Batch Processor**                | `@batch_processor` and `@async_batch_processor` decorators [are now deprecated](#deprecated-batch-processing-decorators) | Yes                  |
@@ -91,6 +92,18 @@ def lambda_handler(event: DynamoDBStreamModel, context: LambdaContext):
 
 ```
 
+## Importing Pydantic objects
+
+We have stopped exporting Pydantic objects directly from `aws_lambda_powertools.utilities.parser.pydantic`. This change prevents customers from accidentally importing all of Pydantic, which could significantly slow down function startup times.
+
+```diff
+- #BEFORE - v2
+- from aws_lambda_powertools.utilities.parser.pydantic import EmailStr
+
++ # NOW - v3
++ from pydantic import EmailStr
+```
+
 ## New AWS Lambda Layer ARNs
 
 !!! note "No code changes required"
@@ -101,18 +114,18 @@ This also allows us to include architecture-specific versions of both Pydantic v
 
 To take advantage of the new layers, you need to update your functions or deployment setup to include one of the new Lambda layer ARN from the table below:
 
-| Architecture | Python version | Layer ARN                                                                                        |
-| ------------ | -------------- | ------------------------------------------------------------------------------------------------ |
-| x86_64       | 3.8            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-x86:{version}    |
-| x86_64       | 3.9            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-x86:{version}    |
-| x86_64       | 3.10           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86:{version}   |
-| x86_64       | 3.11           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86:{version}   |
-| x86_64       | 3.12           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:{version}   |
-| arm64        | 3.8            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-arm64:{version}  |
-| arm64        | 3.9            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:{version}  |
-| arm64        | 3.10           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:{version} |
-| arm64        | 3.11           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:{version} |
-| arm64        | 3.12           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:{version} |
+| Architecture | Python version | Layer ARN                                                                                           |
+| ------------ | -------------- | --------------------------------------------------------------------------------------------------- |
+| x86_64       | 3.8            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-x86_64:{version}    |
+| x86_64       | 3.9            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-x86_64:{version}    |
+| x86_64       | 3.10           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:{version}   |
+| x86_64       | 3.11           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:{version}   |
+| x86_64       | 3.12           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:{version}   |
+| arm64        | 3.8            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-arm64:{version}     |
+| arm64        | 3.9            | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:{version}     |
+| arm64        | 3.10           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:{version}    |
+| arm64        | 3.11           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:{version}    |
+| arm64        | 3.12           | arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:{version}    |
 
 ## Event Handler: headers are case-insensitive
 

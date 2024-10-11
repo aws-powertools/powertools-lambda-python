@@ -16,26 +16,28 @@ on:
         options:
           - beta
           - prod
-        default: Gamma
+        default: beta
         required: true
       version:
         description: Layer version to duplicate
-        type: number
+        type: string
         required: true
   workflow_call:
     inputs:
       environment:
         description: Deployment environment
         type: string
-        default: Gamma
         required: true
       version:
         description: Layer version to duplicate
-        type: number
+        type: string
         required: true
 
 name: Layer Rename
 run-name: Layer Rename - ${{ inputs.environment }}
+
+permissions:
+  contents: read
 
 jobs:
   download:
@@ -64,14 +66,14 @@ jobs:
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-x86:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_x86_64.zip
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-x86:${{ inputs.version }} > ${{ matrix.layer }}_x86_64.json
       - name: Store Zip
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: ${{ matrix.layer }}_x86_64.zip
           path: ${{ matrix.layer }}_x86_64.zip
           retention-days: 1
           if-no-files-found: error
       - name: Store Metadata
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: ${{ matrix.layer }}_x86_64.json
           path: ${{ matrix.layer }}_x86_64.json
@@ -136,7 +138,7 @@ jobs:
       - name: Verify Layer Signature
         run: |
           SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_x86_64.json)
-          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_x86_64.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1 
+          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_x86_64.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
@@ -158,4 +160,4 @@ jobs:
               --statement-id 'PublicLayer' \
               --action lambda:GetLayerVersion \
               --principal '*' \
-              --version-number 
+              --version-number
