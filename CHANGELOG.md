@@ -18,16 +18,16 @@
 ## Maintenance
 
 * **ci:** new pre-release 3.1.1a0 ([#5353](https://github.com/aws-powertools/powertools-lambda-python/issues/5353))
-* **deps:** bump squidfunk/mkdocs-material from `8e8b333` to `f9cb76d` in /docs ([#5366](https://github.com/aws-powertools/powertools-lambda-python/issues/5366))
 * **deps:** bump actions/upload-artifact from 4.4.1 to 4.4.3 ([#5357](https://github.com/aws-powertools/powertools-lambda-python/issues/5357))
-* **deps-dev:** bump nox from 2024.4.15 to 2024.10.9 ([#5355](https://github.com/aws-powertools/powertools-lambda-python/issues/5355))
+* **deps:** bump squidfunk/mkdocs-material from `8e8b333` to `f9cb76d` in /docs ([#5366](https://github.com/aws-powertools/powertools-lambda-python/issues/5366))
 * **deps-dev:** bump boto3-stubs from 1.35.36 to 1.35.37 ([#5356](https://github.com/aws-powertools/powertools-lambda-python/issues/5356))
 * **deps-dev:** bump mkdocs-material from 9.5.39 to 9.5.40 ([#5365](https://github.com/aws-powertools/powertools-lambda-python/issues/5365))
+* **deps-dev:** bump boto3-stubs from 1.35.37 to 1.35.38 ([#5364](https://github.com/aws-powertools/powertools-lambda-python/issues/5364))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.161.0a0 to 2.161.1a0 ([#5349](https://github.com/aws-powertools/powertools-lambda-python/issues/5349))
 * **deps-dev:** bump boto3-stubs from 1.35.35 to 1.35.36 ([#5350](https://github.com/aws-powertools/powertools-lambda-python/issues/5350))
 * **deps-dev:** bump sentry-sdk from 2.15.0 to 2.16.0 ([#5348](https://github.com/aws-powertools/powertools-lambda-python/issues/5348))
-* **deps-dev:** bump boto3-stubs from 1.35.37 to 1.35.38 ([#5364](https://github.com/aws-powertools/powertools-lambda-python/issues/5364))
 * **deps-dev:** bump cfn-lint from 1.16.0 to 1.16.1 ([#5363](https://github.com/aws-powertools/powertools-lambda-python/issues/5363))
+* **deps-dev:** bump nox from 2024.4.15 to 2024.10.9 ([#5355](https://github.com/aws-powertools/powertools-lambda-python/issues/5355))
 
 
 <a name="v3.1.0"></a>
