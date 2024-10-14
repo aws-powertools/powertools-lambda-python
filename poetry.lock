@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.38"
-description = "Type annotations for boto3 1.35.38 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.39"
+description = "Type annotations for boto3 1.35.39 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.38-py3-none-any.whl", hash = "sha256:c21476e76dff6da533068881bf16ffb1b858094b6b334d029fc1f04e3792c3be"},
-    {file = "boto3_stubs-1.35.38.tar.gz", hash = "sha256:333594eec18e632c6f719809adaed75cc99b64a945d9f12bac9fdafdc7477fc8"},
+    {file = "boto3_stubs-1.35.39-py3-none-any.whl", hash = "sha256:b977a4282852ed3206749ab7dbfe4e03ac560a70fa9e2d79ec558bccfcc6c629"},
+    {file = "boto3_stubs-1.35.39.tar.gz", hash = "sha256:6a0f4d38fb38d3dd96a1cefeda356b5ac5717cda314b24493ea527899dffb235"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.38)", "botocore (==1.35.38)"]
+boto3 = ["boto3 (==1.35.39)", "botocore (==1.35.39)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -2038,13 +2038,12 @@ jsonpointer = ">=1.9"
 
 [[package]]
 name = "jsonpath-ng"
-version = "1.6.1"
+version = "1.7.0"
 description = "A final implementation of JSONPath for Python that aims to be standard compliant, including arithmetic and binary comparison operators and providing clear AST for metaprogramming."
 optional = true
 python-versions = "*"
 files = [
-    {file = "jsonpath-ng-1.6.1.tar.gz", hash = "sha256:086c37ba4917304850bd837aeab806670224d3f038fe2833ff593a672ef0a5fa"},
-    {file = "jsonpath_ng-1.6.1-py3-none-any.whl", hash = "sha256:8f22cd8273d7772eea9aaa84d922e0841aa36fdb8a2c6b7f6c3791a16a9bc0be"},
+    {file = "jsonpath-ng-1.7.0.tar.gz", hash = "sha256:f6f5f7fd4e5ff79c785f1573b394043b39849fb2bb47bcead935d12b00beab3c"},
 ]
 
 [package.dependencies]
