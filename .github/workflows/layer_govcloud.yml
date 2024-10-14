@@ -120,24 +120,30 @@ jobs:
           aws-region: us-gov-east-1
           mask-aws-account-id: true
       - name: Create Layer
+        id: create-layer
         run: |
-          aws --region us-gov-east-1 lambda publish-layer-version \
+          LAYER_VERSION=$(aws --region us-gov-east-1 lambda publish-layer-version \
             --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --license-info "MIT-0" \
             --description "$(jq -r '.Description' ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
-            --query 'Version' | \
-            xargs aws --region us-gov-east-1 lambda add-layer-version-permission \
-              --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
-              --statement-id 'PublicLayer' \
-              --action lambda:GetLayerVersion \
-              --principal '*' \
-              --version-number 
+            --query 'Version' \
+            --output text)
+          echo "LAYER_VERSION=$LAYER_VERSION" >> "$GITHUB_OUTPUT"
+
+          aws --region us-gov-east-1 lambda add-layer-version-permission \
+            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
+            --statement-id 'PublicLayer' \
+            --action lambda:GetLayerVersion \
+            --principal '*' \
+            --version-number $LAYER_VERSION
       - name: Verify Layer
+        env:
+          LAYER_VERSION: ${{ steps.create-layer.outputs.LAYER_VERSION }}
         run: |
-          REMOTE_SHA=$(aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.CodeSha256' --output text)
+          REMOTE_SHA=$(aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }} --query 'Content.CodeSha256' --output text)
           SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_${{ matrix.arch }}.json)
           test $REMOTE_SHA == $SHA && echo "SHA OK: ${SHA}" || exit 1 
 
@@ -181,23 +187,30 @@ jobs:
           aws-region: us-gov-west-1
           mask-aws-account-id: true
       - name: Create Layer
+        id: create-layer
         run: |
-          aws --region us-gov-west-1 lambda publish-layer-version \
+          LAYER_VERSION=$(aws --region us-gov-west-1 lambda publish-layer-version \
             --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
             --zip-file fileb://./${{ matrix.layer }}_${{ matrix.arch }}.zip \
             --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --compatible-architectures $(jq  -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_${{ matrix.arch }}.json) \
             --license-info "MIT-0" \
             --description "$(jq -r '.Description' ${{ matrix.layer }}_${{ matrix.arch }}.json)" \
-            --query 'Version' | \
-            xargs aws --region us-gov-west-1 lambda add-layer-version-permission \
-              --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
-              --statement-id 'PublicLayer' \
-              --action lambda:GetLayerVersion \
-              --principal '*' \
-              --version-number 
+            --query 'Version' \
+            --output text)
+
+          echo "LAYER_VERSION=$LAYER_VERSION" >> "$GITHUB_OUTPUT"
+
+          aws --region us-gov-west-1 lambda add-layer-version-permission \
+            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
+            --statement-id 'PublicLayer' \
+            --action lambda:GetLayerVersion \
+            --principal '*' \
+            --version-number $LAYER_VERSION
       - name: Verify Layer
+        env:
+          LAYER_VERSION: ${{ steps.create-layer.outputs.LAYER_VERSION }}
         run: |
-          REMOTE_SHA=$(aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.CodeSha256' --output text)
+          REMOTE_SHA=$(aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }} --query 'Content.CodeSha256' --output text)
           SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_${{ matrix.arch }}.json)
           test $REMOTE_SHA == $SHA && echo "SHA OK: ${SHA}" || exit 1 
