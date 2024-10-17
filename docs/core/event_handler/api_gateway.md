@@ -131,6 +131,9 @@ When using Amazon API Gateway HTTP API to front your Lambda functions, you can u
 ???+ note
     Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
 
+    <!-- markdownlint-disable-next-line MD013 -->
+    If you're using Terraform to deploy a HTTP API, note that it defaults the [payload_format_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_integration#payload_format_version){target="_blank" rel="nofollow"} value to 1.0 if not specified.
+
 ```python hl_lines="5 11" title="Using HTTP API resolver"
 --8<-- "examples/event_handler_rest/src/getting_started_http_api_resolver.py"
 ```
@@ -198,7 +201,7 @@ Each dynamic route you set must be part of your function signature. This allows 
 
 === "dynamic_routes.py"
 
-    ```python hl_lines="14 16"
+    ```python hl_lines="16 18"
     --8<-- "examples/event_handler_rest/src/dynamic_routes.py"
     ```
 
@@ -640,7 +643,7 @@ matches one of the allowed values.
 
 === "setting_cors.py"
 
-    ```python hl_lines="5 11-12 34"
+    ```python hl_lines="7 14-15 38"
     --8<-- "examples/event_handler_rest/src/setting_cors.py"
     ```
 
@@ -652,7 +655,7 @@ matches one of the allowed values.
 
 === "setting_cors_extra_origins.py"
 
-    ```python hl_lines="5 11-12 34"
+    ```python hl_lines="7 14 15 38"
     --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins.py"
     ```
 
@@ -943,7 +946,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "compressing_responses_using_route.py"
 
-    ```python hl_lines="17 27"
+    ```python hl_lines="19 29"
      --8<-- "examples/event_handler_rest/src/compressing_responses_using_route.py"
     ```
 
@@ -1154,7 +1157,7 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
     !!! info
         This means all methods, including [middleware](#middleware) will work as usual.
 
-    ```python hl_lines="5 13 16 25 28"
+    ```python hl_lines="7 10 15 18 27 30"
     --8<-- "examples/event_handler_rest/src/split_route_module.py"
     ```
 
@@ -1186,7 +1189,7 @@ When necessary, you can set a prefix when including a router object. This means 
 
 === "split_route_prefix_module.py"
 
-    ```python hl_lines="13 25"
+    ```python hl_lines="14 26"
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 

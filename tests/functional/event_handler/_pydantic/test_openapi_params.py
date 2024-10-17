@@ -460,3 +460,38 @@ def test_create_model_field_convert_underscore():
 
     result = _create_model_field(field_info, int, "user_id", False)
     assert result.alias == "user-id"
+
+
+def test_openapi_with_example_as_list():
+    app = APIGatewayRestResolver()
+
+    @app.get("/users", summary="Get Users", operation_id="GetUsers", description="Get paginated users", tags=["Users"])
+    def handler(
+        count: Annotated[
+            int,
+            Query(gt=0, lt=100, examples=["Example 1"]),
+        ] = 1,
+    ):
+        print(count)
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/users"].get
+    assert len(get.parameters) == 1
+    assert get.summary == "Get Users"
+    assert get.operationId == "GetUsers"
+    assert get.description == "Get paginated users"
+    assert get.tags == ["Users"]
+
+    parameter = get.parameters[0]
+    assert parameter.required is False
+    assert parameter.name == "count"
+    assert parameter.in_ == ParameterInType.query
+    assert parameter.schema_.type == "integer"
+    assert parameter.schema_.default == 1
+    assert parameter.schema_.title == "Count"
+    assert parameter.schema_.exclusiveMinimum == 0
+    assert parameter.schema_.exclusiveMaximum == 100
+    assert len(parameter.schema_.examples) == 1
+    assert parameter.schema_.examples[0] == "Example 1"

@@ -1,5 +1,6 @@
 import json
 from typing import Callable
+from urllib.parse import quote
 
 import boto3
 import combining_powertools_utilities_schema as schemas
@@ -103,19 +104,20 @@ def get_comments():
 
         return {"comments": comments.json()[:10]}
     except Exception as exc:
-        raise InternalServerError(str(exc))
+        raise InternalServerError(str(exc)) from exc
 
 
 @app.get("/comments/<comment_id>")
 @tracer.capture_method
 def get_comments_by_id(comment_id: str):
     try:
+        comment_id = quote(comment_id, safe="")
         comments: requests.Response = requests.get(f"https://jsonplaceholder.typicode.com/comments/{comment_id}")
         comments.raise_for_status()
 
         return {"comments": comments.json()}
     except Exception as exc:
-        raise InternalServerError(str(exc))
+        raise InternalServerError(str(exc)) from exc
 
 
 @middleware_custom

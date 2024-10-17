@@ -206,7 +206,7 @@ section Git release
     Upload attestation          : active, 8s
 
 section Layer release
-    Build (x86+ARM)             : active, layer_build, 10:08, 6m
+    Build (x86_64+ARM)             : active, layer_build, 10:08, 6m
     Deploy Beta                 : active, layer_beta, after layer_build, 6.3m
     Deploy Prod                 : active, layer_prod, after layer_beta, 6.3m
 
