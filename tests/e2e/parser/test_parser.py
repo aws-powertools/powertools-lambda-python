@@ -20,6 +20,11 @@ def handler_with_dataclass_arn(infrastructure: dict) -> str:
     return infrastructure.get("HandlerWithDataclass", "")
 
 
+@pytest.fixture
+def handler_with_type_model_class(infrastructure: dict) -> str:
+    return infrastructure.get("HandlerWithModelTypeClass", "")
+
+
 @pytest.mark.xdist_group(name="parser")
 def test_parser_with_basic_model(handler_with_basic_model_arn):
     # GIVEN
@@ -60,6 +65,22 @@ def test_parser_with_dataclass(handler_with_dataclass_arn):
     # WHEN
     parser_execution, _ = data_fetcher.get_lambda_response(
         lambda_arn=handler_with_dataclass_arn,
+        payload=payload,
+    )
+
+    ret = parser_execution["Payload"].read().decode("utf-8")
+
+    assert "powertools" in ret
+
+
+@pytest.mark.xdist_group(name="parser")
+def test_parser_with_type_model(handler_with_type_model_class):
+    # GIVEN
+    payload = json.dumps({"name": "powertools", "profile": {"description": "python", "size": "XXL"}})
+
+    # WHEN
+    parser_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=handler_with_type_model_class,
         payload=payload,
     )
 
