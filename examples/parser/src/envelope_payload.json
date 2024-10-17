@@ -1,0 +1,17 @@
+{
+    "version": "0",
+    "id": "6a7e8feb-b491-4cf7-a9f1-bf3703467718",
+    "detail-type": "CustomerSignedUp",
+    "source": "CustomerService",
+    "account": "111122223333",
+    "time": "2020-10-22T18:43:48Z",
+    "region": "us-west-1",
+    "resources": [
+        "some_additional_"
+    ],
+    "detail": {
+        "username": "universe",
+        "parentid_1": "12345",
+        "parentid_2": "6789"
+    }
+}

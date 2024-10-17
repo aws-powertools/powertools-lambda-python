@@ -1,0 +1,15 @@
+{
+    "version": "0",
+    "id": "12345678-1234-1234-1234-123456789012",
+    "detail-type": "Order Placed",
+    "source": "com.mycompany.orders",
+    "account": "123456789012",
+    "time": "2023-05-03T12:00:00Z",
+    "region": "us-west-2",
+    "resources": [],
+    "detail": {
+        "order_id": "ORD-12345",
+        "amount": 99.99,
+        "customer_id": "CUST-6789"
+    }
+}
