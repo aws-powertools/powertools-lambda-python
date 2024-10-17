@@ -79,8 +79,7 @@ class Post(BaseModel):
 # PROCESSING SINGLE RESOLVERS
 @app.resolver(type_name="Query", field_name="getPost")
 def get_post(post_id: str = "") -> dict:
-    post = Post(**posts[post_id]).dict()
-    return post
+    return Post(**posts[post_id]).model_dump_json()
 
 
 @app.resolver(type_name="Query", field_name="allPosts")
