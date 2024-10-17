@@ -14,8 +14,9 @@ from aws_cdk import (
 )
 from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission, Runtime
 from aws_cdk.aws_ssm import StringParameter
-from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayerPythonV3
 from constructs import Construct
+
+from layer_v3.layer_constructors.layer_stack import LambdaPowertoolsLayerPythonV3
 
 
 @jsii.implements(IAspect)
@@ -46,11 +47,11 @@ class Layer(Construct):
         layer = LambdaPowertoolsLayerPythonV3(
             self,
             "Layer",
-            layer_version_name=layer_version_name,
-            version=powertools_version,
+            layer_name=layer_version_name,
+            powertools_version=powertools_version,
             python_version=python_version,
             include_extras=True,
-            compatible_architectures=[architecture] if architecture else [],
+            architecture=architecture or Architecture.X86_64,
         )
         layer.apply_removal_policy(RemovalPolicy.RETAIN)
 
