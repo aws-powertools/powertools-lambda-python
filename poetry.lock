@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.43"
-description = "Type annotations for boto3 1.35.43 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.44"
+description = "Type annotations for boto3 1.35.44 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.43-py3-none-any.whl", hash = "sha256:d9c9d0611cdf28a7ef131a4cfd49625f0daf187ecbc5ac87a92d669f3826baf2"},
-    {file = "boto3_stubs-1.35.43.tar.gz", hash = "sha256:08e86ded9e6677aa4248fbd774eb52cda568686c0c6b64e127e517e88b28981c"},
+    {file = "boto3_stubs-1.35.44-py3-none-any.whl", hash = "sha256:03b8f717692e85003539135c5553c3d8591c2475f9c9860e4e0b8a139c94b5ff"},
+    {file = "boto3_stubs-1.35.44.tar.gz", hash = "sha256:8268c64f6480d9cdd9fcc01082ea5bea96a33e5967ee23d90dcbd3153ec9ffe6"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.43)", "botocore (==1.35.43)"]
+boto3 = ["boto3 (==1.35.44)", "botocore (==1.35.44)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -949,18 +949,18 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.274"
+version = "0.1.275"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.274-py3-none-any.whl", hash = "sha256:83888df3627f9dc40a47a1f8f21d6da6ade5f5286ba38afa558a666f790b804d"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.274.tar.gz", hash = "sha256:f1ab7b700bd6f85aeb0a69138e582a8997cdc85331984833f59b116d33810a6b"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.275-py3-none-any.whl", hash = "sha256:0ae3cfa25a2e06f24321ae9f9ee303e152e94d5562c9bb2aab582fa398983767"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.275.tar.gz", hash = "sha256:8fc326ae4746f9b3b6885ec336ba8a2135b872de2ca779a8e84a1e93beb4822f"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.162.1,<3.0.0"
-cdk-nag = ">=2.29.6,<3.0.0"
+cdk-nag = ">=2.29.8,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.104.0,<2.0.0"
 publication = ">=0.0.3"
@@ -4315,4 +4315,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "4871c452786b36d7a2812d5c3d7a23dd35854dba4455d144962ae60118fbcad7"
+content-hash = "8277728ec4c487c1a65bd74f286c1121c3cbbceb53ba12060675c811b58d90c6"
