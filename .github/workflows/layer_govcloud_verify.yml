@@ -12,7 +12,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Layer version to duplicate
+        description: Layer version to verify information
         type: string
         required: true
 
