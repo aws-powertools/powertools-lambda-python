@@ -128,11 +128,12 @@ Here's an example on how we can handle the `/todos` path.
 
 When using Amazon API Gateway HTTP API to front your Lambda functions, you can use `APIGatewayHttpResolver`.
 
+<!-- markdownlint-disable MD013 -->
 ???+ note
     Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
 
-    <!-- markdownlint-disable-next-line MD013 -->
     If you're using Terraform to deploy a HTTP API, note that it defaults the [payload_format_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_integration#payload_format_version){target="_blank" rel="nofollow"} value to 1.0 if not specified.
+<!-- markdownlint-enable MD013 -->
 
 ```python hl_lines="5 11" title="Using HTTP API resolver"
 --8<-- "examples/event_handler_rest/src/getting_started_http_api_resolver.py"

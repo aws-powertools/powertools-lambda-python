@@ -97,7 +97,7 @@ def pydanticv2_only():
 def openapi30_schema():
     from urllib.request import urlopen
 
-    f = urlopen("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json")
+    f = urlopen("https://spec.openapis.org/oas/3.0/schema/2021-09-28")
     data = json.loads(f.read().decode("utf-8"))
     return fastjsonschema.compile(
         data,
@@ -109,7 +109,7 @@ def openapi30_schema():
 def openapi31_schema():
     from urllib.request import urlopen
 
-    f = urlopen("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json")
+    f = urlopen("https://spec.openapis.org/oas/3.1/schema/2022-10-07")
     data = json.loads(f.read().decode("utf-8"))
     return fastjsonschema.compile(
         data,
