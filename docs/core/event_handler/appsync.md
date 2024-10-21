@@ -270,8 +270,8 @@ Let's assume you have `split_operation.py` as your Lambda function entrypoint an
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
 
-???+ info
-    For safety, we always clear any data available in the `context` dictionary after each invocation.
+???+ warning
+    For safety, we clear the context after each invocation, except for async single resolvers. For these, use `app.context.clear()` before returning the function.
 
 ???+ tip
     This can also be useful for middlewares injecting contextual information before a request is processed.

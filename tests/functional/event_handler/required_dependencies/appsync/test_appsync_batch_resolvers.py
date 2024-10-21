@@ -943,3 +943,41 @@ def test_app_access_batch_current_event():
 
     # THEN the resolver must be able to return a field in the batch_current_event
     assert ret[0] == mock_event[0]["identity"]["sub"]
+
+
+def test_context_is_accessible_in_sync_batch_resolver():
+    mock_event = load_event("appSyncBatchEvent.json")
+
+    # GIVEN An instance of AppSyncResolver and a resolver function registered with the app
+    app = AppSyncResolver()
+
+    @app.batch_resolver(field_name="createSomething")
+    def get_user(event: List) -> List:
+        return [app.context.get("project_name")]
+
+    # WHEN we resolve the event
+    app.append_context(project_name="powertools")
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the batch_current_event
+    assert app.context == {}
+    assert ret[0] == "powertools"
+
+
+def test_context_is_accessible_in_async_batch_resolver():
+    mock_event = load_event("appSyncBatchEvent.json")
+
+    # GIVEN An instance of AppSyncResolver and a resolver function registered with the app
+    app = AppSyncResolver()
+
+    @app.async_batch_resolver(field_name="createSomething")
+    async def get_user(event: List) -> List:
+        return [app.context.get("project_name")]
+
+    # WHEN we resolve the event
+    app.append_context(project_name="powertools")
+    ret = app.resolve(mock_event, {})
+
+    # THEN the resolver must be able to return a field in the batch_current_event
+    assert app.context == {}
+    assert ret[0] == "powertools"
