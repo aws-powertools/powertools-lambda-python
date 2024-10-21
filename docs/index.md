@@ -67,10 +67,26 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python312` for `Python 3.12`.
 
+    ==== "AWS"
+
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
     | x86_64          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:2__{: .copyMe}:clipboard:       |
     | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:2__{: .copyMe}:clipboard: |
+
+    ==== "AWS GovCloud (us-gov-east-1)"
+
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:2__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:2__{: .copyMe}:clipboard: |
+
+    ==== "AWS GovCloud (us-gov-west-1)"
+
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:2__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:2__{: .copyMe}:clipboard: |
 
     === "AWS Console"
 
