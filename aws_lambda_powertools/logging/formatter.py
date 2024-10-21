@@ -51,19 +51,10 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
-    def append_thread_local_keys(self, **additional_keys) -> None:
-        raise NotImplementedError()
-
     def get_current_keys(self) -> dict[str, Any]:
         return {}
 
-    def get_current_thread_keys(self) -> dict[str, Any]:
-        return {}
-
     def remove_keys(self, keys: Iterable[str]) -> None:
-        raise NotImplementedError()
-
-    def remove_thread_local_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -71,7 +62,18 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
         """Removes any previously added logging keys"""
         raise NotImplementedError()
 
-    def clear_thread_local_keys(self) -> None:
+    # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
+    # They prevent race conditions and ensure data consistency across multiple threads.
+    def thread_safe_append_keys(self, **additional_keys) -> None:
+        raise NotImplementedError()
+
+    def thread_safe_get_current_keys(self) -> dict[str, Any]:
+        return {}
+
+    def thread_safe_remove_keys(self, keys: Iterable[str]) -> None:
+        raise NotImplementedError()
+
+    def thread_safe_clear_keys(self) -> None:
         """Removes any previously added logging keys in a specific thread"""
         raise NotImplementedError()
 
@@ -250,27 +252,33 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
 
-    def append_thread_local_keys(self, **additional_keys) -> None:
-        set_context_keys(**additional_keys)
-
     def get_current_keys(self) -> dict[str, Any]:
         return self.log_format
-
-    def get_current_thread_keys(self) -> dict[str, Any]:
-        return _get_context().get()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         for key in keys:
             self.log_format.pop(key, None)
 
-    def remove_thread_local_keys(self, keys: Iterable[str]) -> None:
-        remove_context_keys(keys)
-
     def clear_state(self) -> None:
         self.log_format = dict.fromkeys(self.log_record_order)
         self.log_format.update(**self.keys_combined)
 
-    def clear_thread_local_keys(self) -> None:
+    # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
+    # They prevent race conditions and ensure data consistency across multiple threads.
+    def thread_safe_append_keys(self, **additional_keys) -> None:
+        # Append additional key-value pairs to the context safely in a thread-safe manner.
+        set_context_keys(**additional_keys)
+
+    def thread_safe_get_current_keys(self) -> dict[str, Any]:
+        # Retrieve the current context keys safely in a thread-safe manner.
+        return _get_context().get()
+
+    def thread_safe_remove_keys(self, keys: Iterable[str]) -> None:
+        # Remove specified keys from the context safely in a thread-safe manner.
+        remove_context_keys(keys)
+
+    def thread_safe_clear_keys(self) -> None:
+        # Clear all keys from the context safely in a thread-safe manner.
         clear_context_keys()
 
     @staticmethod

@@ -415,14 +415,14 @@ def test_logger_logs_stack_trace_with_formatter_non_default_value(service_name, 
     assert "stack_trace" not in log
 
 
-def test_thread_keys_encapsulation(service_name, stdout):
+def test_thread_safe_keys_encapsulation(service_name, stdout):
     logger = Logger(
         service=service_name,
         stream=stdout,
     )
 
     def send_thread_message_with_key(message, keys):
-        logger.append_thread_local_keys(**keys)
+        logger.thread_safe_append_keys(**keys)
         logger.info(message)
 
     global_key = {"exampleKey": "globalKey"}
@@ -453,16 +453,16 @@ def test_thread_keys_encapsulation(service_name, stdout):
     assert logs[3].get("exampleThread2Key") is None
 
 
-def test_remove_thread_key(service_name, stdout):
+def test_thread_safe_remove_key(service_name, stdout):
     logger = Logger(
         service=service_name,
         stream=stdout,
     )
 
     def send_message_with_key_and_without(message, keys):
-        logger.append_thread_local_keys(**keys)
+        logger.thread_safe_append_keys(**keys)
         logger.info(message)
-        logger.remove_thread_local_keys(keys.keys())
+        logger.thread_safe_remove_keys(keys.keys())
         logger.info(message)
 
     thread1_keys = {"exampleThread1Key": "thread1"}
@@ -474,16 +474,16 @@ def test_remove_thread_key(service_name, stdout):
     assert logs[1].get("exampleThread1Key") is None
 
 
-def test_clear_thread_key(service_name, stdout):
+def test_thread_safe_clear_key(service_name, stdout):
     logger = Logger(
         service=service_name,
         stream=stdout,
     )
 
     def send_message_with_key_and_clear(message, keys):
-        logger.append_thread_local_keys(**keys)
+        logger.thread_safe_append_keys(**keys)
         logger.info(message)
-        logger.clear_thread_local_keys()
+        logger.thread_safe_clear_keys()
         logger.info(message)
 
     thread1_keys = {"exampleThread1Key": "thread1"}
@@ -496,15 +496,15 @@ def test_clear_thread_key(service_name, stdout):
     assert logs[1].get("exampleThread1Key") is None
 
 
-def test_get_thread_key(service_name, stdout):
+def test_thread_safe_getkey(service_name, stdout):
     logger = Logger(
         service=service_name,
         stream=stdout,
     )
 
     def send_message_with_key_and_get(message, keys):
-        logger.append_thread_local_keys(**keys)
-        logger.info(logger.get_current_thread_keys())
+        logger.thread_safe_append_keys(**keys)
+        logger.info(logger.thread_safe_get_current_keys())
 
     thread1_keys = {"exampleThread1Key": "thread1"}
     Thread(target=send_message_with_key_and_get, args=("msg", thread1_keys)).start()

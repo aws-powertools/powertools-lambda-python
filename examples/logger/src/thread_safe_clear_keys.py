@@ -8,9 +8,9 @@ logger = Logger()
 
 
 def threaded_func(order_id: str):
-    logger.append_thread_local_keys(order_id=order_id, thread_id=threading.get_ident())
+    logger.thread_safe_append_keys(order_id=order_id, thread_id=threading.get_ident())
     logger.info("Collecting payment")
-    logger.remove_thread_local_keys(["order_id"])
+    logger.thread_safe_clear_keys()
     logger.info("Exiting thread")
 
 

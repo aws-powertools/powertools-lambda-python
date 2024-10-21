@@ -8,8 +8,10 @@ logger = Logger()
 
 
 def threaded_func(order_id: str):
-    logger.append_thread_local_keys(order_id=order_id, thread_id=threading.get_ident())
+    logger.thread_safe_append_keys(order_id=order_id, thread_id=threading.get_ident())
     logger.info("Collecting payment")
+    logger.thread_safe_remove_keys(["order_id"])
+    logger.info("Exiting thread")
 
 
 def lambda_handler(event: dict, context: LambdaContext) -> str:
