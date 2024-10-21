@@ -78,14 +78,14 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python312` for `Python 3.12`.
 
-    ##### AWS GovCloud (us-gov-east-1)
+    **AWS GovCloud (us-gov-east-1)**
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
     | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:2__{: .copyMe}:clipboard:       |
     | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:2__{: .copyMe}:clipboard: |
 
-    ##### AWS GovCloud (us-gov-west-1)
+    **AWS GovCloud (us-gov-west-1)**
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
