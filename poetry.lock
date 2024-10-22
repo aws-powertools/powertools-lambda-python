@@ -4258,17 +4258,17 @@ files = [
 
 [[package]]
 name = "xenon"
-version = "0.9.1"
+version = "0.9.3"
 description = "Monitor code metrics for Python on your CI server"
 optional = false
 python-versions = "*"
 files = [
-    {file = "xenon-0.9.1-py2.py3-none-any.whl", hash = "sha256:b2888a5764ebd57a1f9f1624fde86e8303cb30c686e492f19d98867c458f7870"},
-    {file = "xenon-0.9.1.tar.gz", hash = "sha256:d6745111c3e258b749a4fd424b1b899d99ea183cea232365ee2f88fe7d80c03b"},
+    {file = "xenon-0.9.3-py2.py3-none-any.whl", hash = "sha256:6e2c2c251cc5e9d01fe984e623499b13b2140fcbf74d6c03a613fa43a9347097"},
+    {file = "xenon-0.9.3.tar.gz", hash = "sha256:4a7538d8ba08aa5d79055fb3e0b2393c0bd6d7d16a4ab0fcdef02ef1f10a43fa"},
 ]
 
 [package.dependencies]
-PyYAML = ">=4.2b1,<7.0"
+PyYAML = ">=5.0,<7.0"
 radon = ">=4,<7"
 requests = ">=2.0,<3.0"
 
@@ -4315,4 +4315,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "f3b31f318698b27662088661edeff711071bcdfb48dcf7a7d1637f7d050a35bf"
+content-hash = "e99c6e147aeb67e16d8cb7ddc0cd1b1e527cea6f7754e564fc1c931306b84af8"
