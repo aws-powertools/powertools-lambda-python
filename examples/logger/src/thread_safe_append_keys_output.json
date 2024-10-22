@@ -1,0 +1,20 @@
+[
+    {
+        "level": "INFO",
+        "location": "threaded_func:11",
+        "message": "Collecting payment",
+        "timestamp": "2024-09-08 03:04:11,316-0400",
+        "service": "payment",
+        "order_id": "order_id_value_1",
+        "thread_id": "3507187776085958"
+    },
+    {
+        "level": "INFO",
+        "location": "threaded_func:11",
+        "message": "Collecting payment",
+        "timestamp": "2024-09-08 03:04:11,316-0400",
+        "service": "payment",
+        "order_id": "order_id_value_2",
+        "thread_id": "140718447808512"
+    }
+]
