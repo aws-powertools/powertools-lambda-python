@@ -1,5 +1,6 @@
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, root_validator
+from aws_lambda_powertools.utilities.parser import parse, BaseModel
+from aws_lambda_powertools.utilities.parser import model_validator
 
 class UserModel(BaseModel):
 	username: str

@@ -1,6 +1,7 @@
 import json
 from typing import Any, Type
-from aws_lambda_powertools.utilities.parser import event_parser, BaseEnvelope, BaseModel, validator
+from aws_lambda_powertools.utilities.parser import event_parser, BaseEnvelope, BaseModel
+from aws_lambda_powertools.utilities.validation import validator
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 class CancelOrder(BaseModel):
@@ -18,7 +19,7 @@ class CancelOrderModel(BaseModel):
 
 class CustomEnvelope(BaseEnvelope):
     def parse(self, data: dict, model: Type[BaseModel]) -> Any:
-        return model.parse_obj({"body": data.get("body", {})})
+        return model.model_validate({"body": data.get("body", {})})
 
 @event_parser(model=CancelOrderModel, envelope=CustomEnvelope)
 def lambda_handler(event: CancelOrderModel, context: LambdaContext):

@@ -1,7 +1,8 @@
 import json
 from typing import Any, Dict, Optional, TypeVar, Union
-from aws_lambda_powertools.utilities.parser import BaseEnvelope, event_parser, BaseModel
+from aws_lambda_powertools.utilities.parser import BaseEnvelope, BaseModel
 from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
+from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 Model = TypeVar("Model", bound=BaseModel)

@@ -1,4 +1,5 @@
-from aws_lambda_powertools.utilities.parser import BaseModel, parse, ValidationError
+from aws_lambda_powertools.utilities.parser import BaseModel, ValidationError
+from aws_lambda_powertools.utilities.parser import parse
 
 # Define a Pydantic model for the expected structure of the input
 class MyEvent(BaseModel):

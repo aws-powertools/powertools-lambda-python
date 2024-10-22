@@ -1,4 +1,5 @@
-from aws_lambda_powertools.utilities.parser import parse, BaseModel, field_validator
+from aws_lambda_powertools.utilities.parser import parse, BaseModel
+from aws_lambda_powertools.utilities.parser import field_validator
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 class HelloWorldModel(BaseModel):

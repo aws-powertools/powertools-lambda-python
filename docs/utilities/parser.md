@@ -47,7 +47,7 @@ Define models by inheriting from `BaseModel` to parse incoming events. Pydantic 
 The `event_parser` decorator automatically parses and validates the event.
 
 
-```python title="getting_started_with_parser.py"
+```python title="getting_started_with_parser.py" hl_lines="2 8"
 --8<-- "examples/parser/src/getting_started_with_parser.py"
 ```
 
@@ -59,10 +59,10 @@ The function catches **ValidationError**, returning a 400 status code with an er
 
 The `parse()` function allows you to manually control when and how an event is parsed into a Pydantic model. This can be useful in cases where you need flexibility, such as handling different event formats or adding custom logic before parsing.
 
-```python title="parser_function.py"
+```python title="parser_function.py" hl_lines="2 12"
 --8<-- "examples/parser/src/parser_function.py"
 ```
----
+
 
 **Should I use parse() or @event_parser? 🤔**
 
@@ -124,9 +124,9 @@ You can extend them to include your own models, and yet have all other known fie
 **Example: custom data model with Amazon EventBridge**
 Use the model to validate and extract relevant information from the incoming event. This can be useful when you need to handle events with a specific structure or when you want to ensure that the event data conforms to certain rules.
 
-=== "Custom data model"
+=== "Custom data model" 
 
-    ```python
+    ```python hl_lines="2 5 13"
     --8<-- "examples/parser/src/custom_data_model_with_eventbridge.py"
     ```
 
@@ -157,7 +157,7 @@ Using `@event_parser` decorator to automatically parse the EventBridge event and
 
 === "Envelopes using event parser decorator"
 
-    ```python
+    ```python hl_lines="2 10"
     --8<-- "examples/parser/src/envelope_with_event_parser.py"
     ```
 
@@ -197,7 +197,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
 
 === "Bring your own envelope with Event Bridge"
 
-    ```python
+    ```python hl_lines="3 4 8-16"
     --8<-- "examples/parser/src/bring_your_own_envelope.py"
     ```
 
@@ -235,7 +235,7 @@ Keep the following in mind regardless of which decorator you end up using it:
 
 Quick validation using decorator `field_validator` to verify whether the field `message` has the value of `hello world`.
 
-```python title="field_validator.py"
+```python title="field_validator.py" hl_lines="2 8"
 --8<-- "examples/parser/src/field_validator.py"
 ```
 
@@ -247,7 +247,7 @@ If you run using a test event `{"message": "hello universe"}` you should expect 
 
 Alternatively, you can pass `'*'` as an argument for the decorator so that you can validate every value available.
 
-```python title="field_validator_all_values.py"
+```python title="field_validator_all_values.py" hl_lines="2 9"
 --8<-- "examples/parser/src/field_validator_all_values.py"
 ```
 
@@ -264,7 +264,7 @@ Try with `event={"message": "hello universe", "sender": "universe"}` to get a va
 - It can modify or validate multiple fields at once.
 - It's useful for validations that depend on multiple fields.
 
-```python title="model_validator.py"
+```python title="model_validator.py" hl_lines="3 10"
 --8<-- "examples/parser/src/model_validator.py"
 ```
 
@@ -280,7 +280,7 @@ Wrap these fields with [Pydantic&#39;s Json Type](https://pydantic-docs.helpmanu
 
 === "Validate string fields containing JSON data"
 
-    ```python
+    ```python hl_lines="4 6-11"
     --8<-- "examples/parser/src/string_fields_contain_json.py"
     ```
 
@@ -294,7 +294,7 @@ Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpma
 
 === "Validate string fields containing JSON data using Pydantic validator"
 
-    ```python
+    ```python hl_lines="4 14"
     --8<-- "examples/parser/src/string_fields_contain_json_pydantic_validator.py"
     ```
 
@@ -313,7 +313,7 @@ Pydantic's definition of _serialization_ is broader than usual. It includes conv
 
 Read more at [Serialization for Pydantic documentation](https://docs.pydantic.dev/latest/concepts/serialization/#model_copy){target="\_blank" rel="nofollow"}.
 
-```python title="serialization_parser.py"
+```python title="serialization_parser.py" hl_lines="37-38"
 --8<-- "examples/parser/src/serialization_parser.py"
 ```
 
@@ -335,5 +335,5 @@ We export most common classes, exceptions, and utilities from Pydantic as part o
 If what you're trying to use isn't available as part of the high level import system, use the following escape _most_ hatch mechanism:
 
 ```python
-from aws_lambda_powertools.utilities.parser.pydantic import <what you'd like to import'>
+from aws_lambda_powertools.utilities.parser.pydantic import <"what you'd like to import">
 ```

@@ -1,4 +1,5 @@
-from aws_lambda_powertools.utilities.parser import event_parser, parse, BaseModel, envelopes
+from aws_lambda_powertools.utilities.parser import event_parser, BaseModel
+from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 class UserModel(BaseModel):
