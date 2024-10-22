@@ -7,6 +7,13 @@
     ]
   },
   {
+    "version": "3.2.0",
+    "title": "3.2.0",
+    "aliases": [
+      "latest"
+    ]
+  },
+  {
     "version": "3.1.0",
     "title": "3.1.0",
     "aliases": []
@@ -229,8 +236,6 @@
   {
     "version": "2.16.3",
     "title": "2.16.3",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   }
 ]
