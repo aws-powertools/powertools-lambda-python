@@ -46,7 +46,7 @@ jobs:
           mask-aws-account-id: true
       - name: Output ${{ matrix.layer }}-${{ matrix.arch }}
         run: |
-          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --output table
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
 
   gov_east:
     name: Verify (East)
@@ -77,7 +77,7 @@ jobs:
       - name: Verify Layer ${{ matrix.layer }}-${{ matrix.arch }}
         id: verify-layer
         run: |
-          aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' --output table
+          aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
 
   gov_west:
     name: Verify (West)
@@ -108,4 +108,4 @@ jobs:
       - name: Verify Layer ${{ matrix.layer }}-${{ matrix.arch }}
         id: verify-layer
         run: |
-          aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' --output table
+          aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
