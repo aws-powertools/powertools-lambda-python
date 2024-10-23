@@ -238,13 +238,13 @@ typeguard = ">=2.13.3,<5.0.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.162.1"
+version = "2.163.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk_lib-2.162.1-py3-none-any.whl", hash = "sha256:696cf76ebe8ee6cb4af14e5d621cf551659e27c5c5c0e6c0146e478eada6195b"},
-    {file = "aws_cdk_lib-2.162.1.tar.gz", hash = "sha256:5c8157f144acecb40fa190bd49feb669f5be5d1bb2cf7bf7b0cdc3daa19615d9"},
+    {file = "aws_cdk_lib-2.163.1-py3-none-any.whl", hash = "sha256:4525a725c8758dfcd950a9ce2f618b1fe4abac658e9aef5e4c3f0d4f02565f88"},
+    {file = "aws_cdk_lib-2.163.1.tar.gz", hash = "sha256:e41cfa2d3a134fcbd9b25cb7330ba34fee3b9997e45331d3439cc4c959c3e898"},
 ]
 
 [package.dependencies]
@@ -431,13 +431,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.45"
-description = "Type annotations for boto3 1.35.45 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.46"
+description = "Type annotations for boto3 1.35.46 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.45-py3-none-any.whl", hash = "sha256:7ddd315be0739cff7dccde67dd0ba5d419b7c74fab43fba6abcaf0c45607e383"},
-    {file = "boto3_stubs-1.35.45.tar.gz", hash = "sha256:d4530f60e149e159971ffe3916cb5095d4b7a2f6c57908ac1f60d8ca669d6dd6"},
+    {file = "boto3_stubs-1.35.46-py3-none-any.whl", hash = "sha256:5b2887214d0953e7e6d5aeb4276e3b9e3cc3fb7375ef39a9da8aaa0c3e48b223"},
+    {file = "boto3_stubs-1.35.46.tar.gz", hash = "sha256:a5bddda9eaa277b615d9e394f42f51d97e6652166db6810f645cc52a4f4efccb"},
 ]
 
 [package.dependencies]
@@ -499,7 +499,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.45)", "botocore (==1.35.45)"]
+boto3 = ["boto3 (==1.35.46)", "botocore (==1.35.46)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -4258,17 +4258,17 @@ files = [
 
 [[package]]
 name = "xenon"
-version = "0.9.1"
+version = "0.9.3"
 description = "Monitor code metrics for Python on your CI server"
 optional = false
 python-versions = "*"
 files = [
-    {file = "xenon-0.9.1-py2.py3-none-any.whl", hash = "sha256:b2888a5764ebd57a1f9f1624fde86e8303cb30c686e492f19d98867c458f7870"},
-    {file = "xenon-0.9.1.tar.gz", hash = "sha256:d6745111c3e258b749a4fd424b1b899d99ea183cea232365ee2f88fe7d80c03b"},
+    {file = "xenon-0.9.3-py2.py3-none-any.whl", hash = "sha256:6e2c2c251cc5e9d01fe984e623499b13b2140fcbf74d6c03a613fa43a9347097"},
+    {file = "xenon-0.9.3.tar.gz", hash = "sha256:4a7538d8ba08aa5d79055fb3e0b2393c0bd6d7d16a4ab0fcdef02ef1f10a43fa"},
 ]
 
 [package.dependencies]
-PyYAML = ">=4.2b1,<7.0"
+PyYAML = ">=5.0,<7.0"
 radon = ">=4,<7"
 requests = ">=2.0,<3.0"
 
@@ -4315,4 +4315,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "f3b31f318698b27662088661edeff711071bcdfb48dcf7a7d1637f7d050a35bf"
+content-hash = "80704fa817d81aa2b7ad6289f68776ad1c5276651904dff9de933bcbd7f7ad78"
