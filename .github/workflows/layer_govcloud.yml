@@ -144,7 +144,7 @@ jobs:
         run: |
           REMOTE_SHA=$(aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' --query 'Content.CodeSha256' --output text)
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
-          test "$REMOTE_SHA" == "$SHA "&& echo "SHA OK: ${SHA}" || exit 1 
+          test "$REMOTE_SHA" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1 
           aws --region us-gov-east-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-east-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' --output table
 
   copy_west:
@@ -213,5 +213,5 @@ jobs:
         run: |
           REMOTE_SHA=$(aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' --query 'Content.CodeSha256' --output text)
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
-          test "$REMOTE_SHA" == "$SHA "&& echo "SHA OK: ${SHA}" || exit 1 
+          test "$REMOTE_SHA" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1 
           aws --region us-gov-west-1 lambda get-layer-version-by-arn --arn 'arn:aws-us-gov:lambda:us-gov-west-1:${{ secrets.AWS_ACCOUNT_ID }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' --output table
