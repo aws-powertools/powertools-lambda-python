@@ -232,7 +232,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 for k, v in res.items()
             }
         elif dataclasses.is_dataclass(res):
-            return dataclasses.asdict(res)  # type: ignore[call-overload]
+            return dataclasses.asdict(res)  # type: ignore[arg-type]
         return res
 
     def _get_body(self, app: EventHandlerInstance) -> dict[str, Any]:

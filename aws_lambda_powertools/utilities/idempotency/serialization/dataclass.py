@@ -42,4 +42,4 @@ class DataclassSerializer(BaseIdempotencyModelSerializer):
 
         if not is_dataclass(model_type):
             raise IdempotencyModelTypeError("Model type is not inherited of dataclass type")
-        return cls(model=model_type)
+        return cls(model=model_type)  # type: ignore[arg-type]
