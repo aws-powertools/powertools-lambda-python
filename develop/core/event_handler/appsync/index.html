@@ -3704,9 +3704,9 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 </div>
 <h4 id="sharing-contextual-data">Sharing contextual data<a class="headerlink" href="#sharing-contextual-data" title="Permanent link">&para;</a></h4>
 <p>You can use <code>append_context</code> when you want to share data between your App and Router instances. Any data you share will be available via the <code>context</code> dictionary available in your App or Router context.</p>
-<details class="info" open="open">
-<summary>Info</summary>
-<p>For safety, we always clear any data available in the <code>context</code> dictionary after each invocation.</p>
+<details class="warning" open="open">
+<summary>Warning</summary>
+<p>For safety, we clear the context after each invocation, except for async single resolvers. For these, use <code>app.context.clear()</code> before returning the function.</p>
 </details>
 <details class="tip" open="open">
 <summary>Tip</summary>
@@ -5350,7 +5350,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2024-09-12
+    2024-10-24
   </span>
 
     
