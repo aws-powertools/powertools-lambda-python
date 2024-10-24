@@ -19,7 +19,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-You need to bring Pydantic v2.0.3 or later as an external dependency.
+You need to bring Pydantic v2.4.0 or later as an external dependency.
 
 Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
