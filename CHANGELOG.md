@@ -4,12 +4,23 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **ci:** Update output to something easily copy/pasteable ([#5435](https://github.com/aws-powertools/powertools-lambda-python/issues/5435))
+* **ci:** remove space ([#5433](https://github.com/aws-powertools/powertools-lambda-python/issues/5433))
+
 ## Documentation
 
 * **layer:** update layer version number - v3.2.0 ([#5426](https://github.com/aws-powertools/powertools-lambda-python/issues/5426))
 
 ## Maintenance
 
+* **ci:** new pre-release 3.2.1a0 ([#5434](https://github.com/aws-powertools/powertools-lambda-python/issues/5434))
+* **deps:** bump actions/dependency-review-action from 4.3.4 to 4.3.5 ([#5431](https://github.com/aws-powertools/powertools-lambda-python/issues/5431))
+* **deps-dev:** bump boto3-stubs from 1.35.45 to 1.35.46 ([#5430](https://github.com/aws-powertools/powertools-lambda-python/issues/5430))
+* **deps-dev:** bump aws-cdk from 2.162.1 to 2.163.1 ([#5432](https://github.com/aws-powertools/powertools-lambda-python/issues/5432))
+* **deps-dev:** bump xenon from 0.9.1 to 0.9.3 ([#5428](https://github.com/aws-powertools/powertools-lambda-python/issues/5428))
+* **deps-dev:** bump aws-cdk-lib from 2.162.1 to 2.163.1 ([#5429](https://github.com/aws-powertools/powertools-lambda-python/issues/5429))
 
 
 <a name="v3.2.0"></a>
