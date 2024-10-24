@@ -159,13 +159,14 @@ To ease routine tasks like extracting correlation ID from popular event sources,
 
 You can append additional keys using either mechanism:
 
-* Persist new keys across all future log messages via `append_keys` method
+* New keys persist across all future log messages via `append_keys` method
 * Add additional keys on a per log message basis as a keyword=value, or via `extra` parameter
+* New keys persist across all future logs in a specific thread via `thread_safe_append_keys` method. Check [Working with thread-safe keys](#working-with-thread-safe-keys) section.
 
 #### append_keys method
 
 ???+ warning
-	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank"}.
+    `append_keys` is not thread-safe, use [thread_safe_append_keys](#appending-thread-safe-additional-keys) instead
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -228,6 +229,16 @@ It accepts any dictionary, and all keyword arguments will be added as part of th
 
 ### Removing additional keys
 
+You can remove additional keys using either mechanism:
+
+* Remove new keys across all future log messages via `remove_keys` method
+* Remove keys persist across all future logs in a specific thread via `thread_safe_remove_keys` method. Check [Working with thread-safe keys](#working-with-thread-safe-keys) section.
+
+???+ danger
+    Keys added by `append_keys` can only be removed by `remove_keys` and thread-local keys added by `thread_safe_append_keys` can only be removed by `thread_safe_remove_keys` or `thread_safe_clear_keys`. Thread-local and normal logger keys are distinct values and can't be manipulated interchangeably.
+
+#### remove_keys method
+
 You can remove any additional key from Logger state using `remove_keys`.
 
 === "remove_keys.py"
@@ -283,6 +294,9 @@ You can view all currently configured keys from the Logger state using the `get_
     ```python hl_lines="4 11"
     --8<-- "examples/logger/src/get_current_keys.py"
     ```
+
+???+ info
+    For thread-local additional logging keys, use `get_current_thread_keys` instead
 
 ### Log levels
 
@@ -472,6 +486,68 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 | **APPSYNC_RESOLVER**          | `'request.headers."x-amzn-trace-id"'` | AppSync X-Ray Trace ID          |
 | **APPLICATION_LOAD_BALANCER** | `'headers."x-amzn-trace-id"'`         | ALB X-Ray Trace ID              |
 | **EVENT_BRIDGE**              | `"id"`                                | EventBridge Event ID            |
+
+### Working with thread-safe keys
+
+#### Appending thread-safe additional keys
+
+You can append your own thread-local keys in your existing Logger via the `thread_safe_append_keys` method
+
+=== "thread_safe_append_keys.py"
+
+    ```python hl_lines="11"
+    --8<-- "examples/logger/src/thread_safe_append_keys.py"
+    ```
+
+=== "thread_safe_append_keys_output.json"
+
+    ```json hl_lines="8 9 17 18"
+    --8<-- "examples/logger/src/thread_safe_append_keys_output.json"
+    ```
+
+#### Removing thread-safe additional keys
+
+You can remove any additional thread-local keys from Logger using either `thread_safe_remove_keys` or `thread_safe_clear_keys`.
+
+Use the `thread_safe_remove_keys` method to remove a list of thread-local keys that were previously added using the `thread_safe_append_keys` method.
+
+=== "thread_safe_remove_keys.py"
+
+    ```python hl_lines="13"
+    --8<-- "examples/logger/src/thread_safe_remove_keys.py"
+    ```
+
+=== "thread_safe_remove_keys_output.json"
+
+    ```json hl_lines="8 9 17 18 26 34"
+    --8<-- "examples/logger/src/thread_safe_remove_keys_output.json"
+    ```
+
+#### Clearing thread-safe additional keys
+
+Use the `thread_safe_clear_keys` method to remove all thread-local keys that were previously added using the `thread_safe_append_keys` method.
+
+=== "thread_safe_clear_keys.py"
+
+    ```python hl_lines="13"
+    --8<-- "examples/logger/src/thread_safe_clear_keys.py"
+    ```
+
+=== "thread_safe_clear_keys_output.json"
+
+    ```json hl_lines="8 9 17 18"
+    --8<-- "examples/logger/src/thread_safe_clear_keys_output.json"
+    ```
+
+#### Accessing thread-safe currently keys
+
+You can view all currently thread-local keys from the Logger state using the `thread_safe_get_current_keys()` method. This method is useful when you need to avoid overwriting keys that are already configured.
+
+=== "thread_safe_get_current_keys.py"
+
+    ```python hl_lines="13"
+    --8<-- "examples/logger/src/thread_safe_get_current_keys.py"
+    ```
 
 ### Reusing Logger across your code
 

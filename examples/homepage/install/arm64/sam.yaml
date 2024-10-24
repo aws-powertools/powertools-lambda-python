@@ -9,4 +9,4 @@ Resources:
           Runtime: python3.12
           Handler: app.lambda_handler
           Layers:
-          - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:1
+          - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:3

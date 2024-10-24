@@ -6,7 +6,7 @@
 ? Do you want to configure advanced settings? Yes
 ...
 ? Do you want to enable Lambda layers for this function? Yes
-? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:1
+? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:3
 ❯ amplify push -y
 
 
@@ -17,5 +17,5 @@ General information
 - Name: <NAME-OF-FUNCTION>
 ? Which setting do you want to update? Lambda layers configuration
 ? Do you want to enable Lambda layers for this function? Yes
-? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:1
+? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:3
 ? Do you want to edit the local lambda function now? No
