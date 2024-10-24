@@ -153,6 +153,7 @@ class AppSyncResolver(Router):
         # If we clean the context immediately, it might not be available when the coroutine is actually executed.
         # For single async operations, the context should be cleaned up manually after the coroutine completes.
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/5290
+        # REVIEW: Review this support in Powertools V4
         if not asyncio.iscoroutine(response):
             self.clear_context()
 
