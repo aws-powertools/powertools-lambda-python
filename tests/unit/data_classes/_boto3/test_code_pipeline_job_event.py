@@ -1,7 +1,9 @@
 import json
 import zipfile
+from io import StringIO
 
 import pytest
+from botocore.response import StreamingBody
 from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import CodePipelineJobEvent
@@ -184,3 +186,86 @@ def test_code_pipeline_get_artifact(mocker: MockerFixture):
         },
     )
     assert artifact_str == file_contents
+
+
+def test_raw_code_pipeline_get_artifact(mocker: MockerFixture):
+    raw_content = json.dumps({"steve": "french"})
+
+    class MockClient:
+        @staticmethod
+        def get_object(Bucket: str, Key: str):
+            assert Bucket == "us-west-2-123456789012-my-pipeline"
+            assert Key == "my-pipeline/test-api-2/TdOSFRV"
+            return {"Body": StreamingBody(StringIO(str(raw_content)), len(str(raw_content)))}
+
+    s3 = mocker.patch("boto3.client")
+    s3.return_value = MockClient()
+
+    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+
+    artifact_str = event.get_artifact(artifact_name="my-pipeline-SourceArtifact")
+
+    s3.assert_called_once_with(
+        "s3",
+        **{
+            "aws_access_key_id": event.data.artifact_credentials.access_key_id,
+            "aws_secret_access_key": event.data.artifact_credentials.secret_access_key,
+            "aws_session_token": event.data.artifact_credentials.session_token,
+        },
+    )
+    assert artifact_str == raw_content
+
+
+def test_code_pipeline_put_artifact(mocker: MockerFixture):
+
+    raw_content = json.dumps({"steve": "french"})
+    artifact_content_type = "application/json"
+    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+    artifact_name = event.data.output_artifacts[0].name
+
+    class MockClient:
+        @staticmethod
+        def put_object(
+            Bucket: str,
+            Key: str,
+            ContentType: str,
+            Body: str,
+            ServerSideEncryption: str,
+            SSEKMSKeyId: str,
+            BucketKeyEnabled: bool,
+        ):
+            output_artifact = event.find_output_artifact(artifact_name)
+            assert Bucket == output_artifact.location.s3_location.bucket_name
+            assert Key == output_artifact.location.s3_location.key
+            assert ContentType == artifact_content_type
+            assert Body == raw_content
+            assert ServerSideEncryption == "aws:kms"
+            assert SSEKMSKeyId == event.data.encryption_key.get_id
+            assert BucketKeyEnabled is True
+
+    s3 = mocker.patch("boto3.client")
+    s3.return_value = MockClient()
+
+    event.put_artifact(
+        artifact_name=artifact_name,
+        body=raw_content,
+        content_type=artifact_content_type,
+    )
+
+    s3.assert_called_once_with(
+        "s3",
+        **{
+            "aws_access_key_id": event.data.artifact_credentials.access_key_id,
+            "aws_secret_access_key": event.data.artifact_credentials.secret_access_key,
+            "aws_session_token": event.data.artifact_credentials.session_token,
+        },
+    )
+
+
+def test_code_pipeline_put_output_artifact_not_found():
+    raw_event = load_event("codePipelineEventData.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
+
+    assert parsed_event.find_output_artifact("not-found") is None
+    with pytest.raises(ValueError):
+        parsed_event.put_artifact(artifact_name="not-found", body="", content_type="text/plain")
