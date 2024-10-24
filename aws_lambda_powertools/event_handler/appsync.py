@@ -149,7 +149,13 @@ class AppSyncResolver(Router):
             Router.current_event = data_model(event)
             response = self._call_single_resolver(event=event, data_model=data_model)
 
-        self.clear_context()
+        # We don't clear the context for coroutines because we don't have control over the event loop.
+        # If we clean the context immediately, it might not be available when the coroutine is actually executed.
+        # For single async operations, the context should be cleaned up manually after the coroutine completes.
+        # See: https://github.com/aws-powertools/powertools-lambda-python/issues/5290
+        # REVIEW: Review this support in Powertools V4
+        if not asyncio.iscoroutine(response):
+            self.clear_context()
 
         return response
 
