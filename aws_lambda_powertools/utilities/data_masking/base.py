@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import functools
 import logging
 import warnings
@@ -94,8 +95,41 @@ class DataMasking:
     @overload
     def erase(self, data: dict, fields: list[str]) -> dict: ...
 
-    def erase(self, data: Sequence | Mapping, fields: list[str] | None = None) -> str | list[str] | tuple[str] | dict:
-        return self._apply_action(data=data, fields=fields, action=self.provider.erase)
+    @overload
+    def erase(
+        self,
+        data: dict,
+        fields: list[str],
+        custom_mask: bool | None = None,
+        mask_pattern: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
+    ) -> dict: ...
+
+    def erase(
+        self,
+        data: Sequence | Mapping,
+        fields: list[str] | None = None,
+        custom_mask: bool | None = None,
+        mask_pattern: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
+        masking_rules: dict | None = None,
+    ) -> str | list[str] | tuple[str] | dict:
+        if not data:
+            return data
+        if masking_rules:
+            return self._apply_masking_rules(data, masking_rules)
+        else:
+            return self._apply_action(
+                data=data,
+                fields=fields,
+                action=self.provider.erase,
+                custom_mask=custom_mask,
+                mask_pattern=mask_pattern,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
+            )
 
     def _apply_action(
         self,
@@ -103,6 +137,10 @@ class DataMasking:
         fields: list[str] | None,
         action: Callable,
         provider_options: dict | None = None,
+        custom_mask: bool | None = None,
+        mask_pattern: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
         **encryption_context: str,
     ):
         """
@@ -136,11 +174,23 @@ class DataMasking:
                 fields=fields,
                 action=action,
                 provider_options=provider_options,
+                custom_mask=custom_mask,
+                mask_pattern=mask_pattern,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
                 **encryption_context,
             )
         else:
             logger.debug(f"Running action {action.__name__} with the entire data")
-            return action(data=data, provider_options=provider_options, **encryption_context)
+            return action(
+                data=data,
+                provider_options=provider_options,
+                custom_mask=custom_mask,
+                mask_pattern=mask_pattern,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
+                **encryption_context,
+            )
 
     def _apply_action_to_fields(
         self,
@@ -148,6 +198,10 @@ class DataMasking:
         fields: list,
         action: Callable,
         provider_options: dict | None = None,
+        custom_mask: bool | None = None,
+        mask_pattern: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
         **encryption_context: str,
     ) -> dict | str:
         """
@@ -194,6 +248,8 @@ class DataMasking:
         new_dict = {'a': {'b': {'c': '*****'}}, 'x': {'y': '*****'}}
         ```
         """
+        if not fields:
+            raise ValueError("Fields parameter cannot be empty")
 
         data_parsed: dict = self._normalize_data_to_parse(fields, data)
 
@@ -204,6 +260,10 @@ class DataMasking:
             self._call_action,
             action=action,
             provider_options=provider_options,
+            custom_mask=custom_mask,
+            mask_pattern=mask_pattern,
+            regex_pattern=regex_pattern,
+            mask_format=mask_format,
             **encryption_context,  # type: ignore[arg-type]
         )
 
@@ -225,12 +285,6 @@ class DataMasking:
             # For in-place updates, json_parse accepts a callback function
             # that receives 3 args: field_value, fields, field_name
             # We create a partial callback to pre-populate known provider options (action, provider opts, enc ctx)
-            update_callback = functools.partial(
-                self._call_action,
-                action=action,
-                provider_options=provider_options,
-                **encryption_context,  # type: ignore[arg-type]
-            )
 
             json_parse.update(
                 data_parsed,
@@ -239,6 +293,49 @@ class DataMasking:
 
         return data_parsed
 
+    def _apply_masking_rules(self, data: dict, masking_rules: dict) -> dict:
+        """
+        Apply masking rules to data, supporting different rules for each field.
+        """
+        result = data.copy()
+
+        for path, rule in masking_rules.items():
+            try:
+                # Handle nested paths (e.g., 'address.street')
+                parts = path.split(".")
+                current = result
+
+                for part in parts[:-1]:
+                    if isinstance(current[part], str) and current[part].startswith("{"):
+                        try:
+                            current[part] = ast.literal_eval(current[part])
+                        except (ValueError, SyntaxError):
+                            continue
+                    current = current[part]
+
+                final_field = parts[-1]
+
+                # Apply masking rule to the target field
+                if final_field in current:
+                    current[final_field] = self.provider.erase(str(current[final_field]), **rule)
+
+            except (KeyError, TypeError, AttributeError):
+                # Log warning if field not found or invalid path
+                warnings.warn(f"Could not apply masking rule for path: {path}", stacklevel=2)
+                continue
+
+        return result
+
+    def _mask_nested_field(self, data: dict, field_path: str, mask_function):
+        keys = field_path.split(".")
+        current = data
+        for key in keys[:-1]:
+            current = current.get(key, {})
+            if not isinstance(current, dict):
+                return  # Caminho inválido
+        if keys[-1] in current:
+            current[keys[-1]] = mask_function(current[keys[-1]])
+
     @staticmethod
     def _call_action(
         field_value: Any,
@@ -246,6 +343,10 @@ class DataMasking:
         field_name: str,
         action: Callable,
         provider_options: dict[str, Any] | None = None,
+        custom_mask: bool | None = None,
+        mask_pattern: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
         **encryption_context,
     ) -> None:
         """
@@ -263,7 +364,15 @@ class DataMasking:
         Returns:
         - fields[field_name]: Returns the processed field value
         """
-        fields[field_name] = action(field_value, provider_options=provider_options, **encryption_context)
+        fields[field_name] = action(
+            field_value,
+            provider_options=provider_options,
+            custom_mask=custom_mask,
+            mask_pattern=mask_pattern,
+            regex_pattern=regex_pattern,
+            mask_format=mask_format,
+            **encryption_context,
+        )
         return fields[field_name]
 
     def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
