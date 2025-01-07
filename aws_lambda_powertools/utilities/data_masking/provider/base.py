@@ -70,8 +70,8 @@ class BaseProvider:
     def erase(
         self,
         data,
-        custom_mask: bool | None = None,
-        mask_pattern: str | None = None,
+        dynamic_mask: bool | None = None,
+        custom_mask: str | None = None,
         regex_pattern: str | None = None,
         mask_format: str | None = None,
         masking_rules: dict | None = None,
@@ -91,13 +91,12 @@ class BaseProvider:
 
         if data:
             if isinstance(data, str):
+                if dynamic_mask:
+                    result = self._custom_erase(data, **kwargs)
                 if custom_mask:
-                    if mask_pattern:
-                        result = self._pattern_mask(data, mask_pattern)
-                    elif regex_pattern and mask_format:
-                        result = self._regex_mask(data, regex_pattern, mask_format)
-                    else:
-                        result = self._custom_erase(data, **kwargs)
+                    result = self._pattern_mask(data, custom_mask)
+                if regex_pattern and mask_format:
+                    result = self._regex_mask(data, regex_pattern, mask_format)
             elif isinstance(data, dict):
                 if masking_rules:
                     result = self._apply_masking_rules(data, masking_rules)
@@ -105,8 +104,8 @@ class BaseProvider:
                 result = type(data)(
                     self.erase(
                         item,
+                        dynamic_mask=dynamic_mask,
                         custom_mask=custom_mask,
-                        mask_pattern=mask_pattern,
                         regex_pattern=regex_pattern,
                         mask_format=mask_format,
                         masking_rules=masking_rules,
