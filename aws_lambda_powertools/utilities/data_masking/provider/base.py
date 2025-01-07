@@ -3,8 +3,9 @@ from __future__ import annotations
 import functools
 import json
 import re
-from typing import Any, Callable, Iterable
+from typing import Any, Callable
 
+# , Iterable
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
 PRESERVE_CHARS = set("-_. ")
@@ -69,14 +70,14 @@ class BaseProvider:
 
     def erase(
         self,
-        data,
+        data: Any,
         dynamic_mask: bool | None = None,
         custom_mask: str | None = None,
         regex_pattern: str | None = None,
         mask_format: str | None = None,
         masking_rules: dict | None = None,
         **kwargs,
-    ) -> Iterable[str]:
+    ) -> str | dict | list | tuple | set:
         """
         This method irreversibly erases data.
 
@@ -85,47 +86,68 @@ class BaseProvider:
 
         If the data to be erased is of an iterable type like `list`, `tuple`,
         or `set`, this method will return a new object of the same type as the
-        input data but with each element replaced by the string "*****" or following one of the custom masks.
+        input data but with each element masked according to the specified rules.
         """
-        result = DATA_MASKING_STRING
+        result = None
 
-        if data:
-            if isinstance(data, str):
-                if dynamic_mask:
-                    result = self._custom_erase(data, **kwargs)
-                if custom_mask:
-                    result = self._pattern_mask(data, custom_mask)
-                if regex_pattern and mask_format:
-                    result = self._regex_mask(data, regex_pattern, mask_format)
-            elif isinstance(data, dict):
-                if masking_rules:
-                    result = self._apply_masking_rules(data, masking_rules)
-            elif isinstance(data, (list, tuple, set)):
-                result = type(data)(
-                    self.erase(
-                        item,
-                        dynamic_mask=dynamic_mask,
-                        custom_mask=custom_mask,
-                        regex_pattern=regex_pattern,
-                        mask_format=mask_format,
-                        masking_rules=masking_rules,
-                        **kwargs,
-                    )
-                    for item in data
+        # Handle empty or None data
+        if not data:
+            result = DATA_MASKING_STRING if isinstance(data, (str, bytes)) else data
+
+        # Handle string data
+        elif isinstance(data, str):
+            if regex_pattern and mask_format:
+                result = self._regex_mask(data, regex_pattern, mask_format)
+            elif custom_mask:
+                result = self._pattern_mask(data, custom_mask)
+            elif dynamic_mask:
+                result = self._custom_erase(data, **kwargs)
+            else:
+                result = DATA_MASKING_STRING
+
+        # Handle dictionary data
+        elif isinstance(data, dict):
+            result = (
+                self._apply_masking_rules(data, masking_rules)
+                if masking_rules
+                else {k: DATA_MASKING_STRING for k in data}
+            )
+
+        # Handle iterable data (list, tuple, set)
+        elif isinstance(data, (list, tuple, set)):
+            masked_data = (
+                self.erase(
+                    item,
+                    dynamic_mask=dynamic_mask,
+                    custom_mask=custom_mask,
+                    regex_pattern=regex_pattern,
+                    mask_format=mask_format,
+                    masking_rules=masking_rules,
+                    **kwargs,
                 )
+                for item in data
+            )
+            result = type(data)(masked_data)
+
+        # Default case
+        else:
+            result = DATA_MASKING_STRING
 
         return result
 
     def _apply_masking_rules(self, data: dict, masking_rules: dict) -> dict:
+        """Apply masking rules to dictionary data."""
         return {
             key: self.erase(str(value), **masking_rules[key]) if key in masking_rules else str(value)
             for key, value in data.items()
         }
 
     def _pattern_mask(self, data: str, pattern: str) -> str:
+        """Apply pattern masking to string data."""
         return pattern[: len(data)] if len(pattern) >= len(data) else pattern
 
     def _regex_mask(self, data: str, regex_pattern: str, mask_format: str) -> str:
+        """Apply regex masking to string data."""
         try:
             if regex_pattern not in _regex_cache:
                 _regex_cache[regex_pattern] = re.compile(regex_pattern)
@@ -137,5 +159,4 @@ class BaseProvider:
         if not data:
             return ""
 
-        # Use join with list comprehension instead of building list incrementally
         return "".join("*" if char not in PRESERVE_CHARS else char for char in data)
