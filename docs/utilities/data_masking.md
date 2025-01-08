@@ -43,7 +43,7 @@ stateDiagram-v2
 
 ## Terminology
 
-**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. This operation replaces data in-memory, making it a one-way action.
+**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_, or with a customized mask. This operation replaces data in-memory, making it a one-way action.
 
 **Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it. Learn more about encryption [here](https://aws.amazon.com/blogs/security/importance-of-encryption-and-how-aws-can-help/){target="_blank"}.
 
@@ -115,6 +115,25 @@ Erasing will remove the original data and replace it with a `*****`. This means 
 === "getting_started_erase_data_output.json"
     ```json hl_lines="5 7 12"
     --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
+    ```
+
+The `erase` method also supports additional flags for more advanced and flexible masking:
+
+| Flag | Behavior                                                    |
+| ---------------- | ----------------------------------------------------------|
+| `dynamic_mask`(bool)    | When set to `True`, this flag enables custom masking behavior. It activates the use of advanced masking techniques such as pattern-based or regex-based masking.|
+| `custom_mask`(str)    | Specifies a simple pattern for masking data. This pattern is applied directly to the input string, replacing all the original characters. For example, with a `custom_mask` of "XX-XX" applied to "12345", the result would be "XX-XX".|
+| `regex_pattern`(str)    | Defines a regular expression pattern used to identify parts of the input string that should be masked. This allows for more complex and flexible masking rules. It's used in conjunction with `mask_format`.|
+| `mask_format`(str)    | Specifies the format to use when replacing parts of the string matched by `regex_pattern`. It can include placeholders (like \1, \2) to refer to captured groups in the regex pattern, allowing some parts of the original string to be preserved.|
+| `masking_rules`(dict)    | Allows you to apply different masking rules (flags) for each data field.|
+
+=== "custom_data_masking.py"
+    ```python hl_lines="13 17 21 25 36"
+    --8<-- "examples/data_masking/src/custom_data_masking.py"
+    ```
+=== "generic_data_input.json"
+    ```json hl_lines="6 7 9 12"
+    --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
 ### Encrypting data
