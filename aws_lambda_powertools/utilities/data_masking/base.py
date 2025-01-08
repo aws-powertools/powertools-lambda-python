@@ -96,6 +96,9 @@ class DataMasking:
     def erase(self, data: dict, fields: list[str]) -> dict: ...
 
     @overload
+    def erase(self, data: dict[Any, Any], *, masking_rules: dict[str, object]) -> dict[Any, Any]: ...
+
+    @overload
     def erase(
         self,
         data: dict,

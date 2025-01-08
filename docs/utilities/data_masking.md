@@ -119,21 +119,36 @@ Erasing will remove the original data and replace it with a `*****`. This means 
 
 The `erase` method also supports additional flags for more advanced and flexible masking:
 
-| Flag | Behavior                                                    |
-| ---------------- | ----------------------------------------------------------|
-| `dynamic_mask`(bool)    | When set to `True`, this flag enables custom masking behavior. It activates the use of advanced masking techniques such as pattern-based or regex-based masking.|
-| `custom_mask`(str)    | Specifies a simple pattern for masking data. This pattern is applied directly to the input string, replacing all the original characters. For example, with a `custom_mask` of "XX-XX" applied to "12345", the result would be "XX-XX".|
-| `regex_pattern`(str)    | Defines a regular expression pattern used to identify parts of the input string that should be masked. This allows for more complex and flexible masking rules. It's used in conjunction with `mask_format`.|
-| `mask_format`(str)    | Specifies the format to use when replacing parts of the string matched by `regex_pattern`. It can include placeholders (like \1, \2) to refer to captured groups in the regex pattern, allowing some parts of the original string to be preserved.|
-| `masking_rules`(dict)    | Allows you to apply different masking rules (flags) for each data field.|
+=== "dynamic_mask"
 
-=== "custom_data_masking.py"
-    ```python hl_lines="13 17 21 25 36"
+    (bool) When set to `True`, this flag enables custom masking behavior. It activates the use of advanced masking techniques such as pattern-based or regex-based masking.
+
+    > Expression: `data_masker.erase(data, fields=["address.zip"], dynamic_mask=True)`
+
+    > Field result: `'street': '*** **** **'`
+
+=== "custom_mask"
+
+    (str) Specifies a simple pattern for masking data. This pattern is applied directly to the input string, replacing all the original characters. For example, with a `custom_mask` of "XX-XX" applied to "12345", the result would be "XX-XX".
+
+    > Expression: `data_masker.erase(data, fields=["address.zip"], custom_mask="XX")`
+
+    > Field result: `'zip': 'XX'`
+
+=== "regex_pattern & mask_format"
+
+    (str) `regex_pattern` defines a regular expression pattern used to identify parts of the input string that should be masked. This allows for more complex and flexible masking rules. It's used in conjunction with `mask_format`.
+    `mask_format` specifies the format to use when replacing parts of the string matched by `regex_pattern`. It can include placeholders (like \1, \2) to refer to captured groups in the regex pattern, allowing some parts of the original string to be preserved.
+
+    > Expression: `data_masker.erase(data, fields=["email"], regex_pattern=r"(.)(.*)(@.*)", mask_format=r"\1****\3")`
+
+    > Field result: `'email': 'j****@example.com'`
+
+=== "masking_rules"
+
+    (dict) Allows you to apply different masking rules (flags) for each data field.
+    ```python hl_lines="20"
     --8<-- "examples/data_masking/src/custom_data_masking.py"
-    ```
-=== "generic_data_input.json"
-    ```json hl_lines="6 7 9 12"
-    --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
 ### Encrypting data
