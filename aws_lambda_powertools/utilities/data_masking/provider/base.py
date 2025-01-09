@@ -91,11 +91,11 @@ class BaseProvider:
         result = None
 
         # Handle empty or None data
-        if not data:
-            result = DATA_MASKING_STRING if isinstance(data, (str, bytes)) else data
+        if data is None or (isinstance(data, (str, list, dict)) and not data):
+            return data
 
         # Handle string data
-        elif isinstance(data, str):
+        if isinstance(data, str):
             if regex_pattern and mask_format:
                 result = self._regex_mask(data, regex_pattern, mask_format)
             elif custom_mask:
@@ -107,15 +107,24 @@ class BaseProvider:
 
         # Handle dictionary data
         elif isinstance(data, dict):
-            result = (
-                self._apply_masking_rules(data, masking_rules)
-                if masking_rules
-                else {k: DATA_MASKING_STRING for k in data}
-            )
+            if masking_rules:
+                result = self._apply_masking_rules(data, masking_rules)
+            else:
+                result = {}
+                for k, v in data.items():
+                    result[str(k)] = self.erase(
+                        str(v),
+                        dynamic_mask=dynamic_mask,
+                        custom_mask=custom_mask,
+                        regex_pattern=regex_pattern,
+                        mask_format=mask_format,
+                        masking_rules=masking_rules,
+                        **kwargs,
+                    )
 
         # Handle iterable data (list, tuple, set)
         elif isinstance(data, (list, tuple, set)):
-            masked_data = (
+            masked_data = [
                 self.erase(
                     item,
                     dynamic_mask=dynamic_mask,
@@ -126,16 +135,16 @@ class BaseProvider:
                     **kwargs,
                 )
                 for item in data
-            )
+            ]
             result = type(data)(masked_data)
 
-        # Default case
+        # Handle other types (int, float, bool, etc.)
         else:
-            result = DATA_MASKING_STRING
+            result = str(data)
 
         return result
 
-    def _apply_masking_rules(self, data: dict, masking_rules: dict) -> dict:
+    def _apply_masking_rules(self, data: dict, masking_rules: dict) -> Any:
         """Apply masking rules to dictionary data."""
         return {
             key: self.erase(str(value), **masking_rules[key]) if key in masking_rules else str(value)

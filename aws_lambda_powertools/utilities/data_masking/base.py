@@ -335,7 +335,7 @@ class DataMasking:
         for key in keys[:-1]:
             current = current.get(key, {})
             if not isinstance(current, dict):
-                return  # Caminho inválido
+                return
         if keys[-1] in current:
             current[keys[-1]] = mask_function(current[keys[-1]])
 
