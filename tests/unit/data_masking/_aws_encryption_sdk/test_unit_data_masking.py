@@ -25,6 +25,16 @@ def test_erase_int(data_masker):
     assert erased_string == DATA_MASKING_STRING
 
 
+def test_erase_int_custom_mask(data_masker):
+    # GIVEN an int data type
+
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(42, custom_mask="XX")
+
+    # THEN the result is the data masked
+    assert erased_string == "XX"
+
+
 def test_erase_float(data_masker):
     # GIVEN a float data type
 
@@ -205,3 +215,36 @@ def test_parsing_nonexistent_fields_warning_on_missing_field():
 
     # THEN the "erased" payload is the same of the original
     assert masked_json_string == data
+
+
+def test_regex_mask(data_masker):
+    data = "Hello! My name is Fulano Ciclano"
+    regex_pattern = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
+    mask_format = "XXXX XXXX"
+
+    result = data_masker.erase(data, regex_pattern=regex_pattern, mask_format=mask_format)
+
+    assert result == "Hello! My name is XXXX XXXX"
+
+
+def test_erase_json_dict_with_fields_and_masks(data_masker):
+    # GIVEN the data type is a json representation of a dictionary
+    data = json.dumps(
+        {
+            "a": {
+                "1": {"None": "hello", "four": "world"},
+                "b": {"3": {"4": "goodbye", "e": "world"}},
+            },
+        },
+    )
+
+    # WHEN erase is called with a list of fields specified
+    masked_json_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"], dynamic_mask=True)
+
+    # THEN the result is only the specified fields are erased
+    assert masked_json_string == {
+        "a": {
+            "1": {"None": "*****", "four": "world"},
+            "b": {"3": {"4": "*******", "e": "world"}},
+        },
+    }

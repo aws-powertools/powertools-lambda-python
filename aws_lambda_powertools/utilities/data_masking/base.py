@@ -119,8 +119,6 @@ class DataMasking:
         mask_format: str | None = None,
         masking_rules: dict | None = None,
     ) -> str | list[str] | tuple[str] | dict:
-        if not data:
-            return data
         if masking_rules:
             return self._apply_masking_rules(data, masking_rules)
         else:

@@ -77,11 +77,16 @@ class BaseProvider:
         masking_rules: dict | None = None,
         **kwargs,
     ) -> Any:
-        # Handle empty or None data
-        if data is None or (isinstance(data, (str, list, dict)) and not data):
-            return data
 
-        result = data  # Default to returning the original data
+        result = DATA_MASKING_STRING
+
+        if not any([dynamic_mask, custom_mask, regex_pattern, mask_format, masking_rules]):
+            if isinstance(data, (str, int, float, dict, bytes)):
+                return DATA_MASKING_STRING
+            elif isinstance(data, (list, tuple, set)):
+                return type(data)([DATA_MASKING_STRING] * len(data))
+            else:
+                return DATA_MASKING_STRING
 
         if isinstance(data, (str, int, float)):
             result = self._mask_primitive(str(data), dynamic_mask, custom_mask, regex_pattern, mask_format, **kwargs)
@@ -194,7 +199,7 @@ class BaseProvider:
                 _regex_cache[regex_pattern] = re.compile(regex_pattern)
             return _regex_cache[regex_pattern].sub(mask_format, data)
         except re.error:
-            return DATA_MASKING_STRING
+            return data
 
     def _custom_erase(self, data: str, **kwargs) -> str:
         if not data:
