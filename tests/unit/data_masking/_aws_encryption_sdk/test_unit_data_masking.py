@@ -248,3 +248,37 @@ def test_erase_json_dict_with_fields_and_masks(data_masker):
             "b": {"3": {"4": "*******", "e": "world"}},
         },
     }
+
+
+def test_erase_json_dict_with_complex_masking_rules(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with nested and filtered paths
+    data = json.dumps(
+        {
+            "email": "john.doe@example.com",
+            "age": 30,
+            "addres": [
+                {"postcode": 13000, "street": "123 Main St", "details": {"name": "Home", "type": "Primary"}},
+                {"postcode": 14000, "street": "456 Other Street", "details": {"name": "Office", "type": "Secondary"}},
+            ],
+        },
+    )
+
+    # WHEN erase is called with complex masking rules
+    masking_rules = {
+        "email": {"regex_pattern": "(.)(.*)(@.*)", "mask_format": r"\1****\3"},
+        "age": {"dynamic_mask": True},
+        "addres..name": {"custom_mask": "xxx"},
+        "addres[?(@.postcode > 12000)]": {"dynamic_mask": True},
+    }
+
+    masked_json_string = data_masker.erase(data, masking_rules=masking_rules)
+
+    # THEN the result should have all specified fields masked according to their rules
+    assert masked_json_string == {
+        "email": "j****@example.com",
+        "age": "*****",
+        "addres": [
+            {"postcode": "*****", "street": "*** *** **", "details": {"name": "xxx", "type": "*******"}},
+            {"postcode": "*****", "street": "*** ***** ******", "details": {"name": "xxx", "type": "********"}},
+        ],
+    }
