@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import functools
 import logging
 import warnings
@@ -296,33 +295,55 @@ class DataMasking:
 
     def _apply_masking_rules(self, data: dict, masking_rules: dict) -> dict:
         """
-        Apply masking rules to data, supporting different rules for each field.
+        Apply masking rules to data, supporting both simple field names and complex path expressions.
+
+        Args:
+            data: The dictionary containing data to mask
+            masking_rules: Dictionary mapping field names or path expressions to masking rules
+
+        Returns:
+            dict: The masked data dictionary
         """
         result = data.copy()
 
         for path, rule in masking_rules.items():
             try:
-                # Handle nested paths (e.g., 'address.street')
-                parts = path.split(".")
-                current = result
+                if ".." in path:
+                    # Handle recursive descent paths (e.g., "address..name")
+                    base_path, field = path.split("..")
+                    jsonpath_expr = parse(f"$.{base_path}..{field}")
+                elif "[" in path:
+                    # Handle array notation paths (e.g., "address[*].street")
+                    jsonpath_expr = parse(f"$.{path}")
+                else:
+                    # Handle simple field names (e.g., "email")
+                    jsonpath_expr = parse(f"$.{path}")
 
-                for part in parts[:-1]:
-                    if isinstance(current[part], str) and current[part].startswith("{"):
-                        try:
-                            current[part] = ast.literal_eval(current[part])
-                        except (ValueError, SyntaxError):
-                            continue
-                    current = current[part]
+                matches = jsonpath_expr.find(result)
 
-                final_field = parts[-1]
+                if not matches:
+                    warnings.warn(f"No matches found for path: {path}", stacklevel=2)
+                    continue
 
-                # Apply masking rule to the target field
-                if final_field in current:
-                    current[final_field] = self.provider.erase(str(current[final_field]), **rule)
+                for match in matches:
+                    try:
+                        value = match.value
+                        if value is not None:
+                            if isinstance(value, dict):
+                                # Handle dictionary values by masking each field
+                                for k, v in value.items():
+                                    if v is not None:
+                                        value[k] = self.provider.erase(str(v), **rule)
+                            else:
+                                masked_value = self.provider.erase(str(value), **rule)
+                                match.full_path.update(result, masked_value)
 
-            except (KeyError, TypeError, AttributeError):
-                # Log warning if field not found or invalid path
-                warnings.warn(f"Could not apply masking rule for path: {path}", stacklevel=2)
+                    except Exception as e:
+                        warnings.warn(f"Error masking value for path {path}: {str(e)}", stacklevel=2)
+                        continue
+
+            except Exception as e:
+                warnings.warn(f"Error processing path {path}: {str(e)}", stacklevel=2)
                 continue
 
         return result
