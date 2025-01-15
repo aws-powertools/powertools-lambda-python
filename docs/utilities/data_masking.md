@@ -117,6 +117,8 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
     ```
 
+#### Custom masking
+
 The `erase` method also supports additional flags for more advanced and flexible masking:
 
 === "dynamic_mask"
