@@ -330,31 +330,6 @@ class Logger:
                 ),
             )
 
-    @contextmanager
-    def append_context_keys(self, **keys: Any) -> Generator[Any, Any, Any]:
-        """
-        Context manager to temporarily add logging keys.
-
-        Parameters:
-        -----------
-        **keys: Any
-            Key-value pairs to include in the log context during the lifespan of the context manager.
-
-        Example:
-        --------
-        >>> logger = Logger(service="example_service")
-        >>> with logger.append_context_keys(user_id="123", operation="process"):
-        >>>     logger.info("Log with context")
-        >>> logger.info("Log without context")
-        """
-        # Add keys to the context
-        self.append_keys(**keys)
-        try:
-            yield
-        finally:
-            # Remove the keys after exiting the context
-            self.remove_keys(keys.keys())
-
     @overload
     def inject_lambda_context(
         self,
@@ -605,6 +580,26 @@ class Logger:
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
+
+    @contextmanager
+    def append_context_keys(self, **additional_keys: Any) -> Generator[None, None, None]:
+        """
+        Context manager to temporarily add logging keys.
+
+        Parameters:
+        -----------
+        **keys: Any
+            Key-value pairs to include in the log context during the lifespan of the context manager.
+
+        Example:
+        --------
+        >>> logger = Logger(service="example_service")
+        >>> with logger.append_context_keys(user_id="123", operation="process"):
+        >>>     logger.info("Log with context")
+        >>> logger.info("Log without context")
+        """
+        with self.registered_formatter.append_context_keys(**additional_keys):
+            yield
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.
