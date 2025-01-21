@@ -4,20 +4,20 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 
-class AWSIoTCRUDEventOperation(str, enum.Enum):
+class IoTCRUDEventOperation(str, enum.Enum):
     CREATED = "CREATED"
     UPDATED = "UPDATED"
     DELETED = "DELETED"
 
 
-class AWSIoTCRUDEvent(BaseModel):
-    """The "Thing: created, updated, deleted" eventt"""
+class IoTCRUDEvent(BaseModel):
+    """The "Thing: created, updated, deleted" event"""
 
     eventType: str
     eventId: str
     timestamp: int
 
-    operation: AWSIoTCRUDEventOperation
+    operation: IoTCRUDEventOperation
 
     thingId: str
 
