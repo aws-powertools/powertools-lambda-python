@@ -194,7 +194,17 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 
 The append_context_keys method allows temporary modification of a Logger instance's context without creating a new logger. It's useful for adding context keys to specific workflows while maintaining the logger's overall state and simplicity.
 
-* Add examples
+=== "append_context_keys.py"
+
+    ```python hl_lines="7 8"
+    --8<-- "examples/logger/src/append_context_keys.py"
+    ```
+
+=== "append_context_keys_output.json"
+
+    ```json hl_lines="8 9"
+    --8<-- "examples/logger/src/append_context_keys.json"
+    ```
 
 #### ephemeral metadata
 
