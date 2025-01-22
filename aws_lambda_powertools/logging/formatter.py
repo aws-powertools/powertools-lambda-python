@@ -7,10 +7,11 @@ import os
 import time
 import traceback
 from abc import ABCMeta, abstractmethod
+from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
@@ -61,6 +62,10 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def clear_state(self) -> None:
         """Removes any previously added logging keys"""
         raise NotImplementedError()
+
+    @contextmanager
+    def append_context_keys(self, **additional_keys: Any) -> Generator[None, None, None]:
+        yield
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.
@@ -262,6 +267,31 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def clear_state(self) -> None:
         self.log_format = dict.fromkeys(self.log_record_order)
         self.log_format.update(**self.keys_combined)
+
+    @contextmanager
+    def append_context_keys(self, **additional_keys: Any) -> Generator[None, None, None]:
+        """
+        Context manager to temporarily add logging keys.
+
+        Parameters:
+        -----------
+        **keys: Any
+            Key-value pairs to include in the log context during the lifespan of the context manager.
+
+        Example:
+        --------
+        >>> logger = Logger(service="example_service")
+        >>> with logger.append_context_keys(user_id="123", operation="process"):
+        >>>     logger.info("Log with context")
+        >>> logger.info("Log without context")
+        """
+        # Add keys to the context
+        self.append_keys(**additional_keys)
+        try:
+            yield
+        finally:
+            # Remove the keys after exiting the context
+            self.remove_keys(additional_keys.keys())
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.
