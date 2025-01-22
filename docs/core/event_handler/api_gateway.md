@@ -1103,6 +1103,14 @@ Security schemes are declared at the top-level first. You can reference them glo
 
     1. Using the oauth security scheme defined bellow, scoped to the "admin" role.
 
+=== "Global security schemes and optional security per route"
+
+    ```python title="security_schemes_global_and_optional.py" hl_lines="22 37-46"
+    --8<-- "examples/event_handler_rest/src/security_schemes_global_and_optional.py"
+    ```
+
+    1. To make security optional in a specific route, an empty security requirement ({}) can be included in the array.
+
 OpenAPI 3 lets you describe APIs protected using the following security schemes:
 
 | Security Scheme                                                                                                                                                                         | Type            | Description                                                                                                                                                                                                                                                                         |
