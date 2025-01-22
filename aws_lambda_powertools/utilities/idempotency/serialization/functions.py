@@ -5,7 +5,7 @@ from typing import Any, Optional, Union, get_args, get_origin
 if sys.version_info >= (3, 10):
     from types import UnionType  # Available in Python 3.10+
 else:
-    UnionType = Union  # Fallback for Python 3.8 and 3.9
+    UnionType = Union  # Fallback for Python 3.9
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyModelTypeError,

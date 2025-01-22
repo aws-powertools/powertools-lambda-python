@@ -48,7 +48,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python38
           - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
@@ -94,7 +93,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python38
           - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
@@ -163,7 +161,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python38
           - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
