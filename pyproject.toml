@@ -9,7 +9,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT No Attribution License (MIT-0)",
   "Natural Language :: English",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -39,7 +38,7 @@ license = "MIT"
 "Releases" = "https://github.com/aws-powertools/powertools-lambda-python/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0.0"
+python = ">=3.9,<4.0.0"
 
 # Required libraries installed by default
 jmespath = "^1.0.1"
@@ -86,7 +85,6 @@ filelock = "^3.16.0"
 dirhash = "^0.5.0"
 mypy-boto3-appconfigdata = "^1.36.0"
 ijson = "^3.3.0"
-typed-ast = { version = "^1.5.5", python = "< 3.8" }
 hvac = "^2.3.0"
 aws-requests-auth = "^0.4.3"
 urllib3 = "<2"

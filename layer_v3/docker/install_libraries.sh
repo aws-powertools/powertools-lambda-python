@@ -1,6 +1,6 @@
 #!/bin/sh
 
-al2_versions=("3.8" "3.9" "3.10" "3.11")
+al2_versions=("3.9" "3.10" "3.11")
 
 # Flag to indicate if the version is al2 or not
 is_al2=0
