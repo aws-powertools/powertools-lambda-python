@@ -1105,7 +1105,7 @@ Security schemes are declared at the top-level first. You can reference them glo
 
 === "Global security schemes and optional security per route"
 
-    ```python title="security_schemes_global_and_optional.py" hl_lines="20 35-44"
+    ```python title="security_schemes_global_and_optional.py" hl_lines="22 37-46"
     --8<-- "examples/event_handler_rest/src/security_schemes_global_and_optional.py"
     ```
 

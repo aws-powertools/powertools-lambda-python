@@ -14,7 +14,7 @@ logger = Logger()
 app = APIGatewayRestResolver(enable_validation=True)
 
 
-@app.get("/protected", security=[{"oauth": ["admin"]}])  # (1)!
+@app.get("/protected", security=[{"oauth": ["admin"]}])
 def protected() -> dict:
     return {"hello": "world"}
 
