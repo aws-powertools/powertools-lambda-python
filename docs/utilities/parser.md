@@ -132,7 +132,7 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
-| **TransferFamily**                          | Lambda Event Source payload for AWS Transfer Family custom identity provider          |
+| **TransferFamilyAuthorizer**                | Lambda Event Source payload for AWS Transfer Family Lambda authorizer                 |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
 | **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                         |
 

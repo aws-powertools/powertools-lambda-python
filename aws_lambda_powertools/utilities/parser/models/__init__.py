@@ -109,7 +109,7 @@ from .ses import (
 )
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
-from .transfer_family import TransferFamily
+from .transfer_family import TransferFamilyAuthorizer
 from .vpc_lattice import VpcLatticeModel
 from .vpc_latticev2 import VpcLatticeV2Model
 
@@ -180,7 +180,7 @@ __all__ = [
     "SqsAttributesModel",
     "S3SqsEventNotificationModel",
     "S3SqsEventNotificationRecordModel",
-    "TransferFamily",
+    "TransferFamilyAuthorizer",
     "APIGatewayProxyEventModel",
     "APIGatewayEventRequestContext",
     "APIGatewayEventAuthorizer",

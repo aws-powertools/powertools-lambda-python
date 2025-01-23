@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyAddress
 
 
-class TransferFamily(BaseModel):
+class TransferFamilyAuthorizer(BaseModel):
     username: str
     password: Optional[str] = None
     protocol: Literal["SFTP", "FTP", "FTPS"]

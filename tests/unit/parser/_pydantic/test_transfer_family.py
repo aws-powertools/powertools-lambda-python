@@ -1,10 +1,10 @@
-from aws_lambda_powertools.utilities.parser.models import TransferFamily
+from aws_lambda_powertools.utilities.parser.models import TransferFamilyAuthorizer
 from tests.functional.utils import load_event
 
 
-def test_aws_transfer_family_model():
-    raw_event = load_event("TransferFamily.json")
-    parsed_event = TransferFamily(**raw_event)
+def test_transfer_family_authorizer_model():
+    raw_event = load_event("TransferFamilyAuthorizer.json")
+    parsed_event = TransferFamilyAuthorizer(**raw_event)
 
     assert parsed_event.username == raw_event["username"]
     assert parsed_event.password == raw_event["password"]
@@ -13,10 +13,10 @@ def test_aws_transfer_family_model():
     assert str(parsed_event.source_ip) == raw_event["sourceIp"]
 
 
-def test_aws_transfer_family_model_without_password():
-    raw_event = load_event("TransferFamily.json")
+def test_transfer_family_authorizer_model_without_password():
+    raw_event = load_event("TransferFamilyAuthorizer.json")
     del raw_event["password"]
-    parsed_event = TransferFamily(**raw_event)
+    parsed_event = TransferFamilyAuthorizer(**raw_event)
 
     assert parsed_event.username == raw_event["username"]
     assert parsed_event.password is None

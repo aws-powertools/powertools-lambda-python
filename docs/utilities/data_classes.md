@@ -108,6 +108,8 @@ Log Data Event for Troubleshooting
 | [SES](#ses)                                                                   | `SESEvent`                                         |
 | [SNS](#sns)                                                                   | `SNSEvent`                                         |
 | [SQS](#sqs)                                                                   | `SQSEvent`                                         |
+| [TransferFamilyAuthorizer]                                                    | `TransferFamilyAuthorizer`                         |
+| [TransferFamilyAuthorizerResponse]                                            | `TransferFamilyAuthorizerResponse`                 |
 | [VPC Lattice V2](#vpc-lattice-v2)                                             | `VPCLatticeV2Event`                                |
 | [VPC Lattice V1](#vpc-lattice-v1)                                             | `VPCLatticeEvent`                                  |
 
