@@ -41,10 +41,10 @@ You can initialize the appropriate data class by passing the Lambda event object
 
 Alternatively, you can use the `event_source` decorator to automatically parse the event.
 
-=== "getting_started_data_classes_decorator.py"
+=== "apigw_proxy_decorator.py"
 
     ```python hl_lines="1 3"
-    --8<-- "examples/event_sources/src/getting_started_data_classes_decorator.py"
+    --8<-- "examples/event_sources/src/apigw_proxy_decorator.py"
     ```
 
 === "apigw_event.json"
@@ -137,270 +137,133 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
 === "apiGatewayAuthorizerRequestEvent.json"
 
-    ```json hl_lines="11"
+    ```json hl_lines="3 11"
     --8<-- "examples/event_sources/events/apiGatewayAuthorizerRequestEvent.json"
     ```
 
 === "apigw_type_token.py"
 
-    ```python hl_lines="2 8"
+    ```python hl_lines="2-4 7"
     --8<-- "examples/event_sources/src/apigw_authorizer_token.py"
     ```
 
 === "apiGatewayAuthorizerTokentEvent.json"
 
-    ```json hl_lines="6 9 18 21"
+    ```json hl_lines="2 3"
     --8<-- "examples/event_sources/events/apiGatewayAuthorizerTokenEvent.json"
     ```
 
 ### API Gateway Authorizer V2
 
-> New in 1.20.0
-
 It is used for [API Gateway HTTP API Lambda Authorizer payload version 2](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}.
 See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"} for more details.
 
-=== "app.py"
+=== "apigw_auth_v2.py"
 
-    This example looks up user details via `x-token` header. It uses `APIGatewayAuthorizerResponseV2` to return a deny policy when user is not found or authorized.
+    ```python hl_lines="2-4 15"
+    --8<-- "examples/event_sources/src/apigw_auth_v2.py"
+    ```
 
-    ```python hl_lines="2-5 21 24"
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
-        APIGatewayAuthorizerEventV2,
-        APIGatewayAuthorizerResponseV2,
-    )
-    from secrets import compare_digest
+=== "apiGatewayAuthorizerV2Event.json"
 
-
-    def get_user_by_token(token):
-        if compare_digest(token, "Foo"):
-            return {"name": "Foo"}
-        return None
-
-
-    @event_source(data_class=APIGatewayAuthorizerEventV2)
-    def handler(event: APIGatewayAuthorizerEventV2, context):
-        user = get_user_by_token(event.headers["x-token"])
-
-        if user is None:
-            # No user was found, so we return not authorized
-            return APIGatewayAuthorizerResponseV2().asdict()
-
-        # Found the user and setting the details in the context
-        return APIGatewayAuthorizerResponseV2(authorize=True, context=user).asdict()
+    ```json
+    --8<-- "examples/event_sources/events/apiGatewayAuthorizerV2Event.json"
     ```
 
 ### API Gateway Proxy
 
 It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
-=== "app.py"
+=== "apigw_proxy_decorator.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+    ```python hl_lines="1 3"
+    --8<-- "examples/event_sources/src/apigw_proxy_decorator.py"
+    ```
 
-    @event_source(data_class=APIGatewayProxyEvent)
-    def lambda_handler(event: APIGatewayProxyEvent, context):
-        if "helloworld" in event.path and event.http_method == "GET":
-            request_context = event.request_context
-            identity = request_context.identity
-            user = identity.user
-            do_something_with(event.json_body, user)
+=== "apiGatewayProxyEvent.json"
+
+    ```json hl_lines="3 4"
+    --8<-- "examples/event_sources/events/apigw_event.json"
     ```
 
 ### API Gateway Proxy V2
 
 It is used for HTTP API using v2 proxy event.
 
-=== "app.py"
+=== "apigw_proxy_v2.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEventV2
+    ```python hl_lines="1 3"
+    --8<-- "examples/event_sources/src/apigw_proxy_v2.py"
+    ```
 
-    @event_source(data_class=APIGatewayProxyEventV2)
-    def lambda_handler(event: APIGatewayProxyEventV2, context):
-        if "helloworld" in event.path and event.http_method == "POST":
-            do_something_with(event.json_body, event.query_string_parameters)
+=== "apiGatewayProxyEvent.json"
+
+    ```json
+    --8<-- "examples/event_sources/events/apiGatewayProxyV2Event.json"
     ```
 
 ### Application Load Balancer
 
-Is it used for Application load balancer event.
+Is it used for [Application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) event.
 
-=== "app.py"
+=== "albEvent.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, ALBEvent
+    ```python hl_lines="1 3"
+    --8<-- "examples/event_sources/src/albEvent.py"
+    ```
 
-    @event_source(data_class=ALBEvent)
-    def lambda_handler(event: ALBEvent, context):
-        if "helloworld" in event.path and event.http_method == "POST":
-            do_something_with(event.json_body, event.query_string_parameters)
+=== "albEvent.json"
+
+    ```json hl_lines="7 8"
+    --8<-- "examples/event_sources/events/albEvent.json"
     ```
 
 ### AppSync Authorizer
-
-> New in 1.20.0
 
 Used when building an [AWS_LAMBDA Authorization](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization){target="_blank"} with AppSync.
 See blog post [Introducing Lambda authorization for AWS AppSync GraphQL APIs](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/){target="_blank"}
 or read the Amplify documentation on using [AWS Lambda for authorization](https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda){target="_blank"} with AppSync.
 
-In this example extract the `requestId` as the `correlation_id` for logging, used `@event_source` decorator and builds the AppSync authorizer using the `AppSyncAuthorizerResponse` helper.
+=== "appSyncAuthorizerEvent.py"
 
-=== "app.py"
+    ```python hl_lines="5-7 20"
+    --8<-- "examples/event_sources/src/appSyncAuthorizerEvent.py"
+    ```
 
-    ```python
-    from typing import Dict
+=== "appSyncAuthorizerEvent.json"
 
-    from aws_lambda_powertools.logging import correlation_paths
-    from aws_lambda_powertools.logging.logger import Logger
-    from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import (
-        AppSyncAuthorizerEvent,
-        AppSyncAuthorizerResponse,
-    )
-    from aws_lambda_powertools.utilities.data_classes.event_source import event_source
-
-    logger = Logger()
-
-
-    def get_user_by_token(token: str):
-        """Look a user by token"""
-        ...
-
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_AUTHORIZER)
-    @event_source(data_class=AppSyncAuthorizerEvent)
-    def lambda_handler(event: AppSyncAuthorizerEvent, context) -> Dict:
-        user = get_user_by_token(event.authorization_token)
-
-        if not user:
-            # No user found, return not authorized
-            return AppSyncAuthorizerResponse().asdict()
-
-        return AppSyncAuthorizerResponse(
-            authorize=True,
-            resolver_context={"id": user.id},
-            # Only allow admins to delete events
-            deny_fields=None if user.is_admin else ["Mutation.deleteEvent"],
-        ).asdict()
+    ```json
+    --8<-- "examples/event_sources/events/appSyncAuthorizerEvent.json"
     ```
 
 ### AppSync Resolver
 
-> New in 1.12.0
-
 Used when building Lambda GraphQL Resolvers with [Amplify GraphQL Transform Library](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"} (`@function`),
 and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
 
-In this example, we also use the new Logger `correlation_id` and built-in `correlation_paths` to extract, if available, X-Ray Trace ID in AppSync request headers:
+The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
 
-=== "app.py"
+=== "appSyncResolverEvent.py"
 
-    ```python hl_lines="2-5 12 14 19 21 29-30"
-    from aws_lambda_powertools.logging import Logger, correlation_paths
-    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
-        AppSyncResolverEvent,
-        AppSyncIdentityCognito
-    )
-
-    logger = Logger()
-
-    def get_locations(name: str = None, size: int = 0, page: int = 0):
-        """Your resolver logic here"""
-
-    @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_RESOLVER)
-    def lambda_handler(event, context):
-        event: AppSyncResolverEvent = AppSyncResolverEvent(event)
-
-        # Case insensitive look up of request headers
-        x_forwarded_for = event.headers.get("x-forwarded-for")
-
-        # Support for AppSyncIdentityCognito or AppSyncIdentityIAM identity types
-        assert isinstance(event.identity, AppSyncIdentityCognito)
-        identity: AppSyncIdentityCognito = event.identity
-
-        # Logging with correlation_id
-        logger.debug({
-            "x-forwarded-for": x_forwarded_for,
-            "username": identity.username
-        })
-
-        if event.type_name == "Merchant" and event.field_name == "locations":
-            return get_locations(**event.arguments)
-
-        raise ValueError(f"Unsupported field resolver: {event.field_name}")
-
+    ```python hl_lines="2-4 8"
+    --8<-- "examples/event_sources/src/appSyncResolverEvent.py"
     ```
 
-=== "Example AppSync Event"
+=== "appSyncResolverEvent.json"
 
-    ```json hl_lines="2-8 14 19 20"
-    {
-      "typeName": "Merchant",
-      "fieldName": "locations",
-      "arguments": {
-        "page": 2,
-        "size": 1,
-        "name": "value"
-      },
-      "identity": {
-        "claims": {
-          "iat": 1615366261
-          ...
-        },
-        "username": "mike",
-        ...
-      },
-      "request": {
-        "headers": {
-          "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
-          "x-forwarded-for": "127.0.0.1"
-          ...
-        }
-      },
-      ...
-    }
-    ```
-
-=== "Example CloudWatch Log"
-
-    ```json hl_lines="5 6 16"
-    {
-        "level":"DEBUG",
-        "location":"lambda_handler:22",
-        "message":{
-            "x-forwarded-for":"127.0.0.1",
-            "username":"mike"
-        },
-        "timestamp":"2021-03-10 12:38:40,062",
-        "service":"service_undefined",
-        "sampling_rate":0.0,
-        "cold_start":true,
-        "function_name":"func_name",
-        "function_memory_size":512,
-        "function_arn":"func_arn",
-        "function_request_id":"6735a29c-c000-4ae3-94e6-1f1c934f7f94",
-        "correlation_id":"Root=1-60488877-0b0c4e6727ab2a1c545babd0"
-    }
+    ```json
+    --8<-- "examples/event_sources/events/appSyncResolverEvent.json"
     ```
 
 ### AWS Config Rule
+
+The example utilizes AWSConfigRuleEvent to parse the incoming event. The function logs the message type of the invoking event and returns a simple success response. The example event receives a Scheduled Event Notification, but could also be ItemChanged and Oversized.
 
 === "aws_config_rule.py"
     ```python hl_lines="3 11"
     --8<-- "examples/event_sources/src/aws_config_rule.py"
     ```
 
-=== "Event - ItemChanged"
-    ```json
-    --8<-- "examples/event_sources/src/aws_config_rule_item_changed.json"
-    ```
-=== "Event - Oversized"
-    ```json
-    --8<-- "examples/event_sources/src/aws_config_rule_oversized.json"
-    ```
 === "Event - ScheduledNotification"
     ```json
     --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
@@ -408,18 +271,32 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 
 ### Bedrock Agent
 
-=== "app.py"
+The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/) with `BedrockAgentEvent` to parse the incoming event. The function logs the action group and input text, then returns a structured response compatible with Bedrock Agent's expected format, including a mock response body.
 
-    ```python hl_lines="2 8 10"
+=== "bedrock_agent_event.py"
+
+    ```python hl_lines="2 6"
     --8<-- "examples/event_sources/src/bedrock_agent_event.py"
+    ```
+
+=== "bedrockAgentEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/bedrockAgentEvent.json"
     ```
 
 ### CloudFormation Custom Resource
 
-=== "app.py"
+The example focuses on the "Create" request type, generating a unique physical resource ID and logging the process. The function is structured to potentially handle "Update" and "Delete" operations as well.
 
-    ```python hl_lines="11 13 15 17 19"
+=== "cloudformation_custom_resource_handler.py"
+
+    ```python hl_lines="2-3 10 14 19"
     --8<-- "examples/event_sources/src/cloudformation_custom_resource_handler.py"
+    ```
+
+=== "cloudformationCustomResourceCreate.json"
+    ```json
+    --8<-- "examples/event_sources/events/cloudformationCustomResourceCreate.json"
     ```
 
 ### CloudWatch Dashboard Custom Widget

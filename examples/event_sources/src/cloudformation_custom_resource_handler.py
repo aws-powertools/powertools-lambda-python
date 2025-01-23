@@ -13,31 +13,15 @@ def lambda_handler(event: CloudFormationCustomResourceEvent, context: LambdaCont
     request_type = event.request_type
 
     if request_type == "Create":
-        return on_create(event)
-    if request_type == "Update":
-        return on_update(event)
-    if request_type == "Delete":
-        return on_delete(event)
+        return on_create(event, context)
+    else:
+        raise ValueError(f"Invalid request type: {request_type}")
 
 
-def on_create(event: CloudFormationCustomResourceEvent):
+def on_create(event: CloudFormationCustomResourceEvent, context: LambdaContext):
     props = event.resource_properties
     logger.info(f"Create new resource with props {props}.")
 
-    # Add your create code here ...
-    physical_id = ...
+    physical_id = f"MyResource-{context.aws_request_id}"
 
-    return {"PhysicalResourceId": physical_id}
-
-
-def on_update(event: CloudFormationCustomResourceEvent):
-    physical_id = event.physical_resource_id
-    props = event.resource_properties
-    logger.info(f"Update resource {physical_id} with props {props}.")
-    # ...
-
-
-def on_delete(event: CloudFormationCustomResourceEvent):
-    physical_id = event.physical_resource_id
-    logger.info(f"Delete resource {physical_id}.")
-    # ...
+    return {"PhysicalResourceId": physical_id, "Data": {"Message": "Resource created successfully"}}
