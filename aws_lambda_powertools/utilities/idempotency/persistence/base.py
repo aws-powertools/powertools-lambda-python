@@ -58,7 +58,7 @@ class BasePersistenceLayer(ABC):
         self,
         config: IdempotencyConfig,
         function_name: str | None = None,
-        idempotency_key_custom_prefix: str | None = None,
+        key_prefix: str | None = None,
     ) -> None:
         """
         Initialize the base persistence layer from the configuration settings
@@ -69,12 +69,11 @@ class BasePersistenceLayer(ABC):
             Idempotency configuration settings
         function_name: str, Optional
             The name of the function being decorated
-        idempotency_key_custom_prefix: str | Optional
-            Custom prefix for idempotency key: idempotency_key_custom_prefix#hash
+        key_prefix: str | Optional
+            Custom prefix for idempotency key: key_prefix#hash
         """
         self.function_name = (
-            idempotency_key_custom_prefix
-            or f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
+            key_prefix or f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
         )
 
         if self.configured:

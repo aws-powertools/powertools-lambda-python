@@ -29,7 +29,7 @@ class Order:
     data_keyword_argument="order",
     config=config,
     persistence_store=dynamodb,
-    idempotency_key_custom_prefix="my_custom_prefix", # (1)!
+    key_prefix="my_custom_prefix", # (1)!
 )
 def process_order(order: Order): 
     return f"processed order {order.order_id}"

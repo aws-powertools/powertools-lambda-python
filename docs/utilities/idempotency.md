@@ -362,7 +362,7 @@ You can change this expiration window with the **`expires_after_seconds`** param
 
 !!! warning "Warning: Changing the idempotency key generation will invalidate existing idempotency records"
 
-Use **`idempotency_key_custom_prefix`** parameter in the `@idempotent` or `@idempotent_function` decorators to define a custom prefix for your Idempotency Key. This allows you to decouple idempotency key name from function names. It can be useful during application refactoring, for example.
+Use **`key_prefix`** parameter in the `@idempotent` or `@idempotent_function` decorators to define a custom prefix for your Idempotency Key. This allows you to decouple idempotency key name from function names. It can be useful during application refactoring, for example.
 
 === "Using a custom prefix in Lambda Handler"
 

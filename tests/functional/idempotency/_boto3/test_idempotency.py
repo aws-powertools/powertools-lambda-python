@@ -2062,7 +2062,7 @@ def test_idempotent_function_with_custom_prefix_standalone_function():
     @idempotent_function(
         persistence_store=persistence_layer,
         data_keyword_argument="record",
-        idempotency_key_custom_prefix="my-custom-prefix",
+        key_prefix="my-custom-prefix",
     )
     def record_handler(record):
         return expected_result
@@ -2080,7 +2080,7 @@ def test_idempotent_function_with_custom_prefix_lambda_handler(lambda_context):
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
-    @idempotent(persistence_store=persistence_layer, idempotency_key_custom_prefix="my-custom-prefix")
+    @idempotent(persistence_store=persistence_layer, key_prefix="my-custom-prefix")
     def lambda_handler(record, context):
         return expected_result
 
