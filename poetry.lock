@@ -235,14 +235,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "39.2.2"
+version = "39.2.3"
 description = "Cloud Assembly Schema"
 optional = false
 python-versions = "~=3.8"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk.cloud_assembly_schema-39.2.2-py3-none-any.whl", hash = "sha256:c2f10edd7765a4ff0e28508c5e63798c3f89699242a4755d1984472acf6acaf2"},
-    {file = "aws_cdk_cloud_assembly_schema-39.2.2.tar.gz", hash = "sha256:ae2140bc3ffbc306d8e931d5a70bc5c573b1e047838d29d8e7d13dfa97ea4ea8"},
+    {file = "aws_cdk.cloud_assembly_schema-39.2.3-py3-none-any.whl", hash = "sha256:50df7151a131b82c9a7ab8ab9c9a2780a712e774f5418c86d1d27e13051dac17"},
+    {file = "aws_cdk_cloud_assembly_schema-39.2.3.tar.gz", hash = "sha256:c809a4a92f0c2f92318cf1a6541f83ecd43d99dbad648f1160943209af8fbdbb"},
 ]
 
 [package.dependencies]
@@ -436,18 +436,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.36.3"
+version = "1.36.4"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "boto3-1.36.3-py3-none-any.whl", hash = "sha256:f9843a5d06f501d66ada06f5a5417f671823af2cf319e36ceefa1bafaaaaa953"},
-    {file = "boto3-1.36.3.tar.gz", hash = "sha256:53a5307f6a3526ee2f8590e3c45efa504a3ea4532c1bfe4926c0c19bf188d141"},
+    {file = "boto3-1.36.4-py3-none-any.whl", hash = "sha256:9f8f699e75ec63fcc98c4dd7290997c7c06c68d3ac8161ad4735fe71f5fe945c"},
+    {file = "boto3-1.36.4.tar.gz", hash = "sha256:eeceeb74ef8b65634d358c27aa074917f4449dc828f79301f1075232618eb502"},
 ]
 
 [package.dependencies]
-botocore = ">=1.36.3,<1.37.0"
+botocore = ">=1.36.4,<1.37.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.11.0,<0.12.0"
 
@@ -456,14 +456,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.36.3"
-description = "Type annotations for boto3 1.36.3 generated with mypy-boto3-builder 8.8.0"
+version = "1.36.4"
+description = "Type annotations for boto3 1.36.4 generated with mypy-boto3-builder 8.8.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.36.3-py3-none-any.whl", hash = "sha256:aa89073b98a071fa05a080ec11d7912667dc157bd89dd5b7e323bd9ecc67e77e"},
-    {file = "boto3_stubs-1.36.3.tar.gz", hash = "sha256:f4a0ac68202e699486f7fb7283985edd1709300633ba29feb4c79ce488ce59fe"},
+    {file = "boto3_stubs-1.36.4-py3-none-any.whl", hash = "sha256:3d4e9a8a4d7163bcdb6514b92e901706ce4f522dc8aeab8b4e157fa9e0138e49"},
+    {file = "boto3_stubs-1.36.4.tar.gz", hash = "sha256:36db2481d1a0291a2c05c30756fd83514c8d461f8dbc2915cb0c7cf06dc9ed70"},
 ]
 
 [package.dependencies]
@@ -530,7 +530,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.36.0,<1.37.0)"]
 billing = ["mypy-boto3-billing (>=1.36.0,<1.37.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.36.0,<1.37.0)"]
-boto3 = ["boto3 (==1.36.3)"]
+boto3 = ["boto3 (==1.36.4)"]
 braket = ["mypy-boto3-braket (>=1.36.0,<1.37.0)"]
 budgets = ["mypy-boto3-budgets (>=1.36.0,<1.37.0)"]
 ce = ["mypy-boto3-ce (>=1.36.0,<1.37.0)"]
@@ -893,14 +893,14 @@ xray = ["mypy-boto3-xray (>=1.36.0,<1.37.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.36.3"
+version = "1.36.4"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "botocore-1.36.3-py3-none-any.whl", hash = "sha256:536ab828e6f90dbb000e3702ac45fd76642113ae2db1b7b1373ad24104e89255"},
-    {file = "botocore-1.36.3.tar.gz", hash = "sha256:775b835e979da5c96548ed1a0b798101a145aec3cd46541d62e27dda5a94d7f8"},
+    {file = "botocore-1.36.4-py3-none-any.whl", hash = "sha256:3f183aa7bb0c1ba02171143a05f28a4438abdf89dd6b8c0a7727040375a90520"},
+    {file = "botocore-1.36.4.tar.gz", hash = "sha256:ef54f5e3316040b6ff775941e6ed052c3230dda0079d17d9f9e3c757375f2027"},
 ]
 
 [package.dependencies]
@@ -916,14 +916,14 @@ crt = ["awscrt (==0.23.4)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.36.3"
+version = "1.36.4"
 description = "Type annotations and code completion for botocore"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "botocore_stubs-1.36.3-py3-none-any.whl", hash = "sha256:af32c6127f507b66762749c7c8a78ba2a22aac86097d15b2097f2bfb4faf1ac3"},
-    {file = "botocore_stubs-1.36.3.tar.gz", hash = "sha256:30437070ba1df6f0549b1ded723aca74d06850610c7df002d643e0aa9f4c4520"},
+    {file = "botocore_stubs-1.36.4-py3-none-any.whl", hash = "sha256:bbbd1b061b68bdc6d474ad9dfbf7f56386f416b297862347ae735f2272a78e4b"},
+    {file = "botocore_stubs-1.36.4.tar.gz", hash = "sha256:cc1677029f32d98c9e080885e2098424fd6afd41d6d3380f96d42c29e73e30b5"},
 ]
 
 [package.dependencies]
@@ -977,20 +977,20 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.34.23"
+version = "2.34.24"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 groups = ["dev"]
 files = [
-    {file = "cdk_nag-2.34.23-py3-none-any.whl", hash = "sha256:e5f0ebb366d3fc6fa9124da94fb890a682eb5db69db70bbed6f44ebf0886427a"},
-    {file = "cdk_nag-2.34.23.tar.gz", hash = "sha256:ef7b1414e7ff6d14723d239beaea46ef4ddab32a28d802e7daa18d9677df80a1"},
+    {file = "cdk_nag-2.34.24-py3-none-any.whl", hash = "sha256:9cafae19bfa8386e3a27f4c00f5a628714eb7cf82eb0ca6e41d8647b756f433b"},
+    {file = "cdk_nag-2.34.24.tar.gz", hash = "sha256:6c332ce7e0b2882af9740b6eab132943112e8e059a7dc5cf36d644fc97ed8f17"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.156.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.105.0,<2.0.0"
+jsii = ">=1.106.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -1109,14 +1109,14 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.22.5"
+version = "1.22.6"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "cfn_lint-1.22.5-py3-none-any.whl", hash = "sha256:18309e59cc03ff18b02676688df7eb1a17f5276da3776f31946fc0d9aa9b8fe7"},
-    {file = "cfn_lint-1.22.5.tar.gz", hash = "sha256:8b4f55e283143e99d8d331627637226c291cecfb936606f7aab2d940e71e566d"},
+    {file = "cfn_lint-1.22.6-py3-none-any.whl", hash = "sha256:70e8cc71ed12608964bdc1749c48140164d1fd65c30f3a5eaff4f9ee3396d908"},
+    {file = "cfn_lint-1.22.6.tar.gz", hash = "sha256:0652daf9e86d823f6513d430d233682b940806b6aad74cba2e4dc07de9603d84"},
 ]
 
 [package.dependencies]
@@ -4632,4 +4632,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "e4a8d49ae31770350becde99eaf8a34c0acf67b4fc96359cdaa070325595692b"
+content-hash = "9e537cd6a43226f5123e4a4903d8b3d90e28da7430d8cbd33931bdbcc9674330"
