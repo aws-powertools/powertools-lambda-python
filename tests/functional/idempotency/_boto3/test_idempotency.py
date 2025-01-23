@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import datetime
 import warnings
 from typing import Any, Optional
@@ -57,13 +58,6 @@ from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
 TESTS_MODULE_PREFIX = "test-func.tests.functional.idempotency._boto3.test_idempotency"
-
-
-def get_dataclasses_lib():
-    """Python 3.6 doesn't support dataclasses natively"""
-    import dataclasses
-
-    return dataclasses
 
 
 # Using parametrize to run test twice, with two separate instances of persistence store. One instance with caching
@@ -1313,7 +1307,6 @@ def test_idempotent_function_serialization_no_response():
 @pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
 def test_idempotent_function_serialization_dataclass(output_serializer_type: str):
     # GIVEN
-    dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
     idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_dataclass.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
@@ -1359,7 +1352,6 @@ def test_idempotent_function_serialization_dataclass(output_serializer_type: str
 
 def test_idempotent_function_serialization_dataclass_failure_no_return_type():
     # GIVEN
-    dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
     idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
@@ -1655,7 +1647,6 @@ def test_invalid_dynamodb_persistence_layer():
 
 def test_idempotent_function_dataclasses():
     # Scenario _prepare_data should convert a python dataclasses to a dict
-    dataclasses = get_dataclasses_lib()
 
     @dataclasses.dataclass
     class Foo:
@@ -1670,7 +1661,6 @@ def test_idempotent_function_dataclasses():
 
 def test_idempotent_function_dataclass_with_jmespath():
     # GIVEN
-    dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
     idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_dataclass_with_jmespath.<locals>.collect_payment#{hash_idempotency_key(mock_event['transaction_id'])}"  # noqa E501
@@ -2019,7 +2009,6 @@ def test_idempotent_lambda_already_completed_response_hook_is_called_with_none(
 @pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
 def test_idempotent_function_serialization_dataclass_with_optional_return(output_serializer_type: str):
     # GIVEN
-    dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
     idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_dataclass_with_optional_return.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
@@ -2061,3 +2050,41 @@ def test_idempotent_function_serialization_dataclass_with_optional_return(output
     assert isinstance(second_call, PaymentOutput)
     assert second_call.customer_id == payment.customer_id
     assert second_call.transaction_id == payment.transaction_id
+
+
+def test_idempotent_function_with_custom_prefix_standalone_function():
+    # Scenario to validate we can use idempotent_function with any function
+    mock_event = {"data": "value"}
+    idempotency_key = f"my-custom-prefix#{hash_idempotency_key(mock_event)}"
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        key_prefix="my-custom-prefix",
+    )
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function
+    result = record_handler(record=mock_event)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result
+
+
+def test_idempotent_function_with_custom_prefix_lambda_handler(lambda_context):
+    # Scenario to validate we can use idempotent_function with any function
+    mock_event = {"data": "value"}
+    idempotency_key = f"my-custom-prefix#{hash_idempotency_key(mock_event)}"
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
+
+    @idempotent(persistence_store=persistence_layer, key_prefix="my-custom-prefix")
+    def lambda_handler(record, context):
+        return expected_result
+
+    # WHEN calling the function
+    result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result

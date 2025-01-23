@@ -18,7 +18,9 @@ The idempotency utility allows you to retry operations within a time window with
 
 The property of idempotency means that an operation does not cause additional side effects if it is called more than once with the same input parameters.
 
-**Idempotency key** is a combination of **(a)** Lambda function name, **(b)** fully qualified name of your function, and **(c)** a hash of the entire payload or part(s) of the payload you specify.
+<!-- markdownlint-disable MD013 -->
+**Idempotency key** By default, this is a combination of **(a)** Lambda function name, **(b)** fully qualified name of your function, and **(c)** a hash of the entire payload or part(s) of the payload you specify. However, you can customize the key generation by using **(a)** a [custom prefix name](#customizing-the-idempotency-key-generation), while still incorporating **(c)** a hash of the entire payload or part(s) of the payload you specify.
+<!-- markdownlint-enable MD013 -->
 
 **Idempotent request** is an operation with the same input previously processed that is not expired in your persistent storage or in-memory cache.
 
@@ -355,6 +357,28 @@ You can change this expiration window with the **`expires_after_seconds`** param
     **Why?**
 
     A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
+
+### Customizing the Idempotency key generation
+
+!!! warning "Warning: Changing the idempotency key generation will invalidate existing idempotency records"
+
+Use **`key_prefix`** parameter in the `@idempotent` or `@idempotent_function` decorators to define a custom prefix for your Idempotency Key. This allows you to decouple idempotency key name from function names. It can be useful during application refactoring, for example.
+
+=== "Using a custom prefix in Lambda Handler"
+
+    ```python hl_lines="25"
+    --8<-- "examples/idempotency/src/working_with_custom_idempotency_key_prefix.py"
+    ```
+
+    1. The Idempotency record will be something like `my_custom_prefix#c4ca4238a0b923820dcc509a6f75849b`
+
+=== "Using a custom prefix in standalone functions"
+
+    ```python hl_lines="32"
+    --8<-- "examples/idempotency/src/working_with_custom_idempotency_key_prefix_standalone.py"
+    ```
+
+    1. The Idempotency record will be something like `my_custom_prefix#c4ca4238a0b923820dcc509a6f75849b`
 
 ### Lambda timeouts
 
