@@ -5,115 +5,105 @@ description: Utility
 
 <!-- markdownlint-disable MD043 -->
 
-Event Source Data Classes utility provides classes self-describing Lambda event sources.
+Event Source Data Classes provides self-describing and strongly-typed classes for various AWS Lambda event sources.
 
 ## Key features
 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
 * Docstrings for fields contained in event schemas
-
-**Background**
-
-When authoring Lambda functions, you often need to understand the schema of the event dictionary which is passed to the
-handler. There are several common event types which follow a specific schema, depending on the service triggering the
-Lambda function.
+* Standardized attribute-based access to event properties
 
 ## Getting started
 
-### Utilizing the data classes
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
-The classes are initialized by passing in the Lambda event object into the constructor of the appropriate data class or
-by using the `event_source` decorator.
+There are two ways to use Event Source Data Classes in your Lambda functions.
 
-For example, if your Lambda function is being triggered by an API Gateway proxy integration, you can use the
-`APIGatewayProxyEvent` class.
+**Method 1: Direct Initialization**
 
-=== "app.py"
+You can initialize the appropriate data class by passing the Lambda event object to its constructor.
+
+=== "getting_started_data_classes.py"
 
     ```python hl_lines="1 4"
-    from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
-
-    def lambda_handler(event: dict, context):
-        event = APIGatewayProxyEvent(event)
-        if 'helloworld' in event.path and event.http_method == 'GET':
-            do_something_with(event.body, user)
+    --8<-- "examples/event_sources/src/getting_started_data_classes.py"
     ```
 
-Same example as above, but using the `event_source` decorator
+=== "apigw_event.json"
 
-=== "app.py"
+    ```json hl_lines="3-4"
+    --8<-- "examples/event_sources/events/apigw_event.json"
+    ```
+
+**Method 2: Using the event_source Decorator**
+
+Alternatively, you can use the `event_source` decorator to automatically parse the event.
+
+=== "getting_started_data_classes_decorator.py"
 
     ```python hl_lines="1 3"
-    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
-
-    @event_source(data_class=APIGatewayProxyEvent)
-    def lambda_handler(event: APIGatewayProxyEvent, context):
-        if 'helloworld' in event.path and event.http_method == 'GET':
-            do_something_with(event.body, user)
+    --8<-- "examples/event_sources/src/getting_started_data_classes_decorator.py"
     ```
 
-Log Data Event for Troubleshooting
+=== "apigw_event.json"
 
-=== "app.py"
-
-    ```python hl_lines="4 8"
-    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
-    from aws_lambda_powertools.logging.logger import Logger
-
-    logger = Logger(service="hello_logs", level="DEBUG")
-
-    @event_source(data_class=APIGatewayProxyEvent)
-    def lambda_handler(event: APIGatewayProxyEvent, context):
-        logger.debug(event)
+    ```json hl_lines="3-4"
+    --8<-- "examples/event_sources/events/apigw_event.json"
     ```
 
-**Autocomplete with self-documented properties and methods**
+### Autocomplete with self-documented properties and methods
+
+Event Source Data Classes has the ability to leverage IDE autocompletion and inline documentation.
+When using the APIGatewayProxyEvent class, for example, the IDE will offer autocomplete suggestions for various properties and methods.
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
 
 ## Supported event sources
 
-| Event Source                                                                  | Data_class                                         |
-|-------------------------------------------------------------------------------|----------------------------------------------------|
-| [Active MQ](#active-mq)                                                       | `ActiveMQEvent`                                    |
-| [API Gateway Authorizer](#api-gateway-authorizer)                             | `APIGatewayAuthorizerRequestEvent`                 |
-| [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                       | `APIGatewayAuthorizerEventV2`                      |
-| [API Gateway Proxy](#api-gateway-proxy)                                       | `APIGatewayProxyEvent`                             |
-| [API Gateway Proxy V2](#api-gateway-proxy-v2)                                 | `APIGatewayProxyEventV2`                           |
-| [Application Load Balancer](#application-load-balancer)                       | `ALBEvent`                                         |
-| [AppSync Authorizer](#appsync-authorizer)                                     | `AppSyncAuthorizerEvent`                           |
-| [AppSync Resolver](#appsync-resolver)                                         | `AppSyncResolverEvent`                             |
-| [AWS Config Rule](#aws-config-rule)                                           | `AWSConfigRuleEvent`                               |
-| [Bedrock Agent](#bedrock-agent)                                               | `BedrockAgent`                                     |
-| [CloudFormation Custom Resource](#cloudformation-custom-resource)             | `CloudFormationCustomResourceEvent`                |
-| [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
-| [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
-| [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
-| [CodeDeploy Lifecycle Hook](#codedeploy-lifecycle-hook)                       | `CodeDeployLifecycleHookEvent`                     |
-| [CodePipeline Job Event](#codepipeline-job)                                   | `CodePipelineJobEvent`                             |
-| [Cognito User Pool](#cognito-user-pool)                                       | Multiple available under `cognito_user_pool_event` |
-| [Connect Contact Flow](#connect-contact-flow)                                 | `ConnectContactFlowEvent`                          |
-| [DynamoDB streams](#dynamodb-streams)                                         | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`   |
-| [EventBridge](#eventbridge)                                                   | `EventBridgeEvent`                                 |
-| [Kafka](#kafka)                                                               | `KafkaEvent`                                       |
-| [Kinesis Data Stream](#kinesis-streams)                                       | `KinesisStreamEvent`                               |
-| [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream)         | `KinesisFirehoseEvent`                             |
-| [Lambda Function URL](#lambda-function-url)                                   | `LambdaFunctionUrlEvent`                           |
-| [Rabbit MQ](#rabbit-mq)                                                       | `RabbitMQEvent`                                    |
-| [S3](#s3)                                                                     | `S3Event`                                          |
-| [S3 Batch Operations](#s3-batch-operations)                                   | `S3BatchOperationEvent`                            |
-| [S3 Object Lambda](#s3-object-lambda)                                         | `S3ObjectLambdaEvent`                              |
-| [S3 EventBridge Notification](#s3-eventbridge-notification)                   | `S3EventBridgeNotificationEvent`                   |
-| [SES](#ses)                                                                   | `SESEvent`                                         |
-| [SNS](#sns)                                                                   | `SNSEvent`                                         |
-| [SQS](#sqs)                                                                   | `SQSEvent`                                         |
-| [VPC Lattice V2](#vpc-lattice-v2)                                             | `VPCLatticeV2Event`                                |
-| [VPC Lattice V1](#vpc-lattice-v1)                                             | `VPCLatticeEvent`                                  |
+Each event source is linked to its corresponding GitHub file with the full set of properties, methods, and docstrings specific to each event type.
+
+| Event Source | Data_class | Properties |
+|--------------|------------|------------|
+| [Active MQ](#active-mq) | `ActiveMQEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/active_mq_event.py) |
+| [API Gateway Authorizer](#api-gateway-authorizer) | `APIGatewayAuthorizerRequestEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/api_gateway_authorizer_event.py) |
+| [API Gateway Authorizer V2](#api-gateway-authorizer-v2) | `APIGatewayAuthorizerEventV2` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/api_gateway_authorizer_event.py) |
+| [API Gateway Proxy](#api-gateway-proxy) | `APIGatewayProxyEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/api_gateway_proxy_event.py) |
+| [API Gateway Proxy V2](#api-gateway-proxy-v2) | `APIGatewayProxyEventV2` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/api_gateway_proxy_event.py) |
+| [Application Load Balancer](#application-load-balancer) | `ALBEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/alb_event.py) |
+| [AppSync Authorizer](#appsync-authorizer) | `AppSyncAuthorizerEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/appsync_authorizer_event.py) |
+| [AppSync Resolver](#appsync-resolver) | `AppSyncResolverEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/appsync_resolver_event.py) |
+| [AWS Config Rule](#aws-config-rule) | `AWSConfigRuleEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/aws_config_rule_event.py) |
+| [Bedrock Agent](#bedrock-agent) | `BedrockAgent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/bedrock_agent_event.py) |
+| [CloudFormation Custom Resource](#cloudformation-custom-resource) | `CloudFormationCustomResourceEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cloudformation_custom_resource_event.py) |
+| [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cloud_watch_alarm_event.py) |
+| [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cloud_watch_custom_widget_event.py) |
+| [CloudWatch Logs](#cloudwatch-logs) | `CloudWatchLogsEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cloud_watch_logs_event.py) |
+| [CodeDeploy Lifecycle Hook](#codedeploy-lifecycle-hook) | `CodeDeployLifecycleHookEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/code_deploy_lifecycle_hook_event.py) |
+| [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/code_pipeline_job_event.py) |
+| [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
+| [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
+| [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
+| [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
+| [Kafka](#kafka) | `KafkaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kafka_event.py) |
+| [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_stream_event.py) |
+| [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_firehose_event.py) |
+| [Lambda Function URL](#lambda-function-url) | `LambdaFunctionUrlEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/lambda_function_url_event.py) |
+| [Rabbit MQ](#rabbit-mq) | `RabbitMQEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/rabbit_mq_event.py) |
+| [S3](#s3) | `S3Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/s3_event.py) |
+| [S3 Batch Operations](#s3-batch-operations) | `S3BatchOperationEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/s3_batch_operation_event.py) |
+| [S3 Object Lambda](#s3-object-lambda) | `S3ObjectLambdaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/s3_object_event.py) |
+| [S3 EventBridge Notification](#s3-eventbridge-notification) | `S3EventBridgeNotificationEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/s3_event.py) |
+| [SES](#ses) | `SESEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/ses_event.py) |
+| [SNS](#sns) | `SNSEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/sns_event.py) |
+| [SQS](#sqs) | `SQSEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/sqs_event.py) |
+| [VPC Lattice V2](#vpc-lattice-v2) | `VPCLatticeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
+| [VPC Lattice V1](#vpc-lattice-v1) | `VPCLatticeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
 
 ???+ info
-    The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
-    documentation inherently (via autocompletion, types and docstrings).
+    The examples showcase a subset of Event Source Data Classes capabilities - for comprehensive details, leverage your IDE's
+    autocompletion, refer to type hints and docstrings, and explore the [full API reference](https://docs.powertools.aws.dev/lambda/python/latest/api/utilities/data_classes/) for complete property listings of each event source.
 
 ### Active MQ
 
@@ -121,119 +111,46 @@ It is used for [Active MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg
 the [AWS blog post](https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/){target="_blank"}
 for more details.
 
-=== "app.py"
+=== "active_mq_example.py"
 
-    ```python hl_lines="4-5 9-10"
-    from typing import Dict
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/active_mq_example.py"
+    ```
 
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.active_mq_event import ActiveMQEvent
+=== "active_mq_event.json"
 
-    logger = Logger()
-
-    @event_source(data_class=ActiveMQEvent)
-    def lambda_handler(event: ActiveMQEvent, context):
-        for message in event.messages:
-            logger.debug(f"MessageID: {message.message_id}")
-            data: Dict = message.json_data
-            logger.debug("Process json in base64 encoded data str", data)
+    ```json hl_lines="6 9 18 21"
+    --8<-- "examples/event_sources/events/active_mq_event_example.json"
     ```
 
 ### API Gateway Authorizer
-
-> New in 1.20.0
 
 It is used for [API Gateway Rest API Lambda Authorizer payload](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html){target="_blank"}.
 
 Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayAuthorizerTokenEvent`** for type `TOKEN`.
 
-=== "app_type_request.py"
+=== "apigw_type_request.py"
 
-    This example uses the `APIGatewayAuthorizerResponse` to decline a given request if the user is not found.
-
-    When the user is found, it includes the user details in the request context that will be available to the back-end, and returns a full access policy for admin users.
-
-    ```python hl_lines="2-6 29 36-42 47 49"
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
-        DENY_ALL_RESPONSE,
-        APIGatewayAuthorizerRequestEvent,
-        APIGatewayAuthorizerResponse,
-        HttpVerb,
-    )
-    from secrets import compare_digest
-
-
-    def get_user_by_token(token):
-        if compare_digest(token, "admin-foo"):
-            return {"id": 0, "name": "Admin", "isAdmin": True}
-        elif compare_digest(token, "regular-foo"):
-            return {"id": 1, "name": "Joe"}
-        else:
-            return None
-
-
-    @event_source(data_class=APIGatewayAuthorizerRequestEvent)
-    def handler(event: APIGatewayAuthorizerRequestEvent, context):
-        user = get_user_by_token(event.headers["Authorization"])
-
-        if user is None:
-            # No user was found
-            # to return 401 - `{"message":"Unauthorized"}`, but pollutes lambda error count metrics
-            # raise Exception("Unauthorized")
-            # to return 403 - `{"message":"Forbidden"}`
-            return DENY_ALL_RESPONSE
-
-        # parse the `methodArn` as an `APIGatewayRouteArn`
-        arn = event.parsed_arn
-
-        # Create the response builder from parts of the `methodArn`
-        # and set the logged in user id and context
-        policy = APIGatewayAuthorizerResponse(
-            principal_id=user["id"],
-            context=user,
-            region=arn.region,
-            aws_account_id=arn.aws_account_id,
-            api_id=arn.api_id,
-            stage=arn.stage,
-        )
-
-        # Conditional IAM Policy
-        if user.get("isAdmin", False):
-            policy.allow_all_routes()
-        else:
-            policy.allow_route(HttpVerb.GET.value, "/user-profile")
-
-        return policy.asdict()
+    ```python hl_lines="2-4 7"
+    --8<-- "examples/event_sources/src/apigw_authorizer_request.py"
     ```
-=== "app_type_token.py"
 
-    ```python hl_lines="2-5 12-18 21 23-24"
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
-        APIGatewayAuthorizerTokenEvent,
-        APIGatewayAuthorizerResponse,
-    )
+=== "apiGatewayAuthorizerRequestEvent.json"
 
+    ```json hl_lines="11"
+    --8<-- "examples/event_sources/events/apiGatewayAuthorizerRequestEvent.json"
+    ```
 
-    @event_source(data_class=APIGatewayAuthorizerTokenEvent)
-    def handler(event: APIGatewayAuthorizerTokenEvent, context):
-        arn = event.parsed_arn
+=== "apigw_type_token.py"
 
-        policy = APIGatewayAuthorizerResponse(
-            principal_id="user",
-            region=arn.region,
-            aws_account_id=arn.aws_account_id,
-            api_id=arn.api_id,
-            stage=arn.stage
-        )
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/apigw_authorizer_token.py"
+    ```
 
-        if event.authorization_token == "42":
-            policy.allow_all_routes()
-        else:
-            policy.deny_all_routes()
-        return policy.asdict()
+=== "apiGatewayAuthorizerTokentEvent.json"
+
+    ```json hl_lines="6 9 18 21"
+    --8<-- "examples/event_sources/events/apiGatewayAuthorizerTokenEvent.json"
     ```
 
 ### API Gateway Authorizer V2
