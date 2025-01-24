@@ -224,10 +224,10 @@ Used when building an [AWS_LAMBDA Authorization](https://docs.aws.amazon.com/app
 See blog post [Introducing Lambda authorization for AWS AppSync GraphQL APIs](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/){target="_blank"}
 or read the Amplify documentation on using [AWS Lambda for authorization](https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda){target="_blank"} with AppSync.
 
-=== "appSyncAuthorizerEvent.py"
+=== "appSyncAuthorizer.py"
 
     ```python hl_lines="5-7 20"
-    --8<-- "examples/event_sources/src/appSyncAuthorizerEvent.py"
+    --8<-- "examples/event_sources/src/appSyncAuthorizer.py"
     ```
 
 === "appSyncAuthorizerEvent.json"
@@ -243,10 +243,10 @@ and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsyn
 
 The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
 
-=== "appSyncResolverEvent.py"
+=== "appSyncResolver.py"
 
     ```python hl_lines="2-4 8"
-    --8<-- "examples/event_sources/src/appSyncResolverEvent.py"
+    --8<-- "examples/event_sources/src/appSyncResolver.py"
     ```
 
 === "appSyncResolverEvent.json"
@@ -273,10 +273,10 @@ The example utilizes AWSConfigRuleEvent to parse the incoming event. The functio
 
 The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/) with `BedrockAgentEvent` to parse the incoming event. The function logs the action group and input text, then returns a structured response compatible with Bedrock Agent's expected format, including a mock response body.
 
-=== "bedrock_agent_event.py"
+=== "bedrock_agent.py"
 
     ```python hl_lines="2 6"
-    --8<-- "examples/event_sources/src/bedrock_agent_event.py"
+    --8<-- "examples/event_sources/src/bedrock_agent.py"
     ```
 
 === "bedrockAgentEvent.json"
@@ -286,7 +286,7 @@ The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/
 
 ### CloudFormation Custom Resource
 
-The example focuses on the "Create" request type, generating a unique physical resource ID and logging the process. The function is structured to potentially handle "Update" and "Delete" operations as well.
+The example focuses on the `Create` request type, generating a unique physical resource ID and logging the process. The function is structured to potentially handle `Update` and `Delete` operations as well.
 
 === "cloudformation_custom_resource_handler.py"
 
@@ -301,36 +301,17 @@ The example focuses on the "Create" request type, generating a unique physical r
 
 ### CloudWatch Dashboard Custom Widget
 
-=== "app.py"
+Thie example for `CloudWatchDashboardCustomWidgetEvent` logs the dashboard name, extracts key information like widget ID and time range, and returns a formatted response with a title and markdown content. Read more about [custom widgets for Cloudwatch dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_samples.html).
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchDashboardCustomWidgetEvent
+=== "cloudWatchDashboard.py"
 
-    const DOCS = `
-    ## Echo
-    A simple echo script. Anything passed in \`\`\`echo\`\`\` parameter is returned as the content of custom widget.
+    ```python hl_lines="2 6"
+    --8<-- "examples/event_sources/src/cloudWatchDashboard.py"
+    ```
 
-    ### Widget parameters
-    | Param    | Description              |
-    | -------- | ------------------------ |
-    | **echo** | The content to echo back |
-
-    ### Example parameters
-    \`\`\` yaml
-    echo: <h1>Hello world</h1>
-    \`\`\`
-    `
-
-    @event_source(data_class=CloudWatchDashboardCustomWidgetEvent)
-    def lambda_handler(event: CloudWatchDashboardCustomWidgetEvent, context):
-
-        if event.describe:
-            return DOCS
-
-        # You can directly return HTML or JSON content
-        # Alternatively, you can return markdown that will be rendered by CloudWatch
-        echo = event.widget_context.params["echo"]
-        return { "markdown": f"# {echo}" }
+=== "cloudWatchDashboardEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/cloudWatchDashboardEvent.json"
     ```
 
 ### CloudWatch Alarm State Change Action
@@ -338,10 +319,15 @@ The example focuses on the "Create" request type, generating a unique physical r
 [CloudWatch supports Lambda as an alarm state change action](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html#alarms-and-actions){target="_blank"}.
 You can use the `CloudWathAlarmEvent` data class to access the fields containing such data as alarm information, current state, and previous state.
 
-=== "app.py"
+=== "cloudwatch_alarm_event.py"
 
     ```python hl_lines="2 8"
     --8<-- "examples/event_sources/src/cloudwatch_alarm_event.py"
+    ```
+
+=== "cloudWatchAlarmEventSingleMetric.json"
+    ```json
+    --8<-- "examples/event_sources/events/cloudWatchAlarmEventSingleMetric.json"
     ```
 
 ### CloudWatch Logs
@@ -349,65 +335,43 @@ You can use the `CloudWathAlarmEvent` data class to access the fields containing
 CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
 
-=== "app.py"
+=== "cloudwatch_logs.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchLogsEvent
-    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
+    ```python hl_lines="2-3 7"
+    --8<-- "examples/event_sources/src/cloudwatch_logs.py"
+    ```
 
-    @event_source(data_class=CloudWatchLogsEvent)
-    def lambda_handler(event: CloudWatchLogsEvent, context):
-        decompressed_log: CloudWatchLogsDecodedData = event.parse_logs_data()
-        log_events = decompressed_log.log_events
-        for event in log_events:
-            do_something_with(event.timestamp, event.message)
+=== "cloudWatchLogEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/cloudWatchLogEvent.json"
     ```
 
 #### Kinesis integration
 
 [When streaming CloudWatch Logs to a Kinesis Data Stream](https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/){target="_blank"} (cross-account or not), you can use `extract_cloudwatch_logs_from_event` to decode, decompress and extract logs as `CloudWatchLogsDecodedData` to ease log processing.
 
-=== "app.py"
+=== "kinesisStreamCloudWatchLogs.py"
 
-    ```python hl_lines="5-6 11"
-    from typing import List
+    ```python hl_lines="4-6 8"
+    --8<-- "examples/event_sources/src/kinesisStreamCloudWatchLogs.py"
+    ```
 
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import CloudWatchLogsDecodedData
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
-        KinesisStreamEvent, extract_cloudwatch_logs_from_event)
-
-
-    @event_source(data_class=KinesisStreamEvent)
-    def simple_handler(event: KinesisStreamEvent, context):
-        logs: List[CloudWatchLogsDecodedData] = extract_cloudwatch_logs_from_event(event)
-        for log in logs:
-            if log.message_type == "DATA_MESSAGE":
-                return "success"
-        return "nothing to be processed"
+=== "kinesisStreamCloudWatchLogsEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
 
 Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md){target="_blank"} for more robust log processing.
 
-=== "app.py"
+=== "kinesis_batch_example.py"
 
-    ```python hl_lines="3-4 10"
-    from aws_lambda_powertools.utilities.batch import (BatchProcessor, EventType,
-                                                       batch_processor)
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
-        KinesisStreamRecord, extract_cloudwatch_logs_from_record)
+    ```python hl_lines="7-9 15"
+    --8<-- "examples/event_sources/src/kinesis_batch_example.py"
+    ```
 
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
-
-
-    def record_handler(record: KinesisStreamRecord):
-        log = extract_cloudwatch_logs_from_record(record)
-        return log.message_type == "DATA_MESSAGE"
-
-
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context):
-        return processor.response()
+=== "kinesisStreamCloudWatchLogsEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
 
 ### CodeDeploy LifeCycle Hook
