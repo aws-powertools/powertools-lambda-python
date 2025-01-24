@@ -3,7 +3,7 @@ from tests.functional.utils import load_event
 
 
 def test_transfer_family_authorizer_model():
-    raw_event = load_event("TransferFamilyAuthorizer.json")
+    raw_event = load_event("transferFamilyAuthorizer.json")
     parsed_event = TransferFamilyAuthorizer(**raw_event)
 
     assert parsed_event.username == raw_event["username"]
@@ -14,7 +14,7 @@ def test_transfer_family_authorizer_model():
 
 
 def test_transfer_family_authorizer_model_without_password():
-    raw_event = load_event("TransferFamilyAuthorizer.json")
+    raw_event = load_event("transferFamilyAuthorizer.json")
     del raw_event["password"]
     parsed_event = TransferFamilyAuthorizer(**raw_event)
 

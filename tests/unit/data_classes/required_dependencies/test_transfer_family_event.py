@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.data_classes.transfer_family_event import (
 from tests.functional.utils import load_event
 
 
-def test_transfer_family_event():
+def test_transfer_family_authorizer_event():
     raw_event = load_event("transferFamilyAuthorizer.json")
     parsed_event = TransferFamilyAuthorizer(raw_event)
 
