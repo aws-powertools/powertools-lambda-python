@@ -131,7 +131,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
 === "apigw_type_request.py"
 
-    ```python hl_lines="2-4 7"
+    ```python hl_lines="2-4 8"
     --8<-- "examples/event_sources/src/apigw_authorizer_request.py"
     ```
 
@@ -143,7 +143,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 
 === "apigw_type_token.py"
 
-    ```python hl_lines="2-4 7"
+    ```python hl_lines="2-4 8"
     --8<-- "examples/event_sources/src/apigw_authorizer_token.py"
     ```
 
@@ -160,7 +160,7 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
 
 === "apigw_auth_v2.py"
 
-    ```python hl_lines="2-4 15"
+    ```python hl_lines="2-4 16"
     --8<-- "examples/event_sources/src/apigw_auth_v2.py"
     ```
 
@@ -176,7 +176,7 @@ It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
 === "apigw_proxy_decorator.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/apigw_proxy_decorator.py"
     ```
 
@@ -192,7 +192,7 @@ It is used for HTTP API using v2 proxy event.
 
 === "apigw_proxy_v2.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/apigw_proxy_v2.py"
     ```
 
@@ -208,7 +208,7 @@ Is it used for [Application load balancer](https://docs.aws.amazon.com/elasticlo
 
 === "albEvent.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/albEvent.py"
     ```
 
@@ -245,7 +245,7 @@ The example serves as an AppSync resolver for the `locations` field of the `Merc
 
 === "appSyncResolver.py"
 
-    ```python hl_lines="2-4 8"
+    ```python hl_lines="2-4 9"
     --8<-- "examples/event_sources/src/appSyncResolver.py"
     ```
 
@@ -260,7 +260,7 @@ The example serves as an AppSync resolver for the `locations` field of the `Merc
 The example utilizes AWSConfigRuleEvent to parse the incoming event. The function logs the message type of the invoking event and returns a simple success response. The example event receives a Scheduled Event Notification, but could also be ItemChanged and Oversized.
 
 === "aws_config_rule.py"
-    ```python hl_lines="3 11"
+    ```python hl_lines="2-3 10"
     --8<-- "examples/event_sources/src/aws_config_rule.py"
     ```
 
@@ -275,7 +275,7 @@ The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/
 
 === "bedrock_agent.py"
 
-    ```python hl_lines="2 6"
+    ```python hl_lines="2 7"
     --8<-- "examples/event_sources/src/bedrock_agent.py"
     ```
 
@@ -290,7 +290,7 @@ The example focuses on the `Create` request type, generating a unique physical r
 
 === "cloudformation_custom_resource_handler.py"
 
-    ```python hl_lines="2-3 10 14 19"
+    ```python hl_lines="2-3 11 15 20"
     --8<-- "examples/event_sources/src/cloudformation_custom_resource_handler.py"
     ```
 
@@ -305,7 +305,7 @@ Thie example for `CloudWatchDashboardCustomWidgetEvent` logs the dashboard name,
 
 === "cloudWatchDashboard.py"
 
-    ```python hl_lines="2 6"
+    ```python hl_lines="2 7"
     --8<-- "examples/event_sources/src/cloudWatchDashboard.py"
     ```
 
@@ -337,7 +337,7 @@ decompress and parse json data from the event.
 
 === "cloudwatch_logs.py"
 
-    ```python hl_lines="2-3 7"
+    ```python hl_lines="2-3 8"
     --8<-- "examples/event_sources/src/cloudwatch_logs.py"
     ```
 
@@ -352,7 +352,7 @@ decompress and parse json data from the event.
 
 === "kinesisStreamCloudWatchLogs.py"
 
-    ```python hl_lines="4-6 8"
+    ```python hl_lines="5-6 11"
     --8<-- "examples/event_sources/src/kinesisStreamCloudWatchLogs.py"
     ```
 
@@ -365,7 +365,7 @@ Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless int
 
 === "kinesis_batch_example.py"
 
-    ```python hl_lines="7-9 15"
+    ```python hl_lines="7-9 18"
     --8<-- "examples/event_sources/src/kinesis_batch_example.py"
     ```
 
@@ -380,72 +380,30 @@ CodeDeploy triggers Lambdas with this event when defined in
 [AppSpec definitions](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html)
 to test applications at different stages of deployment.
 
-=== "app.py"
-    ```python
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import (
-        event_source,
-        CodeDeployLifecycleHookEvent,
-    )
+=== "codedeploy_lifecycle_hook.py"
 
-    logger = Logger()
+    ```python hl_lines="1-2 6"
+    --8<-- "examples/event_sources/src/codedeploy_lifecycle_hook.py"
+    ```
 
-    def lambda_handler(
-        event: CodeDeployLifecycleHookEvent, context: LambdaContext
-    ) -> None:
-        deployment_id = event.deployment_id
-        lifecycle_event_hook_execution_id = event.lifecycle_event_hook_execution_id
+=== "codeDeployLifecycleHookEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/codeDeployLifecycleHookEvent.json"
     ```
 
 ### CodePipeline Job
 
-Data classes and utility functions to help create continuous delivery pipelines tasks with AWS Lambda
+Data classes and utility functions to help create continuous delivery pipelines tasks with AWS Lambda.
 
-=== "app.py"
+=== "code_pipeline_job.py"
 
-    ```python
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import event_source, CodePipelineJobEvent
+    ```python hl_lines="1 3"
+    --8<-- "examples/event_sources/src/code_pipeline_job.py"
+    ```
 
-    logger = Logger()
-
-    @event_source(data_class=CodePipelineJobEvent)
-    def lambda_handler(event, context):
-        """The Lambda function handler
-
-        If a continuing job then checks the CloudFormation stack status
-        and updates the job accordingly.
-
-        If a new job then kick of an update or creation of the target
-        CloudFormation stack.
-        """
-
-        # Extract the Job ID
-        job_id = event.get_id
-
-        # Extract the params
-        params: dict = event.decoded_user_parameters
-        stack = params["stack"]
-        artifact_name = params["artifact"]
-        template_file = params["file"]
-
-        try:
-            if event.data.continuation_token:
-                # If we're continuing then the create/update has already been triggered
-                # we just need to check if it has finished.
-                check_stack_update_status(job_id, stack)
-            else:
-                template = event.get_artifact(artifact_name, template_file)
-                # Kick off a stack update or create
-                start_update_or_create(job_id, stack, template)
-        except Exception as e:
-            # If any other exceptions which we didn't expect are raised
-            # then fail the job and log the exception message.
-            logger.exception("Function failed due to exception.")
-            put_job_failure(job_id, "Function exception: " + str(e))
-
-        logger.debug("Function complete.")
-        return "Complete."
+=== "codePipelineEvent.json"
+    ```json hl_lines="3 19"
+    --8<-- "examples/event_sources/events/codePipelineEvent.json"
     ```
 
 ### Cognito User Pool
@@ -469,18 +427,19 @@ can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event
 | Custom Email Sender     | `data_classes.cognito_user_pool_event.CustomEmailSenderTriggerEvent`           |
 | Custom SMS Sender       | `data_classes.cognito_user_pool_event.CustomSMSSenderTriggerEvent`             |
 
+Some examples for the Cognito User Pools Lambda triggers sources:
+
 #### Post Confirmation Example
 
-=== "app.py"
+=== "cognito_post_confirmation.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import PostConfirmationTriggerEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/cognito_post_confirmation.py"
+    ```
 
-    def lambda_handler(event, context):
-        event: PostConfirmationTriggerEvent = PostConfirmationTriggerEvent(event)
-
-        user_attributes = event.request.user_attributes
-        do_something_with(user_attributes)
+=== "cognitoPostConfirmationEvent.json"
+    ```json hl_lines="12-14"
+    --8<-- "examples/event_sources/events/cognitoPostConfirmationEvent.json"
     ```
 
 #### Define Auth Challenge Example
@@ -490,213 +449,60 @@ can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event
 
 This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}.
 
-=== "app.py"
+=== "cognito_define_auth.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import DefineAuthChallengeTriggerEvent
-
-    def handler(event: dict, context) -> dict:
-        event: DefineAuthChallengeTriggerEvent = DefineAuthChallengeTriggerEvent(event)
-        if (
-            len(event.request.session) == 1
-            and event.request.session[0].challenge_name == "SRP_A"
-        ):
-            event.response.issue_tokens = False
-            event.response.fail_authentication = False
-            event.response.challenge_name = "PASSWORD_VERIFIER"
-        elif (
-            len(event.request.session) == 2
-            and event.request.session[1].challenge_name == "PASSWORD_VERIFIER"
-            and event.request.session[1].challenge_result
-        ):
-            event.response.issue_tokens = False
-            event.response.fail_authentication = False
-            event.response.challenge_name = "CUSTOM_CHALLENGE"
-        elif (
-            len(event.request.session) == 3
-            and event.request.session[2].challenge_name == "CUSTOM_CHALLENGE"
-            and event.request.session[2].challenge_result
-        ):
-            event.response.issue_tokens = True
-            event.response.fail_authentication = False
-        else:
-            event.response.issue_tokens = False
-            event.response.fail_authentication = True
-
-        return event.raw_event
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/cognito_define_auth.py"
     ```
-=== "SPR_A response"
 
-    ```json hl_lines="25-27"
-    {
-        "version": "1",
-        "region": "us-east-1",
-        "userPoolId": "us-east-1_example",
-        "userName": "UserName",
-        "callerContext": {
-            "awsSdkVersion": "awsSdkVersion",
-            "clientId": "clientId"
-        },
-        "triggerSource": "DefineAuthChallenge_Authentication",
-        "request": {
-            "userAttributes": {
-                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
-                "email_verified": "true",
-                "name": "First Last",
-                "email": "define-auth@mail.com"
-            },
-            "session": [
-                {
-                    "challengeName": "SRP_A",
-                    "challengeResult": true
-                }
-            ]
-        },
-        "response": {
-            "issueTokens": false,
-            "failAuthentication": false,
-            "challengeName": "PASSWORD_VERIFIER"
-        }
-    }
-    ```
-=== "PASSWORD_VERIFIER success response"
-
-    ```json hl_lines="30-32"
-    {
-        "version": "1",
-        "region": "us-east-1",
-        "userPoolId": "us-east-1_example",
-        "userName": "UserName",
-        "callerContext": {
-            "awsSdkVersion": "awsSdkVersion",
-            "clientId": "clientId"
-        },
-        "triggerSource": "DefineAuthChallenge_Authentication",
-        "request": {
-            "userAttributes": {
-                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
-                "email_verified": "true",
-                "name": "First Last",
-                "email": "define-auth@mail.com"
-            },
-            "session": [
-                {
-                    "challengeName": "SRP_A",
-                    "challengeResult": true
-                },
-                {
-                    "challengeName": "PASSWORD_VERIFIER",
-                    "challengeResult": true
-                }
-            ]
-        },
-        "response": {
-            "issueTokens": false,
-            "failAuthentication": false,
-            "challengeName": "CUSTOM_CHALLENGE"
-        }
-    }
-
-    ```
-=== "CUSTOM_CHALLENGE success response"
-
-    ```json hl_lines="34 35"
-    {
-        "version": "1",
-        "region": "us-east-1",
-        "userPoolId": "us-east-1_example",
-        "userName": "UserName",
-        "callerContext": {
-            "awsSdkVersion": "awsSdkVersion",
-            "clientId": "clientId"
-        },
-        "triggerSource": "DefineAuthChallenge_Authentication",
-        "request": {
-            "userAttributes": {
-                "sub": "4A709A36-7D63-4785-829D-4198EF10EBDA",
-                "email_verified": "true",
-                "name": "First Last",
-                "email": "define-auth@mail.com"
-            },
-            "session": [
-                {
-                    "challengeName": "SRP_A",
-                    "challengeResult": true
-                },
-                {
-                    "challengeName": "PASSWORD_VERIFIER",
-                    "challengeResult": true
-                },
-                {
-                    "challengeName": "CUSTOM_CHALLENGE",
-                    "challengeResult": true
-                }
-            ]
-        },
-        "response": {
-            "issueTokens": true,
-            "failAuthentication": false
-        }
-    }
+=== "cognitoDefineAuthChallengeEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/cognitoDefineAuthChallengeEvent.json"
     ```
 
 #### Create Auth Challenge Example
 
 This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}.
 
-=== "app.py"
+=== "cognito_create_auth.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import CreateAuthChallengeTriggerEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/cognito_create_auth.py"
+    ```
 
-    @event_source(data_class=CreateAuthChallengeTriggerEvent)
-    def handler(event: CreateAuthChallengeTriggerEvent, context) -> dict:
-        if event.request.challenge_name == "CUSTOM_CHALLENGE":
-            event.response.public_challenge_parameters = {"captchaUrl": "url/123.jpg"}
-            event.response.private_challenge_parameters = {"answer": "5"}
-            event.response.challenge_metadata = "CAPTCHA_CHALLENGE"
-        return event.raw_event
+=== "cognitoCreateAuthChallengeEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/cognitoCreateAuthChallengeEvent.json"
     ```
 
 #### Verify Auth Challenge Response Example
 
 This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}.
 
-=== "app.py"
+=== "cognito_verify_auth.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import VerifyAuthChallengeResponseTriggerEvent
+    ```python hl_lines="2 4"
+    --8<-- "examples/event_sources/src/cognito_verify_auth.py"
+    ```
 
-    @event_source(data_class=VerifyAuthChallengeResponseTriggerEvent)
-    def handler(event: VerifyAuthChallengeResponseTriggerEvent, context) -> dict:
-        event.response.answer_correct = (
-            event.request.private_challenge_parameters.get("answer") == event.request.challenge_answer
-        )
-        return event.raw_event
+=== "cognitoVerifyAuthChallengeResponseEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/cognitoVerifyAuthChallengeResponseEvent.json"
     ```
 
 ### Connect Contact Flow
 
-> New in 1.11.0
+The example integrates with [Amazon Connect](https://docs.aws.amazon.com/connect/latest/adminguide/what-is-amazon-connect.html) by handling contact flow events. The function converts the event into a `ConnectContactFlowEvent` object, providing a structured representation of the contact flow data.
 
-=== "app.py"
+=== "connect_contact_flow.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
-        ConnectContactFlowChannel,
-        ConnectContactFlowEndpointType,
-        ConnectContactFlowEvent,
-        ConnectContactFlowInitiationMethod,
-    )
+    ```python hl_lines="1-5 9"
+    --8<-- "examples/event_sources/src/connect_contact_flow.py"
+    ```
 
-    def lambda_handler(event, context):
-        event: ConnectContactFlowEvent = ConnectContactFlowEvent(event)
-        assert event.contact_data.attributes == {"Language": "en-US"}
-        assert event.contact_data.channel == ConnectContactFlowChannel.VOICE
-        assert event.contact_data.customer_endpoint.endpoint_type == ConnectContactFlowEndpointType.TELEPHONE_NUMBER
-        assert event.contact_data.initiation_method == ConnectContactFlowInitiationMethod.API
+=== "connectContactFlowEventAll.json"
+    ```json
+    --8<-- "examples/event_sources/events/connectContactFlowEventAll.json"
     ```
 
 ### DynamoDB Streams
@@ -705,66 +511,47 @@ The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent
 (`DynamoDBRecordEventName`).
 The class automatically deserializes DynamoDB types into their equivalent Python types.
 
-=== "app.py"
-
-    ```python
-    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
-        DynamoDBStreamEvent,
-        DynamoDBRecordEventName
-    )
-
-    def lambda_handler(event, context):
-        event: DynamoDBStreamEvent = DynamoDBStreamEvent(event)
-
-        # Multiple records can be delivered in a single event
-        for record in event.records:
-            if record.event_name == DynamoDBRecordEventName.MODIFY:
-                do_something_with(record.dynamodb.new_image)
-                do_something_with(record.dynamodb.old_image)
+=== "dynamodb_stream.py"
+    ```python hl_lines="1-3 7"
+    --8<-- "examples/event_sources/src/dynamodb_stream.py"
     ```
-
-=== "multiple_records_types.py"
-
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, DynamoDBStreamEvent
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    @event_source(data_class=DynamoDBStreamEvent)
-    def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
-        for record in event.records:
-            # {"N": "123.45"} => Decimal("123.45")
-            key: str = record.dynamodb.keys["id"]
-            print(key)
+=== "dynamodb_multiple_records.py"
+    ```python hl_lines="1 5"
+    --8<-- "examples/event_sources/src/dynamodb_multiple_records.py"
+    ```
+=== "dynamoStreamEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/dynamoStreamEvent.json"
     ```
 
 ### EventBridge
 
-=== "app.py"
+ When an event matching a defined rule occurs in EventBridge, it can [automatically trigger a Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/with-eventbridge-scheduler.html), passing the event data as input.
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, EventBridgeEvent
+=== "eventBridgeEvent.py"
 
-    @event_source(data_class=EventBridgeEvent)
-    def lambda_handler(event: EventBridgeEvent, context):
-        do_something_with(event.detail)
+    ```python hl_lines="1 3"
+    --8<-- "examples/event_sources/src/eventBridgeEvent.py"
+    ```
 
+=== "eventBridgeEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/eventBridgeEvent.json"
     ```
 
 ### Kafka
 
 This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html){target="_blank"} and [self-managed Apache Kafka](https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html){target="_blank"}.
 
-=== "app.py"
+=== "kafka_event.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, KafkaEvent
+    ```python hl_lines="1 6"
+    --8<-- "examples/event_sources/src/kafka_event.py"
+    ```
 
-    @event_source(data_class=KafkaEvent)
-    def lambda_handler(event: KafkaEvent, context):
-        for record in event.records:
-            do_something_with(record.decoded_key, record.json_value)
-
+=== "kafkaEventMsk.json"
+    ```json
+    --8<-- "examples/event_sources/events/kafkaEventMsk.json"
     ```
 
 ### Kinesis streams
@@ -772,22 +559,15 @@ This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.c
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
 
-=== "app.py"
+=== "kinesis_streams.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, KinesisStreamEvent
+    ```python hl_lines="3 8"
+    --8<-- "examples/event_sources/src/kinesis_streams.py"
+    ```
 
-    @event_source(data_class=KinesisStreamEvent)
-    def lambda_handler(event: KinesisStreamEvent, context):
-        kinesis_record = next(event.records).kinesis
-
-        # if data was delivered as text
-        data = kinesis_record.data_as_text()
-
-        # if data was delivered as json
-        data = kinesis_record.data_as_json()
-
-        do_something_with(data)
+=== "kinesisStreamEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/kinesisStreamEvent.json"
     ```
 
 ### Kinesis Firehose delivery stream
@@ -824,6 +604,11 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
     ```
 
     1. This record will now be sent to your [S3 bucket in the `processing-failed` folder](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling){target="_blank"}.
+
+=== "kinesisFirehoseEvent.json"
+    ```json
+    --8<-- "examples/event_sources/events/kinesisFirehoseKinesisEvent.json"
+    ```
 
 ### Lambda Function URL
 

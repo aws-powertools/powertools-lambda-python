@@ -1,0 +1,32 @@
+{
+    "invocationId": "2b4d1ad9-2f48-94bd-a088-767c317e994a",
+    "sourceKinesisStreamArn": "arn:aws:kinesis:us-east-1:123456789012:stream/kinesis-source",
+    "deliveryStreamArn": "arn:aws:firehose:us-east-2:123456789012:deliverystream/delivery-stream-name",
+    "region": "us-east-2",
+    "records": [
+        {
+            "data": "SGVsbG8gV29ybGQ=",
+            "recordId": "record1",
+            "approximateArrivalTimestamp": 1664028820148,
+            "kinesisRecordMetadata": {
+                "shardId": "shardId-000000000000",
+                "partitionKey": "1234",
+                "approximateArrivalTimestamp": 1664028820148,
+                "sequenceNumber": "49546986683135544286507457936321625675700192471156785154",
+                "subsequenceNumber": 0
+            }
+        },
+        {
+            "data": "eyJIZWxsbyI6ICJXb3JsZCJ9",
+            "recordId": "record2",
+            "approximateArrivalTimestamp": 1664028793294,
+            "kinesisRecordMetadata": {
+                "shardId": "shardId-000000000001",
+                "partitionKey": "4567",
+                "approximateArrivalTimestamp": 1664028793294,
+                "sequenceNumber": "49546986683135544286507457936321625675700192471156785155",
+                "subsequenceNumber": 0
+            }
+        }
+    ]
+}
