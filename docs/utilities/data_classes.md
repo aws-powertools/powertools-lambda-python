@@ -25,13 +25,13 @@ There are two ways to use Event Source Data Classes in your Lambda functions.
 
 You can initialize the appropriate data class by passing the Lambda event object to its constructor.
 
-=== "getting_started_data_classes.py"
+=== "app.py"
 
     ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/getting_started_data_classes.py"
     ```
 
-=== "apigw_event.json"
+=== "API Gateway Proxy Example Event"
 
     ```json hl_lines="3-4"
     --8<-- "examples/event_sources/events/apigw_event.json"
@@ -41,13 +41,13 @@ You can initialize the appropriate data class by passing the Lambda event object
 
 Alternatively, you can use the `event_source` decorator to automatically parse the event.
 
-=== "apigw_proxy_decorator.py"
+=== "app.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/apigw_proxy_decorator.py"
     ```
 
-=== "apigw_event.json"
+=== "API Gateway Proxy Example Event"
 
     ```json hl_lines="3-4"
     --8<-- "examples/event_sources/events/apigw_event.json"
@@ -111,13 +111,13 @@ It is used for [Active MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg
 the [AWS blog post](https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/){target="_blank"}
 for more details.
 
-=== "active_mq_example.py"
+=== "app.py"
 
-    ```python hl_lines="2 8"
+    ```python hl_lines="5 10"
     --8<-- "examples/event_sources/src/active_mq_example.py"
     ```
 
-=== "active_mq_event.json"
+=== "Active MQ Example Event"
 
     ```json hl_lines="6 9 18 21"
     --8<-- "examples/event_sources/events/active_mq_event_example.json"
@@ -129,25 +129,25 @@ It is used for [API Gateway Rest API Lambda Authorizer payload](https://docs.aws
 
 Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayAuthorizerTokenEvent`** for type `TOKEN`.
 
-=== "apigw_type_request.py"
+=== "app.py"
 
     ```python hl_lines="2-4 8"
     --8<-- "examples/event_sources/src/apigw_authorizer_request.py"
     ```
 
-=== "apiGatewayAuthorizerRequestEvent.json"
+=== "API Gateway Authorizer Request Example Event"
 
     ```json hl_lines="3 11"
     --8<-- "examples/event_sources/events/apiGatewayAuthorizerRequestEvent.json"
     ```
 
-=== "apigw_type_token.py"
+=== "app_token.py"
 
     ```python hl_lines="2-4 8"
     --8<-- "examples/event_sources/src/apigw_authorizer_token.py"
     ```
 
-=== "apiGatewayAuthorizerTokentEvent.json"
+=== "API Gateway Authorizer Token Example Event"
 
     ```json hl_lines="2 3"
     --8<-- "examples/event_sources/events/apiGatewayAuthorizerTokenEvent.json"
@@ -158,13 +158,13 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 It is used for [API Gateway HTTP API Lambda Authorizer payload version 2](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html){target="_blank"}.
 See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/){target="_blank"} for more details.
 
-=== "apigw_auth_v2.py"
+=== "app.py"
 
-    ```python hl_lines="2-4 16"
+    ```python hl_lines="4-6 16"
     --8<-- "examples/event_sources/src/apigw_auth_v2.py"
     ```
 
-=== "apiGatewayAuthorizerV2Event.json"
+=== "API Gateway Authorizer V2 Example Event"
 
     ```json
     --8<-- "examples/event_sources/events/apiGatewayAuthorizerV2Event.json"
@@ -174,13 +174,13 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
 
 It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
-=== "apigw_proxy_decorator.py"
+=== "app.py"
 
     ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/apigw_proxy_decorator.py"
     ```
 
-=== "apiGatewayProxyEvent.json"
+=== "API Gateway Proxy Example Event"
 
     ```json hl_lines="3 4"
     --8<-- "examples/event_sources/events/apigw_event.json"
@@ -190,13 +190,13 @@ It is used for either API Gateway REST API or HTTP API using v1 proxy event.
 
 It is used for HTTP API using v2 proxy event.
 
-=== "apigw_proxy_v2.py"
+=== "app.py"
 
     ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/apigw_proxy_v2.py"
     ```
 
-=== "apiGatewayProxyEvent.json"
+=== "API Gateway Proxy V2 Example Event"
 
     ```json
     --8<-- "examples/event_sources/events/apiGatewayProxyV2Event.json"
@@ -206,13 +206,13 @@ It is used for HTTP API using v2 proxy event.
 
 Is it used for [Application load balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) event.
 
-=== "albEvent.py"
+=== "app.py"
 
     ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/albEvent.py"
     ```
 
-=== "albEvent.json"
+=== "Application Load Balancer Example Event"
 
     ```json hl_lines="7 8"
     --8<-- "examples/event_sources/events/albEvent.json"
@@ -224,13 +224,13 @@ Used when building an [AWS_LAMBDA Authorization](https://docs.aws.amazon.com/app
 See blog post [Introducing Lambda authorization for AWS AppSync GraphQL APIs](https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/){target="_blank"}
 or read the Amplify documentation on using [AWS Lambda for authorization](https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda){target="_blank"} with AppSync.
 
-=== "appSyncAuthorizer.py"
+=== "app.py"
 
     ```python hl_lines="5-7 20"
     --8<-- "examples/event_sources/src/appSyncAuthorizer.py"
     ```
 
-=== "appSyncAuthorizerEvent.json"
+=== "AppSync Authorizer Example Event"
 
     ```json
     --8<-- "examples/event_sources/events/appSyncAuthorizerEvent.json"
@@ -243,13 +243,13 @@ and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsyn
 
 The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
 
-=== "appSyncResolver.py"
+=== "app.py"
 
     ```python hl_lines="2-4 9"
     --8<-- "examples/event_sources/src/appSyncResolver.py"
     ```
 
-=== "appSyncResolverEvent.json"
+=== "AppSync Resolver Example Event"
 
     ```json
     --8<-- "examples/event_sources/events/appSyncResolverEvent.json"
@@ -259,12 +259,12 @@ The example serves as an AppSync resolver for the `locations` field of the `Merc
 
 The example utilizes AWSConfigRuleEvent to parse the incoming event. The function logs the message type of the invoking event and returns a simple success response. The example event receives a Scheduled Event Notification, but could also be ItemChanged and Oversized.
 
-=== "aws_config_rule.py"
+=== "app.py"
     ```python hl_lines="2-3 10"
     --8<-- "examples/event_sources/src/aws_config_rule.py"
     ```
 
-=== "Event - ScheduledNotification"
+=== "ScheduledNotification Example Event"
     ```json
     --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
     ```
@@ -273,13 +273,13 @@ The example utilizes AWSConfigRuleEvent to parse the incoming event. The functio
 
 The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/) with `BedrockAgentEvent` to parse the incoming event. The function logs the action group and input text, then returns a structured response compatible with Bedrock Agent's expected format, including a mock response body.
 
-=== "bedrock_agent.py"
+=== "app.py"
 
     ```python hl_lines="2 7"
     --8<-- "examples/event_sources/src/bedrock_agent.py"
     ```
 
-=== "bedrockAgentEvent.json"
+=== "Bedrock Agent Example Event"
     ```json
     --8<-- "examples/event_sources/events/bedrockAgentEvent.json"
     ```
@@ -288,13 +288,13 @@ The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/
 
 The example focuses on the `Create` request type, generating a unique physical resource ID and logging the process. The function is structured to potentially handle `Update` and `Delete` operations as well.
 
-=== "cloudformation_custom_resource_handler.py"
+=== "app.py"
 
-    ```python hl_lines="2-3 11 15 20"
+    ```python hl_lines="2-3 11 15 21"
     --8<-- "examples/event_sources/src/cloudformation_custom_resource_handler.py"
     ```
 
-=== "cloudformationCustomResourceCreate.json"
+=== "CloudFormation Custom Resource Example Event"
     ```json
     --8<-- "examples/event_sources/events/cloudformationCustomResourceCreate.json"
     ```
@@ -303,13 +303,13 @@ The example focuses on the `Create` request type, generating a unique physical r
 
 Thie example for `CloudWatchDashboardCustomWidgetEvent` logs the dashboard name, extracts key information like widget ID and time range, and returns a formatted response with a title and markdown content. Read more about [custom widgets for Cloudwatch dashboard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/add_custom_widget_samples.html).
 
-=== "cloudWatchDashboard.py"
+=== "app.py"
 
     ```python hl_lines="2 7"
     --8<-- "examples/event_sources/src/cloudWatchDashboard.py"
     ```
 
-=== "cloudWatchDashboardEvent.json"
+=== "CloudWatch Dashboard Example Event"
     ```json
     --8<-- "examples/event_sources/events/cloudWatchDashboardEvent.json"
     ```
@@ -319,13 +319,13 @@ Thie example for `CloudWatchDashboardCustomWidgetEvent` logs the dashboard name,
 [CloudWatch supports Lambda as an alarm state change action](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html#alarms-and-actions){target="_blank"}.
 You can use the `CloudWathAlarmEvent` data class to access the fields containing such data as alarm information, current state, and previous state.
 
-=== "cloudwatch_alarm_event.py"
+=== "app.py"
 
     ```python hl_lines="2 8"
     --8<-- "examples/event_sources/src/cloudwatch_alarm_event.py"
     ```
 
-=== "cloudWatchAlarmEventSingleMetric.json"
+=== "CloudWatch Alarm Example Event"
     ```json
     --8<-- "examples/event_sources/events/cloudWatchAlarmEventSingleMetric.json"
     ```
@@ -335,13 +335,13 @@ You can use the `CloudWathAlarmEvent` data class to access the fields containing
 CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.
 
-=== "cloudwatch_logs.py"
+=== "app.py"
 
     ```python hl_lines="2-3 8"
     --8<-- "examples/event_sources/src/cloudwatch_logs.py"
     ```
 
-=== "cloudWatchLogEvent.json"
+=== "CloudWatch Logs Example Event"
     ```json
     --8<-- "examples/event_sources/events/cloudWatchLogEvent.json"
     ```
@@ -350,26 +350,26 @@ decompress and parse json data from the event.
 
 [When streaming CloudWatch Logs to a Kinesis Data Stream](https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/){target="_blank"} (cross-account or not), you can use `extract_cloudwatch_logs_from_event` to decode, decompress and extract logs as `CloudWatchLogsDecodedData` to ease log processing.
 
-=== "kinesisStreamCloudWatchLogs.py"
+=== "app.py"
 
-    ```python hl_lines="5-6 11"
+    ```python hl_lines="5-7 11"
     --8<-- "examples/event_sources/src/kinesisStreamCloudWatchLogs.py"
     ```
 
-=== "kinesisStreamCloudWatchLogsEvent.json"
+=== "Kinesis Stream CloudWatch Logs Example Event"
     ```json
     --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
 
 Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md){target="_blank"} for more robust log processing.
 
-=== "kinesis_batch_example.py"
+=== "app.py"
 
     ```python hl_lines="7-9 18"
     --8<-- "examples/event_sources/src/kinesis_batch_example.py"
     ```
 
-=== "kinesisStreamCloudWatchLogsEvent.json"
+=== "Kinesis Stream CloudWatch Logs Example Event"
     ```json
     --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
@@ -380,13 +380,13 @@ CodeDeploy triggers Lambdas with this event when defined in
 [AppSpec definitions](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html)
 to test applications at different stages of deployment.
 
-=== "codedeploy_lifecycle_hook.py"
+=== "app.py"
 
-    ```python hl_lines="1-2 6"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/codedeploy_lifecycle_hook.py"
     ```
 
-=== "codeDeployLifecycleHookEvent.json"
+=== "CodeDeploy LifeCycle Hook Example Event"
     ```json
     --8<-- "examples/event_sources/events/codeDeployLifecycleHookEvent.json"
     ```
@@ -395,13 +395,13 @@ to test applications at different stages of deployment.
 
 Data classes and utility functions to help create continuous delivery pipelines tasks with AWS Lambda.
 
-=== "code_pipeline_job.py"
+=== "app.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/code_pipeline_job.py"
     ```
 
-=== "codePipelineEvent.json"
+=== "CodePipeline Job Example Event"
     ```json hl_lines="3 19"
     --8<-- "examples/event_sources/events/codePipelineEvent.json"
     ```
@@ -431,13 +431,13 @@ Some examples for the Cognito User Pools Lambda triggers sources:
 
 #### Post Confirmation Example
 
-=== "cognito_post_confirmation.py"
+=== "app.py"
 
-    ```python hl_lines="1 4"
+    ```python hl_lines="1 5"
     --8<-- "examples/event_sources/src/cognito_post_confirmation.py"
     ```
 
-=== "cognitoPostConfirmationEvent.json"
+=== "Cognito Post Confirmation Example Event"
     ```json hl_lines="12-14"
     --8<-- "examples/event_sources/events/cognitoPostConfirmationEvent.json"
     ```
@@ -449,13 +449,13 @@ Some examples for the Cognito User Pools Lambda triggers sources:
 
 This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html){target="_blank"}.
 
-=== "cognito_define_auth.py"
+=== "app.py"
 
-    ```python hl_lines="1 4"
+    ```python hl_lines="1 5"
     --8<-- "examples/event_sources/src/cognito_define_auth.py"
     ```
 
-=== "cognitoDefineAuthChallengeEvent.json"
+=== "Cognito Define Auth Challengen Example Event"
     ```json
     --8<-- "examples/event_sources/events/cognitoDefineAuthChallengeEvent.json"
     ```
@@ -464,13 +464,13 @@ This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda 
 
 This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html){target="_blank"}.
 
-=== "cognito_create_auth.py"
+=== "app.py"
 
-    ```python hl_lines="1 4"
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/cognito_create_auth.py"
     ```
 
-=== "cognitoCreateAuthChallengeEvent.json"
+=== "Cognito Define Auth Challengen Example Event"
     ```json
     --8<-- "examples/event_sources/events/cognitoCreateAuthChallengeEvent.json"
     ```
@@ -479,13 +479,13 @@ This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda 
 
 This example is based on the AWS Cognito docs for [Verify Auth Challenge Response Lambda Trigger](https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html){target="_blank"}.
 
-=== "cognito_verify_auth.py"
+=== "app.py"
 
-    ```python hl_lines="2 4"
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/cognito_verify_auth.py"
     ```
 
-=== "cognitoVerifyAuthChallengeResponseEvent.json"
+=== "Cognito Verify Auth Challengen Example Event"
     ```json
     --8<-- "examples/event_sources/events/cognitoVerifyAuthChallengeResponseEvent.json"
     ```
@@ -494,13 +494,13 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 
 The example integrates with [Amazon Connect](https://docs.aws.amazon.com/connect/latest/adminguide/what-is-amazon-connect.html) by handling contact flow events. The function converts the event into a `ConnectContactFlowEvent` object, providing a structured representation of the contact flow data.
 
-=== "connect_contact_flow.py"
+=== "app.py"
 
-    ```python hl_lines="1-5 9"
+    ```python hl_lines="1-5 10"
     --8<-- "examples/event_sources/src/connect_contact_flow.py"
     ```
 
-=== "connectContactFlowEventAll.json"
+=== "Connect Contact Flow Example Event"
     ```json
     --8<-- "examples/event_sources/events/connectContactFlowEventAll.json"
     ```
@@ -511,15 +511,15 @@ The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent
 (`DynamoDBRecordEventName`).
 The class automatically deserializes DynamoDB types into their equivalent Python types.
 
-=== "dynamodb_stream.py"
-    ```python hl_lines="1-3 7"
+=== "app.py"
+    ```python hl_lines="1-3 8"
     --8<-- "examples/event_sources/src/dynamodb_stream.py"
     ```
-=== "dynamodb_multiple_records.py"
+=== "app_multiple_records.py"
     ```python hl_lines="1 5"
     --8<-- "examples/event_sources/src/dynamodb_multiple_records.py"
     ```
-=== "dynamoStreamEvent.json"
+=== "DynamoDB Streams Example Event"
     ```json
     --8<-- "examples/event_sources/events/dynamoStreamEvent.json"
     ```
@@ -528,13 +528,13 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 
  When an event matching a defined rule occurs in EventBridge, it can [automatically trigger a Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/with-eventbridge-scheduler.html), passing the event data as input.
 
-=== "eventBridgeEvent.py"
+=== "app.py"
 
-    ```python hl_lines="1 3"
+    ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/eventBridgeEvent.py"
     ```
 
-=== "eventBridgeEvent.json"
+=== "EventBridge Example Event"
     ```json
     --8<-- "examples/event_sources/events/eventBridgeEvent.json"
     ```
@@ -543,13 +543,13 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 
 This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html){target="_blank"} and [self-managed Apache Kafka](https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html){target="_blank"}.
 
-=== "kafka_event.py"
+=== "app.py"
 
-    ```python hl_lines="1 6"
+    ```python hl_lines="1 8"
     --8<-- "examples/event_sources/src/kafka_event.py"
     ```
 
-=== "kafkaEventMsk.json"
+=== "Kafka Example Event"
     ```json
     --8<-- "examples/event_sources/events/kafkaEventMsk.json"
     ```
@@ -559,13 +559,13 @@ This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.c
 Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.
 
-=== "kinesis_streams.py"
+=== "app.py"
 
-    ```python hl_lines="3 8"
+    ```python hl_lines="4 10"
     --8<-- "examples/event_sources/src/kinesis_streams.py"
     ```
 
-=== "kinesisStreamEvent.json"
+=== "Kinesis streams Example Event"
     ```json
     --8<-- "examples/event_sources/events/kinesisStreamEvent.json"
     ```
@@ -582,7 +582,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Transforming streaming records"
 
-    ```python hl_lines="2-3 12 28"
+    ```python hl_lines="2-3 10 12"
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
 
@@ -591,7 +591,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Dropping invalid records"
 
-    ```python hl_lines="5-6 16 34"
+    ```python hl_lines="5-6 14 16"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
     ```
 
@@ -599,7 +599,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Indicating a processing failure"
 
-    ```python hl_lines="2-3 33"
+    ```python hl_lines="2-3 11 33"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
     ```
 
@@ -612,60 +612,49 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 ### Lambda Function URL
 
+[Lambda Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html) provide a direct HTTP endpoint for invoking Lambda functions. This feature allows functions to receive and process HTTP requests without the need for additional services like API Gateway.
+
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, LambdaFunctionUrlEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/lambdaFunctionUrl.py"
+    ```
 
-    @event_source(data_class=LambdaFunctionUrlEvent)
-    def lambda_handler(event: LambdaFunctionUrlEvent, context):
-        do_something_with(event.body)
+=== "Lambda Function URL Example Event"
+    ```json
+    --8<-- "examples/event_sources/events/lambdaFunctionUrlEvent.json"
     ```
 
 ### Rabbit MQ
 
-It is used for [Rabbit MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html){target="_blank"}, also see
+It is used for [Rabbit MQ payloads](https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html){target="_blank"}. See
 the [blog post](https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/){target="_blank"}
 for more details.
 
 === "app.py"
 
-    ```python hl_lines="4-5 9-10"
-    from typing import Dict
+    ```python hl_lines="5 10"
+    --8<-- "examples/event_sources/src/rabbit_mq_example.py"
+    ```
 
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.utilities.data_classes import event_source
-    from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import RabbitMQEvent
-
-    logger = Logger()
-
-    @event_source(data_class=RabbitMQEvent)
-    def lambda_handler(event: RabbitMQEvent, context):
-        for queue_name, messages in event.rmq_messages_by_queue.items():
-            logger.debug(f"Messages for queue: {queue_name}")
-            for message in messages:
-                logger.debug(f"MessageID: {message.basic_properties.message_id}")
-                data: Dict = message.json_data
-                logger.debug("Process json in base64 encoded data str", data)
+=== "Rabbit MQ Example Event"
+    ```json
+    --8<-- "examples/event_sources/events/rabbitMQEvent.json"
     ```
 
 ### S3
 
+Integration with Amazon S3 enables automatic, serverless processing of object-level events in S3 buckets. When triggered by actions like object creation or deletion, Lambda functions receive detailed event information, allowing for real-time file processing, data transformations, and automated workflows.
+
 === "app.py"
 
-    ```python
-    from urllib.parse import unquote_plus
-    from aws_lambda_powertools.utilities.data_classes import event_source, S3Event
+    ```python hl_lines="3 6"
+    --8<-- "examples/event_sources/src/s3Event.py"
+    ```
 
-    @event_source(data_class=S3Event)
-    def lambda_handler(event: S3Event, context):
-        bucket_name = event.bucket_name
-
-        # Multiple records can be delivered in a single event
-        for record in event.records:
-            object_key = unquote_plus(record.s3.get_object.key)
-
-            do_something_with(f"{bucket_name}/{object_key}")
+=== "S3 Example Event"
+    ```json
+    --8<-- "examples/event_sources/events/s3Event.json"
     ```
 
 ### S3 Batch Operations
@@ -678,54 +667,42 @@ This example is based on the AWS S3 Batch Operations documentation [Example Lamb
     --8<-- "examples/event_sources/src/s3_batch_operation.py"
     ```
 
+=== "S3 Batch Operations Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/events/s3BatchOperationEventSchemaV2.json"
+    ```
+
 ### S3 Object Lambda
 
 This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3](https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/){target="_blank"}.
 
 === "app.py"
 
-    ```python  hl_lines="5-6 12 14"
-    import boto3
-    import requests
+    ```python hl_lines="5 6 13 15"
+    --8<-- "examples/event_sources/src/s3_object_lambda.py"
+    ```
 
-    from aws_lambda_powertools import Logger
-    from aws_lambda_powertools.logging.correlation_paths import S3_OBJECT_LAMBDA
-    from aws_lambda_powertools.utilities.data_classes.s3_object_event import S3ObjectLambdaEvent
+=== "S3 Object Lambda Example Event"
 
-    logger = Logger()
-    session = boto3.session.Session()
-    s3 = session.client("s3")
-
-    @logger.inject_lambda_context(correlation_id_path=S3_OBJECT_LAMBDA, log_event=True)
-    def lambda_handler(event, context):
-        event = S3ObjectLambdaEvent(event)
-
-        # Get object from S3
-        response = requests.get(event.input_s3_url)
-        original_object = response.content.decode("utf-8")
-
-        # Make changes to the object about to be returned
-        transformed_object = original_object.upper()
-
-        # Write object back to S3 Object Lambda
-        s3.write_get_object_response(
-            Body=transformed_object, RequestRoute=event.request_route, RequestToken=event.request_token
-        )
-
-        return {"status_code": 200}
+    ```json
+    --8<-- "examples/event_sources/events/s3ObjectEvent.json"
     ```
 
 ### S3 EventBridge Notification
 
+[S3 EventBridge notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html) enhance Lambda's ability to process S3 events by routing them through Amazon EventBridge. This integration offers advanced filtering, multiple destination support, and standardized CloudEvents format.
+
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, S3EventBridgeNotificationEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/s3_event_bridge.py"
+    ```
 
-    @event_source(data_class=S3EventBridgeNotificationEvent)
-    def lambda_handler(event: S3EventBridgeNotificationEvent, context):
-        bucket_name = event.detail.bucket.name
-        file_key = event.detail.object.key
+=== "S3 EventBridge Notification Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/events/s3EventBridgeNotificationObjectCreatedEvent.json"
     ```
 
 ### Secrets Manager
@@ -746,50 +723,50 @@ AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [
 
 ### SES
 
+The integration with Simple Email Service (SES) enables serverless email processing. When configured, SES can trigger Lambda functions in response to incoming emails or delivery status notifications. The Lambda function receives an SES event containing details like sender, recipients, and email content.
+
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, SESEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/ses_event.py"
+    ```
 
-    @event_source(data_class=SESEvent)
-    def lambda_handler(event: SESEvent, context):
-        # Multiple records can be delivered in a single event
-        for record in event.records:
-            mail = record.ses.mail
-            common_headers = mail.common_headers
+=== "SES Example Event"
 
-            do_something_with(common_headers.to, common_headers.subject)
+    ```json
+    --8<-- "tests/events/sesEvent.json"
     ```
 
 ### SNS
 
+The integration with Simple Notification Service (SNS) enables serverless message processing. When configured, SNS can trigger Lambda functions in response to published messages or notifications. The Lambda function receives an SNS event containing details like the message body, subject, and metadata.
+
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, SNSEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/sns_event.py"
+    ```
 
-    @event_source(data_class=SNSEvent)
-    def lambda_handler(event: SNSEvent, context):
-        # Multiple records can be delivered in a single event
-        for record in event.records:
-            message = record.sns.message
-            subject = record.sns.subject
+=== "SNS Example Event"
 
-            do_something_with(subject, message)
+    ```json
+    --8<-- "tests/events/snsEvent.json"
     ```
 
 ### SQS
 
+The integration with Simple Queue Service (SQS) enables serverless queue processing. When configured, SQS can trigger Lambda functions in response to messages in the queue. The Lambda function receives an SQS event containing details like message body, attributes, and metadata.
+
 === "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, SQSEvent
+    ```python hl_lines="1 4"
+    --8<-- "examples/event_sources/src/sqs_event.py"
+    ```
 
-    @event_source(data_class=SQSEvent)
-    def lambda_handler(event: SQSEvent, context):
-        # Multiple records can be delivered in a single event
-        for record in event.records:
-            do_something_with(record.body)
+=== "SQS Example Event"
+
+    ```json
+    --8<-- "tests/events/sqsEvent.json"
     ```
 
 ### VPC Lattice V2
@@ -850,5 +827,4 @@ However, certain events may contain sensitive fields such as `secret_access_key`
 === "debugging_output.json"
     ```json hl_lines="16 17 18"
     --8<-- "examples/event_sources/src/debugging_output.json"
-    ```
     ```
