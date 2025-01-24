@@ -120,7 +120,7 @@ for more details.
 === "Active MQ Example Event"
 
     ```json hl_lines="6 9 18 21"
-    --8<-- "examples/event_sources/events/active_mq_event_example.json"
+    --8<-- "tests/events/activeMQEvent.json"
     ```
 
 ### API Gateway Authorizer
@@ -138,7 +138,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 === "API Gateway Authorizer Request Example Event"
 
     ```json hl_lines="3 11"
-    --8<-- "examples/event_sources/events/apiGatewayAuthorizerRequestEvent.json"
+    --8<-- "tests/events/apiGatewayAuthorizerRequestEvent.json"
     ```
 
 === "app_token.py"
@@ -150,7 +150,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
 === "API Gateway Authorizer Token Example Event"
 
     ```json hl_lines="2 3"
-    --8<-- "examples/event_sources/events/apiGatewayAuthorizerTokenEvent.json"
+    --8<-- "tests/events/apiGatewayAuthorizerTokenEvent.json"
     ```
 
 ### API Gateway Authorizer V2
@@ -167,7 +167,7 @@ See also [this blog post](https://aws.amazon.com/blogs/compute/introducing-iam-a
 === "API Gateway Authorizer V2 Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/apiGatewayAuthorizerV2Event.json"
+    --8<-- "tests/events/apiGatewayAuthorizerV2Event.json"
     ```
 
 ### API Gateway Proxy
@@ -199,7 +199,7 @@ It is used for HTTP API using v2 proxy event.
 === "API Gateway Proxy V2 Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/apiGatewayProxyV2Event.json"
+    --8<-- "tests/events/apiGatewayProxyV2Event.json"
     ```
 
 ### Application Load Balancer
@@ -215,7 +215,7 @@ Is it used for [Application load balancer](https://docs.aws.amazon.com/elasticlo
 === "Application Load Balancer Example Event"
 
     ```json hl_lines="7 8"
-    --8<-- "examples/event_sources/events/albEvent.json"
+    --8<-- "tests/events/albEvent.json"
     ```
 
 ### AppSync Authorizer
@@ -233,7 +233,7 @@ or read the Amplify documentation on using [AWS Lambda for authorization](https:
 === "AppSync Authorizer Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/appSyncAuthorizerEvent.json"
+    --8<-- "tests/events/appSyncAuthorizerEvent.json"
     ```
 
 ### AppSync Resolver
@@ -252,7 +252,7 @@ The example serves as an AppSync resolver for the `locations` field of the `Merc
 === "AppSync Resolver Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/appSyncResolverEvent.json"
+    --8<-- "tests/events/appSyncResolverEvent.json"
     ```
 
 ### AWS Config Rule
@@ -266,7 +266,7 @@ The example utilizes AWSConfigRuleEvent to parse the incoming event. The functio
 
 === "ScheduledNotification Example Event"
     ```json
-    --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
+    --8<-- "tests/events/awsConfigRuleScheduled.json"
     ```
 
 ### Bedrock Agent
@@ -281,7 +281,7 @@ The example handles [Bedrock Agent event](https://aws.amazon.com/bedrock/agents/
 
 === "Bedrock Agent Example Event"
     ```json
-    --8<-- "examples/event_sources/events/bedrockAgentEvent.json"
+    --8<-- "tests/events/bedrockAgentEvent.json"
     ```
 
 ### CloudFormation Custom Resource
@@ -296,7 +296,7 @@ The example focuses on the `Create` request type, generating a unique physical r
 
 === "CloudFormation Custom Resource Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cloudformationCustomResourceCreate.json"
+    --8<-- "tests/events/cloudformationCustomResourceCreate.json"
     ```
 
 ### CloudWatch Dashboard Custom Widget
@@ -311,7 +311,7 @@ Thie example for `CloudWatchDashboardCustomWidgetEvent` logs the dashboard name,
 
 === "CloudWatch Dashboard Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cloudWatchDashboardEvent.json"
+    --8<-- "tests/events/cloudWatchDashboardEvent.json"
     ```
 
 ### CloudWatch Alarm State Change Action
@@ -327,7 +327,7 @@ You can use the `CloudWathAlarmEvent` data class to access the fields containing
 
 === "CloudWatch Alarm Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cloudWatchAlarmEventSingleMetric.json"
+    --8<-- "tests/events/cloudWatchAlarmEventSingleMetric.json"
     ```
 
 ### CloudWatch Logs
@@ -343,7 +343,7 @@ decompress and parse json data from the event.
 
 === "CloudWatch Logs Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cloudWatchLogEvent.json"
+    --8<-- "tests/events/cloudWatchLogEvent.json"
     ```
 
 #### Kinesis integration
@@ -358,7 +358,7 @@ decompress and parse json data from the event.
 
 === "Kinesis Stream CloudWatch Logs Example Event"
     ```json
-    --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
+    --8<-- "tests/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
 
 Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md){target="_blank"} for more robust log processing.
@@ -371,7 +371,7 @@ Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless int
 
 === "Kinesis Stream CloudWatch Logs Example Event"
     ```json
-    --8<-- "examples/event_sources/events/kinesisStreamCloudWatchLogsEvent.json"
+    --8<-- "tests/events/kinesisStreamCloudWatchLogsEvent.json"
     ```
 
 ### CodeDeploy LifeCycle Hook
@@ -388,7 +388,7 @@ to test applications at different stages of deployment.
 
 === "CodeDeploy LifeCycle Hook Example Event"
     ```json
-    --8<-- "examples/event_sources/events/codeDeployLifecycleHookEvent.json"
+    --8<-- "tests/events/codeDeployLifecycleHookEvent.json"
     ```
 
 ### CodePipeline Job
@@ -401,7 +401,7 @@ Data classes and utility functions to help create continuous delivery pipelines 
     ```
 === "CodePipeline Job Example Event"
     ```json hl_lines="3 19"
-    --8<-- "examples/event_sources/events/codePipelineEvent.json"
+    --8<-- "tests/events/codePipelineEvent.json"
     ```
 
 ### Cognito User Pool
@@ -437,7 +437,7 @@ Some examples for the Cognito User Pools Lambda triggers sources:
 
 === "Cognito Post Confirmation Example Event"
     ```json hl_lines="12-14"
-    --8<-- "examples/event_sources/events/cognitoPostConfirmationEvent.json"
+    --8<-- "tests/events/cognitoPostConfirmationEvent.json"
     ```
 
 #### Define Auth Challenge Example
@@ -455,7 +455,7 @@ This example is based on the AWS Cognito docs for [Define Auth Challenge Lambda 
 
 === "Cognito Define Auth Challengen Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cognitoDefineAuthChallengeEvent.json"
+    --8<-- "tests/events/cognitoDefineAuthChallengeEvent.json"
     ```
 
 #### Create Auth Challenge Example
@@ -468,9 +468,9 @@ This example is based on the AWS Cognito docs for [Create Auth Challenge Lambda 
     --8<-- "examples/event_sources/src/cognito_create_auth.py"
     ```
 
-=== "Cognito Define Auth Challengen Example Event"
+=== "Cognito Create Auth Challengen Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cognitoCreateAuthChallengeEvent.json"
+    --8<-- "tests/events/cognitoCreateAuthChallengeEvent.json"
     ```
 
 #### Verify Auth Challenge Response Example
@@ -485,7 +485,7 @@ This example is based on the AWS Cognito docs for [Verify Auth Challenge Respons
 
 === "Cognito Verify Auth Challengen Example Event"
     ```json
-    --8<-- "examples/event_sources/events/cognitoVerifyAuthChallengeResponseEvent.json"
+    --8<-- "tests/events/cognitoVerifyAuthChallengeResponseEvent.json"
     ```
 
 ### Connect Contact Flow
@@ -500,7 +500,7 @@ The example integrates with [Amazon Connect](https://docs.aws.amazon.com/connect
 
 === "Connect Contact Flow Example Event"
     ```json
-    --8<-- "examples/event_sources/events/connectContactFlowEventAll.json"
+    --8<-- "tests/events/connectContactFlowEventAll.json"
     ```
 
 ### DynamoDB Streams
@@ -519,7 +519,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
     ```
 === "DynamoDB Streams Example Event"
     ```json
-    --8<-- "examples/event_sources/events/dynamoStreamEvent.json"
+    --8<-- "tests/events/dynamoStreamEvent.json"
     ```
 
 ### EventBridge
@@ -534,7 +534,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 
 === "EventBridge Example Event"
     ```json
-    --8<-- "examples/event_sources/events/eventBridgeEvent.json"
+    --8<-- "tests/events/eventBridgeEvent.json"
     ```
 
 ### Kafka
@@ -549,7 +549,7 @@ This example is based on the AWS docs for [Amazon MSK](https://docs.aws.amazon.c
 
 === "Kafka Example Event"
     ```json
-    --8<-- "examples/event_sources/events/kafkaEventMsk.json"
+    --8<-- "tests/events/kafkaEventMsk.json"
     ```
 
 ### Kinesis streams
@@ -565,7 +565,7 @@ or plain text, depending on the original payload.
 
 === "Kinesis streams Example Event"
     ```json
-    --8<-- "examples/event_sources/events/kinesisStreamEvent.json"
+    --8<-- "tests/events/kinesisStreamEvent.json"
     ```
 
 ### Kinesis Firehose delivery stream
@@ -605,7 +605,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "kinesisFirehoseEvent.json"
     ```json
-    --8<-- "examples/event_sources/events/kinesisFirehoseKinesisEvent.json"
+    --8<-- "tests/events/kinesisFirehoseKinesisEvent.json"
     ```
 
 ### Lambda Function URL
@@ -620,7 +620,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Lambda Function URL Example Event"
     ```json
-    --8<-- "examples/event_sources/events/lambdaFunctionUrlEvent.json"
+    --8<-- "tests/events/lambdaFunctionUrlEvent.json"
     ```
 
 ### Rabbit MQ
@@ -637,7 +637,7 @@ for more details.
 
 === "Rabbit MQ Example Event"
     ```json
-    --8<-- "examples/event_sources/events/rabbitMQEvent.json"
+    --8<-- "tests/events/rabbitMQEvent.json"
     ```
 
 ### S3
@@ -652,7 +652,7 @@ Integration with Amazon S3 enables automatic, serverless processing of object-le
 
 === "S3 Example Event"
     ```json
-    --8<-- "examples/event_sources/events/s3Event.json"
+    --8<-- "tests/events/s3Event.json"
     ```
 
 ### S3 Batch Operations
@@ -668,7 +668,7 @@ This example is based on the AWS S3 Batch Operations documentation [Example Lamb
 === "S3 Batch Operations Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/s3BatchOperationEventSchemaV2.json"
+    --8<-- "tests/events/s3BatchOperationEventSchemaV2.json"
     ```
 
 ### S3 Object Lambda
@@ -700,7 +700,7 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 === "S3 EventBridge Notification Example Event"
 
     ```json
-    --8<-- "examples/event_sources/events/s3EventBridgeNotificationObjectCreatedEvent.json"
+    --8<-- "tests/events/s3EventBridgeNotificationObjectCreatedEvent.json"
     ```
 
 ### Secrets Manager
@@ -782,7 +782,7 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
 === "Lattice Example Event"
 
     ```json
-    --8<-- "examples/event_sources/src/vpc_lattice_v2_payload.json"
+    --8<-- "examples/event_sources/events/vpc_lattice_v2_payload.json"
     ```
 
 ### VPC Lattice V1
@@ -800,7 +800,7 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
 === "Lattice Example Event"
 
     ```json
-    --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
+    --8<-- "examples/event_sources/events/vpc_lattice_payload.json"
     ```
 
 ## Advanced
@@ -820,9 +820,9 @@ However, certain events may contain sensitive fields such as `secret_access_key`
 
 === "debugging_event.json"
     ```json hl_lines="28 29"
-    --8<-- "examples/event_sources/src/debugging_event.json"
+    --8<-- "examples/event_sources/events/debugging_event.json"
     ```
 === "debugging_output.json"
     ```json hl_lines="16 17 18"
-    --8<-- "examples/event_sources/src/debugging_output.json"
+    --8<-- "examples/event_sources/events/debugging_output.json"
     ```

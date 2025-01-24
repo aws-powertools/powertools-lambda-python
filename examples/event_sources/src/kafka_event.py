@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.data_classes import KafkaEvent, event_source
 
 
-def do_something_with(key: bytes, value: dict):
+def do_something_with(key: str, value: str):
     print(f"key: {key}, value: {value}")
 
 

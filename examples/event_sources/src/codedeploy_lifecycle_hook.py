@@ -2,7 +2,7 @@ from aws_lambda_powertools.utilities.data_classes import CodeDeployLifecycleHook
 
 
 @event_source(data_class=CodeDeployLifecycleHookEvent)
-def lambda_handler(event: CodeDeployLifecycleHookEvent, context) -> None:
+def lambda_handler(event: CodeDeployLifecycleHookEvent, context):
     deployment_id = event.deployment_id
     lifecycle_event_hook_execution_id = event.lifecycle_event_hook_execution_id
 
