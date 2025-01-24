@@ -27,7 +27,7 @@ class CloudWatchLogsDecode(BaseModel):
 
 
 class CloudWatchLogsData(BaseModel):
-    decoded_data: CloudWatchLogsDecode = Field(None, alias="data")
+    decoded_data: CloudWatchLogsDecode = Field(..., alias="data")
 
     @field_validator("decoded_data", mode="before")
     def prepare_data(cls, value):

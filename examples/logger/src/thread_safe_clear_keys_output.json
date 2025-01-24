@@ -1,0 +1,34 @@
+[
+    {
+        "level": "INFO",
+        "location": "threaded_func:11",
+        "message": "Collecting payment",
+        "timestamp": "2024-09-08 12:26:10,648-0400",
+        "service": "payment",
+        "order_id": "order_id_value_1",
+        "thread_id": 140077070292544
+    },
+    {
+        "level": "INFO",
+        "location": "threaded_func:11",
+        "message": "Collecting payment",
+        "timestamp": "2024-09-08 12:26:10,649-0400",
+        "service": "payment",
+        "order_id": "order_id_value_2",
+        "thread_id": 140077061899840
+    },
+    {
+        "level": "INFO",
+        "location": "threaded_func:13",
+        "message": "Exiting thread",
+        "timestamp": "2024-09-08 12:26:10,649-0400",
+        "service": "payment"
+    },
+    {
+        "level": "INFO",
+        "location": "threaded_func:13",
+        "message": "Exiting thread",
+        "timestamp": "2024-09-08 12:26:10,649-0400",
+        "service": "payment"
+    }
+]

@@ -126,6 +126,14 @@ This article will walk you through using Powertools for AWS Lambda to optimize y
 
 [Streaming data with AWS Lambda & Powertools for AWS Lambda](https://towardsdev.com/streaming-data-with-aws-lambda-5f0e81f854cd){target="_blank" rel="nofollow"}
 
+### Simplified Data Masking in AWS Lambda with Powertools
+
+Learn to implement data masking in AWS Lambda with Powertools, protecting sensitive data in healthcare and finance while ensuring compliance with HIPAA and PCI-DSS regulations.
+
+> **Author: [Avinash Dalvi](https://www.linkedin.com/in/avinash-dalvi-315b021a/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Simplified Data Masking in AWS Lambda with Powertools](https://www.internetkatta.com/simplified-data-masking-in-aws-lambda-with-powertool){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser

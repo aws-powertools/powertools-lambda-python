@@ -72,4 +72,4 @@ class APIGatewayProxyEventV2Model(BaseModel):
 class ApiGatewayAuthorizerRequestV2(APIGatewayProxyEventV2Model):
     type: Literal["REQUEST"]
     routeArn: str
-    identitySource: List[str]
+    identitySource: Optional[List[str]] = None

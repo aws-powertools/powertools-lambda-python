@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Handler: main.handler
-    Runtime: python3.8
+    Runtime: python3.13
     MemorySize: 128
     Tracing: Active
     Environment:

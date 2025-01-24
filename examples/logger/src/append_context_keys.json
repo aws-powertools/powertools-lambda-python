@@ -1,0 +1,18 @@
+[
+    {
+        "level": "INFO",
+        "location": "lambda_handler:8",
+        "message": "Log with context",
+        "timestamp": "2024-03-21T10:30:00.123Z",
+        "service": "example_service",
+        "user_id": "123",
+        "operation": "process"
+    },
+    {
+        "level": "INFO",
+        "location": "lambda_handler:10",
+        "message": "Log without context",
+        "timestamp": "2024-03-21T10:30:00.124Z",
+        "service": "example_service"
+    }
+]

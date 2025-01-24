@@ -396,11 +396,9 @@ to test applications at different stages of deployment.
 Data classes and utility functions to help create continuous delivery pipelines tasks with AWS Lambda.
 
 === "app.py"
-
     ```python hl_lines="1 4"
     --8<-- "examples/event_sources/src/code_pipeline_job.py"
     ```
-
 === "CodePipeline Job Example Event"
     ```json hl_lines="3 19"
     --8<-- "examples/event_sources/events/codePipelineEvent.json"

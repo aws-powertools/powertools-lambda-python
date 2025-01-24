@@ -1045,6 +1045,25 @@ def test_clear_default_dimensions(namespace):
     assert not my_metrics.default_dimensions
 
 
+def test_add_dimensions_with_empty_value(namespace, capsys, metric):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    my_dimension = "my_empty_dimension"
+
+    # WHEN we try to add a dimension with empty value
+    with pytest.warns(UserWarning, match=f"The dimension {my_dimension} doesn't meet the requirements *"):
+        my_metrics.add_dimension(name="my_empty_dimension", value=" ")
+
+    my_metrics.add_metric(**metric)
+    my_metrics.flush_metrics()
+
+    output = capture_metrics_output(capsys)
+
+    # THEN the serialized metric should not contain this dimension
+    assert my_dimension not in output
+
+
 def test_get_and_set_namespace_and_service_properties(namespace, service, metrics, capsys):
     # GIVEN Metrics instance is initialized without namespace and service
     my_metrics = Metrics()

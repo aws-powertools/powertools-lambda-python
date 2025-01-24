@@ -188,7 +188,7 @@ class SSMProvider(BaseProvider):
         sdk_options["decrypt"] = decrypt
         sdk_options["recursive"] = recursive
 
-        return super().get_multiple(path, max_age, transform, force_fetch, raise_on_transform_error, **sdk_options)
+        return super().get_multiple(path, max_age, transform, raise_on_transform_error, force_fetch, **sdk_options)
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users

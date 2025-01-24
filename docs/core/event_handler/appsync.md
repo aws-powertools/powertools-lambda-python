@@ -270,8 +270,8 @@ Let's assume you have `split_operation.py` as your Lambda function entrypoint an
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
 
-???+ info
-    For safety, we always clear any data available in the `context` dictionary after each invocation.
+???+ warning
+    For safety, we clear the context after each invocation, except for async single resolvers. For these, use `app.context.clear()` before returning the function.
 
 ???+ tip
     This can also be useful for middlewares injecting contextual information before a request is processed.
@@ -287,6 +287,19 @@ You can use `append_context` when you want to share data between your App and Ro
 	```python hl_lines="22"
     --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
 	```
+
+### Exception handling
+
+You can use **`exception_handler`** decorator with any Python exception. This allows you to handle a common exception outside your resolver, for example validation errors.
+
+The `exception_handler` function also supports passing a list of exception types you wish to handle with one handler.
+
+```python hl_lines="5-7 11" title="Exception handling"
+--8<-- "examples/event_handler_graphql/src/exception_handling_graphql.py"
+```
+
+???+ warning
+    This is not supported when using async single resolvers.
 
 ### Batch processing
 

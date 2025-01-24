@@ -27,8 +27,8 @@ class S3RequestParameters(BaseModel):
 
 
 class S3ResponseElements(BaseModel):
-    x_amz_request_id: str = Field(None, alias="x-amz-request-id")
-    x_amz_id_2: str = Field(None, alias="x-amz-id-2")
+    x_amz_request_id: str = Field(..., alias="x-amz-request-id")
+    x_amz_id_2: str = Field(..., alias="x-amz-id-2")
 
 
 class S3OwnerIdentify(BaseModel):
@@ -60,7 +60,7 @@ class S3EventNotificationObjectModel(BaseModel):
     key: str
     size: Optional[NonNegativeFloat] = None
     etag: str = Field(default="")
-    version_id: str = Field(None, alias="version-id")
+    version_id: Optional[str] = Field(None, alias="version-id")
     sequencer: Optional[str] = None
 
 
@@ -72,9 +72,9 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
     version: str
     bucket: S3EventNotificationEventBridgeBucketModel
     object: S3EventNotificationObjectModel  # noqa: A003,VNE003
-    request_id: str = Field(None, alias="request-id")
+    request_id: str = Field(..., alias="request-id")
     requester: str
-    source_ip_address: str = Field(None, alias="source-ip-address")
+    source_ip_address: Optional[str] = Field(None, alias="source-ip-address")
     reason: Optional[str] = None
     deletion_type: Optional[str] = Field(None, alias="deletion-type")
     restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
@@ -83,7 +83,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
     destination_access_tier: Optional[str] = Field(None, alias="destination-access-tier")
 
 
-class S3EventNotificationEventBridgeModel(EventBridgeModel):
+class S3EventNotificationEventBridgeModel(EventBridgeModel):  # type: ignore[override]
     detail: S3EventNotificationEventBridgeDetailModel
 
 

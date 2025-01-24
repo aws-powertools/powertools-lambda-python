@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import requests
 
 from aws_lambda_powertools import Logger, Tracer
@@ -27,6 +29,7 @@ def get_todos():
 @app.get("/todos/<todo_id>", compress=True)
 @tracer.capture_method
 def get_todo_by_id(todo_id: str):  # same example using Response class
+    todo_id = quote(todo_id, safe="")
     todos: requests.Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{todo_id}")
     todos.raise_for_status()
 

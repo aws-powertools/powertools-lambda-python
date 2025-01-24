@@ -14,8 +14,8 @@ from aws_cdk import (
 )
 from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission, Runtime
 from aws_cdk.aws_ssm import StringParameter
-from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayerPythonV3
 from constructs import Construct
+from layer_constructors.layer_stack import LambdaPowertoolsLayerPythonV3
 
 
 @jsii.implements(IAspect)
@@ -46,11 +46,11 @@ class Layer(Construct):
         layer = LambdaPowertoolsLayerPythonV3(
             self,
             "Layer",
-            layer_version_name=layer_version_name,
-            version=powertools_version,
+            layer_name=layer_version_name,
+            powertools_version=powertools_version,
             python_version=python_version,
             include_extras=True,
-            compatible_architectures=[architecture] if architecture else [],
+            architecture=architecture or Architecture.X86_64,
         )
         layer.apply_removal_policy(RemovalPolicy.RETAIN)
 
@@ -80,11 +80,9 @@ class LayerStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         python_version_normalized = python_version.replace(".", "")
-        layer_name_x86 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-x86"
+        layer_name_x86_64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-x86_64"
         layer_name_arm64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-arm64"
 
-        if python_version == "python3.8":
-            python_version = Runtime.PYTHON_3_8
         if python_version == "python3.9":
             python_version = Runtime.PYTHON_3_9
         if python_version == "python3.10":
@@ -93,6 +91,8 @@ class LayerStack(Stack):
             python_version = Runtime.PYTHON_3_11
         if python_version == "python3.12":
             python_version = Runtime.PYTHON_3_12
+        if python_version == "python3.13":
+            python_version = Runtime.PYTHON_3_13
 
         has_arm64_support = CfnParameter(
             self,
@@ -119,7 +119,7 @@ class LayerStack(Stack):
         layer_single = Layer(
             self,
             f"LayerSingle-{python_version_normalized}",
-            layer_version_name=layer_name_x86,
+            layer_version_name=layer_name_x86_64,
             python_version=python_version,
             powertools_version=powertools_version,
         )
@@ -142,7 +142,7 @@ class LayerStack(Stack):
         layer = Layer(
             self,
             f"Layer-{python_version_normalized}",
-            layer_version_name=layer_name_x86,
+            layer_version_name=layer_name_x86_64,
             powertools_version=powertools_version,
             python_version=python_version,
             architecture=Architecture.X86_64,

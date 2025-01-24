@@ -83,7 +83,7 @@ timeline
                                 : Create PR
 
     Lambda Layers               : Fetch PyPi release
-                                : Build x86 architecture
+                                : Build x86_64 architecture
                                 : Build ARM architecture
                                 : Deploy Beta
                                 : Canary testing

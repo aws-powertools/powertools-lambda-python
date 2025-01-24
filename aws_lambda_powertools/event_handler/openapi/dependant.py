@@ -106,7 +106,7 @@ def get_typed_signature(call: Callable[..., Any]) -> inspect.Signature:
     signature = inspect.signature(call)
 
     # Gets the global namespace for the call. This is used to resolve forward references.
-    globalns = getattr(call, "__global__", {})
+    globalns = getattr(call, "__globals__", {})
 
     typed_params = [
         inspect.Parameter(

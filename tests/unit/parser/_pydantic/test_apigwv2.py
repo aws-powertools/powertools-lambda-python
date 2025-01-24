@@ -130,3 +130,12 @@ def test_apigw_v2_request_authorizer():
     assert parsed_event.type == raw_event["type"]
     assert parsed_event.identitySource == raw_event["identitySource"]
     assert parsed_event.routeArn == raw_event["routeArn"]
+
+
+def test_apigw_v2_request_authorizer_without_identity_source():
+    raw_event = load_event("apiGatewayAuthorizerV2Event.json")
+    raw_event["identitySource"] = None
+
+    parsed_event: ApiGatewayAuthorizerRequestV2 = ApiGatewayAuthorizerRequestV2(**raw_event)
+
+    assert parsed_event.identitySource == raw_event["identitySource"]

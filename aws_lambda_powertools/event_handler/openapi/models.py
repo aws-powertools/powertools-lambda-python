@@ -201,7 +201,7 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = None
     readOnly: Optional[bool] = None
     writeOnly: Optional[bool] = None
-    examples: Optional[List["Example"]] = None
+    examples: Optional[List[Any]] = None
     # Ref: OpenAPI 3.0.0: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#schema-object
     # Schema Object
     discriminator: Optional[Discriminator] = None
@@ -363,6 +363,7 @@ class SecuritySchemeType(Enum):
     http = "http"
     oauth2 = "oauth2"
     openIdConnect = "openIdConnect"
+    mutualTLS = "mutualTLS"
 
 
 class SecurityBase(OpenAPIExtensions):
@@ -389,7 +390,7 @@ class HTTPBase(SecurityBase):
     scheme: str
 
 
-class HTTPBearer(HTTPBase):
+class HTTPBearer(HTTPBase):  # type: ignore[override]
     scheme: Literal["bearer"] = "bearer"
     bearerFormat: Optional[str] = None
 
@@ -440,7 +441,11 @@ class OpenIdConnect(SecurityBase):
     openIdConnectUrl: str
 
 
-SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer]
+class MutualTLS(SecurityBase):
+    type_: SecuritySchemeType = Field(default=SecuritySchemeType.mutualTLS, alias="type")
+
+
+SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer, MutualTLS]
 
 
 # https://swagger.io/specification/#components-object

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pytest
 from pydantic import BaseModel
 
@@ -219,3 +221,47 @@ def test_idempotent_function_pydantic_with_jmespath():
 
     # THEN idempotency key assertion happens at MockPersistenceLayer
     assert result == payment.transaction_id
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_pydantic_with_optional_return(output_serializer_type: str):
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_with_optional_return.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = PydanticSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = PydanticSerializer
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> Optional[PaymentOutput]:
+        return PaymentOutput(**payment.dict())
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id

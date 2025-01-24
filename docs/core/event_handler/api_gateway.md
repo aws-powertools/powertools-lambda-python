@@ -128,8 +128,12 @@ Here's an example on how we can handle the `/todos` path.
 
 When using Amazon API Gateway HTTP API to front your Lambda functions, you can use `APIGatewayHttpResolver`.
 
+<!-- markdownlint-disable MD013 -->
 ???+ note
     Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
+
+    If you're using Terraform to deploy a HTTP API, note that it defaults the [payload_format_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/apigatewayv2_integration#payload_format_version){target="_blank" rel="nofollow"} value to 1.0 if not specified.
+<!-- markdownlint-enable MD013 -->
 
 ```python hl_lines="5 11" title="Using HTTP API resolver"
 --8<-- "examples/event_handler_rest/src/getting_started_http_api_resolver.py"
@@ -198,7 +202,7 @@ Each dynamic route you set must be part of your function signature. This allows 
 
 === "dynamic_routes.py"
 
-    ```python hl_lines="14 16"
+    ```python hl_lines="16 18"
     --8<-- "examples/event_handler_rest/src/dynamic_routes.py"
     ```
 
@@ -640,7 +644,7 @@ matches one of the allowed values.
 
 === "setting_cors.py"
 
-    ```python hl_lines="5 11-12 34"
+    ```python hl_lines="7 14-15 38"
     --8<-- "examples/event_handler_rest/src/setting_cors.py"
     ```
 
@@ -652,7 +656,7 @@ matches one of the allowed values.
 
 === "setting_cors_extra_origins.py"
 
-    ```python hl_lines="5 11-12 34"
+    ```python hl_lines="7 14 15 38"
     --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins.py"
     ```
 
@@ -943,7 +947,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "compressing_responses_using_route.py"
 
-    ```python hl_lines="17 27"
+    ```python hl_lines="19 29"
      --8<-- "examples/event_handler_rest/src/compressing_responses_using_route.py"
     ```
 
@@ -1099,6 +1103,14 @@ Security schemes are declared at the top-level first. You can reference them glo
 
     1. Using the oauth security scheme defined bellow, scoped to the "admin" role.
 
+=== "Global security schemes and optional security per route"
+
+    ```python title="security_schemes_global_and_optional.py" hl_lines="22 37-46"
+    --8<-- "examples/event_handler_rest/src/security_schemes_global_and_optional.py"
+    ```
+
+    1. To make security optional in a specific route, an empty security requirement ({}) can be included in the array.
+
 OpenAPI 3 lets you describe APIs protected using the following security schemes:
 
 | Security Scheme                                                                                                                                                                         | Type            | Description                                                                                                                                                                                                                                                                         |
@@ -1107,6 +1119,7 @@ OpenAPI 3 lets you describe APIs protected using the following security schemes:
 | [API keys](https://swagger.io/docs/specification/authentication/api-keys/https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies) | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
 | [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                                                                                | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
 | [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"}                                                             | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
+| [Mutual TLS](https://swagger.io/specification/#security-scheme-object){target="_blank"}.                                                                                                | `MutualTLS`     | Client/server certificate mutual authentication scheme. |
 
 ???-note "Using OAuth2 with the Swagger UI?"
     You can use the `OAuth2Config` option to configure a default OAuth2 app on the generated Swagger UI.
@@ -1154,7 +1167,7 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
     !!! info
         This means all methods, including [middleware](#middleware) will work as usual.
 
-    ```python hl_lines="5 13 16 25 28"
+    ```python hl_lines="7 10 15 18 27 30"
     --8<-- "examples/event_handler_rest/src/split_route_module.py"
     ```
 
@@ -1186,7 +1199,7 @@ When necessary, you can set a prefix when including a router object. This means 
 
 === "split_route_prefix_module.py"
 
-    ```python hl_lines="13 25"
+    ```python hl_lines="14 26"
     --8<-- "examples/event_handler_rest/src/split_route_prefix_module.py"
     ```
 

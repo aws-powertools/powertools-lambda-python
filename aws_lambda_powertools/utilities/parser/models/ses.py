@@ -32,7 +32,7 @@ class SesMailHeaders(BaseModel):
 
 
 class SesMailCommonHeaders(BaseModel):
-    header_from: List[str] = Field(None, alias="from")
+    header_from: List[str] = Field(..., alias="from")
     to: List[str]
     cc: Optional[List[str]] = None
     bcc: Optional[List[str]] = None

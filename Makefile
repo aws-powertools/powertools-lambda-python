@@ -6,8 +6,12 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
-	poetry config --local virtualenvs.in-project true
 	@$(MAKE) dev-version-plugin
+	poetry install --extras "all redis datamasking"
+	pre-commit install
+
+dev-quality-code:
+	pip install --upgrade pip pre-commit poetry
 	poetry install --extras "all redis datamasking"
 	pre-commit install
 
@@ -116,4 +120,4 @@ mypy:
 
 
 dev-version-plugin:
-	poetry self add git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4
+	poetry self add git+https://github.com/monim67/poetry-bumpversion@348de6f247222e2953d649932426e63492e0a6bf

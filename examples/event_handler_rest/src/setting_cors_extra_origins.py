@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import requests
 from requests import Response
 
@@ -26,6 +28,7 @@ def get_todos():
 @app.get("/todos/<todo_id>")
 @tracer.capture_method
 def get_todo_by_id(todo_id: str):  # value come as str
+    todo_id = quote(todo_id, safe="")
     todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{todo_id}")
     todos.raise_for_status()
 

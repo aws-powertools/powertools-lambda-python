@@ -50,7 +50,7 @@ class KafkaSelfManagedEventModel(KafkaBaseEventModel):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
     """
 
-    eventSource: Literal["aws:SelfManagedKafka"]
+    eventSource: Literal["SelfManagedKafka"]
 
 
 class KafkaMskEventModel(KafkaBaseEventModel):

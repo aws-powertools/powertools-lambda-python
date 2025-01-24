@@ -7,16 +7,8 @@ import os
 import random
 import sys
 import warnings
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    Mapping,
-    TypeVar,
-    overload,
-)
+from contextlib import contextmanager
+from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, overload
 
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_PRECONFIGURED,
@@ -589,6 +581,44 @@ class Logger:
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
 
+    @contextmanager
+    def append_context_keys(self, **additional_keys: Any) -> Generator[None, None, None]:
+        """
+        Context manager to temporarily add logging keys.
+
+        Parameters:
+        -----------
+        **keys: Any
+            Key-value pairs to include in the log context during the lifespan of the context manager.
+
+        Example:
+        --------
+        >>> logger = Logger(service="example_service")
+        >>> with logger.append_context_keys(user_id="123", operation="process"):
+        >>>     logger.info("Log with context")
+        >>> logger.info("Log without context")
+        """
+        with self.registered_formatter.append_context_keys(**additional_keys):
+            yield
+
+    # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
+    # They prevent race conditions and ensure data consistency across multiple threads.
+    def thread_safe_append_keys(self, **additional_keys: object) -> None:
+        # Append additional key-value pairs to the context safely in a thread-safe manner.
+        self.registered_formatter.thread_safe_append_keys(**additional_keys)
+
+    def thread_safe_get_current_keys(self) -> dict[str, Any]:
+        # Retrieve the current context keys safely in a thread-safe manner.
+        return self.registered_formatter.thread_safe_get_current_keys()
+
+    def thread_safe_remove_keys(self, keys: Iterable[str]) -> None:
+        # Remove specified keys from the context safely in a thread-safe manner.
+        self.registered_formatter.thread_safe_remove_keys(keys)
+
+    def thread_safe_clear_keys(self) -> None:
+        # Clear all keys from the context safely in a thread-safe manner.
+        self.registered_formatter.thread_safe_clear_keys()
+
     def structure_logs(self, append: bool = False, formatter_options: dict | None = None, **keys) -> None:
         """Sets logging formatting to JSON.
 
@@ -633,6 +663,7 @@ class Logger:
 
         # Mode 3
         self.registered_formatter.clear_state()
+        self.registered_formatter.thread_safe_clear_keys()
         self.registered_formatter.append_keys(**log_keys)
 
     def set_correlation_id(self, value: str | None) -> None:

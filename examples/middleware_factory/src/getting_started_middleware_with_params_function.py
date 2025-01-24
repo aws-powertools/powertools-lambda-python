@@ -42,9 +42,7 @@ def obfuscate_sensitive_data(
         if guest_data.get(guest_field):
             event["detail"]["guest"][guest_field] = obfuscate_data(str(guest_data.get(guest_field)))
 
-    response = handler(event, context)
-
-    return response
+    return handler(event, context)
 
 
 def obfuscate_data(value: str) -> bytes:

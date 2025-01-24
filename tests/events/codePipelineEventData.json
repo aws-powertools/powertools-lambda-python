@@ -40,6 +40,10 @@
                 "secretAccessKey": "6CGtmAa3lzWtV7a...",
                 "sessionToken": "IQoJb3JpZ2luX2VjEA...",
                 "expirationTime": 1575493418000
+            },
+            "encryptionKey": {
+                "id": "someKey",
+                "type": "KMS"
             }
         }
     }

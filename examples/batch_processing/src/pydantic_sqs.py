@@ -14,7 +14,7 @@ class Order(BaseModel):
     item: dict
 
 
-class OrderSqsRecord(SqsRecordModel):
+class OrderSqsRecord(SqsRecordModel):  # type: ignore[override]
     body: Json[Order]  # deserialize order data from JSON string
 
 

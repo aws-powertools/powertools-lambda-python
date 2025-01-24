@@ -38,6 +38,7 @@ lint.ignore = [
     "B904",    # raise-without-from-inside-except - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
     "PYI024",
+    "A005"
 ]
 
 # Exclude files and directories

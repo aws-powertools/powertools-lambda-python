@@ -96,12 +96,12 @@ class BaseInfrastructure(InfrastructureProvider):
         self.create_lambda_functions()
         ```
 
-        Creating Lambda functions and override runtime to Python 3.12
+        Creating Lambda functions and override runtime to Python 3.13
 
         ```python
         from aws_cdk.aws_lambda import Runtime
 
-        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_12)
+        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_13)
         ```
         """
         if not self._handlers_dir.exists():
@@ -113,12 +113,11 @@ class BaseInfrastructure(InfrastructureProvider):
             "aws-lambda-powertools-e2e-test",
             layer_version_name="aws-lambda-powertools-e2e-test",
             compatible_runtimes=[
-                Runtime.PYTHON_3_7,
-                Runtime.PYTHON_3_8,
                 Runtime.PYTHON_3_9,
                 Runtime.PYTHON_3_10,
                 Runtime.PYTHON_3_11,
                 Runtime.PYTHON_3_12,
+                Runtime.PYTHON_3_13,
             ],
             compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
@@ -250,9 +249,7 @@ class BaseInfrastructure(InfrastructureProvider):
     def _determine_runtime_version(self) -> Runtime:
         """Determine Python runtime version based on the current Python interpreter"""
         version = sys.version_info
-        if version.major == 3 and version.minor == 8:
-            return Runtime.PYTHON_3_8
-        elif version.major == 3 and version.minor == 9:
+        if version.major == 3 and version.minor == 9:
             return Runtime.PYTHON_3_9
         elif version.major == 3 and version.minor == 10:
             return Runtime.PYTHON_3_10
@@ -260,8 +257,10 @@ class BaseInfrastructure(InfrastructureProvider):
             return Runtime.PYTHON_3_11
         elif version.major == 3 and version.minor == 12:
             return Runtime.PYTHON_3_12
+        elif version.major == 3 and version.minor == 13:
+            return Runtime.PYTHON_3_13
         else:
-            raise Exception(f"Unsupported Python version: {version}")
+            raise ValueError(f"Unsupported Python version: {version}")
 
     def create_resources(self) -> None:
         """Create any necessary CDK resources. It'll be called before deploy
