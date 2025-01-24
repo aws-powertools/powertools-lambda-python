@@ -1,0 +1,7 @@
+{
+  "username": "value",
+  "password": "value",
+  "protocol": "SFTP",
+  "serverId": "s-abcd123456",
+  "sourceIp": "192.168.0.100"
+}
