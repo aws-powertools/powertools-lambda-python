@@ -559,7 +559,7 @@ or plain text, depending on the original payload.
 
 === "app.py"
 
-    ```python hl_lines="4 10"
+    ```python hl_lines="4 11"
     --8<-- "examples/event_sources/src/kinesis_streams.py"
     ```
 
