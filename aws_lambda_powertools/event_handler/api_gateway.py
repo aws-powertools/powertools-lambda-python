@@ -2521,7 +2521,7 @@ class Router(BaseRouter):
             frozen_responses = _FrozenDict(responses) if responses else None
             frozen_tags = frozenset(tags) if tags else None
             frozen_security = _FrozenListDict(security) if security else None
-            fronzen_openapi_extensions = _FrozenDict(openapi_extensions) if openapi_extensions else None
+            frozen_openapi_extensions = _FrozenDict(openapi_extensions) if openapi_extensions else None
 
             route_key = (
                 rule,
@@ -2537,7 +2537,7 @@ class Router(BaseRouter):
                 operation_id,
                 include_in_schema,
                 frozen_security,
-                fronzen_openapi_extensions,
+                frozen_openapi_extensions,
                 deprecated,
             )
 
