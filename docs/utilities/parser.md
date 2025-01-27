@@ -259,7 +259,7 @@ If you run using a test event `{"message": "hello universe"}` you should expect 
 
 `model_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted or comparing field values.
 
-???+ tip For users of `root_validator` (deprecated as of version 3.0.0), it is recommended to use `model_validator` instead.
+!!! tip "If you are still using the deprecated `root_validator` function, switch to `model_validator` for the latest Pydantic functionality."
 
 ```python title="model_validator.py" hl_lines="1 12-17"
 --8<-- "examples/parser/src/model_validator.py"
