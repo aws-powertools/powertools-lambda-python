@@ -1,0 +1,27 @@
+{
+    "eventSource": "aws:mq",
+    "eventSourceArn": "arn:aws:mq:us-east-2:111122223333:broker:test:b-9bcfa592-423a-4942-879d-eb284b418fc8",
+    "messages": [
+        {
+            "messageID": "ID:b-9bcfa592-423a-4942-879d-eb284b418fc8-1.mq.us-east-2.amazonaws.com-37557-1234520418293-4:1:1:1:1",
+            "messageType": "jms/text-message",
+            "destination": {
+                "physicalName": "testQueue"
+            },
+            "data": "QUJDOkFBQUE=",
+            "timestamp": 1598827811958,
+            "properties": {
+                "index": "1"
+            }
+        },
+        {
+            "messageID": "ID:b-9bcfa592-423a-4942-879d-eb284b418fc8-1.mq.us-east-2.amazonaws.com-37557-1234520418293-4:1:1:1:2",
+            "messageType": "jms/bytes-message",
+            "destination": {
+                "physicalName": "testQueue2"
+            },
+            "data": "LQaGQ82S48k=",
+            "timestamp": 1598827811959
+        }
+    ]
+}

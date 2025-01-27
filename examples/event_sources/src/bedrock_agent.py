@@ -1,12 +1,11 @@
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent, event_source
-from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
 
 @event_source(data_class=BedrockAgentEvent)
-def lambda_handler(event: BedrockAgentEvent, context: LambdaContext) -> dict:
+def lambda_handler(event: BedrockAgentEvent, context) -> dict:
     input_text = event.input_text
 
     logger.info(f"Bedrock Agent {event.action_group} invoked with input", input_text=input_text)

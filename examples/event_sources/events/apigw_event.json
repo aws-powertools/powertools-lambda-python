@@ -1,0 +1,20 @@
+{
+    "resource": "/helloworld",
+    "path": "/hello",
+    "httpMethod": "GET",
+    "headers": {
+        "Accept": "*/*",
+        "Host": "api.example.com"
+    },
+    "queryStringParameters": {
+        "name": "John"
+    },
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+        "stage": "prod"
+    },
+    "body": null,
+    "isBase64Encoded": false
+}
