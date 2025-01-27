@@ -98,8 +98,8 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [SES](#ses) | `SESEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/ses_event.py) |
 | [SNS](#sns) | `SNSEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/sns_event.py) |
 | [SQS](#sqs) | `SQSEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/sqs_event.py) |
-| [TransferFamilyAuthorizer]                                                    | `TransferFamilyAuthorizer`                         |
-| [TransferFamilyAuthorizerResponse]                                            | `TransferFamilyAuthorizerResponse`                 |
+| [TransferFamilyAuthorizer]                                                    | `TransferFamilyAuthorizer`                         | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/transfer_family_event.py) |
+| [TransferFamilyAuthorizerResponse]                                            | `TransferFamilyAuthorizerResponse`                 | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/transfer_family_event.py) |
 | [VPC Lattice V2](#vpc-lattice-v2) | `VPCLatticeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
 | [VPC Lattice V1](#vpc-lattice-v1) | `VPCLatticeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
 
