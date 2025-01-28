@@ -63,6 +63,8 @@ jobs:
         run: make dev-quality-code
       - name: testing export
         run: poetry export --format requirements.txt --output requirements.txt
+      - name: reading export
+        run: cat requirements.txt
       - name: Formatting and Linting
         run: make lint
       - name: Static type checking
