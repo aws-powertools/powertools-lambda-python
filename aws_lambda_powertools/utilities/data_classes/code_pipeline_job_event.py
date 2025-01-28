@@ -236,7 +236,25 @@ class CodePipelineJobEvent(DictWrapper):
                 return artifact
         return None
 
-    def get_artifact(self, artifact_name: str, filename: str) -> str | None:
+    def find_output_artifact(self, artifact_name: str) -> CodePipelineArtifact | None:
+        """Find an output artifact by artifact name
+
+        Parameters
+        ----------
+        artifact_name : str
+            The name of the output artifact to look for
+
+        Returns
+        -------
+        CodePipelineArtifact, None
+            Matching CodePipelineArtifact if found
+        """
+        for artifact in self.data.output_artifacts:
+            if artifact.name == artifact_name:
+                return artifact
+        return None
+
+    def get_artifact(self, artifact_name: str, filename: str | None = None) -> str | None:
         """Get a file within an artifact zip on s3
 
         Parameters
@@ -245,6 +263,7 @@ class CodePipelineJobEvent(DictWrapper):
             Name of the S3 artifact to download
         filename : str
             The file name within the artifact zip to extract as a string
+            If None, this will return the raw object body.
 
         Returns
         -------
@@ -255,10 +274,67 @@ class CodePipelineJobEvent(DictWrapper):
         if artifact is None:
             return None
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            s3 = self.setup_s3_client()
-            bucket = artifact.location.s3_location.bucket_name
-            key = artifact.location.s3_location.key
-            s3.download_file(bucket, key, tmp_file.name)
-            with zipfile.ZipFile(tmp_file.name, "r") as zip_file:
-                return zip_file.read(filename).decode("UTF-8")
+        s3 = self.setup_s3_client()
+        bucket = artifact.location.s3_location.bucket_name
+        key = artifact.location.s3_location.key
+
+        if filename:
+            with tempfile.NamedTemporaryFile() as tmp_file:
+                s3.download_file(bucket, key, tmp_file.name)
+                with zipfile.ZipFile(tmp_file.name, "r") as zip_file:
+                    return zip_file.read(filename).decode("UTF-8")
+
+        return s3.get_object(Bucket=bucket, Key=key)["Body"].read()
+
+    def put_artifact(self, artifact_name: str, body: Any, content_type: str) -> None:
+        """Writes an object to an s3 output artifact.
+
+        Parameters
+        ----------
+        artifact_name : str
+            Name of the S3 artifact to upload
+        body: Any
+            The data to be written. Binary files should use io.BytesIO.
+        content_type: str
+            The content type of the data.
+
+        Returns
+        -------
+        None
+        """
+        artifact = self.find_output_artifact(artifact_name)
+        if artifact is None:
+            raise ValueError(f"Artifact not found: {artifact_name}.")
+
+        s3 = self.setup_s3_client()
+        bucket = artifact.location.s3_location.bucket_name
+        key = artifact.location.s3_location.key
+
+        # boto3 doesn't support None to omit the parameter when using ServerSideEncryption and SSEKMSKeyId
+        # So we are using if/else instead.
+
+        if self.data.encryption_key:
+
+            encryption_key_id = self.data.encryption_key.get_id
+            encryption_key_type = self.data.encryption_key.get_type
+            if encryption_key_type == "KMS":
+                encryption_key_type = "aws:kms"
+
+            s3.put_object(
+                Bucket=bucket,
+                Key=key,
+                ContentType=content_type,
+                Body=body,
+                ServerSideEncryption=encryption_key_type,
+                SSEKMSKeyId=encryption_key_id,
+                BucketKeyEnabled=True,
+            )
+
+        else:
+            s3.put_object(
+                Bucket=bucket,
+                Key=key,
+                ContentType=content_type,
+                Body=body,
+                BucketKeyEnabled=True,
+            )

@@ -18,7 +18,13 @@ class EventHandlerStack(BaseInfrastructure):
         functions = self.create_lambda_functions(function_props={"timeout": Duration.seconds(10)})
 
         self._create_alb(function=[functions["AlbHandler"], functions["AlbHandlerWithBodyNone"]])
-        self._create_api_gateway_rest(function=[functions["ApiGatewayRestHandler"], functions["OpenapiHandler"]])
+        self._create_api_gateway_rest(
+            function=[
+                functions["ApiGatewayRestHandler"],
+                functions["OpenapiHandler"],
+                functions["OpenapiHandlerWithPep563"],
+            ],
+        )
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
@@ -91,6 +97,9 @@ class EventHandlerStack(BaseInfrastructure):
 
         openapi_schema = apigw.root.add_resource("openapi_schema")
         openapi_schema.add_method("GET", apigwv1.LambdaIntegration(function[1], proxy=True))
+
+        openapi_schema = apigw.root.add_resource("openapi_schema_with_pep563")
+        openapi_schema.add_method("GET", apigwv1.LambdaIntegration(function[2], proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 

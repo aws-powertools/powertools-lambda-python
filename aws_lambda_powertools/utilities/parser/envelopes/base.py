@@ -4,7 +4,10 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, TypeVar
 
-from aws_lambda_powertools.utilities.parser.functions import _retrieve_or_set_model_from_cache
+from aws_lambda_powertools.utilities.parser.functions import (
+    _parse_and_validate_event,
+    _retrieve_or_set_model_from_cache,
+)
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.parser.types import T
@@ -38,11 +41,7 @@ class BaseEnvelope(ABC):
         adapter = _retrieve_or_set_model_from_cache(model=model)
 
         logger.debug("parsing event against model")
-        if isinstance(data, str):
-            logger.debug("parsing event as string")
-            return adapter.validate_json(data)
-
-        return adapter.validate_python(data)
+        return _parse_and_validate_event(data=data, adapter=adapter)
 
     @abstractmethod
     def parse(self, data: dict[str, Any] | Any | None, model: type[T]):

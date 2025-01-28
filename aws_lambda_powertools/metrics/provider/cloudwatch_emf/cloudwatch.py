@@ -22,6 +22,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
@@ -272,10 +273,26 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             raise SchemaValidationError(
                 f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}.",
             )
-        # Cast value to str according to EMF spec
-        # Majority of values are expected to be string already, so
-        # checking before casting improves performance in most cases
-        self.dimension_set[name] = value if isinstance(value, str) else str(value)
+
+        value = value if isinstance(value, str) else str(value)
+
+        if not name.strip() or not value.strip():
+            warnings.warn(
+                f"The dimension {name} doesn't meet the requirements and won't be added. "
+                "Ensure the dimension name and value are non-empty strings",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
+
+        if name in self.dimension_set or name in self.default_dimensions:
+            warnings.warn(
+                f"Dimension '{name}' has already been added. The previous value will be overwritten.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+
+        self.dimension_set[name] = value
 
     def add_metadata(self, key: str, value: Any) -> None:
         """Adds high cardinal metadata for metrics object
@@ -284,7 +301,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         Instead, this will be searchable through logs.
 
         If you're looking to add metadata to filter metrics, then
-        use add_dimensions method.
+        use add_dimension method.
 
         Example
         -------

@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencyModelSerializer,
     BaseIdempotencySerializer,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.functions import get_actual_type
 
 DataClass = Any
 
@@ -37,9 +38,12 @@ class DataclassSerializer(BaseIdempotencyModelSerializer):
 
     @classmethod
     def instantiate(cls, model_type: Any) -> BaseIdempotencySerializer:
+
+        model_type = get_actual_type(model_type=model_type)
+
         if model_type is None:
             raise IdempotencyNoSerializationModelError("No serialization model was supplied")
 
         if not is_dataclass(model_type):
             raise IdempotencyModelTypeError("Model type is not inherited of dataclass type")
-        return cls(model=model_type)
+        return cls(model=model_type)  # type: ignore[arg-type]

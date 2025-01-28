@@ -248,7 +248,7 @@ AWS Lambda will officially block updates to Lambda functions using Python 3.7 su
 
 We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
 
-As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to X86 and ARM64 compilation for smaller binaries and extra speed.
+As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to x86_64 and ARM64 compilation for smaller binaries and extra speed.
 
 This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
 

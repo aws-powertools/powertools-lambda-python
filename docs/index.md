@@ -59,18 +59,18 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
     | **[Parser](./utilities/parser.md#install)**             | **`pip install "aws-lambda-powertools[parser]"`**{.copyMe}:clipboard:                    | `pydantic` _(v2)_ |
     | **[Data Masking](./utilities/data_masking.md#install)** | **`pip install "aws-lambda-powertools[datamasking]"`**{.copyMe}:clipboard:               | `aws-encryption-sdk`, `jsonpath-ng`                                          |
     | **All extra dependencies at once**                      | **`pip install "aws-lambda-powertools[all]"`**{.copyMe}:clipboard:                       |
-    | **Two or more extra dependencies only, not all**        | **`pip install "aws-lambda-powertools[tracer,parser,datamasking"]`**{.copyMe}:clipboard: |
+    | **Two or more extra dependencies only, not all**        | **`pip install "aws-lambda-powertools[tracer,parser,datamasking]"`**{.copyMe}:clipboard: |
 
 === "Lambda Layer"
 
     [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python312` for `Python 3.12`.
+    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86:1__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:1__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
 
     === "AWS Console"
 
@@ -78,6 +78,45 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
         * Under Layers, choose `AWS layers` or `Specify an ARN`
         * Click to copy the [correct ARN](#lambda-layer) value based on your AWS Lambda function architecture and region
+
+
+    === "AWS SSM Parameter Store"
+        We offer Parameter Store aliases for releases too, allowing you to specify either specific versions or use the latest version on every deploy. To use these you can add these snippets to your AWS CloudFormation or Terraform projects:
+
+        **CloudFormation**
+
+        Sample Placeholders:
+
+        - `{arch}` is either `arm64` (Graviton based functions) or `x86_64`
+        - `{python_version}` is the Python version without the period (.), e.g., `python313` for `Python 3.13`.
+        - `{version}` is the semantic version number (e,g. 3.1.0) for a release or `latest`
+
+        ```yaml
+        MyFunction:
+            Type: "AWS::Lambda::Function"
+            Properties:
+                ...
+                Layers:
+                - {{resolve:ssm:/aws/service/powertools/python/{arch}/{python_version}/{version}}}
+        ```
+
+        **Terraform**
+
+        Using the [`aws_ssm_parameter`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) data provider from the AWS Terraform provider allows you to lookup the value of parameters to use later in your project.
+
+        ```hcl
+        data "aws_ssm_parameter" "powertools_version" {
+            name = "/aws/service/powertools/python/{arch}/{python_version}/{version}"
+        }
+
+        resource "aws_lambda_function" "test_lambda" {
+            ...
+
+            runtime = "python3.13"
+
+            layers = [data.aws_ssm_parameter.powertools_version.value]
+        }
+        ```
 
     === "Infrastructure as Code (IaC)"
 
@@ -166,10 +205,30 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:1 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:6 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
+
+=== "Lambda Layer (GovCloud)"
+
+    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+
+    For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
+
+    **AWS GovCloud (us-gov-east-1)**
+
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
+
+    **AWS GovCloud (us-gov-west-1)**
+
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
 
 === "Serverless Application Repository (SAR)"
 
@@ -247,7 +306,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
 ### Lambda Layer
 
-[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install) for Python versions from **3.8 to 3.12**, as well as for both **arm64 and x86** architectures, to ensure compatibility. We also remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install) for Python versions from **3.9 to 3.13**, as well as for both **arm64 and x86_64** architectures, to ensure compatibility. We also remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
 === "x86_64"
     --8<-- "docs/includes/_layer_homepage_x86.md"
@@ -260,7 +319,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86:1 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:6 --region eu-west-1
 ```
 
 #### SAR
@@ -448,6 +507,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**CyberArk**](https://www.cyberark.com/){target="_blank" rel="nofollow"}
 { .card }
 
+[**Flyweight**](https://flyweight.io/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**globaldatanet**](https://globaldatanet.com/){target="_blank" rel="nofollow"}
 { .card }
 
@@ -489,7 +551,7 @@ Knowing which companies are using this library is important to help prioritize t
 
 <!-- markdownlint-disable MD051 -->
 
-When [using Layers](#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86 and ARM architecture.
+When [using Layers](#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86_64 and ARM architecture.
 
 <!-- markdownlint-enable MD051 -->
 

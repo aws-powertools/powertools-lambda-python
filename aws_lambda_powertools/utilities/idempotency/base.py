@@ -74,6 +74,7 @@ class IdempotencyHandler:
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
         output_serializer: BaseIdempotencySerializer | None = None,
+        key_prefix: str | None = None,
         function_args: tuple | None = None,
         function_kwargs: dict | None = None,
     ):
@@ -91,6 +92,8 @@ class IdempotencyHandler:
         output_serializer: BaseIdempotencySerializer | None
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done via the NoOpSerializer
+        key_prefix: str | Optional
+            Custom prefix for idempotency key: key_prefix#hash
         function_args: tuple | None
             Function arguments
         function_kwargs: dict | None
@@ -102,8 +105,14 @@ class IdempotencyHandler:
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
         self.config = config
+        self.key_prefix = key_prefix
 
-        persistence_store.configure(config, f"{self.function.__module__}.{self.function.__qualname__}")
+        persistence_store.configure(
+            config=config,
+            function_name=f"{self.function.__module__}.{self.function.__qualname__}",
+            key_prefix=self.key_prefix,
+        )
+
         self.persistence_store = persistence_store
 
     def handle(self) -> Any:

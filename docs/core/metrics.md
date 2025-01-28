@@ -25,7 +25,7 @@ If you're new to Amazon CloudWatch, there are five terminologies you must be awa
 * **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
 
 <figure>
-  <img src="../../media/metrics_terminology.png" />
+  <img src="../../media/metrics_terminology.png" alt="Terminology" />
   <figcaption>Metric terminology, visually explained</figcaption>
 </figure>
 
@@ -130,6 +130,8 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
     ```python hl_lines="9 13"
     --8<-- "examples/metrics/src/set_default_dimensions_log_metrics.py"
     ```
+
+**Note:** Dimensions with empty values will not be included.
 
 ### Changing default timestamp
 
@@ -430,4 +432,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_cloudwatch_emf.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/required_dependencies/test_metrics_cloudwatch_emf.py){target="_blank"}

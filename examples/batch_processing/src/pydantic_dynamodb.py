@@ -31,12 +31,12 @@ class OrderDynamoDB(BaseModel):
         return json.loads(value["S"])
 
 
-class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
+class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):  # type: ignore[override]
     NewImage: Optional[OrderDynamoDB]
     OldImage: Optional[OrderDynamoDB]
 
 
-class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
+class OrderDynamoDBRecord(DynamoDBStreamRecordModel):  # type: ignore[override]
     dynamodb: OrderDynamoDBChangeRecord
 
 

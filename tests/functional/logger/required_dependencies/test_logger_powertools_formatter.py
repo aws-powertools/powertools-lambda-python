@@ -6,8 +6,10 @@ import os
 import random
 import re
 import string
+import sys
 import time
 from collections import namedtuple
+from threading import Thread
 
 import pytest
 
@@ -40,7 +42,7 @@ def service_name():
 
 
 def capture_logging_output(stdout):
-    return json.loads(stdout.getvalue().strip())
+    return [json.loads(d.strip()) for d in stdout.getvalue().strip().split("\n")]
 
 
 @pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
@@ -370,7 +372,7 @@ def test_datadog_formatter_use_rfc3339_date(stdout, service_name):
     logger.info({})
 
     # THEN the timestamp uses RFC3339 by default
-    log = capture_logging_output(stdout)
+    log = capture_logging_output(stdout)[0]
 
     assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"
 
@@ -389,7 +391,7 @@ def test_logger_logs_stack_trace_with_formatter_default_value(service_name, stdo
 
     # THEN we expect a "stack_trace" in log
     handler({}, lambda_context)
-    log = capture_logging_output(stdout)
+    log = capture_logging_output(stdout)[0]
     assert "stack_trace" in log
 
 
@@ -410,5 +412,108 @@ def test_logger_logs_stack_trace_with_formatter_non_default_value(service_name, 
 
     # THEN we expect a "stack_trace" not in log
     handler({}, lambda_context)
-    log = capture_logging_output(stdout)
+    log = capture_logging_output(stdout)[0]
     assert "stack_trace" not in log
+
+
+def test_thread_safe_keys_encapsulation(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    def send_thread_message_with_key(message, keys):
+        logger.thread_safe_append_keys(**keys)
+        logger.info(message)
+
+    global_key = {"exampleKey": "globalKey"}
+    logger.append_keys(**global_key)
+    logger.info("global key added")
+
+    thread1_keys = {"exampleThread1Key": "thread1"}
+    Thread(target=send_thread_message_with_key, args=("thread1", thread1_keys)).start()
+    thread2_keys = {"exampleThread2Key": "thread2"}
+    Thread(target=send_thread_message_with_key, args=("thread2", thread2_keys)).start()
+
+    logger.info("final log, all thread keys gone")
+
+    logs = capture_logging_output(stdout)
+
+    assert logs[0].get("exampleKey") == "globalKey"
+
+    assert logs[1].get("exampleKey") == "globalKey"
+    assert logs[1].get("exampleThread1Key") == "thread1"
+    assert logs[1].get("exampleThread2Key") is None
+
+    assert logs[2].get("exampleKey") == "globalKey"
+    assert logs[2].get("exampleThread1Key") is None
+    assert logs[2].get("exampleThread2Key") == "thread2"
+
+    assert logs[3].get("exampleKey") == "globalKey"
+    assert logs[3].get("exampleThread1Key") is None
+    assert logs[3].get("exampleThread2Key") is None
+
+
+@pytest.mark.skipif(sys.version_info >= (3, 13), reason="Test temporarily disabled for Python 3.13+")
+def test_thread_safe_remove_key(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    def send_message_with_key_and_without(message, keys):
+        logger.thread_safe_append_keys(**keys)
+        logger.info(message)
+        logger.thread_safe_remove_keys(keys.keys())
+        logger.info(message)
+
+    thread1_keys = {"exampleThread1Key": "thread1"}
+    Thread(target=send_message_with_key_and_without, args=("msg", thread1_keys)).start()
+
+    logs = capture_logging_output(stdout)
+    print(logs)
+
+    assert logs[0].get("exampleThread1Key") == "thread1"
+    assert logs[1].get("exampleThread1Key") is None
+
+
+def test_thread_safe_clear_key(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    def send_message_with_key_and_clear(message, keys):
+        logger.thread_safe_append_keys(**keys)
+        logger.info(message)
+        logger.thread_safe_clear_keys()
+        logger.info(message)
+
+    thread1_keys = {"exampleThread1Key": "thread1"}
+    Thread(target=send_message_with_key_and_clear, args=("msg", thread1_keys)).start()
+
+    logs = capture_logging_output(stdout)
+    print(logs)
+
+    assert logs[0].get("exampleThread1Key") == "thread1"
+    assert logs[1].get("exampleThread1Key") is None
+
+
+def test_thread_safe_getkey(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    def send_message_with_key_and_get(message, keys):
+        logger.thread_safe_append_keys(**keys)
+        logger.info(logger.thread_safe_get_current_keys())
+
+    thread1_keys = {"exampleThread1Key": "thread1"}
+    Thread(target=send_message_with_key_and_get, args=("msg", thread1_keys)).start()
+
+    logs = capture_logging_output(stdout)
+    print(logs)
+
+    assert logs[0].get("exampleThread1Key") == "thread1"
+    assert logs[0].get("message") == thread1_keys

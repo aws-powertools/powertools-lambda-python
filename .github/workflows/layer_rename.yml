@@ -1,0 +1,163 @@
+# Rename Layer
+# ---
+# This workflow copies a specific layer version in an AWS account, renaming it in the process
+#
+# Using a matrix, we pull each architecture and python version of the layer and store them as artifacts
+# we upload them to each of the AWS accounts.
+#
+# A number of safety checks are performed to ensure safety.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: choice
+        options:
+          - beta
+          - prod
+        default: beta
+        required: true
+      version:
+        description: Layer version to duplicate
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: string
+        required: true
+      version:
+        description: Layer version to duplicate
+        type: string
+        required: true
+
+name: Layer Rename
+run-name: Layer Rename - ${{ inputs.environment }}
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python38
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+    environment: layer-prod
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+      - name: Grab Zip
+        run: |
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-x86:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_x86_64.zip
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-x86:${{ inputs.version }} > ${{ matrix.layer }}_x86_64.json
+      - name: Store Zip
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        with:
+          name: ${{ matrix.layer }}_x86_64.zip
+          path: ${{ matrix.layer }}_x86_64.zip
+          retention-days: 1
+          if-no-files-found: error
+      - name: Store Metadata
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        with:
+          name: ${{ matrix.layer }}_x86_64.json
+          path: ${{ matrix.layer }}_x86_64.json
+          retention-days: 1
+          if-no-files-found: error
+
+  copy:
+    name: Copy
+    needs: download
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python38
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+        region:
+          - "af-south-1"
+          - "ap-east-1"
+          - "ap-northeast-1"
+          - "ap-northeast-2"
+          - "ap-northeast-3"
+          - "ap-south-1"
+          - "ap-south-2"
+          - "ap-southeast-1"
+          - "ap-southeast-2"
+          - "ap-southeast-3"
+          - "ap-southeast-4"
+          - "ca-central-1"
+          - "ca-west-1"
+          - "eu-central-1"
+          - "eu-central-2"
+          - "eu-north-1"
+          - "eu-south-1"
+          - "eu-south-2"
+          - "eu-west-1"
+          - "eu-west-2"
+          - "eu-west-3"
+          - "il-central-1"
+          - "me-central-1"
+          - "me-south-1"
+          - "sa-east-1"
+          - "us-east-1"
+          - "us-east-2"
+          - "us-west-1"
+          - "us-west-2"
+    environment: layer-${{ inputs.environment }}
+    steps:
+      - name: Download Zip
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: ${{ matrix.layer }}_x86_64.zip
+      - name: Download Metadata
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: ${{ matrix.layer }}_x86_64.json
+      - name: Verify Layer Signature
+        run: |
+          SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}_x86_64.json)
+          test $(openssl dgst -sha256 -binary ${{ matrix.layer }}_x86_64.zip | openssl enc -base64) == $SHA && echo "SHA OK: ${SHA}" || exit 1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
+          aws-region: ${{ matrix.region }}
+          mask-aws-account-id: true
+      - name: Create Layer
+        run: |
+          aws --region ${{ matrix.region }} lambda publish-layer-version \
+            --layer-name ${{ matrix.layer }}-x86_64 \
+            --zip-file fileb://./${{ matrix.layer }}_x86_64.zip \
+            --compatible-runtimes $(jq -r ".CompatibleRuntimes[0]" ${{ matrix.layer }}_x86_64.json) \
+            --compatible-architectures $(jq -r ".CompatibleArchitectures[0]" ${{ matrix.layer }}_x86_64.json) \
+            --license-info "MIT-0" \
+            --description "$(jq -r '.Description' ${{ matrix.layer }}_x86_64.json)" \
+            --query 'Version' | \
+            xargs aws --region ${{ matrix.region }} lambda add-layer-version-permission \
+              --layer-name ${{ matrix.layer }}-x86_64 \
+              --statement-id 'PublicLayer' \
+              --action lambda:GetLayerVersion \
+              --principal '*' \
+              --version-number

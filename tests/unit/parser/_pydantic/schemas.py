@@ -87,6 +87,11 @@ class MyApiGatewayBusiness(BaseModel):
     username: str
 
 
+class MyApiGatewayWebSocketBusiness(BaseModel):
+    message: str
+    action: str
+
+
 class MyALambdaFuncUrlBusiness(BaseModel):
     message: str
     username: str

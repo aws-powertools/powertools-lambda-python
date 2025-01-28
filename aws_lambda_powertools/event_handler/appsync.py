@@ -53,6 +53,7 @@ class AppSyncResolver(Router):
         """
         super().__init__()
         self.context = {}  # early init as customers might add context before event resolution
+        self._exception_handlers: dict[type, Callable] = {}
 
     def __call__(
         self,
@@ -142,14 +143,26 @@ class AppSyncResolver(Router):
         self.lambda_context = context
         Router.lambda_context = context
 
-        if isinstance(event, list):
-            Router.current_batch_event = [data_model(e) for e in event]
-            response = self._call_batch_resolver(event=event, data_model=data_model)
-        else:
-            Router.current_event = data_model(event)
-            response = self._call_single_resolver(event=event, data_model=data_model)
+        try:
+            if isinstance(event, list):
+                Router.current_batch_event = [data_model(e) for e in event]
+                response = self._call_batch_resolver(event=event, data_model=data_model)
+            else:
+                Router.current_event = data_model(event)
+                response = self._call_single_resolver(event=event, data_model=data_model)
+        except Exception as exp:
+            response_builder = self._lookup_exception_handler(type(exp))
+            if response_builder:
+                return response_builder(exp)
+            raise
 
-        self.clear_context()
+        # We don't clear the context for coroutines because we don't have control over the event loop.
+        # If we clean the context immediately, it might not be available when the coroutine is actually executed.
+        # For single async operations, the context should be cleaned up manually after the coroutine completes.
+        # See: https://github.com/aws-powertools/powertools-lambda-python/issues/5290
+        # REVIEW: Review this support in Powertools V4
+        if not asyncio.iscoroutine(response):
+            self.clear_context()
 
         return response
 
@@ -464,3 +477,47 @@ class AppSyncResolver(Router):
             raise_on_error=raise_on_error,
             aggregate=aggregate,
         )
+
+    def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
+        """
+        A decorator function that registers a handler for one or more exception types.
+
+        Parameters
+        ----------
+        exc_class (type[Exception] | list[type[Exception]])
+            A single exception type or a list of exception types.
+
+        Returns
+        -------
+        Callable:
+            A decorator function that registers the exception handler.
+        """
+
+        def register_exception_handler(func: Callable):
+            if isinstance(exc_class, list):  # pragma: no cover
+                for exp in exc_class:
+                    self._exception_handlers[exp] = func
+            else:
+                self._exception_handlers[exc_class] = func
+            return func
+
+        return register_exception_handler
+
+    def _lookup_exception_handler(self, exp_type: type) -> Callable | None:
+        """
+        Looks up the registered exception handler for the given exception type or its base classes.
+
+        Parameters
+        ----------
+        exp_type (type):
+            The exception type to look up the handler for.
+
+        Returns
+        -------
+        Callable | None:
+            The registered exception handler function if found, otherwise None.
+        """
+        for cls in exp_type.__mro__:
+            if cls in self._exception_handlers:
+                return self._exception_handlers[cls]
+        return None

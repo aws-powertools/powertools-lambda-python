@@ -1,0 +1,14 @@
+{
+    "version": "0",
+    "id": "abcd-1234-efgh-5678",
+    "detail-type": "order.created",
+    "source": "my.order.service",
+    "account": "123456789012",
+    "time": "2023-09-10T12:00:00Z",
+    "region": "us-west-2",
+    "resources": [],
+    "detail": {
+        "orderId": "O-12345",
+        "amount": 100.0
+    }
+}

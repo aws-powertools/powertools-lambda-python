@@ -45,6 +45,7 @@ from .secrets_manager_event import SecretsManagerEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
+from .transfer_family_event import TransferFamilyAuthorizer, TransferFamilyAuthorizerResponse
 from .vpc_lattice import VPCLatticeEvent, VPCLatticeEventV2
 
 __all__ = [
@@ -87,4 +88,6 @@ __all__ = [
     "VPCLatticeEvent",
     "VPCLatticeEventV2",
     "CloudFormationCustomResourceEvent",
+    "TransferFamilyAuthorizerResponse",
+    "TransferFamilyAuthorizer",
 ]

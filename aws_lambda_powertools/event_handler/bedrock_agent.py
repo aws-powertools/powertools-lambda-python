@@ -108,9 +108,9 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-
         openapi_extensions = None
         security = None
 
@@ -128,6 +128,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             include_in_schema,
             security,
             openapi_extensions,
+            deprecated,
             middlewares,
         )
 
@@ -146,6 +147,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -165,6 +167,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             include_in_schema,
             security,
             openapi_extensions,
+            deprecated,
             middlewares,
         )
 
@@ -183,6 +186,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -202,6 +206,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             include_in_schema,
             security,
             openapi_extensions,
+            deprecated,
             middlewares,
         )
 
@@ -220,6 +225,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        deprecated: bool = False,
         middlewares: list[Callable] | None = None,
     ):
         openapi_extensions = None
@@ -239,6 +245,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             include_in_schema,
             security,
             openapi_extensions,
+            deprecated,
             middlewares,
         )
 
@@ -257,6 +264,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -276,6 +284,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             include_in_schema,
             security,
             openapi_extensions,
+            deprecated,
             middlewares,
         )
 

@@ -1114,3 +1114,106 @@ def test_logger_json_unicode(stdout, service_name):
 
     assert log["message"] == non_ascii_chars
     assert log[japanese_field] == japanese_string
+
+
+def test_append_context_keys_adds_and_removes_keys(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+    test_keys = {"user_id": "123", "operation": "test"}
+
+    # WHEN context keys are added
+    with logger.append_context_keys(**test_keys):
+        logger.info("message with context keys")
+    logger.info("message without context keys")
+
+    # THEN context keys should only be present in the first log statement
+    with_context_log, without_context_log = capture_multiple_logging_statements_output(stdout)
+
+    assert "user_id" in with_context_log
+    assert test_keys["user_id"] == with_context_log["user_id"]
+    assert "user_id" not in without_context_log
+
+
+def test_append_context_keys_handles_empty_dict(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN context is added with no keys
+    with logger.append_context_keys():
+        logger.info("message with empty context")
+
+    # THEN log should contain only default keys
+    log_output = capture_logging_output(stdout)
+    assert set(log_output.keys()) == {"service", "timestamp", "level", "message", "location"}
+
+
+def test_append_context_keys_handles_exception(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+    test_user_id = "128"
+
+    # WHEN an exception occurs within the context
+    exception_raised = False
+    try:
+        with logger.append_context_keys(user_id=test_user_id):
+            logger.info("message before exception")
+            raise ValueError("Test exception")
+    except ValueError:
+        exception_raised = True
+        logger.info("message after exception")
+
+    # THEN verify the exception was raised and handled
+    assert exception_raised, "Expected ValueError to be raised"
+
+
+def test_append_context_keys_nested_contexts(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN nested contexts are used
+    with logger.append_context_keys(level1="outer"):
+        logger.info("outer context message")
+        with logger.append_context_keys(level2="inner"):
+            logger.info("nested context message")
+        logger.info("back to outer context message")
+    logger.info("no context message")
+
+    # THEN logs should contain appropriate context keys
+    outer, nested, back_outer, no_context = capture_multiple_logging_statements_output(stdout)
+
+    assert outer["level1"] == "outer"
+    assert "level2" not in outer
+
+    assert nested["level1"] == "outer"
+    assert nested["level2"] == "inner"
+
+    assert back_outer["level1"] == "outer"
+    assert "level2" not in back_outer
+
+    assert "level1" not in no_context
+    assert "level2" not in no_context
+
+
+def test_append_context_keys_with_formatter(stdout, service_name):
+    # GIVEN a Logger is initialized with a custom formatter
+    class CustomFormatter(BasePowertoolsFormatter):
+        def append_keys(self, **additional_keys):
+            pass
+
+        def clear_state(self) -> None:
+            pass
+
+        def remove_keys(self, keys: Iterable[str]) -> None:
+            pass
+
+    custom_formatter = CustomFormatter()
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formatter)
+    test_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN context keys are added
+    with logger.append_context_keys(**test_keys):
+        logger.info("message with context")
+
+    # THEN the context keys should not persist
+    current_keys = logger.get_current_keys()
+    assert current_keys == {}

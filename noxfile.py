@@ -79,7 +79,6 @@ def test_with_datadog_as_required_package(session: nox.Session):
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/datadog/",
         ],
-        extras="datadog",
     )
 
 

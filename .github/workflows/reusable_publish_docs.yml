@@ -44,14 +44,14 @@ jobs:
       id-token: write  # trade JWT token for AWS credentials in AWS Docs account
       pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938  # v4.2.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
           ref: ${{ inputs.git_ref }}
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
           cache: "poetry"
@@ -79,10 +79,11 @@ jobs:
           poetry run mike set-default --push latest
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+          mask-aws-account-id: true
       - name: Copy API Docs
         run: |
           cp -r api site/

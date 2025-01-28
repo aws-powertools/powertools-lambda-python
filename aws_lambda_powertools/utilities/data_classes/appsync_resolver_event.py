@@ -158,7 +158,8 @@ class AppSyncResolverEvent(DictWrapper):
 
         info: dict | None = data.get("info")
         if not info:
-            info = {"fieldName": self.get("fieldName"), "parentTypeName": self.get("typeName")}
+            parent_type_name = self.get("parentTypeName") or self.get("typeName")
+            info = {"fieldName": self.get("fieldName"), "parentTypeName": parent_type_name}
 
         self._info = AppSyncResolverEventInfo(info)
 

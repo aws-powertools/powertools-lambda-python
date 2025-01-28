@@ -3,6 +3,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     APIKey,
     APIKeyIn,
     HTTPBearer,
+    MutualTLS,
     OAuth2,
     OAuthFlowImplicit,
     OAuthFlows,
@@ -110,3 +111,24 @@ def test_openapi_security_scheme_open_id_connect():
     open_id_connect_scheme = security_schemes["openIdConnect"]
     assert open_id_connect_scheme.type_.value == "openIdConnect"
     assert open_id_connect_scheme.openIdConnectUrl == "https://example.com/oauth2/authorize"
+
+
+def test_openapi_security_scheme_mtls():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler():
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema(
+        security_schemes={
+            "mutualTLS": MutualTLS(description="mTLS Authentication"),
+        },
+    )
+
+    security_schemes = schema.components.securitySchemes
+    assert security_schemes is not None
+
+    assert "mutualTLS" in security_schemes
+    mtls_scheme = security_schemes["mutualTLS"]
+    assert mtls_scheme.description == "mTLS Authentication"

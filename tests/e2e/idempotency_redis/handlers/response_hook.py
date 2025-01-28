@@ -1,16 +1,16 @@
 import os
 
 from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer,
     IdempotencyConfig,
     idempotent,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import RedisCachePersistenceLayer
 
-TABLE_NAME = os.getenv("IdempotencyTable", "")
-persistence_layer = DynamoDBPersistenceLayer(table_name=TABLE_NAME)
+REDIS_HOST = os.getenv("RedisEndpoint", "")
+persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379)
 
 
 def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:

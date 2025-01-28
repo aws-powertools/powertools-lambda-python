@@ -230,4 +230,4 @@ class DynamoDBProvider(BaseProvider):
 
         # maintenance: look for better ways to correctly type DynamoDB multiple return types
         # without a breaking change within ABC return type
-        return {item[self.sort_attr]: item[self.value_attr] for item in items}
+        return {item[self.sort_attr]: item[self.value_attr] for item in items}  # type: ignore[misc]

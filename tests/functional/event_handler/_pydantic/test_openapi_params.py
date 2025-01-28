@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
@@ -44,6 +44,7 @@ def test_openapi_no_params():
     get = path.get
     assert get.summary == "GET /"
     assert get.operationId == "handler__get"
+    assert get.deprecated is None
 
     assert get.responses is not None
     assert 200 in get.responses.keys()
@@ -130,8 +131,9 @@ def test_openapi_with_custom_params():
     assert parameter.schema_.exclusiveMinimum == 0
     assert parameter.schema_.exclusiveMaximum == 100
     assert len(parameter.schema_.examples) == 1
-    assert parameter.schema_.examples[0].summary == "Example 1"
-    assert parameter.schema_.examples[0].value == 10
+    example = Example(**parameter.schema_.examples[0])
+    assert example.summary == "Example 1"
+    assert example.value == 10
 
 
 def test_openapi_with_scalar_returns():
@@ -387,6 +389,46 @@ def test_openapi_with_body_description():
     assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
 
 
+def test_openapi_with_deprecated_operations():
+    app = APIGatewayRestResolver()
+
+    @app.get("/", deprecated=True)
+    def _get():
+        raise NotImplementedError()
+
+    @app.post("/", deprecated=True)
+    def _post():
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/"].get
+    assert get.deprecated is True
+
+    post = schema.paths["/"].post
+    assert post.deprecated is True
+
+
+def test_openapi_without_deprecated_operations():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def _get():
+        raise NotImplementedError()
+
+    @app.post("/", deprecated=False)
+    def _post():
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/"].get
+    assert get.deprecated is None
+
+    post = schema.paths["/"].post
+    assert post.deprecated is None
+
+
 def test_openapi_with_excluded_operations():
     app = APIGatewayRestResolver()
 
@@ -460,3 +502,73 @@ def test_create_model_field_convert_underscore():
 
     result = _create_model_field(field_info, int, "user_id", False)
     assert result.alias == "user-id"
+
+
+def test_openapi_with_example_as_list():
+    app = APIGatewayRestResolver()
+
+    @app.get("/users", summary="Get Users", operation_id="GetUsers", description="Get paginated users", tags=["Users"])
+    def handler(
+        count: Annotated[
+            int,
+            Query(gt=0, lt=100, examples=["Example 1"]),
+        ] = 1,
+    ):
+        print(count)
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/users"].get
+    assert len(get.parameters) == 1
+    assert get.summary == "Get Users"
+    assert get.operationId == "GetUsers"
+    assert get.description == "Get paginated users"
+    assert get.tags == ["Users"]
+
+    parameter = get.parameters[0]
+    assert parameter.required is False
+    assert parameter.name == "count"
+    assert parameter.in_ == ParameterInType.query
+    assert parameter.schema_.type == "integer"
+    assert parameter.schema_.default == 1
+    assert parameter.schema_.title == "Count"
+    assert parameter.schema_.exclusiveMinimum == 0
+    assert parameter.schema_.exclusiveMaximum == 100
+    assert len(parameter.schema_.examples) == 1
+    assert parameter.schema_.examples[0] == "Example 1"
+
+
+def test_openapi_with_examples_of_base_model_field():
+    app = APIGatewayRestResolver()
+
+    class Todo(BaseModel):
+        id: int = Field(examples=[1])
+        title: str = Field(examples=["Example 1"])
+        priority: float = Field(examples=[0.5])
+        completed: bool = Field(examples=[True])
+
+    @app.get("/")
+    def handler() -> Todo:
+        return Todo(id=0, title="", priority=0.0, completed=False)
+
+    schema = app.get_openapi_schema()
+    assert "Todo" in schema.components.schemas
+    todo_schema = schema.components.schemas["Todo"]
+    assert isinstance(todo_schema, Schema)
+
+    assert "id" in todo_schema.properties
+    id_property = todo_schema.properties["id"]
+    assert id_property.examples == [1]
+
+    assert "title" in todo_schema.properties
+    title_property = todo_schema.properties["title"]
+    assert title_property.examples == ["Example 1"]
+
+    assert "priority" in todo_schema.properties
+    priority_property = todo_schema.properties["priority"]
+    assert priority_property.examples == [0.5]
+
+    assert "completed" in todo_schema.properties
+    completed_property = todo_schema.properties["completed"]
+    assert completed_property.examples == [True]
