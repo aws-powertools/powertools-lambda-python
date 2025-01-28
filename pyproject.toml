@@ -134,6 +134,9 @@ omit = [
 ]
 branch = true
 
+[tool.poetry.requires-plugins]
+poetry-plugin-export = "^1.9.0"
+
 [tool.coverage.html]
 directory = "test_report"
 title = "Powertools for AWS Lambda (Python) Test Coverage"
