@@ -61,6 +61,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: make dev-quality-code
+      - name: testing export
+        run: poetry export --format requirements.txt --output requirements.txt
       - name: Formatting and Linting
         run: make lint
       - name: Static type checking
