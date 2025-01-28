@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **event_handler:** fixes typo in variable name `fronzen_openapi_extensions` ([#5929](https://github.com/aws-powertools/powertools-lambda-python/issues/5929))
 * **event_handler:** add tests for PEP 563 compatibility with OpenAPI ([#5886](https://github.com/aws-powertools/powertools-lambda-python/issues/5886))
 * **event_handler:** fix forward references resolution in OpenAPI ([#5885](https://github.com/aws-powertools/powertools-lambda-python/issues/5885))
 * **parser:** make identitySource optional for ApiGatewayAuthorizerRequestV2 model ([#5880](https://github.com/aws-powertools/powertools-lambda-python/issues/5880))
@@ -15,31 +16,38 @@
 * **data_classes:** improve Event Source Data Classes documentation ([#5916](https://github.com/aws-powertools/powertools-lambda-python/issues/5916))
 * **event_handler:** demonstrate handling optional security routes ([#5895](https://github.com/aws-powertools/powertools-lambda-python/issues/5895))
 * **layer:** update layer version number - v3.4.1 ([#5869](https://github.com/aws-powertools/powertools-lambda-python/issues/5869))
+* **parser:** improve documentation with Pydantic best practices ([#5925](https://github.com/aws-powertools/powertools-lambda-python/issues/5925))
 
 ## Features
 
+* **event_source:** add AWS Transfer Family classes ([#5912](https://github.com/aws-powertools/powertools-lambda-python/issues/5912))
 * **idempotency:** add support for custom Idempotency key prefix ([#5898](https://github.com/aws-powertools/powertools-lambda-python/issues/5898))
 * **logger:** add context manager for logger keys ([#5883](https://github.com/aws-powertools/powertools-lambda-python/issues/5883))
 * **parser:** add AWS Transfer Family model ([#5906](https://github.com/aws-powertools/powertools-lambda-python/issues/5906))
 
 ## Maintenance
 
-* **ci:** drop support for Python 3.8 ([#5896](https://github.com/aws-powertools/powertools-lambda-python/issues/5896))
 * **ci:** adjust token permission ([#5867](https://github.com/aws-powertools/powertools-lambda-python/issues/5867))
 * **ci:** new pre-release 3.4.2a0 ([#5873](https://github.com/aws-powertools/powertools-lambda-python/issues/5873))
 * **ci:** make `pyproject.toml` fully compatible with Poetryv2 ([#5902](https://github.com/aws-powertools/powertools-lambda-python/issues/5902))
 * **ci:** fix permissions for gh pages ([#5866](https://github.com/aws-powertools/powertools-lambda-python/issues/5866))
-* **deps:** bump pydantic from 2.10.5 to 2.10.6 ([#5918](https://github.com/aws-powertools/powertools-lambda-python/issues/5918))
+* **ci:** drop support for Python 3.8 ([#5896](https://github.com/aws-powertools/powertools-lambda-python/issues/5896))
 * **deps:** bump squidfunk/mkdocs-material from `ba73db5` to `41942f7` in /docs ([#5890](https://github.com/aws-powertools/powertools-lambda-python/issues/5890))
-* **deps-dev:** bump boto3-stubs from 1.36.1 to 1.36.2 ([#5881](https://github.com/aws-powertools/powertools-lambda-python/issues/5881))
-* **deps-dev:** bump testcontainers from 3.7.1 to 4.9.1 ([#5907](https://github.com/aws-powertools/powertools-lambda-python/issues/5907))
+* **deps:** bump pydantic from 2.10.5 to 2.10.6 ([#5918](https://github.com/aws-powertools/powertools-lambda-python/issues/5918))
 * **deps-dev:** bump cfn-lint from 1.22.5 to 1.22.6 ([#5900](https://github.com/aws-powertools/powertools-lambda-python/issues/5900))
 * **deps-dev:** bump cfn-lint from 1.22.6 to 1.22.7 ([#5910](https://github.com/aws-powertools/powertools-lambda-python/issues/5910))
-* **deps-dev:** bump boto3-stubs from 1.36.2 to 1.36.3 ([#5894](https://github.com/aws-powertools/powertools-lambda-python/issues/5894))
+* **deps-dev:** bump testcontainers from 3.7.1 to 4.9.1 ([#5907](https://github.com/aws-powertools/powertools-lambda-python/issues/5907))
+* **deps-dev:** bump pytest-benchmark from 4.0.0 to 5.1.0 ([#5909](https://github.com/aws-powertools/powertools-lambda-python/issues/5909))
+* **deps-dev:** bump ruff from 0.9.2 to 0.9.3 ([#5911](https://github.com/aws-powertools/powertools-lambda-python/issues/5911))
 * **deps-dev:** bump pytest-cov from 5.0.0 to 6.0.0 ([#5908](https://github.com/aws-powertools/powertools-lambda-python/issues/5908))
+* **deps-dev:** bump pytest-asyncio from 0.24.0 to 0.25.2 ([#5920](https://github.com/aws-powertools/powertools-lambda-python/issues/5920))
+* **deps-dev:** bump boto3-stubs from 1.36.4 to 1.36.5 ([#5919](https://github.com/aws-powertools/powertools-lambda-python/issues/5919))
+* **deps-dev:** bump boto3-stubs from 1.36.4 to 1.36.6 ([#5923](https://github.com/aws-powertools/powertools-lambda-python/issues/5923))
+* **deps-dev:** bump boto3-stubs from 1.36.2 to 1.36.3 ([#5894](https://github.com/aws-powertools/powertools-lambda-python/issues/5894))
+* **deps-dev:** bump aws-cdk from 2.176.0 to 2.177.0 ([#5930](https://github.com/aws-powertools/powertools-lambda-python/issues/5930))
 * **deps-dev:** bump mkdocs-material from 9.5.49 to 9.5.50 ([#5889](https://github.com/aws-powertools/powertools-lambda-python/issues/5889))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.175.1a0 to 2.176.0a0 ([#5882](https://github.com/aws-powertools/powertools-lambda-python/issues/5882))
-* **deps-dev:** bump ruff from 0.9.2 to 0.9.3 ([#5911](https://github.com/aws-powertools/powertools-lambda-python/issues/5911))
+* **deps-dev:** bump boto3-stubs from 1.36.1 to 1.36.2 ([#5881](https://github.com/aws-powertools/powertools-lambda-python/issues/5881))
 * **deps-dev:** bump aws-cdk from 2.175.1 to 2.176.0 ([#5878](https://github.com/aws-powertools/powertools-lambda-python/issues/5878))
 * **deps-dev:** bump ruff from 0.9.1 to 0.9.2 ([#5877](https://github.com/aws-powertools/powertools-lambda-python/issues/5877))
 * **deps-dev:** bump aws-cdk-lib from 2.175.1 to 2.176.0 ([#5876](https://github.com/aws-powertools/powertools-lambda-python/issues/5876))
@@ -47,9 +55,9 @@
 * **deps-dev:** bump sentry-sdk from 2.19.2 to 2.20.0 ([#5870](https://github.com/aws-powertools/powertools-lambda-python/issues/5870))
 * **deps-dev:** bump boto3-stubs from 1.35.97 to 1.35.99 ([#5874](https://github.com/aws-powertools/powertools-lambda-python/issues/5874))
 * **deps-dev:** bump cfn-lint from 1.22.4 to 1.22.5 ([#5872](https://github.com/aws-powertools/powertools-lambda-python/issues/5872))
-* **deps-dev:** bump pytest-asyncio from 0.24.0 to 0.25.2 ([#5920](https://github.com/aws-powertools/powertools-lambda-python/issues/5920))
-* **deps-dev:** bump boto3-stubs from 1.36.4 to 1.36.5 ([#5919](https://github.com/aws-powertools/powertools-lambda-python/issues/5919))
-* **deps-dev:** bump pytest-benchmark from 4.0.0 to 5.1.0 ([#5909](https://github.com/aws-powertools/powertools-lambda-python/issues/5909))
+* **deps-dev:** bump aws-cdk-lib from 2.176.0 to 2.177.0 ([#5931](https://github.com/aws-powertools/powertools-lambda-python/issues/5931))
+* **deps-dev:** bump boto3-stubs from 1.36.6 to 1.36.7 ([#5932](https://github.com/aws-powertools/powertools-lambda-python/issues/5932))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.176.0a0 to 2.177.0a0 ([#5933](https://github.com/aws-powertools/powertools-lambda-python/issues/5933))
 
 
 <a name="v3.4.1"></a>
