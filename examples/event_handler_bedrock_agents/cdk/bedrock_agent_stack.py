@@ -3,13 +3,7 @@ from aws_cdk import (
 )
 from aws_cdk.aws_lambda import Runtime
 from aws_cdk.aws_lambda_python_alpha import PythonFunction
-from cdklabs.generative_ai_cdk_constructs.bedrock import (
-    ActionGroupExecutor,
-    Agent,
-    AgentActionGroup,
-    ApiSchema,
-    BedrockFoundationModel,
-)
+from cdklabs.generative_ai_cdk_constructs import bedrock
 from constructs import Construct
 
 
@@ -27,22 +21,20 @@ class AgentsCdkStack(Stack):
             handler="lambda_handler",
         )
 
-        agent = Agent(
+        agent = bedrock.Agent(
             self,
             "Agent",
-            foundation_model=BedrockFoundationModel.ANTHROPIC_CLAUDE_INSTANT_V1_2,
+            foundation_model=bedrock.BedrockFoundationModel.ANTHROPIC_CLAUDE_INSTANT_V1_2,
             instruction="You are a helpful and friendly agent that answers questions about insurance claims.",
         )
 
-        executor_group = ActionGroupExecutor(lambda_=action_group_function)
-
-        action_group = AgentActionGroup(
-            self,
-            "ActionGroup",
-            action_group_name="InsureClaimsSupport",
+        action_group: bedrock.AgentActionGroup = bedrock.AgentActionGroup(
+            name="InsureClaimsSupport",
             description="Use these functions for insurance claims support",
-            action_group_executor=executor_group,
-            action_group_state="ENABLED",
-            api_schema=ApiSchema.from_asset("./lambda/openapi.json"),  # (2)!
+            executor=bedrock.ActionGroupExecutor.fromlambda_function(
+                lambda_function=action_group_function,
+            ),
+            enabled=True,
+            api_schema=bedrock.ApiSchema.from_local_asset("./lambda/openapi.json"),  # (2)!
         )
         agent.add_action_group(action_group)
