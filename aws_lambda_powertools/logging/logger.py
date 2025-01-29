@@ -285,7 +285,11 @@ class Logger:
         #   b) different sampling mechanisms
         #   c) multiple messages from being logged as handlers can be duplicated
         is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
-        if self.child or is_logger_preconfigured:
+        if self.child:
+            self.setLevel(log_level)
+            return
+
+        if is_logger_preconfigured:
             return
 
         self.setLevel(log_level)
