@@ -7,9 +7,15 @@
 ## Bug Fixes
 
 * **docs:** typo in a service name in Event Handler ([#5944](https://github.com/aws-powertools/powertools-lambda-python/issues/5944))
+* **logger:** child logger must respect log level ([#5950](https://github.com/aws-powertools/powertools-lambda-python/issues/5950))
+
+## Documentation
+
+* **layer:** update layer version number - v3.5.0 ([#5952](https://github.com/aws-powertools/powertools-lambda-python/issues/5952))
 
 ## Maintenance
 
+* **ci:** new pre-release 3.5.1a1 ([#5954](https://github.com/aws-powertools/powertools-lambda-python/issues/5954))
 * **ci:** new pre-release 3.5.1a0 ([#5945](https://github.com/aws-powertools/powertools-lambda-python/issues/5945))
 
 
