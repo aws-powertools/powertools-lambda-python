@@ -3,7 +3,7 @@ name: Deploy CDK Layer v3 stack
 # PROCESS
 #
 # 1. Split what AWS regions support ARM vs regions that Lambda support ARM
-# 2. We build the Lambda layer for 3.8 to 3.12 Python runtime and both x86_64 and arm64 (see `matrix` section)
+# 2. We build the Lambda layer for 3.9 to 3.13 Python runtime and both x86_64 and arm64 (see `matrix` section)
 # 3. Deploy previously built layer for each AWS commercial region
 # 4. Export all published Layers as JSON
 # 5. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
@@ -78,7 +78,7 @@ jobs:
                  "eu-north-1", "eu-south-1", "eu-south-2", "eu-west-1", "eu-west-2", "eu-west-3",
                  "il-central-1", "me-central-1", "me-south-1", "sa-east-1", "us-east-1",
                  "us-east-2", "us-west-1", "us-west-2"]
-        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13"]
+        python-version: ["3.9","3.10","3.11","3.12","3.13"]
         include:
           - region: "af-south-1"
             has_arm64_support: "true"
@@ -153,7 +153,9 @@ jobs:
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
       - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+        run: |
+          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+          pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:

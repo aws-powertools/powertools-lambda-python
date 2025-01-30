@@ -4,7 +4,7 @@ name: Deploy V3 SAR
 #
 # 1. This workflow starts after the layer artifact is produced on `publish_v3_layer`
 # 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
-# 3. We publish the SAR for 3.8 to 3.13 Python runtime and both x86_64 and arm64 (see `matrix` section)
+# 3. We publish the SAR for 3.9 to 3.13 Python runtime and both x86_64 and arm64 (see `matrix` section)
 # 4. We use `sam package` and `sam publish` to publish the SAR app
 # 5. We remove the previous Canary stack (if present) and deploy a new one to test the SAR App. We retain the Canary in the account for debugging purposes
 # 6. Finally the published SAR app is made public on the PROD environment
@@ -72,7 +72,7 @@ jobs:
     strategy:
       matrix:
         architecture: ["x86_64", "arm64"]
-        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13"]
+        python-version: ["3.9","3.10","3.11","3.12","3.13"]
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2

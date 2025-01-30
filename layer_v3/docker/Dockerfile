@@ -19,7 +19,7 @@ WORKDIR /tmp
 # PACKAGE_SUFFIX = ' @ git+https://github.com/awslabs/aws-lambda-powertools-python@develop'
 # PACKAGE_SUFFIX = ''
 
-# PYTHON_VERSION = 3.8, 3.9, 3.10, 3.11, 3.12, and 3.13
+# PYTHON_VERSION = 3.9, 3.10, 3.11, 3.12, and 3.13
 
 # Installing libs based on base image; We must use dnf for AL2023 (Python 3.12+)
 COPY install_libraries.sh .

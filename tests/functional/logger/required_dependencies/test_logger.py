@@ -1217,3 +1217,18 @@ def test_append_context_keys_with_formatter(stdout, service_name):
     # THEN the context keys should not persist
     current_keys = logger.get_current_keys()
     assert current_keys == {}
+
+
+def test_logger_change_level_child_logger(stdout, service_name):
+    # GIVEN a new Logger and child Logger
+    logger = Logger(service=service_name, stream=stdout)
+    child_logger = Logger(service=service_name, child=True, stream=stdout, level="DEBUG")
+
+    # WHEN we emit logs for both in DEBUG level
+    logger.debug("PARENT")
+    child_logger.debug("CHILD")
+
+    # THEN only child log must emit log due to level
+    logs = list(stdout.getvalue().strip().split("\n"))
+    assert len(logs) == 1
+    assert "service" in logs[0]

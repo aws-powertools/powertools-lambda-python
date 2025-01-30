@@ -54,7 +54,12 @@ class BasePersistenceLayer(ABC):
         self.use_local_cache = False
         self.hash_function = hashlib.md5
 
-    def configure(self, config: IdempotencyConfig, function_name: str | None = None) -> None:
+    def configure(
+        self,
+        config: IdempotencyConfig,
+        function_name: str | None = None,
+        key_prefix: str | None = None,
+    ) -> None:
         """
         Initialize the base persistence layer from the configuration settings
 
@@ -64,8 +69,12 @@ class BasePersistenceLayer(ABC):
             Idempotency configuration settings
         function_name: str, Optional
             The name of the function being decorated
+        key_prefix: str | Optional
+            Custom prefix for idempotency key: key_prefix#hash
         """
-        self.function_name = f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
+        self.function_name = (
+            key_prefix or f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
+        )
 
         if self.configured:
             # Prevent being reconfigured multiple times
@@ -75,9 +84,7 @@ class BasePersistenceLayer(ABC):
         self.event_key_jmespath = config.event_key_jmespath
         if config.event_key_jmespath:
             self.event_key_compiled_jmespath = jmespath.compile(config.event_key_jmespath)
-        self.jmespath_options = config.jmespath_options
-        if not self.jmespath_options:
-            self.jmespath_options = {"custom_functions": PowertoolsFunctions()}
+        self.jmespath_options = config.jmespath_options or {"custom_functions": PowertoolsFunctions()}
         if config.payload_validation_jmespath:
             self.validation_key_jmespath = jmespath.compile(config.payload_validation_jmespath)
             self.payload_validation_enabled = True

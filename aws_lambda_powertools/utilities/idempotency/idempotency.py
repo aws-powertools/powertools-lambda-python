@@ -40,6 +40,7 @@ def idempotent(
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
     config: IdempotencyConfig | None = None,
+    key_prefix: str | None = None,
     **kwargs,
 ) -> Any:
     """
@@ -57,6 +58,8 @@ def idempotent(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
+    key_prefix: str | Optional
+        Custom prefix for idempotency key: key_prefix#hash
 
     Examples
     --------
@@ -94,6 +97,7 @@ def idempotent(
         function_payload=event,
         config=config,
         persistence_store=persistence_store,
+        key_prefix=key_prefix,
         function_args=args,
         function_kwargs=kwargs,
     )
@@ -108,6 +112,7 @@ def idempotent_function(
     persistence_store: BasePersistenceLayer,
     config: IdempotencyConfig | None = None,
     output_serializer: BaseIdempotencySerializer | type[BaseIdempotencyModelSerializer] | None = None,
+    key_prefix: str | None = None,
     **kwargs: Any,
 ) -> Any:
     """
@@ -128,6 +133,8 @@ def idempotent_function(
             If not supplied, no serialization is done via the NoOpSerializer.
             In case a serializer of type inheriting BaseIdempotencyModelSerializer is given,
             the serializer is derived from the function return type.
+    key_prefix: str | Optional
+        Custom prefix for idempotency key: key_prefix#hash
 
     Examples
     --------
@@ -154,6 +161,7 @@ def idempotent_function(
                 persistence_store=persistence_store,
                 config=config,
                 output_serializer=output_serializer,
+                key_prefix=key_prefix,
                 **kwargs,
             ),
         )
@@ -191,6 +199,7 @@ def idempotent_function(
             config=config,
             persistence_store=persistence_store,
             output_serializer=output_serializer,
+            key_prefix=key_prefix,
             function_args=args,
             function_kwargs=kwargs,
         )

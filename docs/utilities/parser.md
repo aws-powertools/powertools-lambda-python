@@ -108,8 +108,8 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **ApiGatewayAuthorizerRequest**             | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Request     |
 | **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
 | **ApiGatewayAuthorizerRequestV2**           | Lambda Event Source payload for Amazon API Gateway v2 Lambda Authorizer               |
-| **APIGatewayWebSocketMessageEventModel** | Lambda Event Source payload for Amazon API Gateway WebSocket API message body         |
-| **APIGatewayWebSocketConnectEventModel** | Lambda Event Source payload for Amazon API Gateway WebSocket API $connect message     |
+| **APIGatewayWebSocketMessageEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API message body         |
+| **APIGatewayWebSocketConnectEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API $connect message     |
 | **APIGatewayWebSocketDisconnectEventModel** | Lambda Event Source payload for Amazon API Gateway WebSocket API $disconnect message  |
 | **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents                                        |
 | **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
@@ -132,6 +132,7 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
+| **TransferFamilyAuthorizer**                | Lambda Event Source payload for AWS Transfer Family Lambda authorizer                 |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
 | **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                         |
 
@@ -257,6 +258,8 @@ If you run using a test event `{"message": "hello universe"}` you should expect 
 #### Model validator
 
 `model_validator` can help when you have a complex validation mechanism. For example finding whether data has been omitted or comparing field values.
+
+!!! tip "If you are still using the deprecated `root_validator` function, switch to `model_validator` for the latest Pydantic functionality."
 
 ```python title="model_validator.py" hl_lines="1 12-17"
 --8<-- "examples/parser/src/model_validator.py"

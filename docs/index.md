@@ -69,8 +69,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
 
     === "AWS Console"
 
@@ -205,7 +205,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:6 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:7 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
@@ -220,15 +220,15 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
 
     **AWS GovCloud (us-gov-west-1)**
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:6__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:6__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
 
 === "Serverless Application Repository (SAR)"
 
@@ -306,7 +306,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
 ### Lambda Layer
 
-[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install) for Python versions from **3.8 to 3.13**, as well as for both **arm64 and x86_64** architectures, to ensure compatibility. We also remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install) for Python versions from **3.9 to 3.13**, as well as for both **arm64 and x86_64** architectures, to ensure compatibility. We also remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
 === "x86_64"
     --8<-- "docs/includes/_layer_homepage_x86.md"
@@ -319,7 +319,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:6 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:7 --region eu-west-1
 ```
 
 #### SAR

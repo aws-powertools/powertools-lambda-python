@@ -83,8 +83,6 @@ class LayerStack(Stack):
         layer_name_x86_64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-x86_64"
         layer_name_arm64 = f"AWSLambdaPowertoolsPythonV3-{python_version_normalized}-arm64"
 
-        if python_version == "python3.8":
-            python_version = Runtime.PYTHON_3_8
         if python_version == "python3.9":
             python_version = Runtime.PYTHON_3_9
         if python_version == "python3.10":

@@ -3,10 +3,11 @@ name = "aws-lambda-powertools-python-layer"
 version = "3.0.0"
 description = "Powertools for AWS Lambda (Python) Lambda Layers"
 authors = ["Powertools for AWS Maintainers <aws-powertools-maintainers@amazon.com>"]
+package-mode = false
 
 license = "MIT"
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 aws-cdk-lib = "^2.167.0"
 
 [tool.poetry.dev-dependencies]

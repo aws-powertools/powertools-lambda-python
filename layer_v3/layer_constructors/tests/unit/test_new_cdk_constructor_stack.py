@@ -25,7 +25,6 @@ def test_with_no_configuration_constructor():
 @pytest.mark.parametrize(
     "python_version",
     [
-        lambda_.Runtime.PYTHON_3_8,
         lambda_.Runtime.PYTHON_3_9,
         lambda_.Runtime.PYTHON_3_10,
         lambda_.Runtime.PYTHON_3_11,
@@ -62,7 +61,6 @@ def test_with_different_python_version_x86_64(python_version):
 @pytest.mark.parametrize(
     "python_version",
     [
-        lambda_.Runtime.PYTHON_3_8,
         lambda_.Runtime.PYTHON_3_9,
         lambda_.Runtime.PYTHON_3_10,
         lambda_.Runtime.PYTHON_3_11,
