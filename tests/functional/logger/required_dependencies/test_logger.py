@@ -1232,3 +1232,32 @@ def test_logger_change_level_child_logger(stdout, service_name):
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 1
     assert "service" in logs[0]
+
+
+def test_clear_state_with_append_keys():
+    # GIVEN a Logger is initialized
+    logger = Logger(service="service_name", stream=stdout)
+
+    # WHEN append keys are added
+    logger.append_keys(custom_key="custom_key")
+    logger.info("message with appended keys")
+    logger.clear_state()
+
+    # THEN context keys should be cleared
+    assert "custom_key" not in logger.get_current_keys()
+
+
+def test_clear_state(stdout, service_name):
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("message for the user")
+    logger.clear_state()
+
+    expected_keys = {
+        "level": "%(levelname)s",
+        "location": "%(funcName)s:%(lineno)d",
+        "message": None,
+        "timestamp": "%(asctime)s",
+        "service": service_name,
+        "sampling_rate": None,
+    }
+    assert logger.get_current_keys() == expected_keys

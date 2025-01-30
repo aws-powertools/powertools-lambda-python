@@ -222,6 +222,7 @@ class Logger:
             choice=sampling_rate,
             env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE),
         )
+        self._default_log_keys: dict[str, Any] = {"service": self.service, "sampling_rate": self.sampling_rate}
         self.child = child
         self.logger_formatter = logger_formatter
         self._stream = stream or sys.stdout
@@ -604,6 +605,15 @@ class Logger:
         """
         with self.registered_formatter.append_context_keys(**additional_keys):
             yield
+
+    def clear_state(self) -> None:
+        """Removes all custom keys that were appended to the Logger."""
+        # Clear all custom keys from the formatter
+        self.registered_formatter.clear_state()
+
+        # Reset to default keys
+        default_keys: dict[Any, Any] = dict(self._default_log_keys)
+        self.structure_logs(**default_keys)
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.
