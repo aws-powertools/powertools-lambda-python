@@ -136,6 +136,42 @@ copyright: Copyright &copy; 2023 Amazon Web Services
 plugins:
   - git-revision-date
   - search
+  - mkdocstrings:
+      default_handler: python
+      enable_inventory: true
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+          options:
+            # General
+            allow_inspection: true
+            show_source: true
+            show_bases: true
+            # Headings
+            heading_level: 2
+            #show_root_heading: false
+            #show_root_toc_entry: true
+            #show_root_full_path: true
+            #show_root_members_full_path: false
+            #show_object_full_path: false
+            #show_category_heading: true
+            # Members
+            filters: ["!^_[^_]"]
+            group_by_category: true
+            show_submodules: false
+            # Docstrings
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: spacy
+            merge_init_into_class: true
+            show_if_no_docstring: false
+            # Signature
+            annotations_path: brief
+            show_signature: true
+            show_signature_annotations: true
+            separate_signature: true
 
 extra_css:
   - stylesheets/extra.css
