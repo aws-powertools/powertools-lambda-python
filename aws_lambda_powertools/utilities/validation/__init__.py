@@ -1,5 +1,7 @@
 """
 Simple validator to enforce incoming/outgoing event conforms with JSON Schema
+!!! abstract "Usage Documentation"
+    [`Validation`](../utilities/validation.md)
 """
 
 from .exceptions import (
