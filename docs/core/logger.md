@@ -308,9 +308,7 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
 ##### clear_state method
 
-`clear_state()` is a method you can call explicitly within your code to clear appended keys at any point during the execution of a single Lambda invocation.
-
-This allows for more granular control over the logger's state within a single function execution, enabling you to reset the logger to its initial state before specific logging operations or at the end of certain processes within the same Lambda run.
+You can call `clear_state()` as a method explicitly within your code to clear appended keys at any point during the execution of your Lambda invocation.
 
 === "clear_state_method.py"
 
