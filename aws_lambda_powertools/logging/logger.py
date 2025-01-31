@@ -611,8 +611,7 @@ class Logger:
         self.registered_formatter.clear_state()
 
         # Reset to default keys
-        default_keys: dict[Any, Any] = dict(self._default_log_keys)
-        self.structure_logs(**default_keys)
+        self.structure_logs(**self._default_log_keys)
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.
