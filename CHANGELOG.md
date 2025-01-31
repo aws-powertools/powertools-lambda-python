@@ -7,10 +7,19 @@
 ## Bug Fixes
 
 * **docs:** typo in a service name in Event Handler ([#5944](https://github.com/aws-powertools/powertools-lambda-python/issues/5944))
+* **logger:** child logger must respect log level ([#5950](https://github.com/aws-powertools/powertools-lambda-python/issues/5950))
+
+## Documentation
+
+* **layer:** update layer version number - v3.5.0 ([#5952](https://github.com/aws-powertools/powertools-lambda-python/issues/5952))
 
 ## Maintenance
 
 * **ci:** new pre-release 3.5.1a0 ([#5945](https://github.com/aws-powertools/powertools-lambda-python/issues/5945))
+* **ci:** install & configure mkdocstrings plugin ([#5959](https://github.com/aws-powertools/powertools-lambda-python/issues/5959))
+* **ci:** new pre-release 3.5.1a1 ([#5954](https://github.com/aws-powertools/powertools-lambda-python/issues/5954))
+* **deps:** bump actions/setup-python from 5.3.0 to 5.4.0 ([#5960](https://github.com/aws-powertools/powertools-lambda-python/issues/5960))
+* **deps:** bump docker/setup-qemu-action from 3.2.0 to 3.3.0 ([#5961](https://github.com/aws-powertools/powertools-lambda-python/issues/5961))
 
 
 <a name="v3.5.0"></a>
