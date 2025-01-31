@@ -19,7 +19,7 @@ class SchemaValidationError(Exception):
         rule: str | None = None,
         rule_definition: Any | None = None,
     ):
-        """
+        """When serialization fail schema validation
 
         Parameters
         ----------
