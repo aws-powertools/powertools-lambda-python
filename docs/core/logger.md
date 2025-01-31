@@ -274,13 +274,15 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 #### Clearing all state
 
+##### Decorator with clear_state
+
 Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html){target="_blank"}, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
 ???+ tip "Tip: When is this useful?"
     It is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
 
 ???+ danger "Danger: This can have unintended side effects if you use Layers"
-    Lambda Layers code is imported before the Lambda handler.
+    Lambda Layers code is imported before the Lambda handler. When a Lambda function starts, it first imports and executes all code in the Layers (including any global scope code) before proceeding to the function's own code.
 
     This means that `clear_state=True` will instruct Logger to remove any keys previously added before Lambda handler execution proceeds.
 
@@ -302,6 +304,27 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
 
     ```json hl_lines="7"
     --8<-- "examples/logger/src/clear_state_event_two.json"
+    ```
+
+##### clear_state method
+
+You can call `clear_state()` as a method explicitly within your code to clear appended keys at any point during the execution of your Lambda invocation.
+
+=== "clear_state_method.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/logger/src/clear_state_method.py"
+    ```
+=== "Output before clear_state()"
+
+    ```json hl_lines="9 17"
+    --8<-- "examples/logger/src/before_clear_state.json"
+    ```
+
+=== "Output after clear_state()"
+
+    ```json hl_lines="4"
+    --8<-- "examples/logger/src/after_clear_state.json"
     ```
 
 ### Accessing currently configured keys

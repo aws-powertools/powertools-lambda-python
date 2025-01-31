@@ -1,0 +1,7 @@
+{
+    "level": "INFO",
+    "location": "lambda_handler:126",
+    "message": "State after clearing - only show default keys",
+    "timestamp": "2025-01-30 13:56:03,158-0300",
+    "service": "payment"
+}
