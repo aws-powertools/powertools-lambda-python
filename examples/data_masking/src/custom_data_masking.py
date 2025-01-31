@@ -13,8 +13,8 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
     masking_rules = {
         "email": {"regex_pattern": "(.)(.*)(@.*)", "mask_format": r"\1****\3"},
         "age": {"dynamic_mask": True},
-        "address.zip": {"dynamic_mask": True, "custom_mask": "xxx"},
-        "address.street": {"dynamic_mask": False},
+        "address.zip": {"custom_mask": "xxx"},
+        "$.other_address[?(@.postcode > 12000)]": {"custom_mask": "Masked"},
     }
 
     result = data_masker.erase(data, masking_rules=masking_rules)

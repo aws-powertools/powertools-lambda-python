@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import warnings
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
 
 from jsonpath_ng.ext import parse
@@ -304,21 +305,11 @@ class DataMasking:
         Returns:
             dict: The masked data dictionary
         """
-        result = data.copy()
+        result = deepcopy(data)
 
         for path, rule in masking_rules.items():
             try:
-                if ".." in path:
-                    # Handle recursive descent paths (e.g., "address..name")
-                    base_path, field = path.split("..")
-                    jsonpath_expr = parse(f"$.{base_path}..{field}")
-                elif "[" in path:
-                    # Handle array notation paths (e.g., "address[*].street")
-                    jsonpath_expr = parse(f"$.{path}")
-                else:
-                    # Handle simple field names (e.g., "email")
-                    jsonpath_expr = parse(f"$.{path}")
-
+                jsonpath_expr = parse(f"$.{path}")
                 matches = jsonpath_expr.find(result)
 
                 if not matches:
@@ -329,14 +320,8 @@ class DataMasking:
                     try:
                         value = match.value
                         if value is not None:
-                            if isinstance(value, dict):
-                                # Handle dictionary values by masking each field
-                                for k, v in value.items():
-                                    if v is not None:
-                                        value[k] = self.provider.erase(str(v), **rule)
-                            else:
-                                masked_value = self.provider.erase(str(value), **rule)
-                                match.full_path.update(result, masked_value)
+                            masked_value = self.provider.erase(str(value), **rule)
+                            match.full_path.update(result, masked_value)
 
                     except Exception as e:
                         warnings.warn(f"Error masking value for path {path}: {str(e)}", stacklevel=2)

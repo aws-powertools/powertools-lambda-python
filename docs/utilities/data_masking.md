@@ -123,7 +123,7 @@ The `erase` method also supports additional flags for more advanced and flexible
 
 === "dynamic_mask"
 
-    (bool) When set to `True`, this flag enables custom masking behavior. It activates the use of advanced masking techniques such as pattern-based or regex-based masking.
+    (bool) Enables dynamic masking behavior when set to `True`, by maintaining the original length and structure of the text replacing with *.
 
     > Expression: `data_masker.erase(data, fields=["address.zip"], dynamic_mask=True)`
 
@@ -151,6 +151,16 @@ The `erase` method also supports additional flags for more advanced and flexible
     (dict) Allows you to apply different masking rules (flags) for each data field.
     ```python hl_lines="20"
     --8<-- "examples/data_masking/src/custom_data_masking.py"
+    ```
+=== "Input example"
+
+    ```json
+    --8<-- "examples/data_masking/src/payload_custom_masking.json"
+    ```
+=== "Masking rules output example"
+
+    ```json hl_lines="4 5 10 21"
+    --8<-- "examples/data_masking/src/output_custom_masking.json"
     ```
 
 ### Encrypting data

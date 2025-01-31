@@ -218,12 +218,16 @@ def test_parsing_nonexistent_fields_warning_on_missing_field():
 
 
 def test_regex_mask(data_masker):
-    data = "Hello! My name is Fulano Ciclano"
+    # GIVEN a str data type
+    data = "Hello! My name is John Doe"
+
+    # WHEN erase is called with regex pattern and mask format
     regex_pattern = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
     mask_format = "XXXX XXXX"
 
     result = data_masker.erase(data, regex_pattern=regex_pattern, mask_format=mask_format)
 
+    # THEN the result is the regex part masked by the masked format
     assert result == "Hello! My name is XXXX XXXX"
 
 
