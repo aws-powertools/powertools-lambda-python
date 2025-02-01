@@ -222,6 +222,7 @@ class Logger:
             choice=sampling_rate,
             env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE),
         )
+        self._default_log_keys: dict[str, Any] = {"service": self.service, "sampling_rate": self.sampling_rate}
         self.child = child
         self.logger_formatter = logger_formatter
         self._stream = stream or sys.stdout
@@ -231,7 +232,6 @@ class Logger:
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false"),
         )
-        self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
 
         # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
@@ -604,6 +604,14 @@ class Logger:
         """
         with self.registered_formatter.append_context_keys(**additional_keys):
             yield
+
+    def clear_state(self) -> None:
+        """Removes all custom keys that were appended to the Logger."""
+        # Clear all custom keys from the formatter
+        self.registered_formatter.clear_state()
+
+        # Reset to default keys
+        self.structure_logs(**self._default_log_keys)
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.

@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "level": "INFO",
+            "location": "lambda_handler:122",
+            "message": "Starting order processing",
+            "timestamp": "2025-01-30 13:56:03,157-0300",
+            "service": "payment",
+            "order_id": "12345"
+        },
+        {
+            "level": "INFO",
+            "location": "lambda_handler:124",
+            "message": "Final state before clearing",
+            "timestamp": "2025-01-30 13:56:03,157-0300",
+            "service": "payment",
+            "order_id": "12345"
+        }
+    ]
+}
