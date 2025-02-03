@@ -4,7 +4,7 @@ import functools
 import logging
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
 from jsonpath_ng.ext import parse
 
@@ -66,6 +66,10 @@ class DataMasking:
             fields=None,
             action=self.provider.encrypt,
             provider_options=provider_options or {},
+            dynamic_mask=None,
+            custom_mask=None,
+            regex_pattern=None,
+            mask_format=None,
             **encryption_context,
         )
 
@@ -80,47 +84,25 @@ class DataMasking:
             fields=None,
             action=self.provider.decrypt,
             provider_options=provider_options or {},
+            dynamic_mask=None,
+            custom_mask=None,
+            regex_pattern=None,
+            mask_format=None,
             **encryption_context,
         )
 
-    @overload
-    def erase(self, data, fields: None) -> str: ...
-
-    @overload
-    def erase(self, data: list, fields: list[str]) -> list[str]: ...
-
-    @overload
-    def erase(self, data: tuple, fields: list[str]) -> tuple[str]: ...
-
-    @overload
-    def erase(self, data: dict, fields: list[str]) -> dict: ...
-
-    @overload
-    def erase(self, data: dict[Any, Any], *, masking_rules: dict[str, object]) -> dict[Any, Any]: ...
-
-    @overload
     def erase(
         self,
-        data: dict,
-        fields: list[str],
-        dynamic_mask: bool | None = None,
-        custom_mask: str | None = None,
-        regex_pattern: str | None = None,
-        mask_format: str | None = None,
-    ) -> dict: ...
-
-    def erase(
-        self,
-        data: Sequence | Mapping,
+        data: Any,
         fields: list[str] | None = None,
         dynamic_mask: bool | None = None,
         custom_mask: str | None = None,
         regex_pattern: str | None = None,
         mask_format: str | None = None,
         masking_rules: dict | None = None,
-    ) -> str | list[str] | tuple[str] | dict:
+    ) -> Any:
         if masking_rules:
-            return self._apply_masking_rules(data, masking_rules)
+            return self._apply_masking_rules(data=data, masking_rules=masking_rules)
         else:
             return self._apply_action(
                 data=data,
@@ -142,8 +124,8 @@ class DataMasking:
         custom_mask: str | None = None,
         regex_pattern: str | None = None,
         mask_format: str | None = None,
-        **encryption_context: str,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """
         Helper method to determine whether to apply a given action to the entire input data
         or to specific fields if the 'fields' argument is specified.
@@ -159,8 +141,6 @@ class DataMasking:
             and returns the modified value.
         provider_options : dict
             Provider specific keyword arguments to propagate; used as an escape hatch.
-        encryption_context: str
-            Encryption context to use in encrypt and decrypt operations.
 
         Returns
         -------
@@ -179,7 +159,7 @@ class DataMasking:
                 custom_mask=custom_mask,
                 regex_pattern=regex_pattern,
                 mask_format=mask_format,
-                **encryption_context,
+                **kwargs,
             )
         else:
             logger.debug(f"Running action {action.__name__} with the entire data")
@@ -190,7 +170,7 @@ class DataMasking:
                 custom_mask=custom_mask,
                 regex_pattern=regex_pattern,
                 mask_format=mask_format,
-                **encryption_context,
+                **kwargs,
             )
 
     def _apply_action_to_fields(

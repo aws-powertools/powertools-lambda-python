@@ -28,7 +28,7 @@ class BaseProvider:
         def decrypt(self, data) -> Any:
             # Implementation logic for data decryption
 
-        def erase(self, data) -> str | Iterable:
+        def erase(self, data) -> Any | Iterable:
             # Implementation logic for data masking
             pass
 
@@ -78,7 +78,7 @@ class BaseProvider:
         **kwargs,
     ) -> Any:
 
-        result = DATA_MASKING_STRING
+        result: Any = DATA_MASKING_STRING
 
         if not any([dynamic_mask, custom_mask, regex_pattern, mask_format, masking_rules]):
             if isinstance(data, (str, int, float, dict, bytes)):
