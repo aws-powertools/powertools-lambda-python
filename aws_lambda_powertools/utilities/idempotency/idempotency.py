@@ -61,20 +61,20 @@ def idempotent(
     key_prefix: str | Optional
         Custom prefix for idempotency key: key_prefix#hash
 
-    Examples
+    Example
     --------
     **Processes Lambda's event in an idempotent manner**
 
-        >>> from aws_lambda_powertools.utilities.idempotency import (
-        >>>    idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
-        >>> )
-        >>>
-        >>> idem_config=IdempotencyConfig(event_key_jmespath="body")
-        >>> persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
-        >>>
-        >>> @idempotent(config=idem_config, persistence_store=persistence_layer)
-        >>> def handler(event, context):
-        >>>     return {"StatusCode": 200}
+        from aws_lambda_powertools.utilities.idempotency import (
+           idempotent, DynamoDBPersistenceLayer, IdempotencyConfig
+        )
+
+        idem_config=IdempotencyConfig(event_key_jmespath="body")
+        persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency_store")
+
+        @idempotent(config=idem_config, persistence_store=persistence_layer)
+        def handler(event, context):
+            return {"StatusCode": 200}
     """
 
     # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
@@ -136,7 +136,7 @@ def idempotent_function(
     key_prefix: str | Optional
         Custom prefix for idempotency key: key_prefix#hash
 
-    Examples
+    Example
     --------
     **Processes an order in an idempotent manner**
 

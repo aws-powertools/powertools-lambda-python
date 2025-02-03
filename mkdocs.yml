@@ -63,6 +63,12 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Idempotency: 
+          - Base: api_doc/idempotency/base.md
+          - Config: api_doc/idempotency/config.md
+          - Exceptions: api_doc/idempotency/exceptions.md
+          - Persistence: api_doc/idempotency/persistence.md
+          - Serialization: api_doc/idempotency/serialization.md
       - JMESPath Functions: api_doc/jmespath_functions.md
       - Parameters:
           - Base: api_doc/parameters/base.md
