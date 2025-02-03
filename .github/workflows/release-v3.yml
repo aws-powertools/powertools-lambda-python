@@ -40,7 +40,7 @@ on:
         default: v3.0.0
         required: true
       layer_documentation_version:
-        description: "Version to be updated in our documentation. e.g. if the current layer number is 3, this value must be 4."
+        description: "Lambda layer version to be updated in our documentation. e.g. if the current layer number is 3, this value must be 4."
         type: string
         required: true
       skip_pypi:
