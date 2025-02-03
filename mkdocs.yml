@@ -63,6 +63,12 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Parameters:
+          - Base: api_doc/parameters/base.md
+          - AppConfig: api_doc/parameters/appconfig.md
+          - DynamoDB: api_doc/parameters/dynamodb.md
+          - SSM: api_doc/parameters/ssm.md
+          - Secrets: api_doc/parameters/secrets.md
       - Parser: api_doc/parser.md
       - Streaming: api_doc/streaming.md
       - Typing: api_doc/typing.md
