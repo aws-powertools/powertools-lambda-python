@@ -1,3 +1,9 @@
+"""
+Base class for Data Masking
+!!! abstract "Usage Documentation"
+    [`Data masking`](../../utilities/data_masking.md)
+"""
+
 from __future__ import annotations
 
 import functools
@@ -24,8 +30,9 @@ class DataMasking:
     The DataMasking class orchestrates erasing, encrypting, and decrypting
     for the base provider.
 
-    Example:
-    ```
+    Example
+    -------
+    ```python
     from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 
     def lambda_handler(event, context):
