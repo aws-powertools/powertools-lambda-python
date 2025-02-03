@@ -63,14 +63,18 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
-      - Feature Flags: 
+      - Data Masking:
+          - Base: api_doc/data_masking/base.md
+          - Exception: api_doc/data_masking/exceptions.md
+          - Provider: api_doc/data_masking/provider.md
+      - Feature Flags:
           - AppConfig: api_doc/feature_flags/appconfig.md
           - Base: api_doc/feature_flags/base.md
           - Comparators: api_doc/feature_flags/comparators.md
           - Exceptions: api_doc/feature_flags/exceptions.md
           - Feature flags: api_doc/feature_flags/feature_flags.md
           - Schema: api_doc/feature_flags/schema.md
-      - Idempotency: 
+      - Idempotency:
           - Base: api_doc/idempotency/base.md
           - Config: api_doc/idempotency/config.md
           - Exceptions: api_doc/idempotency/exceptions.md
