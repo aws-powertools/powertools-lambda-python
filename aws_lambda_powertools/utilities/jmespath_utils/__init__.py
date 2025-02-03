@@ -1,3 +1,8 @@
+"""
+Built-in JMESPath Functions to easily deserialize common encoded JSON payloads in Lambda functions.
+!!! abstract "Usage Documentation"
+    [`JMESPath Functions`](../utilities/jmespath_functions.md)
+"""
 from __future__ import annotations
 
 import base64
@@ -42,7 +47,7 @@ def query(data: dict | str, envelope: str, jmespath_options: dict | None = None)
 
     Built-in JMESPath functions include: powertools_json, powertools_base64, powertools_base64_gzip
 
-    Examples
+    Example
     --------
 
     **Deserialize JSON string and extracts data from body key**
