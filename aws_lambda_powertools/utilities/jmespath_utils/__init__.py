@@ -3,6 +3,7 @@ Built-in JMESPath Functions to easily deserialize common encoded JSON payloads i
 !!! abstract "Usage Documentation"
     [`JMESPath Functions`](../utilities/jmespath_functions.md)
 """
+
 from __future__ import annotations
 
 import base64
