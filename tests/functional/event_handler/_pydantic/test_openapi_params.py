@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -160,6 +160,42 @@ def test_openapi_with_response_returns():
     @app.get("/")
     def handler() -> Response[Annotated[str, Body(title="Response title")]]:
         return Response(body="Hello, world", status_code=200)
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters is None
+
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
+    assert response.schema_.title == "Response title"
+    assert response.schema_.type == "string"
+
+
+def test_openapi_with_tuple_returns():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler() -> Tuple[str, int]:
+        return "Hello, world", 200
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters is None
+
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
+    assert response.schema_.title == "Return"
+    assert response.schema_.type == "string"
+
+
+def test_openapi_with_tuple_annotated_returns():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler() -> Tuple[Annotated[str, Body(title="Response title")], int]:
+        return "Hello, world", 200
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
