@@ -48,9 +48,9 @@ class AWSEncryptionSDKProvider(BaseProvider):
     """
     The AWSEncryptionSDKProvider is used as a provider for the DataMasking class.
 
-    Usage
+    Example
     -------
-    ```
+    ```python
     from aws_lambda_powertools.utilities.data_masking import DataMasking
     from aws_lambda_powertools.utilities.data_masking.providers.kms.aws_encryption_sdk import (
         AWSEncryptionSDKProvider,
