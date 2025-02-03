@@ -179,7 +179,8 @@ class FeatureFlags:
         dict[str, dict]
             parsed JSON dictionary
 
-            **Example**
+        Example
+        -------
 
         ```python
         {
@@ -251,7 +252,7 @@ class FeatureFlags:
             Can be boolean or any JSON values for non-boolean features.
 
 
-        Examples
+        Example
         --------
 
         ```python
@@ -343,7 +344,8 @@ class FeatureFlags:
         list[str]
             list of all feature names that either matches context or have True as default
 
-            **Example**
+        Example
+        -------
 
         ```python
         ["premium_features", "my_feature_two", "always_true_feature"]
@@ -400,8 +402,8 @@ class FeatureFlags:
         exc_class : Exception | list[Exception]
             One or more exceptions to catch
 
-        Examples
-        --------
+        Example
+        -------
 
         ```python
         feature_flags = FeatureFlags(store=app_config)

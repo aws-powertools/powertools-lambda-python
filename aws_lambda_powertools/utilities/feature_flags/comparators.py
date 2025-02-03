@@ -56,6 +56,8 @@ def compare_time_range(context_value: Any, condition_value: dict) -> bool:
     end_time = current_time.replace(hour=int(end_hour), minute=int(end_min))
 
     if int(end_hour) < int(start_hour):
+        # In normal circumstances, we need to assert **both** conditions
+        """
         # When the end hour is smaller than start hour, it means we are crossing a day's boundary.
         # In this case we need to assert that current_time is **either** on one side or the other side of the boundary
         #
@@ -69,10 +71,9 @@ def compare_time_range(context_value: Any, condition_value: dict) -> bool:
         #                                             │ │                                        │
         #    └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
         #                                               │
-
+        """
         return (start_time <= current_time) or (current_time <= end_time)
     else:
-        # In normal circumstances, we need to assert **both** conditions
         return start_time <= current_time <= end_time
 
 
