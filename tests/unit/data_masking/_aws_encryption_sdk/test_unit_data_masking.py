@@ -277,3 +277,149 @@ def test_erase_json_dict_with_complex_masking_rules(data_masker):
         "age": "**",
         "address": {"zip": "xxx", "street": "123 Main St", "details": {"name": "Home", "type": "Primary"}},
     }
+
+
+def test_no_matches_for_masking_rule(data_masker):
+    # GIVEN a dictionary without the expected field
+    data = {"name": "Ana"}
+    masking_rules = {"$.missing_field": {"dynamic_mask": True}}
+
+    # WHEN applying the masking rule
+    with pytest.warns(UserWarning, match=r"No matches found for path: \$\.missing_field"):
+        result = data_masker._apply_masking_rules(data, masking_rules)
+
+    # THEN the original data remains unchanged
+    assert result == data
+
+
+def test_warning_during_masking_value(data_masker):
+    # GIVEN data and a masking rule
+    data = {"value": "test"}
+
+    # Mock provider that raises an error
+    class MockProvider:
+        def erase(self, value, **kwargs):
+            raise ValueError("Mock error")
+
+    data_masker.provider = MockProvider()
+
+    # WHEN erase is called
+    with pytest.warns(UserWarning, match="Error masking value for path value: Mock error"):
+        masked_data = data_masker.erase(data, masking_rules={"value": {"rule": "value"}})
+
+    # THEN the original data should remain unchanged
+    assert masked_data["value"] == "test"
+
+
+def test_mask_nested_field_with_non_dict_value(data_masker):
+    # GIVEN nested data where a middle path component is not a dictionary
+    data = {"user": {"contact": "not_a_dict", "details": {"ssn": "123-45-6789"}}}  # This will stop the traversal
+
+    # WHEN attempting to mask a field through a path containing a non-dict value
+    data_masker._mask_nested_field(data, "user.contact.details.ssn", lambda x: "MASKED")
+
+    # THEN the data should remain unchanged since traversal stopped at non-dict value
+    assert data == {"user": {"contact": "not_a_dict", "details": {"ssn": "123-45-6789"}}}
+
+
+def test_mask_nested_field_success(data_masker):
+    # GIVEN nested data with a field to mask
+    data = {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "12345"}}}}}
+
+    # WHEN masking a nested field with a masking rule
+    data_masker._mask_nested_field(data, "user.contact.details.address.zip", {"custom_mask": "xxx"})
+
+    # THEN the nested field should be masked while other data remains unchanged
+    assert data == {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "xxx"}}}}}
+
+
+## teste aqui
+def test_erase_dictionary_with_masking_rules(data_masker):
+    # GIVEN a dictionary with nested sensitive data
+    data = {"user": {"name": "John Doe", "ssn": "123-45-6789", "address": {"street": "123 Main St", "zip": "12345"}}}
+
+    # AND masking rules for specific fields
+    masking_rules = {"user.ssn": {"custom_mask": "XXX-XX-XXXX"}, "user.address.zip": {"custom_mask": "00000"}}
+
+    # WHEN erase is called with masking rules
+    result = data_masker.erase(data, masking_rules=masking_rules)
+
+    # THEN only the specified fields should be masked
+    assert result == {
+        "user": {
+            "name": "John Doe",  # unchanged
+            "ssn": "XXX-XX-XXXX",  # masked
+            "address": {"street": "123 Main St", "zip": "00000"},  # unchanged  # masked
+        },
+    }
+
+
+def test_erase_dictionary_with_global_mask(data_masker):
+    # GIVEN a dictionary with sensitive data
+    data = {"user": {"name": "John Doe", "ssn": "123-45-6789"}}
+
+    # WHEN erase is called with a custom mask for all fields
+    result = data_masker.erase(data, custom_mask="REDACTED")
+
+    # THEN all fields should use the custom mask
+    assert result == {"user": {"name": "REDACTED", "ssn": "REDACTED"}}
+
+
+def test_erase_empty_dictionary(data_masker):
+    # GIVEN an empty dictionary
+    data = {}
+
+    # WHEN erase is called
+    result = data_masker.erase(data, custom_mask="MASKED")
+
+    # THEN an empty dictionary should be returned
+    assert result == {}
+
+
+def test_erase_different_iterables_with_masking(data_masker):
+    # GIVEN different types of iterables
+    list_data = ["name", "phone", "email"]
+    tuple_data = ("name", "phone", "email")
+    set_data = {"name", "phone", "email"}
+
+    # WHEN erase is called with a custom mask
+    masked_list = data_masker.erase(list_data, custom_mask="XXX")
+    masked_tuple = data_masker.erase(tuple_data, custom_mask="XXX")
+    masked_set = data_masker.erase(set_data, custom_mask="XXX")
+
+    # THEN the masked data should maintain its original type
+    assert isinstance(masked_list, list)
+    assert isinstance(masked_tuple, tuple)
+    assert isinstance(masked_set, set)
+
+    # AND all values should be masked
+    expected_values = {"XXX"}
+    assert set(masked_list) == expected_values
+    assert set(masked_tuple) == expected_values
+    assert masked_set == expected_values
+
+
+def test_erase_handles_invalid_regex_pattern(data_masker):
+    # GIVEN a string and an invalid regex pattern
+    data = "test123"
+
+    # WHEN masking with invalid regex
+    result = data_masker.erase(
+        data,
+        regex_pattern="[",
+        mask_format="X",  # Invalid regex pattern that will raise re.error
+    )
+
+    # THEN original data should be returned
+    assert result == "test123"
+
+
+def test_erase_handles_empty_string_with_dynamic_mask(data_masker):
+    # GIVEN an empty string
+    data = ""
+
+    # WHEN erase is called with dynamic_mask
+    result = data_masker.erase(data, dynamic_mask=True)
+
+    # THEN empty string should be returned
+    assert result == ""

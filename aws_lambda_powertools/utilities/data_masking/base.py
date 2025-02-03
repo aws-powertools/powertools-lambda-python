@@ -321,7 +321,7 @@ class DataMasking:
             if not isinstance(current, dict):
                 return
         if keys[-1] in current:
-            current[keys[-1]] = mask_function(current[keys[-1]])
+            current[keys[-1]] = self.provider.erase(current[keys[-1]], **mask_function)
 
     @staticmethod
     def _call_action(
