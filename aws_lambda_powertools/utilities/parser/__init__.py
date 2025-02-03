@@ -1,5 +1,4 @@
-"""Advanced event_parser utility
-"""
+"""Advanced event_parser utility"""
 
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 

@@ -1,4 +1,4 @@
-""" Utilities to enhance middlewares """
+"""Utilities to enhance middlewares"""
 
 from .factory import lambda_handler_decorator
 

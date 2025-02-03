@@ -51,9 +51,8 @@ def async_batch_processor(
     processor: AsyncBatchProcessor
         Batch Processor to handle partial failure cases
 
-    Examples
+    Example
     --------
-    **Processes Lambda's event with a BasePartialProcessor**
         >>> from aws_lambda_powertools.utilities.batch import async_batch_processor, AsyncBatchProcessor
         >>> from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
         >>>
@@ -119,7 +118,7 @@ def batch_processor(
     processor: BatchProcessor
         Batch Processor to handle partial failure cases
 
-    Examples
+    Example
     --------
     **Processes Lambda's event with a BatchProcessor**
 
@@ -180,7 +179,7 @@ def process_partial_response(
     result: PartialItemFailureResponse
         Lambda Partial Batch Response
 
-    Examples
+    Example
     --------
     **Processes Lambda's SQS event**
 
@@ -244,7 +243,7 @@ def async_process_partial_response(
     result: PartialItemFailureResponse
         Lambda Partial Batch Response
 
-    Examples
+    Example
     --------
     **Processes Lambda's SQS event**
 

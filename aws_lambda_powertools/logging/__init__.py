@@ -1,5 +1,4 @@
-"""Logging utility
-"""
+"""Logging utility"""
 
 from .logger import Logger
 
