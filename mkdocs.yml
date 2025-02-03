@@ -63,6 +63,10 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Batch Processing:
+          - Base: api_doc/batch/base.md
+          - Decorators: api_doc/batch/decorators.md
+          - Exceptions: api_doc/batch/exceptions.md
       - Event Source Data Classes: api_doc/data_classes.md
       - Data Masking:
           - Base: api_doc/data_masking/base.md
