@@ -63,6 +63,7 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Event Source Data Classes: api_doc/data_classes.md
       - Data Masking:
           - Base: api_doc/data_masking/base.md
           - Exception: api_doc/data_masking/exceptions.md
