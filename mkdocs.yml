@@ -63,6 +63,7 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Typing: api_doc/typing.md
       - Validation: api_doc/validation.md
 
 theme:
