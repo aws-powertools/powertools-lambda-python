@@ -1,7 +1,7 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
 
@@ -149,8 +149,8 @@ class Metrics:
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         default_dimensions: dict[str, str] | None = None,
-        **kwargs,
-    ):
+        **kwargs: dict[str, Any],
+    ) -> Callable[..., Any]:
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,
             capture_cold_start_metric=capture_cold_start_metric,
