@@ -2,6 +2,7 @@
 !!! abstract "Usage Documentation"
     [`Feature Flags`](../../utilities/feature_flags.md)
 """
+
 from __future__ import annotations
 
 import logging
