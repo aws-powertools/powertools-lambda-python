@@ -76,7 +76,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         boto3_client : DynamoDBClient, optional
             Boto3 DynamoDB Client to use, boto3_session and boto_config will be ignored if both are provided
 
-        Examples
+        Example
         --------
         **Create a DynamoDB persistence layer with custom settings**
 

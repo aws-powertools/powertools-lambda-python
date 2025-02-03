@@ -112,7 +112,7 @@ class RedisConnection:
         ssl: bool, optional: default True
             set whether to use ssl for Redis connection
 
-        Examples
+        Example
         --------
 
         ```python
