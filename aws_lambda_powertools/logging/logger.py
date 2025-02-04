@@ -1,3 +1,8 @@
+"""
+Logger utility
+!!! abstract "Usage Documentation"
+    [`Logger`](../../core/logger.md)
+"""
 from __future__ import annotations
 
 import functools
@@ -82,7 +87,7 @@ class Logger:
         by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
-    sample_rate: float, optional
+    sampling_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
         valid output for a logging stream, by default sys.stdout
@@ -103,7 +108,6 @@ class Logger:
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
-
         See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
         also supports a custom %F directive for milliseconds.
     use_rfc3339: bool, optional
@@ -116,7 +120,6 @@ class Logger:
         by default json.loads
     json_default : Callable, optional
         function to coerce unserializable values, by default `str()`
-
         Only used when no custom formatter is set
     utc : bool, optional
         set logging timestamp to UTC, by default False to continue to use local time as per stdlib
@@ -590,17 +593,19 @@ class Logger:
         """
         Context manager to temporarily add logging keys.
 
-        Parameters:
+        Parameters
         -----------
-        **keys: Any
+        **additional_keys: Any
             Key-value pairs to include in the log context during the lifespan of the context manager.
 
-        Example:
+        Example
         --------
-        >>> logger = Logger(service="example_service")
-        >>> with logger.append_context_keys(user_id="123", operation="process"):
-        >>>     logger.info("Log with context")
-        >>> logger.info("Log without context")
+        **Logging with contextual keys**
+
+            logger = Logger(service="example_service")
+            with logger.append_context_keys(user_id="123", operation="process"):
+                logger.info("Log with context")
+            logger.info("Log without context")
         """
         with self.registered_formatter.append_context_keys(**additional_keys):
             yield
