@@ -61,6 +61,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: make dev-quality-code
+      - name: Checking third-party library licenses
+        run: make check-licenses
       - name: Formatting and Linting
         run: make lint
       - name: Static type checking
@@ -73,8 +75,6 @@ jobs:
         run: make security-baseline
       - name: Complexity baseline
         run: make complexity-baseline
-      - name: Checking third-party library licenses
-        run: make check-licenses
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # 5.3.1
         with:
