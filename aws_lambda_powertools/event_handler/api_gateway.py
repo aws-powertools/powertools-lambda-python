@@ -313,10 +313,10 @@ class Route:
         middlewares: list[Callable[..., Response]] | None = None,
     ):
         """
+        Internally used Route Configuration
 
         Parameters
         ----------
-
         method: str
             The HTTP method, example "GET"
         path: str
@@ -908,6 +908,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
 
 class BaseRouter(ABC):
+    """Base class for Routing"""
+
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
@@ -1459,7 +1461,7 @@ def _registered_api_adapter(app: ApiGatewayResolver, next_middleware: Callable[.
 
 
 class ApiGatewayResolver(BaseRouter):
-    """API Gateway and ALB proxy resolver
+    """API Gateway, VPC Laticce, Bedrock and ALB proxy resolver
 
     Examples
     --------
@@ -2570,6 +2572,8 @@ class Router(BaseRouter):
 
 
 class APIGatewayRestResolver(ApiGatewayResolver):
+    """Amazon API Gateway REST and HTTP API v1 payload resolver"""
+
     current_event: APIGatewayProxyEvent
 
     def __init__(
@@ -2650,6 +2654,8 @@ class APIGatewayRestResolver(ApiGatewayResolver):
 
 
 class APIGatewayHttpResolver(ApiGatewayResolver):
+    """Amazon API Gateway HTTP API v2 payload resolver"""
+
     current_event: APIGatewayProxyEventV2
 
     def __init__(
@@ -2685,6 +2691,8 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
 
 
 class ALBResolver(ApiGatewayResolver):
+    """Amazon Application Load Balancer (ALB) resolver"""
+
     current_event: ALBEvent
 
     def __init__(
