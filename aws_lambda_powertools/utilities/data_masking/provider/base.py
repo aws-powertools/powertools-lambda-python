@@ -127,7 +127,7 @@ class BaseProvider:
         elif custom_mask:
             return self._pattern_mask(data, custom_mask)
         elif dynamic_mask:
-            return self._custom_erase(data, **kwargs)
+            return self._custom_erase(data)
         else:
             return DATA_MASKING_STRING
 
@@ -201,7 +201,7 @@ class BaseProvider:
         except re.error:
             return data
 
-    def _custom_erase(self, data: str, **kwargs) -> str:
+    def _custom_erase(self, data: str) -> str:
         if not data:
             return ""
 
