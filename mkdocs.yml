@@ -94,6 +94,9 @@ nav:
           - Secrets: api_doc/parameters/secrets.md
       - Parser: api_doc/parser.md
       - Streaming: api_doc/streaming.md
+      - Tracer:
+          - Base: api_doc/tracer/base.md
+          - Tracing: api_doc/tracer/tracing.md
       - Typing: api_doc/typing.md
       - Validation: api_doc/validation.md
 
