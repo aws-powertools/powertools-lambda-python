@@ -1,3 +1,9 @@
+"""
+Tracing utility
+!!! abstract "Usage Documentation"
+    [`Tracer`](../../core/tracer.md)
+"""
+
 from __future__ import annotations
 
 import abc

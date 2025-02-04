@@ -1,3 +1,9 @@
+"""
+Base for Idempotency utility
+!!! abstract "Usage Documentation"
+    [`Idempotency`](../../utilities/idempotency.md)
+"""
+
 from __future__ import annotations
 
 import datetime

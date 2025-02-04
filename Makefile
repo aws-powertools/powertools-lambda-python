@@ -1,5 +1,5 @@
-.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-api build-docs-website
-.PHONY: docs-local docs-api-local security-baseline complexity-baseline release-prod release-test release
+.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-website check-licenses
+.PHONY: docs-local security-baseline complexity-baseline release-prod release-test release
 
 target:
 	@$(MAKE) pr
@@ -20,6 +20,10 @@ dev-gitpod:
 	pip install --upgrade pip poetry
 	poetry install --extras "all redis datamasking"
 	pre-commit install
+
+# Running licensecheck with zero to break the pipeline if there is an invalid license
+check-licenses:
+	poetry run licensecheck -u poetry:dev --zero
 
 format:
 	poetry run black aws_lambda_powertools tests examples
@@ -55,7 +59,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs mypy pre-commit check-licenses test security-baseline complexity-baseline
 
 build: pr
 	poetry build
@@ -65,14 +69,6 @@ release-docs:
 	rm -rf site api
 	@echo "Updating website docs"
 	poetry run mike deploy --push --update-aliases ${VERSION} ${ALIAS}
-	@echo "Building API docs"
-	@$(MAKE) build-docs-api VERSION=${VERSION}
-
-build-docs-api:
-	poetry run pdoc --html --output-dir ./api/ ./aws_lambda_powertools --force
-	mv -f ./api/aws_lambda_powertools/* ./api/
-	rm -rf ./api/aws_lambda_powertools
-	mkdir ${VERSION} && cp -R api ${VERSION}
 
 docs-local:
 	poetry run mkdocs serve
@@ -80,9 +76,6 @@ docs-local:
 docs-local-docker:
 	docker build -t squidfunk/mkdocs-material ./docs/
 	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
-
-docs-api-local:
-	poetry run pdoc --http : aws_lambda_powertools
 
 security-baseline:
 	poetry run bandit --baseline bandit.baseline -r aws_lambda_powertools

@@ -11,9 +11,9 @@ class BaseProvider:
     """
     The BaseProvider class serves as an abstract base class for data masking providers.
 
-    Examples
+    Example
     --------
-    ```
+    ```python
     from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
     from aws_lambda_powertools.utilities.data_masking import DataMasking
 
