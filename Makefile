@@ -59,7 +59,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline check-licenses
+pr: lint lint-docs mypy pre-commit check-licenses test security-baseline complexity-baseline
 
 build: pr
 	poetry build
