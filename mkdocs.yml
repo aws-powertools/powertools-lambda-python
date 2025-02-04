@@ -86,6 +86,12 @@ nav:
           - Persistence: api_doc/idempotency/persistence.md
           - Serialization: api_doc/idempotency/serialization.md
       - JMESPath Functions: api_doc/jmespath_functions.md
+      - Logger:
+          - DataDog Formatter: api_doc/logger/datadog_formatter.md
+          - Exceptions: api_doc/logger/exceptions.md
+          - Formatter: api_doc/logger/formatter.md
+          - Lambda Context: api_doc/logger/lambda_context.md
+          - Logger: api_doc/logger/logger.md
       - Middleware Factory: api_doc/middleware_factory.md
       - Parameters:
           - Base: api_doc/parameters/base.md

@@ -273,17 +273,17 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         """
         Context manager to temporarily add logging keys.
 
-        Parameters:
+        Parameters
         -----------
-        **keys: Any
+        **additional_keys: Any
             Key-value pairs to include in the log context during the lifespan of the context manager.
 
-        Example:
+        Example
         --------
-        >>> logger = Logger(service="example_service")
-        >>> with logger.append_context_keys(user_id="123", operation="process"):
-        >>>     logger.info("Log with context")
-        >>> logger.info("Log without context")
+            logger = Logger(service="example_service")
+            with logger.append_context_keys(user_id="123", operation="process"):
+                logger.info("Log with context")
+            logger.info("Log without context")
         """
         # Add keys to the context
         self.append_keys(**additional_keys)
