@@ -269,7 +269,7 @@ def test_erase_json_dict_with_complex_masking_rules(data_masker):
         "address.zip": {"custom_mask": "xxx"},
     }
 
-    masked_json_string = data_masker.erase(data, masking_rules=masking_rules)
+    masked_json_string = data_masker.erase(data=data, masking_rules=masking_rules)
 
     # THEN the result should have all specified fields masked according to their rules
     assert masked_json_string == {
@@ -285,8 +285,8 @@ def test_no_matches_for_masking_rule(data_masker):
     masking_rules = {"$.missing_field": {"dynamic_mask": True}}
 
     # WHEN applying the masking rule
-    with pytest.warns(UserWarning, match=r"No matches found for path: \$\.missing_field"):
-        result = data_masker._apply_masking_rules(data, masking_rules)
+    with pytest.warns(UserWarning, match=r"No matches found *"):
+        result = data_masker.erase(data=data, masking_rules=masking_rules)
 
     # THEN the original data remains unchanged
     assert result == data
@@ -311,29 +311,16 @@ def test_warning_during_masking_value(data_masker):
     assert masked_data["value"] == "test"
 
 
-def test_mask_nested_field_with_non_dict_value(data_masker):
-    # GIVEN nested data where a middle path component is not a dictionary
-    data = {"user": {"contact": "not_a_dict", "details": {"ssn": "123-45-6789"}}}  # This will stop the traversal
-
-    # WHEN attempting to mask a field through a path containing a non-dict value
-    data_masker._mask_nested_field(data, "user.contact.details.ssn", lambda x: "MASKED")
-
-    # THEN the data should remain unchanged since traversal stopped at non-dict value
-    assert data == {"user": {"contact": "not_a_dict", "details": {"ssn": "123-45-6789"}}}
-
-
 def test_mask_nested_field_success(data_masker):
     # GIVEN nested data with a field to mask
     data = {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "12345"}}}}}
 
     # WHEN masking a nested field with a masking rule
-    data_masker._mask_nested_field(data, "user.contact.details.address.zip", {"custom_mask": "xxx"})
+    data_masked = data_masker.erase(data=data, fields=["user.contact.details.address.zip"], custom_mask="xxx")
 
     # THEN the nested field should be masked while other data remains unchanged
-    assert data == {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "xxx"}}}}}
+    assert data_masked == {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "xxx"}}}}}
 
-
-## teste aqui
 def test_erase_dictionary_with_masking_rules(data_masker):
     # GIVEN a dictionary with nested sensitive data
     data = {"user": {"name": "John Doe", "ssn": "123-45-6789", "address": {"street": "123 Main St", "zip": "12345"}}}
@@ -423,3 +410,15 @@ def test_erase_handles_empty_string_with_dynamic_mask(data_masker):
 
     # THEN empty string should be returned
     assert result == ""
+
+def test_erase_dictionary_with_masking_rules_wrong_field(data_masker):
+    # GIVEN a dictionary with nested sensitive data
+    data = {"user": {"name": "John Doe", "ssn": "123-45-6789", "address": {"street": "123 Main St", "zip": "12345"}}}
+
+    # AND masking rules for specific fields
+    masking_rules = {"user.ssn...": {"custom_mask": "XXX-XX-XXXX"}, "user.address.zip": {"custom_mask": "00000"}}
+
+    # WHEN erase is called with wrong masking rules
+    # We must have a warning
+    with pytest.warns(UserWarning, match="Error processing path*"):
+        data_masker.erase(data, masking_rules=masking_rules)

@@ -140,6 +140,8 @@ def test_with_aws_encryption_sdk_as_required_package(session: nox.Session):
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/data_masking/_aws_encryption_sdk/",
             f"{PREFIX_TESTS_UNIT}/data_masking/_aws_encryption_sdk/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/data_masking/required_dependencies/",
+            f"{PREFIX_TESTS_UNIT}/data_masking/required_dependencies/",
         ],
         extras="datamasking",
     )
