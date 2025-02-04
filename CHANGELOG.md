@@ -9,37 +9,59 @@
 * **docs:** typo in a service name in Event Handler ([#5944](https://github.com/aws-powertools/powertools-lambda-python/issues/5944))
 * **logger:** child logger must respect log level ([#5950](https://github.com/aws-powertools/powertools-lambda-python/issues/5950))
 
+## Code Refactoring
+
+* **metrics:** Improve type annotations for metrics decorator ([#6000](https://github.com/aws-powertools/powertools-lambda-python/issues/6000))
+
 ## Documentation
 
+* **api:** migrating the tracer utility to mkdocstrings ([#6017](https://github.com/aws-powertools/powertools-lambda-python/issues/6017))
+* **api:** migrating the batch utility to mkdocstrings ([#6016](https://github.com/aws-powertools/powertools-lambda-python/issues/6016))
+* **api:** migrating the event source data classes utility to mkdocstrings ([#6015](https://github.com/aws-powertools/powertools-lambda-python/issues/6015))
+* **api:** migrating the data masking utility to mkdocstrings ([#6013](https://github.com/aws-powertools/powertools-lambda-python/issues/6013))
+* **api:** migrating the AppConfig utility to mkdocstrings ([#6008](https://github.com/aws-powertools/powertools-lambda-python/issues/6008))
+* **api:** migrating the idempotency utility to mkdocstrings ([#6007](https://github.com/aws-powertools/powertools-lambda-python/issues/6007))
+* **api:** migrating the jmespath utility to mkdocstrings ([#6006](https://github.com/aws-powertools/powertools-lambda-python/issues/6006))
+* **api:** migrating the parameters utility to mkdocstrings ([#6005](https://github.com/aws-powertools/powertools-lambda-python/issues/6005))
+* **api:** migrating the parser utility to mkdocstrings ([#6004](https://github.com/aws-powertools/powertools-lambda-python/issues/6004))
+* **api:** migrating the streaming utility to mkdocstrings ([#6003](https://github.com/aws-powertools/powertools-lambda-python/issues/6003))
+* **api:** migrating the typing utility to mkdocstrings ([#5996](https://github.com/aws-powertools/powertools-lambda-python/issues/5996))
 * **api:** migrating the validation utility to mkdocstrings ([#5972](https://github.com/aws-powertools/powertools-lambda-python/issues/5972))
 * **layer:** update layer version number - v3.5.0 ([#5952](https://github.com/aws-powertools/powertools-lambda-python/issues/5952))
 
 ## Features
 
 * **logger:** add clear_state method ([#5956](https://github.com/aws-powertools/powertools-lambda-python/issues/5956))
+* **openapi:** enhance support for tuple return type validation ([#5997](https://github.com/aws-powertools/powertools-lambda-python/issues/5997))
 
 ## Maintenance
 
+* **ci:** new pre-release 3.5.1a4 ([#6018](https://github.com/aws-powertools/powertools-lambda-python/issues/6018))
 * **ci:** new pre-release 3.5.1a0 ([#5945](https://github.com/aws-powertools/powertools-lambda-python/issues/5945))
 * **ci:** new pre-release 3.5.1a1 ([#5954](https://github.com/aws-powertools/powertools-lambda-python/issues/5954))
 * **ci:** install & configure mkdocstrings plugin ([#5959](https://github.com/aws-powertools/powertools-lambda-python/issues/5959))
-* **ci:** new pre-release 3.5.1a2 ([#5970](https://github.com/aws-powertools/powertools-lambda-python/issues/5970))
 * **ci:** new pre-release 3.5.1a3 ([#5998](https://github.com/aws-powertools/powertools-lambda-python/issues/5998))
-* **deps:** bump actions/setup-python from 5.3.0 to 5.4.0 ([#5960](https://github.com/aws-powertools/powertools-lambda-python/issues/5960))
-* **deps:** bump squidfunk/mkdocs-material from `41942f7` to `471695f` in /docs ([#5979](https://github.com/aws-powertools/powertools-lambda-python/issues/5979))
+* **ci:** new pre-release 3.5.1a2 ([#5970](https://github.com/aws-powertools/powertools-lambda-python/issues/5970))
+* **deps:** bump codecov/codecov-action from 5.1.2 to 5.3.1 ([#5964](https://github.com/aws-powertools/powertools-lambda-python/issues/5964))
+* **deps:** bump release-drafter/release-drafter from 6.0.0 to 6.1.0 ([#5976](https://github.com/aws-powertools/powertools-lambda-python/issues/5976))
 * **deps:** bump aws-actions/configure-aws-credentials from 4.0.2 to 4.0.3 ([#5975](https://github.com/aws-powertools/powertools-lambda-python/issues/5975))
+* **deps:** bump actions/setup-python from 5.3.0 to 5.4.0 ([#5960](https://github.com/aws-powertools/powertools-lambda-python/issues/5960))
 * **deps:** bump pypa/gh-action-pypi-publish from 1.12.3 to 1.12.4 ([#5980](https://github.com/aws-powertools/powertools-lambda-python/issues/5980))
+* **deps:** bump actions/setup-go from 5.2.0 to 5.3.0 ([#5978](https://github.com/aws-powertools/powertools-lambda-python/issues/5978))
+* **deps:** bump squidfunk/mkdocs-material from `471695f` to `7e841df` in /docs ([#6012](https://github.com/aws-powertools/powertools-lambda-python/issues/6012))
+* **deps:** bump squidfunk/mkdocs-material from `41942f7` to `471695f` in /docs ([#5979](https://github.com/aws-powertools/powertools-lambda-python/issues/5979))
+* **deps:** bump docker/setup-qemu-action from 3.2.0 to 3.3.0 ([#5961](https://github.com/aws-powertools/powertools-lambda-python/issues/5961))
 * **deps:** bump actions/upload-artifact from 4.5.0 to 4.6.0 ([#5962](https://github.com/aws-powertools/powertools-lambda-python/issues/5962))
 * **deps:** bump actions/setup-node from 4.1.0 to 4.2.0 ([#5963](https://github.com/aws-powertools/powertools-lambda-python/issues/5963))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 3.0.18 to 3.0.20 ([#5977](https://github.com/aws-powertools/powertools-lambda-python/issues/5977))
-* **deps:** bump actions/setup-go from 5.2.0 to 5.3.0 ([#5978](https://github.com/aws-powertools/powertools-lambda-python/issues/5978))
-* **deps:** bump docker/setup-qemu-action from 3.2.0 to 3.3.0 ([#5961](https://github.com/aws-powertools/powertools-lambda-python/issues/5961))
-* **deps:** bump release-drafter/release-drafter from 6.0.0 to 6.1.0 ([#5976](https://github.com/aws-powertools/powertools-lambda-python/issues/5976))
-* **deps:** bump codecov/codecov-action from 5.1.2 to 5.3.1 ([#5964](https://github.com/aws-powertools/powertools-lambda-python/issues/5964))
 * **deps-dev:** bump mkdocs-material from 9.5.50 to 9.6.1 ([#5966](https://github.com/aws-powertools/powertools-lambda-python/issues/5966))
 * **deps-dev:** bump isort from 5.13.2 to 6.0.0 ([#5965](https://github.com/aws-powertools/powertools-lambda-python/issues/5965))
 * **deps-dev:** bump cfn-lint from 1.22.7 to 1.23.1 ([#5967](https://github.com/aws-powertools/powertools-lambda-python/issues/5967))
 * **deps-dev:** bump black from 24.10.0 to 25.1.0 ([#5968](https://github.com/aws-powertools/powertools-lambda-python/issues/5968))
+* **deps-dev:** bump mkdocstrings-python from 1.13.0 to 1.14.2 ([#6011](https://github.com/aws-powertools/powertools-lambda-python/issues/6011))
+* **deps-dev:** bump mkdocs-material from 9.6.1 to 9.6.2 ([#6009](https://github.com/aws-powertools/powertools-lambda-python/issues/6009))
+* **deps-dev:** bump boto3-stubs from 1.36.10 to 1.36.11 ([#6010](https://github.com/aws-powertools/powertools-lambda-python/issues/6010))
+* **deps-dev:** bump boto3-stubs from 1.36.10 to 1.36.12 ([#6014](https://github.com/aws-powertools/powertools-lambda-python/issues/6014))
 * **deps-dev:** bump ruff from 0.9.3 to 0.9.4 ([#5969](https://github.com/aws-powertools/powertools-lambda-python/issues/5969))
 
 
