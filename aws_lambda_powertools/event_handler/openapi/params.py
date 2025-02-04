@@ -931,7 +931,10 @@ def analyze_param(
         The type annotation and the Pydantic field representing the parameter
     """
     field_info, type_annotation = get_field_info_and_type_annotation(
-        annotation, value, is_path_param, is_response_param,
+        annotation,
+        value,
+        is_path_param,
+        is_response_param,
     )
 
     # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
@@ -963,7 +966,10 @@ def analyze_param(
 
 
 def get_field_info_and_type_annotation(
-    annotation, value, is_path_param: bool, is_response_param: bool,
+    annotation,
+    value,
+    is_path_param: bool,
+    is_response_param: bool,
 ) -> tuple[FieldInfo | None, Any]:
     """
     Get the FieldInfo and type annotation from an annotation and value.
