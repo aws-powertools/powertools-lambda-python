@@ -37,7 +37,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     Lambda handler. It also validates the response against the OpenAPI schema defined by the Lambda handler. It
     should not be used directly, but rather through the `enable_validation` parameter of the `ApiGatewayResolver`.
 
-    Examples
+    Example
     --------
 
     ```python

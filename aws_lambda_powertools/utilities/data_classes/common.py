@@ -1,3 +1,9 @@
+"""
+Base class for Event Source Data Classes
+!!! abstract "Usage Documentation"
+    [`Data classes`](../utilities/data_classes.md)
+"""
+
 from __future__ import annotations
 
 import base64

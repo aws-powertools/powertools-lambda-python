@@ -1,3 +1,10 @@
+"""
+The Parser utility simplifies data parsing and validation using Pydantic. It allows you to define data models
+in pure Python classes, parse and validate incoming events, and extract only the data you need.
+!!! abstract "Usage Documentation"
+    [`Parser`](../utilities/parser.md)
+"""
+
 from __future__ import annotations
 
 import logging

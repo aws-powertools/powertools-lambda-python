@@ -48,9 +48,9 @@ class AWSEncryptionSDKProvider(BaseProvider):
     """
     The AWSEncryptionSDKProvider is used as a provider for the DataMasking class.
 
-    Usage
+    Example
     -------
-    ```
+    ```python
     from aws_lambda_powertools.utilities.data_masking import DataMasking
     from aws_lambda_powertools.utilities.data_masking.providers.kms.aws_encryption_sdk import (
         AWSEncryptionSDKProvider,
@@ -142,17 +142,17 @@ class KMSKeyProvider:
 
         Parameters
         -------
-            data : Any
-                The data to be encrypted.
-            provider_options : dict
-                Additional options for the aws_encryption_sdk.EncryptionSDKClient
-            **encryption_context : str
-                Additional keyword arguments collected into a dictionary.
+        data: Any
+            The data to be encrypted.
+        provider_options: dict
+            Additional options for the aws_encryption_sdk.EncryptionSDKClient
+        **encryption_context: str
+            Additional keyword arguments collected into a dictionary.
 
         Returns
         -------
-            ciphertext : str
-                The encrypted data, as a base64-encoded string.
+        ciphertext: str
+            The encrypted data, as a base64-encoded string.
         """
         provider_options = provider_options or {}
         self._validate_encryption_context(encryption_context)
@@ -179,15 +179,15 @@ class KMSKeyProvider:
 
         Parameters
         -------
-            data : str
-                The encrypted data, as a base64-encoded string
-            provider_options
-                Additional options for the aws_encryption_sdk.EncryptionSDKClient
+        data: str
+            The encrypted data, as a base64-encoded string
+        provider_options
+            Additional options for the aws_encryption_sdk.EncryptionSDKClient
 
         Returns
         -------
-            ciphertext : bytes
-                The decrypted data in bytes
+        ciphertext: bytes
+            The decrypted data in bytes
         """
         provider_options = provider_options or {}
         self._validate_encryption_context(encryption_context)

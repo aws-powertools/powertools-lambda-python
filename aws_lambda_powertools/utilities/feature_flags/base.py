@@ -28,7 +28,8 @@ class StoreProvider(ABC):
         dict[str, Any]
             parsed JSON dictionary
 
-            **Example**
+        Example
+        -------
 
         ```python
         {

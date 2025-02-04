@@ -63,6 +63,59 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
+      - Batch Processing:
+          - Base: api_doc/batch/base.md
+          - Decorators: api_doc/batch/decorators.md
+          - Exceptions: api_doc/batch/exceptions.md
+      - Event Source Data Classes: api_doc/data_classes.md
+      - Data Masking:
+          - Base: api_doc/data_masking/base.md
+          - Exception: api_doc/data_masking/exceptions.md
+          - Provider: api_doc/data_masking/provider.md
+      - Event Handler:
+          - AppSync: api_doc/event_handler/appsync.md
+          - Middleware: api_doc/event_handler/middleware.md
+          - OpenAPI: api_doc/event_handler/openapi.md
+          - REST: api_doc/event_handler/api_gateway.md
+      - Feature Flags:
+          - AppConfig: api_doc/feature_flags/appconfig.md
+          - Base: api_doc/feature_flags/base.md
+          - Comparators: api_doc/feature_flags/comparators.md
+          - Exceptions: api_doc/feature_flags/exceptions.md
+          - Feature flags: api_doc/feature_flags/feature_flags.md
+          - Schema: api_doc/feature_flags/schema.md
+      - Idempotency:
+          - Base: api_doc/idempotency/base.md
+          - Config: api_doc/idempotency/config.md
+          - Exceptions: api_doc/idempotency/exceptions.md
+          - Persistence: api_doc/idempotency/persistence.md
+          - Serialization: api_doc/idempotency/serialization.md
+      - JMESPath Functions: api_doc/jmespath_functions.md
+      - Logger:
+          - DataDog Formatter: api_doc/logger/datadog_formatter.md
+          - Exceptions: api_doc/logger/exceptions.md
+          - Formatter: api_doc/logger/formatter.md
+          - Lambda Context: api_doc/logger/lambda_context.md
+          - Logger: api_doc/logger/logger.md
+      - Metrics:
+          - Base: api_doc/metrics/base.md
+          - Exceptions: api_doc/metrics/exceptions.md
+          - Providers:
+            - EMF: api_doc/metrics/provider_emf.md
+            - DataDog: api_doc/metrics/provider_datadog.md
+      - Middleware Factory: api_doc/middleware_factory.md
+      - Parameters:
+          - Base: api_doc/parameters/base.md
+          - AppConfig: api_doc/parameters/appconfig.md
+          - DynamoDB: api_doc/parameters/dynamodb.md
+          - SSM: api_doc/parameters/ssm.md
+          - Secrets: api_doc/parameters/secrets.md
+      - Parser: api_doc/parser.md
+      - Streaming: api_doc/streaming.md
+      - Tracer:
+          - Base: api_doc/tracer/base.md
+          - Tracing: api_doc/tracer/tracing.md
+      - Typing: api_doc/typing.md
       - Validation: api_doc/validation.md
 
 theme:
