@@ -69,6 +69,30 @@ class DataMasking:
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> str:
+        """
+        Encrypt data using the configured encryption provider.
+
+        Parameters
+        ----------
+        data : dict, Mapping, Sequence, or Number
+            The data to encrypt.
+        provider_options : dict, optional
+            Provider-specific options for encryption.
+        **encryption_context : str
+            Additional key-value pairs for encryption context.
+
+        Returns
+        -------
+        str
+            The encrypted data as a base64-encoded string.
+
+        Example
+        --------
+
+            encryption_provider = AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN])
+            data_masker = DataMasking(provider=encryption_provider)
+            encrypted = data_masker.encrypt({"secret": "value"})
+        """
         return self._apply_action(
             data=data,
             fields=None,
@@ -87,6 +111,31 @@ class DataMasking:
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> Any:
+        """
+        Decrypt data using the configured encryption provider.
+
+        Parameters
+        ----------
+        data : dict, Mapping, Sequence, or Number
+            The data to encrypt.
+        provider_options : dict, optional
+            Provider-specific options for encryption.
+        **encryption_context : str
+            Additional key-value pairs for encryption context.
+
+        Returns
+        -------
+        str
+            The encrypted data as a base64-encoded string.
+
+        Example
+        --------
+
+            encryption_provider = AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN])
+            data_masker = DataMasking(provider=encryption_provider)
+            encrypted = data_masker.decrypt(encrypted_data)
+        """
+
         return self._apply_action(
             data=data,
             fields=None,
@@ -110,6 +159,31 @@ class DataMasking:
         mask_format: str | None = None,
         masking_rules: dict | None = None,
     ) -> Any:
+        """
+        Erase or mask sensitive data in the input.
+
+        Parameters
+        ----------
+        data : Any
+            The data to be erased or masked.
+        fields : list of str, optional
+            List of field names to be erased or masked.
+        dynamic_mask : bool, optional
+            Whether to use dynamic masking.
+        custom_mask : str, optional
+            Custom mask to apply instead of the default.
+        regex_pattern : str, optional
+            Regular expression pattern for identifying data to mask.
+        mask_format : str, optional
+            Format string for the mask.
+        masking_rules : dict, optional
+            Dictionary of custom masking rules.
+
+        Returns
+        -------
+        Any
+            The data with sensitive information erased or masked.
+        """
         if masking_rules:
             return self._apply_masking_rules(data=data, masking_rules=masking_rules)
         else:
@@ -313,7 +387,11 @@ class DataMasking:
                             match.full_path.update(result, masked_value)
 
                     except Exception as e:
-                        warnings.warn(f"Error masking value for path {path}: {str(e)}", category=PowertoolsUserWarning, stacklevel=2)
+                        warnings.warn(
+                            f"Error masking value for path {path}: {str(e)}",
+                            category=PowertoolsUserWarning,
+                            stacklevel=2,
+                        )
                         continue
 
             except Exception as e:
