@@ -24,10 +24,10 @@ find ./docs ./examples -type f \( -name "*.md" -o -name "*.py" -o -name "*.yaml"
     echo "Processing file: $file"
 
     # Use sed to replace the version number in the Lambda layer ARN
-    # -i '': edit files in-place without creating a backup
+    # -i: edit files in-place without creating a backup
     # -E: use extended regular expressions
     # The regex matches the layer name and replaces only the version number at the end
-    sed -i '' -E "s/(AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
     if [ $? -eq 0 ]; then
         echo "Updated $file successfully"
         grep "arn:aws:lambda:" "$file"
