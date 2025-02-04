@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class SchemaValidationMiddleware(BaseMiddlewareHandler):
     """Middleware to validate API request and response against JSON Schema using the [Validation utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/validation/).
 
-    Examples
+    Example
     --------
     **Validating incoming event**
 

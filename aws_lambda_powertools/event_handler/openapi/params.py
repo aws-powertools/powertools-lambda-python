@@ -879,8 +879,6 @@ def get_flat_dependant(
     ----------
     dependant: Dependant
         The dependant model to flatten
-    skip_repeats: bool
-        If True, child Dependents already visited will be skipped to avoid duplicates
     visited: list[CacheKey], optional
         Keeps track of visited Dependents to avoid infinite recursion. Defaults to empty list.
 
@@ -932,8 +930,9 @@ def analyze_param(
     ModelField | None
         The type annotation and the Pydantic field representing the parameter
     """
-    field_info, type_annotation = \
-        get_field_info_and_type_annotation(annotation, value, is_path_param, is_response_param)
+    field_info, type_annotation = get_field_info_and_type_annotation(
+        annotation, value, is_path_param, is_response_param,
+    )
 
     # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
     if isinstance(value, FieldInfo):
@@ -964,7 +963,7 @@ def analyze_param(
 
 
 def get_field_info_and_type_annotation(
-    annotation, value, is_path_param: bool, is_response_param: bool
+    annotation, value, is_path_param: bool, is_response_param: bool,
 ) -> tuple[FieldInfo | None, Any]:
     """
     Get the FieldInfo and type annotation from an annotation and value.

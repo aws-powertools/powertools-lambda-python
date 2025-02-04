@@ -87,10 +87,6 @@ class DatadogProvider(BaseProvider):
             Timestamp in int for the metrics, default = time.time()
         tags: list[str]
             In format like ["tag:value", "tag2:value2"]
-        args: Any
-            extra args will be dropped for compatibility
-        kwargs: Any
-            extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
 
         Examples
         --------

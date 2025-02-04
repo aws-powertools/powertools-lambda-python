@@ -72,6 +72,11 @@ nav:
           - Base: api_doc/data_masking/base.md
           - Exception: api_doc/data_masking/exceptions.md
           - Provider: api_doc/data_masking/provider.md
+      - Event Handler:
+          - AppSync: api_doc/event_handler/appsync.md
+          - Middleware: api_doc/event_handler/middleware.md
+          - OpenAPI: api_doc/event_handler/openapi.md
+          - REST: api_doc/event_handler/api_gateway.md
       - Feature Flags:
           - AppConfig: api_doc/feature_flags/appconfig.md
           - Base: api_doc/feature_flags/base.md

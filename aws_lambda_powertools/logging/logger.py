@@ -3,6 +3,7 @@ Logger utility
 !!! abstract "Usage Documentation"
     [`Logger`](../../core/logger.md)
 """
+
 from __future__ import annotations
 
 import functools

@@ -26,7 +26,7 @@ class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
     This is the middleware handler function where middleware logic is implemented.
     The next middleware handler is represented by `next_middleware`, returning a Response object.
 
-    Examples
+    Example
     --------
 
     **Correlation ID Middleware**
