@@ -86,6 +86,7 @@ nav:
           - Persistence: api_doc/idempotency/persistence.md
           - Serialization: api_doc/idempotency/serialization.md
       - JMESPath Functions: api_doc/jmespath_functions.md
+      - Middleware Factory: api_doc/middleware_factory.md
       - Parameters:
           - Base: api_doc/parameters/base.md
           - AppConfig: api_doc/parameters/appconfig.md
