@@ -8,6 +8,7 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
 )
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 @pytest.fixture
@@ -304,7 +305,7 @@ def test_warning_during_masking_value(data_masker):
     data_masker.provider = MockProvider()
 
     # WHEN erase is called
-    with pytest.warns(UserWarning, match="Error masking value for path value: Mock error"):
+    with pytest.warns(expected_warning=PowertoolsUserWarning, match="Error masking value for path value: Mock error"):
         masked_data = data_masker.erase(data, masking_rules={"value": {"rule": "value"}})
 
     # THEN the original data should remain unchanged
@@ -422,5 +423,5 @@ def test_erase_dictionary_with_masking_rules_wrong_field(data_masker):
 
     # WHEN erase is called with wrong masking rules
     # We must have a warning
-    with pytest.warns(UserWarning, match="Error processing path*"):
+    with pytest.warns(expected_warning=PowertoolsUserWarning, match="Error processing path*"):
         data_masker.erase(data, masking_rules=masking_rules)

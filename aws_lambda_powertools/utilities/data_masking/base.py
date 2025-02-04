@@ -19,6 +19,7 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from numbers import Number
@@ -102,6 +103,7 @@ class DataMasking:
         self,
         data: Any,
         fields: list[str] | None = None,
+        *,
         dynamic_mask: bool | None = None,
         custom_mask: str | None = None,
         regex_pattern: str | None = None,
@@ -311,11 +313,11 @@ class DataMasking:
                             match.full_path.update(result, masked_value)
 
                     except Exception as e:
-                        warnings.warn(f"Error masking value for path {path}: {str(e)}", stacklevel=2)
+                        warnings.warn(f"Error masking value for path {path}: {str(e)}", category=PowertoolsUserWarning, stacklevel=2)
                         continue
 
             except Exception as e:
-                warnings.warn(f"Error processing path {path}: {str(e)}", stacklevel=2)
+                warnings.warn(f"Error processing path {path}: {str(e)}", category=PowertoolsUserWarning, stacklevel=2)
                 continue
 
         return result
