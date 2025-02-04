@@ -1,4 +1,4 @@
-"""Utilities to enhance middlewares
+"""Utilities to enhance middleware
 !!! abstract "Usage Documentation"
     [`Middleware Factory`](../utilities/middleware_factory.md)
 """
