@@ -92,6 +92,12 @@ nav:
           - Formatter: api_doc/logger/formatter.md
           - Lambda Context: api_doc/logger/lambda_context.md
           - Logger: api_doc/logger/logger.md
+      - Metrics:
+          - Base: api_doc/metrics/base.md
+          - Exceptions: api_doc/metrics/exceptions.md
+          - Providers:
+            - EMF: api_doc/metrics/provider_emf.md
+            - DataDog: api_doc/metrics/provider_datadog.md
       - Middleware Factory: api_doc/middleware_factory.md
       - Parameters:
           - Base: api_doc/parameters/base.md
