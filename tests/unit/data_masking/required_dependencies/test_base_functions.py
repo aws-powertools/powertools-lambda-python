@@ -1,19 +1,12 @@
-
-import json
-
 import pytest
 
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
-from aws_lambda_powertools.utilities.data_masking.exceptions import (
-    DataMaskingFieldNotFoundError,
-    DataMaskingUnsupportedTypeError,
-)
 
 
 @pytest.fixture
 def data_masker() -> DataMasking:
     return DataMasking()
+
 
 def test_mask_nested_field_with_non_dict_value(data_masker):
     # GIVEN nested data where a middle path component is not a dictionary

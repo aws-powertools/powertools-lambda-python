@@ -321,6 +321,7 @@ def test_mask_nested_field_success(data_masker):
     # THEN the nested field should be masked while other data remains unchanged
     assert data_masked == {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "xxx"}}}}}
 
+
 def test_erase_dictionary_with_masking_rules(data_masker):
     # GIVEN a dictionary with nested sensitive data
     data = {"user": {"name": "John Doe", "ssn": "123-45-6789", "address": {"street": "123 Main St", "zip": "12345"}}}
@@ -410,6 +411,7 @@ def test_erase_handles_empty_string_with_dynamic_mask(data_masker):
 
     # THEN empty string should be returned
     assert result == ""
+
 
 def test_erase_dictionary_with_masking_rules_wrong_field(data_masker):
     # GIVEN a dictionary with nested sensitive data
