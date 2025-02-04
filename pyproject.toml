@@ -123,7 +123,6 @@ boto3-stubs = {extras = ["appconfig", "appconfigdata", "cloudformation", "cloudw
 nox = "^2024.4.15"
 mkdocstrings-python = "^1.13.0"
 licensecheck = "^2024.3"
-pdoc3 = "^0.11.5"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
