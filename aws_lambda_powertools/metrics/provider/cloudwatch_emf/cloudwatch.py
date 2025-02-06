@@ -21,7 +21,7 @@ from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
@@ -77,6 +77,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
+        self.metrics_disabled = self.is_metrics_disabled()
+
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self.timestamp: int | None = None
 
@@ -85,6 +87,14 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
 
         self.dimension_set.update(**self.default_dimensions)
+
+    @staticmethod
+    def is_metrics_disabled() -> bool:
+        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLE"""
+        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+        if is_disabled:
+            logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
+        return is_disabled
 
     def add_metric(
         self,
@@ -127,6 +137,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         MetricResolutionError
             When metric resolution is not supported by CloudWatch
         """
+        if self.metrics_disabled:
+            return
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
@@ -268,6 +280,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         value : str
             Dimension value
         """
+        if self.metrics_disabled:
+            return
         logger.debug(f"Adding dimension: {name}:{value}")
         if len(self.dimension_set) == MAX_DIMENSIONS:
             raise SchemaValidationError(
@@ -316,6 +330,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         value : any
             Metadata value
         """
+        if self.metrics_disabled:
+            return
         logger.debug(f"Adding metadata: {key}:{value}")
 
         # Cast key to str according to EMF spec
@@ -368,6 +384,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
+        if self.metrics_disabled:
+            return
         if not raise_on_empty_metrics and not self.metric_set:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "
