@@ -1329,3 +1329,86 @@ def test_metric_custom_timestamp_with_wrong_type(namespace, metric):
             "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
             "Ensure the timestamp is within 14 days past or 2 hours future."
         )
+
+
+def test_metrics_disabled_with_env_var(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized and adding metrics
+    metrics = Metrics()
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+
+    # WHEN flushing metrics
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics output should be empty
+    assert metrics_output is None
+
+
+def test_metrics_disabled_persists_after_flush(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    metrics = Metrics()
+
+    # WHEN multiple operations are performed with flush in between
+    metrics.add_metric(name="metric1", unit="Count", value=1)
+    first_flush = metrics.flush_metrics()
+
+    metrics.add_metric(name="metric2", unit="Count", value=2)
+    second_flush = metrics.flush_metrics()
+
+    # THEN all flush operations should return None
+    assert first_flush is None
+    assert second_flush is None
+
+
+def test_metrics_disabled_with_namespace_and_service(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized with namespace and service
+    metrics = Metrics(namespace="test_namespace", service="test_service")
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics should still be disabled
+    assert metrics_output is None
+
+
+def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):
+    # GIVEN environment variable is set to enable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = Metrics(namespace="test")
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert "test_metric" in metrics_output
+    assert metrics_output["test_metric"] == [1.0]
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Namespace"] == "test"
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"] == "test_metric"
+
+
+def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
+    # GIVEN environment variable is not set
+    monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = Metrics(namespace="test")
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert "test_metric" in metrics_output
+    assert metrics_output["test_metric"] == [1.0]
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Namespace"] == "test"
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"] == "test_metric"
