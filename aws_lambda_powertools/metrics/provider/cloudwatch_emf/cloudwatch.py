@@ -90,11 +90,15 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
     @staticmethod
     def is_metrics_disabled() -> bool:
-        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLE"""
-        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED"""
+        if constants.METRICS_DISABLED_ENV not in os.environ:
+            return False
+        
+        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV))
         if is_disabled:
             logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
-        return is_disabled
+        return bool(is_disabled)
+
 
     def add_metric(
         self,
