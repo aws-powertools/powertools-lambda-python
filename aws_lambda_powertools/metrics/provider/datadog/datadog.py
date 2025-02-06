@@ -13,7 +13,7 @@ from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaVal
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.shared.types import AnyCallableT
@@ -65,6 +65,15 @@ class DatadogProvider(BaseProvider):
         )
         self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
+        self.metrics_disabled = self.is_metrics_disabled()
+
+    @staticmethod
+    def is_metrics_disabled() -> bool:
+        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLE"""
+        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+        if is_disabled:
+            logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
+        return is_disabled
 
     #  adding name,value,timestamp,tags
     def add_metric(
@@ -99,7 +108,8 @@ class DatadogProvider(BaseProvider):
             >>>     sales='sam'
             >>> )
         """
-
+        if self.metrics_disabled:
+            return
         # validating metric name
         if not self._validate_datadog_metric_name(name):
             docs = "https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics"
@@ -180,6 +190,8 @@ class DatadogProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
+        if self.metrics_disabled:
+            return
         if not raise_on_empty_metrics and len(self.metric_set) == 0:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "
