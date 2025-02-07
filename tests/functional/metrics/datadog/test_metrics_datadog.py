@@ -334,3 +334,81 @@ def test_namespace_env_var(monkeypatch):
 
     # THEN namespace should match the explicitly passed variable and not the env var
     assert output[0]["m"] == f"{env_namespace}.item_sold"
+
+
+####################
+def test_metrics_disabled_with_env_var(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized and adding metrics
+    metrics = DatadogMetrics()
+    metrics.add_metric(name="test_metric", value=1)
+
+    # WHEN flushing metrics
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics output should be empty
+    assert metrics_output is None
+
+
+def test_metrics_disabled_persists_after_flush(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    metrics = DatadogMetrics()
+
+    # WHEN multiple operations are performed with flush in between
+    metrics.add_metric(name="metric1", unit="Count", value=1)
+    first_flush = metrics.flush_metrics()
+
+    metrics.add_metric(name="metric2", unit="Count", value=2)
+    second_flush = metrics.flush_metrics()
+
+    # THEN all flush operations should return None
+    assert first_flush is None
+    assert second_flush is None
+
+
+def test_metrics_disabled_with_namespace(monkeypatch):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized with namespace and service
+    metrics = DatadogMetrics(namespace="test_namespace")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics should still be disabled
+    assert metrics_output is None
+
+
+def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):
+    # GIVEN environment variable is set to enable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN Datadog metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert metrics_output
+
+
+def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
+    # GIVEN environment variable is not set
+    monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert "test.test_metric" in metrics_output["m"]
