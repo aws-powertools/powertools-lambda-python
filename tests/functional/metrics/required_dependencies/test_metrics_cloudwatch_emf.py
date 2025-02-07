@@ -1412,3 +1412,70 @@ def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
     assert metrics_output["test_metric"] == [1.0]
     assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Namespace"] == "test"
     assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"] == "test_metric"
+
+
+def test_metrics_disabled_with_dev_mode(monkeypatch, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+
+    # WHEN metrics is initialized and adding metrics
+    metrics = Metrics(namespace=namespace)
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+
+    # AND flushing metrics
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics output should be empty
+    assert metrics_output is None
+
+
+def test_metrics_enabled_with_dev_mode_false(monkeypatch, capsys):
+    # GIVEN environment variable is set to enable metrics
+    monkeypatch.setenv("POWERTOOLS_DEV", "false")
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = Metrics(namespace="test")
+    metrics.add_metric(name="test_metric", unit="Count", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert "test_metric" in metrics_output
+    assert metrics_output["test_metric"] == [1.0]
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Namespace"] == "test"
+    assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"] == "test_metric"
+
+
+def test_metrics_dev_mode_does_not_override_metrics_disabled(monkeypatch, capsys):
+    # GIVEN dev mode is enabled but metrics disabled is explicitly false
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized
+    metrics = Metrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1, unit="Count")
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout (POWERTOOLS_METRICS_DISABLED takes precedence)
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+    assert metrics_output
+
+
+def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypatch):
+    # GIVEN dev mode is false but metrics disabled is true
+    monkeypatch.setenv("POWERTOOLS_DEV", "false")
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized
+    metrics = Metrics(namespace="test")
+
+    metrics.add_metric(name="test_metric", value=1, unit="Count")
+
+    # WHEN flushing metrics
+    metrics_output = metrics.flush_metrics()
+
+    # THEN metrics output should be empty
+    assert metrics_output is None

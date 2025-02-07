@@ -69,7 +69,15 @@ class DatadogProvider(BaseProvider):
 
     @staticmethod
     def is_metrics_disabled() -> bool:
-        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED"""
+        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED or POWERTOOLS_DEV"""
+        # First check if POWERTOOLS_DEV is enabled
+        dev_mode_value = os.getenv(constants.POWERTOOLS_DEV_ENV)
+        dev_mode = resolve_truthy_env_var_choice(env=dev_mode_value or "false")
+        if dev_mode:
+            logger.debug("Metrics have been disabled via env var POWERTOOLS_DEV")
+            return True
+
+        # Then check POWERTOOLS_METRICS_DISABLED
         if constants.METRICS_DISABLED_ENV not in os.environ:
             return False
 
