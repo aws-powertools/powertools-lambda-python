@@ -72,7 +72,7 @@ class DatadogProvider(BaseProvider):
         """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED"""
         if constants.METRICS_DISABLED_ENV not in os.environ:
             return False
-        
+
         is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV))
         if is_disabled:
             logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
@@ -111,8 +111,6 @@ class DatadogProvider(BaseProvider):
             >>>     sales='sam'
             >>> )
         """
-        if self.metrics_disabled:
-            return
         # validating metric name
         if not self._validate_datadog_metric_name(name):
             docs = "https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics"
@@ -193,8 +191,7 @@ class DatadogProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
-        if self.metrics_disabled:
-            return
+
         if not raise_on_empty_metrics and len(self.metric_set) == 0:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "

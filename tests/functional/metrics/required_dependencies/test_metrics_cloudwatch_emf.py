@@ -1331,12 +1331,12 @@ def test_metric_custom_timestamp_with_wrong_type(namespace, metric):
         )
 
 
-def test_metrics_disabled_with_env_var(monkeypatch):
+def test_metrics_disabled_with_env_var(monkeypatch, namespace):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
 
     # WHEN metrics is initialized and adding metrics
-    metrics = Metrics()
+    metrics = Metrics(namespace=namespace)
     metrics.add_metric(name="test_metric", unit="Count", value=1)
 
     # WHEN flushing metrics
@@ -1346,10 +1346,10 @@ def test_metrics_disabled_with_env_var(monkeypatch):
     assert metrics_output is None
 
 
-def test_metrics_disabled_persists_after_flush(monkeypatch):
+def test_metrics_disabled_persists_after_flush(monkeypatch, namespace):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
-    metrics = Metrics()
+    metrics = Metrics(namespace=namespace)
 
     # WHEN multiple operations are performed with flush in between
     metrics.add_metric(name="metric1", unit="Count", value=1)
