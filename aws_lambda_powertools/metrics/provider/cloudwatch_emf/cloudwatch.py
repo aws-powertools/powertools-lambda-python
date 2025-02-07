@@ -94,7 +94,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         if constants.METRICS_DISABLED_ENV not in os.environ:
             return False
 
-        is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.METRICS_DISABLED_ENV))
+        env_value = os.getenv(constants.METRICS_DISABLED_ENV)
+        is_disabled = resolve_truthy_env_var_choice(env=env_value or "false")
         if is_disabled:
             logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
         return bool(is_disabled)
