@@ -47,6 +47,8 @@ class Metrics:
         metric namespace
     POWERTOOLS_SERVICE_NAME : str
         service name used for default dimension
+    POWERTOOLS_METRICS_DISABLED: bool
+        Powertools metrics disabled (e.g. `"true", "True", "TRUE"`)
 
     Parameters
     ----------
