@@ -330,7 +330,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         """
         Set the timestamp for the metric.
 
-        Parameters:
+        Parameters
         -----------
         timestamp: int | datetime.datetime
             The timestamp to create the metric.

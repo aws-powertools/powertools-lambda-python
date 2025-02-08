@@ -1,3 +1,9 @@
+"""
+Logger utility
+!!! abstract "Usage Documentation"
+    [`Logger`](../../core/logger.md)
+"""
+
 from __future__ import annotations
 
 import functools
@@ -82,7 +88,7 @@ class Logger:
         by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
-    sample_rate: float, optional
+    sampling_rate: float, optional
         sample rate for debug calls within execution context defaults to 0.0
     stream: sys.stdout, optional
         valid output for a logging stream, by default sys.stdout
@@ -103,7 +109,6 @@ class Logger:
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
-
         See https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior . This
         also supports a custom %F directive for milliseconds.
     use_rfc3339: bool, optional
@@ -116,7 +121,6 @@ class Logger:
         by default json.loads
     json_default : Callable, optional
         function to coerce unserializable values, by default `str()`
-
         Only used when no custom formatter is set
     utc : bool, optional
         set logging timestamp to UTC, by default False to continue to use local time as per stdlib
@@ -222,6 +226,7 @@ class Logger:
             choice=sampling_rate,
             env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE),
         )
+        self._default_log_keys: dict[str, Any] = {"service": self.service, "sampling_rate": self.sampling_rate}
         self.child = child
         self.logger_formatter = logger_formatter
         self._stream = stream or sys.stdout
@@ -231,7 +236,6 @@ class Logger:
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false"),
         )
-        self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
 
         # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
@@ -590,20 +594,30 @@ class Logger:
         """
         Context manager to temporarily add logging keys.
 
-        Parameters:
+        Parameters
         -----------
-        **keys: Any
+        **additional_keys: Any
             Key-value pairs to include in the log context during the lifespan of the context manager.
 
-        Example:
+        Example
         --------
-        >>> logger = Logger(service="example_service")
-        >>> with logger.append_context_keys(user_id="123", operation="process"):
-        >>>     logger.info("Log with context")
-        >>> logger.info("Log without context")
+        **Logging with contextual keys**
+
+            logger = Logger(service="example_service")
+            with logger.append_context_keys(user_id="123", operation="process"):
+                logger.info("Log with context")
+            logger.info("Log without context")
         """
         with self.registered_formatter.append_context_keys(**additional_keys):
             yield
+
+    def clear_state(self) -> None:
+        """Removes all custom keys that were appended to the Logger."""
+        # Clear all custom keys from the formatter
+        self.registered_formatter.clear_state()
+
+        # Reset to default keys
+        self.structure_logs(**self._default_log_keys)
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
     # They prevent race conditions and ensure data consistency across multiple threads.

@@ -22,7 +22,7 @@ def generate_swagger_html(
     spec: str
         The OpenAPI spec
     swagger_js: str
-       Swagger UI JavaScript source code or URL
+        Swagger UI JavaScript source code or URL
     swagger_css: str
         Swagger UI CSS source code or URL
     swagger_base_url: str

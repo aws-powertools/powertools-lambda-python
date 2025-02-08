@@ -62,6 +62,61 @@ nav:
           #     - Overview: contributing/tracks/overview.md
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
+  - API Documentation:
+      - Batch Processing:
+          - Base: api_doc/batch/base.md
+          - Decorators: api_doc/batch/decorators.md
+          - Exceptions: api_doc/batch/exceptions.md
+      - Event Source Data Classes: api_doc/data_classes.md
+      - Data Masking:
+          - Base: api_doc/data_masking/base.md
+          - Exception: api_doc/data_masking/exceptions.md
+          - Provider: api_doc/data_masking/provider.md
+      - Event Handler:
+          - AppSync: api_doc/event_handler/appsync.md
+          - Middleware: api_doc/event_handler/middleware.md
+          - OpenAPI: api_doc/event_handler/openapi.md
+          - REST: api_doc/event_handler/api_gateway.md
+      - Feature Flags:
+          - AppConfig: api_doc/feature_flags/appconfig.md
+          - Base: api_doc/feature_flags/base.md
+          - Comparators: api_doc/feature_flags/comparators.md
+          - Exceptions: api_doc/feature_flags/exceptions.md
+          - Feature flags: api_doc/feature_flags/feature_flags.md
+          - Schema: api_doc/feature_flags/schema.md
+      - Idempotency:
+          - Base: api_doc/idempotency/base.md
+          - Config: api_doc/idempotency/config.md
+          - Exceptions: api_doc/idempotency/exceptions.md
+          - Persistence: api_doc/idempotency/persistence.md
+          - Serialization: api_doc/idempotency/serialization.md
+      - JMESPath Functions: api_doc/jmespath_functions.md
+      - Logger:
+          - DataDog Formatter: api_doc/logger/datadog_formatter.md
+          - Exceptions: api_doc/logger/exceptions.md
+          - Formatter: api_doc/logger/formatter.md
+          - Lambda Context: api_doc/logger/lambda_context.md
+          - Logger: api_doc/logger/logger.md
+      - Metrics:
+          - Base: api_doc/metrics/base.md
+          - Exceptions: api_doc/metrics/exceptions.md
+          - Providers:
+            - EMF: api_doc/metrics/provider_emf.md
+            - DataDog: api_doc/metrics/provider_datadog.md
+      - Middleware Factory: api_doc/middleware_factory.md
+      - Parameters:
+          - Base: api_doc/parameters/base.md
+          - AppConfig: api_doc/parameters/appconfig.md
+          - DynamoDB: api_doc/parameters/dynamodb.md
+          - SSM: api_doc/parameters/ssm.md
+          - Secrets: api_doc/parameters/secrets.md
+      - Parser: api_doc/parser.md
+      - Streaming: api_doc/streaming.md
+      - Tracer:
+          - Base: api_doc/tracer/base.md
+          - Tracing: api_doc/tracer/tracing.md
+      - Typing: api_doc/typing.md
+      - Validation: api_doc/validation.md
 
 theme:
   name: material
@@ -134,6 +189,7 @@ markdown_extensions:
 copyright: Copyright &copy; 2023 Amazon Web Services
 
 plugins:
+  - privacy
   - git-revision-date
   - search
   - mkdocstrings:
@@ -144,22 +200,19 @@ plugins:
           import:
             - https://docs.python.org/3/objects.inv
           options:
-            # General
-            allow_inspection: true
-            show_source: true
-            show_bases: true
             # Headings
-            heading_level: 2
-            #show_root_heading: false
+            #heading_level: 2
+            #show_root_heading: true
             #show_root_toc_entry: true
             #show_root_full_path: true
             #show_root_members_full_path: false
             #show_object_full_path: false
-            #show_category_heading: true
+            show_category_heading: false
             # Members
-            filters: ["!^_[^_]"]
+            filters: ["!^_"]
             group_by_category: true
-            show_submodules: false
+            members_order: alphabetical
+            show_submodules: true
             # Docstrings
             docstring_style: numpy
             docstring_options:
@@ -168,10 +221,10 @@ plugins:
             merge_init_into_class: true
             show_if_no_docstring: false
             # Signature
-            annotations_path: brief
             show_signature: true
             show_signature_annotations: true
             separate_signature: true
+            summary: true
 
 extra_css:
   - stylesheets/extra.css

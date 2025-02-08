@@ -21,7 +21,7 @@ class SqsFifoPartialProcessor(BatchProcessor):
     Stops processing records when the first record fails. The remaining records are reported as failed items.
 
     Example
-    _______
+    -------
 
     ## Process batch triggered by a FIFO SQS
 
