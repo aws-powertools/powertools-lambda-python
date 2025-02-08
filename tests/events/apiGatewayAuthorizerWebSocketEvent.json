@@ -1,0 +1,81 @@
+{
+    "type":"REQUEST",
+    "methodArn":"arn:aws:execute-api:us-east-1:533568316194:c5jwxq709g/production/$connect",
+    "headers":{
+       "Authorization":"Leo",
+       "Connection":"upgrade",
+       "content-length":"0",
+       "Host":"c5jwxq709g.execute-api.us-east-1.amazonaws.com",
+       "Sec-WebSocket-Extensions":"permessage-deflate; client_max_window_bits",
+       "Sec-WebSocket-Version":"13",
+       "Upgrade":"websocket",
+       "X-Amzn-Trace-Id":"Root=1-6797b6d3-64f9c928577f3ac56f5368ce",
+       "X-Forwarded-For":"93.108.161.96",
+       "X-Forwarded-Port":"443",
+       "X-Forwarded-Proto":"https"
+    },
+    "multiValueHeaders":{
+       "Authorization":[
+          "Leo"
+       ],
+       "Connection":[
+          "upgrade"
+       ],
+       "content-length":[
+          "0"
+       ],
+       "Host":[
+          "c5jwxq709g.execute-api.us-east-1.amazonaws.com"
+       ],
+       "Sec-WebSocket-Extensions":[
+          "permessage-deflate; client_max_window_bits"
+       ],
+       "Sec-WebSocket-Key":[
+          "CYZZrfNgEcgzzzwL44qytQ=="
+       ],
+       "Sec-WebSocket-Version":[
+          "13"
+       ],
+       "Upgrade":[
+          "websocket"
+       ],
+       "X-Amzn-Trace-Id":[
+          "Root=1-6797b6d3-64f9c928577f3ac56f5368ce"
+       ],
+       "X-Forwarded-For":[
+          "93.108.161.96"
+       ],
+       "X-Forwarded-Port":[
+          "443"
+       ],
+       "X-Forwarded-Proto":[
+          "https"
+       ]
+    },
+    "queryStringParameters":{
+
+    },
+    "multiValueQueryStringParameters":{
+
+    },
+    "stageVariables":{
+
+    },
+    "requestContext":{
+       "routeKey":"$connect",
+       "eventType":"CONNECT",
+       "extendedRequestId":"FDmBIG3EoAMEqYA=",
+       "requestTime":"27/Jan/2025:16:39:47 +0000",
+       "messageDirection":"IN",
+       "stage":"production",
+       "connectedAt":1737995987617,
+       "requestTimeEpoch":1737995987617,
+       "identity":{
+          "sourceIp":"93.108.161.96"
+       },
+       "requestId":"FDmBIG3EoAMEqYA=",
+       "domainName":"c5jwxq709g.execute-api.us-east-1.amazonaws.com",
+       "connectionId":"FDmBIeapIAMCIQg=",
+       "apiId":"c5jwxq709g"
+    }
+}
