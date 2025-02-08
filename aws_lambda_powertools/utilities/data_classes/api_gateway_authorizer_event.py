@@ -3,9 +3,9 @@ from __future__ import annotations
 import enum
 import re
 import warnings
-from typing import Any, overload, override
+from typing import Any, overload
 
-from typing_extensions import deprecated
+from typing_extensions import deprecated, override
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
