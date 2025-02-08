@@ -28,7 +28,7 @@ class APIGatewayRouteArn:
         aws_account_id: str,
         api_id: str,
         stage: str,
-        http_method: str,
+        http_method: str | None,
         resource: str,
         partition: str = "aws",
         is_websocket_authorizer: bool = False,
@@ -666,8 +666,9 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
             usage_identifier_key,
         )
 
+    # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def _add_route(self, effect: str, resource: str, conditions: list[dict] | None = None):
+    def _add_route(self, effect: str, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
@@ -700,8 +701,9 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
 
         self._add_route(effect="Deny", resource="*")
 
+    # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def allow_route(self, resource: str, conditions: list[dict] | None = None):
+    def allow_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
         """
         Add an API Gateway Websocket method to the list of allowed methods for the policy.
 
@@ -728,8 +730,9 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
         """
         self._add_route(effect="Allow", resource=resource, conditions=conditions)
 
+    # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def deny_route(self, resource: str, conditions: list[dict] | None = None):
+    def deny_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
         """
         Add an API Gateway Websocket method to the list of allowed methods for the policy.
 
