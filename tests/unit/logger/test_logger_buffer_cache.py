@@ -1,6 +1,6 @@
 import pytest
 
-from aws_lambda_powertools.logging.buffer import LoggerBufferCache
+from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
