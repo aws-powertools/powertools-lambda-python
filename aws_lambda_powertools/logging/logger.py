@@ -16,6 +16,7 @@ import warnings
 from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, overload
 
+from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
@@ -36,7 +37,10 @@ from aws_lambda_powertools.shared.functions import (
 from aws_lambda_powertools.utilities import jmespath_utils
 
 if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.buffer.config import LoggerBufferConfig
+    from aws_lambda_powertools.logging.types import LOG_LEVEL_VALUES
     from aws_lambda_powertools.shared.types import AnyCallableT
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +86,7 @@ class Logger:
     ----------
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
-    level : str, int optional
+    level : Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
         or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
         by default "INFO"
@@ -200,7 +204,7 @@ class Logger:
     def __init__(
         self,
         service: str | None = None,
-        level: str | int | None = None,
+        level: LOG_LEVEL_VALUES | int | None = None,
         child: bool = False,
         sampling_rate: float | None = None,
         stream: IO[str] | None = None,
@@ -216,6 +220,7 @@ class Logger:
         utc: bool = False,
         use_rfc3339: bool = False,
         serialize_stacktrace: bool = True,
+        logger_buffer: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
         self.service = resolve_env_var_choice(
@@ -251,6 +256,10 @@ class Logger:
             "use_rfc3339": use_rfc3339,
             "serialize_stacktrace": serialize_stacktrace,
         }
+
+        self._logger_buffer = logger_buffer
+        if self._logger_buffer:
+            self._buffer_cache = LoggerBufferCache(max_size_bytes=self._logger_buffer.max_size)
 
         self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
 

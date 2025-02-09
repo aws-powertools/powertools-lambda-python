@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.types import LOG_LEVEL_VALUES
 
 
 class LoggerBufferConfig:
@@ -14,7 +17,7 @@ class LoggerBufferConfig:
     def __init__(
         self,
         max_size: int = 10240,
-        minimum_log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG",
+        minimum_log_level: LOG_LEVEL_VALUES = "DEBUG",
         flush_on_error: bool = True,
         compress: bool = False,
     ):
