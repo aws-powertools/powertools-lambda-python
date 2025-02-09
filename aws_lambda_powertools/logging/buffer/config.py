@@ -8,16 +8,13 @@ class LoggerBufferConfig:
     Configuration for log buffering behavior.
     """
 
-    # Define a type alias for valid log levels
-    LogLevelType = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-
     # Define class-level constant for valid log levels
     VALID_LOG_LEVELS: list[str] = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
     def __init__(
         self,
         max_size: int = 10240,
-        minimum_log_level: LogLevelType = "DEBUG",
+        minimum_log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "DEBUG",
         flush_on_error: bool = True,
         compress: bool = False,
     ):
