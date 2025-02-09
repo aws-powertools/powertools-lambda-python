@@ -60,6 +60,7 @@ def test_with_only_required_packages(session: nox.Session):
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
+            f"{PREFIX_TESTS_UNIT}/logger/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/typing/required_dependencies/",
