@@ -36,13 +36,13 @@ If you're new to Amazon CloudWatch, there are five terminologies you must be awa
 
 Metric has three global settings that will be used across all metrics emitted:
 
-| Setting              | Description                                                                     | Environment variable           | Constructor parameter |
-| -------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
-| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Service**          | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
-| **Disable Powertools Metrics**          | Optionally, disables all Powertools metrics.	 | `POWERTOOLS_METRICS_DISABLED`      | N/A            |
+| Setting                         | Description                                                                     | Environment variable           | Constructor parameter |
+| ------------------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace**            | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Service**                     | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
+| **Disable Powertools Metrics**  | Optionally, disables all Powertools metrics.	                                | `POWERTOOLS_METRICS_DISABLED`  | N/A                   |
 
-???+ warning
+???+ info
     `POWERTOOLS_METRICS_DISABLED` will not disable default metrics created by AWS services.
 
 ???+ tip

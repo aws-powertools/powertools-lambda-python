@@ -78,7 +78,6 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
-        self.metrics_disabled = is_metrics_disabled()
 
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self.timestamp: int | None = None
@@ -379,7 +378,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                 "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
                 stacklevel=2,
             )
-        elif not self.metrics_disabled:
+        elif not is_metrics_disabled():
             logger.debug("Flushing existing metrics")
             metrics = self.serialize_metric_set()
             print(json.dumps(metrics, separators=(",", ":")))

@@ -10,7 +10,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import strtobool
 
 logger = logging.getLogger(__name__)
 
@@ -142,24 +142,25 @@ def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
 
 
 def is_metrics_disabled() -> bool:
-    """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED or POWERTOOLS_DEV
+    """
+    Determine if metrics should be disabled based on environment variables.
 
     Returns:
-        bool: True if metrics are disabled, False otherwise
+        bool: True if metrics are disabled, False otherwise.
+
+    Rules:
+    - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is True: Disable metrics
+    - If POWERTOOLS_METRICS_DISABLED is True: Disable metrics
+    - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is not set: Disable metrics
     """
-    # First check POWERTOOLS_METRICS_DISABLED as it should take precedence
-    if constants.METRICS_DISABLED_ENV in os.environ:
-        env_value = os.getenv(constants.METRICS_DISABLED_ENV)
-        is_disabled = resolve_truthy_env_var_choice(env=env_value or "false")
-        if is_disabled:
-            logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
-        return bool(is_disabled)
 
-    # Then check if POWERTOOLS_DEV is enabled
-    dev_mode_value = os.getenv(constants.POWERTOOLS_DEV_ENV)
-    dev_mode = resolve_truthy_env_var_choice(env=dev_mode_value or "false")
-    if dev_mode:
-        logger.debug("Metrics have been disabled via env var POWERTOOLS_DEV")
-        return True
+    is_dev_mode = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "false"))
+    is_metrics_disabled = strtobool(os.getenv(constants.METRICS_DISABLED_ENV, "false"))
 
-    return False
+    disable_conditions = [
+        is_metrics_disabled,
+        is_metrics_disabled and is_dev_mode,
+        is_dev_mode and os.getenv(constants.METRICS_DISABLED_ENV) is None,
+    ]
+
+    return any(disable_conditions)

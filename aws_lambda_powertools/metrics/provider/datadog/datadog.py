@@ -66,7 +66,6 @@ class DatadogProvider(BaseProvider):
         )
         self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
-        self.metrics_disabled = is_metrics_disabled()
 
     #  adding name,value,timestamp,tags
     def add_metric(
@@ -202,7 +201,7 @@ class DatadogProvider(BaseProvider):
                         timestamp=metric_item["e"],
                         tags=metric_item["t"],
                     )
-            elif not self.metrics_disabled:
+            elif not is_metrics_disabled():
                 # dd module not found: flush to log, this format can be recognized via datadog log forwarder
                 # https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
                 for metric_item in metrics:
