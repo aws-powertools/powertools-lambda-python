@@ -89,8 +89,6 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         self.dimension_set.update(**self.default_dimensions)
 
-        logger.info("im here")
-
     def add_metric(
         self,
         name: str,
