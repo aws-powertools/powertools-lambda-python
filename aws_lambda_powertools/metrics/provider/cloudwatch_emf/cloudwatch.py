@@ -15,13 +15,14 @@ from aws_lambda_powertools.metrics.functions import (
     convert_timestamp_to_emf_format,
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
+    is_metrics_disabled,
     validate_emf_timestamp,
 )
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
@@ -77,7 +78,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
-        self.metrics_disabled = self.is_metrics_disabled()
+        self.metrics_disabled = is_metrics_disabled()
 
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self.timestamp: int | None = None
@@ -88,25 +89,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         self.dimension_set.update(**self.default_dimensions)
 
-    @staticmethod
-    def is_metrics_disabled() -> bool:
-        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED or POWERTOOLS_DEV"""
-        # First check POWERTOOLS_METRICS_DISABLED
-        if constants.METRICS_DISABLED_ENV in os.environ:
-            env_value = os.getenv(constants.METRICS_DISABLED_ENV)
-            is_disabled = resolve_truthy_env_var_choice(env=env_value or "false")
-            if is_disabled:
-                logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
-            return bool(is_disabled)
-
-        # Then check if POWERTOOLS_DEV is enabled
-        dev_mode_value = os.getenv(constants.POWERTOOLS_DEV_ENV)
-        dev_mode = resolve_truthy_env_var_choice(env=dev_mode_value or "false")
-        if dev_mode:
-            logger.debug("Metrics have been disabled via env var POWERTOOLS_DEV")
-            return True
-
-        return False
+        logger.info("im here")
 
     def add_metric(
         self,
@@ -398,7 +381,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                 "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
                 stacklevel=2,
             )
-        else:
+        elif not self.metrics_disabled:
             logger.debug("Flushing existing metrics")
             metrics = self.serialize_metric_set()
             print(json.dumps(metrics, separators=(",", ":")))

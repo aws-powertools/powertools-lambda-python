@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import os
 from datetime import datetime
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
@@ -8,6 +10,9 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
+
+logger = logging.getLogger(__name__)
 
 
 def extract_cloudwatch_metric_resolution_value(metric_resolutions: list, resolution: int | MetricResolution) -> int:
@@ -134,3 +139,27 @@ def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
         # Returning zero represents the initial date of epoch time,
         # which will be skipped by Amazon CloudWatch.
         return 0
+
+
+def is_metrics_disabled() -> bool:
+    """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED or POWERTOOLS_DEV
+
+    Returns:
+        bool: True if metrics are disabled, False otherwise
+    """
+    # First check POWERTOOLS_METRICS_DISABLED as it should take precedence
+    if constants.METRICS_DISABLED_ENV in os.environ:
+        env_value = os.getenv(constants.METRICS_DISABLED_ENV)
+        is_disabled = resolve_truthy_env_var_choice(env=env_value or "false")
+        if is_disabled:
+            logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
+        return bool(is_disabled)
+
+    # Then check if POWERTOOLS_DEV is enabled
+    dev_mode_value = os.getenv(constants.POWERTOOLS_DEV_ENV)
+    dev_mode = resolve_truthy_env_var_choice(env=dev_mode_value or "false")
+    if dev_mode:
+        logger.debug("Metrics have been disabled via env var POWERTOOLS_DEV")
+        return True
+
+    return False

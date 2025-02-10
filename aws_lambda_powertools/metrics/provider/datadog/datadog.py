@@ -10,10 +10,11 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.functions import is_metrics_disabled
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.shared.types import AnyCallableT
@@ -65,27 +66,7 @@ class DatadogProvider(BaseProvider):
         )
         self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
-        self.metrics_disabled = self.is_metrics_disabled()
-
-    @staticmethod
-    def is_metrics_disabled() -> bool:
-        """Checks if metrics have been disabled via POWERTOOLS_METRICS_DISABLED or POWERTOOLS_DEV"""
-        # First check if POWERTOOLS_DEV is enabled
-        dev_mode_value = os.getenv(constants.POWERTOOLS_DEV_ENV)
-        dev_mode = resolve_truthy_env_var_choice(env=dev_mode_value or "false")
-        if dev_mode:
-            logger.debug("Metrics have been disabled via env var POWERTOOLS_DEV")
-            return True
-
-        # Then check POWERTOOLS_METRICS_DISABLED
-        if constants.METRICS_DISABLED_ENV not in os.environ:
-            return False
-
-        env_value = os.getenv(constants.METRICS_DISABLED_ENV)
-        is_disabled = resolve_truthy_env_var_choice(env=env_value or "false")
-        if is_disabled:
-            logger.debug("Metrics have been disabled via env var POWERTOOLS_METRICS_DISABLED")
-        return bool(is_disabled)
+        self.metrics_disabled = is_metrics_disabled()
 
     #  adding name,value,timestamp,tags
     def add_metric(
@@ -221,7 +202,7 @@ class DatadogProvider(BaseProvider):
                         timestamp=metric_item["e"],
                         tags=metric_item["t"],
                     )
-            else:
+            elif not self.metrics_disabled:
                 # dd module not found: flush to log, this format can be recognized via datadog log forwarder
                 # https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
                 for metric_item in metrics:

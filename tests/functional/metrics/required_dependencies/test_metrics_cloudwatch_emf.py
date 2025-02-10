@@ -1331,49 +1331,54 @@ def test_metric_custom_timestamp_with_wrong_type(namespace, metric):
         )
 
 
-def test_metrics_disabled_with_env_var(monkeypatch, namespace):
+def test_metrics_disabled_with_env_var(monkeypatch, namespace, capsys):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
 
     # WHEN metrics is initialized and adding metrics
     metrics = Metrics(namespace=namespace)
     metrics.add_metric(name="test_metric", unit="Count", value=1)
+    metrics.flush_metrics()
 
-    # WHEN flushing metrics
-    metrics_output = metrics.flush_metrics()
-
-    # THEN metrics output should be empty
-    assert metrics_output is None
+    # THEN no Powertools metrics should be sent to CloudWatch
+    output = capsys.readouterr()
+    assert not output.out
 
 
-def test_metrics_disabled_persists_after_flush(monkeypatch, namespace):
+def test_metrics_disabled_persists_after_flush(monkeypatch, capsys, namespace):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
     metrics = Metrics(namespace=namespace)
 
     # WHEN multiple operations are performed with flush in between
     metrics.add_metric(name="metric1", unit="Count", value=1)
-    first_flush = metrics.flush_metrics()
+    metrics.flush_metrics()
 
+    # THEN first flush should not emit any metrics
+    captured = capsys.readouterr()
+    assert not captured.out
+
+    # WHEN adding and flushing more metrics
     metrics.add_metric(name="metric2", unit="Count", value=2)
-    second_flush = metrics.flush_metrics()
+    metrics.flush_metrics()
 
-    # THEN all flush operations should return None
-    assert first_flush is None
-    assert second_flush is None
+    # THEN second flush should also not emit any metrics
+    captured = capsys.readouterr()
+    assert not captured.out
 
 
-def test_metrics_disabled_with_namespace_and_service(monkeypatch):
+def test_metrics_disabled_with_namespace_and_service(monkeypatch, capsys):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
 
     # WHEN metrics is initialized with namespace and service
     metrics = Metrics(namespace="test_namespace", service="test_service")
     metrics.add_metric(name="test_metric", unit="Count", value=1)
-    metrics_output = metrics.flush_metrics()
+    metrics.flush_metrics()
 
-    # THEN metrics should still be disabled
-    assert metrics_output is None
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
 
 
 def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):
@@ -1414,7 +1419,7 @@ def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
     assert metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"][0]["Name"] == "test_metric"
 
 
-def test_metrics_disabled_with_dev_mode(monkeypatch, namespace):
+def test_metrics_disabled_with_dev_mode(monkeypatch, namespace, capsys):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_DEV", "true")
 
@@ -1423,10 +1428,11 @@ def test_metrics_disabled_with_dev_mode(monkeypatch, namespace):
     metrics.add_metric(name="test_metric", unit="Count", value=1)
 
     # AND flushing metrics
-    metrics_output = metrics.flush_metrics()
+    metrics.flush_metrics()
 
-    # THEN metrics output should be empty
-    assert metrics_output is None
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
 
 
 def test_metrics_enabled_with_dev_mode_false(monkeypatch, capsys):
@@ -1458,24 +1464,25 @@ def test_metrics_dev_mode_does_not_override_metrics_disabled(monkeypatch, capsys
     metrics.add_metric(name="test_metric", value=1, unit="Count")
     metrics.flush_metrics()
 
-    # THEN metrics should be written to stdout (POWERTOOLS_METRICS_DISABLED takes precedence)
+    # THEN metrics should be written to stdout since POWERTOOLS_METRICS_DISABLED is false
     output = capsys.readouterr().out
+    assert output  # First verify we have output
     metrics_output = json.loads(output)
     assert metrics_output
+    assert "_aws" in metrics_output
+    assert any(metric["Name"] == "test_metric" for metric in metrics_output["_aws"]["CloudWatchMetrics"][0]["Metrics"])
 
 
-def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypatch):
+def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypatch, capsys):
     # GIVEN dev mode is false but metrics disabled is true
     monkeypatch.setenv("POWERTOOLS_DEV", "false")
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
 
     # WHEN metrics is initialized
     metrics = Metrics(namespace="test")
-
     metrics.add_metric(name="test_metric", value=1, unit="Count")
+    metrics.flush_metrics()
 
-    # WHEN flushing metrics
-    metrics_output = metrics.flush_metrics()
-
-    # THEN metrics output should be empty
-    assert metrics_output is None
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
