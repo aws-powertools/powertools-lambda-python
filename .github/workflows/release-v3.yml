@@ -39,6 +39,10 @@ on:
         description: "Version to be released in PyPi, Docs, and Lambda Layer, e.g. v3.0.0, v3.0.0a0 (pre-release)"
         default: v3.0.0
         required: true
+      layer_documentation_version:
+        description: "Lambda layer version to be updated in our documentation. e.g. if the current layer number is 3, this value must be 4."
+        type: string
+        required: true
       skip_pypi:
         description: "Skip publishing to PyPi as it can't publish more than once. Useful for semi-failed releases"
         default: false
@@ -342,6 +346,7 @@ jobs:
     uses: ./.github/workflows/publish_v3_layer.yml
     with:
       latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+      layer_documentation_version: ${{ inputs.layer_documentation_version }}
       pre_release: ${{ inputs.pre_release }}
       source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
       source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}

@@ -5,7 +5,7 @@ import re
 import warnings
 from typing import Any, overload
 
-from typing_extensions import deprecated
+from typing_extensions import deprecated, override
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
@@ -28,9 +28,10 @@ class APIGatewayRouteArn:
         aws_account_id: str,
         api_id: str,
         stage: str,
-        http_method: str,
+        http_method: str | None,
         resource: str,
         partition: str = "aws",
+        is_websocket_authorizer: bool = False,
     ):
         self.partition = partition
         self.region = region
@@ -40,39 +41,54 @@ class APIGatewayRouteArn:
         self.http_method = http_method
         # Remove matching "/" from `resource`.
         self.resource = resource.lstrip("/")
+        self.is_websocket_authorizer = is_websocket_authorizer
 
     @property
     def arn(self) -> str:
         """Build an arn from its parts
         eg: arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request"""
-        return (
-            f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}/"
-            f"{self.http_method}/{self.resource}"
-        )
+        base_arn = f"arn:{self.partition}:execute-api:{self.region}:{self.aws_account_id}:{self.api_id}/{self.stage}"
+
+        if not self.is_websocket_authorizer:
+            return f"{base_arn}/{self.http_method}/{self.resource}"
+        else:
+            return f"{base_arn}/{self.resource}"
 
 
-def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
+def parse_api_gateway_arn(arn: str, is_websocket_authorizer: bool = False) -> APIGatewayRouteArn:
     """Parses a gateway route arn as a APIGatewayRouteArn class
 
     Parameters
     ----------
     arn : str
         ARN string for a methodArn or a routeArn
+    is_websocket_authorizer: bool
+        If it's a API Gateway Websocket
+
     Returns
     -------
     APIGatewayRouteArn
     """
     arn_parts = arn.split(":")
     api_gateway_arn_parts = arn_parts[5].split("/")
+
+    if not is_websocket_authorizer:
+        http_method = api_gateway_arn_parts[2]
+        resource = "/".join(api_gateway_arn_parts[3:]) if len(api_gateway_arn_parts) >= 4 else ""
+    else:
+        http_method = None
+        resource = "/".join(api_gateway_arn_parts[2:])
+
     return APIGatewayRouteArn(
         partition=arn_parts[1],
         region=arn_parts[3],
         aws_account_id=arn_parts[4],
         api_id=api_gateway_arn_parts[0],
         stage=api_gateway_arn_parts[1],
-        http_method=api_gateway_arn_parts[2],
+        http_method=http_method,
         # conditional allow us to handle /path/{proxy+} resources, as their length changes.
-        resource="/".join(api_gateway_arn_parts[3:]) if len(api_gateway_arn_parts) >= 4 else "",
+        resource=resource,
+        is_websocket_authorizer=is_websocket_authorizer,
     )
 
 
@@ -512,13 +528,14 @@ class APIGatewayAuthorizerResponse:
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         resource_arn = APIGatewayRouteArn(
-            self.region,
-            self.aws_account_id,
-            self.api_id,
-            self.stage,
-            http_method,
-            resource,
-            self.partition,
+            region=self.region,
+            aws_account_id=self.aws_account_id,
+            api_id=self.api_id,
+            stage=self.stage,
+            http_method=http_method,
+            resource=resource,
+            partition=self.partition,
+            is_websocket_authorizer=False,
         ).arn
 
         route = {"resourceArn": resource_arn, "conditions": conditions}
@@ -617,3 +634,127 @@ class APIGatewayAuthorizerResponse:
             response["context"] = self.context
 
         return response
+
+
+class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
+    """The IAM Policy Response required for API Gateway WebSocket APIs
+
+    Based on: - https://github.com/awslabs/aws-apigateway-lambda-authorizer-blueprints/blob/\
+    master/blueprints/python/api-gateway-authorizer-python.py
+
+    Documentation:
+    -------------
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html
+    - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
+    """
+
+    @staticmethod
+    def from_route_arn(
+        arn: str,
+        principal_id: str,
+        context: dict | None = None,
+        usage_identifier_key: str | None = None,
+    ) -> APIGatewayAuthorizerResponseWebSocket:
+        parsed_arn = parse_api_gateway_arn(arn, is_websocket_authorizer=True)
+        return APIGatewayAuthorizerResponseWebSocket(
+            principal_id,
+            parsed_arn.region,
+            parsed_arn.aws_account_id,
+            parsed_arn.api_id,
+            parsed_arn.stage,
+            context,
+            usage_identifier_key,
+        )
+
+    # Note: we need ignore[override] because we are removing the http_method field
+    @override
+    def _add_route(self, effect: str, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+        """Adds a route to the internal lists of allowed or denied routes. Each object in
+        the internal list contains a resource ARN and a condition statement. The condition
+        statement can be null."""
+        resource_arn = APIGatewayRouteArn(
+            region=self.region,
+            aws_account_id=self.aws_account_id,
+            api_id=self.api_id,
+            stage=self.stage,
+            http_method=None,
+            resource=resource,
+            partition=self.partition,
+            is_websocket_authorizer=True,
+        ).arn
+
+        route = {"resourceArn": resource_arn, "conditions": conditions}
+
+        if effect.lower() == "allow":
+            self._allow_routes.append(route)
+        else:  # deny
+            self._deny_routes.append(route)
+
+    @override
+    def allow_all_routes(self):
+        """Adds a '*' allow to the policy to authorize access to all methods of an API"""
+        self._add_route(effect="Allow", resource="*")
+
+    @override
+    def deny_all_routes(self):
+        """Adds a '*' allow to the policy to deny access to all methods of an API"""
+
+        self._add_route(effect="Deny", resource="*")
+
+    # Note: we need ignore[override] because we are removing the http_method field
+    @override
+    def allow_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+        """
+        Add an API Gateway Websocket method to the list of allowed methods for the policy.
+
+        This method adds an API Gateway Websocket method Resource path) to the list of
+        allowed methods for the policy. It optionally includes conditions for the policy statement.
+
+        Parameters
+        ----------
+        resource : str
+            The API Gateway resource path to allow.
+        conditions : list[dict] | None, optional
+            A list of condition dictionaries to apply to the policy statement.
+            Default is None.
+
+        Notes
+        -----
+        For more information on AWS policy conditions, see:
+        https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition
+
+        Example
+        --------
+        >>> policy = APIGatewayAuthorizerResponseWebSocket(...)
+        >>> policy.allow_route("/api/users", [{"StringEquals": {"aws:RequestTag/Environment": "Production"}}])
+        """
+        self._add_route(effect="Allow", resource=resource, conditions=conditions)
+
+    # Note: we need ignore[override] because we are removing the http_method field
+    @override
+    def deny_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+        """
+        Add an API Gateway Websocket method to the list of allowed methods for the policy.
+
+        This method adds an API Gateway Websocket method Resource path) to the list of
+        denied methods for the policy. It optionally includes conditions for the policy statement.
+
+        Parameters
+        ----------
+        resource : str
+            The API Gateway resource path to allow.
+        conditions : list[dict] | None, optional
+            A list of condition dictionaries to apply to the policy statement.
+            Default is None.
+
+        Notes
+        -----
+        For more information on AWS policy conditions, see:
+        https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html#Condition
+
+        Example
+        --------
+        >>> policy = APIGatewayAuthorizerResponseWebSocket(...)
+        >>> policy.deny_route("/api/users", [{"StringEquals": {"aws:RequestTag/Environment": "Production"}}])
+        """
+        self._add_route(effect="Deny", resource=resource, conditions=conditions)

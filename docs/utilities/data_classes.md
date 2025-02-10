@@ -131,10 +131,16 @@ It is used for [API Gateway Rest API Lambda Authorizer payload](https://docs.aws
 
 Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayAuthorizerTokenEvent`** for type `TOKEN`.
 
-=== "app.py"
+=== "Rest APIs"
 
-    ```python hl_lines="2-4 8"
+    ```python hl_lines="2-4 8 18"
     --8<-- "examples/event_sources/src/apigw_authorizer_request.py"
+    ```
+
+=== "WebSocket APIs"
+
+    ```python hl_lines="2-4 8 18"
+    --8<-- "examples/event_sources/src/apigw_authorizer_request_websocket.py"
     ```
 
 === "API Gateway Authorizer Request Example Event"

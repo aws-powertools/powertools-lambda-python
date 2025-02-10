@@ -189,6 +189,7 @@ markdown_extensions:
 copyright: Copyright &copy; 2023 Amazon Web Services
 
 plugins:
+  - privacy
   - git-revision-date
   - search
   - mkdocstrings:
