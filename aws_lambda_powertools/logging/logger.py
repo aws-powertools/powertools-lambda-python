@@ -12,6 +12,7 @@ import logging
 import os
 import random
 import sys
+import time
 import warnings
 from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, overload
@@ -457,6 +458,12 @@ class Logger:
 
         return decorate
 
+    def _add_log_to_buffer(self, level, msg, filename, line, function, **kwargs):
+        if self._buffer_cache:
+            return False
+
+        return True
+
     def info(
         self,
         msg: object,
@@ -470,14 +477,27 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        return self._logger.info(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
+        if self._logger_buffer:
+            caller_frame = inspect.stack()[1]
+            record = {
+                "level": "INFO",
+                "msg": msg % args if args else msg,
+                "filename": caller_frame.filename,
+                "line": caller_frame.lineno,
+                "function": caller_frame.function,
+                "extra_kwargs": kwargs,
+                "timestamp": time.time(),
+            }
+            return self._add_log_to_buffer(**record)
+        else:
+            return self._logger.info(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
 
     def error(
         self,
