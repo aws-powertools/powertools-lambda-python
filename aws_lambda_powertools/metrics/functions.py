@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import os
 from datetime import datetime
 
@@ -11,8 +10,6 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import strtobool
-
-logger = logging.getLogger(__name__)
 
 
 def extract_cloudwatch_metric_resolution_value(metric_resolutions: list, resolution: int | MetricResolution) -> int:
