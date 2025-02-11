@@ -315,7 +315,7 @@ class DataMasking:
         if not fields:
             raise ValueError("Fields parameter cannot be empty")
 
-        data_parsed: dict = self._normalize_data_to_parse(fields, data)
+        data_parsed: dict = self._normalize_data_to_parse(data)
 
         # For in-place updates, json_parse accepts a callback function
         # this function must receive 3 args: field_value, fields, field_name
@@ -449,7 +449,7 @@ class DataMasking:
         )
         return fields[field_name]
 
-    def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
+    def _normalize_data_to_parse(self, data: str | dict) -> dict:
         if isinstance(data, str):
             # Parse JSON string as dictionary
             data_parsed = self.json_deserializer(data)
