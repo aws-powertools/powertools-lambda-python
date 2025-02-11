@@ -207,7 +207,7 @@ class DataMasking:
         custom_mask: str | None = None,
         regex_pattern: str | None = None,
         mask_format: str | None = None,
-        **kwargs: Any,
+        **encryption_context: Any,
     ) -> Any:
         """
         Helper method to determine whether to apply a given action to the entire input data
@@ -242,19 +242,24 @@ class DataMasking:
                 custom_mask=custom_mask,
                 regex_pattern=regex_pattern,
                 mask_format=mask_format,
-                **kwargs,
             )
         else:
             logger.debug(f"Running action {action.__name__} with the entire data")
-            return action(
-                data=data,
-                provider_options=provider_options,
-                dynamic_mask=dynamic_mask,
-                custom_mask=custom_mask,
-                regex_pattern=regex_pattern,
-                mask_format=mask_format,
-                **kwargs,
-            )
+            if action.__name__ == "erase":
+                return action(
+                    data=data,
+                    provider_options=provider_options,
+                    dynamic_mask=dynamic_mask,
+                    custom_mask=custom_mask,
+                    regex_pattern=regex_pattern,
+                    mask_format=mask_format,
+                )
+            else:
+                return action(
+                    data=data,
+                    provider_options=provider_options,
+                    **encryption_context,
+                )
 
     def _apply_action_to_fields(
         self,
