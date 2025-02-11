@@ -128,8 +128,6 @@ class BaseProvider:
             return self._pattern_mask(data, custom_mask)
         elif dynamic_mask:
             return self._custom_erase(data)
-        else:
-            return DATA_MASKING_STRING
 
     def _mask_dict(
         self,

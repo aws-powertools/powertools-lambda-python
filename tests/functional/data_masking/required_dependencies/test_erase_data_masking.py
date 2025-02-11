@@ -280,6 +280,16 @@ def test_erase_json_dict_with_complex_masking_rules(data_masker):
     }
 
 
+def test_dynamic_mask_with_string(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with nested and filtered paths
+    data = "XYZEKDEDE"
+
+    masked_json_string = data_masker.erase(data=data, dynamic_mask=True)
+
+    # THEN the result should have all specified fields masked according to their rules
+    assert masked_json_string == "*********"
+
+
 def test_no_matches_for_masking_rule(data_masker):
     # GIVEN a dictionary without the expected field
     data = {"name": "Ana"}
