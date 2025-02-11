@@ -450,9 +450,6 @@ class DataMasking:
         return fields[field_name]
 
     def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
-        if not fields:
-            raise ValueError("No fields specified.")
-
         if isinstance(data, str):
             # Parse JSON string as dictionary
             data_parsed = self.json_deserializer(data)

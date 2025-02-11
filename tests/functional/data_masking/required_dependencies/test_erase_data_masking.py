@@ -232,6 +232,24 @@ def test_regex_mask(data_masker):
     assert result == "Hello! My name is XXXX XXXX"
 
 
+def test_regex_mask_with_cache(data_masker):
+    # GIVEN a str data type
+    data = "Hello! My name is John Doe"
+    data1 = "Hello! My name is John Xix"
+
+    # WHEN erase is called with regex pattern and mask format
+    regex_pattern = r"\b[A-Z][a-z]+ [A-Z][a-z]+\b"
+    mask_format = "XXXX XXXX"
+
+    # WHEN erasing twice to check the regex compiled and stored in the cache
+    result = data_masker.erase(data, regex_pattern=regex_pattern, mask_format=mask_format)
+    result1 = data_masker.erase(data1, regex_pattern=regex_pattern, mask_format=mask_format)
+
+    # THEN the result is the regex part masked by the masked format
+    assert result == "Hello! My name is XXXX XXXX"
+    assert result1 == "Hello! My name is XXXX XXXX"
+
+
 def test_erase_json_dict_with_fields_and_masks(data_masker):
     # GIVEN the data type is a json representation of a dictionary
     data = json.dumps(
@@ -349,6 +367,39 @@ def test_erase_dictionary_with_masking_rules(data_masker):
             "name": "John Doe",  # unchanged
             "ssn": "XXX-XX-XXXX",  # masked
             "address": {"street": "123 Main St", "zip": "00000"},  # unchanged  # masked
+        },
+    }
+
+
+def test_erase_dictionary_with_masking_rules_with_list(data_masker):
+    # GIVEN a dictionary with nested sensitive data
+    data = {"user": {"name": ["leandro", "powertools"]}}
+
+    # AND masking rules for specific fields
+    masking_rules = {"user.name": {"custom_mask": "NO-NAME"}}
+
+    # WHEN erase is called with masking rules
+    result = data_masker.erase(data, masking_rules=masking_rules)
+
+    # THEN only the specified fields should be masked
+    assert result == {
+        "user": {
+            "name": "NO-NAME",
+        },
+    }
+
+
+def test_erase_list_with_custom_mask(data_masker):
+    # GIVEN a dictionary with nested sensitive data
+    data = {"user": {"name": ["leandro", "powertools"]}}
+
+    # WHEN erase is called with masking rules
+    result = data_masker.erase(data, fields=["user.name"], dynamic_mask=True)
+
+    # THEN only the specified fields should be masked
+    assert result == {
+        "user": {
+            "name": ["*******", "**********"],
         },
     }
 
