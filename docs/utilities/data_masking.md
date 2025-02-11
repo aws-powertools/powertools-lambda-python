@@ -43,7 +43,7 @@ stateDiagram-v2
 
 ## Terminology
 
-**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. This operation replaces data in-memory, making it a one-way action.
+**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_, or with a customized mask. This operation replaces data in-memory, making it a one-way action.
 
 **Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it. Learn more about encryption [here](https://aws.amazon.com/blogs/security/importance-of-encryption-and-how-aws-can-help/){target="_blank"}.
 
@@ -115,6 +115,52 @@ Erasing will remove the original data and replace it with a `*****`. This means 
 === "getting_started_erase_data_output.json"
     ```json hl_lines="5 7 12"
     --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
+    ```
+
+#### Custom masking
+
+The `erase` method also supports additional flags for more advanced and flexible masking:
+
+=== "dynamic_mask"
+
+    (bool) Enables dynamic masking behavior when set to `True`, by maintaining the original length and structure of the text replacing with *.
+
+    > Expression: `data_masker.erase(data, fields=["address.zip"], dynamic_mask=True)`
+
+    > Field result: `'street': '*** **** **'`
+
+=== "custom_mask"
+
+    (str) Specifies a simple pattern for masking data. This pattern is applied directly to the input string, replacing all the original characters. For example, with a `custom_mask` of "XX-XX" applied to "12345", the result would be "XX-XX".
+
+    > Expression: `data_masker.erase(data, fields=["address.zip"], custom_mask="XX")`
+
+    > Field result: `'zip': 'XX'`
+
+=== "regex_pattern & mask_format"
+
+    (str) `regex_pattern` defines a regular expression pattern used to identify parts of the input string that should be masked. This allows for more complex and flexible masking rules. It's used in conjunction with `mask_format`.
+    `mask_format` specifies the format to use when replacing parts of the string matched by `regex_pattern`. It can include placeholders (like \1, \2) to refer to captured groups in the regex pattern, allowing some parts of the original string to be preserved.
+
+    > Expression: `data_masker.erase(data, fields=["email"], regex_pattern=r"(.)(.*)(@.*)", mask_format=r"\1****\3")`
+
+    > Field result: `'email': 'j****@example.com'`
+
+=== "masking_rules"
+
+    (dict) Allows you to apply different masking rules (flags) for each data field.
+    ```python hl_lines="20"
+    --8<-- "examples/data_masking/src/custom_data_masking.py"
+    ```
+=== "Input example"
+
+    ```json
+    --8<-- "examples/data_masking/src/payload_custom_masking.json"
+    ```
+=== "Masking rules output example"
+
+    ```json hl_lines="4 5 10 21"
+    --8<-- "examples/data_masking/src/output_custom_masking.json"
     ```
 
 ### Encrypting data

@@ -9,7 +9,8 @@ from __future__ import annotations
 import functools
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
+from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
 from jsonpath_ng.ext import parse
 
@@ -18,6 +19,7 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from numbers import Number
@@ -67,11 +69,39 @@ class DataMasking:
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> str:
+        """
+        Encrypt data using the configured encryption provider.
+
+        Parameters
+        ----------
+        data : dict, Mapping, Sequence, or Number
+            The data to encrypt.
+        provider_options : dict, optional
+            Provider-specific options for encryption.
+        **encryption_context : str
+            Additional key-value pairs for encryption context.
+
+        Returns
+        -------
+        str
+            The encrypted data as a base64-encoded string.
+
+        Example
+        --------
+
+            encryption_provider = AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN])
+            data_masker = DataMasking(provider=encryption_provider)
+            encrypted = data_masker.encrypt({"secret": "value"})
+        """
         return self._apply_action(
             data=data,
             fields=None,
             action=self.provider.encrypt,
             provider_options=provider_options or {},
+            dynamic_mask=None,
+            custom_mask=None,
+            regex_pattern=None,
+            mask_format=None,
             **encryption_context,
         )
 
@@ -81,28 +111,91 @@ class DataMasking:
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> Any:
+        """
+        Decrypt data using the configured encryption provider.
+
+        Parameters
+        ----------
+        data : dict, Mapping, Sequence, or Number
+            The data to encrypt.
+        provider_options : dict, optional
+            Provider-specific options for encryption.
+        **encryption_context : str
+            Additional key-value pairs for encryption context.
+
+        Returns
+        -------
+        str
+            The encrypted data as a base64-encoded string.
+
+        Example
+        --------
+
+            encryption_provider = AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN])
+            data_masker = DataMasking(provider=encryption_provider)
+            encrypted = data_masker.decrypt(encrypted_data)
+        """
+
         return self._apply_action(
             data=data,
             fields=None,
             action=self.provider.decrypt,
             provider_options=provider_options or {},
+            dynamic_mask=None,
+            custom_mask=None,
+            regex_pattern=None,
+            mask_format=None,
             **encryption_context,
         )
 
-    @overload
-    def erase(self, data, fields: None) -> str: ...
+    def erase(
+        self,
+        data: Any,
+        fields: list[str] | None = None,
+        *,
+        dynamic_mask: bool | None = None,
+        custom_mask: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
+        masking_rules: dict | None = None,
+    ) -> Any:
+        """
+        Erase or mask sensitive data in the input.
 
-    @overload
-    def erase(self, data: list, fields: list[str]) -> list[str]: ...
+        Parameters
+        ----------
+        data : Any
+            The data to be erased or masked.
+        fields : list of str, optional
+            List of field names to be erased or masked.
+        dynamic_mask : bool, optional
+            Whether to use dynamic masking.
+        custom_mask : str, optional
+            Custom mask to apply instead of the default.
+        regex_pattern : str, optional
+            Regular expression pattern for identifying data to mask.
+        mask_format : str, optional
+            Format string for the mask.
+        masking_rules : dict, optional
+            Dictionary of custom masking rules.
 
-    @overload
-    def erase(self, data: tuple, fields: list[str]) -> tuple[str]: ...
-
-    @overload
-    def erase(self, data: dict, fields: list[str]) -> dict: ...
-
-    def erase(self, data: Sequence | Mapping, fields: list[str] | None = None) -> str | list[str] | tuple[str] | dict:
-        return self._apply_action(data=data, fields=fields, action=self.provider.erase)
+        Returns
+        -------
+        Any
+            The data with sensitive information erased or masked.
+        """
+        if masking_rules:
+            return self._apply_masking_rules(data=data, masking_rules=masking_rules)
+        else:
+            return self._apply_action(
+                data=data,
+                fields=fields,
+                action=self.provider.erase,
+                dynamic_mask=dynamic_mask,
+                custom_mask=custom_mask,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
+            )
 
     def _apply_action(
         self,
@@ -110,8 +203,12 @@ class DataMasking:
         fields: list[str] | None,
         action: Callable,
         provider_options: dict | None = None,
-        **encryption_context: str,
-    ):
+        dynamic_mask: bool | None = None,
+        custom_mask: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
+        **kwargs: Any,
+    ) -> Any:
         """
         Helper method to determine whether to apply a given action to the entire input data
         or to specific fields if the 'fields' argument is specified.
@@ -127,8 +224,6 @@ class DataMasking:
             and returns the modified value.
         provider_options : dict
             Provider specific keyword arguments to propagate; used as an escape hatch.
-        encryption_context: str
-            Encryption context to use in encrypt and decrypt operations.
 
         Returns
         -------
@@ -143,11 +238,23 @@ class DataMasking:
                 fields=fields,
                 action=action,
                 provider_options=provider_options,
-                **encryption_context,
+                dynamic_mask=dynamic_mask,
+                custom_mask=custom_mask,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
+                **kwargs,
             )
         else:
             logger.debug(f"Running action {action.__name__} with the entire data")
-            return action(data=data, provider_options=provider_options, **encryption_context)
+            return action(
+                data=data,
+                provider_options=provider_options,
+                dynamic_mask=dynamic_mask,
+                custom_mask=custom_mask,
+                regex_pattern=regex_pattern,
+                mask_format=mask_format,
+                **kwargs,
+            )
 
     def _apply_action_to_fields(
         self,
@@ -155,6 +262,10 @@ class DataMasking:
         fields: list,
         action: Callable,
         provider_options: dict | None = None,
+        dynamic_mask: bool | None = None,
+        custom_mask: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
         **encryption_context: str,
     ) -> dict | str:
         """
@@ -201,8 +312,10 @@ class DataMasking:
         new_dict = {'a': {'b': {'c': '*****'}}, 'x': {'y': '*****'}}
         ```
         """
+        if not fields:
+            raise ValueError("Fields parameter cannot be empty")
 
-        data_parsed: dict = self._normalize_data_to_parse(fields, data)
+        data_parsed: dict = self._normalize_data_to_parse(data)
 
         # For in-place updates, json_parse accepts a callback function
         # this function must receive 3 args: field_value, fields, field_name
@@ -211,6 +324,10 @@ class DataMasking:
             self._call_action,
             action=action,
             provider_options=provider_options,
+            dynamic_mask=dynamic_mask,
+            custom_mask=custom_mask,
+            regex_pattern=regex_pattern,
+            mask_format=mask_format,
             **encryption_context,  # type: ignore[arg-type]
         )
 
@@ -232,12 +349,6 @@ class DataMasking:
             # For in-place updates, json_parse accepts a callback function
             # that receives 3 args: field_value, fields, field_name
             # We create a partial callback to pre-populate known provider options (action, provider opts, enc ctx)
-            update_callback = functools.partial(
-                self._call_action,
-                action=action,
-                provider_options=provider_options,
-                **encryption_context,  # type: ignore[arg-type]
-            )
 
             json_parse.update(
                 data_parsed,
@@ -246,6 +357,59 @@ class DataMasking:
 
         return data_parsed
 
+    def _apply_masking_rules(self, data: dict, masking_rules: dict) -> dict:
+        """
+        Apply masking rules to data, supporting both simple field names and complex path expressions.
+
+        Args:
+            data: The dictionary containing data to mask
+            masking_rules: Dictionary mapping field names or path expressions to masking rules
+
+        Returns:
+            dict: The masked data dictionary
+        """
+        result = deepcopy(data)
+
+        for path, rule in masking_rules.items():
+            try:
+                jsonpath_expr = parse(f"$.{path}")
+                matches = jsonpath_expr.find(result)
+
+                if not matches:
+                    warnings.warn(f"No matches found for path: {path}", stacklevel=2)
+                    continue
+
+                for match in matches:
+                    try:
+                        value = match.value
+                        if value is not None:
+                            masked_value = self.provider.erase(str(value), **rule)
+                            match.full_path.update(result, masked_value)
+
+                    except Exception as e:
+                        warnings.warn(
+                            f"Error masking value for path {path}: {str(e)}",
+                            category=PowertoolsUserWarning,
+                            stacklevel=2,
+                        )
+                        continue
+
+            except Exception as e:
+                warnings.warn(f"Error processing path {path}: {str(e)}", category=PowertoolsUserWarning, stacklevel=2)
+                continue
+
+        return result
+
+    def _mask_nested_field(self, data: dict, field_path: str, mask_function):
+        keys = field_path.split(".")
+        current = data
+        for key in keys[:-1]:
+            current = current.get(key, {})
+            if not isinstance(current, dict):
+                return
+        if keys[-1] in current:
+            current[keys[-1]] = self.provider.erase(current[keys[-1]], **mask_function)
+
     @staticmethod
     def _call_action(
         field_value: Any,
@@ -253,6 +417,10 @@ class DataMasking:
         field_name: str,
         action: Callable,
         provider_options: dict[str, Any] | None = None,
+        dynamic_mask: bool | None = None,
+        custom_mask: str | None = None,
+        regex_pattern: str | None = None,
+        mask_format: str | None = None,
         **encryption_context,
     ) -> None:
         """
@@ -270,13 +438,18 @@ class DataMasking:
         Returns:
         - fields[field_name]: Returns the processed field value
         """
-        fields[field_name] = action(field_value, provider_options=provider_options, **encryption_context)
+        fields[field_name] = action(
+            field_value,
+            provider_options=provider_options,
+            dynamic_mask=dynamic_mask,
+            custom_mask=custom_mask,
+            regex_pattern=regex_pattern,
+            mask_format=mask_format,
+            **encryption_context,
+        )
         return fields[field_name]
 
-    def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
-        if not fields:
-            raise ValueError("No fields specified.")
-
+    def _normalize_data_to_parse(self, data: str | dict) -> dict:
         if isinstance(data, str):
             # Parse JSON string as dictionary
             data_parsed = self.json_deserializer(data)
