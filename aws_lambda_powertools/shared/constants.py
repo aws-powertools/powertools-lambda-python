@@ -40,6 +40,7 @@ LAMBDA_LOG_LEVEL_ENV: str = "AWS_LAMBDA_LOG_LEVEL"
 METRICS_NAMESPACE_ENV: str = "POWERTOOLS_METRICS_NAMESPACE"
 DATADOG_FLUSH_TO_LOG: str = "DD_FLUSH_TO_LOG"
 SERVICE_NAME_ENV: str = "POWERTOOLS_SERVICE_NAME"
+METRICS_DISABLED_ENV: str = "POWERTOOLS_METRICS_DISABLED"
 # If the timestamp of log event is more than 2 hours in future, the log event is skipped.
 # If the timestamp of log event is more than 14 days in past, the log event is skipped.
 # See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html
