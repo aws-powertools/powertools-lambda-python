@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
@@ -8,6 +9,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import strtobool
 
 
 def extract_cloudwatch_metric_resolution_value(metric_resolutions: list, resolution: int | MetricResolution) -> int:
@@ -134,3 +136,28 @@ def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
         # Returning zero represents the initial date of epoch time,
         # which will be skipped by Amazon CloudWatch.
         return 0
+
+
+def is_metrics_disabled() -> bool:
+    """
+    Determine if metrics should be disabled based on environment variables.
+
+    Returns:
+        bool: True if metrics are disabled, False otherwise.
+
+    Rules:
+    - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is True: Disable metrics
+    - If POWERTOOLS_METRICS_DISABLED is True: Disable metrics
+    - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is not set: Disable metrics
+    """
+
+    is_dev_mode = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "false"))
+    is_metrics_disabled = strtobool(os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+
+    disable_conditions = [
+        is_metrics_disabled,
+        is_metrics_disabled and is_dev_mode,
+        is_dev_mode and os.getenv(constants.METRICS_DISABLED_ENV) is None,
+    ]
+
+    return any(disable_conditions)
