@@ -432,6 +432,7 @@ When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the fol
 | __Logger__        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests. <br><br> However, Amazon CloudWatch Logs view will degrade as each new line is treated as a new message. |
 | __Event Handler__ | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                                                                                                                                    |
 | __Tracer__        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                                                                                                                               |
+| __Metrics__      | Disables Powertools metrics emission by default. <br><br> However, this can be overridden by explicitly setting POWERTOOLS_METRICS_DISABLED=false, which takes precedence over the dev mode setting.                                                                                                                               |
 
 ## Debug mode
 
