@@ -7,4 +7,8 @@ class InvalidLoggerSamplingRateError(Exception):
 
 
 class OrphanedChildLoggerError(Exception):
+    """
+    Orphaned Child logger exception
+    """
+
     pass
