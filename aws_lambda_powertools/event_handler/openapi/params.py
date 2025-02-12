@@ -20,6 +20,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 
 if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.models import Example
     from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
 """
@@ -117,6 +118,7 @@ class Param(FieldInfo):
         max_digits: int | None = _Unset,
         decimal_places: int | None = _Unset,
         examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
         json_schema_extra: dict[str, Any] | None = None,
@@ -205,7 +207,12 @@ class Param(FieldInfo):
         if examples is not None:
             kwargs["examples"] = examples
 
+        if openapi_examples is not None:
+            kwargs["openapi_examples"] = openapi_examples
+
         current_json_schema_extra = json_schema_extra or extra
+
+        self.openapi_examples = openapi_examples
 
         kwargs.update(
             {
@@ -262,6 +269,7 @@ class Path(Param):
         max_digits: int | None = _Unset,
         decimal_places: int | None = _Unset,
         examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
         json_schema_extra: dict[str, Any] | None = None,
@@ -353,6 +361,7 @@ class Path(Param):
             decimal_places=decimal_places,
             deprecated=deprecated,
             examples=examples,
+            openapi_examples=openapi_examples,
             include_in_schema=include_in_schema,
             json_schema_extra=json_schema_extra,
             **extra,
@@ -392,6 +401,7 @@ class Query(Param):
         max_digits: int | None = _Unset,
         decimal_places: int | None = _Unset,
         examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
         json_schema_extra: dict[str, Any] | None = None,
@@ -480,6 +490,7 @@ class Query(Param):
             decimal_places=decimal_places,
             deprecated=deprecated,
             examples=examples,
+            openapi_examples=openapi_examples,
             include_in_schema=include_in_schema,
             json_schema_extra=json_schema_extra,
             **extra,
@@ -522,6 +533,7 @@ class Header(Param):
         max_digits: int | None = _Unset,
         decimal_places: int | None = _Unset,
         examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
         json_schema_extra: dict[str, Any] | None = None,
@@ -616,6 +628,7 @@ class Header(Param):
             decimal_places=decimal_places,
             deprecated=deprecated,
             examples=examples,
+            openapi_examples=openapi_examples,
             include_in_schema=include_in_schema,
             json_schema_extra=json_schema_extra,
             **extra,
@@ -669,6 +682,7 @@ class Body(FieldInfo):
         max_digits: int | None = _Unset,
         decimal_places: int | None = _Unset,
         examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
         deprecated: bool | None = None,
         include_in_schema: bool = True,
         json_schema_extra: dict[str, Any] | None = None,

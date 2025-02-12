@@ -552,11 +552,7 @@ class Route:
         operation_responses: dict[int, OpenAPIResponse] = {
             422: {
                 "description": "Validation Error",
-                "content": {
-                    "application/json": {
-                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                    },
-                },
+                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
             },
         }
 
@@ -760,6 +756,9 @@ class Route:
 
             if field_info.description:
                 parameter["description"] = field_info.description
+
+            if field_info.openapi_examples:
+                parameter["examples"] = field_info.openapi_examples
 
             if field_info.deprecated:
                 parameter["deprecated"] = field_info.deprecated
