@@ -722,31 +722,9 @@ stateDiagram-v2
 ```
 </center>
 
-> Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
-For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
+For inheritance, Logger uses `child` parameter to ensure we don't compete with its parents config. We name child Loggers following Python's convention: _`{service}`.`{filename}`_.
 
-For child Loggers, we introspect the name of your module where `Logger(child=True, service="name")` is called, and we name your Logger as **{service}.{filename}**.
-
-???+ danger
-    A common issue when migrating from other Loggers is that `service` might be defined in the parent Logger (no child param), and not defined in the child Logger:
-
-=== "logging_inheritance_bad.py"
-
-    ```python hl_lines="1 9"
-    --8<-- "examples/logger/src/logging_inheritance_bad.py"
-    ```
-
-=== "logging_inheritance_module.py"
-    ```python hl_lines="1 9"
-    --8<-- "examples/logger/src/logging_inheritance_module.py"
-    ```
-
-In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
-
-???+ tip
-    This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
-
-Do this instead:
+Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same `service` name is important when instantiating them.
 
 === "logging_inheritance_good.py"
 
@@ -773,7 +751,6 @@ There are two important side effects when using child loggers:
     ```
 
 === "logging_inheritance_module.py"
-
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
