@@ -22,7 +22,7 @@ We will create new features and utilities to solve practical problems developers
 
 #### Powertools toolchain (p1)
 
-To improve Lambda development workflows and tooling capabilities through, we aim to demonstrate how to simplify complex packaging methods, enable OpenAPI code generation for multiple Lambda functions, and introduce profiling tools to evaluate Powertools for AWS Lambda (Python) code implementation, tracking memory consumption and computational performance.
+To improve Lambda development workflows and tooling capabilities, we aim to demonstrate how to simplify complex packaging methods, enable OpenAPI code generation for multiple Lambda functions, and introduce profiling tools to evaluate Powertools for AWS Lambda (Python) code implementation, tracking memory consumption and computational performance.
 
 - [ ] Create a comprehensive "Recipes" section with Lambda packaging tutorials for tools like uv, poetry, pants, providing clear, practical build strategies.
 - [ ] Enable OpenAPI generation capabilities to create specifications across multiple Lambda functions, eliminating LambdaLith architectural constraints.
