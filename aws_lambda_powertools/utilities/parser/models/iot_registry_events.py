@@ -24,7 +24,7 @@ class AddRemoveOperation(str, enum.Enum):
 class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     """The "Thing: created, updated, deleted" event"""
 
-    operation: IoTCRUDEventOperation
+    operation: EVENT_CRUD_OPERATION
 
     thingId: str
     accountId: str
