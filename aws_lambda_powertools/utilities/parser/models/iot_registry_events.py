@@ -84,7 +84,7 @@ class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
     dynamicGroupMappingId: Optional[str]
 
 
-class IoTThingAddedToOrRemoveFromThingGroupEvent(IOTCoreRegistryEventBase):
+class IoTCoreAddOrRemoveFromThingGroupEvent(IoTCoreRegistryEventsBase):
     """
     Thing Added to or Removed from a Thing Group
     """
