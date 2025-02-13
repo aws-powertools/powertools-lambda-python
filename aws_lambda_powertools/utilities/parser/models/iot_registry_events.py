@@ -30,7 +30,7 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
 
 
 class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
-    operation: IoTCRUDEventOperation
+    operation: EVENT_CRUD_OPERATION
     accountId: str
     thingTypeId: str
     thingTypeName: str
