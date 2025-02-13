@@ -35,7 +35,7 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     attributes: Dict[str, Any]
 
 
-class IoTThingTypeCRUDEvent(IOTCoreRegistryEventBase):
+class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
     operation: IoTCRUDEventOperation
     accountId: str
     thingTypeId: str
