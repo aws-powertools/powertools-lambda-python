@@ -63,7 +63,7 @@ class RootToParentThingGroup(BaseModel):
     groupId: str
 
 
-class IoTThingGroupCRUDEvent(IOTCoreRegistryEventBase):
+class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
     """
     Thing Group Created/Updated/Deleted
     """
