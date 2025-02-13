@@ -102,7 +102,7 @@ class IoTThingGroupAddedToOrDeletedFromThingGroupEvent(IOTCoreRegistryEventBase)
     Thing Group Added to or Deleted from a Thing Group
     """
 
-    operation: AddRemoveOperation
+    operation: EVENT_ADD_REMOVE_OPERATION
     accountId: str
     thingGroupId: str
     thingGroupName: str
