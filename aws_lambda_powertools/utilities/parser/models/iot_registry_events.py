@@ -23,8 +23,6 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     thingName: str
     versionNumber: int
     thingTypeName: Optional[str]
-    billingGroupName: Optional[str]
-
     attributes: Dict[str, Any]
 
 
@@ -36,7 +34,7 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
     isDeprecated: bool
     deprecationDate: Optional[str]
     searchableAttributes: List[str]
-    propagatingAttributes: Dict[str, str]
+    propagatingAttributes: List[Dict[str, str]]
     description: str
 
 
