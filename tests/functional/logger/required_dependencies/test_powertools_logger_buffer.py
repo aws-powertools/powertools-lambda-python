@@ -92,3 +92,51 @@ def test_logger_buffer_is_never_buffered_with_error_new(stdout, service_name):
     # THEN: We expect the log record is not buffered
     log = capture_logging_output(stdout)
     assert "Received an exception" == log["message"]
+
+
+@pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
+def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, log_level):
+    # GIVEN: A logger configured with buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed too")
+
+    log_command = {
+        "CRITICAL": logger.critical,
+        "ERROR": logger.error,
+        "EXCEPTION": logger.exception,
+    }
+
+    # WHEN a log message is sent using the corresponding log method
+    log_message = log_command[log_level]
+    log_message("Received an exception")
+
+    # THEN: We expect the log record is not buffered
+    log = capture_multiple_logging_statements_output(stdout)
+    assert "Buffer was flushed" == log[0]["message"]
+
+
+@pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
+def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name, log_level):
+    # GIVEN: A logger configured with buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=False)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed too")
+
+    log_command = {
+        "CRITICAL": logger.critical,
+        "ERROR": logger.error,
+        "EXCEPTION": logger.exception,
+    }
+
+    # WHEN a log message is sent using the corresponding log method
+    log_message = log_command[log_level]
+    log_message("Received an exception")
+
+    # THEN: We expect the log record is not buffered
+    log = capture_logging_output(stdout)
+    assert "Received an exception" == log["message"]

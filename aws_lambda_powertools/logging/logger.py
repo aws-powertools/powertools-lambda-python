@@ -463,6 +463,10 @@ class Logger:
 
         return True
 
+    def flush_buffer(self):
+        ## INITIAL IMPLEMENTATION
+        self._logger.debug("Buffer was flushed")
+
     def debug(
         self,
         msg: object,
@@ -504,7 +508,7 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is not active, flushing
+        # Buffer is not active and we need to flush
         if not self._logger_buffer:
             return self._logger.info(
                 msg,
@@ -515,6 +519,7 @@ class Logger:
                 extra=extra,
             )
 
+        # Buffer log level is higher than this log level and we need to flush
         if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
             return self._logger.info(
                 msg,
@@ -542,7 +547,7 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is not active, flushing
+        # Buffer is not active and we need to flush
         if not self._logger_buffer:
             return self._logger.warning(
                 msg,
@@ -553,6 +558,7 @@ class Logger:
                 extra=extra,
             )
 
+        # Buffer log level is higher than this log level and we need to flush
         if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
             return self._logger.warning(
                 msg,
@@ -580,6 +586,12 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
+        # Buffer is active and an error happened
+        # LoggerBufferConfig flush_on_error is True
+        # So, we need to flush the buffer
+        if self._logger_buffer and self._logger_buffer.flush_on_error:
+            self.flush_buffer()
+
         return self._logger.error(
             msg,
             *args,
@@ -602,6 +614,12 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
+        # Buffer is active and an error happened
+        # LoggerBufferConfig flush_on_error is True
+        # So, we need to flush the buffer
+        if self._logger_buffer and self._logger_buffer.flush_on_error:
+            self.flush_buffer()
+
         return self._logger.critical(
             msg,
             *args,
@@ -623,6 +641,12 @@ class Logger:
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
+
+        # Buffer is active and an error happened
+        # LoggerBufferConfig flush_on_error is True
+        # So, we need to flush the buffer
+        if self._logger_buffer and self._logger_buffer.flush_on_error:
+            self.flush_buffer()
 
         return self._logger.exception(
             msg,
