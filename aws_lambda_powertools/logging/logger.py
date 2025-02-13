@@ -39,7 +39,6 @@ from aws_lambda_powertools.utilities import jmespath_utils
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging.buffer.config import LoggerBufferConfig
-    from aws_lambda_powertools.logging.types import LOG_LEVEL_VALUES
     from aws_lambda_powertools.shared.types import AnyCallableT
 
 
@@ -205,7 +204,7 @@ class Logger:
     def __init__(
         self,
         service: str | None = None,
-        level: LOG_LEVEL_VALUES | int | None = None,
+        level: str | int | None = None,
         child: bool = False,
         sampling_rate: float | None = None,
         stream: IO[str] | None = None,
