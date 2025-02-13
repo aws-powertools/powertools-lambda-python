@@ -52,7 +52,7 @@ class IoTCoreThingTypeAssociationEvent(IoTCoreRegistryEventsBase):
     Thing Type Associated or Disassociated with a Thing
     """
 
-    operation: AddRemoveOperation
+    operation: EVENT_ADD_REMOVE_OPERATION
     thingId: str
     thingName: str
     thingTypeName: str
