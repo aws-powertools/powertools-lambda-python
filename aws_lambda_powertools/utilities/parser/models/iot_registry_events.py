@@ -68,7 +68,7 @@ class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
     Thing Group Created/Updated/Deleted
     """
 
-    operation: IoTCRUDEventOperation
+    operation: EVENT_CRUD_OPERATION
     accountId: str
     thingGroupId: str
     thingGroupName: str
