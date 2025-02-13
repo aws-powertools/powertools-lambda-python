@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.parser.models.iot_registry_events import (
 )
 
 
-def test_IoTCoreThingEvent_serialization():
+def test_IoTCoreThingEvent_should_serialize_from_event_data():
     event = {
         "eventType": "THING_EVENT",
         "eventId": "f5ae9b94-8b8e-4d8e-8c8f-b3266dd89853",
@@ -26,7 +26,7 @@ def test_IoTCoreThingEvent_serialization():
     assert parsed_event is not None
 
 
-def test_IoTCoreThingTypeEvent_serialization():
+def test_IoTCoreThingTypeEvent_should_serialize_from_event_data():
     event = {
         "eventType": "THING_TYPE_EVENT",
         "eventId": "8827376c-4b05-49a3-9b3b-733729df7ed5",
@@ -48,7 +48,7 @@ def test_IoTCoreThingTypeEvent_serialization():
     assert result is not None
 
 
-def test_IoTCoreThingTypeAssociationEvent_serialization():
+def test_IoTCoreThingTypeAssociationEvent_should_serialize_from_event_data():
     event = {
         "eventId": "87f8e095-531c-47b3-aab5-5171364d138d",
         "eventType": "THING_TYPE_ASSOCIATION_EVENT",
@@ -62,7 +62,7 @@ def test_IoTCoreThingTypeAssociationEvent_serialization():
     assert result is not None
 
 
-def test_IoTCoreThingGroupEvent_serialization():
+def test_IoTCoreThingGroupEvent_should_serialize_from_event_data():
     event = {
         "eventType": "THING_GROUP_EVENT",
         "eventId": "8b9ea8626aeaa1e42100f3f32b975899",
@@ -104,7 +104,7 @@ def test_IoTCoreThingGroupEvent_serialization():
     assert result is not None
 
 
-def test_IoTCoreAddOrRemoveFromThingGroupEvent_serialization():
+def test_IoTCoreAddOrRemoveFromThingGroupEvent_should_serialize_from_event_data():
     event = {
         "eventType": "THING_GROUP_MEMBERSHIP_EVENT",
         "eventId": "d684bd5f-6f6e-48e1-950c-766ac7f02fd1",
@@ -121,7 +121,7 @@ def test_IoTCoreAddOrRemoveFromThingGroupEvent_serialization():
     assert result is not None
 
 
-def test_IoTCoreAddOrDeleteFromThingGroupEvent_serialization():
+def test_IoTCoreAddOrDeleteFromThingGroupEvent_should_serialize_from_event_data():
     event = {
         "eventType": "THING_GROUP_HIERARCHY_EVENT",
         "eventId": "264192c7-b573-46ef-ab7b-489fcd47da41",
