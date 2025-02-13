@@ -27,6 +27,7 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     operation: IoTCRUDEventOperation
 
     thingId: str
+    accountId: str
     thingName: str
     versionNumber: int
     thingTypeName: Optional[str]
