@@ -47,7 +47,7 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
     description: str
 
 
-class IoTThingTypeAssociationEvent(IOTCoreRegistryEventBase):
+class IoTCoreThingTypeAssociationEvent(IoTCoreRegistryEventsBase):
     """
     Thing Type Associated or Disassociated with a Thing
     """
