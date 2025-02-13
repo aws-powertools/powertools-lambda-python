@@ -457,15 +457,20 @@ class Logger:
 
         return decorate
 
-    def _add_log_line_to_buffer(self, level, msg, filename, line, function, **kwargs):
+    def _add_log_line_to_buffer(self, log_record: dict[str, Any]):
         # Initial implementation, will always cache
-        self._buffer_cache.add("XRAY_ID", msg)
-
-        return True
+        # Add logic for "empty"
+        tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
+        if tracer_id:
+            self._buffer_cache.add(tracer_id, log_record)
 
     def flush_buffer(self):
-        ## INITIAL IMPLEMENTATION
-        self._logger.debug("Buffer was flushed")
+        # Initial logic
+        tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
+        for item in self._buffer_cache.get(tracer_id):
+            self._logger.debug(item["msg"])
+
+        self._buffer_cache.clear()
 
     def debug(
         self,
@@ -493,7 +498,7 @@ class Logger:
 
         log_record = _create_buffer_record(level="DEBUG", msg=msg, args=args, **kwargs)
 
-        self._add_log_line_to_buffer(**log_record)
+        self._add_log_line_to_buffer(log_record)
 
     def info(
         self,
@@ -532,7 +537,7 @@ class Logger:
 
         log_record: dict[str, Any] = _create_buffer_record(level="INFO", msg=msg, args=args, **kwargs)
 
-        self._add_log_line_to_buffer(**log_record)
+        self._add_log_line_to_buffer(log_record)
 
     def warning(
         self,
@@ -571,7 +576,7 @@ class Logger:
 
         log_record = _create_buffer_record(level="WARNING", msg=msg, args=args, **kwargs)
 
-        self._add_log_line_to_buffer(**log_record)
+        self._add_log_line_to_buffer(log_record)
 
     def error(
         self,

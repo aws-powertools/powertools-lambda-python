@@ -10,6 +10,7 @@ import pytest
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
+from aws_lambda_powertools.shared import constants
 
 
 @pytest.fixture
@@ -95,8 +96,9 @@ def test_logger_buffer_is_never_buffered_with_error_new(stdout, service_name):
 
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
-def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, log_level):
+def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, log_level, monkeypatch):
     # GIVEN: A logger configured with buffer
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
@@ -115,7 +117,8 @@ def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, lo
 
     # THEN: We expect the log record is not buffered
     log = capture_multiple_logging_statements_output(stdout)
-    assert "Buffer was flushed" == log[0]["message"]
+    assert "this log line will be flushed" == log[0]["message"]
+    assert "this log line will be flushed too" == log[1]["message"]
 
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
