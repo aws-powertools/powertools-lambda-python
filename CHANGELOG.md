@@ -8,6 +8,10 @@
 
 * **security:** fix encryption_context handling in data masking operations ([#6074](https://github.com/aws-powertools/powertools-lambda-python/issues/6074))
 
+## Documentation
+
+* **roadmap:** update roadmap ([#6077](https://github.com/aws-powertools/powertools-lambda-python/issues/6077))
+
 ## Maintenance
 
 * **ci:** new pre-release 3.6.1a0 ([#6084](https://github.com/aws-powertools/powertools-lambda-python/issues/6084))
