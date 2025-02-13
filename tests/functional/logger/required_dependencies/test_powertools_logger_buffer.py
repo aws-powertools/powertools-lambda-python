@@ -82,7 +82,7 @@ def test_logger_buffer_is_never_buffered_with_exception(stdout, service_name):
     assert "Received an exception" == log["message"]
 
 
-def test_logger_buffer_is_never_buffered_with_error_new(stdout, service_name):
+def test_logger_buffer_is_never_buffered_with_error(stdout, service_name):
     # GIVEN: A logger configured with buffer
     logger_buffer_config = LoggerBufferConfig(max_size=10240)
     logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
@@ -143,3 +143,18 @@ def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name
     # THEN: We expect the log record is not buffered
     log = capture_logging_output(stdout)
     assert "Received an exception" == log["message"]
+
+
+def test_create_and_flush_logs(stdout, service_name, monkeypatch):
+    # GIVEN: A logger configured with buffer
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    logger.debug("this log line will be flushed")
+
+    logger.flush_buffer()
+
+    # THEN: We expect the log record is not buffered
+    log = capture_multiple_logging_statements_output(stdout)
+    assert "this log line will be flushed" == log[0]["message"]

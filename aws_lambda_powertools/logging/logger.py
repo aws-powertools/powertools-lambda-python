@@ -457,18 +457,73 @@ class Logger:
 
         return decorate
 
-    def _add_log_line_to_buffer(self, log_record: dict[str, Any]):
-        # Initial implementation, will always cache
-        # Add logic for "empty"
+    def _create_and_flush_log_record(self, log_line: dict) -> None:
+        """
+        Create and immediately flush a log record to the configured logger.
+
+        Parameters
+        ----------
+        log_line : dict[str, Any]
+            Dictionary containing log record details with keys:
+            - 'level': Logging level
+            - 'filename': Source filename
+            - 'line': Line number
+            - 'msg': Log message
+            - 'function': Source function name
+            - 'extra': Additional context
+            - 'timestamp': Original log creation time
+
+        Notes
+        -----
+        Bypasses standard logging flow by directly creating and handling a log record.
+        Preserves original timestamp and source information.
+        """
+        record = self._logger.makeRecord(
+            name=self.name,
+            level=log_line["level"],
+            fn=log_line["filename"],
+            lno=log_line["line"],
+            msg=log_line["msg"],
+            args=(),
+            exc_info=None,
+            func=log_line["function"],
+            extra=log_line["extra"],
+        )
+        record.created = log_line["timestamp"]
+        self._logger.handle(record)
+
+    def _add_log_record_to_buffer(
+        self,
+        level: int,
+        msg: object,
+        args: object,
+        exc_info: logging._ExcInfoType,
+        stack_info: bool,
+        extra: Mapping[str, object],
+    ):
         tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
         if tracer_id:
+            log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
             self._buffer_cache.add(tracer_id, log_record)
 
     def flush_buffer(self):
-        # Initial logic
+        """
+        Flush all buffered log records associated with current trace ID.
+
+        Notes
+        -----
+        Retrieves log records for current trace from buffer
+        Immediately processes and logs each record
+        Clears buffer after complete processing
+
+        Raises
+        ------
+        Any exceptions from underlying logging or buffer mechanisms
+        will be propagated to caller
+        """
         tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
-        for item in self._buffer_cache.get(tracer_id):
-            self._logger.debug(item["msg"])
+        for log_line in self._buffer_cache.get(tracer_id):
+            self._create_and_flush_log_record(log_line)
 
         self._buffer_cache.clear()
 
@@ -485,7 +540,16 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is not active, flushing
+        # Logging workflow for logging.debug:
+        # 1. Buffer is completely disabled - log right away
+        # 2. DEBUG is the maximum level of buffer, so, can't bypass if enabled
+        # 3. Store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
         if not self._logger_buffer:
             return self._logger.debug(
                 msg,
@@ -496,9 +560,15 @@ class Logger:
                 extra=extra,
             )
 
-        log_record = _create_buffer_record(level="DEBUG", msg=msg, args=args, **kwargs)
-
-        self._add_log_line_to_buffer(log_record)
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.DEBUG,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+        )
 
     def info(
         self,
@@ -513,7 +583,16 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is not active and we need to flush
+        # Logging workflow for logging.info:
+        # 1. Buffer is completely disabled - log right away
+        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
+        # 3. If neither condition met, store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
         if not self._logger_buffer:
             return self._logger.info(
                 msg,
@@ -524,7 +603,7 @@ class Logger:
                 extra=extra,
             )
 
-        # Buffer log level is higher than this log level and we need to flush
+        # Bypass buffer when log severity meets or exceeds configured minimum
         if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
             return self._logger.info(
                 msg,
@@ -535,9 +614,15 @@ class Logger:
                 extra=extra,
             )
 
-        log_record: dict[str, Any] = _create_buffer_record(level="INFO", msg=msg, args=args, **kwargs)
-
-        self._add_log_line_to_buffer(log_record)
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.INFO,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+        )
 
     def warning(
         self,
@@ -552,7 +637,16 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is not active and we need to flush
+        # Logging workflow for logging.warning:
+        # 1. Buffer is completely disabled - log right away
+        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
+        # 3. If neither condition met, store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
         if not self._logger_buffer:
             return self._logger.warning(
                 msg,
@@ -563,7 +657,7 @@ class Logger:
                 extra=extra,
             )
 
-        # Buffer log level is higher than this log level and we need to flush
+        # Bypass buffer when log severity meets or exceeds configured minimum
         if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
             return self._logger.warning(
                 msg,
@@ -574,9 +668,15 @@ class Logger:
                 extra=extra,
             )
 
-        log_record = _create_buffer_record(level="WARNING", msg=msg, args=args, **kwargs)
-
-        self._add_log_line_to_buffer(log_record)
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.WARNING,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+        )
 
     def error(
         self,
@@ -591,9 +691,11 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is active and an error happened
-        # LoggerBufferConfig flush_on_error is True
-        # So, we need to flush the buffer
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Error log is not "bufferable", so ensure error log is immediately available
+
         if self._logger_buffer and self._logger_buffer.flush_on_error:
             self.flush_buffer()
 
@@ -619,9 +721,10 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is active and an error happened
-        # LoggerBufferConfig flush_on_error is True
-        # So, we need to flush the buffer
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Critical log is not "bufferable", so ensure error log is immediately available
         if self._logger_buffer and self._logger_buffer.flush_on_error:
             self.flush_buffer()
 
@@ -647,9 +750,10 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Buffer is active and an error happened
-        # LoggerBufferConfig flush_on_error is True
-        # So, we need to flush the buffer
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Exception log is not "bufferable", so ensure error log is immediately available
         if self._logger_buffer and self._logger_buffer.flush_on_error:
             self.flush_buffer()
 

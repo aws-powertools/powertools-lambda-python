@@ -2,21 +2,26 @@ from __future__ import annotations
 
 import inspect
 import time
-from typing import Any
+from typing import Any, Mapping
 
 
-def _create_buffer_record(level: str, msg: object, args: object, **kwargs) -> dict[str, Any]:
+def _create_buffer_record(
+    level: int,
+    msg: object,
+    args: object,
+    extra: Mapping[str, object] | None = None,
+) -> dict[str, Any]:
     caller_frame = inspect.stack()[2]
     timestamp = time.time()
 
     return {
-        "level": level.upper(),
+        "level": level,
         "msg": msg,
         "args": args,
         "filename": caller_frame.filename,
         "line": caller_frame.lineno,
         "function": caller_frame.function,
-        "extra_kwargs": kwargs or {},
+        "extra": extra,
         "timestamp": timestamp,
     }
 
