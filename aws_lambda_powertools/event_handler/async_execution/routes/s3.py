@@ -63,10 +63,10 @@ class S3Route(BaseRoute):
     def is_target_with_bucket(self, bucket: str | None) -> bool:
         if not bucket:
             return False
-        elif self.bucket and self.bucket == bucket:
-            return True
-        elif self.bucket_prefix and bucket.find(self.bucket_prefix) == 0:
-            return True
+        elif self.bucket:
+            return self.bucket == bucket
+        elif self.bucket_prefix:
+            return bucket.find(self.bucket_prefix) == 0
         else:
             return False
 
