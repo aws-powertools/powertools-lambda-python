@@ -98,7 +98,7 @@ class IoTCoreAddOrRemoveFromThingGroupEvent(IoTCoreRegistryEventsBase):
     membershipId: str
 
 
-class IoTThingGroupAddedToOrDeletedFromThingGroupEvent(IOTCoreRegistryEventBase):
+class IoTCoreAddOrDeleteFromThingGroupEvent(IoTCoreRegistryEventsBase):
     """
     Thing Group Added to or Deleted from a Thing Group
     """
