@@ -12,12 +12,12 @@ import logging
 import os
 import random
 import sys
-import time
 import warnings
 from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, overload
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
+from aws_lambda_powertools.logging.buffer.functions import _create_buffer_record, _resolve_buffer_log_level
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
@@ -459,10 +459,38 @@ class Logger:
         return decorate
 
     def _add_log_to_buffer(self, level, msg, filename, line, function, **kwargs):
-        if self._buffer_cache:
-            return False
+        # Initial implementation, will always cache
+        self._buffer_cache.add("XRAY_ID", msg)
 
         return True
+
+    def debug(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Buffer is not active, flushing
+        if not self._logger_buffer:
+            return self._logger.debug(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        log_record = _create_buffer_record(level="DEBUG", msg=msg, args=args, **kwargs)
+
+        self._add_log_to_buffer(**log_record)
 
     def info(
         self,
@@ -477,19 +505,8 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        if self._logger_buffer:
-            caller_frame = inspect.stack()[1]
-            record = {
-                "level": "INFO",
-                "msg": msg % args if args else msg,
-                "filename": caller_frame.filename,
-                "line": caller_frame.lineno,
-                "function": caller_frame.function,
-                "extra_kwargs": kwargs,
-                "timestamp": time.time(),
-            }
-            return self._add_log_to_buffer(**record)
-        else:
+        # Buffer is not active, flushing
+        if not self._logger_buffer:
             return self._logger.info(
                 msg,
                 *args,
@@ -498,6 +515,58 @@ class Logger:
                 stacklevel=stacklevel,
                 extra=extra,
             )
+
+        if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
+            return self._logger.info(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        log_record: dict[str, Any] = _create_buffer_record(level="INFO", msg=msg, args=args, **kwargs)
+
+        self._add_log_to_buffer(**log_record)
+
+    def warning(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Buffer is not active, flushing
+        if not self._logger_buffer:
+            return self._logger.warning(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
+            return self._logger.warning(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        log_record = _create_buffer_record(level="WARNING", msg=msg, args=args, **kwargs)
+
+        self._add_log_to_buffer(**log_record)
 
     def error(
         self,
@@ -513,28 +582,6 @@ class Logger:
         extra = {**extra, **kwargs}
 
         return self._logger.error(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def exception(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: logging._ExcInfoType = True,
-        stack_info: bool = False,
-        stacklevel: int = 2,
-        extra: Mapping[str, object] | None = None,
-        **kwargs: object,
-    ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        return self._logger.exception(
             msg,
             *args,
             exc_info=exc_info,
@@ -565,11 +612,11 @@ class Logger:
             extra=extra,
         )
 
-    def warning(
+    def exception(
         self,
         msg: object,
         *args: object,
-        exc_info: logging._ExcInfoType = None,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Mapping[str, object] | None = None,
@@ -578,29 +625,7 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        return self._logger.warning(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def debug(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: logging._ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 2,
-        extra: Mapping[str, object] | None = None,
-        **kwargs: object,
-    ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        return self._logger.debug(
+        return self._logger.exception(
             msg,
             *args,
             exc_info=exc_info,

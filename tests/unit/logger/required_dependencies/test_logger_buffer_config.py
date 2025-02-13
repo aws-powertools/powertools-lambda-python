@@ -63,7 +63,7 @@ def test_invalid_log_level():
 
 def test_case_insensitive_log_level():
     # GIVEN
-    test_cases = ["debug", "Info", "WARNING", "error", "CRITICAL"]
+    test_cases = ["debug", "Info", "WARNING"]
 
     # WHEN / THEN
     for log_level in test_cases:

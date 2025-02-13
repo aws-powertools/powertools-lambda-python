@@ -1,0 +1,94 @@
+"""aws_lambda_logging tests."""
+
+import io
+import json
+import random
+import string
+from collections import namedtuple
+
+import pytest
+
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
+
+
+@pytest.fixture
+def lambda_context():
+    lambda_context = {
+        "function_name": "test",
+        "memory_limit_in_mb": 128,
+        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
+        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+    }
+
+    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
+
+
+@pytest.fixture
+def stdout():
+    return io.StringIO()
+
+
+@pytest.fixture
+def service_name():
+    chars = string.ascii_letters + string.digits
+    return "".join(random.SystemRandom().choice(chars) for _ in range(15))
+
+
+def capture_logging_output(stdout):
+    return json.loads(stdout.getvalue().strip())
+
+
+def capture_multiple_logging_statements_output(stdout):
+    return [json.loads(line.strip()) for line in stdout.getvalue().split("\n") if line]
+
+
+@pytest.mark.parametrize("log_level", ["DEBUG", "WARNING", "INFO"])
+def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_name):
+    # GIVEN a configured logger with buffer enabled and specific minimum log level
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="WARNING")
+    logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    msg = "This is a test"
+    log_command = {
+        "INFO": logger.info,
+        "WARNING": logger.warning,
+        "DEBUG": logger.debug,
+    }
+
+    # WHEN a log message is sent using the corresponding log method
+    log_message = log_command[log_level]
+    log_message(msg)
+    log_dict = stdout.getvalue()
+
+    # THEN verify that the message is buffered and not immediately output
+    assert log_dict == ""
+
+
+def test_logger_buffer_is_never_buffered_with_exception(stdout, service_name):
+    # GIVEN: A logger configured with buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN: An exception is raised and logged
+    try:
+        raise ValueError("something went wrong")
+    except Exception:
+        logger.exception("Received an exception")
+
+    # THEN: We expect the log record is not buffered
+    log = capture_logging_output(stdout)
+    assert "Received an exception" == log["message"]
+
+
+def test_logger_buffer_is_never_buffered_with_error_new(stdout, service_name):
+    # GIVEN: A logger configured with buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN: An exception is raised and logged
+    logger.error("Received an exception")
+
+    # THEN: We expect the log record is not buffered
+    log = capture_logging_output(stdout)
+    assert "Received an exception" == log["message"]

@@ -12,7 +12,7 @@ class LoggerBufferConfig:
     """
 
     # Define class-level constant for valid log levels
-    VALID_LOG_LEVELS: list[str] = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    VALID_LOG_LEVELS: list[str] = ["DEBUG", "INFO", "WARNING"]
 
     def __init__(
         self,
