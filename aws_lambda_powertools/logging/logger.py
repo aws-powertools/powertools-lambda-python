@@ -17,7 +17,7 @@ from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, overload
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
-from aws_lambda_powertools.logging.buffer.functions import _create_buffer_record, _resolve_buffer_log_level
+from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level, _create_buffer_record
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
@@ -86,7 +86,7 @@ class Logger:
     ----------
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
-    level : Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], int optional
+    level : str, int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
         or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
         by default "INFO"
@@ -457,7 +457,7 @@ class Logger:
 
         return decorate
 
-    def _add_log_to_buffer(self, level, msg, filename, line, function, **kwargs):
+    def _add_log_line_to_buffer(self, level, msg, filename, line, function, **kwargs):
         # Initial implementation, will always cache
         self._buffer_cache.add("XRAY_ID", msg)
 
@@ -493,7 +493,7 @@ class Logger:
 
         log_record = _create_buffer_record(level="DEBUG", msg=msg, args=args, **kwargs)
 
-        self._add_log_to_buffer(**log_record)
+        self._add_log_line_to_buffer(**log_record)
 
     def info(
         self,
@@ -520,7 +520,7 @@ class Logger:
             )
 
         # Buffer log level is higher than this log level and we need to flush
-        if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
+        if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
             return self._logger.info(
                 msg,
                 *args,
@@ -532,7 +532,7 @@ class Logger:
 
         log_record: dict[str, Any] = _create_buffer_record(level="INFO", msg=msg, args=args, **kwargs)
 
-        self._add_log_to_buffer(**log_record)
+        self._add_log_line_to_buffer(**log_record)
 
     def warning(
         self,
@@ -559,7 +559,7 @@ class Logger:
             )
 
         # Buffer log level is higher than this log level and we need to flush
-        if _resolve_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
+        if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
             return self._logger.warning(
                 msg,
                 *args,
@@ -571,7 +571,7 @@ class Logger:
 
         log_record = _create_buffer_record(level="WARNING", msg=msg, args=args, **kwargs)
 
-        self._add_log_to_buffer(**log_record)
+        self._add_log_line_to_buffer(**log_record)
 
     def error(
         self,

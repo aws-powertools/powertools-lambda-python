@@ -21,7 +21,7 @@ def _create_buffer_record(level: str, msg: object, args: object, **kwargs) -> di
     }
 
 
-def _resolve_buffer_log_level(buffer_log_level, current_log_level):
+def _check_minimum_buffer_log_level(buffer_log_level, current_log_level):
     # Define log level mapping
     log_levels = {
         "DEBUG": 10,
@@ -36,7 +36,7 @@ def _resolve_buffer_log_level(buffer_log_level, current_log_level):
     current_level_num = log_levels.get(current_log_level.upper())
 
     # Compare numeric levels
-    if buffer_level_num <= current_level_num:
+    if buffer_level_num < current_level_num:
         return True
 
     return False
