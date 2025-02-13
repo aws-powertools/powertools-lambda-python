@@ -23,7 +23,7 @@ stateDiagram-v2
     DatadogExtension --> Datadog: async
 
     state LambdaExtension {
-        DatadogExtension 
+        DatadogExtension
     }
 
 ```
@@ -174,10 +174,14 @@ This has the advantage of keeping cold start metric separate from your applicati
 
 You can use any of the following environment variables to configure `DatadogMetrics`:
 
-| Setting              | Description                                                                      | Environment variable           | Constructor parameter |
-| -------------------- | -------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
-| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
+| Setting                        | Description                                                                      | Environment variable           | Constructor parameter |
+| ------------------------------ | -------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace**           | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Flush to log**               | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
+| **Disable Powertools Metrics** | Optionally, disables all Powertools metrics.	                                    | `POWERTOOLS_METRICS_DISABLED`  | N/A                   |
+
+???+ info
+    `POWERTOOLS_METRICS_DISABLED` will not disable default metrics created by AWS services.
 
 ## Advanced
 

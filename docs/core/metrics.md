@@ -34,12 +34,16 @@ If you're new to Amazon CloudWatch, there are five terminologies you must be awa
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
-Metric has two global settings that will be used across all metrics emitted:
+Metric has three global settings that will be used across all metrics emitted:
 
-| Setting              | Description                                                                     | Environment variable           | Constructor parameter |
-| -------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
-| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Service**          | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
+| Setting                         | Description                                                                     | Environment variable           | Constructor parameter |
+| ------------------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace**            | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Service**                     | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
+| **Disable Powertools Metrics**  | Optionally, disables all Powertools metrics.	                                | `POWERTOOLS_METRICS_DISABLED`  | N/A                   |
+
+???+ info
+    `POWERTOOLS_METRICS_DISABLED` will not disable default metrics created by AWS services.
 
 ???+ tip
     Use your application or main service as the metric namespace to easily group all metrics.
@@ -79,7 +83,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
     CloudWatch EMF supports a max of 100 metrics per batch. Metrics utility will flush all metrics when adding the 100th metric. Subsequent metrics (101th+) will be aggregated into a new EMF object, for your convenience.
 
 ???+ warning "Warning: Do not create metrics or dimensions outside the handler"
-    Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
+    Metrics or dimensions added in the global scope will only be added during cold start. Disregard if that's the intended behavior.
 
 ### Adding high-resolution metrics
 

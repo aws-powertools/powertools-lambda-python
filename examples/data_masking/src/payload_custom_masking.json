@@ -1,0 +1,34 @@
+{
+    "body": {
+        "id": 1,
+        "name": "Jane Doe",
+        "age": 30,
+        "email": "janedoe@example.com",
+        "address": {
+            "street": "123 Main St",
+            "city": "Anytown",
+            "state": "CA",
+            "zip": "12345",
+            "postcode": 12345,
+            "product": {
+                "name": "Car"
+            }
+        },
+        "other_address": [
+            {
+                "postcode": 11345,
+                "street": "123 Any Drive"
+            },
+            {
+                "postcode": 67890,
+                "street": "100 Main Street,"
+            }
+        ],
+        "company_address": {
+            "street": "456 ACME Ave",
+            "city": "Anytown",
+            "state": "CA",
+            "zip": "12345"
+        }
+    }
+}
