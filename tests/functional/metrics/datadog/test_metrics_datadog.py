@@ -334,3 +334,163 @@ def test_namespace_env_var(monkeypatch):
 
     # THEN namespace should match the explicitly passed variable and not the env var
     assert output[0]["m"] == f"{env_namespace}.item_sold"
+
+
+def test_metrics_disabled_with_env_var(monkeypatch, capsys):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized and adding metrics
+    metrics = DatadogMetrics()
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
+
+
+def test_metrics_disabled_persists_after_flush(monkeypatch, capsys):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    metrics = DatadogMetrics()
+
+    # WHEN multiple operations are performed with flush in between
+    metrics.add_metric(name="metric1", value=1)
+    metrics.flush_metrics()
+
+    # THEN first flush should not emit any metrics
+    captured = capsys.readouterr()
+    assert not captured.out
+
+    # WHEN adding and flushing more metrics
+    metrics.add_metric(name="metric2", value=2)
+    metrics.flush_metrics()
+
+    # THEN second flush should also not emit any metrics
+    captured = capsys.readouterr()
+    assert not captured.out
+
+
+def test_metrics_disabled_with_namespace(monkeypatch, capsys):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized with namespace and service
+    metrics = DatadogMetrics(namespace="test_namespace")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
+
+
+def test_metrics_disabled_with_dev_mode_true(monkeypatch, capsys):
+    # GIVEN dev mode is enabled
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+
+    # WHEN metrics is initialized
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out
+
+
+def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):
+    # GIVEN environment variable is set to enable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN Datadog metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert metrics_output
+
+
+def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
+    # GIVEN environment variable is not set
+    monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
+
+    # WHEN metrics is initialized with namespace and metrics added
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+
+    assert "test.test_metric" in metrics_output["m"]
+
+
+def test_metrics_enabled_with_dev_mode_false(monkeypatch, capsys):
+    # GIVEN dev mode is disabled
+    monkeypatch.setenv("POWERTOOLS_DEV", "false")
+
+    # WHEN metrics is initialized
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+    assert metrics_output
+
+
+def test_metrics_disabled_dev_mode_overrides_metrics_disabled(monkeypatch, capsys):
+    # GIVEN dev mode is enabled but metrics disabled is false
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout since POWERTOOLS_METRICS_DISABLED is false
+    output = capsys.readouterr().out
+    assert output  # First verify we have output
+    metrics_output = json.loads(output)
+    assert metrics_output  # Then verify it's valid JSON
+    assert "test.test_metric" in metrics_output["m"]  # Verify the metric is present
+
+
+def test_metrics_enabled_with_both_false(monkeypatch, capsys):
+    # GIVEN both dev mode and metrics disabled are false
+    monkeypatch.setenv("POWERTOOLS_DEV", "false")
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
+
+    # WHEN metrics is initialized
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN metrics should be written to stdout
+    output = capsys.readouterr().out
+    metrics_output = json.loads(output)
+    assert metrics_output
+
+
+def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypatch, capsys):
+    # GIVEN dev mode is false but metrics disabled is true
+    monkeypatch.setenv("POWERTOOLS_DEV", "false")
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN metrics is initialized
+    metrics = DatadogMetrics(namespace="test")
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN no metrics should have been recorded
+    captured = capsys.readouterr()
+    assert not captured.out

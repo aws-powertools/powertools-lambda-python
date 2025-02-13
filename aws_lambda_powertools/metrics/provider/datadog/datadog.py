@@ -10,6 +10,7 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.functions import is_metrics_disabled
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
@@ -99,7 +100,6 @@ class DatadogProvider(BaseProvider):
             >>>     sales='sam'
             >>> )
         """
-
         # validating metric name
         if not self._validate_datadog_metric_name(name):
             docs = "https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics"
@@ -180,6 +180,7 @@ class DatadogProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
+
         if not raise_on_empty_metrics and len(self.metric_set) == 0:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "
@@ -200,7 +201,7 @@ class DatadogProvider(BaseProvider):
                         timestamp=metric_item["e"],
                         tags=metric_item["t"],
                     )
-            else:
+            elif not is_metrics_disabled():
                 # dd module not found: flush to log, this format can be recognized via datadog log forwarder
                 # https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
                 for metric_item in metrics:
