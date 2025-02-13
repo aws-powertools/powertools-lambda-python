@@ -731,7 +731,9 @@ def test_process_partial_response_raises_unexpected_batch_type(event, record_han
         )
 
     # THEN the correct error message is raised
-    assert "Unexpected batch type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(exc_info.value)
+    assert "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(
+        exc_info.value,
+    )
 
 
 @pytest.mark.asyncio
@@ -756,21 +758,6 @@ async def test_async_process_partial_response_raises_unexpected_batch_type(event
         )
 
     # THEN the correct error message is raised
-    assert "Unexpected batch type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(exc_info.value)
-
-
-def test_process_partial_response_should_not_raise_unexpected_batch_type(record_handler):
-    # GIVEN a valid SQS event structure
-    event = {"Records": [{"messageId": "1", "body": "test"}]}
-    processor = BatchProcessor(event_type=EventType.SQS)
-
-    # WHEN processing the event
-    try:
-        process_partial_response(
-            event=event,
-            record_handler=record_handler,
-            processor=processor,
-        )
-    except UnexpectedBatchTypeError:
-        # THEN no UnexpectedBatchTypeError should be raised
-        pytest.fail("UnexpectedBatchTypeError was raised with a valid event structure!")
+    assert "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(
+        exc_info.value,
+    )

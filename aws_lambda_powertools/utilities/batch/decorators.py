@@ -206,7 +206,9 @@ def process_partial_response(
     try:
         records: list[dict] = event.get("Records", [])
         if not records or not isinstance(records, list):
-            raise UnexpectedBatchTypeError
+            raise UnexpectedBatchTypeError(
+                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
+            )
 
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
@@ -273,7 +275,9 @@ def async_process_partial_response(
     try:
         records: list[dict] = event.get("Records", [])
         if not records or not isinstance(records, list):
-            raise UnexpectedBatchTypeError
+            raise UnexpectedBatchTypeError(
+                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
+            )
 
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))

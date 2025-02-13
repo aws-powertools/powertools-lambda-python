@@ -41,10 +41,7 @@ class BatchProcessingError(BaseBatchProcessingError):
 class UnexpectedBatchTypeError(BatchProcessingError):
     """Error thrown by the Batch Processing utility when a partial processor receives an unexpected batch type"""
 
-    def __init__(self):
-        msg = "Unexpected batch type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams"
-        super().__init__(msg)
-        self.name = "UnexpectedBatchTypeError"
+    pass
 
 
 class SQSFifoCircuitBreakerError(Exception):
