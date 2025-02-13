@@ -21,7 +21,7 @@ class AddRemoveOperation(str, enum.Enum):
     REMOVED = "REMOVED"
 
 
-class IoTCRUDEvent(IOTCoreRegistryEventBase):
+class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     """The "Thing: created, updated, deleted" event"""
 
     operation: IoTCRUDEventOperation
