@@ -10,15 +10,8 @@ class IoTCoreRegistryEventsBase(BaseModel):
     timestamp: int
 
 
-class IoTCRUDEventOperation(str, enum.Enum):
-    CREATED = "CREATED"
-    UPDATED = "UPDATED"
-    DELETED = "DELETED"
-
-
-class AddRemoveOperation(str, enum.Enum):
-    ADDED = "ADDED"
-    REMOVED = "REMOVED"
+EVENT_CRUD_OPERATION = Literal["CREATED", "UPDATED", "DELETED"]
+EVENT_ADD_REMOVE_OPERATION = Literal["ADDED", "REMOVED"]
 
 
 class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
