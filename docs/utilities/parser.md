@@ -156,7 +156,7 @@ Use the model to validate and extract relevant information from the incoming eve
 
     ```python hl_lines="4 8 17"
     --8<-- "examples/parser/src/custom_data_model_with_eventbridge.py"
-    ```****
+    ```
 
 === "Sample event"
 
