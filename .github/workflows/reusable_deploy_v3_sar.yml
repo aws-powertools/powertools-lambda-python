@@ -135,8 +135,7 @@ jobs:
         env:
           VERSION: ${{ inputs.package-version }}
         run: |
-          # VERSION="${VERSION/a/-a}"
-          VERSION="3.0.0"
+          VERSION="${VERSION/a/-a}"
           echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Prepare SAR App
         env:
@@ -149,7 +148,7 @@ jobs:
 
           # fill in the SAR SAM template
           sed \
-            -e "s|<VERSION>|${VERSION}|g" \
+            -e "s|<VERSION>|${{ env.VERSION }}|g" \
             -e "s/<SAR_APP_NAME>/${{ env.SAR_NAME }}/g" \
             -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" \
             -e "s|<PYTHON_RUNTIME>|${{ matrix.python-version }}|g" \
@@ -165,6 +164,7 @@ jobs:
 
           # Package the SAR to our SAR S3 bucket, and publish it
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET_V3 }}
+          cat packaged.yml
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}
