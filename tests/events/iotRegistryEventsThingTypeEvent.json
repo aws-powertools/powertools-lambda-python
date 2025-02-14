@@ -1,0 +1,17 @@
+{
+  "eventType": "THING_TYPE_EVENT",
+  "eventId": "8827376c-4b05-49a3-9b3b-733729df7ed5",
+  "timestamp": 1234567890123,
+  "operation": "CREATED",
+  "accountId": "123456789012",
+  "thingTypeId": "c530ae83-32aa-4592-94d3-da29879d1aac",
+  "thingTypeName": "MyThingType",
+  "isDeprecated": false,
+  "deprecationDate": null,
+  "searchableAttributes": ["attribute1", "attribute2", "attribute3"],
+  "propagatingAttributes": [
+      {"userPropertyKey": "key", "thingAttribute": "model"},
+      {"userPropertyKey": "key", "connectionAttribute": "iot:ClientId"}
+  ],
+  "description": "My thing type"
+}

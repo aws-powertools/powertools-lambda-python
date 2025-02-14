@@ -118,6 +118,12 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
 | **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                                       |
 | **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                            |
+| **IoTCoreThingEvent**                       | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
+| **IoTCoreThingTypeEvent**                   | Lambda Event Source payload for IoT Core Thing Type events.                                   |
+| **IoTCoreThingTypeAssociationEvent**        | Lambda Event Source payload for IoT Core Thing Type associated or disassociated with a Thing. |
+| **IoTCoreThingGroupEvent**                  | Lambda Event Source payload for IoT Core Thing Group created, updated, or deleted.            |
+| **IoTCoreAddOrRemoveFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing added to or removed from a Thing Group.        |
+| **IoTCoreAddOrDeleteFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing Group added to or deleted from a Thing Group.  |
 | **KafkaMskEventModel**                      | Lambda Event Source payload for AWS MSK payload                                               |
 | **KafkaSelfManagedEventModel**              | Lambda Event Source payload for self managed Kafka payload                                    |
 | **KinesisDataStreamModel**                  | Lambda Event Source payload for Amazon Kinesis Data Streams                                   |
@@ -135,12 +141,6 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **TransferFamilyAuthorizer**                | Lambda Event Source payload for AWS Transfer Family Lambda authorizer                         |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                            |
 | **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                                 |
-| **IoTCoreThingEvent**                       | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
-| **IoTCoreThingTypeEvent**                   | Lambda Event Source payload for IoT Core Thing Type events.                                   |
-| **IoTCoreThingTypeAssociationEvent**        | Lambda Event Source payload for IoT Core Thing Type associated or disassociated with a Thing. |
-| **IoTCoreThingGroupEvent**                  | Lambda Event Source payload for IoT Core Thing Group created, updated, or deleted.            |
-| **IoTCoreAddOrRemoveFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing added to or removed from a Thing Group.        |
-| **IoTCoreAddOrDeleteFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing Group added to or deleted from a Thing Group.  |
 
 #### Extending built-in models
 
