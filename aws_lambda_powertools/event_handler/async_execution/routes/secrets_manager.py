@@ -29,8 +29,14 @@ class SecretsManagerRoute(BaseRoute):
 
         if not secret_id:
             return None
-        elif self.secret_id and self.secret_id == secret_id:
-            return self.func, SecretsManagerEvent(event)
+        elif self.secret_id and self.secret_name_prefix:
+            part = secret_id.split(":")
+            secret_name = part[-1]
+            if self.secret_id == secret_id and secret_name.find(self.secret_name_prefix) == 0:
+                return self.func, SecretsManagerEvent(event)
+        elif self.secret_id:
+            if self.secret_id == secret_id:
+                return self.func, SecretsManagerEvent(event)
         elif self.secret_name_prefix:
             part = secret_id.split(":")
             secret_name = part[-1]
