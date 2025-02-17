@@ -3,8 +3,8 @@
 
     === "Python 3.9"
 
-        | Region               | Layer ARN                                                                                                       |
-        | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+        | Region               | Layer ARN                                                                                                                  |
+        | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
         | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:     |
         | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:      |
         | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard: |
@@ -17,6 +17,7 @@
         | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard: |
+        | **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard: |
         | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
@@ -29,6 +30,7 @@
         | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:     |
+        | **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:   |
         | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:8**{: .copyMe}:clipboard:      |
@@ -51,6 +53,7 @@
         | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard: |
+        | **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard: |
         | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
@@ -63,6 +66,7 @@
         | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:     |
+        | **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:   |
         | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:8**{: .copyMe}:clipboard:      |
@@ -85,6 +89,7 @@
         | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard: |
+        | **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard: |
         | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
@@ -97,6 +102,7 @@
         | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:     |
+        | **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:   |
         | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:8**{: .copyMe}:clipboard:      |
@@ -119,6 +125,7 @@
         | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard: |
+        | **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard: |
         | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
@@ -131,6 +138,7 @@
         | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:     |
+        | **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:   |
         | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:8**{: .copyMe}:clipboard:      |
@@ -153,6 +161,7 @@
         | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard: |
         | **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard: |
+        | **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard: |
         | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
         | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
@@ -165,6 +174,7 @@
         | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
         | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:     |
+        | **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:   |
         | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:      |
         | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:8**{: .copyMe}:clipboard:      |
