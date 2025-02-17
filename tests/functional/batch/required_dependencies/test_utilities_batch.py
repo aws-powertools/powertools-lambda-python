@@ -15,7 +15,7 @@ from aws_lambda_powertools.utilities.batch import (
     batch_processor,
     process_partial_response,
 )
-from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError
+from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, UnexpectedBatchTypeError
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBRecord,
 )
@@ -708,3 +708,56 @@ def test_async_process_partial_response_invalid_input(async_record_handler: Call
     # WHEN/THEN
     with pytest.raises(ValueError):
         async_process_partial_response(batch, record_handler, processor)
+
+
+@pytest.mark.parametrize(
+    "event",
+    [
+        {},
+        {"Records": None},
+        {"Records": "not a list"},
+    ],
+)
+def test_process_partial_response_raises_unexpected_batch_type(event, record_handler):
+    # GIVEN a batch processor configured for SQS events
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    # WHEN processing an event with invalid Records
+    with pytest.raises(UnexpectedBatchTypeError) as exc_info:
+        process_partial_response(
+            event=event,
+            record_handler=record_handler,
+            processor=processor,
+        )
+
+    # THEN the correct error message is raised
+    assert "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(
+        exc_info.value,
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "event",
+    [
+        {},
+        {"Records": None},
+        {"Records": "not a list"},
+    ],
+)
+async def test_async_process_partial_response_raises_unexpected_batch_type(event, async_record_handler):
+    # GIVEN a batch processor configured for SQS events
+    processor = BatchProcessor(event_type=EventType.SQS)
+
+    # WHEN processing an event with invalid Records asynchronously
+    with pytest.raises(UnexpectedBatchTypeError) as exc_info:
+        await async_process_partial_response(
+            event=event,
+            record_handler=async_record_handler,
+            processor=processor,
+        )
+
+    # THEN the correct error message is raised
+    assert "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(
+        exc_info.value,
+    )

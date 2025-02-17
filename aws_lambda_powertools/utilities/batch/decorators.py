@@ -12,6 +12,7 @@ from aws_lambda_powertools.utilities.batch import (
     BatchProcessor,
     EventType,
 )
+from aws_lambda_powertools.utilities.batch.exceptions import UnexpectedBatchTypeError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -204,6 +205,11 @@ def process_partial_response(
     """
     try:
         records: list[dict] = event.get("Records", [])
+        if not records or not isinstance(records, list):
+            raise UnexpectedBatchTypeError(
+                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
+            )
+
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
@@ -268,6 +274,11 @@ def async_process_partial_response(
     """
     try:
         records: list[dict] = event.get("Records", [])
+        if not records or not isinstance(records, list):
+            raise UnexpectedBatchTypeError(
+                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
+            )
+
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line

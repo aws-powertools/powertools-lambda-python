@@ -75,13 +75,11 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python38-arm64
           - AWSLambdaPowertoolsPythonV3-python39-arm64
           - AWSLambdaPowertoolsPythonV3-python310-arm64
           - AWSLambdaPowertoolsPythonV3-python311-arm64
           - AWSLambdaPowertoolsPythonV3-python312-arm64
           - AWSLambdaPowertoolsPythonV3-python313-arm64
-          - AWSLambdaPowertoolsPythonV3-python38-x86_64
           - AWSLambdaPowertoolsPythonV3-python39-x86_64
           - AWSLambdaPowertoolsPythonV3-python310-x86_64
           - AWSLambdaPowertoolsPythonV3-python311-x86_64
