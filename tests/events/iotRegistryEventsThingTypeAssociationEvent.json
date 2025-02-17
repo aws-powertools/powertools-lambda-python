@@ -1,0 +1,9 @@
+{
+  "eventId": "87f8e095-531c-47b3-aab5-5171364d138d",
+  "eventType": "THING_TYPE_ASSOCIATION_EVENT",
+  "operation": "ADDED",
+  "thingId": "b604f69c-aa9a-4d4a-829e-c480e958a0b5",
+  "thingName": "myThing",
+  "thingTypeName": "MyThingType",
+  "timestamp": 1234567890123
+}

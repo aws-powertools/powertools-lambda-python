@@ -1,0 +1,12 @@
+{
+  "eventType": "THING_EVENT",
+  "eventId": "f5ae9b94-8b8e-4d8e-8c8f-b3266dd89853",
+  "timestamp": 1234567890123,
+  "operation": "CREATED",
+  "accountId": "123456789012",
+  "thingId": "b604f69c-aa9a-4d4a-829e-c480e958a0b5",
+  "thingName": "MyThing",
+  "versionNumber": 1,
+  "thingTypeName": null,
+  "attributes": {"attribute3": "value3", "attribute1": "value1", "attribute2": "value2"}
+}
