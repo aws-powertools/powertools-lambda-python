@@ -13,7 +13,7 @@ run-name: SSM Parameters - Python
 # A successful parameter would look similar to:
 #   /aws/service/powertools/python/arm64/python3.13/3.1.0
 # And will have a value of:
-#   arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python38-arm64:4
+#   arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:4
 
 on:
   workflow_dispatch:
