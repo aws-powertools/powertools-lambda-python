@@ -139,7 +139,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         # Check if we have a return type defined
         if route.dependant.return_param:
             try:
-                # Validate all responses, including None
+                # Validate and serialize the response, including None
                 response.body = self._serialize_response(
                     field=route.dependant.return_param,
                     response_content=response.body,
@@ -154,15 +154,18 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     def _serialize_response(
         self,
         *,
-        field: Any = None,
+        field: ModelField | None = None,
         response_content: Any,
         include: IncEx | None = None,
         exclude: IncEx | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
     ) -> Any:
+        """
+        Serialize the response content according to the field type.
+        """
         if field:
             errors: list[dict[str, Any]] = []
             value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
