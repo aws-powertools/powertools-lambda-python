@@ -182,7 +182,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 exclude_none=exclude_none,
             )
         else:
-            # Just serialize the response content returned from the handler
+            # Just serialize the response content returned from the handler.
             return jsonable_encoder(response_content, custom_serializer=self._validation_serializer)
 
     def _prepare_response_content(
