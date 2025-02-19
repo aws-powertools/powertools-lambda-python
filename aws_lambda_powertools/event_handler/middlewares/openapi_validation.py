@@ -138,16 +138,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     def _handle_response(self, *, route: Route, response: Response):
         # Check if we have a return type defined
         if route.dependant.return_param:
-            try:
-                # Validate and serialize the response, including None
-                response.body = self._serialize_response(
-                    field=route.dependant.return_param,
-                    response_content=response.body,
-                )
-            except RequestValidationError as e:
-                logger.error(f"Response validation failed: {str(e)}")
-                response.status_code = 422
-                response.body = {"detail": e.errors()}
+            # Validate and serialize the response, including None
+            response.body = self._serialize_response(
+                field=route.dependant.return_param,
+                response_content=response.body,
+            )
 
         return response
 
@@ -184,6 +179,12 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 )
             return jsonable_encoder(
                 value,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
                 custom_serializer=self._validation_serializer,
             )
         else:
