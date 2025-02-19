@@ -1130,7 +1130,7 @@ def test_validate_with_minimal_event():
     assert result["statusCode"] == 200
 
 
-def test_validate_optional_return_types(gw_event):
+def test_validation_error_none_returned_non_optional_type(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -1138,37 +1138,57 @@ def test_validate_optional_return_types(gw_event):
         name: str
         age: int
 
-    # AND handlers defined with different Optional return types
     @app.get("/none_not_allowed")
     def handler_none_not_allowed() -> Model:
         return None  # type: ignore
 
-    @app.get("/none_allowed")
-    def handler_none_allowed() -> Optional[Model]:
-        return None
-
-    @app.get("/valid_optional")
-    def handler_valid_optional() -> Optional[Model]:
-        return Model(name="John", age=30)
-
     # WHEN returning None for a non-Optional type
     gw_event["path"] = "/none_not_allowed"
     result = app(gw_event, {})
+
     # THEN it should return a validation error
     assert result["statusCode"] == 422
     body = json.loads(result["body"])
     assert "model_attributes_type" in body["detail"][0]["type"]
 
+
+def test_none_returned_for_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_allowed")
+    def handler_none_allowed() -> Optional[Model]:
+        return None
+
     # WHEN returning None for an Optional type
     gw_event["path"] = "/none_allowed"
     result = app(gw_event, {})
+
     # THEN it should succeed
     assert result["statusCode"] == 200
     assert result["body"] == "null"
 
+
+def test_valid_model_returned_for_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/valid_optional")
+    def handler_valid_optional() -> Optional[Model]:
+        return Model(name="John", age=30)
+
     # WHEN returning a valid model for an Optional type
     gw_event["path"] = "/valid_optional"
     result = app(gw_event, {})
+
     # THEN it should succeed and return the serialized model
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}

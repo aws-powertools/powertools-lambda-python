@@ -172,6 +172,17 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             if errors:
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
 
+            if hasattr(field, "serialize"):
+                return field.serialize(
+                    value,
+                    include=include,
+                    exclude=exclude,
+                    by_alias=by_alias,
+                    exclude_unset=exclude_unset,
+                    exclude_defaults=exclude_defaults,
+                    exclude_none=exclude_none,
+                )
+
             return field.serialize(
                 value,
                 include=include,
@@ -180,6 +191,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=self._validation_serializer,
             )
         else:
             # Just serialize the response content returned from the handler.
