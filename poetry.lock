@@ -105,22 +105,6 @@ publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
-name = "aws-cdk-asset-kubectl-v20"
-version = "2.1.3"
-description = "A Lambda Layer that contains kubectl v1.20"
-optional = false
-python-versions = "~=3.8"
-files = [
-    {file = "aws_cdk.asset_kubectl_v20-2.1.3-py3-none-any.whl", hash = "sha256:d5612e5bd03c215a28ce53193b1144ecf4e93b3b6779563c046a8a74d83a3979"},
-    {file = "aws_cdk_asset_kubectl_v20-2.1.3.tar.gz", hash = "sha256:237cd8530d9e8be0bbc7159af927dbb6b7f91bf3f4099c8ef4d9a213b34264be"},
-]
-
-[package.dependencies]
-jsii = ">=1.103.1,<2.0.0"
-publication = ">=0.0.3"
-typeguard = ">=2.13.3,<5.0.0"
-
-[[package]]
 name = "aws-cdk-asset-node-proxy-agent-v6"
 version = "2.1.0"
 description = "@aws-cdk/asset-node-proxy-agent-v6"
@@ -212,17 +196,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.178.2a0"
+version = "2.179.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk.aws_lambda_python_alpha-2.178.2a0-py3-none-any.whl", hash = "sha256:e79c2c6c71421da1e24e8cb5586c91679b43df12f40cc2f9fca3d51461ee0c53"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.178.2a0.tar.gz", hash = "sha256:a3b84379595454eed6d557ac79b5984ad880f3d308ea0d994b743e4aec60f33a"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.179.0a0-py3-none-any.whl", hash = "sha256:68a58f6b23017b58386b5977fbf56d43db320a314096f11c95319e9417be7858"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.179.0a0.tar.gz", hash = "sha256:2ba8a096fd132de8268175ed9d10c89de90bcc475f386b013d42405806668726"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.178.2,<3.0.0"
+aws-cdk-lib = ">=2.179.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.106.0,<2.0.0"
 publication = ">=0.0.3"
@@ -246,18 +230,17 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.178.2"
+version = "2.179.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws_cdk_lib-2.178.2-py3-none-any.whl", hash = "sha256:624383e57fe2b32f7d0fc098b78b4cd21d19ae3af3f24b01f32ec4795baaee25"},
-    {file = "aws_cdk_lib-2.178.2.tar.gz", hash = "sha256:c00757885b74023350bb34f388f6447155e802ecf827e595bda917098a4925fe"},
+    {file = "aws_cdk_lib-2.179.0-py3-none-any.whl", hash = "sha256:1d7b88ee69067b8d58dac9eeb6697bbaf5d5c032a3070898389c41e7c4f3e3d7"},
+    {file = "aws_cdk_lib-2.179.0.tar.gz", hash = "sha256:b653a55754f4020a4b36e4ae183d213e76e27b18b842cbf9e430e9eccb700550"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = ">=2.2.208,<3.0.0"
-"aws-cdk.asset-kubectl-v20" = ">=2.1.3,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
 "aws-cdk.cloud-assembly-schema" = ">=39.2.0,<40.0.0"
 constructs = ">=10.0.0,<11.0.0"
