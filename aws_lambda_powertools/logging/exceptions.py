@@ -4,3 +4,11 @@ class InvalidLoggerSamplingRateError(Exception):
     """
 
     pass
+
+
+class OrphanedChildLoggerError(Exception):
+    """
+    Orphaned Child logger exception
+    """
+
+    pass
