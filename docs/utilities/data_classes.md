@@ -102,6 +102,12 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [TransferFamilyAuthorizerResponse]                                            | `TransferFamilyAuthorizerResponse`                 | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/transfer_family_event.py) |
 | [VPC Lattice V2](#vpc-lattice-v2) | `VPCLatticeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
 | [VPC Lattice V1](#vpc-lattice-v1) | `VPCLatticeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
+| IoT Core Thing Created/Updated/Deleted | [`IoTCoreThingEvent`](#iotcorethingevent) | [GitHub](https://github.com/example/repo) |
+| IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted | [`IoTCoreThingTypeEvent`](#iotcorethingtypeevent) | [GitHub](https://github.com/example/repo) |
+| IoT Core Thing Type Associated/Disassociated with a Thing | [`IoTCoreThingTypeAssociationEvent`](#iotcorethingtypeassociationevent) | [GitHub](https://github.com/example/repo) |
+| IoT Core Thing Group Created/Updated/Deleted | [`IoTCoreThingGroupEvent`](#iotcorethinggroupevent) | [GitHub](https://github.com/example/repo) |
+| IoT Thing Added/Removed from Thing Group | [`IoTCoreAddOrRemoveFromThingGroupEvent`](#iotcoreaddorremovefromthinggroupevent) | [GitHub](https://github.com/example/repo) |
+| IoT Child Group Added/Deleted from Parent Group | [`IoTCoreAddOrDeleteFromThingGroupEvent`](#iotcoreaddordeletefromthinggroupevent) | [GitHub](https://github.com/example/repo) |
 
 ???+ info
     The examples showcase a subset of Event Source Data Classes capabilities - for comprehensive details, leverage your IDE's
