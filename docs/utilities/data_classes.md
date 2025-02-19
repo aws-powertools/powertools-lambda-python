@@ -817,6 +817,13 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     --8<-- "examples/event_sources/events/vpc_lattice_payload.json"
     ```
 
+### IoT Core Thing Created/Updated/Deleted	
+### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted	
+### IoT Core Thing Type Associated/Disassociated with a Thing
+### IoT Core Thing Group Created/Updated/Deleted
+### IoT Thing Added/Removed from Thing Group
+### IoT Child Group Added/Deleted from Parent Group	
+
 ## Advanced
 
 ### Debugging
