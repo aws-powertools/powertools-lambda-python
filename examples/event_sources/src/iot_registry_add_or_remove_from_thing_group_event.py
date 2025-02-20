@@ -3,4 +3,5 @@ from aws_lambda_powertools.utilities.data_classes.iot_registry_event import IoTC
 
 
 @event_source(data_class=IoTCoreAddOrRemoveFromThingGroupEvent)
-def lambda_handler(event: IoTCoreAddOrRemoveFromThingGroupEvent, context): ...
+def lambda_handler(event: IoTCoreAddOrRemoveFromThingGroupEvent, context):
+    print(f"Received IoT Core event type {event.event_type}")
