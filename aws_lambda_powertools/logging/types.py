@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias
-
-LOG_LEVEL_BUFFER_VALUES = Literal["DEBUG", "INFO", "WARNING"]
 
 
 class PowertoolsLogRecord(TypedDict):

@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from aws_lambda_powertools.logging.types import LOG_LEVEL_BUFFER_VALUES
+from typing import Literal
 
 
 class LoggerBufferConfig:
@@ -13,6 +10,7 @@ class LoggerBufferConfig:
 
     # Define class-level constant for valid log levels
     VALID_LOG_LEVELS: list[str] = ["DEBUG", "INFO", "WARNING"]
+    LOG_LEVEL_BUFFER_VALUES = Literal["DEBUG", "INFO", "WARNING"]
 
     def __init__(
         self,
