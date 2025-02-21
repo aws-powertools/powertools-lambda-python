@@ -65,14 +65,14 @@ jobs:
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_${{ matrix.arch }}.zip
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Store Zip
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
           path: ${{ matrix.layer }}_${{ matrix.arch }}.zip
           retention-days: 1
           if-no-files-found: error
       - name: Store Metadata
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
           path: ${{ matrix.layer }}_${{ matrix.arch }}.json
