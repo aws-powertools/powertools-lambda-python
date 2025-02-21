@@ -222,7 +222,7 @@ class Logger:
     ) -> None:
 
         # Used in case of sampling
-        self.initial_log_level = level
+        self.initial_log_level = self._determine_log_level(level)
 
         self.service = resolve_env_var_choice(
             choice=service,
