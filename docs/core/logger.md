@@ -627,24 +627,27 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
 
 ### Sampling debug logs
 
-Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of your concurrent/cold start invocations**.
+Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of the Lambda function executions**.
 
-You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sample_rate` parameter in Logger.
+You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sampling_rate` parameter in Logger.
 
 ???+ tip "Tip: When is this useful?"
-    Let's imagine a sudden spike increase in concurrency triggered a transient issue downstream. When looking into the logs you might not have enough information, and while you can adjust log levels it might not happen again.
+    Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without drowning your logs in unnecessary details.
 
-    This feature takes into account transient issues where additional debugging information can be useful.
+    Example: Imagine an e-commerce checkout process where you want to understand rare payment gateway errors. With 10% sampling, you'll log detailed information for a small subset of transactions, making troubleshooting easier without generating excessive logs.
 
-Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
+Sampling decision happens at every execution when using `@logger.inject_lambda_context` decorator or `refresh_sample_rate_calculation` method. If you don't use any of both, you may end up with undesired sampling behavior.
 
-???+ note
-	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
+=== "sampling_debug_logs_with_decorator.py"
 
-=== "sampling_debug_logs.py"
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/sampling_debug_logs_with_decorator.py"
+    ```
 
-    ```python hl_lines="6 10"
-    --8<-- "examples/logger/src/sampling_debug_logs.py"
+=== "sampling_debug_logs_with_standalone_function.py"
+
+    ```python hl_lines="5 12"
+    --8<-- "examples/logger/src/sampling_debug_logs_with_standalone_function.py"
     ```
 
 === "sampling_debug_logs_output.json"
