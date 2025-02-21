@@ -169,7 +169,7 @@ def test_setup_sampling_rate_env_var_with_percent_and_decorator(
 
     @logger.inject_lambda_context
     def handler(event, context):
-        logger.debug(random.random())
+        logger.debug("test")
 
     # WHEN A lambda handler is invoked multiple times with decorator
     for _i in range(total_runs):
@@ -209,7 +209,7 @@ def test_setup_sampling_rate_env_var_with_percent_and_recalculate_manual_method(
     logger = Logger(service=service_name, level="INFO", sampling_rate=sampling_rate, stream=stdout)
 
     def handler(event, context):
-        logger.debug(random.random())
+        logger.debug("test")
         logger.refresh_sample_rate_calculation()
 
     # WHEN A lambda handler is invoked multiple times with manual refresh_sample_rate_calculation()
