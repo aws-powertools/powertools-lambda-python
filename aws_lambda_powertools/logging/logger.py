@@ -22,8 +22,13 @@ from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_HANDLER,
     LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
     LOGGER_ATTRIBUTE_PRECONFIGURED,
+    LOGGER_BUFFER_FIRST_INVOKE,
 )
-from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
+from aws_lambda_powertools.logging.exceptions import (
+    InvalidBufferItem,
+    InvalidLoggerSamplingRateError,
+    OrphanedChildLoggerError,
+)
 from aws_lambda_powertools.logging.filters import SuppressFilter
 from aws_lambda_powertools.logging.formatter import (
     RESERVED_FORMATTER_CUSTOM_KEYS,
@@ -34,10 +39,12 @@ from aws_lambda_powertools.logging.lambda_context import build_lambda_context_mo
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
+    get_tracer_id,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
 from aws_lambda_powertools.utilities import jmespath_utils
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging.buffer.config import LoggerBufferConfig
@@ -518,14 +525,62 @@ class Logger:
         level: int,
         msg: object,
         args: object,
-        exc_info: logging._ExcInfoType,
-        stack_info: bool,
-        extra: Mapping[str, object],
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        extra: Mapping[str, object] | None = None,
     ):
-        tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
-        if tracer_id:
+        """
+        Add log record to buffer with intelligent tracer ID handling.
+
+        Parameters
+        ----------
+        level : int
+            Logging level of the record.
+        msg : object
+            Log message to be recorded.
+        args : object
+            Additional arguments for the log message.
+        exc_info : logging._ExcInfoType, optional
+            Exception information for the log record.
+        stack_info : bool, optional
+            Whether to include stack information.
+        extra : Mapping[str, object], optional
+            Additional contextual information for the log record.
+
+        Raises
+        ------
+        InvalidBufferItem
+            If the log record cannot be added to the buffer.
+
+        Notes
+        -----
+        Handles special first invocation buffering and migration of log records
+        between different tracer contexts.
+        """
+        # Determine tracer ID, defaulting to first invoke marker
+        tracer_id = get_tracer_id() or LOGGER_BUFFER_FIRST_INVOKE
+
+        try:
+            # Create log record for buffering
             log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
+
+            # Migrate log records from first invoke to current tracer context
+            if tracer_id != LOGGER_BUFFER_FIRST_INVOKE and self._buffer_cache.get(LOGGER_BUFFER_FIRST_INVOKE):
+                # Retrieve first invoke log records
+                first_invoke_items = self._buffer_cache.get(LOGGER_BUFFER_FIRST_INVOKE)
+
+                # Transfer log records to current tracer context
+                for item in first_invoke_items:
+                    self._buffer_cache.add(tracer_id, item)
+
+                # Clear first invoke buffer
+                self._buffer_cache.clear(LOGGER_BUFFER_FIRST_INVOKE)
+
+            # Add current log record to buffer
             self._buffer_cache.add(tracer_id, log_record)
+        except InvalidBufferItem as exc:
+            # Wrap and re-raise buffer addition error
+            raise InvalidBufferItem("Cannot add item to the buffer") from exc
 
     def flush_buffer(self):
         """
@@ -535,6 +590,7 @@ class Logger:
         -----
         Retrieves log records for current trace from buffer
         Immediately processes and logs each record
+        Warning if some cache was evicted in that execution
         Clears buffer after complete processing
 
         Raises
@@ -542,9 +598,18 @@ class Logger:
         Any exceptions from underlying logging or buffer mechanisms
         will be propagated to caller
         """
-        tracer_id = os.getenv(constants.XRAY_TRACE_ID_ENV, None)
+        tracer_id = get_tracer_id()
         for log_line in self._buffer_cache.get(tracer_id):
             self._create_and_flush_log_record(log_line)
+
+        if self._buffer_cache.has_evicted:
+            warnings.warn(
+                message="Some logs are not displayed because they were evicted from the buffer. "
+                "Increase buffer size to store more logs in the buffer",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            self._buffer_cache.has_evicted = False
 
         self._buffer_cache.clear()
 

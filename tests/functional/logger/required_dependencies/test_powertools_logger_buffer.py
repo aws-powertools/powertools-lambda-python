@@ -4,6 +4,7 @@ import io
 import json
 import random
 import string
+import warnings
 from collections import namedtuple
 
 import pytest
@@ -11,6 +12,7 @@ import pytest
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 @pytest.fixture
@@ -158,3 +160,67 @@ def test_create_and_flush_logs(stdout, service_name, monkeypatch):
     # THEN: We expect the log record is not buffered
     log = capture_multiple_logging_statements_output(stdout)
     assert "this log line will be flushed" == log[0]["message"]
+
+
+def test_create_buffer_with_item_overflow(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with 2 bytes
+    logger_buffer_config = LoggerBufferConfig(max_size=2, minimum_log_level="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN logging a line with a size higher than buffer
+    # THEN must raise a warning
+    with pytest.warns(PowertoolsUserWarning, match="Item size*"):
+        logger.debug("this log line will be flushed")
+
+
+def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with 1024 bytes
+    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN we add 3 lines that exceeds than 1024 bytes
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed")
+    logger.debug("this log line will be flushed")
+
+    # THEN must raise a warning when trying to flush the lugs
+    with pytest.warns(PowertoolsUserWarning, match="Some logs are not displayed because*"):
+        logger.flush_buffer()
+
+
+def test_create_buffer_with_items_evicted_next_invocation(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with 1024 bytes
+    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN Add multiple log entries that exceed buffer size
+    message = "this log line will be flushed"
+    logger.debug(message)
+    logger.debug(message)
+    logger.debug(message)
+    logger.debug(message)
+    logger.debug(message)
+
+    # THEN First buffer flush triggers warning about log eviction
+    with pytest.warns(PowertoolsUserWarning, match="Some logs are not displayed because*"):
+        logger.flush_buffer()
+
+    # WHEN Add another log entry
+    logger.debug("new log entry after buffer flush")
+
+    # THEN Subsequent buffer flush should not trigger warning
+    with warnings.catch_warnings(record=True) as warning_list:
+        warnings.simplefilter("always")
+        logger.flush_buffer()
+        assert len(warning_list) == 0, "No warnings should be raised"

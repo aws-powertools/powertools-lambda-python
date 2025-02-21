@@ -20,6 +20,7 @@ class LoggerBufferCache:
         self.max_size_bytes: int = max_size_bytes
         self.cache: dict[str, deque] = {}
         self.current_size: dict[str, int] = {}
+        self.has_evicted: bool = False
 
     def add(self, key: str, item: Any) -> None:
         """
@@ -53,6 +54,7 @@ class LoggerBufferCache:
         while self.current_size[key] + item_size > self.max_size_bytes and self.cache[key]:
             removed_item = self.cache[key].popleft()
             self.current_size[key] -= len(str(removed_item))
+            self.has_evicted = True
 
         self.cache[key].append(item)
         self.current_size[key] += item_size
