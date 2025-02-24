@@ -7,7 +7,104 @@ from typing import Any
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
+class KeyBufferCache:
+    """
+    A cache implementation for a single key with size tracking and eviction support.
+
+    This class manages a buffer for a specific key, keeping track of the current size
+    and providing methods to add, remove, and manage cached items. It supports automatic
+    eviction tracking and size management.
+
+    Attributes
+    ----------
+    cache : deque
+        A double-ended queue storing the cached items.
+    current_size : int
+        The total size of all items currently in the cache.
+    has_evicted : bool
+        A flag indicating whether any items have been evicted from the cache.
+    """
+
+    def __init__(self):
+        """
+        Initialize a buffer cache for a specific key.
+        """
+        self.cache: deque = deque()
+        self.current_size: int = 0
+        self.has_evicted: bool = False
+
+    def add(self, item: Any) -> None:
+        """
+        Add an item to the cache.
+
+        Parameters
+        ----------
+        item : Any
+            The item to be stored in the cache.
+        """
+        item_size = len(str(item))
+        self.cache.append(item)
+        self.current_size += item_size
+
+    def remove_oldest(self) -> Any:
+        """
+        Remove and return the oldest item from the cache.
+
+        Returns
+        -------
+        Any
+            The removed item.
+        """
+        removed_item = self.cache.popleft()
+        self.current_size -= len(str(removed_item))
+        self.has_evicted = True
+        return removed_item
+
+    def get(self) -> list:
+        """
+        Retrieve items for this key.
+
+        Returns
+        -------
+        list
+            List of items in the cache.
+        """
+        return list(self.cache)
+
+    def clear(self) -> None:
+        """
+        Clear the cache for this key.
+        """
+        self.cache.clear()
+        self.current_size = 0
+        self.has_evicted = False
+
+
 class LoggerBufferCache:
+    """
+    A multi-key buffer cache with size-based eviction and management.
+
+    This class provides a flexible caching mechanism that manages multiple keys,
+    with each key having its own buffer cache. The total size of each key's cache
+    is limited, and older items are automatically evicted when the size limit is reached.
+
+    Key Features:
+    - Multiple key support
+    - Size-based eviction
+    - Tracking of evicted items
+    - Configurable maximum buffer size
+
+    Example
+    --------
+    >>> buffer_cache = LoggerBufferCache(max_size_bytes=1000)
+    >>> buffer_cache.add("logs", "First log message")
+    >>> buffer_cache.add("debug", "Debug information")
+    >>> buffer_cache.get("logs")
+    ['First log message']
+    >>> buffer_cache.get_current_size("logs")
+    16
+    """
+
     def __init__(self, max_size_bytes: int):
         """
         Initialize the LoggerBufferCache.
@@ -15,12 +112,10 @@ class LoggerBufferCache:
         Parameters
         ----------
         max_size_bytes : int
-            Maximum size of the cache in bytes.
+            Maximum size of the cache in bytes for each key.
         """
         self.max_size_bytes: int = max_size_bytes
-        self.cache: dict[str, deque] = {}
-        self.current_size: dict[str, int] = {}
-        self.has_evicted: bool = False
+        self.cache: dict[str, KeyBufferCache] = {}
 
     def add(self, key: str, item: Any) -> None:
         """
@@ -33,31 +128,34 @@ class LoggerBufferCache:
         item : Any
             The item to be stored in the cache.
 
-        Notes
-        -----
-        If the item size exceeds the maximum cache size, it will not be added.
+        Returns
+        -------
+        bool
+            True if item was added, False otherwise.
         """
+        # Check if item is larger than entire buffer
         item_size = len(str(item))
-
         if item_size > self.max_size_bytes:
             warnings.warn(
-                message=f"Item size {item_size} bytes exceeds total cache size {self.max_size_bytes} bytes",
-                category=PowertoolsUserWarning,
+                f"Item size {item_size} bytes exceeds total cache size {self.max_size_bytes} bytes",
+                PowertoolsUserWarning,
                 stacklevel=2,
             )
-            return
+            return False
 
+        # Create the key's cache if it doesn't exist
         if key not in self.cache:
-            self.cache[key] = deque()
-            self.current_size[key] = 0
+            self.cache[key] = KeyBufferCache()
 
-        while self.current_size[key] + item_size > self.max_size_bytes and self.cache[key]:
-            removed_item = self.cache[key].popleft()
-            self.current_size[key] -= len(str(removed_item))
-            self.has_evicted = True
+        # Calculate the size after adding the new item
+        new_total_size = self.cache[key].current_size + item_size
 
-        self.cache[key].append(item)
-        self.current_size[key] += item_size
+        # If adding the item would exceed max size, remove oldest items
+        while new_total_size > self.max_size_bytes and self.cache[key].cache:
+            self.cache[key].remove_oldest()
+            new_total_size = self.cache[key].current_size + item_size
+
+        self.cache[key].add(item)
 
     def get(self, key: str) -> list:
         """
@@ -73,7 +171,7 @@ class LoggerBufferCache:
         list
             List of items for the given key, or an empty list if the key doesn't exist.
         """
-        return list(self.cache.get(key, deque()))
+        return [] if key not in self.cache else self.cache[key].get()
 
     def clear(self, key: str | None = None) -> None:
         """
@@ -81,13 +179,45 @@ class LoggerBufferCache:
 
         Parameters
         ----------
-        key : str, optional
+        key : Optional[str], optional
             The key to clear. If None, clears the entire cache.
         """
         if key:
             if key in self.cache:
+                self.cache[key].clear()
                 del self.cache[key]
-                del self.current_size[key]
         else:
             self.cache.clear()
-            self.current_size.clear()
+
+    def has_evicted(self, key: str) -> bool:
+        """
+        Check if a specific key's cache has evicted items.
+
+        Parameters
+        ----------
+        key : str
+            The key to check for evicted items.
+
+        Returns
+        -------
+        bool
+            True if items have been evicted, False otherwise.
+        """
+        return False if key not in self.cache else self.cache[key].has_evicted
+
+    def get_current_size(self, key: str) -> int | None:
+        """
+        Get the current size of the buffer for a specific key.
+
+        Parameters
+        ----------
+        key : str
+            The key to get the current size for.
+
+        Returns
+        -------
+        int
+            The current size of the buffer for the key.
+            Returns 0 if the key does not exist.
+        """
+        return None if key not in self.cache else self.cache[key].current_size

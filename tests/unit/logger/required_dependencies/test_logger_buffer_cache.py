@@ -12,7 +12,6 @@ def test_initialization():
     # THEN cache should have correct initial state
     assert logger_cache.max_size_bytes == 1000
     assert logger_cache.cache == {}
-    assert logger_cache.current_size == {}
 
 
 def test_add_single_item():
@@ -25,7 +24,7 @@ def test_add_single_item():
     # THEN item is stored correctly with proper size tracking
     assert len(logger_cache.get("key1")) == 1
     assert logger_cache.get("key1")[0] == "test_item"
-    assert logger_cache.current_size["key1"] == len("test_item")
+    assert logger_cache.get_current_size("key1") == len("test_item")
 
 
 def test_add_multiple_items_same_key():
@@ -39,6 +38,7 @@ def test_add_multiple_items_same_key():
     # THEN items are stored sequentially
     assert len(logger_cache.get("key1")) == 2
     assert logger_cache.get("key1") == ["item1", "item2"]
+    assert logger_cache.has_evicted("key1") is False
 
 
 def test_cache_size_limit_single_key():
@@ -52,7 +52,8 @@ def test_cache_size_limit_single_key():
 
     # THEN cache maintains size limit for a single key
     assert len(logger_cache.get("key1")) > 0
-    assert logger_cache.current_size["key1"] <= 10
+    assert logger_cache.get_current_size("key1") <= 10
+    assert logger_cache.has_evicted("key1") is True
 
 
 def test_item_larger_than_cache():
@@ -104,7 +105,6 @@ def test_clear_all():
 
     # THEN cache becomes empty
     assert logger_cache.cache == {}
-    assert logger_cache.current_size == {}
 
 
 def test_clear_specific_key():
@@ -134,9 +134,9 @@ def test_multiple_keys_with_size_limits():
     logger_cache.add("key2", "long_item")
 
     # THEN total size remains within limit
-    assert len(logger_cache.cache["key1"]) > 0
-    assert len(logger_cache.cache["key2"]) > 0
-    assert logger_cache.current_size["key1"] + logger_cache.current_size["key2"] <= 20
+    assert len(logger_cache.get("key1")) > 0
+    assert len(logger_cache.get("key2")) > 0
+    assert logger_cache.get_current_size("key1") + logger_cache.get_current_size("key2") <= 20
 
 
 def test_add_different_types():
@@ -162,5 +162,5 @@ def test_cache_size_tracking():
     logger_cache.add("key1", "another_item")
 
     # THEN current size is tracked correctly
-    assert logger_cache.current_size["key1"] == len("small") + len("another_item")
-    assert logger_cache.current_size["key1"] <= 30
+    assert logger_cache.get_current_size("key1") == len("small") + len("another_item")
+    assert logger_cache.get_current_size("key1") <= 30
