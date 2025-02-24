@@ -627,16 +627,16 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
 
 ### Sampling debug logs
 
-Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of the Lambda function executions**.
+Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of the Lambda function invocations**.
 
 You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sampling_rate` parameter in Logger.
 
 ???+ tip "Tip: When is this useful?"
-    Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without drowning your logs in unnecessary details.
+    Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without increasing the overall verbosity of your logs.
 
     Example: Imagine an e-commerce checkout process where you want to understand rare payment gateway errors. With 10% sampling, you'll log detailed information for a small subset of transactions, making troubleshooting easier without generating excessive logs.
 
-Sampling decision happens at every execution when using `@logger.inject_lambda_context` decorator or `refresh_sample_rate_calculation` method. If you don't use any of both, you may end up with undesired sampling behavior.
+The sampling decision happens automatically with each invocation when using `@logger.inject_lambda_context` decorator.  When not using the decorator, you're in charge of refreshing it via `refresh_sample_rate_calculation` method. Skipping both may lead to unexpected sampling results.
 
 === "sampling_debug_logs_with_decorator.py"
 
