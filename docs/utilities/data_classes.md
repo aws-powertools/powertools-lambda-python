@@ -85,7 +85,7 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
-| [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
+| [EventBridge](#eventbridge) | ****`EventBridgeEvent`**** | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
 | [Kafka](#kafka) | `KafkaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kafka_event.py) |
 | [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_stream_event.py) |
 | [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_firehose_event.py) |
@@ -817,7 +817,20 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     --8<-- "examples/event_sources/events/vpc_lattice_payload.json"
     ```
 
-### IoT Core Thing Created/Updated/Deleted	
+### IoT Core Thing Created/Updated/Deleted
+
+
+=== "app.py"
+
+    ```python hl_lines="7-9 18"
+    --8<-- "examples/event_sources/src/kinesis_batch_example.py"
+    ```
+
+=== "Example Event"
+    ```json
+    --8<-- "tests/events/kinesisStreamCloudWatchLogsEvent.json"
+    ```
+
 ### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted	
 ### IoT Core Thing Type Associated/Disassociated with a Thing
 ### IoT Core Thing Group Created/Updated/Deleted
