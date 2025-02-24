@@ -149,7 +149,7 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
         return datetime.fromisoformat(self["deprecationDate"]) if self.get("deprecationDate") else None
 
     @property
-    def searchable_attributes(self) -> List[str]:
+    def searchable_attributes(self) -> list[str]:
         """
         The list of attributes that are searchable for the thing type.
         """
