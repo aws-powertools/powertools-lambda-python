@@ -862,6 +862,16 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Thing Added/Removed from Thing Group
+=== "app.py"
+    ```python
+    --8<-- "examples/event_sources/src/iot_registry_add_or_remove_from_thing_group_event.py"
+    ```
+
+=== "Example Event"
+    ```json
+    --8<-- "tests/events/iotRegistryEventsAddOrRemoveFromThingGroupEvent.json"
+    ```
+
 ### IoT Child Group Added/Deleted from Parent Group	
 
 ## Advanced
