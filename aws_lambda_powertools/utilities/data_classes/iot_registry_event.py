@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -79,14 +79,14 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
         return self["versionNumber"]
 
     @property
-    def thing_type_name(self) -> Optional[str]:
+    def thing_type_name(self) -> str | None:
         """
         The thing type name if available, or None if not specified.
         """
         return self.get("thingTypeName")
 
     @property
-    def attributes(self) -> Dict[str, Any]:
+    def attributes(self) -> dict[str, Any]:
         """
         The dictionary of attributes associated with the thing.
         """
@@ -142,7 +142,7 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
         return self["isDeprecated"]
 
     @property
-    def deprecation_date(self) -> Optional[datetime]:
+    def deprecation_date(self) -> datetime | None:
         """
         The deprecation date of the thing type, or None if not available.
         """
@@ -156,7 +156,7 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
         return self["searchableAttributes"]
 
     @property
-    def propagating_attributes(self) -> List[Dict[str, str]]:
+    def propagating_attributes(self) -> list[dict[str, str]]:
         """
         The list of attributes to propagate for the thing type.
         """
@@ -259,14 +259,14 @@ class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
         return self["versionNumber"]
 
     @property
-    def parent_group_name(self) -> Optional[str]:
+    def parent_group_name(self) -> str | None:
         """
         The name of the parent group, or None if not applicable.
         """
         return self.get("parentGroupName")
 
     @property
-    def parent_group_id(self) -> Optional[str]:
+    def parent_group_id(self) -> str | None:
         """
         The ID of the parent group, or None if not applicable.
         """
@@ -280,21 +280,21 @@ class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
         return self["description"]
 
     @property
-    def root_to_parent_thing_groups(self) -> List[Dict[str, str]]:
+    def root_to_parent_thing_groups(self) -> list[dict[str, str]]:
         """
         The list of root-to-parent thing group mappings.
         """
         return self["rootToParentThingGroups"]
 
     @property
-    def attributes(self) -> Dict[str, Any]:
+    def attributes(self) -> dict[str, Any]:
         """
         The attributes associated with the thing group.
         """
         return self["attributes"]
 
     @property
-    def dynamic_group_mapping_id(self) -> Optional[str]:
+    def dynamic_group_mapping_id(self) -> str | None:
         """
         The dynamic group mapping ID if available, or None if not specified.
         """
