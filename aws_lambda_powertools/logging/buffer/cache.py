@@ -141,7 +141,7 @@ class LoggerBufferCache:
                 PowertoolsUserWarning,
                 stacklevel=2,
             )
-            return False
+            return
 
         # Create the key's cache if it doesn't exist
         if key not in self.cache:
