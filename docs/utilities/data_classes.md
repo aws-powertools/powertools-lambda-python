@@ -818,6 +818,8 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Core Thing Created/Updated/Deleted
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thing).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_thing_event.py"
@@ -828,7 +830,9 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     --8<-- "tests/events/iotRegistryEventsThingEvent.json"
     ```
 
-### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted	
+### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thingtype-crud).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_thing_type_event.py"
@@ -840,6 +844,8 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Core Thing Type Associated/Disassociated with a Thing
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thingtype-assoc).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_thing_type_association_event.py"
@@ -851,6 +857,8 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Core Thing Group Created/Updated/Deleted
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-crud).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_thing_group_event.py"
@@ -862,6 +870,8 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Thing Added/Removed from Thing Group
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-addremove).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_add_or_remove_from_thing_group_event.py"
@@ -873,6 +883,8 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Child Group Added/Deleted from Parent Group	
+You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-adddelete).
+
 === "app.py"
     ```python
     --8<-- "examples/event_sources/src/iot_registry_add_or_delete_from_thing_group_event.py"
