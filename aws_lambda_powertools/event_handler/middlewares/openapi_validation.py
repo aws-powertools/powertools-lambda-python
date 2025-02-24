@@ -136,14 +136,13 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
-        # Process the response body if it exists
-        if response.body:
-            # Validate and serialize the response, if it's JSON
-            if response.is_json():
-                response.body = self._serialize_response(
-                    field=route.dependant.return_param,
-                    response_content=response.body,
-                )
+        # Check if we have a return type defined
+        if route.dependant.return_param:
+            # Validate and serialize the response, including None
+            response.body = self._serialize_response(
+                field=route.dependant.return_param,
+                response_content=response.body,
+            )
 
         return response
 
@@ -164,15 +163,6 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
         if field:
             errors: list[dict[str, Any]] = []
-            # MAINTENANCE: remove this when we drop pydantic v1
-            if not hasattr(field, "serializable"):
-                response_content = self._prepare_response_content(
-                    response_content,
-                    exclude_unset=exclude_unset,
-                    exclude_defaults=exclude_defaults,
-                    exclude_none=exclude_none,
-                )
-
             value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
             if errors:
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
@@ -187,7 +177,6 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     exclude_defaults=exclude_defaults,
                     exclude_none=exclude_none,
                 )
-
             return jsonable_encoder(
                 value,
                 include=include,
@@ -199,7 +188,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 custom_serializer=self._validation_serializer,
             )
         else:
-            # Just serialize the response content returned from the handler
+            # Just serialize the response content returned from the handler.
             return jsonable_encoder(response_content, custom_serializer=self._validation_serializer)
 
     def _prepare_response_content(
