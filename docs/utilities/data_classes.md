@@ -818,20 +818,27 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     ```
 
 ### IoT Core Thing Created/Updated/Deleted
-
-
 === "app.py"
-
-    ```python hl_lines="7-9 18"
-    --8<-- "examples/event_sources/src/kinesis_batch_example.py"
+    ```python
+    --8<-- "examples/event_sources/src/iot_registry_thing_event.py"
     ```
 
 === "Example Event"
     ```json
-    --8<-- "tests/events/kinesisStreamCloudWatchLogsEvent.json"
+    --8<-- "tests/events/iotRegistryEventsThingEvent.json"
     ```
 
 ### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted	
+=== "app.py"
+    ```python
+    --8<-- "examples/event_sources/src/iot_registry_thing_type_event.py"
+    ```
+
+=== "Example Event"
+    ```json
+    --8<-- "tests/events/iotRegistryEventsThingTypeEvent.json"
+    ```
+
 ### IoT Core Thing Type Associated/Disassociated with a Thing
 ### IoT Core Thing Group Created/Updated/Deleted
 ### IoT Thing Added/Removed from Thing Group
