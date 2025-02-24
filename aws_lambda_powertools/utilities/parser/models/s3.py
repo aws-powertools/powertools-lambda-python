@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
@@ -23,7 +23,7 @@ class S3Identity(BaseModel):
 
 
 class S3RequestParameters(BaseModel):
-    sourceIPAddress: IPvAnyNetwork
+    sourceIPAddress: Union[IPvAnyNetwork, Literal["s3.amazonaws.com"]]
 
 
 class S3ResponseElements(BaseModel):
@@ -45,7 +45,7 @@ class S3Object(BaseModel):
     key: str
     size: Optional[NonNegativeFloat] = None
     eTag: Optional[str] = None
-    sequencer: str
+    sequencer: Optional[str] = None
     versionId: Optional[str] = None
 
 
