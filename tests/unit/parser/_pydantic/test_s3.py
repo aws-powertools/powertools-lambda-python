@@ -157,3 +157,44 @@ def test_s3_none_etag_value_failed_validation():
     raw_event["Records"][0]["s3"]["object"]["eTag"] = None
     with pytest.raises(ValidationError):
         S3Model(**raw_event)
+
+
+def test_s3_trigger_event_lifecycle_transition():
+    raw_event = load_event("s3EventLifecycleTransition.json")
+    parsed_event: S3Model = S3Model(**raw_event)
+
+    records = list(parsed_event.Records)
+    assert len(records) == 1
+
+    record: S3RecordModel = records[0]
+    raw_record = raw_event["Records"][0]
+    assert record.eventVersion == raw_record["eventVersion"]
+    assert record.eventSource == raw_record["eventSource"]
+    assert record.awsRegion == raw_record["awsRegion"]
+    convert_time = int(round(record.eventTime.timestamp() * 1000))
+    assert convert_time == 1567539447192
+    assert record.eventName == raw_record["eventName"]
+    assert record.glacierEventData is None
+
+    user_identity = record.userIdentity
+    assert user_identity.principalId == raw_record["userIdentity"]["principalId"]
+
+    request_parameters = record.requestParameters
+    assert str(request_parameters.sourceIPAddress) == "s3.amazonaws.com"
+    assert record.responseElements.x_amz_request_id == raw_record["responseElements"]["x-amz-request-id"]
+    assert record.responseElements.x_amz_id_2 == raw_record["responseElements"]["x-amz-id-2"]
+
+    s3 = record.s3
+    raw_s3 = raw_event["Records"][0]["s3"]
+    assert s3.s3SchemaVersion == raw_record["s3"]["s3SchemaVersion"]
+    assert s3.configurationId == raw_record["s3"]["configurationId"]
+    assert s3.object.key == raw_s3["object"]["key"]
+    assert s3.object.size == 12345
+    assert s3.object.eTag == "abcdef1232423423"
+    assert s3.object.versionId == "SomeThingThere"
+
+    bucket = s3.bucket
+    raw_bucket = raw_record["s3"]["bucket"]
+    assert bucket.name == raw_bucket["name"]
+    assert bucket.ownerIdentity.principalId == raw_bucket["ownerIdentity"]["principalId"]
+    assert bucket.arn == raw_bucket["arn"]
