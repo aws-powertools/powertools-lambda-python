@@ -66,6 +66,7 @@ def test_iotcore_thing_group_event():
     raw_event = load_event("iotRegistryEventsThingGroupEvent.json")
     parsed_event = IoTCoreThingGroupEvent(raw_event)
 
+    assert parsed_event.event_type == raw_event["eventType"]
     assert parsed_event.event_id == raw_event["eventId"]
     assert parsed_event.operation == raw_event["operation"]
     assert parsed_event.account_id == raw_event["accountId"]
