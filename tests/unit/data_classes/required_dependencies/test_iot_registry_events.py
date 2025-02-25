@@ -26,6 +26,7 @@ def test_iotcore_thing_event():
     assert parsed_event.event_id == raw_event["eventId"]
 
     # Validate timestamp conversion
+    # Original field is int
     expected_timestamp = datetime.fromtimestamp(
         raw_event["timestamp"] / 1000 if raw_event["timestamp"] > 10**10 else raw_event["timestamp"],
     )
