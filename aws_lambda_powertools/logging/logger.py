@@ -602,15 +602,15 @@ class Logger:
         for log_line in self._buffer_cache.get(tracer_id):
             self._create_and_flush_log_record(log_line)
 
-        if self._buffer_cache.has_evicted:
+        if self._buffer_cache.has_evicted(tracer_id):
             warnings.warn(
                 message="Some logs are not displayed because they were evicted from the buffer. "
                 "Increase buffer size to store more logs in the buffer",
                 category=PowertoolsUserWarning,
                 stacklevel=2,
             )
-            self._buffer_cache.has_evicted = False
 
+        # Clear the entire cache
         self._buffer_cache.clear()
 
     def debug(
