@@ -370,6 +370,7 @@ class Logger:
             # Because I don't need other if condition here
             if random.random() <= float(self.sampling_rate):
                 self._logger.setLevel(logging.DEBUG)
+                logger.debug("Setting log level to DEBUG due to sampling rate")
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 (
