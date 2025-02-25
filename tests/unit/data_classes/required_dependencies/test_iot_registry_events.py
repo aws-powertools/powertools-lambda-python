@@ -36,17 +36,28 @@ def test_iotcore_thing_type_event():
     raw_event = load_event("iotRegistryEventsThingTypeEvent.json")
     parsed_event = IoTCoreThingTypeEvent(raw_event)
 
+    assert parsed_event.event_type == raw_event["eventType"]
+    assert parsed_event.operation == raw_event["operation"]
     assert parsed_event.event_id == raw_event["eventId"]
+    assert parsed_event.account_id == raw_event["accountId"]
     assert parsed_event.thing_type_name == raw_event["thingTypeName"]
+    assert parsed_event.is_deprecated == raw_event["isDeprecated"]
+    assert parsed_event.deprecation_date == raw_event["deprecationDate"]
+    assert parsed_event.searchable_attributes == raw_event["searchableAttributes"]
+    assert parsed_event.propagating_attributes == raw_event["propagatingAttributes"]
+    assert parsed_event.description == raw_event["description"]
 
 
 def test_iotcore_thing_type_association_event():
     raw_event = load_event("iotRegistryEventsThingTypeAssociationEvent.json")
     parsed_event = IoTCoreThingTypeAssociationEvent(raw_event)
 
+    assert parsed_event.event_type == raw_event["eventType"]
+    assert parsed_event.operation == raw_event["operation"]
     assert parsed_event.event_id == raw_event["eventId"]
     assert parsed_event.thing_id == raw_event["thingId"]
     assert parsed_event.thing_type_name == raw_event["thingTypeName"]
+    assert parsed_event.thing_name == raw_event["thingName"]
 
 
 def test_iotcore_thing_group_event():

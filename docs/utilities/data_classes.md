@@ -85,7 +85,7 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
-| [EventBridge](#eventbridge) | ****`EventBridgeEvent`**** | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
+| [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
 | [Kafka](#kafka) | `KafkaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kafka_event.py) |
 | [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_stream_event.py) |
 | [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_firehose_event.py) |
@@ -102,16 +102,16 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [TransferFamilyAuthorizerResponse]                                            | `TransferFamilyAuthorizerResponse`                 | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/transfer_family_event.py) |
 | [VPC Lattice V2](#vpc-lattice-v2) | `VPCLatticeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
 | [VPC Lattice V1](#vpc-lattice-v1) | `VPCLatticeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/vpc_lattice.py) |
-| [IoT Core Thing Created/Updated/Deleted](#iot-core-thing-createdupdateddeleted) | [`IoTCoreThingEvent`](#iotcorethingevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L33) |
-| [IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted](#iot-core-thing-type-createdupdateddeprecatedundeprecateddeleted) | [`IoTCoreThingTypeEvent`](#iotcorethingtypeevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L96) |
-| [IoT Core Thing Type Associated/Disassociated with a Thing](#iot-core-thing-type-associateddisassociated-with-a-thing) | [`IoTCoreThingTypeAssociationEvent`](#iotcorethingtypeassociationevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L173) |
-| [IoT Core Thing Group Created/Updated/Deleted](#iot-core-thing-group-createdupdateddeleted) | [`IoTCoreThingGroupEvent`](#iotcorethinggroupevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L214) |
-| [IoT Thing Added/Removed from Thing Group](#iot-thing-addedremoved-from-thing-group) | [`IoTCoreAddOrRemoveFromThingGroupEvent`](#iotcoreaddorremovefromthinggroupevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L304) |
-| [IoT Child Group Added/Deleted from Parent Group](#iot-child-group-addeddeleted-from-parent-group) | [`IoTCoreAddOrDeleteFromThingGroupEvent`](#iotcoreaddordeletefromthinggroupevent) | [GitHub](https://github.com/basvandriel/powertools-lambda-python/blob/7a9ebf9b15cc064c368e5e9ef55343e5dc5c676c/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L366) |
+| [IoT Core Thing Created/Updated/Deleted](#iot-core-thing-createdupdateddeleted) | `IoTCoreThingEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L33) |
+| [IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted](#iot-core-thing-type-createdupdateddeprecatedundeprecateddeleted) | `IoTCoreThingTypeEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L96) |
+| [IoT Core Thing Type Associated/Disassociated with a Thing](#iot-core-thing-type-associateddisassociated-with-a-thing) | `IoTCoreThingTypeAssociationEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L173) |
+| [IoT Core Thing Group Created/Updated/Deleted](#iot-core-thing-group-createdupdateddeleted) | `IoTCoreThingGroupEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L214) |
+| [IoT Thing Added/Removed from Thing Group](#iot-thing-addedremoved-from-thing-group) | `IoTCoreAddOrRemoveFromThingGroupEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L304) |
+| [IoT Child Group Added/Deleted from Parent Group](#iot-child-group-addeddeleted-from-parent-group) | `IoTCoreAddOrDeleteFromThingGroupEvent` | [GitHub](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/iot_registry_event.py#L366) |
 
 ???+ info
     The examples showcase a subset of Event Source Data Classes capabilities - for comprehensive details, leverage your IDE's
-    autocompletion, refer to type https://www.apple.com/nl/shop/buy-mac/apple-studio-displayhints and docstrings, and explore the [full API reference](https://docs.powertools.aws.dev/lambda/python/latest/api/utilities/data_classes/) for complete property listings of each event source.
+    autocompletion, refer to type hints and docstrings, and explore the [full API reference](https://docs.powertools.aws.dev/lambda/python/latest/api/utilities/data_classes/) for complete property listings of each event source.
 
 ### Active MQ
 
@@ -817,11 +817,14 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     --8<-- "examples/event_sources/events/vpc_lattice_payload.json"
     ```
 
-### IoT Core Thing Created/Updated/Deleted
+### IoT Core Events
+
+#### IoT Core Thing Created/Updated/Deleted
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thing).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_thing_event.py"
     ```
 
@@ -830,11 +833,12 @@ You can use IoT Core registry events to trigger your lambda functions. More info
     --8<-- "tests/events/iotRegistryEventsThingEvent.json"
     ```
 
-### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted
+#### IoT Core Thing Type Created/Updated/Deprecated/Undeprecated/Deleted
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thingtype-crud).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_thing_type_event.py"
     ```
 
@@ -843,11 +847,12 @@ You can use IoT Core registry events to trigger your lambda functions. More info
     --8<-- "tests/events/iotRegistryEventsThingTypeEvent.json"
     ```
 
-### IoT Core Thing Type Associated/Disassociated with a Thing
+#### IoT Core Thing Type Associated/Disassociated with a Thing
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thingtype-assoc).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_thing_type_association_event.py"
     ```
 
@@ -856,11 +861,12 @@ You can use IoT Core registry events to trigger your lambda functions. More info
     --8<-- "tests/events/iotRegistryEventsThingTypeAssociationEvent.json"
     ```
 
-### IoT Core Thing Group Created/Updated/Deleted
+#### IoT Core Thing Group Created/Updated/Deleted
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-crud).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_thing_group_event.py"
     ```
 
@@ -869,11 +875,12 @@ You can use IoT Core registry events to trigger your lambda functions. More info
     --8<-- "tests/events/iotRegistryEventsThingGroupEvent.json"
     ```
 
-### IoT Thing Added/Removed from Thing Group
+#### IoT Thing Added/Removed from Thing Group
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-addremove).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_add_or_remove_from_thing_group_event.py"
     ```
 
@@ -882,11 +889,12 @@ You can use IoT Core registry events to trigger your lambda functions. More info
     --8<-- "tests/events/iotRegistryEventsAddOrRemoveFromThingGroupEvent.json"
     ```
 
-### IoT Child Group Added/Deleted from Parent Group	
+#### IoT Child Group Added/Deleted from Parent Group
+
 You can use IoT Core registry events to trigger your lambda functions. More information on this specific one can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/registry-events.html#registry-events-thinggroup-adddelete).
 
 === "app.py"
-    ```python
+    ```python hl_lines="2 5"
     --8<-- "examples/event_sources/src/iot_registry_add_or_delete_from_thing_group_event.py"
     ```
 
