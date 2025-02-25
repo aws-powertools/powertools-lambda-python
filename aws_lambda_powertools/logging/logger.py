@@ -484,14 +484,13 @@ class Logger:
                 logger.debug("Event received")
                 self.info(extract_event_from_common_models(event))
 
-            lambda_execution_return = lambda_handler(event, context, *args, **kwargs)
-
-            # Sampling rate is defined, so, we need to recalculate the sampling
+            # Sampling rate is defined, and this is not ColdStart
+            # then we need to recalculate the sampling
             # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6141
-            if self.sampling_rate:
+            if self.sampling_rate and not cold_start:
                 self.refresh_sample_rate_calculation()
 
-            return lambda_execution_return
+            return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
 
