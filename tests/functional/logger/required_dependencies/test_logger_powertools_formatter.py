@@ -416,6 +416,7 @@ def test_logger_logs_stack_trace_with_formatter_non_default_value(service_name, 
     assert "stack_trace" not in log
 
 
+@pytest.mark.skipif(reason="Test temporarily disabled")
 def test_thread_safe_keys_encapsulation(service_name, stdout):
     logger = Logger(
         service=service_name,

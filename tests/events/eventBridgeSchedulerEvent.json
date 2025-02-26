@@ -1,0 +1,13 @@
+{
+  "version":"0",
+  "id":"d167b752-343a-4b28-afd6-d4de056319e8",
+  "detail-type":"Scheduled Event",
+  "source":"aws.scheduler",
+  "account":"123456789012",
+  "time":"2025-02-20T16:03:00Z",
+  "region":"us-east-1",
+  "resources":[
+     "arn:aws:scheduler:us-east-1:123456789012:schedule/default/aaaaa"
+  ],
+  "detail":"{}"
+}

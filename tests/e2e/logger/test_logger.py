@@ -29,6 +29,16 @@ def tz_handler_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("TzHandlerArn", "")
 
 
+@pytest.fixture
+def multiple_logger_instances_fn(infrastructure: dict) -> str:
+    return infrastructure.get("MultipleLoggerInstances", "")
+
+
+@pytest.fixture
+def multiple_logger_instances_arn(infrastructure: dict) -> str:
+    return infrastructure.get("MultipleLoggerInstancesArn", "")
+
+
 @pytest.mark.xdist_group(name="logger")
 def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     # GIVEN
@@ -43,6 +53,31 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
 
     # THEN
     logs = data_fetcher.get_logs(function_name=basic_handler_fn, start_time=execution_time, minimum_log_entries=2)
+
+    assert len(logs) == 2
+    assert len(logs.get_cold_start_log()) == 1
+    assert len(logs.get_log(key=custom_key)) == 2
+    assert logs.have_keys(*LOGGER_LAMBDA_CONTEXT_KEYS) is True
+
+
+@pytest.mark.xdist_group(name="logger")
+def test_multiple_logger_instances(multiple_logger_instances_fn, multiple_logger_instances_arn):
+    # GIVEN
+    message = "logs should be visible with default settings"
+    custom_key = "order_id"
+    additional_keys = {custom_key: f"{uuid4()}"}
+    payload = json.dumps({"message": message, "append_keys": additional_keys})
+
+    # WHEN
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=multiple_logger_instances_arn, payload=payload)
+    data_fetcher.get_lambda_response(lambda_arn=multiple_logger_instances_arn, payload=payload)
+
+    # THEN
+    logs = data_fetcher.get_logs(
+        function_name=multiple_logger_instances_fn,
+        start_time=execution_time,
+        minimum_log_entries=2,
+    )
 
     assert len(logs) == 2
     assert len(logs.get_cold_start_log()) == 1
