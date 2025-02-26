@@ -49,7 +49,7 @@ on:
         type: boolean
         required: false
       skip_lambda_layer:
-        description: "Skip publishing Lambda Layers as it can't publish more than once. Useful for semi-failed releases"
+        description: "Skip publishing Lambda Layers as it can publish duplicated versions of the same layer. Useful for semi-failed releases"
         default: false
         type: boolean
         required: false
