@@ -1,0 +1,11 @@
+{
+    "eventType": "THING_GROUP_HIERARCHY_EVENT",
+    "eventId": "264192c7-b573-46ef-ab7b-489fcd47da41",
+    "timestamp": 1234567890123,
+    "operation": "ADDED",
+    "accountId": "123456789012",
+    "thingGroupId": "8f82a106-6b1d-4331-8984-a84db5f6f8cb",
+    "thingGroupName": "MyRootThingGroup",
+    "childGroupId": "06838589-373f-4312-b1f2-53f2192291c4",
+    "childGroupName": "MyChildThingGroup"
+}

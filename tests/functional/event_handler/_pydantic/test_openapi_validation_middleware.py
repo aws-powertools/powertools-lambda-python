@@ -1128,3 +1128,76 @@ def test_validate_with_minimal_event():
     # THEN the handler should be invoked and return 200
     result = app(minimal_event, {})
     assert result["statusCode"] == 200
+
+
+def test_validation_error_none_returned_non_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_not_allowed")
+    def handler_none_not_allowed() -> Model:
+        return None  # type: ignore
+
+    # WHEN returning None for a non-Optional type
+    gw_event["path"] = "/none_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert "model_attributes_type" in body["detail"][0]["type"]
+
+
+def test_none_returned_for_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_allowed")
+    def handler_none_allowed() -> Optional[Model]:
+        return None
+
+    # WHEN returning None for an Optional type
+    gw_event["path"] = "/none_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should succeed
+    assert result["statusCode"] == 200
+    assert result["body"] == "null"
+
+
+@pytest.mark.parametrize(
+    "path, body",
+    [
+        ("/empty_dict", {}),
+        ("/empty_list", []),
+        ("/none", "null"),
+        ("/empty_string", ""),
+    ],
+    ids=["empty_dict", "empty_list", "none", "empty_string"],
+)
+def test_none_returned_for_falsy_return(gw_event, path, body):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get(path)
+    def handler_none_allowed() -> Model:
+        return body
+
+    # WHEN returning None for an Optional type
+    gw_event["path"] = path
+    result = app(gw_event, {})
+
+    # THEN it should succeed
+    assert result["statusCode"] == 422

@@ -608,3 +608,44 @@ def test_openapi_with_examples_of_base_model_field():
     assert "completed" in todo_schema.properties
     completed_property = todo_schema.properties["completed"]
     assert completed_property.examples == [True]
+
+
+def test_openapi_with_openapi_example():
+    app = APIGatewayRestResolver()
+
+    first_example = Example(summary="Example1", description="Example1", value="a")
+    second_example = Example(summary="Example2", description="Example2", value="b")
+
+    @app.get("/users", summary="Get Users", operation_id="GetUsers", description="Get paginated users", tags=["Users"])
+    def handler(
+        count: Annotated[
+            int,
+            Query(
+                openapi_examples={
+                    "first_example": first_example,
+                    "second_example": second_example,
+                },
+            ),
+        ] = 1,
+    ):
+        print(count)
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/users"].get
+    assert len(get.parameters) == 1
+    assert get.summary == "Get Users"
+    assert get.operationId == "GetUsers"
+    assert get.description == "Get paginated users"
+    assert get.tags == ["Users"]
+
+    parameter = get.parameters[0]
+    assert parameter.required is False
+    assert parameter.name == "count"
+    assert parameter.examples["first_example"] == first_example
+    assert parameter.examples["second_example"] == second_example
+    assert parameter.in_ == ParameterInType.query
+    assert parameter.schema_.type == "integer"
+    assert parameter.schema_.default == 1
+    assert parameter.schema_.title == "Count"

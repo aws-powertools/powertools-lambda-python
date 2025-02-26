@@ -38,6 +38,12 @@ class BatchProcessingError(BaseBatchProcessingError):
         return self.format_exceptions(parent_exception_str)
 
 
+class UnexpectedBatchTypeError(BatchProcessingError):
+    """Error thrown by the Batch Processing utility when a partial processor receives an unexpected batch type"""
+
+    pass
+
+
 class SQSFifoCircuitBreakerError(Exception):
     """
     Signals a record not processed due to the SQS FIFO processing being interrupted

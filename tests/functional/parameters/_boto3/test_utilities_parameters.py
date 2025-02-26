@@ -617,7 +617,7 @@ def test_ssm_provider_set_parameter_with_custom_options(monkeypatch, mock_name, 
         "Overwrite": True,
         "Tier": "Advanced",
         "Description": "Parameter",
-        "KeyId": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
+        "KeyId": "validkmskey",
     }
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
@@ -631,7 +631,7 @@ def test_ssm_provider_set_parameter_with_custom_options(monkeypatch, mock_name, 
             parameter_type="SecureString",
             overwrite=True,
             description="Parameter",
-            kms_key_id="arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
+            kms_key_id="validkmskey",
         )
 
         assert version == response

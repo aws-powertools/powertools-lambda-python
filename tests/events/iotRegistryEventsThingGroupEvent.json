@@ -1,0 +1,37 @@
+{
+  "eventType": "THING_GROUP_EVENT",
+  "eventId": "8b9ea8626aeaa1e42100f3f32b975899",
+  "timestamp": 1603995417409,
+  "operation": "UPDATED",
+  "accountId": "571EXAMPLE833",
+  "thingGroupId": "8757eec8-bb37-4cca-a6fa-403b003d139f",
+  "thingGroupName": "Tg_level5",
+  "versionNumber": 3,
+  "parentGroupName": "Tg_level4",
+  "parentGroupId": "5fce366a-7875-4c0e-870b-79d8d1dce119",
+  "description": "New description for Tg_level5",
+  "rootToParentThingGroups": [
+      {
+          "groupArn": "arn:aws:iot:us-west-2:571EXAMPLE833:thinggroup/TgTopLevel",
+          "groupId": "36aa0482-f80d-4e13-9bff-1c0a75c055f6"
+      },
+      {
+          "groupArn": "arn:aws:iot:us-west-2:571EXAMPLE833:thinggroup/Tg_level1",
+          "groupId": "bc1643e1-5a85-4eac-b45a-92509cbe2a77"
+      },
+      {
+          "groupArn": "arn:aws:iot:us-west-2:571EXAMPLE833:thinggroup/Tg_level2",
+          "groupId": "0476f3d2-9beb-48bb-ae2c-ea8bd6458158"
+      },
+      {
+          "groupArn": "arn:aws:iot:us-west-2:571EXAMPLE833:thinggroup/Tg_level3",
+          "groupId": "1d9d4ffe-a6b0-48d6-9de6-2e54d1eae78f"
+      },
+      {
+          "groupArn": "arn:aws:iot:us-west-2:571EXAMPLE833:thinggroup/Tg_level4",
+          "groupId": "5fce366a-7875-4c0e-870b-79d8d1dce119"
+      }
+  ],
+  "attributes": {"attribute1": "value1", "attribute3": "value3", "attribute2": "value2"},
+  "dynamicGroupMappingId": null
+}

@@ -1,6 +1,7 @@
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
+from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
 from tests.functional.utils import load_event
 from tests.unit.parser._pydantic.schemas import (
     MyAdvancedEventbridgeBusiness,
@@ -51,3 +52,10 @@ def test_handle_invalid_event_with_eventbridge_envelope():
     empty_event = {}
     with pytest.raises(ValidationError):
         parse(event=empty_event, model=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
+
+
+def test_handle_eventbridge_scheduler():
+    raw_event = load_event("eventBridgeSchedulerEvent.json")
+    parsed_event: EventBridgeModel = EventBridgeModel(**raw_event)
+
+    assert parsed_event.detail == {}

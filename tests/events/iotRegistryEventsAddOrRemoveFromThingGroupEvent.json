@@ -1,0 +1,12 @@
+{
+    "eventType": "THING_GROUP_MEMBERSHIP_EVENT",
+    "eventId": "d684bd5f-6f6e-48e1-950c-766ac7f02fd1",
+    "timestamp": 1234567890123,
+    "operation": "ADDED",
+    "accountId": "123456789012",
+    "groupArn": "arn:aws:iot:ap-northeast-2:123456789012:thinggroup/MyChildThingGroup",
+    "groupId": "06838589-373f-4312-b1f2-53f2192291c4",
+    "thingArn": "arn:aws:iot:ap-northeast-2:123456789012:thing/MyThing",
+    "thingId": "b604f69c-aa9a-4d4a-829e-c480e958a0b5",
+    "membershipId": "8505ebf8-4d32-4286-80e9-c23a4a16bbd8"
+}
