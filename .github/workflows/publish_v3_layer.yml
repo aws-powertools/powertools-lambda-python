@@ -174,7 +174,6 @@ jobs:
           path: layer_v3/cdk.py${{ matrix.python-version }}.out.zip
 
   beta:
-    if: ${{ !inputs.skip_lambda_layer }}
     needs: build-layer
     # lower privilege propagated from parent workflow (release-v3.yml)
     permissions:
