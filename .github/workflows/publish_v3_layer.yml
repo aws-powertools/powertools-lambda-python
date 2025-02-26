@@ -49,6 +49,11 @@ on:
         default: false
         type: boolean
         required: false
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can't publish more than once. Useful for semi-failed releases"
+        type: boolean
+        required: false
+
   workflow_call:
     inputs:
       latest_published_version:
@@ -72,6 +77,11 @@ on:
         description: "Sealed source code integrity hash"
         type: string
         required: true
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can't publish more than once. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
 
 permissions:
   contents: read
@@ -164,6 +174,7 @@ jobs:
           path: layer_v3/cdk.py${{ matrix.python-version }}.out.zip
 
   beta:
+    if: ${{ !inputs.skip_lambda_layer }}
     needs: build-layer
     # lower privilege propagated from parent workflow (release-v3.yml)
     permissions:
@@ -180,6 +191,7 @@ jobs:
       source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   prod:
+    if: ${{ !inputs.skip_lambda_layer }}
     needs: beta
     # lower privilege propagated from parent workflow (release-v3.yml)
     permissions:

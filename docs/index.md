@@ -238,8 +238,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | App                                                                                                                                                                                 |     |     | ARN                                                                                                                           |
     | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | [**aws-lambda-powertools-python-layer-v3**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer__{: .copyMe}:clipboard:       |
-    | [**aws-lambda-powertools-python-layer-arm64-v3**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64__{: .copyMe}:clipboard: |
+    | [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer__{: .copyMe}:clipboard:       |
+    | [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64__{: .copyMe}:clipboard: |
 
     ??? question "Don't have enough permissions? Expand for a least-privilege IAM policy example"
 
