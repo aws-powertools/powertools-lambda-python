@@ -220,6 +220,10 @@ class Logger:
         serialize_stacktrace: bool = True,
         **kwargs,
     ) -> None:
+
+        # Used in case of sampling
+        self.initial_log_level = self._determine_log_level(level)
+
         self.service = resolve_env_var_choice(
             choice=service,
             env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
@@ -339,6 +343,17 @@ class Logger:
         self._logger.init = True  # type: ignore[attr-defined]
         self._logger.powertools_handler = self.logger_handler  # type: ignore[attr-defined]
 
+    def refresh_sample_rate_calculation(self) -> None:
+        """
+        Refreshes the sample rate calculation by reconfiguring logging settings.
+
+        Returns
+        -------
+            None
+        """
+        self._logger.setLevel(self.initial_log_level)
+        self._configure_sampling()
+
     def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
 
@@ -347,15 +362,20 @@ class Logger:
         InvalidLoggerSamplingRateError
             When sampling rate provided is not a float
         """
+        if not self.sampling_rate:
+            return
+
         try:
-            if self.sampling_rate and random.random() <= float(self.sampling_rate):
-                logger.debug("Setting log level to Debug due to sampling rate")
+            # This is not testing < 0 or > 1 conditions
+            # Because I don't need other if condition here
+            if random.random() <= float(self.sampling_rate):
                 self._logger.setLevel(logging.DEBUG)
+                logger.debug("Setting log level to DEBUG due to sampling rate")
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 (
                     f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
-                    "Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+                    "Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable or `sampling_rate` parameter."
                 ),
             )
 
@@ -464,6 +484,12 @@ class Logger:
             if log_event:
                 logger.debug("Event received")
                 self.info(extract_event_from_common_models(event))
+
+            # Sampling rate is defined, and this is not ColdStart
+            # then we need to recalculate the sampling
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6141
+            if self.sampling_rate and not cold_start:
+                self.refresh_sample_rate_calculation()
 
             return lambda_handler(event, context, *args, **kwargs)
 

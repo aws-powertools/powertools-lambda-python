@@ -4,13 +4,25 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Features
+
+* **logger:** add new logic to sample debug logs ([#6142](https://github.com/aws-powertools/powertools-lambda-python/issues/6142))
+
 ## Maintenance
 
 * **ci:** new pre-release 3.7.1a0 ([#6166](https://github.com/aws-powertools/powertools-lambda-python/issues/6166))
+* **ci:** new pre-release 3.7.1a1 ([#6178](https://github.com/aws-powertools/powertools-lambda-python/issues/6178))
+* **deps:** bump actions/download-artifact from 4.1.8 to 4.1.9 ([#6174](https://github.com/aws-powertools/powertools-lambda-python/issues/6174))
+* **deps:** bump docker/setup-qemu-action from 3.4.0 to 3.5.0 ([#6176](https://github.com/aws-powertools/powertools-lambda-python/issues/6176))
+* **deps:** bump docker/setup-buildx-action from 3.9.0 to 3.10.0 ([#6175](https://github.com/aws-powertools/powertools-lambda-python/issues/6175))
+* **deps-dev:** bump aws-cdk from 2.1000.3 to 2.1001.0 ([#6173](https://github.com/aws-powertools/powertools-lambda-python/issues/6173))
+* **deps-dev:** bump cfn-lint from 1.26.0 to 1.26.1 ([#6169](https://github.com/aws-powertools/powertools-lambda-python/issues/6169))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.180.0a0 to 2.181.0a0 ([#6172](https://github.com/aws-powertools/powertools-lambda-python/issues/6172))
 * **deps-dev:** bump cfn-lint from 1.25.1 to 1.26.0 ([#6164](https://github.com/aws-powertools/powertools-lambda-python/issues/6164))
 * **deps-dev:** bump boto3-stubs from 1.36.26 to 1.37.0 ([#6165](https://github.com/aws-powertools/powertools-lambda-python/issues/6165))
 * **deps-dev:** bump mypy-boto3-appconfigdata from 1.36.0 to 1.37.0 in the boto-typing group ([#6163](https://github.com/aws-powertools/powertools-lambda-python/issues/6163))
 * **deps-dev:** bump aws-cdk from 2.1000.2 to 2.1000.3 ([#6162](https://github.com/aws-powertools/powertools-lambda-python/issues/6162))
+* **deps-dev:** bump boto3-stubs from 1.37.0 to 1.37.1 ([#6170](https://github.com/aws-powertools/powertools-lambda-python/issues/6170))
 
 
 <a name="v3.7.0"></a>
