@@ -24,7 +24,6 @@ from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
 from aws_lambda_powertools.logging.exceptions import (
-    InvalidBufferItem,
     InvalidLoggerSamplingRateError,
     OrphanedChildLoggerError,
 )
@@ -509,136 +508,6 @@ class Logger:
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
-
-    def _create_and_flush_log_record(self, log_line: dict) -> None:
-        """
-        Create and immediately flush a log record to the configured logger.
-
-        Parameters
-        ----------
-        log_line : dict[str, Any]
-            Dictionary containing log record details with keys:
-            - 'level': Logging level
-            - 'filename': Source filename
-            - 'line': Line number
-            - 'msg': Log message
-            - 'function': Source function name
-            - 'extra': Additional context
-            - 'timestamp': Original log creation time
-
-        Notes
-        -----
-        Bypasses standard logging flow by directly creating and handling a log record.
-        Preserves original timestamp and source information.
-        """
-        record = self._logger.makeRecord(
-            name=self.name,
-            level=log_line["level"],
-            fn=log_line["filename"],
-            lno=log_line["line"],
-            msg=log_line["msg"],
-            args=(),
-            exc_info=None,
-            func=log_line["function"],
-            extra=log_line["extra"],
-        )
-        record.created = log_line["timestamp"]
-        self._logger.handle(record)
-
-    def _add_log_record_to_buffer(
-        self,
-        level: int,
-        msg: object,
-        args: object,
-        exc_info: logging._ExcInfoType = None,
-        stack_info: bool = False,
-        extra: Mapping[str, object] | None = None,
-    ) -> None:
-        """
-        Add log record to buffer with intelligent tracer ID handling.
-
-        Parameters
-        ----------
-        level : int
-            Logging level of the record.
-        msg : object
-            Log message to be recorded.
-        args : object
-            Additional arguments for the log message.
-        exc_info : logging._ExcInfoType, optional
-            Exception information for the log record.
-        stack_info : bool, optional
-            Whether to include stack information.
-        extra : Mapping[str, object], optional
-            Additional contextual information for the log record.
-
-        Raises
-        ------
-        InvalidBufferItem
-            If the log record cannot be added to the buffer.
-
-        Notes
-        -----
-        Handles special first invocation buffering and migration of log records
-        between different tracer contexts.
-        """
-        # Determine tracer ID, defaulting to first invoke marker
-        tracer_id = get_tracer_id()
-
-        try:
-            if tracer_id:
-                log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
-                self._buffer_cache.add(tracer_id, log_record)
-        except InvalidBufferItem as exc:
-            # Wrap and re-raise buffer addition error as warning
-            warnings.warn(
-                message=f"Cannot add item to the buffer: {str(exc)}",
-                category=PowertoolsUserWarning,
-                stacklevel=3,
-            )
-
-    def flush_buffer(self) -> None:
-        """
-        Flush all buffered log records associated with current execution.
-
-        Notes
-        -----
-        Retrieves log records for current trace from buffer
-        Immediately processes and logs each record
-        Warning if some cache was evicted in that execution
-        Clears buffer after complete processing
-
-        Raises
-        ------
-        Any exceptions from underlying logging or buffer mechanisms
-        will be propagated to caller
-        """
-        tracer_id = get_tracer_id()
-
-        # Flushing log without a tracer id? Return
-        if not tracer_id:
-            return
-
-        # is buffer empty? return
-        buffer = self._buffer_cache.get(tracer_id)
-        if not buffer:
-            return
-
-        # Process log records
-        for log_line in buffer:
-            self._create_and_flush_log_record(log_line)
-
-        # Has items evicted?
-        if self._buffer_cache.has_items_evicted(tracer_id):
-            warnings.warn(
-                message="Some logs are not displayed because they were evicted from the buffer. "
-                "Increase buffer size to store more logs in the buffer",
-                category=PowertoolsUserWarning,
-                stacklevel=2,
-            )
-
-        # Clear the entire cache
-        self._buffer_cache.clear()
 
     def debug(
         self,
@@ -1138,6 +1007,130 @@ class Logger:
 
         # Powertools log level is set, we use this
         return powertools_log_level.upper()
+
+    # FUNCTIONS for Buffering log
+
+    def _create_and_flush_log_record(self, log_line: dict) -> None:
+        """
+        Create and immediately flush a log record to the configured logger.
+
+        Parameters
+        ----------
+        log_line : dict[str, Any]
+            Dictionary containing log record details with keys:
+            - 'level': Logging level
+            - 'filename': Source filename
+            - 'line': Line number
+            - 'msg': Log message
+            - 'function': Source function name
+            - 'extra': Additional context
+            - 'timestamp': Original log creation time
+
+        Notes
+        -----
+        Bypasses standard logging flow by directly creating and handling a log record.
+        Preserves original timestamp and source information.
+        """
+        record = self._logger.makeRecord(
+            name=self.name,
+            level=log_line["level"],
+            fn=log_line["filename"],
+            lno=log_line["line"],
+            msg=log_line["msg"],
+            args=(),
+            exc_info=None,
+            func=log_line["function"],
+            extra=log_line["extra"],
+        )
+        record.created = log_line["timestamp"]
+        self._logger.handle(record)
+
+    def _add_log_record_to_buffer(
+        self,
+        level: int,
+        msg: object,
+        args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
+        """
+        Add log record to buffer with intelligent tracer ID handling.
+
+        Parameters
+        ----------
+        level : int
+            Logging level of the record.
+        msg : object
+            Log message to be recorded.
+        args : object
+            Additional arguments for the log message.
+        exc_info : logging._ExcInfoType, optional
+            Exception information for the log record.
+        stack_info : bool, optional
+            Whether to include stack information.
+        extra : Mapping[str, object], optional
+            Additional contextual information for the log record.
+
+        Raises
+        ------
+        InvalidBufferItem
+            If the log record cannot be added to the buffer.
+
+        Notes
+        -----
+        Handles special first invocation buffering and migration of log records
+        between different tracer contexts.
+        """
+        # Determine tracer ID, defaulting to first invoke marker
+        tracer_id = get_tracer_id()
+
+        if tracer_id:
+            log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
+            self._buffer_cache.add(tracer_id, log_record)
+
+    def flush_buffer(self) -> None:
+        """
+        Flush all buffered log records associated with current execution.
+
+        Notes
+        -----
+        Retrieves log records for current trace from buffer
+        Immediately processes and logs each record
+        Warning if some cache was evicted in that execution
+        Clears buffer after complete processing
+
+        Raises
+        ------
+        Any exceptions from underlying logging or buffer mechanisms
+        will be propagated to caller
+        """
+        tracer_id = get_tracer_id()
+
+        # Flushing log without a tracer id? Return
+        if not tracer_id:
+            return
+
+        # is buffer empty? return
+        buffer = self._buffer_cache.get(tracer_id)
+        if not buffer:
+            return
+
+        # Process log records
+        for log_line in buffer:
+            self._create_and_flush_log_record(log_line)
+
+        # Has items evicted?
+        if self._buffer_cache.has_items_evicted(tracer_id):
+            warnings.warn(
+                message="Some logs are not displayed because they were evicted from the buffer. "
+                "Increase buffer size to store more logs in the buffer",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+
+        # Clear the entire cache
+        self._buffer_cache.clear()
 
 
 def set_package_logger(

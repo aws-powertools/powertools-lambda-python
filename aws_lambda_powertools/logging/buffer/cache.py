@@ -137,8 +137,9 @@ class LoggerBufferCache:
         item_size = len(str(item))
         if item_size > self.max_size_bytes:
             warnings.warn(
+                message=f"Cannot add item to the buffer "
                 f"Item size {item_size} bytes exceeds total cache size {self.max_size_bytes} bytes",
-                PowertoolsUserWarning,
+                category=PowertoolsUserWarning,
                 stacklevel=2,
             )
             return

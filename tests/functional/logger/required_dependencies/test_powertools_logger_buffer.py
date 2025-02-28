@@ -48,7 +48,8 @@ def capture_multiple_logging_statements_output(stdout):
 
 @pytest.mark.parametrize("log_level", ["DEBUG", "WARNING", "INFO"])
 def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_name):
-    # GIVEN a configured logger with buffer enabled and specific minimum log level
+
+    # GIVEN A logger configured with a buffer and minimum log level set to WARNING
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="WARNING")
     logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
@@ -59,7 +60,7 @@ def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_nam
         "DEBUG": logger.debug,
     }
 
-    # WHEN a log message is sent using the corresponding log method
+    # WHEN Logging a message using the specified log level
     log_message = log_command[log_level]
     log_message(msg)
     log_dict = stdout.getvalue()
@@ -69,41 +70,43 @@ def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_nam
 
 
 def test_logger_buffer_is_never_buffered_with_exception(stdout, service_name):
-    # GIVEN: A logger configured with buffer
+    # GIVEN A logger configured with a buffer and default logging behavior
     logger_buffer_config = LoggerBufferConfig(max_size=10240)
     logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
-    # WHEN: An exception is raised and logged
+    # WHEN An exception is raised and logged
     try:
         raise ValueError("something went wrong")
     except Exception:
         logger.exception("Received an exception")
 
-    # THEN: We expect the log record is not buffered
+    # THEN We expect the log record is not buffered
     log = capture_logging_output(stdout)
     assert "Received an exception" == log["message"]
 
 
 def test_logger_buffer_is_never_buffered_with_error(stdout, service_name):
-    # GIVEN: A logger configured with buffer
+    # GIVEN A logger configured with a buffer and default logging behavior
     logger_buffer_config = LoggerBufferConfig(max_size=10240)
     logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
-    # WHEN: An exception is raised and logged
+    # WHEN Logging an error message
     logger.error("Received an exception")
 
-    # THEN: We expect the log record is not buffered
+    # THEN The error log should be immediately output without buffering
     log = capture_logging_output(stdout)
     assert "Received an exception" == log["message"]
 
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
 def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, log_level, monkeypatch):
-    # GIVEN: A logger configured with buffer
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN A logger configured with buffer and automatic error-based flushing
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
+    # WHEN Adding debug log messages before triggering an error
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed too")
 
@@ -113,22 +116,26 @@ def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, lo
         "EXCEPTION": logger.exception,
     }
 
-    # WHEN a log message is sent using the corresponding log method
+    # WHEN Logging an error message using the specified log level
     log_message = log_command[log_level]
     log_message("Received an exception")
 
-    # THEN: We expect the log record is not buffered
+    # THEN: All buffered log messages should be flushed and output
     log = capture_multiple_logging_statements_output(stdout)
+    assert isinstance(log, list)
     assert "this log line will be flushed" == log[0]["message"]
     assert "this log line will be flushed too" == log[1]["message"]
 
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
-def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name, log_level):
-    # GIVEN: A logger configured with buffer
+def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name, log_level, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN A logger configured with a buffer and error flushing disabled
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=False)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
+    # WHEN Adding debug log messages before an error
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed too")
 
@@ -138,73 +145,62 @@ def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name
         "EXCEPTION": logger.exception,
     }
 
-    # WHEN a log message is sent using the corresponding log method
+    # WHEN Logging an error message using the specified log level
     log_message = log_command[log_level]
     log_message("Received an exception")
 
-    # THEN: We expect the log record is not buffered
+    # THEN The error log message should be output, but previous debug logs should remain buffered
     log = capture_logging_output(stdout)
+    assert not isinstance(log, list)
     assert "Received an exception" == log["message"]
+    assert log_level == log["level"]
 
 
 def test_create_and_flush_logs(stdout, service_name, monkeypatch):
-    # GIVEN: A logger configured with buffer
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN A logger configured with a large buffer
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
+    # WHEN Logging a message and then flushing the buffer
     logger.debug("this log line will be flushed")
-
     logger.flush_buffer()
 
-    # THEN: We expect the log record is not buffered
+    # THEN The log record should be immediately output and not remain buffered
     log = capture_multiple_logging_statements_output(stdout)
     assert "this log line will be flushed" == log[0]["message"]
-
-
-def test_create_buffer_with_item_overflow(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
-
-    # GIVEN: A logger configured with 2 bytes
-    logger_buffer_config = LoggerBufferConfig(max_size=2, minimum_log_level="DEBUG")
-
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
-
-    # WHEN logging a line with a size higher than buffer
-    # THEN must raise a warning
-    with pytest.warns(PowertoolsUserWarning, match="Item size*"):
-        logger.debug("this log line will be flushed")
 
 
 def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
 
-    # GIVEN: A logger configured with 1024 bytes
+    # GIVEN A logger configured with a 1024-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
 
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
-    # WHEN we add 3 lines that exceeds than 1024 bytes
+    # WHEN Adding multiple log entries that exceed buffer size
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed")
     logger.debug("this log line will be flushed")
 
-    # THEN must raise a warning when trying to flush the lugs
+    # THEN A warning should be raised when flushing logs that exceed buffer capacity
     with pytest.warns(PowertoolsUserWarning, match="Some logs are not displayed because*"):
         logger.flush_buffer()
 
 
-def test_create_buffer_with_items_evicted_next_invocation(stdout, service_name, monkeypatch):
+def test_create_buffer_with_items_evicted_with_next_invocation(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
 
-    # GIVEN: A logger configured with 1024 bytes
+    # GIVEN A logger configured with a 1024-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
 
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
-    # WHEN Add multiple log entries that exceed buffer size
+    # WHEN Adding multiple log entries that exceed buffer size
     message = "this log line will be flushed"
     logger.debug(message)
     logger.debug(message)
@@ -216,7 +212,8 @@ def test_create_buffer_with_items_evicted_next_invocation(stdout, service_name, 
     with pytest.warns(PowertoolsUserWarning, match="Some logs are not displayed because*"):
         logger.flush_buffer()
 
-    # WHEN Add another log entry
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "12345")
+    # WHEN Adding another log entry after initial flush
     logger.debug("new log entry after buffer flush")
 
     # THEN Subsequent buffer flush should not trigger warning
@@ -224,3 +221,55 @@ def test_create_buffer_with_items_evicted_next_invocation(stdout, service_name, 
         warnings.simplefilter("always")
         logger.flush_buffer()
         assert len(warning_list) == 0, "No warnings should be raised"
+
+
+def test_flush_buffer_when_empty(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with a 1024-byte buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN: Flushing the buffer without adding any log entries
+    logger.flush_buffer()
+
+    # THEN: No output should be generated
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+
+def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN A logger configured with a small 10-byte buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10, minimum_log_level="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN Attempting to log a message larger than the entire buffer
+    # THE: A warning should be raised indicating buffer size limitation
+    with pytest.warns(PowertoolsUserWarning, match="Cannot add item to the buffer*"):
+        logger.debug("this log is bigger than entire buffer size")
+
+
+@pytest.mark.parametrize("log_level", ["WARNING", "INFO"])
+def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, service_name):
+    # GIVEN A logger configured with a buffer and minimum log level set to DEBUG
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
+    logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    msg = f"This is a test with level {log_level}"
+    log_command = {
+        "INFO": logger.info,
+        "WARNING": logger.warning,
+    }
+
+    # WHEN Logging a message using the specified log level higher than debug
+    log_message = log_command[log_level]
+    log_message(msg)
+
+    # THEN: The logged message should be immediately output and not buffered
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert log[0]["message"] == msg
