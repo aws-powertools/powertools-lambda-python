@@ -8,9 +8,10 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 
 if TYPE_CHECKING:
+    from http import HTTPStatus
+
     from aws_lambda_powertools.event_handler import CORSConfig
     from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
-    from http import HTTPStatus
 
 
 class LambdaFunctionUrlResolver(ApiGatewayResolver):
@@ -67,7 +68,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
-            response_validation_error_http_status
+            response_validation_error_http_status,
         )
 
     def _get_base_path(self) -> str:

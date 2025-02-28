@@ -2737,7 +2737,15 @@ class ALBResolver(ApiGatewayResolver):
         response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
-        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation, response_validation_error_http_status)
+        super().__init__(
+            ProxyEventType.ALBEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+            response_validation_error_http_status,
+        )
 
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string

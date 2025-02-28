@@ -8,9 +8,10 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 
 if TYPE_CHECKING:
+    from http import HTTPStatus
+
     from aws_lambda_powertools.event_handler import CORSConfig
     from aws_lambda_powertools.utilities.data_classes import VPCLatticeEvent, VPCLatticeEventV2
-    from http import HTTPStatus
 
 
 class VPCLatticeResolver(ApiGatewayResolver):
@@ -57,7 +58,15 @@ class VPCLatticeResolver(ApiGatewayResolver):
         response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon VPC Lattice resolver"""
-        super().__init__(ProxyEventType.VPCLatticeEvent, cors, debug, serializer, strip_prefixes, enable_validation, response_validation_error_http_status)
+        super().__init__(
+            ProxyEventType.VPCLatticeEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+            response_validation_error_http_status,
+        )
 
     def _get_base_path(self) -> str:
         return ""
@@ -107,7 +116,15 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
         response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon VPC Lattice resolver"""
-        super().__init__(ProxyEventType.VPCLatticeEventV2, cors, debug, serializer, strip_prefixes, enable_validation, response_validation_error_http_status)
+        super().__init__(
+            ProxyEventType.VPCLatticeEventV2,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+            response_validation_error_http_status,
+        )
 
     def _get_base_path(self) -> str:
         return ""
