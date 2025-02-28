@@ -179,3 +179,25 @@ class TestCustomResponseValidation:
 
         assert response["statusCode"] == HTTPStatus.INTERNAL_SERVER_ERROR
         assert response["body"] == "Unexpected response."
+
+    def test_incorrect_resolver_config_no_validation(self):
+        with pytest.raises(ValueError) as exception_info:
+            APIGatewayRestResolver(response_validation_error_http_status=500)
+
+        assert (
+            str(exception_info.value)
+            == "'response_validation_error_http_status' cannot be set when enable_validation is False."
+        )
+
+    @pytest.mark.parametrize("response_validation_error_http_status", [(20), ("hi"), (1.21)])
+    def test_incorrect_resolver_config_bad_http_status_code(self, response_validation_error_http_status):
+        with pytest.raises(ValueError) as exception_info:
+            APIGatewayRestResolver(
+                enable_validation=True,
+                response_validation_error_http_status=response_validation_error_http_status,
+            )
+
+        assert (
+            str(exception_info.value)
+            == f"'{response_validation_error_http_status}' must be an integer representing an HTTP status code."
+        )
