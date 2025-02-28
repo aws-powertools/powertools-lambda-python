@@ -34,7 +34,7 @@ def get_todo_by_id(todo_id: int) -> Todo: # (2)!
     return todo.json()["title"] # (3)!
 
 @app.exception_handler(ResponseValidationError) # (4)!
-def handle_validation_error(ex: ResponseValidationError):
+def handle_response_validation_error(ex: ResponseValidationError):
     logger.error("Request failed validation", path=app.current_event.path, errors=ex.errors())
 
     return Response(
