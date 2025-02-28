@@ -402,7 +402,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 The optional `response_validation_error_http_status` argument can be set for all the resolvers to distinguish between failed data validation of payload and response. The desired HTTP status code for failed response validation must be passed to this argument.
 
-Following on from our previous example, we want to distinguish between an invalid payload sent by the user and an invalid response which which are proxying to the user from another endpoint.
+Following on from our previous example, we want to distinguish between an invalid payload sent by the user and an invalid response which is being proxying to the user from another endpoint.
 
 === "customizing_response_validation.py"
 
@@ -410,8 +410,8 @@ Following on from our previous example, we want to distinguish between an invali
     --8<-- "examples/event_handler_rest/src/customizing_response_validation.py"
     ```
 
-    1. This enforces response validation at runtime. Response validation error will return the status code set here.
-    2. We validate our response against `Todo`.
+    1. This enforces response data validation at runtime. A response with status code set here will be returned if response data is not valid.
+    2. We validate our response body against `Todo`.
     3. Operation returns a string as oppose to a Todo object. This will lead to a `500` response as set in line 18.
     4. The distinct `ResponseValidationError` exception can be caught to customise the response—see difference between the sanitized and unsanitized responses.
 
