@@ -19,7 +19,11 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, SchemaValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestValidationError,
+    ResponseValidationError,
+    SchemaValidationError,
+)
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -1496,6 +1500,7 @@ class ApiGatewayResolver(BaseRouter):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
+        response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """
         Parameters
@@ -1530,6 +1535,7 @@ class ApiGatewayResolver(BaseRouter):
         self.context: dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
         self._response_builder_class = ResponseBuilder[BaseProxyEvent]
+        self._response_validation_error_http_status = response_validation_error_http_status
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -1539,7 +1545,14 @@ class ApiGatewayResolver(BaseRouter):
 
             # Note the serializer argument: only use custom serializer if provided by the caller
             # Otherwise, fully rely on the internal Pydantic based mechanism to serialize responses for validation.
-            self.use([OpenAPIValidationMiddleware(validation_serializer=serializer)])
+            self.use(
+                [
+                    OpenAPIValidationMiddleware(
+                        validation_serializer=serializer,
+                        has_response_validation_error=self._response_validation_error_http_status is not None,
+                    ),
+                ],
+            )
 
     def get_openapi_schema(
         self,
@@ -2370,6 +2383,22 @@ class ApiGatewayResolver(BaseRouter):
                 route=route,
             )
 
+        # OpenAPIValidationMiddleware will only raise ResponseValidationError when
+        # 'self._response_validation_error_http_status' is not None
+        if isinstance(exp, ResponseValidationError):
+            if self._response_validation_error_http_status is None:
+                raise TypeError
+            errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
+            return self._response_builder_class(
+                response=Response(
+                    status_code=self._response_validation_error_http_status,
+                    content_type=content_types.APPLICATION_JSON,
+                    body={"statusCode": self._response_validation_error_http_status, "detail": errors},
+                ),
+                serializer=self._serializer,
+                route=route,
+            )
+
         if isinstance(exp, ServiceError):
             return self._response_builder_class(
                 response=Response(
@@ -2582,6 +2611,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
+        response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(
@@ -2591,6 +2621,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
+            response_validation_error_http_status,
         )
 
     def _get_base_path(self) -> str:
@@ -2664,6 +2695,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
+        response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(
@@ -2673,6 +2705,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
+            response_validation_error_http_status,
         )
 
     def _get_base_path(self) -> str:
@@ -2701,9 +2734,10 @@ class ALBResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
+        response_validation_error_http_status: HTTPStatus | None = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
-        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)
+        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation, response_validation_error_http_status)
 
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string
