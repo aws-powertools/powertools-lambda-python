@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import json
 from http import HTTPStatus
+from typing import Optional
 
 import pytest
 from pydantic import BaseModel, Field
@@ -18,7 +17,7 @@ app_with_custom_response_validation_error = APIGatewayRestResolver(
 
 class Todo(BaseModel):
     userId: int
-    id_: int | None = Field(alias="id", default=None)
+    id_: Optional[int] = Field(alias="id", default=None)
     title: str
     completed: bool
 
