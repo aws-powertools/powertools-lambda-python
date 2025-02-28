@@ -55,7 +55,7 @@ class VPCLatticeResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status: HTTPStatus | None = None,
+        response_validation_error_http_status: HTTPStatus | int | None = None,
     ):
         """Amazon VPC Lattice resolver"""
         super().__init__(
@@ -113,7 +113,7 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status: HTTPStatus | None = None,
+        response_validation_error_http_status: HTTPStatus | int | None = None,
     ):
         """Amazon VPC Lattice resolver"""
         super().__init__(
