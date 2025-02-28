@@ -273,3 +273,51 @@ def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, se
     log = capture_multiple_logging_statements_output(stdout)
     assert len(log) == 1
     assert log[0]["message"] == msg
+
+
+def test_logger_buffer_flush_on_uncaught_exception(stdout, service_name, monkeypatch, lambda_context):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with a large buffer and error-based flushing
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
+    def handler(event, context):
+        # Log messages that should be flushed when an exception occurs
+        logger.debug("this log line will be flushed after error - 1")
+        logger.debug("this log line will be flushed after error - 2")
+        raise ValueError("Test error")
+
+    # WHEN Invoking the handler and expecting a ValueError
+    with pytest.raises(ValueError):
+        handler({}, lambda_context)
+
+    # THEN Verify that buffered log messages are flushed before the exception
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2, "Expected two log messages to be flushed"
+    assert log[0]["message"] == "this log line will be flushed after error - 1"
+    assert log[1]["message"] == "this log line will be flushed after error - 2"
+
+
+def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, monkeypatch, lambda_context):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+
+    # GIVEN: A logger configured with a large buffer and error-based flushing
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    @logger.inject_lambda_context(flush_buffer_on_uncaught_error=False)
+    def handler(event, context):
+        # Log messages that should be flushed when an exception occurs
+        logger.debug("this log line will be flushed after error - 1")
+        logger.debug("this log line will be flushed after error - 2")
+        raise ValueError("Test error")
+
+    # WHEN Invoking the handler and expecting a ValueError
+    with pytest.raises(ValueError):
+        handler({}, lambda_context)
+
+    # THEN Verify that buffered log messages are flushed before the exception
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 0

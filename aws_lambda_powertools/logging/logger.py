@@ -400,6 +400,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> AnyCallableT: ...
 
     @overload
@@ -409,6 +410,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
@@ -417,6 +419,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> Any:
         """Decorator to capture Lambda contextual info and inject into logger
 
@@ -473,6 +476,7 @@ class Logger:
                 log_event=log_event,
                 correlation_id_path=correlation_id_path,
                 clear_state=clear_state,
+                flush_buffer_on_uncaught_error=flush_buffer_on_uncaught_error,
             )
 
         log_event = resolve_truthy_env_var_choice(
@@ -505,7 +509,18 @@ class Logger:
             if self.sampling_rate and not cold_start:
                 self.refresh_sample_rate_calculation()
 
-            return lambda_handler(event, context, *args, **kwargs)
+            try:
+                # Execute the Lambda handler with provided event and context
+                return lambda_handler(event, context, *args, **kwargs)
+            except:
+                # Re-raise any exceptions that occur during handler execution
+                raise
+            finally:
+                # Flush the log buffer if configured to do so on uncaught errors
+                # Ensures logging state is cleaned up even if an exception is raised
+                if flush_buffer_on_uncaught_error:
+                    logger.debug("An error happened, flushing the buffer")
+                    self.flush_buffer()
 
         return decorate
 
