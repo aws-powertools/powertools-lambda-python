@@ -22,7 +22,6 @@ from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_HANDLER,
     LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
     LOGGER_ATTRIBUTE_PRECONFIGURED,
-    LOGGER_BUFFER_FIRST_INVOKE,
 )
 from aws_lambda_powertools.logging.exceptions import (
     InvalidBufferItem,
@@ -528,7 +527,7 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         extra: Mapping[str, object] | None = None,
-    ):
+    ) -> None:
         """
         Add log record to buffer with intelligent tracer ID handling.
 
@@ -558,33 +557,23 @@ class Logger:
         between different tracer contexts.
         """
         # Determine tracer ID, defaulting to first invoke marker
-        tracer_id = get_tracer_id() or LOGGER_BUFFER_FIRST_INVOKE
+        tracer_id = get_tracer_id()
 
         try:
-            # Create log record for buffering
-            log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
-
-            # Migrate log records from first invoke to current tracer context
-            if tracer_id != LOGGER_BUFFER_FIRST_INVOKE and self._buffer_cache.get(LOGGER_BUFFER_FIRST_INVOKE):
-                # Retrieve first invoke log records
-                first_invoke_items = self._buffer_cache.get(LOGGER_BUFFER_FIRST_INVOKE)
-
-                # Transfer log records to current tracer context
-                for item in first_invoke_items:
-                    self._buffer_cache.add(tracer_id, item)
-
-                # Clear first invoke buffer
-                self._buffer_cache.clear(LOGGER_BUFFER_FIRST_INVOKE)
-
-            # Add current log record to buffer
-            self._buffer_cache.add(tracer_id, log_record)
+            if tracer_id:
+                log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
+                self._buffer_cache.add(tracer_id, log_record)
         except InvalidBufferItem as exc:
-            # Wrap and re-raise buffer addition error
-            raise InvalidBufferItem("Cannot add item to the buffer") from exc
+            # Wrap and re-raise buffer addition error as warning
+            warnings.warn(
+                message=f"Cannot add item to the buffer: {str(exc)}",
+                category=PowertoolsUserWarning,
+                stacklevel=3,
+            )
 
-    def flush_buffer(self):
+    def flush_buffer(self) -> None:
         """
-        Flush all buffered log records associated with current trace ID.
+        Flush all buffered log records associated with current execution.
 
         Notes
         -----
@@ -599,10 +588,22 @@ class Logger:
         will be propagated to caller
         """
         tracer_id = get_tracer_id()
-        for log_line in self._buffer_cache.get(tracer_id):
+
+        # Flushing log without a tracer id? Return
+        if not tracer_id:
+            return
+
+        # is buffer empty? return
+        buffer = self._buffer_cache.get(tracer_id)
+        if not buffer:
+            return
+
+        # Process log records
+        for log_line in buffer:
             self._create_and_flush_log_record(log_line)
 
-        if self._buffer_cache.has_evicted(tracer_id):
+        # Has items evicted?
+        if self._buffer_cache.has_items_evicted(tracer_id):
             warnings.warn(
                 message="Some logs are not displayed because they were evicted from the buffer. "
                 "Increase buffer size to store more logs in the buffer",

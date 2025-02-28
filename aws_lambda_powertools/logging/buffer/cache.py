@@ -189,7 +189,7 @@ class LoggerBufferCache:
         else:
             self.cache.clear()
 
-    def has_evicted(self, key: str) -> bool:
+    def has_items_evicted(self, key: str) -> bool:
         """
         Check if a specific key's cache has evicted items.
 

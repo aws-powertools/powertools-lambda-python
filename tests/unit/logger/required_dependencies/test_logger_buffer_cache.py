@@ -38,7 +38,7 @@ def test_add_multiple_items_same_key():
     # THEN items are stored sequentially
     assert len(logger_cache.get("key1")) == 2
     assert logger_cache.get("key1") == ["item1", "item2"]
-    assert logger_cache.has_evicted("key1") is False
+    assert logger_cache.has_items_evicted("key1") is False
 
 
 def test_cache_size_limit_single_key():
@@ -53,7 +53,7 @@ def test_cache_size_limit_single_key():
     # THEN cache maintains size limit for a single key
     assert len(logger_cache.get("key1")) > 0
     assert logger_cache.get_current_size("key1") <= 10
-    assert logger_cache.has_evicted("key1") is True
+    assert logger_cache.has_items_evicted("key1") is True
 
 
 def test_item_larger_than_cache():
