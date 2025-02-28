@@ -1,0 +1,8 @@
+{
+  "statusCode": 500,
+  "body": "{\"statusCode\": 500, \"detail\": [{\"type\": \"model_attributes_type\", \"loc\": [\"response\", ]}]}",
+  "isBase64Encoded": false,
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
