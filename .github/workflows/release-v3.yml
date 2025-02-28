@@ -48,6 +48,11 @@ on:
         default: false
         type: boolean
         required: false
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can publish duplicated versions of the same layer. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
       skip_code_quality:
         description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
         default: false
@@ -210,7 +215,7 @@ jobs:
     # NOTE: provenance fails if we use action pinning... it's a Github limitation
     # because SLSA needs to trace & attest it came from a given branch; pinning doesn't expose that information
     # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#referencing-the-slsa-generator
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: ${{ needs.build.outputs.attestation_hashes }}
       upload-assets: false  # we upload its attestation in create_tag job, otherwise it creates a new release
@@ -350,6 +355,7 @@ jobs:
       pre_release: ${{ inputs.pre_release }}
       source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
       source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+      skip_lambda_layer: ${{ inputs.skip_lambda_layer }}
 
   post_release:
     needs: [seal, release, publish_layer]
