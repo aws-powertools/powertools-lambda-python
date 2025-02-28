@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     from aws_lambda_powertools.event_handler import CORSConfig
     from aws_lambda_powertools.utilities.data_classes import VPCLatticeEvent, VPCLatticeEventV2
+    from http import HTTPStatus
 
 
 class VPCLatticeResolver(ApiGatewayResolver):
