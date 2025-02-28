@@ -309,7 +309,7 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 
 !!! info "By default, we hide extended error details for security reasons _(e.g., pydantic url, Pydantic code)_."
 
-Any incoming request that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
+Any incoming request or and outgoing response that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
 
 ```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
 --8<-- "examples/event_handler_rest/src/data_validation_error_unsanitized_output.json"
@@ -396,6 +396,35 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
     ```json hl_lines="3"
     --8<-- "examples/event_handler_rest/src/validating_payload_subset_output.json"
+    ```
+
+#### Validating responses
+
+The optional `response_validation_error_http_status` argument can be set for all the resolvers to distinguish between failed data validation of payload and response. The desired HTTP status code for failed response validation must be passed to this argument.
+
+Following on from our previous example, we want to distinguish between an invalid payload sent by the user and an invalid response which which are proxying to the user from another endpoint.
+
+=== "customizing_response_validation.py"
+
+    ```python hl_lines="18 30 34 36"
+    --8<-- "examples/event_handler_rest/src/customizing_response_validation.py"
+    ```
+
+    1. This enforces response validation at runtime. Response validation error will return the status code set here.
+    2. We validate our response against `Todo`.
+    3. Operation returns a string as oppose to a Todo object. This will lead to a `500` response as set in line 18.
+    4. The distinct `ResponseValidationError` exception can be caught to customise the response—see difference between the sanitized and unsanitized responses.
+
+=== "sanitized_error_response.json"
+
+    ```json hl_lines="2-3"
+    --8<-- "examples/event_handler_rest/src/response_validation_sanitized_error_output.json"
+    ```
+
+=== "unsanitized_error_response.json"
+
+    ```json hl_lines="2-3"
+    --8<-- "examples/event_handler_rest/src/response_validation_error_unsanitized_output.json"
     ```
 
 #### Validating query strings

@@ -1,0 +1,8 @@
+{
+  "statusCode": 500,
+  "body": "Unexpected response.",
+  "isBase64Encoded": false,
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
