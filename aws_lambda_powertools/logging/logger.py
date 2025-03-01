@@ -269,9 +269,9 @@ class Logger:
             "serialize_stacktrace": serialize_stacktrace,
         }
 
-        self._logger_buffer = logger_buffer
-        if self._logger_buffer:
-            self._buffer_cache = LoggerBufferCache(max_size_bytes=self._logger_buffer.max_size)
+        self.buffer_config = logger_buffer
+        if self.buffer_config:
+            self.buffer_cache = LoggerBufferCache(max_size_bytes=self.buffer_config.max_size)
 
         self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
 
@@ -513,14 +513,13 @@ class Logger:
                 # Execute the Lambda handler with provided event and context
                 return lambda_handler(event, context, *args, **kwargs)
             except:
-                # Re-raise any exceptions that occur during handler execution
-                raise
-            finally:
                 # Flush the log buffer if configured to do so on uncaught errors
                 # Ensures logging state is cleaned up even if an exception is raised
                 if flush_buffer_on_uncaught_error:
-                    logger.debug("An error happened, flushing the buffer")
+                    logger.debug("Uncaught error detected, flushing log buffer before exit")
                     self.flush_buffer()
+                # Re-raise any exceptions that occur during handler execution
+                raise
 
         return decorate
 
@@ -547,7 +546,7 @@ class Logger:
         # Also for clarity over complexity
 
         # Buffer is not active and we need to log immediately
-        if not self._logger_buffer:
+        if not self.buffer_config:
             return self._logger.debug(
                 msg,
                 *args,
@@ -590,7 +589,7 @@ class Logger:
         # Also for clarity over complexity
 
         # Buffer is not active and we need to log immediately
-        if not self._logger_buffer:
+        if not self.buffer_config:
             return self._logger.info(
                 msg,
                 *args,
@@ -601,7 +600,7 @@ class Logger:
             )
 
         # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "INFO"):
+        if _check_minimum_buffer_log_level(self.buffer_config.minimum_log_level, "INFO"):
             return self._logger.info(
                 msg,
                 *args,
@@ -644,7 +643,7 @@ class Logger:
         # Also for clarity over complexity
 
         # Buffer is not active and we need to log immediately
-        if not self._logger_buffer:
+        if not self.buffer_config:
             return self._logger.warning(
                 msg,
                 *args,
@@ -655,7 +654,7 @@ class Logger:
             )
 
         # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._logger_buffer.minimum_log_level, "WARNING"):
+        if _check_minimum_buffer_log_level(self.buffer_config.minimum_log_level, "WARNING"):
             return self._logger.warning(
                 msg,
                 *args,
@@ -693,7 +692,7 @@ class Logger:
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Error log is not "bufferable", so ensure error log is immediately available
 
-        if self._logger_buffer and self._logger_buffer.flush_on_error:
+        if self.buffer_config and self.buffer_config.flush_on_error:
             self.flush_buffer()
 
         return self._logger.error(
@@ -722,7 +721,7 @@ class Logger:
         # 1. Buffer configuration checked for immediate flush
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Critical log is not "bufferable", so ensure error log is immediately available
-        if self._logger_buffer and self._logger_buffer.flush_on_error:
+        if self.buffer_config and self.buffer_config.flush_on_error:
             self.flush_buffer()
 
         return self._logger.critical(
@@ -751,7 +750,7 @@ class Logger:
         # 1. Buffer configuration checked for immediate flush
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Exception log is not "bufferable", so ensure error log is immediately available
-        if self._logger_buffer and self._logger_buffer.flush_on_error:
+        if self.buffer_config and self.buffer_config.flush_on_error:
             self.flush_buffer()
 
         return self._logger.exception(
@@ -1102,7 +1101,7 @@ class Logger:
 
         if tracer_id:
             log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
-            self._buffer_cache.add(tracer_id, log_record)
+            self.buffer_cache.add(tracer_id, log_record)
 
     def flush_buffer(self) -> None:
         """
@@ -1127,7 +1126,7 @@ class Logger:
             return
 
         # is buffer empty? return
-        buffer = self._buffer_cache.get(tracer_id)
+        buffer = self.buffer_cache.get(tracer_id)
         if not buffer:
             return
 
@@ -1136,7 +1135,7 @@ class Logger:
             self._create_and_flush_log_record(log_line)
 
         # Has items evicted?
-        if self._buffer_cache.has_items_evicted(tracer_id):
+        if self.buffer_cache.has_items_evicted(tracer_id):
             warnings.warn(
                 message="Some logs are not displayed because they were evicted from the buffer. "
                 "Increase buffer size to store more logs in the buffer",
@@ -1145,7 +1144,7 @@ class Logger:
             )
 
         # Clear the entire cache
-        self._buffer_cache.clear()
+        self.buffer_cache.clear()
 
 
 def set_package_logger(

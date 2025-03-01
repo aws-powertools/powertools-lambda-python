@@ -11,7 +11,7 @@ def _create_buffer_record(
     args: object,
     extra: Mapping[str, object] | None = None,
 ) -> dict[str, Any]:
-    caller_frame = inspect.stack()[2]
+    caller_frame = inspect.stack()[3]
     timestamp = time.time()
 
     return {
