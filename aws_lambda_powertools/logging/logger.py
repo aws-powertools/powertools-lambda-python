@@ -273,7 +273,13 @@ class Logger:
         if self.buffer_config:
             self.buffer_cache = LoggerBufferCache(max_size_bytes=self.buffer_config.max_size)
 
-        self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
+        self._init_logger(
+            formatter_options=formatter_options,
+            log_level=level,
+            buffer_config=self.buffer_config,
+            buffer_cache=getattr(self, "buffer_cache", None),
+            **kwargs,
+        )
 
         if self.log_uncaught_exceptions:
             logger.debug("Replacing exception hook")
@@ -317,6 +323,8 @@ class Logger:
         self,
         formatter_options: dict | None = None,
         log_level: str | int | None = None,
+        buffer_config: LoggerBufferConfig | None = None,
+        buffer_cache: LoggerBufferCache | None = None,
         **kwargs,
     ) -> None:
         """Configures new logger"""
@@ -332,6 +340,11 @@ class Logger:
             return
 
         if is_logger_preconfigured:
+            # Reuse existing buffer configuration from a previously configured logger
+            # Ensures consistent buffer settings across logger instances within the same service
+            # Enables buffer propagation and maintains a unified logging configuration
+            self.buffer_config = self._logger.powertools_buffer_config  # type: ignore[attr-defined]
+            self.buffer_cache = self._logger.powertools_buffer_cache  # type: ignore[attr-defined]
             return
 
         self.setLevel(log_level)
@@ -356,6 +369,8 @@ class Logger:
         logger.debug(f"Marking logger {self.service} as preconfigured")
         self._logger.init = True  # type: ignore[attr-defined]
         self._logger.powertools_handler = self.logger_handler  # type: ignore[attr-defined]
+        self._logger.powertools_buffer_config = buffer_config  # type: ignore[attr-defined]
+        self._logger.powertools_buffer_cache = buffer_cache  # type: ignore[attr-defined]
 
     def refresh_sample_rate_calculation(self) -> None:
         """
@@ -721,6 +736,7 @@ class Logger:
         # 1. Buffer configuration checked for immediate flush
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Critical log is not "bufferable", so ensure error log is immediately available
+
         if self.buffer_config and self.buffer_config.flush_on_error:
             self.flush_buffer()
 
@@ -1100,6 +1116,11 @@ class Logger:
         tracer_id = get_tracer_id()
 
         if tracer_id:
+            if not self.buffer_cache.get(tracer_id):
+                # Detect new Lambda invocation context and reset buffer to maintain log isolation
+                # Ensures logs from previous invocations do not leak into current execution
+                self.buffer_cache.clear()
+
             log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
             self.buffer_cache.add(tracer_id, log_record)
 

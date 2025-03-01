@@ -47,7 +47,9 @@ def capture_multiple_logging_statements_output(stdout):
 
 
 @pytest.mark.parametrize("log_level", ["DEBUG", "WARNING", "INFO"])
-def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_name):
+def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_name, monkeypatch):
+
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and minimum log level set to WARNING
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="WARNING")
@@ -100,7 +102,7 @@ def test_logger_buffer_is_never_buffered_with_error(stdout, service_name):
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
 def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, log_level, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with buffer and automatic error-based flushing
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
@@ -129,7 +131,7 @@ def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, lo
 
 @pytest.mark.parametrize("log_level", ["CRITICAL", "ERROR"])
 def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name, log_level, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and error flushing disabled
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=False)
@@ -157,10 +159,10 @@ def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name
 
 
 def test_create_and_flush_logs(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a large buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     # WHEN Logging a message and then flushing the buffer
@@ -172,12 +174,27 @@ def test_create_and_flush_logs(stdout, service_name, monkeypatch):
     assert "this log line will be flushed" == log[0]["message"]
 
 
+def test_ensure_log_location_after_flush_buffer(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a sufficiently large buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN Logging a debug message and immediately flushing the buffer
+    logger.debug("this log line will be flushed")
+    logger.flush_buffer()
+
+    # THEN Validate that the log location is precisely captured
+    log = capture_multiple_logging_statements_output(stdout)
+    assert "test_ensure_log_location_after_flush_buffer:184" in log[0]["location"]
+
+
 def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a 1024-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
-
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     # WHEN Adding multiple log entries that exceed buffer size
@@ -193,11 +210,10 @@ def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
 
 
 def test_create_buffer_with_items_evicted_with_next_invocation(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a 1024-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
-
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     # WHEN Adding multiple log entries that exceed buffer size
@@ -224,7 +240,7 @@ def test_create_buffer_with_items_evicted_with_next_invocation(stdout, service_n
 
 
 def test_flush_buffer_when_empty(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a 1024-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
@@ -240,7 +256,7 @@ def test_flush_buffer_when_empty(stdout, service_name, monkeypatch):
 
 
 def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a small 10-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=10, minimum_log_level="DEBUG")
@@ -254,7 +270,9 @@ def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
 
 
 @pytest.mark.parametrize("log_level", ["WARNING", "INFO"])
-def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, service_name):
+def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
     # GIVEN A logger configured with a buffer and minimum log level set to DEBUG
     logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
     logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
@@ -276,10 +294,10 @@ def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, se
 
 
 def test_logger_buffer_flush_on_uncaught_exception(stdout, service_name, monkeypatch, lambda_context):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a large buffer and error-based flushing
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
@@ -301,10 +319,10 @@ def test_logger_buffer_flush_on_uncaught_exception(stdout, service_name, monkeyp
 
 
 def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, monkeypatch, lambda_context):
-    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1234")
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a large buffer and error-based flushing
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     @logger.inject_lambda_context(flush_buffer_on_uncaught_error=False)
@@ -321,3 +339,50 @@ def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, mon
     # THEN Verify that buffered log messages are flushed before the exception
     log = capture_multiple_logging_statements_output(stdout)
     assert len(log) == 0
+
+
+def test_buffer_configuration_propagation_across_logger_instances(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with specific buffer settings
+    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
+
+    # Create primary logger with explicit buffer configuration
+    primary_logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # Create secondary logger for the same service (should inherit buffer config)
+    secondary_logger = Logger(level="DEBUG", service=service_name)
+
+    # WHEN Logging messages and flushing the buffer
+    primary_logger.debug("Log message from primary logger")
+    secondary_logger.debug("Log message from secondary logger")
+    primary_logger.flush_buffer()
+
+    # THEN Verify log messages are correctly captured and output
+    log = capture_multiple_logging_statements_output(stdout)
+
+    assert "Log message from primary logger" == log[0]["message"]
+    assert "Log message from secondary logger" == log[1]["message"]
+    assert primary_logger._logger.powertools_buffer_config == secondary_logger._logger.powertools_buffer_config
+
+
+def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_name, monkeypatch, lambda_context):
+    # Set initial trace ID for first Lambda invocation
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with specific buffer parameters
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    def handler(event, context):
+        logger.debug("debug line")
+
+    # WHEN First Lambda invocation with initial trace ID
+    handler({}, lambda_context)
+
+    # WHEN New Lambda invocation arrives with different trace ID
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "2-ABC39786-5908a82a246fb67f3089263f")
+    handler({}, lambda_context)
+
+    # THEN Verify buffer for the original trace ID is cleared
+    assert not logger.buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")
