@@ -1068,7 +1068,7 @@ class Logger:
             lno=log_line["line"],
             msg=log_line["msg"],
             args=(),
-            exc_info=None,
+            exc_info=log_line["exc_info"],
             func=log_line["function"],
             extra=log_line["extra"],
         )
@@ -1121,7 +1121,14 @@ class Logger:
                 # Ensures logs from previous invocations do not leak into current execution
                 self.buffer_cache.clear()
 
-            log_record: dict[str, Any] = _create_buffer_record(level=level, msg=msg, args=args, extra=extra)
+            log_record: dict[str, Any] = _create_buffer_record(
+                level=level,
+                msg=msg,
+                args=args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                extra=extra,
+            )
             self.buffer_cache.add(tracer_id, log_record)
 
     def flush_buffer(self) -> None:

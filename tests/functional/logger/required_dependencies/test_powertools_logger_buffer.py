@@ -187,7 +187,33 @@ def test_ensure_log_location_after_flush_buffer(stdout, service_name, monkeypatc
 
     # THEN Validate that the log location is precisely captured
     log = capture_multiple_logging_statements_output(stdout)
-    assert "test_ensure_log_location_after_flush_buffer:184" in log[0]["location"]
+    assert "test_ensure_log_location_after_flush_buffer" in log[0]["location"]
+
+
+def test_exception_logging_during_buffer_flush(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a sufficiently large buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # Custom exception class
+    class MyError(BaseException):
+        pass
+
+    # WHEN Logging an exception and flushing the buffer
+    try:
+        raise MyError("Test exception message")
+    except MyError as error:
+        logger.debug("Logging a test exception to verify buffer and exception handling", exc_info=error)
+
+    logger.flush_buffer()
+
+    # THEN Validate that the log exception fields
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["exception_name"] == "MyError"
+    assert "Test exception message" in log[0]["exception"]
+    assert "test_exception_logging_during_buffer_flush" in log[0]["exception"]
 
 
 def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
