@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import inspect
 import sys
 import time
 from typing import TYPE_CHECKING, Any, Mapping
@@ -47,7 +46,7 @@ def _create_buffer_record(
     """
     # Retrieve the caller's frame information to capture precise log context
     # Uses inspect.stack() with index 3 to get the original caller's details
-    caller_frame = inspect.stack()[3]
+    caller_frame = sys._getframe(3)
 
     # Get the current timestamp
     timestamp = time.time()
@@ -62,9 +61,9 @@ def _create_buffer_record(
         "level": level,
         "msg": msg,
         "args": args,
-        "filename": caller_frame.filename,
-        "line": caller_frame.lineno,
-        "function": caller_frame.function,
+        "filename": caller_frame.f_code.co_filename,
+        "line": caller_frame.f_lineno,
+        "function": caller_frame.f_code.co_name,
         "extra": extra,
         "timestamp": timestamp,
         "exc_info": exc_info,
