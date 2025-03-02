@@ -10,14 +10,15 @@
 
 ## Maintenance
 
-* **ci:** new pre-release 3.7.1a0 ([#6166](https://github.com/aws-powertools/powertools-lambda-python/issues/6166))
 * **ci:** new pre-release 3.7.1a2 ([#6186](https://github.com/aws-powertools/powertools-lambda-python/issues/6186))
+* **ci:** new pre-release 3.7.1a0 ([#6166](https://github.com/aws-powertools/powertools-lambda-python/issues/6166))
+* **ci:** enable SAR deployment ([#6104](https://github.com/aws-powertools/powertools-lambda-python/issues/6104))
 * **ci:** new pre-release 3.7.1a1 ([#6178](https://github.com/aws-powertools/powertools-lambda-python/issues/6178))
-* **deps:** bump docker/setup-qemu-action from 3.4.0 to 3.5.0 ([#6176](https://github.com/aws-powertools/powertools-lambda-python/issues/6176))
+* **deps:** bump actions/download-artifact from 4.1.8 to 4.1.9 ([#6174](https://github.com/aws-powertools/powertools-lambda-python/issues/6174))
 * **deps:** bump docker/setup-buildx-action from 3.9.0 to 3.10.0 ([#6175](https://github.com/aws-powertools/powertools-lambda-python/issues/6175))
 * **deps:** bump pydantic-settings from 2.8.0 to 2.8.1 ([#6182](https://github.com/aws-powertools/powertools-lambda-python/issues/6182))
 * **deps:** bump codecov/codecov-action from 5.3.1 to 5.4.0 ([#6180](https://github.com/aws-powertools/powertools-lambda-python/issues/6180))
-* **deps:** bump actions/download-artifact from 4.1.8 to 4.1.9 ([#6174](https://github.com/aws-powertools/powertools-lambda-python/issues/6174))
+* **deps:** bump docker/setup-qemu-action from 3.4.0 to 3.5.0 ([#6176](https://github.com/aws-powertools/powertools-lambda-python/issues/6176))
 * **deps-dev:** bump ruff from 0.9.7 to 0.9.8 ([#6184](https://github.com/aws-powertools/powertools-lambda-python/issues/6184))
 * **deps-dev:** bump aws-cdk from 2.1000.3 to 2.1001.0 ([#6173](https://github.com/aws-powertools/powertools-lambda-python/issues/6173))
 * **deps-dev:** bump cfn-lint from 1.26.0 to 1.26.1 ([#6169](https://github.com/aws-powertools/powertools-lambda-python/issues/6169))
