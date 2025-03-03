@@ -10,20 +10,21 @@ from assert_async_graphql_response_module import (  # instance of AppSyncResolve
 )
 
 
-@pytest.fixture
-def lambda_context():
-    @dataclass
-    class LambdaContext:
-        function_name: str = "test"
-        memory_limit_in_mb: int = 128
-        invoked_function_arn: str = "arn:aws:lambda:eu-west-1:123456789012:function:test"
-        aws_request_id: str = "da658bd3-2d6f-4e7b-8ec2-937234644fdc"
+@dataclass
+class LambdaContext:
+    function_name: str = "test"
+    memory_limit_in_mb: int = 128
+    invoked_function_arn: str = "arn:aws:lambda:eu-west-1:123456789012:function:test"
+    aws_request_id: str = "da658bd3-2d6f-4e7b-8ec2-937234644fdc"
 
+
+@pytest.fixture
+def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
 @pytest.mark.asyncio
-async def test_async_direct_resolver(lambda_context):
+async def test_async_direct_resolver(lambda_context: LambdaContext):
     # GIVEN
     fake_event = json.loads(Path("assert_async_graphql_response.json").read_text())
 
