@@ -106,14 +106,14 @@ jobs:
           aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
           role-duration-seconds: 1200
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_SAR_V2_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_SAR_V3_ROLE_ARN }}
           mask-aws-account-id: true
       - name: Setup Node.js
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Download artifact
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
       - name: Unzip artefact
@@ -127,25 +127,22 @@ jobs:
           if [[ "${{ inputs.stage }}" == "BETA" ]]; then
             SAR_NAME="test-${SAR_NAME}"
           fi
-          ARCH_NAME=$(echo ${{ matrix.architecture }} | tr -d '_')
+          ARCH_NAME=$(echo ${{ matrix.architecture }} | tr '_' '-')
           SAR_NAME="${SAR_NAME}-python${{env.PYTHON_VERSION}}-${ARCH_NAME}"
           echo SAR_NAME="${SAR_NAME}" >> "$GITHUB_ENV"
-      - name: Normalize semantic version
-        id: semantic-version # v2.0.0a0 -> v2.0.0-a0
-        env:
-          VERSION: ${{ inputs.package-version }}
-        run: |
-          # VERSION="${VERSION/a/-a}"
-          VERSION="3.0.0"
-          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Prepare SAR App
-        env:
-          VERSION: ${{ steps.semantic-version.outputs.VERSION }}
         run: |
           # From the generated LayerStack cdk.out artifact, find the layer asset path for the correct architecture.
           # We'll use this as the source directory of our SAR. This way we are re-using the same layer asset for our SAR.
           PYTHON_VERSION=$(echo ${{ matrix.python-version }} | tr -d '.')
-          asset=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' "cdk.out/LayerV3Stack-python${PYTHON_VERSION}.template.json")
+          asset_cdk=$(jq -jc '.Resources[] | select(.Properties.CompatibleArchitectures == ["${{ matrix.architecture }}"]) | .Metadata."aws:asset:path"' "cdk.out/LayerV3Stack-python${PYTHON_VERSION}.template.json")
+
+          echo "Normalizing the asset variable"
+          asset=$(echo $asset_cdk | sed -E 's/^(asset\.[^.]+).*\1/\1/')
+
+          VERSION=$(echo ${{ inputs.package-version }} | sed 's/^v//')
+          echo $asset
+          echo $VERSION
 
           # fill in the SAR SAM template
           sed \
@@ -165,6 +162,7 @@ jobs:
 
           # Package the SAR to our SAR S3 bucket, and publish it
           sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket ${{ secrets.AWS_SAR_S3_BUCKET_V3 }}
+          cat packaged.yml
           sam publish --template packaged.yml --region "$AWS_REGION"
       - name: Deploy BETA canary
         if: ${{ inputs.stage == 'BETA' }}

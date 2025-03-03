@@ -48,6 +48,11 @@ on:
         default: false
         type: boolean
         required: false
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can publish duplicated versions of the same layer. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
       skip_code_quality:
         description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
         default: false
@@ -350,6 +355,7 @@ jobs:
       pre_release: ${{ inputs.pre_release }}
       source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
       source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+      skip_lambda_layer: ${{ inputs.skip_lambda_layer }}
 
   post_release:
     needs: [seal, release, publish_layer]

@@ -49,6 +49,11 @@ on:
         default: false
         type: boolean
         required: false
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can publish duplicated versions of the same layer. Useful for semi-failed releases"
+        type: boolean
+        required: false
+
   workflow_call:
     inputs:
       latest_published_version:
@@ -72,6 +77,11 @@ on:
         description: "Sealed source code integrity hash"
         type: string
         required: true
+      skip_lambda_layer:
+        description: "Skip publishing Lambda Layers as it can publish duplicated versions of the same layer. Useful for semi-failed releases"
+        default: false
+        type: boolean
+        required: false
 
 permissions:
   contents: read
@@ -129,14 +139,14 @@ jobs:
           pip install --require-hashes -r requirements.txt
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@4574d27a4764455b42196d70a065bc6853246a25 # v2.0.0
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
 
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca # v3.9.0
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         with:
           install: true
           driver: docker
@@ -180,6 +190,7 @@ jobs:
       source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   prod:
+    if: ${{ !inputs.skip_lambda_layer }}
     needs: beta
     # lower privilege propagated from parent workflow (release-v3.yml)
     permissions:
@@ -195,41 +206,39 @@ jobs:
       source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
       source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
-  # UNCOMMENT sar-beta JOB
-  #sar-beta:
-  #  needs: beta  # canaries run on Layer Beta env
-  #  permissions:
+  sar-beta:
+    needs: beta  # canaries run on Layer Beta env
+    permissions:
       # lower privilege propagated from parent workflow (release.yml)
-  #    id-token: write
-  #    contents: read
-  #    pull-requests: none
-  #    pages: none
-  #  uses: ./.github/workflows/reusable_deploy_v3_sar.yml
-  #  secrets: inherit
-  #  with:
-  #    stage: "BETA"
-  #    environment: "layer-beta"
-  #    package-version: ${{ inputs.latest_published_version }}
-  #    source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
-  #    source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+      id-token: write
+      contents: read
+      pull-requests: none
+      pages: none
+    uses: ./.github/workflows/reusable_deploy_v3_sar.yml
+    secrets: inherit
+    with:
+      stage: "BETA"
+      environment: "layer-beta"
+      package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
-  # UNCOMMENT sar-prod JOB
-  #sar-prod:
-  #  needs: sar-beta
-  #  permissions:
+  sar-prod:
+    needs: sar-beta
+    permissions:
       # lower privilege propagated from parent workflow (release.yml)
-  #    id-token: write
-  #    contents: read
-  #    pull-requests: none
-  #    pages: none
-  #  uses: ./.github/workflows/reusable_deploy_v3_sar.yml
-  #  secrets: inherit
-  #  with:
-  #    stage: "PROD"
-  #    environment: "layer-prod"
-  #    package-version: ${{ inputs.latest_published_version }}
-  #    source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
-  #    source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+      id-token: write
+      contents: read
+      pull-requests: none
+      pages: none
+    uses: ./.github/workflows/reusable_deploy_v3_sar.yml
+    secrets: inherit
+    with:
+      stage: "PROD"
+      environment: "layer-prod"
+      package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
 
   # Updating the documentation with the latest Layer ARNs is a two-phase process
