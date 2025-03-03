@@ -8,7 +8,7 @@ def test_default_configuration():
     config_buffer = LoggerBufferConfig()
 
     # THEN default values are default
-    assert config_buffer.max_size == 10240
+    assert config_buffer.max_size == 20480
     assert config_buffer.minimum_log_level == "DEBUG"
     assert config_buffer.flush_on_error is True
     assert config_buffer.compress is False
@@ -17,14 +17,14 @@ def test_default_configuration():
 def test_custom_configuration():
     # GIVEN a new LoggerBufferConfig with custom configuration parameters
     config_buffer = LoggerBufferConfig(
-        max_size=20480,
+        max_size=51200,
         minimum_log_level="WARNING",
         flush_on_error=False,
         compress=True,
     )
 
     # THEN configuration is set with provided values
-    assert config_buffer.max_size == 20480
+    assert config_buffer.max_size == 51200
     assert config_buffer.minimum_log_level == "WARNING"
     assert config_buffer.flush_on_error is False
     assert config_buffer.compress is True
