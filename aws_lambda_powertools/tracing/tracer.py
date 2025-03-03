@@ -260,7 +260,7 @@ class Tracer:
         lambda_handler: Callable[[T, Any], Any] | Callable[[T, Any, Any], Any] | None = None,
         capture_response: bool | None = None,
         capture_error: bool | None = None,
-    ):
+    ) -> Callable[..., Any]:
         """Decorator to create subsegment for lambda handlers
 
         As Lambda follows (event, context) signature we can remove some of the boilerplate
