@@ -18,6 +18,7 @@ from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.types import (
@@ -1530,6 +1531,7 @@ class ApiGatewayResolver(BaseRouter):
         self.context: dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
         self._response_builder_class = ResponseBuilder[BaseProxyEvent]
+        self.openapi_config = OpenAPIConfig()  # starting an empty dataclass
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -1544,7 +1546,7 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_schema(
         self,
         *,
-        title: str = "Powertools API",
+        title: str = "Powertools for AWS Lambda (Python) API",
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
@@ -1595,6 +1597,29 @@ class ApiGatewayResolver(BaseRouter):
         OpenAPI: pydantic model
             The OpenAPI schema as a pydantic model.
         """
+
+        # DEPRECATION: Will be removed in v4.0.0. Use configure_api() instead.
+        # Maintained for backwards compatibility.
+        # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6122
+        if title == "Powertools for AWS Lambda (Python) API" and self.openapi_config.title:
+            title = self.openapi_config.title
+
+        if version == DEFAULT_API_VERSION and self.openapi_config.version:
+            version = self.openapi_config.version
+
+        if openapi_version == DEFAULT_OPENAPI_VERSION and self.openapi_config.openapi_version:
+            openapi_version = self.openapi_config.openapi_version
+
+        summary = summary or self.openapi_config.summary
+        description = description or self.openapi_config.description
+        tags = tags or self.openapi_config.tags
+        servers = servers or self.openapi_config.servers
+        terms_of_service = terms_of_service or self.openapi_config.terms_of_service
+        contact = contact or self.openapi_config.contact
+        license_info = license_info or self.openapi_config.license_info
+        security_schemes = security_schemes or self.openapi_config.security_schemes
+        security = security or self.openapi_config.security
+        openapi_extensions = openapi_extensions or self.openapi_config.openapi_extensions
 
         from aws_lambda_powertools.event_handler.openapi.compat import (
             GenerateJsonSchema,
@@ -1726,7 +1751,7 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_json_schema(
         self,
         *,
-        title: str = "Powertools API",
+        title: str = "Powertools for AWS Lambda (Python) API",
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
@@ -1777,6 +1802,7 @@ class ApiGatewayResolver(BaseRouter):
         str
             The OpenAPI schema as a JSON serializable dict.
         """
+
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
 
         return model_json(
@@ -1798,6 +1824,89 @@ class ApiGatewayResolver(BaseRouter):
             by_alias=True,
             exclude_none=True,
             indent=2,
+        )
+
+    def configure_openapi(
+        self,
+        title: str = "Powertools for AWS Lambda (Python) API",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[Tag | str] | None = None,
+        servers: list[Server] | None = None,
+        terms_of_service: str | None = None,
+        contact: Contact | None = None,
+        license_info: License | None = None,
+        security_schemes: dict[str, SecurityScheme] | None = None,
+        security: list[dict[str, list[str]]] | None = None,
+        openapi_extensions: dict[str, Any] | None = None,
+    ):
+        """Configure OpenAPI specification settings for the API.
+
+        Sets up the OpenAPI documentation configuration that can be later used
+        when enabling Swagger UI or generating OpenAPI specifications.
+
+        Parameters
+        ----------
+        title: str
+            The title of the application.
+        version: str
+            The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
+        openapi_version: str, default = "3.0.0"
+            The version of the OpenAPI Specification (which the document uses).
+        summary: str, optional
+            A short summary of what the application does.
+        description: str, optional
+            A verbose explanation of the application behavior.
+        tags: list[Tag, str], optional
+            A list of tags used by the specification with additional metadata.
+        servers: list[Server], optional
+            An array of Server Objects, which provide connectivity information to a target server.
+        terms_of_service: str, optional
+            A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: Contact, optional
+            The contact information for the exposed API.
+        license_info: License, optional
+            The license information for the exposed API.
+        security_schemes: dict[str, SecurityScheme]], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: list[dict[str, list[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
+        openapi_extensions: Dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
+
+        Example
+        --------
+        >>> api.configure_openapi(
+        ...     title="My API",
+        ...     version="1.0.0",
+        ...     description="API for managing resources",
+        ...     contact=Contact(
+        ...         name="API Support",
+        ...         email="support@example.com"
+        ...     )
+        ... )
+
+        See Also
+        --------
+        enable_swagger : Method to enable Swagger UI using these configurations
+        OpenAPIConfig : Data class containing all OpenAPI configuration options
+        """
+        self.openapi_config = OpenAPIConfig(
+            title=title,
+            version=version,
+            openapi_version=openapi_version,
+            summary=summary,
+            description=description,
+            tags=tags,
+            servers=servers,
+            terms_of_service=terms_of_service,
+            contact=contact,
+            license_info=license_info,
+            security_schemes=security_schemes,
+            security=security,
+            openapi_extensions=openapi_extensions,
         )
 
     def enable_swagger(
@@ -1867,6 +1976,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_extensions: dict[str, Any], optional
             Additional OpenAPI extensions as a dictionary.
         """
+
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
         from aws_lambda_powertools.event_handler.openapi.swagger_ui import (
