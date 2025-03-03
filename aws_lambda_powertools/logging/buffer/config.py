@@ -14,7 +14,7 @@ class LoggerBufferConfig:
 
     def __init__(
         self,
-        max_size: int = 10240,
+        max_size: int = 20480,
         minimum_log_level: LOG_LEVEL_BUFFER_VALUES = "DEBUG",
         flush_on_error: bool = True,
         compress: bool = False,
