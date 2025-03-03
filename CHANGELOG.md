@@ -11,6 +11,7 @@
 ## Maintenance
 
 * **ci:** new pre-release 3.7.1a2 ([#6186](https://github.com/aws-powertools/powertools-lambda-python/issues/6186))
+* **ci:** new pre-release 3.7.1a3 ([#6201](https://github.com/aws-powertools/powertools-lambda-python/issues/6201))
 * **ci:** new pre-release 3.7.1a0 ([#6166](https://github.com/aws-powertools/powertools-lambda-python/issues/6166))
 * **ci:** new pre-release 3.7.1a1 ([#6178](https://github.com/aws-powertools/powertools-lambda-python/issues/6178))
 * **ci:** enable SAR deployment ([#6104](https://github.com/aws-powertools/powertools-lambda-python/issues/6104))
