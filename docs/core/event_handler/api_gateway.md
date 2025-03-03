@@ -1053,7 +1053,7 @@ Include extra parameters when exporting your OpenAPI specification to apply thes
 
 === "customizing_api_metadata.py"
 
-    ```python hl_lines="25-31"
+    ```python hl_lines="8-16"
     --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
     ```
 
@@ -1089,7 +1089,7 @@ Security schemes are declared at the top-level first. You can reference them glo
 
 === "Global OpenAPI security schemes"
 
-    ```python title="security_schemes_global.py" hl_lines="32-42"
+    ```python title="security_schemes_global.py" hl_lines="17-27"
     --8<-- "examples/event_handler_rest/src/security_schemes_global.py"
     ```
 
@@ -1097,7 +1097,7 @@ Security schemes are declared at the top-level first. You can reference them glo
 
 === "Per Operation security"
 
-    ```python title="security_schemes_per_operation.py" hl_lines="17 32-41"
+    ```python title="security_schemes_per_operation.py" hl_lines="17-26 30"
     --8<-- "examples/event_handler_rest/src/security_schemes_per_operation.py"
     ```
 
@@ -1105,7 +1105,7 @@ Security schemes are declared at the top-level first. You can reference them glo
 
 === "Global security schemes and optional security per route"
 
-    ```python title="security_schemes_global_and_optional.py" hl_lines="22 37-46"
+    ```python title="security_schemes_global_and_optional.py" hl_lines="17-26 35"
     --8<-- "examples/event_handler_rest/src/security_schemes_global_and_optional.py"
     ```
 
