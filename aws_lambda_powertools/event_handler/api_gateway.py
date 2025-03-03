@@ -19,7 +19,11 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
-from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.constants import (
+    DEFAULT_API_VERSION,
+    DEFAULT_OPENAPI_TITLE,
+    DEFAULT_OPENAPI_VERSION,
+)
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
@@ -1546,7 +1550,7 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_schema(
         self,
         *,
-        title: str = "Powertools for AWS Lambda (Python) API",
+        title: str = DEFAULT_OPENAPI_TITLE,
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
@@ -1601,7 +1605,7 @@ class ApiGatewayResolver(BaseRouter):
         # DEPRECATION: Will be removed in v4.0.0. Use configure_api() instead.
         # Maintained for backwards compatibility.
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6122
-        if title == "Powertools for AWS Lambda (Python) API" and self.openapi_config.title:
+        if title == DEFAULT_OPENAPI_TITLE and self.openapi_config.title:
             title = self.openapi_config.title
 
         if version == DEFAULT_API_VERSION and self.openapi_config.version:
@@ -1751,7 +1755,7 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_json_schema(
         self,
         *,
-        title: str = "Powertools for AWS Lambda (Python) API",
+        title: str = DEFAULT_OPENAPI_TITLE,
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
@@ -1828,7 +1832,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def configure_openapi(
         self,
-        title: str = "Powertools for AWS Lambda (Python) API",
+        title: str = DEFAULT_OPENAPI_TITLE,
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
@@ -1913,7 +1917,7 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         path: str = "/swagger",
-        title: str = "Powertools for AWS Lambda (Python) API",
+        title: str = DEFAULT_OPENAPI_TITLE,
         version: str = DEFAULT_API_VERSION,
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: str | None = None,
