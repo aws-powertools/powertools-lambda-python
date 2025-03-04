@@ -362,6 +362,7 @@ version = "5.8"
 description = "A wrapper around re and regex that adds additional back references."
 optional = false
 python-versions = ">=3.9"
+groups = ["dev"]
 files = [
     {file = "backrefs-5.8-py310-none-any.whl", hash = "sha256:c67f6638a34a5b8730812f5101376f9d41dc38c43f1fdc35cb54700f6ed4465d"},
     {file = "backrefs-5.8-py311-none-any.whl", hash = "sha256:2e1c15e4af0e12e45c8701bd5da0902d326b2e200cafcd25e49d9f06d44bb61b"},
@@ -1457,15 +1458,15 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "6.105.0"
+version = "6.106.0"
 description = "The Datadog AWS Lambda Library"
 optional = true
 python-versions = "<4,>=3.8.0"
 groups = ["main"]
 markers = "extra == \"datadog\""
 files = [
-    {file = "datadog_lambda-6.105.0-py3-none-any.whl", hash = "sha256:447d13b6f4971da8aa1227e554a1c2f8985b62aaacbb182bc093a7e048cd1fc4"},
-    {file = "datadog_lambda-6.105.0.tar.gz", hash = "sha256:59d7900b2136e14441dc29de4ff778301d2c8175cc26caf3819c648293357fbb"},
+    {file = "datadog_lambda-6.106.0-py3-none-any.whl", hash = "sha256:0b648c4d16e11e3bc95536f41b26d6ca3a973217221b705bd0a40aece364eee2"},
+    {file = "datadog_lambda-6.106.0.tar.gz", hash = "sha256:17abb2a4f1fe803e54bc4b35a6977e3e873c290c38b4c963096e054052fd0eea"},
 ]
 
 [package.dependencies]
