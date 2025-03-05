@@ -536,7 +536,9 @@ class Logger:
                 # Re-raise any exceptions that occur during handler execution
                 raise
             finally:
-                self._buffer_cache.clear()
+                # Clear the cache after invocation is complete
+                if self._buffer_config:
+                    self._buffer_cache.clear()
 
         return decorate
 
@@ -1117,7 +1119,7 @@ class Logger:
         # Determine tracer ID, defaulting to first invoke marker
         tracer_id = get_tracer_id()
 
-        if tracer_id:
+        if tracer_id and self._buffer_config:
             log_record: dict[str, Any] = _create_buffer_record(
                 level=level,
                 msg=msg,
@@ -1130,7 +1132,7 @@ class Logger:
                 self._buffer_cache.add(tracer_id, log_record)
             except BufferError:
                 warnings.warn(
-                    message=f"Cannot add item to the buffer. "
+                    message="Cannot add item to the buffer. "
                     f"Item size exceeds total cache size {self._buffer_config.max_size} bytes",
                     category=PowertoolsUserWarning,
                     stacklevel=2,
@@ -1181,6 +1183,19 @@ class Logger:
 
         # Clear the entire cache
         self._buffer_cache.clear()
+
+    def clear_buffer(self) -> None:
+        """
+        Clear the internal buffer cache.
+
+        This method removes all items from the buffer cache, effectively resetting it to an empty state.
+
+        Returns
+        -------
+        None
+        """
+        if self._buffer_config:
+            self._buffer_cache.clear()
 
 
 def set_package_logger(

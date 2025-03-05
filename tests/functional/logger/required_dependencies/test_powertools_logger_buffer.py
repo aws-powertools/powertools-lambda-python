@@ -190,6 +190,23 @@ def test_ensure_log_location_after_flush_buffer(stdout, service_name, monkeypatc
     assert "test_ensure_log_location_after_flush_buffer" in log[0]["location"]
 
 
+def test_clear_buffer_during_execution(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a sufficiently large buffer
+    logger_buffer_config = LoggerBufferConfig(max_size=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+
+    # WHEN we clear the buffer during the execution
+    logger.debug("this log line will be flushed")
+    logger.clear_buffer()
+
+    # THEN not log is flushed
+    logger.flush_buffer()
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+
 def test_exception_logging_during_buffer_flush(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
