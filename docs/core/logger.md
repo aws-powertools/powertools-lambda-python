@@ -562,88 +562,78 @@ Use the `@logger.inject_lambda_context` decorator to automatically flush buffere
 
 ##### Flushing manually
 
+<center>
 ```mermaid
 sequenceDiagram
     participant Client
     participant Lambda
     participant Logger
     participant CloudWatch
-
     Client->>Lambda: Invoke Lambda
     Lambda->>Logger: Initialize with DEBUG level buffering
     Logger-->>Lambda: Logger buffer ready
-
     Lambda->>Logger: logger.debug("First debug log")
     Logger-->>Logger: Buffer first debug log
-
     Lambda->>Logger: logger.info("Info log")
     Logger->>CloudWatch: Directly log info message
-
     Lambda->>Logger: logger.debug("Second debug log")
     Logger-->>Logger: Buffer second debug log
-
     Lambda->>Logger: logger.flush_buffer()
     Logger->>CloudWatch: Flush buffered debug logs to CloudWatch
-
     Lambda->>Client: Return execution result
-
 ```
+<i>Flushing buffer manually</i>
+</center>
 
 ##### Flushing on error
 
+<center>
 ```mermaid
 sequenceDiagram
     participant Client
     participant Lambda
     participant Logger
     participant CloudWatch
-
     Client->>Lambda: Invoke Lambda
     Lambda->>Logger: Initialize with DEBUG level buffering
     Logger-->>Lambda: Logger buffer ready
-
     Lambda->>Logger: logger.debug("First log")
     Logger-->>Logger: Buffer first debug log
-
     Lambda->>Logger: logger.debug("Second log")
     Logger-->>Logger: Buffer second debug log
-
     Lambda->>Logger: logger.debug("Third log")
     Logger-->>Logger: Buffer third debug log
-
     Lambda->>Lambda: Exception occurs
     Lambda->>Logger: logger.error("Error details")
     Logger->>CloudWatch: Send buffered debug logs
     Logger->>CloudWatch: Send error log
-
     Lambda->>Client: Raise exception
 ```
+<i>Flushing buffer when an error happens</i>
+</center>
 
 ##### Flushing when uncaught exception happens
 
+<center>
 ```mermaid
 sequenceDiagram
     participant Client
     participant Lambda
     participant Logger
     participant CloudWatch
-
     Client->>Lambda: Invoke Lambda
     Lambda->>Logger: Using decorator @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
     Logger-->>Lambda: Logger context injected
-
     Lambda->>Logger: logger.debug("First log")
     Logger-->>Logger: Buffer first debug log
-
     Lambda->>Logger: logger.debug("Second log")
     Logger-->>Logger: Buffer second debug log
-
     Lambda->>Lambda: Uncaught Exception
     Lambda->>CloudWatch: Automatically send buffered debug logs
-
     Lambda->>Client: Raise uncaught exception
-
 ```
+<i>Flushing buffer when an uncaught exception happens</i>
+</center>
 
 #### Common buffering questions
 

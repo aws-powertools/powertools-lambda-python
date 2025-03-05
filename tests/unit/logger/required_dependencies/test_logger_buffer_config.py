@@ -11,7 +11,6 @@ def test_default_configuration():
     assert config_buffer.max_size == 20480
     assert config_buffer.minimum_log_level == "DEBUG"
     assert config_buffer.flush_on_error is True
-    assert config_buffer.compress is False
 
 
 def test_custom_configuration():
@@ -20,14 +19,12 @@ def test_custom_configuration():
         max_size=51200,
         minimum_log_level="WARNING",
         flush_on_error=False,
-        compress=True,
     )
 
     # THEN configuration is set with provided values
     assert config_buffer.max_size == 51200
     assert config_buffer.minimum_log_level == "WARNING"
     assert config_buffer.flush_on_error is False
-    assert config_buffer.compress is True
 
 
 def test_invalid_max_size_negative():
@@ -79,13 +76,3 @@ def test_invalid_flush_on_error():
     with pytest.raises(ValueError, match="flush_on_error must be a boolean"):
         # THEN a ValueError is raised
         LoggerBufferConfig(flush_on_error=invalid_flush_on_error)
-
-
-def test_invalid_compress():
-    # GIVEN an invalid compress type
-    invalid_compress = "False"
-
-    # WHEN creating a LoggerBufferConfig / THEN
-    with pytest.raises(ValueError, match="compress must be a boolean"):
-        # THEN a ValueError is raised
-        LoggerBufferConfig(compress=invalid_compress)

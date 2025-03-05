@@ -43,7 +43,6 @@ class LoggerBufferConfig:
         max_size: int,
         minimum_log_level: str,
         flush_on_error: bool,
-        compress: bool,
     ) -> None:
         """
         Validate configuration inputs.
@@ -65,9 +64,6 @@ class LoggerBufferConfig:
         if not isinstance(flush_on_error, bool):
             raise ValueError("flush_on_error must be a boolean")
 
-        if not isinstance(compress, bool):
-            raise ValueError("compress must be a boolean")
-
     @property
     def max_size(self) -> int:
         """Maximum buffer size in bytes."""
@@ -82,8 +78,3 @@ class LoggerBufferConfig:
     def flush_on_error(self) -> bool:
         """Flag to flush buffer on error."""
         return self._flush_on_error
-
-    @property
-    def compress(self) -> bool:
-        """Flag to compress buffered logs."""
-        return self._compress
