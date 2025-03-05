@@ -1,7 +1,6 @@
 import pytest
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
-from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 def test_initialization():
@@ -61,7 +60,7 @@ def test_item_larger_than_cache():
     logger_cache = LoggerBufferCache(5)
 
     # WHEN an item larger than cache is added
-    with pytest.warns(expected_warning=PowertoolsUserWarning, match="Item size *"):
+    with pytest.raises(BufferError):
         # THEN a warning is raised
         logger_cache.add("key1", "very_long_item")
 

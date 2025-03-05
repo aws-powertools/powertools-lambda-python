@@ -198,7 +198,7 @@ def test_exception_logging_during_buffer_flush(stdout, service_name, monkeypatch
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     # Custom exception class
-    class MyError(BaseException):
+    class MyError(Exception):
         pass
 
     # WHEN Logging an exception and flushing the buffer
@@ -284,15 +284,21 @@ def test_flush_buffer_when_empty(stdout, service_name, monkeypatch):
 def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
+    message = "this log is bigger than entire buffer size"
+
     # GIVEN A logger configured with a small 10-byte buffer
     logger_buffer_config = LoggerBufferConfig(max_size=10, minimum_log_level="DEBUG")
 
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
     # WHEN Attempting to log a message larger than the entire buffer
-    # THE: A warning should be raised indicating buffer size limitation
+    # THEN A warning should be raised indicating buffer size limitation
     with pytest.warns(PowertoolsUserWarning, match="Cannot add item to the buffer*"):
-        logger.debug("this log is bigger than entire buffer size")
+        logger.debug(message)
+
+    # THEN the log must be flushed to avoid data loss
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["message"] == message
 
 
 @pytest.mark.parametrize("log_level", ["WARNING", "INFO"])
@@ -400,6 +406,7 @@ def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_nam
     logger_buffer_config = LoggerBufferConfig(max_size=10240)
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
 
+    @logger.inject_lambda_context
     def handler(event, context):
         logger.debug("debug line")
 
@@ -411,4 +418,4 @@ def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_nam
     handler({}, lambda_context)
 
     # THEN Verify buffer for the original trace ID is cleared
-    assert not logger.buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")
+    assert not logger._buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")

@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import warnings
 from collections import deque
 from typing import Any
-
-from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 class KeyBufferCache:
@@ -136,13 +133,7 @@ class LoggerBufferCache:
         # Check if item is larger than entire buffer
         item_size = len(str(item))
         if item_size > self.max_size_bytes:
-            warnings.warn(
-                message=f"Cannot add item to the buffer "
-                f"Item size {item_size} bytes exceeds total cache size {self.max_size_bytes} bytes",
-                category=PowertoolsUserWarning,
-                stacklevel=2,
-            )
-            return
+            raise BufferError("Cannot add item to the buffer")
 
         # Create the key's cache if it doesn't exist
         if key not in self.cache:
