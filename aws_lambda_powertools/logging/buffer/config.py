@@ -17,7 +17,6 @@ class LoggerBufferConfig:
         max_size: int = 20480,
         minimum_log_level: LOG_LEVEL_BUFFER_VALUES = "DEBUG",
         flush_on_error: bool = True,
-        compress: bool = False,
     ):
         """
         Initialize logger buffer configuration.
@@ -33,12 +32,11 @@ class LoggerBufferConfig:
         compress : bool, optional
             Whether to compress buffered logs
         """
-        self._validate_inputs(max_size, minimum_log_level, flush_on_error, compress)
+        self._validate_inputs(max_size, minimum_log_level, flush_on_error)
 
         self._max_size = max_size
         self._minimum_log_level = minimum_log_level.upper()
         self._flush_on_error = flush_on_error
-        self._compress = compress
 
     def _validate_inputs(
         self,

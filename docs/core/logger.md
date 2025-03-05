@@ -514,6 +514,153 @@ The following environment variables are available to configure Logger at a globa
 
 ## Advanced
 
+### Buffering logs
+
+Log buffering enables you to buffer logs for a specific request or invocation. Enable log buffering by passing `logger_buffer` when initializing a Logger instance. You can buffer logs at the `WARNING`, `INFO` or `DEBUG` level, and flush them automatically on error or manually as needed.
+
+!!! tip "This is useful when you want to keep logs clean while still providing detailed diagnostic information when needed."
+
+=== "getting_started_with_buffering_logs.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/getting_started_with_buffering_logs.py"
+    ```
+
+#### Customizing Buffer configuration
+
+When configuring log buffering, you have options to fine-tune how logs are captured, stored, and emitted. You can configure the following parameters in the `LoggerBufferConfig` constructor:
+
+| Parameter           | Description                                     | Configuration                |
+|-------------------- |------------------------------------------------ |----------------------------- |
+| `max_size`          | Maximum size of the log buffer in bytes         | `int` (default: 20480 bytes) |
+| `minimum_log_level` | Minimum log level to buffer                     | `DEBUG`, `INFO`, `WARNING`   |
+| `flush_on_error`    | Automatically flush buffer when an error occurs | `True` (default), `False`    |
+
+=== "working_with_buffering_logs_different_levels.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_different_levels.py"
+    ```
+
+=== "working_with_buffering_logs_disable_on_error.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_disable_on_error.py"
+    ```
+
+#### Flushing on uncaught exceptions
+
+Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an uncaught exception occurs in your Lambda function. The `flush_buffer_on_uncaught_error` parameter captures and flush all buffered logs records before the Lambda execution terminates.
+
+=== "working_with_buffering_logs_uncaught_exception.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_uncaught_exception.py"
+    ```
+
+#### Buffering workflows
+
+##### Flushing manually
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Initialize with DEBUG level buffering
+    Logger-->>Lambda: Logger buffer ready
+
+    Lambda->>Logger: logger.debug("First debug log")
+    Logger-->>Logger: Buffer first debug log
+
+    Lambda->>Logger: logger.info("Info log")
+    Logger->>CloudWatch: Directly log info message
+
+    Lambda->>Logger: logger.debug("Second debug log")
+    Logger-->>Logger: Buffer second debug log
+
+    Lambda->>Logger: logger.flush_buffer()
+    Logger->>CloudWatch: Flush buffered debug logs to CloudWatch
+
+    Lambda->>Client: Return execution result
+
+```
+
+##### Flushing on error
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Initialize with DEBUG level buffering
+    Logger-->>Lambda: Logger buffer ready
+
+    Lambda->>Logger: logger.debug("First log")
+    Logger-->>Logger: Buffer first debug log
+
+    Lambda->>Logger: logger.debug("Second log")
+    Logger-->>Logger: Buffer second debug log
+
+    Lambda->>Logger: logger.debug("Third log")
+    Logger-->>Logger: Buffer third debug log
+
+    Lambda->>Lambda: Exception occurs
+    Lambda->>Logger: logger.error("Error details")
+    Logger->>CloudWatch: Send buffered debug logs
+    Logger->>CloudWatch: Send error log
+
+    Lambda->>Client: Raise exception
+```
+
+##### Flushing when uncaught exception happens
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Using decorator @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
+    Logger-->>Lambda: Logger context injected
+
+    Lambda->>Logger: logger.debug("First log")
+    Logger-->>Logger: Buffer first debug log
+
+    Lambda->>Logger: logger.debug("Second log")
+    Logger-->>Logger: Buffer second debug log
+
+    Lambda->>Lambda: Uncaught Exception
+    Lambda->>CloudWatch: Automatically send buffered debug logs
+
+    Lambda->>Client: Raise uncaught exception
+
+```
+
+#### Common buffering questions
+
+When using log buffering to control log emissions in your AWS Lambda functions, it's important to follow best practices to avoid introducing complexity or unnecessary overhead. Keep these guidelines in mind:
+
+1. **How can I prevent log buffering from consuming excessive memory?** Set a `max_size` in `LoggerBufferConfig` to limit the buffer's memory footprint.
+
+2. **What happens if the log buffer reaches its maximum size?** The oldest logs are discarded when the buffer is full, making room for new logs. You need to set an appropriate `max_size` configuration.
+
+3. **Can I customize when logs are flushed?** Yes, use the `flush_on_error=True` in `LoggerBufferConfig` or use `flush_buffer_on_uncaught_error` in `@logger.inject_lambda_context` decorator.
+
+4. **What timestamp is used when I flush the logs?** The timestamp preserves the original time when the log record was created. If you create a log record at 11:00:10 and flush it at 11:00:25, the log line will retain its original timestamp of 11:00:10.
+
+5. **What happens if I try to add a log line that is bigger than max buffer size?** It will not buffer, but log as a normal log.
+
+6. **What happens if Lambda times out without flushing the buffer?** Buffer will be lost and no buffered logs will be flushed.
+
 ### Built-in Correlation ID expressions
 
 You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
