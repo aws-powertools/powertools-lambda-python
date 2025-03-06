@@ -526,7 +526,7 @@ Log buffering enables you to buffer logs for a specific request or invocation. E
     --8<-- "examples/logger/src/getting_started_with_buffering_logs.py"
     ```
 
-#### Customizing Buffer configuration
+#### Configuring the buffer
 
 When configuring log buffering, you have options to fine-tune how logs are captured, stored, and emitted. You can configure the following parameters in the `LoggerBufferConfig` constructor:
 
@@ -548,9 +548,9 @@ When configuring log buffering, you have options to fine-tune how logs are captu
     --8<-- "examples/logger/src/working_with_buffering_logs_disable_on_error.py"
     ```
 
-#### Flushing on uncaught exceptions
+#### Flushing on exceptions
 
-Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an uncaught exception occurs in your Lambda function. The `flush_buffer_on_uncaught_error` parameter captures and flush all buffered logs records before the Lambda execution terminates.
+Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an exception is raised in your Lambda function. The `flush_buffer_on_uncaught_error` parameter captures and flush all buffered logs records before the Lambda execution terminates.
 
 === "working_with_buffering_logs_uncaught_exception.py"
 
@@ -604,13 +604,13 @@ sequenceDiagram
     Lambda->>Logger: logger.debug("Second debug log")
     Logger-->>Logger: Buffer second debug log
     Lambda->>Logger: logger.flush_buffer()
-    Logger->>CloudWatch: Flush buffered debug logs to CloudWatch
+    Logger->>CloudWatch: Emit buffered logs to stdout
     Lambda->>Client: Return execution result
 ```
 <i>Flushing buffer manually</i>
 </center>
 
-##### Flushing on error
+##### Flushing when logging an error
 
 <center>
 ```mermaid
@@ -630,14 +630,16 @@ sequenceDiagram
     Logger-->>Logger: Buffer third debug log
     Lambda->>Lambda: Exception occurs
     Lambda->>Logger: logger.error("Error details")
-    Logger->>CloudWatch: Send buffered debug logs
-    Logger->>CloudWatch: Send error log
+    Logger->>CloudWatch: Emit buffered debug logs
+    Logger->>CloudWatch: Emit error log
     Lambda->>Client: Raise exception
 ```
 <i>Flushing buffer when an error happens</i>
 </center>
 
-##### Flushing when uncaught exception happens
+##### Flushing on exception
+
+This works only when decorating your Lambda handler with the decorator `@logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)`
 
 <center>
 ```mermaid
@@ -647,14 +649,14 @@ sequenceDiagram
     participant Logger
     participant CloudWatch
     Client->>Lambda: Invoke Lambda
-    Lambda->>Logger: Using decorator @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
+    Lambda->>Logger: Using decorator
     Logger-->>Lambda: Logger context injected
     Lambda->>Logger: logger.debug("First log")
     Logger-->>Logger: Buffer first debug log
     Lambda->>Logger: logger.debug("Second log")
     Logger-->>Logger: Buffer second debug log
     Lambda->>Lambda: Uncaught Exception
-    Lambda->>CloudWatch: Automatically send buffered debug logs
+    Lambda->>CloudWatch: Automatically emit buffered debug logs
     Lambda->>Client: Raise uncaught exception
 ```
 <i>Flushing buffer when an uncaught exception happens</i>
@@ -666,13 +668,13 @@ When using log buffering to control log emissions in your AWS Lambda functions, 
 
 1. **How can I prevent log buffering from consuming excessive memory?** Set a `max_size` in `LoggerBufferConfig` to limit the buffer's memory footprint.
 
-2. **What happens if the log buffer reaches its maximum size?** The oldest logs are discarded when the buffer is full, making room for new logs. You need to set an appropriate `max_size` configuration.
+2. **What happens if the log buffer reaches its maximum size?** The oldest logs are discarded when the buffer is full, making room for new logs. You need to set an appropriate `max_size` configuration. When this happens, we emit a warning when flushing the buffer to let you know this happened.
 
 3. **Can I customize when logs are flushed?** Yes, use the `flush_on_error=True` in `LoggerBufferConfig` or use `flush_buffer_on_uncaught_error` in `@logger.inject_lambda_context` decorator.
 
 4. **What timestamp is used when I flush the logs?** The timestamp preserves the original time when the log record was created. If you create a log record at 11:00:10 and flush it at 11:00:25, the log line will retain its original timestamp of 11:00:10.
 
-5. **What happens if I try to add a log line that is bigger than max buffer size?** It will not buffer, but log as a normal log.
+5. **What happens if I try to add a log line that is bigger than max buffer size?** It will not buffer, but log as a normal log and emit a warning.
 
 6. **What happens if Lambda times out without flushing the buffer?** Buffer will be lost and no buffered logs will be flushed.
 
