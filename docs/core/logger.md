@@ -522,7 +522,7 @@ Log buffering enables you to buffer logs for a specific request or invocation. E
 
 === "getting_started_with_buffering_logs.py"
 
-    ```python hl_lines="5 8"
+    ```python hl_lines="5 6 15"
     --8<-- "examples/logger/src/getting_started_with_buffering_logs.py"
     ```
 
@@ -538,13 +538,15 @@ When configuring log buffering, you have options to fine-tune how logs are captu
 
 === "working_with_buffering_logs_different_levels.py"
 
-    ```python hl_lines="5 8"
+    ```python hl_lines="5 6 10-12"
     --8<-- "examples/logger/src/working_with_buffering_logs_different_levels.py"
     ```
 
+    1. Setting `minimum_log_level="WARNING"` configures log buffering for `WARNING` and lower severity levels (`INFO`, `DEBUG`).
+
 === "working_with_buffering_logs_disable_on_error.py"
 
-    ```python hl_lines="5 8"
+    ```python hl_lines="5 6 14 21 24"
     --8<-- "examples/logger/src/working_with_buffering_logs_disable_on_error.py"
     ```
 
@@ -552,10 +554,10 @@ When configuring log buffering, you have options to fine-tune how logs are captu
 
 Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an exception is raised in your Lambda function. The `flush_buffer_on_uncaught_error` parameter captures and flush all buffered logs records before the Lambda execution terminates.
 
-=== "working_with_buffering_logs_uncaught_exception.py"
+=== "working_with_buffering_logs_when_raise_exception.py"
 
-    ```python hl_lines="5 8"
-    --8<-- "examples/logger/src/working_with_buffering_logs_uncaught_exception.py"
+    ```python hl_lines="5 6 13 19"
+    --8<-- "examples/logger/src/working_with_buffering_logs_when_raise_exception.py"
     ```
 
 #### Reutilizing same buffer instance

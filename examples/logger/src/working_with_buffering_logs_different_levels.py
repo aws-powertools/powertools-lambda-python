@@ -2,7 +2,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-logger_buffer_config = LoggerBufferConfig(minimum_log_level="WARNING")
+logger_buffer_config = LoggerBufferConfig(minimum_log_level="WARNING")  # (1)!
 logger = Logger(level="INFO", logger_buffer=logger_buffer_config)
 
 
