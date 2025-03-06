@@ -21,7 +21,7 @@ def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
-def test_idempotent_lambda(lambda_context: LambdaContext):
+def test_idempotent_lambda(lambda_context):
     mock_client = MagicMock()
     app_test_io_operations.persistence_layer.client = mock_client
     result = app_test_io_operations.handler({"testkey": "testvalue"}, lambda_context)

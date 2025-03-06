@@ -17,6 +17,6 @@ def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
-def test_lambda_handler(lambda_context: LambdaContext):
+def test_lambda_handler(lambda_context):
     test_event = {"test": "event"}
     fake_lambda_context_for_logger_module.handler(test_event, lambda_context)

@@ -17,7 +17,7 @@ def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
-def test_lambda_handler(lambda_context: LambdaContext):
+def test_lambda_handler(lambda_context):
     minimal_event = {
         "path": "/todos",
         "httpMethod": "GET",

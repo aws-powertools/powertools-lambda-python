@@ -24,7 +24,7 @@ def lambda_context() -> LambdaContext:
 
 
 @pytest.mark.asyncio
-async def test_async_direct_resolver(lambda_context: LambdaContext):
+async def test_async_direct_resolver(lambda_context):
     # GIVEN
     fake_event = json.loads(Path("assert_async_graphql_response.json").read_text())
 

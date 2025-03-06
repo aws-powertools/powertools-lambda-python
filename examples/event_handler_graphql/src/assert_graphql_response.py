@@ -21,7 +21,7 @@ def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
-def test_direct_resolver(lambda_context: LambdaContext):
+def test_direct_resolver(lambda_context):
     # GIVEN
     fake_event = json.loads(Path("assert_graphql_response.json").read_text())
 

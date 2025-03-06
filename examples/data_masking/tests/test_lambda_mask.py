@@ -20,7 +20,7 @@ def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
-def test_encrypt_lambda(lambda_context: LambdaContext):
+def test_encrypt_lambda(lambda_context):
     # GIVEN: A sample event for testing
     event = {"testkey": "testvalue"}
 
