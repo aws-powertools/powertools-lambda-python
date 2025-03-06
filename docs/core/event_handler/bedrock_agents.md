@@ -319,7 +319,7 @@ Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://do
 
 === "assert_bedrock_agent_response.py"
 
-	```python hl_lines="21-23 27"
+	```python hl_lines="22-24 28"
 	--8<-- "examples/event_handler_bedrock_agents/src/assert_bedrock_agent_response.py"
 	```
 
