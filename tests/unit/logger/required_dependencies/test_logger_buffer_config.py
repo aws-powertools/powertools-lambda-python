@@ -8,23 +8,23 @@ def test_default_configuration():
     config_buffer = LoggerBufferConfig()
 
     # THEN default values are default
-    assert config_buffer.max_size == 20480
-    assert config_buffer.minimum_log_level == "DEBUG"
-    assert config_buffer.flush_on_error is True
+    assert config_buffer.max_bytes == 20480
+    assert config_buffer.buffer_at_verbosity == "DEBUG"
+    assert config_buffer.flush_on_error_log is True
 
 
 def test_custom_configuration():
     # GIVEN a new LoggerBufferConfig with custom configuration parameters
     config_buffer = LoggerBufferConfig(
-        max_size=51200,
-        minimum_log_level="WARNING",
-        flush_on_error=False,
+        max_bytes=51200,
+        buffer_at_verbosity="WARNING",
+        flush_on_error_log=False,
     )
 
     # THEN configuration is set with provided values
-    assert config_buffer.max_size == 51200
-    assert config_buffer.minimum_log_level == "WARNING"
-    assert config_buffer.flush_on_error is False
+    assert config_buffer.max_bytes == 51200
+    assert config_buffer.buffer_at_verbosity == "WARNING"
+    assert config_buffer.flush_on_error_log is False
 
 
 def test_invalid_max_size_negative():
@@ -34,7 +34,7 @@ def test_invalid_max_size_negative():
     # WHEN creating a LoggerBufferConfig
     with pytest.raises(ValueError, match="Max size must be a positive integer"):
         # THEN a ValueError is raised
-        LoggerBufferConfig(max_size=invalid_max_size)
+        LoggerBufferConfig(max_bytes=invalid_max_size)
 
 
 def test_invalid_max_size_type():
@@ -44,7 +44,7 @@ def test_invalid_max_size_type():
     # WHEN creating a LoggerBufferConfig
     with pytest.raises(ValueError, match="Max size must be a positive integer"):
         # THEN a ValueError is raised
-        LoggerBufferConfig(max_size=invalid_max_size)
+        LoggerBufferConfig(max_bytes=invalid_max_size)
 
 
 def test_invalid_log_level():
@@ -55,7 +55,7 @@ def test_invalid_log_level():
     for invalid_log_level in invalid_log_levels:
         # THEN a ValueError is raised
         with pytest.raises(ValueError):
-            LoggerBufferConfig(minimum_log_level=invalid_log_level)
+            LoggerBufferConfig(buffer_at_verbosity=invalid_log_level)
 
 
 def test_case_insensitive_log_level():
@@ -64,8 +64,8 @@ def test_case_insensitive_log_level():
 
     # WHEN / THEN
     for log_level in test_cases:
-        config = LoggerBufferConfig(minimum_log_level=log_level)
-        assert config.minimum_log_level == log_level.upper()
+        config = LoggerBufferConfig(buffer_at_verbosity=log_level)
+        assert config.buffer_at_verbosity == log_level.upper()
 
 
 def test_invalid_flush_on_error():
@@ -75,4 +75,4 @@ def test_invalid_flush_on_error():
     # WHEN creating a LoggerBufferConfig / THEN
     with pytest.raises(ValueError, match="flush_on_error must be a boolean"):
         # THEN a ValueError is raised
-        LoggerBufferConfig(flush_on_error=invalid_flush_on_error)
+        LoggerBufferConfig(flush_on_error_log=invalid_flush_on_error)

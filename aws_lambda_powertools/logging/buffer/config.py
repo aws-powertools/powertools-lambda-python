@@ -14,35 +14,33 @@ class LoggerBufferConfig:
 
     def __init__(
         self,
-        max_size: int = 20480,
-        minimum_log_level: LOG_LEVEL_BUFFER_VALUES = "DEBUG",
-        flush_on_error: bool = True,
+        max_bytes: int = 20480,
+        buffer_at_verbosity: LOG_LEVEL_BUFFER_VALUES = "DEBUG",
+        flush_on_error_log: bool = True,
     ):
         """
         Initialize logger buffer configuration.
 
         Parameters
         ----------
-        max_size : int, optional
+        max_bytes : int, optional
             Maximum size of the buffer in bytes
-        minimum_log_level : str, optional
+        buffer_at_verbosity : str, optional
             Minimum log level to buffer
-        flush_on_error : bool, optional
+        flush_on_error_log : bool, optional
             Whether to flush the buffer when an error occurs
-        compress : bool, optional
-            Whether to compress buffered logs
         """
-        self._validate_inputs(max_size, minimum_log_level, flush_on_error)
+        self._validate_inputs(max_bytes, buffer_at_verbosity, flush_on_error_log)
 
-        self._max_size = max_size
-        self._minimum_log_level = minimum_log_level.upper()
-        self._flush_on_error = flush_on_error
+        self._max_bytes = max_bytes
+        self._buffer_at_verbosity = buffer_at_verbosity.upper()
+        self._flush_on_error_log = flush_on_error_log
 
     def _validate_inputs(
         self,
-        max_size: int,
-        minimum_log_level: str,
-        flush_on_error: bool,
+        max_bytes: int,
+        buffer_at_verbosity: str,
+        flush_on_error_log: bool,
     ) -> None:
         """
         Validate configuration inputs.
@@ -51,30 +49,30 @@ class LoggerBufferConfig:
         ----------
         Same as __init__ method parameters
         """
-        if not isinstance(max_size, int) or max_size <= 0:
+        if not isinstance(max_bytes, int) or max_bytes <= 0:
             raise ValueError("Max size must be a positive integer")
 
-        if not isinstance(minimum_log_level, str):
+        if not isinstance(buffer_at_verbosity, str):
             raise ValueError("Log level must be a string")
 
         # Validate log level
-        if minimum_log_level.upper() not in self.VALID_LOG_LEVELS:
+        if buffer_at_verbosity.upper() not in self.VALID_LOG_LEVELS:
             raise ValueError(f"Invalid log level. Must be one of {self.VALID_LOG_LEVELS}")
 
-        if not isinstance(flush_on_error, bool):
+        if not isinstance(flush_on_error_log, bool):
             raise ValueError("flush_on_error must be a boolean")
 
     @property
-    def max_size(self) -> int:
+    def max_bytes(self) -> int:
         """Maximum buffer size in bytes."""
-        return self._max_size
+        return self._max_bytes
 
     @property
-    def minimum_log_level(self) -> str:
+    def buffer_at_verbosity(self) -> str:
         """Minimum log level to buffer."""
-        return self._minimum_log_level
+        return self._buffer_at_verbosity
 
     @property
-    def flush_on_error(self) -> bool:
+    def flush_on_error_log(self) -> bool:
         """Flag to flush buffer on error."""
-        return self._flush_on_error
+        return self._flush_on_error_log

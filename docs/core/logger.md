@@ -11,6 +11,7 @@ Logger provides an opinionated logger with output structured as JSON.
 * Log Lambda event when instructed (disabled by default)
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
 * Append additional keys to structured log at any point in time
+* Buffering logs for a specific request or invocation, and flushing them automatically on error or manually as needed.
 
 ## Getting started
 
@@ -530,11 +531,13 @@ Log buffering enables you to buffer logs for a specific request or invocation. E
 
 When configuring log buffering, you have options to fine-tune how logs are captured, stored, and emitted. You can configure the following parameters in the `LoggerBufferConfig` constructor:
 
-| Parameter           | Description                                     | Configuration                |
-|-------------------- |------------------------------------------------ |----------------------------- |
-| `max_size`          | Maximum size of the log buffer in bytes         | `int` (default: 20480 bytes) |
-| `minimum_log_level` | Minimum log level to buffer                     | `DEBUG`, `INFO`, `WARNING`   |
-| `flush_on_error`    | Automatically flush buffer when an error occurs | `True` (default), `False`    |
+| Parameter             | Description                                     | Configuration                |
+|---------------------- |------------------------------------------------ |----------------------------- |
+| `max_bytes`           | Maximum size of the log buffer in bytes         | `int` (default: 20480 bytes) |
+| `buffer_at_verbosity` | Minimum log level to buffer                     | `DEBUG`, `INFO`, `WARNING`   |
+| `flush_on_error_log`  | Automatically flush buffer when an error occurs | `True` (default), `False`    |
+
+!!! note "When `flush_on_error_log` is enabled, it automatically flushes for `logger.exception()`, `logger.error()`, and `logger.critical()` statements."
 
 === "working_with_buffering_logs_different_levels.py"
 
@@ -549,6 +552,8 @@ When configuring log buffering, you have options to fine-tune how logs are captu
     ```python hl_lines="5 6 14 21 24"
     --8<-- "examples/logger/src/working_with_buffering_logs_disable_on_error.py"
     ```
+
+    1. Disabling `flush_on_error_log` will not flush the buffer when logging an error. This is useful when you want to control when the buffer is flushed by calling the `logger.flush_buffer()` method.
 
 #### Flushing on exceptions
 
@@ -566,6 +571,8 @@ If you are using log buffering, we recommend sharing the same log instance acros
 
 !!! note "Buffer Inheritance"
     Loggers created with the same `service_name` automatically inherit the buffer configuration from the first initialized logger with a buffer configuration.
+
+    Child loggers instances inherit their parent's buffer configuration but maintain a separate buffer.
 
 === "working_with_buffering_logs_creating_instance.py"
 

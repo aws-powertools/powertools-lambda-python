@@ -2,8 +2,8 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-logger_buffer_config = LoggerBufferConfig(max_size=20480, flush_on_error=False)
-logger = Logger(level="INFO", logger_buffer=logger_buffer_config)
+logger_buffer_config = LoggerBufferConfig(flush_on_error_log=False)  # (1)!
+logger = Logger(level="INFO", buffer_config=logger_buffer_config)
 
 
 class MyException(Exception):

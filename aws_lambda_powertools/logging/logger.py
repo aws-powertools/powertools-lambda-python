@@ -227,7 +227,7 @@ class Logger:
         utc: bool = False,
         use_rfc3339: bool = False,
         serialize_stacktrace: bool = True,
-        logger_buffer: LoggerBufferConfig | None = None,
+        buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
 
@@ -269,9 +269,9 @@ class Logger:
             "serialize_stacktrace": serialize_stacktrace,
         }
 
-        self._buffer_config = logger_buffer
+        self._buffer_config = buffer_config
         if self._buffer_config:
-            self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_size)
+            self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
 
         self._init_logger(
             formatter_options=formatter_options,
@@ -337,6 +337,11 @@ class Logger:
         is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child:
             self.setLevel(log_level)
+            if getattr(self._logger.parent, "powertools_buffer_config", None):
+                # Initializes a new, empty LoggerBufferCache for child logger
+                # Preserves parent's buffer configuration while resetting cache contents
+                self._buffer_config = self._logger.parent.powertools_buffer_config  # type: ignore[union-attr]
+                self._buffer_cache = LoggerBufferCache(self._logger.parent.powertools_buffer_config.max_bytes)  # type: ignore[union-attr]
             return
 
         if is_logger_preconfigured:
@@ -619,7 +624,7 @@ class Logger:
             )
 
         # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._buffer_config.minimum_log_level, "INFO"):
+        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "INFO"):
             return self._logger.info(
                 msg,
                 *args,
@@ -673,7 +678,7 @@ class Logger:
             )
 
         # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._buffer_config.minimum_log_level, "WARNING"):
+        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "WARNING"):
             return self._logger.warning(
                 msg,
                 *args,
@@ -711,7 +716,7 @@ class Logger:
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Error log is not "bufferable", so ensure error log is immediately available
 
-        if self._buffer_config and self._buffer_config.flush_on_error:
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
             self.flush_buffer()
 
         return self._logger.error(
@@ -741,7 +746,7 @@ class Logger:
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Critical log is not "bufferable", so ensure error log is immediately available
 
-        if self._buffer_config and self._buffer_config.flush_on_error:
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
             self.flush_buffer()
 
         return self._logger.critical(
@@ -770,7 +775,7 @@ class Logger:
         # 1. Buffer configuration checked for immediate flush
         # 2. If auto-flush enabled, trigger complete buffer processing
         # 3. Exception log is not "bufferable", so ensure error log is immediately available
-        if self._buffer_config and self._buffer_config.flush_on_error:
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
             self.flush_buffer()
 
         return self._logger.exception(
@@ -1133,7 +1138,7 @@ class Logger:
             except BufferError:
                 warnings.warn(
                     message="Cannot add item to the buffer. "
-                    f"Item size exceeds total cache size {self._buffer_config.max_size} bytes",
+                    f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
                     category=PowertoolsUserWarning,
                     stacklevel=2,
                 )

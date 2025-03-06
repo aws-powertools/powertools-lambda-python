@@ -52,8 +52,8 @@ def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_nam
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and minimum log level set to WARNING
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="WARNING")
-    logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING")
+    logger = Logger(level=log_level, service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     msg = "This is a test"
     log_command = {
@@ -73,8 +73,8 @@ def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_nam
 
 def test_logger_buffer_is_never_buffered_with_exception(stdout, service_name):
     # GIVEN A logger configured with a buffer and default logging behavior
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN An exception is raised and logged
     try:
@@ -89,8 +89,8 @@ def test_logger_buffer_is_never_buffered_with_exception(stdout, service_name):
 
 def test_logger_buffer_is_never_buffered_with_error(stdout, service_name):
     # GIVEN A logger configured with a buffer and default logging behavior
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Logging an error message
     logger.error("Received an exception")
@@ -105,8 +105,8 @@ def test_logger_buffer_is_flushed_when_an_error_happens(stdout, service_name, lo
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with buffer and automatic error-based flushing
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=True)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG", flush_on_error_log=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Adding debug log messages before triggering an error
     logger.debug("this log line will be flushed")
@@ -134,8 +134,8 @@ def test_logger_buffer_is_not_flushed_when_an_error_happens(stdout, service_name
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and error flushing disabled
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG", flush_on_error=False)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG", flush_on_error_log=False)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Adding debug log messages before an error
     logger.debug("this log line will be flushed")
@@ -162,8 +162,8 @@ def test_create_and_flush_logs(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a large buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Logging a message and then flushing the buffer
     logger.debug("this log line will be flushed")
@@ -178,8 +178,8 @@ def test_ensure_log_location_after_flush_buffer(stdout, service_name, monkeypatc
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a sufficiently large buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Logging a debug message and immediately flushing the buffer
     logger.debug("this log line will be flushed")
@@ -194,8 +194,8 @@ def test_clear_buffer_during_execution(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a sufficiently large buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN we clear the buffer during the execution
     logger.debug("this log line will be flushed")
@@ -211,8 +211,8 @@ def test_exception_logging_during_buffer_flush(stdout, service_name, monkeypatch
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a sufficiently large buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # Custom exception class
     class MyError(Exception):
@@ -237,8 +237,8 @@ def test_create_buffer_with_items_evicted(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a 1024-byte buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=1024, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Adding multiple log entries that exceed buffer size
     logger.debug("this log line will be flushed")
@@ -256,8 +256,8 @@ def test_create_buffer_with_items_evicted_with_next_invocation(stdout, service_n
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a 1024-byte buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=1024, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Adding multiple log entries that exceed buffer size
     message = "this log line will be flushed"
@@ -286,9 +286,9 @@ def test_flush_buffer_when_empty(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a 1024-byte buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=1024, minimum_log_level="DEBUG")
+    logger_buffer_config = LoggerBufferConfig(max_bytes=1024, buffer_at_verbosity="DEBUG")
 
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN: Flushing the buffer without adding any log entries
     logger.flush_buffer()
@@ -304,9 +304,9 @@ def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
     message = "this log is bigger than entire buffer size"
 
     # GIVEN A logger configured with a small 10-byte buffer
-    logger_buffer_config = LoggerBufferConfig(max_size=10, minimum_log_level="DEBUG")
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10, buffer_at_verbosity="DEBUG")
 
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # WHEN Attempting to log a message larger than the entire buffer
     # THEN A warning should be raised indicating buffer size limitation
@@ -323,8 +323,8 @@ def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, se
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and minimum log level set to DEBUG
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
-    logger = Logger(level=log_level, service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+    logger = Logger(level=log_level, service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     msg = f"This is a test with level {log_level}"
     log_command = {
@@ -346,8 +346,8 @@ def test_logger_buffer_flush_on_uncaught_exception(stdout, service_name, monkeyp
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a large buffer and error-based flushing
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
     def handler(event, context):
@@ -371,8 +371,8 @@ def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, mon
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN: A logger configured with a large buffer and error-based flushing
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     @logger.inject_lambda_context(flush_buffer_on_uncaught_error=False)
     def handler(event, context):
@@ -390,14 +390,14 @@ def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, mon
     assert len(log) == 0
 
 
-def test_buffer_configuration_propagation_across_logger_instances(stdout, service_name, monkeypatch):
+def test_buffer_configuration_and_buffer_propagation_across_logger_instances(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with specific buffer settings
-    logger_buffer_config = LoggerBufferConfig(max_size=10240, minimum_log_level="DEBUG")
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
 
     # Create primary logger with explicit buffer configuration
-    primary_logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    primary_logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     # Create secondary logger for the same service (should inherit buffer config)
     secondary_logger = Logger(level="DEBUG", service=service_name)
@@ -415,13 +415,68 @@ def test_buffer_configuration_propagation_across_logger_instances(stdout, servic
     assert primary_logger._logger.powertools_buffer_config == secondary_logger._logger.powertools_buffer_config
 
 
+def test_buffer_config_isolation_between_loggers_with_different_services(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with specific buffer settings
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+
+    # Create primary logger with explicit buffer configuration
+    buffered_logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # Configure another logger with a different service name
+    unbuffered_logger = Logger(level="DEBUG", service="powertoolsxyz")
+
+    # WHEN
+    # Log messages using both loggers and flush the buffer
+    buffered_logger.debug("Log message from buffered logger")
+    unbuffered_logger.debug("Log message from unbuffered logger")
+    buffered_logger.flush_buffer()
+
+    # THEN The buffered logger's message is present in the output
+    # THEN The loggers have different buffer configurations
+    log = capture_multiple_logging_statements_output(stdout)
+
+    assert "Log message from buffered logger" == log[0]["message"]
+    assert len(log) == 1
+    assert buffered_logger._logger.powertools_buffer_config != unbuffered_logger._logger.powertools_buffer_config
+
+
+def test_buffer_configuration_propagation_across_child_logger_instances(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with specific buffer settings
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+
+    # Create primary logger with explicit buffer configuration
+    primary_logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # Create a child log
+    secondary_logger = Logger(level="DEBUG", service=service_name, child=True)
+
+    # WHEN Logging messages and flushing the buffer
+    primary_logger.debug("Log message from primary logger")
+    secondary_logger.debug("Log message from secondary logger")
+
+    primary_logger.flush_buffer()
+
+    # THEN Verify log messages are correctly captured and output only for primary logger
+    # 1. Only one log message is output (from parent logger)
+    # 2. Buffer configuration is shared between parent and child
+    # 3. Buffer caches remain separate between instances
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert primary_logger._buffer_config == secondary_logger._buffer_config
+    assert primary_logger._buffer_cache != secondary_logger._buffer_cache
+
+
 def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_name, monkeypatch, lambda_context):
     # Set initial trace ID for first Lambda invocation
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with specific buffer parameters
-    logger_buffer_config = LoggerBufferConfig(max_size=10240)
-    logger = Logger(level="DEBUG", service=service_name, stream=stdout, logger_buffer=logger_buffer_config)
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     @logger.inject_lambda_context
     def handler(event, context):
