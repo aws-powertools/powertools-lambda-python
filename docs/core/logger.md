@@ -519,7 +519,7 @@ The following environment variables are available to configure Logger at a globa
 
 Log buffering enables you to buffer logs for a specific request or invocation. Enable log buffering by passing `logger_buffer` when initializing a Logger instance. You can buffer logs at the `WARNING`, `INFO` or `DEBUG` level, and flush them automatically on error or manually as needed.
 
-!!! tip "This is useful when you want to keep logs clean while still providing detailed diagnostic information when needed."
+!!! tip "This is useful when you want to reduce the number of log messages emitted while still having detailed logs when needed, such as when troubleshooting issues."
 
 === "getting_started_with_buffering_logs.py"
 
@@ -557,7 +557,7 @@ When configuring log buffering, you have options to fine-tune how logs are captu
 
 #### Flushing on exceptions
 
-Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an exception is raised in your Lambda function. The `flush_buffer_on_uncaught_error` parameter captures and flush all buffered logs records before the Lambda execution terminates.
+Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an exception is raised in your Lambda function. This is done by setting the `flush_buffer_on_uncaught_error` option to `True` in the decorator.
 
 === "working_with_buffering_logs_when_raise_exception.py"
 
@@ -594,7 +594,7 @@ If you are using log buffering, we recommend sharing the same log instance acros
 
 #### Buffering workflows
 
-##### Flushing manually
+##### Manual flush
 
 <center>
 ```mermaid
@@ -671,21 +671,23 @@ sequenceDiagram
 <i>Flushing buffer when an uncaught exception happens</i>
 </center>
 
-#### Common buffering questions
+#### Buffering FAQs
 
-When using log buffering to control log emissions in your AWS Lambda functions, it's important to follow best practices to avoid introducing complexity or unnecessary overhead. Keep these guidelines in mind:
+1. **Does the buffer persist across Lambda invocations?** No, each Lambda invocation has its own buffer. The buffer is initialized when the Lambda function is invoked and is cleared after the function execution completes or when flushed manually.
 
-1. **How can I prevent log buffering from consuming excessive memory?** Set a `max_size` in `LoggerBufferConfig` to limit the buffer's memory footprint.
+2. **Are my logs buffered during cold starts?** No, we never buffer logs during cold starts. This is because we want to ensure that logs emitted during this phase are always available for debugging and monitoring purposes. The buffer is only used during the execution of the Lambda function.
 
-2. **What happens if the log buffer reaches its maximum size?** The oldest logs are discarded when the buffer is full, making room for new logs. You need to set an appropriate `max_size` configuration. When this happens, we emit a warning when flushing the buffer to let you know this happened.
+3. **How can I prevent log buffering from consuming excessive memory?** You can limit the size of the buffer by setting the `max_bytes` option in the `LoggerBufferConfig` constructor parameter. This will ensure that the buffer does not grow indefinitely and consume excessive memory.
 
-3. **Can I customize when logs are flushed?** Yes, use the `flush_on_error=True` in `LoggerBufferConfig` or use `flush_buffer_on_uncaught_error` in `@logger.inject_lambda_context` decorator.
+4. **What happens if the log buffer reaches its maximum size?** Older logs are removed from the buffer to make room for new logs. This means that if the buffer is full, you may lose some logs if they are not flushed before the buffer reaches its maximum size. When this happens, we emit a warning when flushing the buffer to indicate that some logs have been dropped.
 
-4. **What timestamp is used when I flush the logs?** The timestamp preserves the original time when the log record was created. If you create a log record at 11:00:10 and flush it at 11:00:25, the log line will retain its original timestamp of 11:00:10.
+5. **What timestamp is used when I flush the logs?** The timestamp preserves the original time when the log record was created. If you create a log record at 11:00:10 and flush it at 11:00:25, the log line will retain its original timestamp of 11:00:10.
 
-5. **What happens if I try to add a log line that is bigger than max buffer size?** It will not buffer, but log as a normal log and emit a warning.
+6. **What happens if I try to add a log line that is bigger than max buffer size?** The log will be emitted directly to standard output and not buffered. When this happens, we emit a warning to indicate that the log line was too big to be buffered.
 
-6. **What happens if Lambda times out without flushing the buffer?** Buffer will be lost and no buffered logs will be flushed.
+7. **What happens if Lambda times out without flushing the buffer?** Logs that are still in the buffer will be lost.
+
+8. **Do child loggers inherit the buffer?**  No, child loggers do not inherit the buffer from their parent logger but only the buffer configuration. This means that if you create a child logger, it will have its own buffer and will not share the buffer with the parent logger.
 
 ### Built-in Correlation ID expressions
 
