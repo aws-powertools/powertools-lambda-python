@@ -558,6 +558,31 @@ Use the `@logger.inject_lambda_context` decorator to automatically flush buffere
     --8<-- "examples/logger/src/working_with_buffering_logs_uncaught_exception.py"
     ```
 
+#### Reutilizing same buffer instance
+
+Reuse the same logger instance across multiple files within a service. Doing this you can centralize logger instance creation and prevent buffer configuration drift.
+
+!!! note "Buffer Inheritance"
+    Loggers created with the same `service_name` automatically inherit the buffer configuration from the first initialized logger with a buffer configuration.
+
+=== "working_with_buffering_logs_creating_instance.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_creating_instance.py"
+    ```
+
+=== "working_with_buffering_logs_reusing_handler.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_reusing_handler.py"
+    ```
+
+=== "working_with_buffering_logs_reusing_function.py"
+
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/working_with_buffering_logs_reusing_function.py"
+    ```
+
 #### Buffering workflows
 
 ##### Flushing manually
