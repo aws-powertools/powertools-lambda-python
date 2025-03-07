@@ -1500,7 +1500,7 @@ class ApiGatewayResolver(BaseRouter):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_code=None,
+        response_validation_error_http_code: HTTPStatus | int | None = None,
     ):
         """
         Parameters
@@ -1521,7 +1521,7 @@ class ApiGatewayResolver(BaseRouter):
         enable_validation: bool | None
             Enables validation of the request body against the route schema, by default False.
         response_validation_error_http_code
-            Enables response validation and sets returned status code if response is not validated.
+            Sets the returned status code if response is not validated. enable_validation must be True.
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: list[Route] = []
