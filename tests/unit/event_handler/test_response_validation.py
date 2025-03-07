@@ -11,7 +11,7 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValid
 app = APIGatewayRestResolver(enable_validation=True)
 app_with_custom_response_validation_error = APIGatewayRestResolver(
     enable_validation=True,
-    response_validation_error_http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
+    response_validation_error_http_code=HTTPStatus.INTERNAL_SERVER_ERROR,
 )
 
 
@@ -182,22 +182,22 @@ class TestCustomResponseValidation:
 
     def test_incorrect_resolver_config_no_validation(self):
         with pytest.raises(ValueError) as exception_info:
-            APIGatewayRestResolver(response_validation_error_http_status=500)
+            APIGatewayRestResolver(response_validation_error_http_code=500)
 
         assert (
             str(exception_info.value)
-            == "'response_validation_error_http_status' cannot be set when enable_validation is False."
+            == "'response_validation_error_http_code' cannot be set when enable_validation is False."
         )
 
-    @pytest.mark.parametrize("response_validation_error_http_status", [(20), ("hi"), (1.21)])
-    def test_incorrect_resolver_config_bad_http_status_code(self, response_validation_error_http_status):
+    @pytest.mark.parametrize("response_validation_error_http_code", [(20), ("hi"), (1.21)])
+    def test_incorrect_resolver_config_bad_http_status_code(self, response_validation_error_http_code):
         with pytest.raises(ValueError) as exception_info:
             APIGatewayRestResolver(
                 enable_validation=True,
-                response_validation_error_http_status=response_validation_error_http_status,
+                response_validation_error_http_code=response_validation_error_http_code,
             )
 
         assert (
             str(exception_info.value)
-            == f"'{response_validation_error_http_status}' must be an integer representing an HTTP status code."
+            == f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
         )
