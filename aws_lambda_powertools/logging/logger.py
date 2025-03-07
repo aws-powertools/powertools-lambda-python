@@ -109,6 +109,8 @@ class Logger:
         custom logging handler e.g. logging.FileHandler("file.log")
     log_uncaught_exceptions: bool, by default False
         logs uncaught exception using sys.excepthook
+    buffer_config: LoggerBufferConfig, optional
+        logger buffer configuration
 
         See: https://docs.python.org/3/library/sys.html#sys.excepthook
 
