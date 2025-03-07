@@ -1538,26 +1538,9 @@ class ApiGatewayResolver(BaseRouter):
         self.processed_stack_frames = []
         self._response_builder_class = ResponseBuilder[BaseProxyEvent]
         self._has_response_validation_error = response_validation_error_http_code is not None
-
-        if response_validation_error_http_code and not enable_validation:
-            msg = "'response_validation_error_http_code' cannot be set when enable_validation is False."
-            raise ValueError(msg)
-
-        if (
-            not isinstance(response_validation_error_http_code, HTTPStatus)
-            and response_validation_error_http_code is not None
-        ):
-
-            try:
-                response_validation_error_http_code = HTTPStatus(response_validation_error_http_code)
-            except ValueError:
-                msg = f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
-                raise ValueError(msg) from None
-
-        self._response_validation_error_http_code = (
-            response_validation_error_http_code
-            if response_validation_error_http_code
-            else HTTPStatus.UNPROCESSABLE_ENTITY
+        self._response_validation_error_http_code = self._validate_response_validation_error_http_code(
+            response_validation_error_http_code,
+            enable_validation,
         )
 
         # Allow for a custom serializer or a concise json serialization
@@ -1576,6 +1559,33 @@ class ApiGatewayResolver(BaseRouter):
                     ),
                 ],
             )
+
+    def _validate_response_validation_error_http_code(
+        self,
+        response_validation_error_http_code: HTTPStatus | int | None,
+        enable_validation: bool,
+    ) -> HTTPStatus:
+        if response_validation_error_http_code and not enable_validation:
+            msg = "'response_validation_error_http_code' cannot be set when enable_validation is False."
+            raise ValueError(msg)
+
+        if (
+            not isinstance(response_validation_error_http_code, HTTPStatus)
+            and response_validation_error_http_code is not None
+        ):
+
+            try:
+                response_validation_error_http_code = HTTPStatus(response_validation_error_http_code)
+            except ValueError:
+                msg = f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
+                raise ValueError(msg) from None
+
+        return (
+            response_validation_error_http_code
+            if response_validation_error_http_code
+            else HTTPStatus.UNPROCESSABLE_ENTITY
+        )
+
 
     def get_openapi_schema(
         self,
