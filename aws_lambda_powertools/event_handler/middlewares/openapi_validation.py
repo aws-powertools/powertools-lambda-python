@@ -72,10 +72,9 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             Optional serializer to use when serializing the response for validation.
             Use it when you have a custom type that cannot be serialized by the default jsonable_encoder.
 
-        custom_serialize_response_error: ValidationException, optional
-            Optional error type to raise when response to be returned by the endpoint is not
-            serialisable according to field type.
-            Raises RequestValidationError by default.
+        has_response_validation_error: bool, optional
+            Optional flag used to distinguish between payload and validation errors.
+            By setting this flag to True, ResponseValidationError will be raised if response could not be validated.
         """
         self._validation_serializer = validation_serializer
         self._has_response_validation_error = has_response_validation_error
