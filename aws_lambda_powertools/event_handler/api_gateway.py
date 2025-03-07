@@ -1500,7 +1500,7 @@ class ApiGatewayResolver(BaseRouter):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status=None,
+        response_validation_error_http_code=None,
     ):
         """
         Parameters
@@ -1520,7 +1520,7 @@ class ApiGatewayResolver(BaseRouter):
             Each prefix can be a static string or a compiled regex pattern
         enable_validation: bool | None
             Enables validation of the request body against the route schema, by default False.
-        response_validation_error_http_status
+        response_validation_error_http_code
             Enables response validation and sets returned status code if response is not validated.
         """
         self._proxy_type = proxy_type
@@ -1537,26 +1537,26 @@ class ApiGatewayResolver(BaseRouter):
         self.context: dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
         self._response_builder_class = ResponseBuilder[BaseProxyEvent]
-        self._has_response_validation_error = response_validation_error_http_status is not None
+        self._has_response_validation_error = response_validation_error_http_code is not None
 
-        if response_validation_error_http_status and not enable_validation:
-            msg = "'response_validation_error_http_status' cannot be set when enable_validation is False."
+        if response_validation_error_http_code and not enable_validation:
+            msg = "'response_validation_error_http_code' cannot be set when enable_validation is False."
             raise ValueError(msg)
 
         if (
-            not isinstance(response_validation_error_http_status, HTTPStatus)
-            and response_validation_error_http_status is not None
+            not isinstance(response_validation_error_http_code, HTTPStatus)
+            and response_validation_error_http_code is not None
         ):
 
             try:
-                response_validation_error_http_status = HTTPStatus(response_validation_error_http_status)
+                response_validation_error_http_code = HTTPStatus(response_validation_error_http_code)
             except ValueError:
-                msg = f"'{response_validation_error_http_status}' must be an integer representing an HTTP status code."
+                msg = f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
                 raise ValueError(msg) from None
 
-        self._response_validation_error_http_status = (
-            response_validation_error_http_status
-            if response_validation_error_http_status
+        self._response_validation_error_http_code = (
+            response_validation_error_http_code
+            if response_validation_error_http_code
             else HTTPStatus.UNPROCESSABLE_ENTITY
         )
 
@@ -2407,11 +2407,11 @@ class ApiGatewayResolver(BaseRouter):
             )
 
         # OpenAPIValidationMiddleware will only raise ResponseValidationError when
-        # 'self._response_validation_error_http_status' is not None
+        # 'self._response_validation_error_http_code' is not None
         if isinstance(exp, ResponseValidationError):
             http_status = (
-                self._response_validation_error_http_status
-                if self._response_validation_error_http_status
+                self._response_validation_error_http_code
+                if self._response_validation_error_http_code
                 else HTTPStatus.UNPROCESSABLE_ENTITY
             )
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
@@ -2419,7 +2419,7 @@ class ApiGatewayResolver(BaseRouter):
                 response=Response(
                     status_code=http_status.value,
                     content_type=content_types.APPLICATION_JSON,
-                    body={"statusCode": self._response_validation_error_http_status, "detail": errors},
+                    body={"statusCode": self._response_validation_error_http_code, "detail": errors},
                 ),
                 serializer=self._serializer,
                 route=route,
@@ -2637,7 +2637,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status: HTTPStatus | int | None = None,
+        response_validation_error_http_code: HTTPStatus | int | None = None,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(
@@ -2647,7 +2647,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
-            response_validation_error_http_status,
+            response_validation_error_http_code,
         )
 
     def _get_base_path(self) -> str:
@@ -2721,7 +2721,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status: HTTPStatus | int | None = None,
+        response_validation_error_http_code: HTTPStatus | int | None = None,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(
@@ -2731,7 +2731,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
-            response_validation_error_http_status,
+            response_validation_error_http_code,
         )
 
     def _get_base_path(self) -> str:
@@ -2760,7 +2760,7 @@ class ALBResolver(ApiGatewayResolver):
         serializer: Callable[[dict], str] | None = None,
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
-        response_validation_error_http_status: HTTPStatus | int | None = None,
+        response_validation_error_http_code: HTTPStatus | int | None = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(
@@ -2770,7 +2770,7 @@ class ALBResolver(ApiGatewayResolver):
             serializer,
             strip_prefixes,
             enable_validation,
-            response_validation_error_http_status,
+            response_validation_error_http_code,
         )
 
     def _get_base_path(self) -> str:

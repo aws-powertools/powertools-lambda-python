@@ -400,7 +400,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 #### Validating responses
 
-The optional `response_validation_error_http_status` argument can be set for all the resolvers to distinguish between failed data validation of payload and response. The desired HTTP status code for failed response validation must be passed to this argument.
+The optional `response_validation_error_http_code` argument can be set for all the resolvers to distinguish between failed data validation of payload and response. The desired HTTP status code for failed response validation must be passed to this argument.
 
 Following on from our previous example, we want to distinguish between an invalid payload sent by the user and an invalid response which is being proxying to the user from another endpoint.
 

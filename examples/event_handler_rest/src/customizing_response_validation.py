@@ -15,7 +15,7 @@ tracer = Tracer()
 logger = Logger()
 app = APIGatewayRestResolver(
     enable_validation=True,
-    response_validation_error_http_status=HTTPStatus.INTERNAL_SERVER_ERROR, # (1)!
+    response_validation_error_http_code=HTTPStatus.INTERNAL_SERVER_ERROR,  # (1)!
 )
 
 
@@ -25,15 +25,17 @@ class Todo(BaseModel):
     title: str
     completed: bool
 
+
 @app.get("/todos_bad_response/<todo_id>")
 @tracer.capture_method
-def get_todo_by_id(todo_id: int) -> Todo: # (2)!
+def get_todo_by_id(todo_id: int) -> Todo:  # (2)!
     todo = requests.get(f"https://jsonplaceholder.typicode.com/todos/{todo_id}")
     todo.raise_for_status()
 
-    return todo.json()["title"] # (3)!
+    return todo.json()["title"]  # (3)!
 
-@app.exception_handler(ResponseValidationError) # (4)!
+
+@app.exception_handler(ResponseValidationError)  # (4)!
 def handle_response_validation_error(ex: ResponseValidationError):
     logger.error("Request failed validation", path=app.current_event.path, errors=ex.errors())
 
@@ -42,6 +44,7 @@ def handle_response_validation_error(ex: ResponseValidationError):
         content_type=content_types.APPLICATION_JSON,
         body="Unexpected response.",
     )
+
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
 @tracer.capture_lambda_handler
