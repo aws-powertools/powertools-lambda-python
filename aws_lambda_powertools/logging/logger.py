@@ -16,12 +16,17 @@ import warnings
 from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, cast, overload
 
+from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
+from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level, _create_buffer_record
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_HANDLER,
     LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
-from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
+from aws_lambda_powertools.logging.exceptions import (
+    InvalidLoggerSamplingRateError,
+    OrphanedChildLoggerError,
+)
 from aws_lambda_powertools.logging.filters import SuppressFilter
 from aws_lambda_powertools.logging.formatter import (
     RESERVED_FORMATTER_CUSTOM_KEYS,
@@ -32,13 +37,17 @@ from aws_lambda_powertools.logging.lambda_context import build_lambda_context_mo
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
+    get_tracer_id,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
 from aws_lambda_powertools.utilities import jmespath_utils
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
+    from aws_lambda_powertools.logging.buffer.config import LoggerBufferConfig
     from aws_lambda_powertools.shared.types import AnyCallableT
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +109,8 @@ class Logger:
         custom logging handler e.g. logging.FileHandler("file.log")
     log_uncaught_exceptions: bool, by default False
         logs uncaught exception using sys.excepthook
+    buffer_config: LoggerBufferConfig, optional
+        logger buffer configuration
 
         See: https://docs.python.org/3/library/sys.html#sys.excepthook
 
@@ -218,6 +229,7 @@ class Logger:
         utc: bool = False,
         use_rfc3339: bool = False,
         serialize_stacktrace: bool = True,
+        buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
 
@@ -259,7 +271,17 @@ class Logger:
             "serialize_stacktrace": serialize_stacktrace,
         }
 
-        self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
+        self._buffer_config = buffer_config
+        if self._buffer_config:
+            self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
+
+        self._init_logger(
+            formatter_options=formatter_options,
+            log_level=level,
+            buffer_config=self._buffer_config,
+            buffer_cache=getattr(self, "_buffer_cache", None),
+            **kwargs,
+        )
 
         if self.log_uncaught_exceptions:
             logger.debug("Replacing exception hook")
@@ -303,6 +325,8 @@ class Logger:
         self,
         formatter_options: dict | None = None,
         log_level: str | int | None = None,
+        buffer_config: LoggerBufferConfig | None = None,
+        buffer_cache: LoggerBufferCache | None = None,
         **kwargs,
     ) -> None:
         """Configures new logger"""
@@ -315,9 +339,19 @@ class Logger:
         is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child:
             self.setLevel(log_level)
+            if getattr(self._logger.parent, "powertools_buffer_config", None):
+                # Initializes a new, empty LoggerBufferCache for child logger
+                # Preserves parent's buffer configuration while resetting cache contents
+                self._buffer_config = self._logger.parent.powertools_buffer_config  # type: ignore[union-attr]
+                self._buffer_cache = LoggerBufferCache(self._logger.parent.powertools_buffer_config.max_bytes)  # type: ignore[union-attr]
             return
 
         if is_logger_preconfigured:
+            # Reuse existing buffer configuration from a previously configured logger
+            # Ensures consistent buffer settings across logger instances within the same service
+            # Enables buffer propagation and maintains a unified logging configuration
+            self._buffer_config = self._logger.powertools_buffer_config  # type: ignore[attr-defined]
+            self._buffer_cache = self._logger.powertools_buffer_cache  # type: ignore[attr-defined]
             return
 
         self.setLevel(log_level)
@@ -342,6 +376,8 @@ class Logger:
         logger.debug(f"Marking logger {self.service} as preconfigured")
         self._logger.init = True  # type: ignore[attr-defined]
         self._logger.powertools_handler = self.logger_handler  # type: ignore[attr-defined]
+        self._logger.powertools_buffer_config = buffer_config  # type: ignore[attr-defined]
+        self._logger.powertools_buffer_cache = buffer_cache  # type: ignore[attr-defined]
 
     def refresh_sample_rate_calculation(self) -> None:
         """
@@ -386,6 +422,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> AnyCallableT: ...
 
     @overload
@@ -395,6 +432,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
@@ -403,6 +441,7 @@ class Logger:
         log_event: bool | None = None,
         correlation_id_path: str | None = None,
         clear_state: bool | None = False,
+        flush_buffer_on_uncaught_error: bool = False,
     ) -> Any:
         """Decorator to capture Lambda contextual info and inject into logger
 
@@ -459,6 +498,7 @@ class Logger:
                 log_event=log_event,
                 correlation_id_path=correlation_id_path,
                 clear_state=clear_state,
+                flush_buffer_on_uncaught_error=flush_buffer_on_uncaught_error,
             )
 
         log_event = resolve_truthy_env_var_choice(
@@ -491,9 +531,66 @@ class Logger:
             if self.sampling_rate and not cold_start:
                 self.refresh_sample_rate_calculation()
 
-            return lambda_handler(event, context, *args, **kwargs)
+            try:
+                # Execute the Lambda handler with provided event and context
+                return lambda_handler(event, context, *args, **kwargs)
+            except:
+                # Flush the log buffer if configured to do so on uncaught errors
+                # Ensures logging state is cleaned up even if an exception is raised
+                if flush_buffer_on_uncaught_error:
+                    logger.debug("Uncaught error detected, flushing log buffer before exit")
+                    self.flush_buffer()
+                # Re-raise any exceptions that occur during handler execution
+                raise
+            finally:
+                # Clear the cache after invocation is complete
+                if self._buffer_config:
+                    self._buffer_cache.clear()
 
         return decorate
+
+    def debug(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Logging workflow for logging.debug:
+        # 1. Buffer is completely disabled - log right away
+        # 2. DEBUG is the maximum level of buffer, so, can't bypass if enabled
+        # 3. Store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
+        if not self._buffer_config:
+            return self._logger.debug(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.DEBUG,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+        )
 
     def info(
         self,
@@ -508,12 +605,98 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        return self._logger.info(
-            msg,
-            *args,
+        # Logging workflow for logging.info:
+        # 1. Buffer is completely disabled - log right away
+        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
+        # 3. If neither condition met, store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
+        if not self._buffer_config:
+            return self._logger.info(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Bypass buffer when log severity meets or exceeds configured minimum
+        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "INFO"):
+            return self._logger.info(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.INFO,
+            msg=msg,
+            args=args,
             exc_info=exc_info,
             stack_info=stack_info,
-            stacklevel=stacklevel,
+            extra=extra,
+        )
+
+    def warning(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        extra = extra or {}
+        extra = {**extra, **kwargs}
+
+        # Logging workflow for logging.warning:
+        # 1. Buffer is completely disabled - log right away
+        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
+        # 3. If neither condition met, store in buffer for potential later processing
+
+        # MAINTAINABILITY_DECISION:
+        # Keeping this implementation to avoid complex code handling.
+        # Also for clarity over complexity
+
+        # Buffer is not active and we need to log immediately
+        if not self._buffer_config:
+            return self._logger.warning(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Bypass buffer when log severity meets or exceeds configured minimum
+        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "WARNING"):
+            return self._logger.warning(
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Store record in the buffer
+        self._add_log_record_to_buffer(
+            level=logging.WARNING,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
             extra=extra,
         )
 
@@ -530,29 +713,15 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Error log is not "bufferable", so ensure error log is immediately available
+
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
+            self.flush_buffer()
+
         return self._logger.error(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
-
-    def exception(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: logging._ExcInfoType = True,
-        stack_info: bool = False,
-        stacklevel: int = 2,
-        extra: Mapping[str, object] | None = None,
-        **kwargs: object,
-    ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        return self._logger.exception(
             msg,
             *args,
             exc_info=exc_info,
@@ -574,6 +743,14 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Critical log is not "bufferable", so ensure error log is immediately available
+
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
+            self.flush_buffer()
+
         return self._logger.critical(
             msg,
             *args,
@@ -583,11 +760,11 @@ class Logger:
             extra=extra,
         )
 
-    def warning(
+    def exception(
         self,
         msg: object,
         *args: object,
-        exc_info: logging._ExcInfoType = None,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Mapping[str, object] | None = None,
@@ -596,29 +773,14 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        return self._logger.warning(
-            msg,
-            *args,
-            exc_info=exc_info,
-            stack_info=stack_info,
-            stacklevel=stacklevel,
-            extra=extra,
-        )
+        # Workflow: Error Logging with automatic buffer flushing
+        # 1. Buffer configuration checked for immediate flush
+        # 2. If auto-flush enabled, trigger complete buffer processing
+        # 3. Exception log is not "bufferable", so ensure error log is immediately available
+        if self._buffer_config and self._buffer_config.flush_on_error_log:
+            self.flush_buffer()
 
-    def debug(
-        self,
-        msg: object,
-        *args: object,
-        exc_info: logging._ExcInfoType = None,
-        stack_info: bool = False,
-        stacklevel: int = 2,
-        extra: Mapping[str, object] | None = None,
-        **kwargs: object,
-    ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        return self._logger.debug(
+        return self._logger.exception(
             msg,
             *args,
             exc_info=exc_info,
@@ -886,6 +1048,161 @@ class Logger:
 
         # Powertools log level is set, we use this
         return powertools_log_level.upper()
+
+    # FUNCTIONS for Buffering log
+
+    def _create_and_flush_log_record(self, log_line: dict) -> None:
+        """
+        Create and immediately flush a log record to the configured logger.
+
+        Parameters
+        ----------
+        log_line : dict[str, Any]
+            Dictionary containing log record details with keys:
+            - 'level': Logging level
+            - 'filename': Source filename
+            - 'line': Line number
+            - 'msg': Log message
+            - 'function': Source function name
+            - 'extra': Additional context
+            - 'timestamp': Original log creation time
+
+        Notes
+        -----
+        Bypasses standard logging flow by directly creating and handling a log record.
+        Preserves original timestamp and source information.
+        """
+        record = self._logger.makeRecord(
+            name=self.name,
+            level=log_line["level"],
+            fn=log_line["filename"],
+            lno=log_line["line"],
+            msg=log_line["msg"],
+            args=(),
+            exc_info=log_line["exc_info"],
+            func=log_line["function"],
+            extra=log_line["extra"],
+        )
+        record.created = log_line["timestamp"]
+        self._logger.handle(record)
+
+    def _add_log_record_to_buffer(
+        self,
+        level: int,
+        msg: object,
+        args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        extra: Mapping[str, object] | None = None,
+    ) -> None:
+        """
+        Add log record to buffer with intelligent tracer ID handling.
+
+        Parameters
+        ----------
+        level : int
+            Logging level of the record.
+        msg : object
+            Log message to be recorded.
+        args : object
+            Additional arguments for the log message.
+        exc_info : logging._ExcInfoType, optional
+            Exception information for the log record.
+        stack_info : bool, optional
+            Whether to include stack information.
+        extra : Mapping[str, object], optional
+            Additional contextual information for the log record.
+
+        Raises
+        ------
+        InvalidBufferItem
+            If the log record cannot be added to the buffer.
+
+        Notes
+        -----
+        Handles special first invocation buffering and migration of log records
+        between different tracer contexts.
+        """
+        # Determine tracer ID, defaulting to first invoke marker
+        tracer_id = get_tracer_id()
+
+        if tracer_id and self._buffer_config:
+            log_record: dict[str, Any] = _create_buffer_record(
+                level=level,
+                msg=msg,
+                args=args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                extra=extra,
+            )
+            try:
+                self._buffer_cache.add(tracer_id, log_record)
+            except BufferError:
+                warnings.warn(
+                    message="Cannot add item to the buffer. "
+                    f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
+                    category=PowertoolsUserWarning,
+                    stacklevel=2,
+                )
+
+                # flush this log to avoid data loss
+                self._create_and_flush_log_record(log_record)
+
+    def flush_buffer(self) -> None:
+        """
+        Flush all buffered log records associated with current execution.
+
+        Notes
+        -----
+        Retrieves log records for current trace from buffer
+        Immediately processes and logs each record
+        Warning if some cache was evicted in that execution
+        Clears buffer after complete processing
+
+        Raises
+        ------
+        Any exceptions from underlying logging or buffer mechanisms
+        will be propagated to caller
+        """
+        tracer_id = get_tracer_id()
+
+        # Flushing log without a tracer id? Return
+        if not tracer_id:
+            return
+
+        # is buffer empty? return
+        buffer = self._buffer_cache.get(tracer_id)
+        if not buffer:
+            return
+
+        # Process log records
+        for log_line in buffer:
+            self._create_and_flush_log_record(log_line)
+
+        # Has items evicted?
+        if self._buffer_cache.has_items_evicted(tracer_id):
+            warnings.warn(
+                message="Some logs are not displayed because they were evicted from the buffer. "
+                "Increase buffer size to store more logs in the buffer",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+
+        # Clear the entire cache
+        self._buffer_cache.clear()
+
+    def clear_buffer(self) -> None:
+        """
+        Clear the internal buffer cache.
+
+        This method removes all items from the buffer cache, effectively resetting it to an empty state.
+
+        Returns
+        -------
+        None
+        """
+        if self._buffer_config:
+            self._buffer_cache.clear()
 
 
 def set_package_logger(
