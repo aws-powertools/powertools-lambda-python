@@ -2419,15 +2419,11 @@ class ApiGatewayResolver(BaseRouter):
         # OpenAPIValidationMiddleware will only raise ResponseValidationError when
         # 'self._response_validation_error_http_code' is not None
         if isinstance(exp, ResponseValidationError):
-            http_status = (
-                self._response_validation_error_http_code
-                if self._response_validation_error_http_code
-                else HTTPStatus.UNPROCESSABLE_ENTITY
-            )
+            http_code = self._response_validation_error_http_code
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
             return self._response_builder_class(
                 response=Response(
-                    status_code=http_status.value,
+                    status_code=http_code.value,
                     content_type=content_types.APPLICATION_JSON,
                     body={"statusCode": self._response_validation_error_http_code, "detail": errors},
                 ),
