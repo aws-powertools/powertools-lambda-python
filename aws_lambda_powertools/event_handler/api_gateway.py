@@ -320,6 +320,7 @@ class Route:
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Response]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ):
         """
         Internally used Route Configuration
@@ -362,6 +363,7 @@ class Route:
             Whether or not to mark this route as deprecated in the OpenAPI schema
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
+        # TODO
         """
         self.method = method.upper()
         self.path = "/" if path.strip() == "" else path
@@ -396,6 +398,8 @@ class Route:
 
         # _body_field is used to cache the dependant model for the body field
         self._body_field: ModelField | None = None
+
+        self.custom_response_validation_http_code: int | HTTPStatus | None = custom_response_validation_http_code
 
     def __call__(
         self,
@@ -564,6 +568,8 @@ class Route:
                 "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
             },
         }
+
+        # TODO update responses
 
         # Add the response to the OpenAPI operation
         if self.responses:
@@ -943,6 +949,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         raise NotImplementedError()
 
@@ -1004,6 +1011,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Get route decorator with GET `method`
 
@@ -1044,6 +1052,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def post(
@@ -1063,6 +1072,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Post route decorator with POST `method`
 
@@ -1104,6 +1114,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def put(
@@ -1123,6 +1134,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Put route decorator with PUT `method`
 
@@ -1164,6 +1176,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def delete(
@@ -1183,6 +1196,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Delete route decorator with DELETE `method`
 
@@ -1223,6 +1237,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def patch(
@@ -1242,6 +1257,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Patch route decorator with PATCH `method`
 
@@ -1285,6 +1301,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def head(
@@ -1304,6 +1321,7 @@ class BaseRouter(ABC):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Head route decorator with HEAD `method`
 
@@ -1346,6 +1364,7 @@ class BaseRouter(ABC):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     def _push_processed_stack_frame(self, frame: str):
@@ -2126,8 +2145,13 @@ class ApiGatewayResolver(BaseRouter):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Route decorator includes parameter `method`"""
+
+        custom_response_validation_http_code = self._validate_route_response_validation_error_http_code(
+            custom_response_validation_http_code,
+        )
 
         def register_resolver(func: AnyCallableT) -> AnyCallableT:
             methods = (method,) if isinstance(method, str) else method
@@ -2155,6 +2179,7 @@ class ApiGatewayResolver(BaseRouter):
                     openapi_extensions,
                     deprecated,
                     middlewares,
+                    custom_response_validation_http_code,
                 )
 
                 # The more specific route wins.
@@ -2523,15 +2548,20 @@ class ApiGatewayResolver(BaseRouter):
             )
 
         # OpenAPIValidationMiddleware will only raise ResponseValidationError when
-        # 'self._response_validation_error_http_code' is not None
+        # 'self._response_validation_error_http_code' is not None or
+        # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
-            http_code = self._response_validation_error_http_code
+            http_code = (
+                self._response_validation_error_http_code
+                if exp.source == "app"
+                else route.custom_response_validation_http_code
+            )
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
             return self._response_builder_class(
                 response=Response(
                     status_code=http_code.value,
                     content_type=content_types.APPLICATION_JSON,
-                    body={"statusCode": self._response_validation_error_http_code, "detail": errors},
+                    body={"statusCode": http_code, "detail": errors},
                 ),
                 serializer=self._serializer,
                 route=route,
@@ -2683,6 +2713,7 @@ class Router(BaseRouter):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         def register_route(func: AnyCallableT) -> AnyCallableT:
             # All dict keys needs to be hashable. So we'll need to do some conversions:
@@ -2708,6 +2739,7 @@ class Router(BaseRouter):
                 frozen_security,
                 frozen_openapi_extensions,
                 deprecated,
+                custom_response_validation_http_code,
             )
 
             # Collate Middleware for routes
@@ -2795,6 +2827,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Any]] | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         # NOTE: see #1552 for more context.
         return super().route(
@@ -2814,6 +2847,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             openapi_extensions,
             deprecated,
             middlewares,
+            custom_response_validation_http_code,
         )
 
     # Override _compile_regex to exclude trailing slashes for route resolution

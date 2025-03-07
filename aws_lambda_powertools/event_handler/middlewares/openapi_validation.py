@@ -150,6 +150,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             response.body = self._serialize_response(
                 field=route.dependant.return_param,
                 response_content=response.body,
+                has_route_custom_response_validation=route.custom_response_validation_http_code is not None,
             )
 
         return response
@@ -165,6 +166,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
+        has_route_custom_response_validation: bool = False,
     ) -> Any:
         """
         Serialize the response content according to the field type.
@@ -174,7 +176,13 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
             if errors:
                 if self._has_response_validation_error:
-                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content)
+                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+                if has_route_custom_response_validation:
+                    raise ResponseValidationError(
+                        errors=_normalize_errors(errors),
+                        body=response_content,
+                        source="route",
+                    )
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
 
             if hasattr(field, "serialize"):

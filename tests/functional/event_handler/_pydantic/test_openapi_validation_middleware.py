@@ -1378,3 +1378,67 @@ def test_custom_response_validation_error_bad_http_code(response_validation_erro
         str(exception_info.value)
         == f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
     )
+
+
+def test_custom_route_response_validation_error_http_code_invalid_response_incomplete_model(gw_event):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/incomplete_model_not_allowed")
+    def handler_incomplete_model_not_allowed() -> Model:
+        return {"age": 18}  # type: ignore
+
+    @app.get(
+        "/custom_incomplete_model_not_allowed",
+        custom_response_validation_http_code=500,
+    )
+    def handler_custom_route_response_validation_error() -> Model:
+        return {"age": 18}  # type: ignore
+
+    # WHEN returning incomplete model for a non-Optional type
+    gw_event["path"] = "/incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    gw_event["path"] = "/custom_incomplete_model_not_allowed"
+    custom_result = app(gw_event, {})
+
+    # THEN it should return a validation error with the custom status code provided
+    assert result["statusCode"] == 422
+    assert custom_result["statusCode"] == 500
+    assert json.loads(result["body"])["detail"] == json.loads(custom_result["body"])["detail"]
+
+
+def test_custom_route_response_validation_error_sanitized_response(gw_event):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    # with a sanitized response validation error response
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get(
+        "/custom_incomplete_model_not_allowed",
+        custom_response_validation_http_code=422,
+    )
+    def handler_custom_route_response_validation_error() -> Model:
+        return {"age": 18}  # type: ignore
+
+    @app.exception_handler(ResponseValidationError)
+    def handle_response_validation_error(ex: ResponseValidationError):
+        return Response(
+            status_code=500,
+            body="Unexpected response.",
+        )
+
+    # WHEN returning incomplete model for a non-Optional type
+    gw_event["path"] = "/custom_incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return the sanitized response
+    assert result["statusCode"] == 500
+    assert result["body"] == "Unexpected response."
