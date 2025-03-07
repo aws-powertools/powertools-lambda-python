@@ -671,7 +671,7 @@ Testing your code with a simple erase operation
 
 === "test_lambda_mask.py"
 
-```python hl_lines="22"
+```python
 --8<-- "examples/data_masking/tests/test_lambda_mask.py"
 ```
 

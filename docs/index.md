@@ -88,7 +88,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         Sample Placeholders:
 
         - `{arch}` is either `arm64` (Graviton based functions) or `x86_64`
-        - `{python_version}` is the Python version without the period (.), e.g., `python313` for `Python 3.13`.
+        - `{python_version}` is the Python runtime version, e.g., `python3.13` for `Python 3.13`.
         - `{version}` is the semantic version number (e,g. 3.1.0) for a release or `latest`
 
         ```yaml
@@ -205,7 +205,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:9 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:10 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
@@ -319,7 +319,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:9 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:10 --region eu-west-1
 ```
 
 #### SAR

@@ -425,7 +425,7 @@ You can read standard output and assert whether metrics have been flushed. Here'
 
     This will be needed when using `capture_cold_start_metric=True`, or when both `Metrics` and `single_metric` are used.
 
-    ```python hl_lines="20-21 27"
+    ```python hl_lines="21-22 28"
     --8<-- "examples/metrics/src/assert_multiple_emf_blobs.py"
     ```
 

@@ -586,7 +586,7 @@ Here's an example of how you can test your synchronous resolvers:
 
 === "assert_graphql_response_module.py"
 
-    ```python hl_lines="11"
+    ```python hl_lines="10"
     --8<-- "examples/event_handler_graphql/src/assert_graphql_response_module.py"
     ```
 

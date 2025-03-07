@@ -25,24 +25,25 @@ def redis_container_image():
     return "public.ecr.aws/docker/library/redis:7.2-alpine"
 
 
+class LambdaContext:
+    def __init__(self):
+        self.function_name = "test-func"
+        self.memory_limit_in_mb = 128
+        self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
+        self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+    def get_remaining_time_in_millis(self) -> int:
+        return 1000
+
+
 @pytest.fixture
-def lambda_context():
-    class LambdaContext:
-        def __init__(self):
-            self.function_name = "test-func"
-            self.memory_limit_in_mb = 128
-            self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
-            self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-        def get_remaining_time_in_millis(self) -> int:
-            return 1000
-
+def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
 # test basic
 def test_idempotent_function_and_lambda_handler_redis_basic(
-    lambda_context,
+    lambda_context: LambdaContext,
     redis_container_image,
 ):
     with RedisContainer(image=redis_container_image) as redis_container:
@@ -69,7 +70,7 @@ def test_idempotent_function_and_lambda_handler_redis_basic(
 
 
 def test_idempotent_function_and_lambda_handler_redis_cache(
-    lambda_context,
+    lambda_context: LambdaContext,
     redis_container_image,
 ):
     with RedisContainer(image=redis_container_image) as redis_container:
@@ -114,7 +115,7 @@ def test_idempotent_function_and_lambda_handler_redis_cache(
 
 # test idem-inprogress
 def test_idempotent_lambda_redis_in_progress(
-    lambda_context,
+    lambda_context: LambdaContext,
     redis_container_image,
 ):
     """
@@ -146,7 +147,7 @@ def test_idempotent_lambda_redis_in_progress(
 
 # test -remove
 def test_idempotent_lambda_redis_delete(
-    lambda_context,
+    lambda_context: LambdaContext,
     redis_container_image,
 ):
     with RedisContainer(image=redis_container_image) as redis_container:
@@ -175,7 +176,7 @@ def test_idempotent_lambda_redis_delete(
         assert handler_result2 == result
 
 
-def test_idempotent_lambda_redis_credential(lambda_context, redis_container_image):
+def test_idempotent_lambda_redis_credential(lambda_context: LambdaContext, redis_container_image):
     with RedisContainer(image=redis_container_image) as redis_container:
         redis_client = redis_container.get_client()
 
