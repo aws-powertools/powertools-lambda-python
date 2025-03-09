@@ -63,7 +63,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Lambda Layer"
 
-    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/layer_v3/docker/Dockerfile#L34){target="_blank"} to achieve the most optimal size.
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
 
@@ -212,7 +212,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Lambda Layer (GovCloud)"
 
-    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/layer_v3/docker/Dockerfile#L34){target="_blank"} to achieve the most optimal size.
 
     For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
 
