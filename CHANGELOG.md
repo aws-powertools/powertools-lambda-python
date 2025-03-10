@@ -14,6 +14,7 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.8.1a0 ([#6244](https://github.com/aws-powertools/powertools-lambda-python/issues/6244))
 * **deps-dev:** bump ruff from 0.9.9 to 0.9.10 ([#6241](https://github.com/aws-powertools/powertools-lambda-python/issues/6241))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.295 to 0.1.296 ([#6240](https://github.com/aws-powertools/powertools-lambda-python/issues/6240))
 * **deps-dev:** bump boto3-stubs from 1.37.7 to 1.37.8 ([#6239](https://github.com/aws-powertools/powertools-lambda-python/issues/6239))
