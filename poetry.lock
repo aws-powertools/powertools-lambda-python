@@ -99,18 +99,18 @@ tests-no-zope = ["attrs[tests-mypy]", "cloudpickle ; platform_python_implementat
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.221"
+version = "2.2.227"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 optional = false
 python-versions = "~=3.8"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk.asset_awscli_v1-2.2.221-py3-none-any.whl", hash = "sha256:66a83e4116b6a7a0041f99f7bca7d0ea354c9ab2e17a938a3dcec50f7272f5d9"},
-    {file = "aws_cdk_asset_awscli_v1-2.2.221.tar.gz", hash = "sha256:7ea0366c8090dc396fed85baddbcf48ac4a088c1bf606cd776138e6526679108"},
+    {file = "aws_cdk.asset_awscli_v1-2.2.227-py3-none-any.whl", hash = "sha256:5160cd515d94d0da252806cd853a3e861e1b76aa553e1c90aec2bd712fa3df1b"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.227.tar.gz", hash = "sha256:0fa4cf382e712121b8bbe11532854018abdba19964ded9c0aa9aace4383816b6"},
 ]
 
 [package.dependencies]
-jsii = ">=1.106.0,<2.0.0"
+jsii = ">=1.108.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -211,20 +211,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.183.0a0"
+version = "2.184.1a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
-python-versions = "~=3.8"
+python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk.aws_lambda_python_alpha-2.183.0a0-py3-none-any.whl", hash = "sha256:e4be5adbe91e39b7e299c10b118fb6c044e61be6cfa0a84b70a864fbe3ee587e"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.183.0a0.tar.gz", hash = "sha256:a31309e8e79524b9f0ecea07a211450a852edeaafb3209fc7de804934afd88b4"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.184.1a0-py3-none-any.whl", hash = "sha256:11b64cfc953caf19b2c01cd9c49892c22cca549f97d8d6b1d17f772172e386ea"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.184.1a0.tar.gz", hash = "sha256:46e5f2342bf19cfc18990c6265b865d3935643530c4ae5904b0d1dcc12de4dfd"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.183.0,<3.0.0"
+aws-cdk-lib = ">=2.184.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.106.0,<2.0.0"
+jsii = ">=1.109.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -247,22 +247,22 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.183.0"
+version = "2.184.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
-python-versions = "~=3.8"
+python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.183.0-py3-none-any.whl", hash = "sha256:4b9f37bb0f472238f1805fce439394da5044e391c68a6160e109e14f941b34bd"},
-    {file = "aws_cdk_lib-2.183.0.tar.gz", hash = "sha256:cb73b320a8f388abf5492ab78c405d80777eaa9290e583e2a8f84bc80e868ffe"},
+    {file = "aws_cdk_lib-2.184.1-py3-none-any.whl", hash = "sha256:2ab33a9bc8a42a425ae9e9214dd92e5e5d1885e210b4bfe16679498b1ea27b2e"},
+    {file = "aws_cdk_lib-2.184.1.tar.gz", hash = "sha256:dc57edaf8ceb21f68c6ebee214194f7b9d4ef013d27b9bfe93e35d71b965b013"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = ">=2.2.208,<3.0.0"
+"aws-cdk.asset-awscli-v1" = ">=2.2.227,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=40.6.0,<41.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=40.7.0,<41.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.106.0,<2.0.0"
+jsii = ">=1.109.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -2141,14 +2141,14 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.108.0"
+version = "1.109.0"
 description = "Python client for jsii runtime"
 optional = false
-python-versions = "~=3.8"
+python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "jsii-1.108.0-py3-none-any.whl", hash = "sha256:d6c99671ab44520069ad6198e3b07379ae9c075bcb53b8a16455c1beb10288ea"},
-    {file = "jsii-1.108.0.tar.gz", hash = "sha256:f1053a414ac117c6ecae7208c5ca4cb6d10ca3420c69e30f8b9cca64cc37e61b"},
+    {file = "jsii-1.109.0-py3-none-any.whl", hash = "sha256:100bb48c7f74b8e22b3182c5466db1c32565ddb681ed5e2bf556076a734d3f07"},
+    {file = "jsii-1.109.0.tar.gz", hash = "sha256:85e0deca8089e2918776541e986d5abab90a66d4330eedfc14e8a060dd507bad"},
 ]
 
 [package.dependencies]
