@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.constants import (
+    DEFAULT_API_VERSION,
+    DEFAULT_OPENAPI_TITLE,
+    DEFAULT_OPENAPI_VERSION,
+)
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.models import (
@@ -61,7 +65,7 @@ class OpenAPIConfig:
     ... )
     """
 
-    title: str = "Powertools for AWS Lambda (Python) API"
+    title: str = DEFAULT_OPENAPI_TITLE
     version: str = DEFAULT_API_VERSION
     openapi_version: str = DEFAULT_OPENAPI_VERSION
     summary: str | None = None
