@@ -66,6 +66,7 @@ class DatadogProvider(BaseProvider):
         )
         self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
+        # When set as env var, the value is a string
         if isinstance(self.flush_to_log, str):
             self.flush_to_log = strtobool(self.flush_to_log)
 
