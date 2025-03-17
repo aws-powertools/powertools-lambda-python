@@ -1586,7 +1586,6 @@ class ApiGatewayResolver(BaseRouter):
             else HTTPStatus.UNPROCESSABLE_ENTITY
         )
 
-
     def get_openapi_schema(
         self,
         *,
