@@ -39,7 +39,7 @@ lint.ignore = [
     "PLC1901", # Compare-to-empty-string - disabled temporarily
     "PYI024",
     "A005",
-    "FA102" # project must require python >= 3.9 making this error obsolete
+    "TC006" # https://docs.astral.sh/ruff/rules/runtime-cast-value/
 ]
 
 # Exclude files and directories
