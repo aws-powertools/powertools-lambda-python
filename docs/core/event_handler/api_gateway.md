@@ -309,7 +309,7 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 
 !!! info "By default, we hide extended error details for security reasons _(e.g., pydantic url, Pydantic code)_."
 
-Any incoming request that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
+Any incoming request or and outgoing response that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
 
 ```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
 --8<-- "examples/event_handler_rest/src/data_validation_error_unsanitized_output.json"
@@ -320,8 +320,6 @@ You can customize the error message by catching the `RequestValidationError` exc
 Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` with an opaque error.
 
 === "data_validation_sanitized_error.py"
-
-    Note that Pydantic versions [1](https://docs.pydantic.dev/1.10/usage/models/#error-handling){target="_blank" rel="nofollow"} and [2](https://docs.pydantic.dev/latest/errors/errors/){target="_blank" rel="nofollow"} report validation detailed errors differently.
 
     ```python hl_lines="8 24-25 31"
     --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error.py"
@@ -397,6 +395,27 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
     ```json hl_lines="3"
     --8<-- "examples/event_handler_rest/src/validating_payload_subset_output.json"
     ```
+
+#### Validating responses
+
+You can use `response_validation_error_http_code` to set a custom HTTP code for failed response validation. When this field is set, we will raise a `ResponseValidationError` instead of a `RequestValidationError`.
+
+=== "customizing_response_validation.py"
+
+    ```python hl_lines="1 16 29 33"
+    --8<-- "examples/event_handler_rest/src/customizing_response_validation.py"
+    ```
+
+    1. A response with status code set here will be returned if response data is not valid.
+    2. Operation returns a string as oppose to a `Todo` object. This will lead to a `500` response as set in line 18.
+
+=== "customizing_response_validation_exception.py"
+
+    ```python hl_lines="1 18 38 39"
+    --8<-- "examples/event_handler_rest/src/customizing_response_validation_exception.py"
+    ```
+
+    1. The distinct `ResponseValidationError` exception can be caught to customise the response.
 
 #### Validating query strings
 

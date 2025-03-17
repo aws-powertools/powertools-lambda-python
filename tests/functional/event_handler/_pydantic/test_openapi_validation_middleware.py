@@ -17,6 +17,7 @@ from aws_lambda_powertools.event_handler import (
     VPCLatticeResolver,
     VPCLatticeV2Resolver,
 )
+from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValidationError
 from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
 
 
@@ -1128,3 +1129,252 @@ def test_validate_with_minimal_event():
     # THEN the handler should be invoked and return 200
     result = app(minimal_event, {})
     assert result["statusCode"] == 200
+
+
+@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
+def test_validation_error_none_returned_non_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_not_allowed")
+    def handler_none_not_allowed() -> Model:
+        return None  # type: ignore
+
+    # WHEN returning None for a non-Optional type
+    gw_event["path"] = "/none_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert body["detail"][0]["type"] == "model_attributes_type"
+    assert body["detail"][0]["loc"] == ["response"]
+
+
+def test_validation_error_incomplete_model_returned_non_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/incomplete_model_not_allowed")
+    def handler_incomplete_model_not_allowed() -> Model:
+        return {"age": 18}  # type: ignore
+
+    # WHEN returning incomplete model for a non-Optional type
+    gw_event["path"] = "/incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert "missing" in body["detail"][0]["type"]
+    assert "name" in body["detail"][0]["loc"]
+
+
+def test_none_returned_for_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_allowed")
+    def handler_none_allowed() -> Optional[Model]:
+        return None
+
+    # WHEN returning None for an Optional type
+    gw_event["path"] = "/none_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should succeed
+    assert result["statusCode"] == 200
+    assert result["body"] == "null"
+
+
+@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
+@pytest.mark.parametrize(
+    "path, body",
+    [
+        ("/empty_dict", {}),
+        ("/empty_list", []),
+        ("/none", "null"),
+        ("/empty_string", ""),
+    ],
+    ids=["empty_dict", "empty_list", "none", "empty_string"],
+)
+def test_none_returned_for_falsy_return(gw_event, path, body):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get(path)
+    def handler_none_allowed() -> Model:
+        return body
+
+    # WHEN returning None for an Optional type
+    gw_event["path"] = path
+    result = app(gw_event, {})
+
+    # THEN it should succeed
+    assert result["statusCode"] == 422
+
+
+def test_custom_response_validation_error_http_code_valid_response(gw_event):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=422)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/valid_response")
+    def handler_valid_response() -> Model:
+        return {
+            "name": "Joe",
+            "age": 18,
+        }  # type: ignore
+
+    # WHEN returning the expected type
+    gw_event["path"] = "/valid_response"
+    result = app(gw_event, {})
+
+    # THEN it should return a 200 OK
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body == {"name": "Joe", "age": 18}
+
+
+@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
+@pytest.mark.parametrize(
+    "http_code",
+    (422, 500, 510),
+)
+def test_custom_response_validation_error_http_code_invalid_response_none(
+    http_code,
+    gw_event,
+):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=http_code)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/none_not_allowed")
+    def handler_none_not_allowed() -> Model:
+        return None  # type: ignore
+
+    # WHEN returning None for a non-Optional type
+    gw_event["path"] = "/none_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error with the custom status code provided
+    assert result["statusCode"] == http_code
+    body = json.loads(result["body"])
+    assert body["detail"][0]["type"] == "model_attributes_type"
+    assert body["detail"][0]["loc"] == ["response"]
+
+
+@pytest.mark.parametrize(
+    "http_code",
+    (422, 500, 510),
+)
+def test_custom_response_validation_error_http_code_invalid_response_incomplete_model(
+    http_code,
+    gw_event,
+):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=http_code)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/incomplete_model_not_allowed")
+    def handler_incomplete_model_not_allowed() -> Model:
+        return {"age": 18}  # type: ignore
+
+    # WHEN returning incomplete model for a non-Optional type
+    gw_event["path"] = "/incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error with the custom status code provided
+    assert result["statusCode"] == http_code
+    body = json.loads(result["body"])
+    assert body["detail"][0]["type"] == "missing"
+    assert body["detail"][0]["loc"] == ["response", "name"]
+
+
+@pytest.mark.parametrize(
+    "http_code",
+    (422, 500, 510),
+)
+def test_custom_response_validation_error_sanitized_response(
+    http_code,
+    gw_event,
+):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    # with a sanitized response validation error response
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=http_code)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    @app.get("/incomplete_model_not_allowed")
+    def handler_incomplete_model_not_allowed() -> Model:
+        return {"age": 18}  # type: ignore
+
+    @app.exception_handler(ResponseValidationError)
+    def handle_response_validation_error(ex: ResponseValidationError):
+        return Response(
+            status_code=500,
+            body="Unexpected response.",
+        )
+
+    # WHEN returning incomplete model for a non-Optional type
+    gw_event["path"] = "/incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN it should return the sanitized response
+    assert result["statusCode"] == 500
+    assert result["body"] == "Unexpected response."
+
+
+def test_custom_response_validation_error_no_validation():
+    # GIVEN an APIGatewayRestResolver with validation not enabled
+    # setting a custom http status code for response validation must raise a ValueError
+    with pytest.raises(ValueError) as exception_info:
+        APIGatewayRestResolver(response_validation_error_http_code=500)
+
+    assert (
+        str(exception_info.value)
+        == "'response_validation_error_http_code' cannot be set when enable_validation is False."
+    )
+
+
+@pytest.mark.parametrize("response_validation_error_http_code", [(20), ("hi"), (1.21)])
+def test_custom_response_validation_error_bad_http_code(response_validation_error_http_code):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    # setting custom status code for response validation that is not a valid HTTP code must raise a ValueError
+    with pytest.raises(ValueError) as exception_info:
+        APIGatewayRestResolver(
+            enable_validation=True,
+            response_validation_error_http_code=response_validation_error_http_code,
+        )
+
+    assert (
+        str(exception_info.value)
+        == f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code."
+    )

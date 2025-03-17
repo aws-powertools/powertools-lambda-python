@@ -17,7 +17,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
 from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
@@ -58,7 +58,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     ```
     """
 
-    def __init__(self, validation_serializer: Callable[[Any], str] | None = None):
+    def __init__(
+        self,
+        validation_serializer: Callable[[Any], str] | None = None,
+        has_response_validation_error: bool = False,
+    ):
         """
         Initialize the OpenAPIValidationMiddleware.
 
@@ -67,8 +71,13 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         validation_serializer : Callable, optional
             Optional serializer to use when serializing the response for validation.
             Use it when you have a custom type that cannot be serialized by the default jsonable_encoder.
+
+        has_response_validation_error: bool, optional
+            Optional flag used to distinguish between payload and validation errors.
+            By setting this flag to True, ResponseValidationError will be raised if response could not be validated.
         """
         self._validation_serializer = validation_serializer
+        self._has_response_validation_error = has_response_validation_error
 
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         logger.debug("OpenAPIValidationMiddleware handler")
@@ -164,6 +173,8 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             errors: list[dict[str, Any]] = []
             value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
             if errors:
+                if self._has_response_validation_error:
+                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content)
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
 
             if hasattr(field, "serialize"):
