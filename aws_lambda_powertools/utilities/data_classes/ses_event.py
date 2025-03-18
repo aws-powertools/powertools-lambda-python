@@ -212,11 +212,11 @@ class SESReceipt(DictWrapper):
 class SESMessage(DictWrapper):
     @property
     def mail(self) -> SESMail:
-        return SESMail(self["ses"]["mail"])
+        return SESMail(self["mail"])
 
     @property
     def receipt(self) -> SESReceipt:
-        return SESReceipt(self["ses"]["receipt"])
+        return SESReceipt(self["receipt"])
 
 
 class SESEventRecord(DictWrapper):
@@ -232,7 +232,7 @@ class SESEventRecord(DictWrapper):
 
     @property
     def ses(self) -> SESMessage:
-        return SESMessage(self._data)
+        return SESMessage(self["ses"])
 
 
 class SESEvent(DictWrapper):
