@@ -320,7 +320,7 @@ class Route:
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         middlewares: list[Callable[..., Response]] | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
+        custom_response_validation_http_code: HTTPStatus | None = None,
     ):
         """
         Internally used Route Configuration
@@ -399,7 +399,7 @@ class Route:
         # _body_field is used to cache the dependant model for the body field
         self._body_field: ModelField | None = None
 
-        self.custom_response_validation_http_code: int | HTTPStatus | None = custom_response_validation_http_code
+        self.custom_response_validation_http_code: HTTPStatus | None = custom_response_validation_http_code
 
     def __call__(
         self,
@@ -2126,6 +2126,29 @@ class ApiGatewayResolver(BaseRouter):
                 content_type="text/html",
                 body=body,
             )
+
+    def _validate_route_response_validation_error_http_code(
+        self,
+        custom_response_validation_http_code: int | HTTPStatus | None,
+    ) -> HTTPStatus | None:
+        if custom_response_validation_http_code and not self._enable_validation:
+            msg = (
+                "'custom_response_validation_http_code' cannot be set for route when enable_validation is False "
+                "on resolver."
+            )
+            raise ValueError(msg)
+
+        if (
+            not isinstance(custom_response_validation_http_code, HTTPStatus)
+            and custom_response_validation_http_code is not None
+        ):
+            try:
+                custom_response_validation_http_code = HTTPStatus(custom_response_validation_http_code)
+            except ValueError:
+                msg = f"'{custom_response_validation_http_code}' must be an integer representing an HTTP status code."
+                raise ValueError(msg) from None
+
+        return custom_response_validation_http_code
 
     def route(
         self,
