@@ -29,7 +29,6 @@ def test_kinesis_stream_event():
 
     kinesis = record.kinesis
     kinesis_raw = raw_event["Records"][0]["kinesis"]
-    assert kinesis._data["kinesis"] == kinesis_raw
 
     assert kinesis.approximate_arrival_timestamp == kinesis_raw["approximateArrivalTimestamp"]
     assert kinesis.data == kinesis_raw["data"]

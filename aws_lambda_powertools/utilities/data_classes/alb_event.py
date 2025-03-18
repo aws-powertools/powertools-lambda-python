@@ -18,7 +18,7 @@ class ALBEventRequestContext(DictWrapper):
     @property
     def elb_target_group_arn(self) -> str:
         """Target group arn for your Lambda function"""
-        return self["requestContext"]["elb"]["targetGroupArn"]
+        return self["elb"]["targetGroupArn"]
 
 
 class ALBEvent(BaseProxyEvent):
@@ -32,7 +32,7 @@ class ALBEvent(BaseProxyEvent):
 
     @property
     def request_context(self) -> ALBEventRequestContext:
-        return ALBEventRequestContext(self._data)
+        return ALBEventRequestContext(self["requestContext"])
 
     @property
     def multi_value_query_string_parameters(self) -> dict[str, list[str]]:

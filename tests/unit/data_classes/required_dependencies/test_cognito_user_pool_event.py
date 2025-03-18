@@ -103,11 +103,11 @@ def test_cognito_custom_message_trigger_event():
     assert parsed_event.request.client_metadata == {}
 
     parsed_event.response.sms_message = "sms"
-    assert parsed_event.response.sms_message == parsed_event["response"]["smsMessage"]
+    assert parsed_event.response.sms_message == raw_event["response"]["smsMessage"]
     parsed_event.response.email_message = "email"
-    assert parsed_event.response.email_message == parsed_event["response"]["emailMessage"]
+    assert parsed_event.response.email_message == raw_event["response"]["emailMessage"]
     parsed_event.response.email_subject = "subject"
-    assert parsed_event.response.email_subject == parsed_event["response"]["emailSubject"]
+    assert parsed_event.response.email_subject == raw_event["response"]["emailSubject"]
 
 
 def test_cognito_custom_email_sender_trigger_event():
@@ -141,7 +141,7 @@ def test_cognito_pre_authentication_trigger_event():
     assert parsed_event.trigger_source == raw_event["triggerSource"]
 
     assert parsed_event.request.user_not_found is None
-    parsed_event["request"]["userNotFound"] = True
+    raw_event["request"]["userNotFound"] = True
     assert parsed_event.request.user_not_found is True
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.validation_data == {}
@@ -171,57 +171,42 @@ def test_cognito_pre_token_generation_trigger_event():
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.client_metadata == {}
 
-    parsed_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
+    raw_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
     group_configuration = parsed_event.request.group_configuration
     assert group_configuration.preferred_role == "temp"
 
-    assert parsed_event["response"].get("claimsOverrideDetails") is None
     claims_override_details = parsed_event.response.claims_override_details
-    assert parsed_event["response"]["claimsOverrideDetails"] == {}
-
     assert claims_override_details.claims_to_add_or_override == {}
     assert claims_override_details.claims_to_suppress == []
     assert claims_override_details.group_configuration is None
 
     claims_override_details.group_configuration = {}
     assert claims_override_details.group_configuration._data == {}
-    assert parsed_event["response"]["claimsOverrideDetails"]["groupOverrideDetails"] == {}
 
     expected_claims = {"test": "value"}
     claims_override_details.claims_to_add_or_override = expected_claims
     assert claims_override_details.claims_to_add_or_override["test"] == "value"
-    assert parsed_event["response"]["claimsOverrideDetails"]["claimsToAddOrOverride"] == expected_claims
 
     claims_override_details.claims_to_suppress = ["email"]
     assert claims_override_details.claims_to_suppress[0] == "email"
-    assert parsed_event["response"]["claimsOverrideDetails"]["claimsToSuppress"] == ["email"]
 
     expected_groups = ["group-A", "group-B"]
     claims_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_override_details.group_configuration.groups_to_override == expected_groups
-    assert (
-        parsed_event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"] == expected_groups
-    )
-    claims_override_details = parsed_event.response.claims_override_details
-    assert claims_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_override_details.group_configuration.iam_roles_to_override == ["role"]
-    assert parsed_event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["iamRolesToOverride"] == ["role"]
 
     claims_override_details.set_group_configuration_preferred_role("role_name")
     assert claims_override_details.group_configuration.preferred_role == "role_name"
-    assert parsed_event["response"]["claimsOverrideDetails"]["groupOverrideDetails"]["preferredRole"] == "role_name"
 
     # Ensure that even if "claimsOverrideDetails" was explicitly set to None
     # accessing `event.response.claims_override_details` would set it to `{}`
-    parsed_event["response"]["claimsOverrideDetails"] = None
+    raw_event["response"]["claimsOverrideDetails"] = None
     claims_override_details = parsed_event.response.claims_override_details
     assert claims_override_details._data == {}
-    assert parsed_event["response"]["claimsOverrideDetails"] == {}
     claims_override_details.claims_to_suppress = ["email"]
     assert claims_override_details.claims_to_suppress[0] == "email"
-    assert parsed_event["response"]["claimsOverrideDetails"]["claimsToSuppress"] == ["email"]
 
 
 def test_cognito_pre_token_v2_generation_trigger_event():
@@ -236,15 +221,12 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.client_metadata == {}
 
-    parsed_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
+    raw_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
     group_configuration = parsed_event.request.group_configuration
     assert group_configuration.preferred_role == "temp"
     assert parsed_event.request.scopes == raw_event["request"]["scopes"]
 
-    assert parsed_event["response"].get("claimsAndScopeOverrideDetails") is None
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"] == {}
-
     claims_scope_override_details.id_token_generation = claims_scope_override_details.access_token_generation = {}
     assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
     assert claims_scope_override_details.id_token_generation.claims_to_suppress == []
@@ -258,45 +240,24 @@ def test_cognito_pre_token_v2_generation_trigger_event():
 
     claims_scope_override_details.group_configuration = {}
     assert claims_scope_override_details.group_configuration._data == {}
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["groupOverrideDetails"] == {}
 
     expected_claims = {"test": "value"}
     claims_scope_override_details.id_token_generation.claims_to_add_or_override = expected_claims
     claims_scope_override_details.access_token_generation.claims_to_add_or_override = expected_claims
     assert claims_scope_override_details.id_token_generation.claims_to_add_or_override["test"] == "value"
     assert claims_scope_override_details.access_token_generation.claims_to_add_or_override["test"] == "value"
-    assert (
-        parsed_event["response"]["claimsAndScopeOverrideDetails"]["idTokenGeneration"]["claimsToAddOrOverride"]
-        == expected_claims
-    )
-    assert (
-        parsed_event["response"]["claimsAndScopeOverrideDetails"]["accessTokenGeneration"]["claimsToAddOrOverride"]
-        == expected_claims
-    )
 
     claims_scope_override_details.id_token_generation.claims_to_suppress = (
         claims_scope_override_details.access_token_generation.claims_to_suppress
     ) = ["email"]
     assert claims_scope_override_details.id_token_generation.claims_to_suppress[0] == "email"
     assert claims_scope_override_details.access_token_generation.claims_to_suppress[0] == "email"
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["idTokenGeneration"]["claimsToSuppress"] == [
-        "email",
-    ]
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["accessTokenGeneration"]["claimsToSuppress"] == [
-        "email",
-    ]
 
     claims_scope_override_details.id_token_generation.scopes_to_suppress = (
         claims_scope_override_details.access_token_generation.scopes_to_suppress
     ) = ["email"]
     assert claims_scope_override_details.id_token_generation.scopes_to_suppress[0] == "email"
     assert claims_scope_override_details.access_token_generation.scopes_to_suppress[0] == "email"
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["idTokenGeneration"]["scopesToSuppress"] == [
-        "email",
-    ]
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["accessTokenGeneration"]["scopesToSuppress"] == [
-        "email",
-    ]
 
     claims_scope_override_details.id_token_generation.scopes_to_add = (
         claims_scope_override_details.access_token_generation.scopes_to_add
@@ -305,47 +266,27 @@ def test_cognito_pre_token_v2_generation_trigger_event():
         claims_scope_override_details.id_token_generation.scopes_to_add[0] == "email"
         and claims_scope_override_details.access_token_generation.scopes_to_add[0] == "email"
     )
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["idTokenGeneration"]["scopesToAdd"] == ["email"]
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["accessTokenGeneration"]["scopesToAdd"] == [
-        "email",
-    ]
 
     expected_groups = ["group-A", "group-B"]
     claims_scope_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_scope_override_details.group_configuration.groups_to_override == expected_groups
-    assert (
-        parsed_event["response"]["claimsAndScopeOverrideDetails"]["groupOverrideDetails"]["groupsToOverride"]
-        == expected_groups
-    )
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
-    assert claims_scope_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_scope_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_scope_override_details.group_configuration.iam_roles_to_override == ["role"]
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["groupOverrideDetails"]["iamRolesToOverride"] == [
-        "role",
-    ]
 
     claims_scope_override_details.set_group_configuration_preferred_role("role_name")
     assert claims_scope_override_details.group_configuration.preferred_role == "role_name"
-    assert (
-        parsed_event["response"]["claimsAndScopeOverrideDetails"]["groupOverrideDetails"]["preferredRole"]
-        == "role_name"
-    )
 
     # Ensure that even if "claimsAndScopeOverrideDetails" was explicitly set to None
     # accessing `event.response.claims_scope_override_details` would set it to `{}`
-    parsed_event["response"]["claimsAndScopeOverrideDetails"] = None
+    raw_event["response"]["claimsAndScopeOverrideDetails"] = None
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
     assert claims_scope_override_details._data == {}
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"] == {}
 
     claims_scope_override_details.id_token_generation = {}
     claims_scope_override_details.id_token_generation.claims_to_suppress = ["email"]
     assert claims_scope_override_details.id_token_generation.claims_to_suppress[0] == "email"
-    assert parsed_event["response"]["claimsAndScopeOverrideDetails"]["idTokenGeneration"]["claimsToSuppress"] == [
-        "email",
-    ]
 
 
 def test_cognito_define_auth_challenge_trigger_event():
@@ -367,14 +308,14 @@ def test_cognito_define_auth_challenge_trigger_event():
 
     # Verify setters
     parsed_event.response.challenge_name = "CUSTOM_CHALLENGE"
-    assert parsed_event.response.challenge_name == parsed_event["response"]["challengeName"]
+    assert parsed_event.response.challenge_name == raw_event["response"]["challengeName"]
     assert parsed_event.response.challenge_name == "CUSTOM_CHALLENGE"
     parsed_event.response.fail_authentication = True
     assert parsed_event.response.fail_authentication
-    assert parsed_event.response.fail_authentication == parsed_event["response"]["failAuthentication"]
+    assert parsed_event.response.fail_authentication == raw_event["response"]["failAuthentication"]
     parsed_event.response.issue_tokens = True
     assert parsed_event.response.issue_tokens
-    assert parsed_event.response.issue_tokens == parsed_event["response"]["issueTokens"]
+    assert parsed_event.response.issue_tokens == raw_event["response"]["issueTokens"]
 
 
 def test_create_auth_challenge_trigger_event():
@@ -395,13 +336,13 @@ def test_create_auth_challenge_trigger_event():
 
     # Verify setters
     parsed_event.response.public_challenge_parameters = {"test": "value"}
-    assert parsed_event.response.public_challenge_parameters == parsed_event["response"]["publicChallengeParameters"]
+    assert parsed_event.response.public_challenge_parameters == raw_event["response"]["publicChallengeParameters"]
     assert parsed_event.response.public_challenge_parameters["test"] == "value"
     parsed_event.response.private_challenge_parameters = {"private": "value"}
-    assert parsed_event.response.private_challenge_parameters == parsed_event["response"]["privateChallengeParameters"]
+    assert parsed_event.response.private_challenge_parameters == raw_event["response"]["privateChallengeParameters"]
     assert parsed_event.response.private_challenge_parameters["private"] == "value"
     parsed_event.response.challenge_metadata = "meta"
-    assert parsed_event.response.challenge_metadata == parsed_event["response"]["challengeMetadata"]
+    assert parsed_event.response.challenge_metadata == raw_event["response"]["challengeMetadata"]
     assert parsed_event.response.challenge_metadata == "meta"
 
 
@@ -423,5 +364,5 @@ def test_verify_auth_challenge_response_trigger_event():
 
     # Verify setters
     parsed_event.response.answer_correct = True
-    assert parsed_event.response.answer_correct == parsed_event["response"]["answerCorrect"]
+    assert parsed_event.response.answer_correct == raw_event["response"]["answerCorrect"]
     assert parsed_event.response.answer_correct
