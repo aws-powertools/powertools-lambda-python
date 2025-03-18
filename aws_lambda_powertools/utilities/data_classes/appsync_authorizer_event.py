@@ -11,32 +11,32 @@ class AppSyncAuthorizerEventRequestContext(DictWrapper):
     @property
     def api_id(self) -> str:
         """AppSync API ID"""
-        return self["requestContext"]["apiId"]
+        return self["apiId"]
 
     @property
     def account_id(self) -> str:
         """AWS Account ID"""
-        return self["requestContext"]["accountId"]
+        return self["accountId"]
 
     @property
     def request_id(self) -> str:
         """Requestt ID"""
-        return self["requestContext"]["requestId"]
+        return self["requestId"]
 
     @property
     def query_string(self) -> str:
         """GraphQL query string"""
-        return self["requestContext"]["queryString"]
+        return self["queryString"]
 
     @property
     def operation_name(self) -> str | None:
         """GraphQL operation name, optional"""
-        return self["requestContext"].get("operationName")
+        return self.get("operationName")
 
     @property
     def variables(self) -> dict:
         """GraphQL variables"""
-        return self["requestContext"]["variables"]
+        return self["variables"]
 
 
 class AppSyncAuthorizerEvent(DictWrapper):
@@ -57,7 +57,7 @@ class AppSyncAuthorizerEvent(DictWrapper):
     @property
     def request_context(self) -> AppSyncAuthorizerEventRequestContext:
         """Request context"""
-        return AppSyncAuthorizerEventRequestContext(self._data)
+        return AppSyncAuthorizerEventRequestContext(self["requestContext"])
 
 
 class AppSyncAuthorizerResponse:

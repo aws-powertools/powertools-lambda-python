@@ -15,27 +15,27 @@ class KinesisStreamRecordPayload(DictWrapper):
     @property
     def approximate_arrival_timestamp(self) -> float:
         """The approximate time that the record was inserted into the stream"""
-        return float(self["kinesis"]["approximateArrivalTimestamp"])
+        return float(self["approximateArrivalTimestamp"])
 
     @property
     def data(self) -> str:
         """The data blob"""
-        return self["kinesis"]["data"]
+        return self["data"]
 
     @property
     def kinesis_schema_version(self) -> str:
         """Schema version for the record"""
-        return self["kinesis"]["kinesisSchemaVersion"]
+        return self["kinesisSchemaVersion"]
 
     @property
     def partition_key(self) -> str:
         """Identifies which shard in the stream the data record is assigned to"""
-        return self["kinesis"]["partitionKey"]
+        return self["partitionKey"]
 
     @property
     def sequence_number(self) -> str:
         """The unique identifier of the record within its shard"""
-        return self["kinesis"]["sequenceNumber"]
+        return self["sequenceNumber"]
 
     def data_as_bytes(self) -> bytes:
         """Decode binary encoded data as bytes"""
@@ -94,7 +94,7 @@ class KinesisStreamRecord(DictWrapper):
     @property
     def kinesis(self) -> KinesisStreamRecordPayload:
         """Underlying Kinesis record associated with the event"""
-        return KinesisStreamRecordPayload(self._data)
+        return KinesisStreamRecordPayload(self["kinesis"])
 
 
 class KinesisStreamEvent(DictWrapper):

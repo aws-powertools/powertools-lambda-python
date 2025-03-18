@@ -183,7 +183,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
 
     @property
     def request_context(self) -> BaseRequestContext:
-        return BaseRequestContext(self._data)
+        return BaseRequestContext(self["requestContext"])
 
     @overload
     def get_header_value(
@@ -306,7 +306,7 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
 
     @property
     def request_context(self) -> BaseRequestContextV2:
-        return BaseRequestContextV2(self._data)
+        return BaseRequestContextV2(self["requestContext"])
 
     @property
     def path_parameters(self) -> dict[str, str]:

@@ -61,42 +61,41 @@ class APIGatewayEventRequestContext(BaseRequestContext):
     @property
     def connected_at(self) -> int | None:
         """The Epoch-formatted connection time. (WebSocket API)"""
-        return self["requestContext"].get("connectedAt")
+        return self.get("connectedAt")
 
     @property
     def connection_id(self) -> str | None:
         """A unique ID for the connection that can be used to make a callback to the client. (WebSocket API)"""
-        return self["requestContext"].get("connectionId")
+        return self.get("connectionId")
 
     @property
     def event_type(self) -> str | None:
         """The event type: `CONNECT`, `MESSAGE`, or `DISCONNECT`. (WebSocket API)"""
-        return self["requestContext"].get("eventType")
+        return self.get("eventType")
 
     @property
     def message_direction(self) -> str | None:
         """Message direction (WebSocket API)"""
-        return self["requestContext"].get("messageDirection")
+        return self.get("messageDirection")
 
     @property
     def message_id(self) -> str | None:
         """A unique server-side ID for a message. Available only when the `eventType` is `MESSAGE`."""
-        return self["requestContext"].get("messageId")
+        return self.get("messageId")
 
     @property
     def operation_name(self) -> str | None:
         """The name of the operation being performed"""
-        return self["requestContext"].get("operationName")
+        return self.get("operationName")
 
     @property
     def route_key(self) -> str | None:
         """The selected route key."""
-        return self["requestContext"].get("routeKey")
+        return self.get("routeKey")
 
     @property
     def authorizer(self) -> APIGatewayEventAuthorizer:
-        authz_data = self._data.get("requestContext", {}).get("authorizer", {})
-        return APIGatewayEventAuthorizer(authz_data)
+        return APIGatewayEventAuthorizer(self.get("authorizer") or {})
 
 
 class APIGatewayProxyEvent(BaseProxyEvent):
@@ -136,7 +135,7 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def request_context(self) -> APIGatewayEventRequestContext:
-        return APIGatewayEventRequestContext(self._data)
+        return APIGatewayEventRequestContext(self["requestContext"])
 
     @property
     def path_parameters(self) -> dict[str, str]:
@@ -248,8 +247,7 @@ class RequestContextV2Authorizer(DictWrapper):
 class RequestContextV2(BaseRequestContextV2):
     @property
     def authorizer(self) -> RequestContextV2Authorizer:
-        ctx = self.get("requestContext") or {}  # key might exist but can be `null`
-        return RequestContextV2Authorizer(ctx.get("authorizer", {}))
+        return RequestContextV2Authorizer(self.get("authorizer") or {})
 
 
 class APIGatewayProxyEventV2(BaseProxyEvent):
@@ -291,7 +289,7 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     @property
     def request_context(self) -> RequestContextV2:
-        return RequestContextV2(self._data)
+        return RequestContextV2(self["requestContext"])
 
     @property
     def path_parameters(self) -> dict[str, str]:
