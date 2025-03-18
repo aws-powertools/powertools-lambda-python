@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD041 MD043 -->
 
-Defining and customizing OpenAPI metadata gives detailed, top-level information about your API. Here's the method to set and tailor this metadata:
+Defining and customizing OpenAPI metadata gives detailed, top-level information about your API. Use the method `app.configure_openapi` to set and tailor this metadata:
 
 | Field Name         | Type           | Description                                                                                                                                                                         |
 | ------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

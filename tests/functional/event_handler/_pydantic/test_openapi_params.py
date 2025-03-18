@@ -32,7 +32,7 @@ def test_openapi_no_params():
         raise NotImplementedError()
 
     schema = app.get_openapi_schema()
-    assert schema.info.title == "Powertools API"
+    assert schema.info.title == "Powertools for AWS Lambda (Python) API"
     assert schema.info.version == "1.0.0"
 
     assert len(schema.paths.keys()) == 1

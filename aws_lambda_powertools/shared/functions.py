@@ -283,3 +283,8 @@ def abs_lambda_path(relative_path: str = "") -> str:
 
 def sanitize_xray_segment_name(name: str) -> str:
     return re.sub(constants.INVALID_XRAY_NAME_CHARACTERS, "", name)
+
+
+def get_tracer_id() -> str | None:
+    xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
+    return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
