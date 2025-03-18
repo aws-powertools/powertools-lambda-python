@@ -23,7 +23,7 @@ dev-gitpod:
 
 # Running licensecheck with zero to break the pipeline if there is an invalid license
 check-licenses:
-	poetry run licensecheck -u poetry:dev --zero  --ignore-licenses UNKNOWN
+	poetry run licensecheck -u poetry:dev --zero
 
 format:
 	poetry run black aws_lambda_powertools tests examples
