@@ -78,10 +78,6 @@ class BedrockAgentEvent(BaseProxyEvent):
         return self["apiPath"]
 
     @property
-    def http_method(self) -> str:
-        return self["httpMethod"]
-
-    @property
     def parameters(self) -> list[BedrockAgentProperty]:
         parameters = self.get("parameters") or []
         return [BedrockAgentProperty(x) for x in parameters]

@@ -120,15 +120,8 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
-    def multi_value_query_string_parameters(self) -> dict[str, list[str]]:
-        return self.get("multiValueQueryStringParameters") or {}  # key might exist but can be `null`
-
-    @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
-        if self.multi_value_query_string_parameters:
-            return self.multi_value_query_string_parameters
-
-        return super().resolved_query_string_parameters
+        return self.multi_value_query_string_parameters or super().resolved_query_string_parameters
 
     @property
     def resolved_headers_field(self) -> dict[str, Any]:
