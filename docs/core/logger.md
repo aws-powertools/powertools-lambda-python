@@ -11,6 +11,7 @@ Logger provides an opinionated logger with output structured as JSON.
 * Log Lambda event when instructed (disabled by default)
 * Log sampling enables DEBUG log level for a percentage of requests (disabled by default)
 * Append additional keys to structured log at any point in time
+* Buffering logs for a specific request or invocation, and flushing them automatically on error or manually as needed.
 
 ## Getting started
 
@@ -514,6 +515,180 @@ The following environment variables are available to configure Logger at a globa
 
 ## Advanced
 
+### Buffering logs
+
+Log buffering enables you to buffer logs for a specific request or invocation. Enable log buffering by passing `logger_buffer` when initializing a Logger instance. You can buffer logs at the `WARNING`, `INFO` or `DEBUG` level, and flush them automatically on error or manually as needed.
+
+!!! tip "This is useful when you want to reduce the number of log messages emitted while still having detailed logs when needed, such as when troubleshooting issues."
+
+=== "getting_started_with_buffering_logs.py"
+
+    ```python hl_lines="5 6 15"
+    --8<-- "examples/logger/src/getting_started_with_buffering_logs.py"
+    ```
+
+#### Configuring the buffer
+
+When configuring log buffering, you have options to fine-tune how logs are captured, stored, and emitted. You can configure the following parameters in the `LoggerBufferConfig` constructor:
+
+| Parameter             | Description                                     | Configuration                |
+|---------------------- |------------------------------------------------ |----------------------------- |
+| `max_bytes`           | Maximum size of the log buffer in bytes         | `int` (default: 20480 bytes) |
+| `buffer_at_verbosity` | Minimum log level to buffer                     | `DEBUG`, `INFO`, `WARNING`   |
+| `flush_on_error_log`  | Automatically flush buffer when an error occurs | `True` (default), `False`    |
+
+!!! note "When `flush_on_error_log` is enabled, it automatically flushes for `logger.exception()`, `logger.error()`, and `logger.critical()` statements."
+
+=== "working_with_buffering_logs_different_levels.py"
+
+    ```python hl_lines="5 6 10-12"
+    --8<-- "examples/logger/src/working_with_buffering_logs_different_levels.py"
+    ```
+
+    1. Setting `minimum_log_level="WARNING"` configures log buffering for `WARNING` and lower severity levels (`INFO`, `DEBUG`).
+
+=== "working_with_buffering_logs_disable_on_error.py"
+
+    ```python hl_lines="5 6 14 21 24"
+    --8<-- "examples/logger/src/working_with_buffering_logs_disable_on_error.py"
+    ```
+
+    1. Disabling `flush_on_error_log` will not flush the buffer when logging an error. This is useful when you want to control when the buffer is flushed by calling the `logger.flush_buffer()` method.
+
+#### Flushing on exceptions
+
+Use the `@logger.inject_lambda_context` decorator to automatically flush buffered logs when an exception is raised in your Lambda function. This is done by setting the `flush_buffer_on_uncaught_error` option to `True` in the decorator.
+
+=== "working_with_buffering_logs_when_raise_exception.py"
+
+    ```python hl_lines="5 6 13 19"
+    --8<-- "examples/logger/src/working_with_buffering_logs_when_raise_exception.py"
+    ```
+
+#### Reutilizing same logger instance
+
+If you are using log buffering, we recommend sharing the same log instance across your code/modules, so that the same buffer is also shared. Doing this you can centralize logger instance creation and prevent buffer configuration drift.
+
+!!! note "Buffer Inheritance"
+    Loggers created with the same `service_name` automatically inherit the buffer configuration from the first initialized logger with a buffer configuration.
+
+    Child loggers instances inherit their parent's buffer configuration but maintain a separate buffer.
+
+=== "working_with_buffering_logs_creating_instance.py"
+
+    ```python hl_lines="2 5"
+    --8<-- "examples/logger/src/working_with_buffering_logs_creating_instance.py"
+    ```
+
+=== "working_with_buffering_logs_reusing_handler.py"
+
+    ```python hl_lines="1 8 12"
+    --8<-- "examples/logger/src/working_with_buffering_logs_reusing_handler.py"
+    ```
+
+=== "working_with_buffering_logs_reusing_function.py"
+
+    ```python hl_lines="1"
+    --8<-- "examples/logger/src/working_with_buffering_logs_reusing_function.py"
+    ```
+
+#### Buffering workflows
+
+##### Manual flush
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Initialize with DEBUG level buffering
+    Logger-->>Lambda: Logger buffer ready
+    Lambda->>Logger: logger.debug("First debug log")
+    Logger-->>Logger: Buffer first debug log
+    Lambda->>Logger: logger.info("Info log")
+    Logger->>CloudWatch: Directly log info message
+    Lambda->>Logger: logger.debug("Second debug log")
+    Logger-->>Logger: Buffer second debug log
+    Lambda->>Logger: logger.flush_buffer()
+    Logger->>CloudWatch: Emit buffered logs to stdout
+    Lambda->>Client: Return execution result
+```
+<i>Flushing buffer manually</i>
+</center>
+
+##### Flushing when logging an error
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Initialize with DEBUG level buffering
+    Logger-->>Lambda: Logger buffer ready
+    Lambda->>Logger: logger.debug("First log")
+    Logger-->>Logger: Buffer first debug log
+    Lambda->>Logger: logger.debug("Second log")
+    Logger-->>Logger: Buffer second debug log
+    Lambda->>Logger: logger.debug("Third log")
+    Logger-->>Logger: Buffer third debug log
+    Lambda->>Lambda: Exception occurs
+    Lambda->>Logger: logger.error("Error details")
+    Logger->>CloudWatch: Emit buffered debug logs
+    Logger->>CloudWatch: Emit error log
+    Lambda->>Client: Raise exception
+```
+<i>Flushing buffer when an error happens</i>
+</center>
+
+##### Flushing on exception
+
+This works only when decorating your Lambda handler with the decorator `@logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)`
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Logger
+    participant CloudWatch
+    Client->>Lambda: Invoke Lambda
+    Lambda->>Logger: Using decorator
+    Logger-->>Lambda: Logger context injected
+    Lambda->>Logger: logger.debug("First log")
+    Logger-->>Logger: Buffer first debug log
+    Lambda->>Logger: logger.debug("Second log")
+    Logger-->>Logger: Buffer second debug log
+    Lambda->>Lambda: Uncaught Exception
+    Lambda->>CloudWatch: Automatically emit buffered debug logs
+    Lambda->>Client: Raise uncaught exception
+```
+<i>Flushing buffer when an uncaught exception happens</i>
+</center>
+
+#### Buffering FAQs
+
+1. **Does the buffer persist across Lambda invocations?** No, each Lambda invocation has its own buffer. The buffer is initialized when the Lambda function is invoked and is cleared after the function execution completes or when flushed manually.
+
+2. **Are my logs buffered during cold starts?** No, we never buffer logs during cold starts. This is because we want to ensure that logs emitted during this phase are always available for debugging and monitoring purposes. The buffer is only used during the execution of the Lambda function.
+
+3. **How can I prevent log buffering from consuming excessive memory?** You can limit the size of the buffer by setting the `max_bytes` option in the `LoggerBufferConfig` constructor parameter. This will ensure that the buffer does not grow indefinitely and consume excessive memory.
+
+4. **What happens if the log buffer reaches its maximum size?** Older logs are removed from the buffer to make room for new logs. This means that if the buffer is full, you may lose some logs if they are not flushed before the buffer reaches its maximum size. When this happens, we emit a warning when flushing the buffer to indicate that some logs have been dropped.
+
+5. **What timestamp is used when I flush the logs?** The timestamp preserves the original time when the log record was created. If you create a log record at 11:00:10 and flush it at 11:00:25, the log line will retain its original timestamp of 11:00:10.
+
+6. **What happens if I try to add a log line that is bigger than max buffer size?** The log will be emitted directly to standard output and not buffered. When this happens, we emit a warning to indicate that the log line was too big to be buffered.
+
+7. **What happens if Lambda times out without flushing the buffer?** Logs that are still in the buffer will be lost.
+
+8. **Do child loggers inherit the buffer?**  No, child loggers do not inherit the buffer from their parent logger but only the buffer configuration. This means that if you create a child logger, it will have its own buffer and will not share the buffer with the parent logger.
+
 ### Built-in Correlation ID expressions
 
 You can use any of the following built-in JMESPath expressions as part of [inject_lambda_context decorator](#setting-a-correlation-id).
@@ -627,24 +802,27 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
 
 ### Sampling debug logs
 
-Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of your concurrent/cold start invocations**.
+Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of the Lambda function invocations**.
 
-You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sample_rate` parameter in Logger.
+You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sampling_rate` parameter in Logger.
 
 ???+ tip "Tip: When is this useful?"
-    Let's imagine a sudden spike increase in concurrency triggered a transient issue downstream. When looking into the logs you might not have enough information, and while you can adjust log levels it might not happen again.
+    Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without increasing the overall verbosity of your logs.
 
-    This feature takes into account transient issues where additional debugging information can be useful.
+    Example: Imagine an e-commerce checkout process where you want to understand rare payment gateway errors. With 10% sampling, you'll log detailed information for a small subset of transactions, making troubleshooting easier without generating excessive logs.
 
-Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
+The sampling decision happens automatically with each invocation when using `@logger.inject_lambda_context` decorator.  When not using the decorator, you're in charge of refreshing it via `refresh_sample_rate_calculation` method. Skipping both may lead to unexpected sampling results.
 
-???+ note
-	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
+=== "sampling_debug_logs_with_decorator.py"
 
-=== "sampling_debug_logs.py"
+    ```python hl_lines="5 8"
+    --8<-- "examples/logger/src/sampling_debug_logs_with_decorator.py"
+    ```
 
-    ```python hl_lines="6 10"
-    --8<-- "examples/logger/src/sampling_debug_logs.py"
+=== "sampling_debug_logs_with_standalone_function.py"
+
+    ```python hl_lines="5 12"
+    --8<-- "examples/logger/src/sampling_debug_logs_with_standalone_function.py"
     ```
 
 === "sampling_debug_logs_output.json"

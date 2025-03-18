@@ -39,6 +39,68 @@ def multiple_logger_instances_arn(infrastructure: dict) -> str:
     return infrastructure.get("MultipleLoggerInstancesArn", "")
 
 
+@pytest.fixture
+def buffer_logs_without_flush_fn(infrastructure: dict) -> str:
+    return infrastructure.get("BufferLogsWithoutFlush", "")
+
+
+@pytest.fixture
+def buffer_logs_without_flush_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BufferLogsWithoutFlushArn", "")
+
+
+@pytest.fixture
+def buffer_logs_with_flush_fn(infrastructure: dict) -> str:
+    return infrastructure.get("BufferLogsWithFlush", "")
+
+
+@pytest.fixture
+def buffer_logs_with_flush_arn(infrastructure: dict) -> str:
+    return infrastructure.get("BufferLogsWithFlushArn", "")
+
+
+@pytest.mark.xdist_group(name="logger")
+def test_buffer_logs_without_flush(buffer_logs_without_flush_fn, buffer_logs_without_flush_arn):
+    # GIVEN
+    message = "logs should be visible with default settings"
+    message_buffer = "not visible message"
+    payload = json.dumps({"message_visible": message, "message_buffered": message_buffer})
+
+    # WHEN
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=buffer_logs_without_flush_arn, payload=payload)
+    data_fetcher.get_lambda_response(lambda_arn=buffer_logs_without_flush_arn, payload=payload)
+
+    # THEN
+    logs = data_fetcher.get_logs(
+        function_name=buffer_logs_without_flush_fn,
+        start_time=execution_time,
+        minimum_log_entries=2,
+    )
+
+    assert len(logs) == 2
+
+
+@pytest.mark.xdist_group(name="logger")
+def test_buffer_logs_with_flush(buffer_logs_with_flush_fn, buffer_logs_with_flush_arn):
+    # GIVEN
+    message = "logs should be visible with default settings"
+    message_buffer = "not visible message"
+    payload = json.dumps({"message_visible": message, "message_buffered": message_buffer})
+
+    # WHEN
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=buffer_logs_with_flush_arn, payload=payload)
+    data_fetcher.get_lambda_response(lambda_arn=buffer_logs_with_flush_arn, payload=payload)
+
+    # THEN
+    logs = data_fetcher.get_logs(
+        function_name=buffer_logs_with_flush_fn,
+        start_time=execution_time,
+        minimum_log_entries=4,
+    )
+
+    assert len(logs) == 4
+
+
 @pytest.mark.xdist_group(name="logger")
 def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     # GIVEN

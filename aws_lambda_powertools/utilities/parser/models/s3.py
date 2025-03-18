@@ -53,7 +53,7 @@ class S3Message(BaseModel):
     s3SchemaVersion: str
     configurationId: str
     bucket: S3Bucket
-    object: S3Object  # noqa: A003,VNE003
+    object: S3Object  # noqa: A003
 
 
 class S3EventNotificationObjectModel(BaseModel):
@@ -71,7 +71,7 @@ class S3EventNotificationEventBridgeBucketModel(BaseModel):
 class S3EventNotificationEventBridgeDetailModel(BaseModel):
     version: str
     bucket: S3EventNotificationEventBridgeBucketModel
-    object: S3EventNotificationObjectModel  # noqa: A003,VNE003
+    object: S3EventNotificationObjectModel  # noqa: A003
     request_id: str = Field(..., alias="request-id")
     requester: str
     source_ip_address: Optional[str] = Field(None, alias="source-ip-address")

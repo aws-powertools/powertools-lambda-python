@@ -86,7 +86,7 @@ def test_setup_service_env_var(monkeypatch, stdout, service_name):
     assert service_name == log["service"]
 
 
-def test_setup_sampling_rate_env_var(monkeypatch, stdout, service_name):
+def test_setup_sampling_rate_env_var_with_100percent(monkeypatch, stdout, service_name):
     # GIVEN Logger is initialized
     # WHEN samping rate is explicitly set to 100% via POWERTOOLS_LOGGER_SAMPLE_RATE env
     sampling_rate = "1"
@@ -101,6 +101,129 @@ def test_setup_sampling_rate_env_var(monkeypatch, stdout, service_name):
     assert sampling_rate == log["sampling_rate"]
     assert "DEBUG" == log["level"]
     assert "I am being sampled" == log["message"]
+
+
+def test_setup_sampling_rate_constructor_with_100percent(stdout, service_name):
+    # GIVEN Logger is initialized
+    # WHEN samping rate is explicitly set to 100% via constructor
+    sampling_rate = 1
+    logger = Logger(service=service_name, sampling_rate=sampling_rate, stream=stdout)
+    logger.debug("I am being sampled")
+
+    # THEN sampling rate should be equals sampling_rate value
+    # log level should be DEBUG
+    # and debug log statements should be in stdout
+    log = capture_logging_output(stdout)
+    assert sampling_rate == log["sampling_rate"]
+    assert "DEBUG" == log["level"]
+    assert "I am being sampled" == log["message"]
+
+
+def test_setup_sampling_rate_env_var_with_0percent(monkeypatch, stdout, service_name):
+    # GIVEN Logger is initialized
+    # WHEN samping rate is explicitly set to 0% via POWERTOOLS_LOGGER_SAMPLE_RATE env
+    sampling_rate = "0"
+    monkeypatch.setenv("POWERTOOLS_LOGGER_SAMPLE_RATE", sampling_rate)
+    logger = Logger(service=service_name, stream=stdout)
+    logger.debug("I am being sampled")
+
+    # THEN we should not log
+    logs = list(stdout.getvalue().strip())
+    assert not logs
+
+
+def test_setup_sampling_rate_constructor_with_0percent(stdout, service_name):
+    # GIVEN Logger is initialized
+    # WHEN samping rate is explicitly set to 100% via constructor
+    sampling_rate = 0
+    logger = Logger(service=service_name, sampling_rate=sampling_rate, stream=stdout)
+    logger.debug("I am being sampled")
+
+    # THEN we should not log
+    logs = list(stdout.getvalue().strip())
+    assert not logs
+
+
+@pytest.mark.parametrize(
+    "percent, minimum_logs, maximum_logs",
+    [
+        (0.5, 35, 65),
+        (0.1, 0, 20),
+        (0.9, 75, 115),
+    ],
+)
+def test_setup_sampling_rate_env_var_with_percent_and_decorator(
+    lambda_context,
+    stdout,
+    service_name,
+    percent,
+    minimum_logs,
+    maximum_logs,
+):
+    # GIVEN the Logger is initialized with a specific sampling rate
+    sampling_rate = percent
+    total_runs = 100
+    minimum_logs_excepted = minimum_logs
+    maximum_logs_excepted = maximum_logs
+    logger = Logger(service=service_name, level="INFO", sampling_rate=sampling_rate, stream=stdout)
+
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.debug("test")
+
+    # WHEN A lambda handler is invoked multiple times with decorator
+    for _i in range(total_runs):
+        handler({}, lambda_context)
+
+    # THEN verify the number of logs falls within the expected range
+    logs = list(stdout.getvalue().strip().split("\n"))
+    assert (
+        len(logs) >= minimum_logs_excepted
+    ), f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
+    assert (
+        len(logs) <= maximum_logs_excepted
+    ), f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
+
+
+@pytest.mark.parametrize(
+    "percent, minimum_logs, maximum_logs",
+    [
+        (0.5, 35, 65),
+        (0.1, 0, 20),
+        (0.9, 75, 115),
+    ],
+)
+def test_setup_sampling_rate_env_var_with_percent_and_recalculate_manual_method(
+    lambda_context,
+    stdout,
+    service_name,
+    percent,
+    minimum_logs,
+    maximum_logs,
+):
+    # GIVEN the Logger is initialized with a specific sampling rate
+    sampling_rate = percent
+    total_runs = 100
+    minimum_logs_excepted = minimum_logs
+    maximum_logs_excepted = maximum_logs
+    logger = Logger(service=service_name, level="INFO", sampling_rate=sampling_rate, stream=stdout)
+
+    def handler(event, context):
+        logger.debug("test")
+        logger.refresh_sample_rate_calculation()
+
+    # WHEN A lambda handler is invoked multiple times with manual refresh_sample_rate_calculation()
+    for _i in range(total_runs):
+        handler({}, lambda_context)
+
+    # THEN verify the number of logs falls within the expected range
+    logs = list(stdout.getvalue().strip().split("\n"))
+    assert (
+        len(logs) >= minimum_logs_excepted
+    ), f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
+    assert (
+        len(logs) <= maximum_logs_excepted
+    ), f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
 
 
 def test_inject_lambda_context(lambda_context, stdout, service_name):
