@@ -1,3 +1,5 @@
+import json
+
 from aws_lambda_powertools.utilities.data_classes import APIGatewayWebSocketEvent
 from tests.functional.utils import load_event
 
@@ -6,7 +8,10 @@ def test_connect_api_gateway_websocket_event():
     raw_event = load_event("apiGatewayWebSocketApiConnect.json")
     parsed_event = APIGatewayWebSocketEvent(raw_event)
 
+    assert parsed_event.is_base64_encoded is False
     assert parsed_event.body is None
+    assert parsed_event.decoded_body is None
+    assert parsed_event.json_body is None
     assert parsed_event.headers == raw_event["headers"]
     assert parsed_event.multi_value_headers == raw_event["multiValueHeaders"]
 
@@ -31,13 +36,17 @@ def test_connect_api_gateway_websocket_event():
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
     assert identity.source_ip == identity_raw["sourceIp"]
+    assert identity.user_agent is None
 
 
 def test_disconnect_api_gateway_websocket_event():
     raw_event = load_event("apiGatewayWebSocketApiDisconnect.json")
     parsed_event = APIGatewayWebSocketEvent(raw_event)
 
+    assert parsed_event.is_base64_encoded is False
     assert parsed_event.body is None
+    assert parsed_event.decoded_body is None
+    assert parsed_event.json_body is None
     assert parsed_event.headers == raw_event["headers"]
     assert parsed_event.multi_value_headers == raw_event["multiValueHeaders"]
 
@@ -62,13 +71,17 @@ def test_disconnect_api_gateway_websocket_event():
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
     assert identity.source_ip == identity_raw["sourceIp"]
+    assert identity.user_agent is None
 
 
 def test_message_api_gateway_websocket_event():
     raw_event = load_event("apiGatewayWebSocketApiMessage.json")
     parsed_event = APIGatewayWebSocketEvent(raw_event)
 
+    assert parsed_event.is_base64_encoded is False
     assert parsed_event.body == raw_event["body"]
+    assert parsed_event.decoded_body == raw_event["body"]
+    assert parsed_event.json_body == json.loads(raw_event["body"])
     assert parsed_event.headers == {}
     assert parsed_event.multi_value_headers == {}
 
@@ -93,3 +106,4 @@ def test_message_api_gateway_websocket_event():
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
     assert identity.source_ip == identity_raw["sourceIp"]
+    assert identity.user_agent is None
