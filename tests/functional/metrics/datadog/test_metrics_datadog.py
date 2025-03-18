@@ -46,6 +46,20 @@ def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     assert logs == json.loads('{"m":"item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
 
 
+def test_datadog_disable_write_to_log_with_env_variable(capsys, monkeypatch):
+    # GIVEN DD_FLUSH_TO_LOG env is configured
+    monkeypatch.setenv("DD_FLUSH_TO_LOG", "False")
+    metrics = DatadogMetrics()
+
+    # WHEN we add a metric
+    metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
+    metrics.flush_metrics()
+    logs = capsys.readouterr().out.strip()
+
+    # THEN metrics is not flushed
+    assert not logs
+
+
 def test_datadog_with_invalid_metric_value():
     # GIVEN DatadogMetrics is initialized
     metrics = DatadogMetrics()
@@ -405,7 +419,7 @@ def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
 
     # WHEN metrics is initialized with namespace and metrics added
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
@@ -421,7 +435,7 @@ def test_metrics_enabled_with_env_var_not_set(monkeypatch, capsys):
     monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
 
     # WHEN metrics is initialized with namespace and metrics added
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
@@ -437,7 +451,7 @@ def test_metrics_enabled_with_dev_mode_false(monkeypatch, capsys):
     monkeypatch.setenv("POWERTOOLS_DEV", "false")
 
     # WHEN metrics is initialized
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
@@ -453,7 +467,7 @@ def test_metrics_disabled_dev_mode_overrides_metrics_disabled(monkeypatch, capsy
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
 
     # WHEN metrics is initialized
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
@@ -471,7 +485,7 @@ def test_metrics_enabled_with_both_false(monkeypatch, capsys):
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "false")
 
     # WHEN metrics is initialized
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
@@ -487,7 +501,7 @@ def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypa
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
 
     # WHEN metrics is initialized
-    metrics = DatadogMetrics(namespace="test")
+    metrics = DatadogMetrics(namespace="test", flush_to_log=True)
     metrics.add_metric(name="test_metric", value=1)
     metrics.flush_metrics()
 
