@@ -495,7 +495,7 @@ class PreTokenGenerationTriggerV2EventRequest(PreTokenGenerationTriggerEventRequ
         return self.get("scopes") or []
 
 
-class ClaimsOverrideDetails(DictWrapper):
+class ClaimsOverrideBase(DictWrapper):
     @property
     def claims_to_add_or_override(self) -> dict[str, str]:
         return self.get("claimsToAddOrOverride") or {}
@@ -515,6 +515,8 @@ class ClaimsOverrideDetails(DictWrapper):
         """A list that contains claims to be suppressed from the identity token."""
         self._data["claimsToSuppress"] = value
 
+
+class GroupConfigurationBase(DictWrapper):
     @property
     def group_configuration(self) -> GroupOverrideDetails | None:
         group_override_details = self.get("groupOverrideDetails")
@@ -549,26 +551,11 @@ class ClaimsOverrideDetails(DictWrapper):
         self["groupOverrideDetails"]["preferredRole"] = value
 
 
-class TokenClaimsAndScopeOverrideDetails(DictWrapper):
-    @property
-    def claims_to_add_or_override(self) -> dict[str, str]:
-        return self.get("claimsToAddOrOverride") or {}
+class ClaimsOverrideDetails(ClaimsOverrideBase, GroupConfigurationBase):
+    pass
 
-    @claims_to_add_or_override.setter
-    def claims_to_add_or_override(self, value: dict[str, str]):
-        """A map of one or more key-value pairs of claims to add or override.
-        For group related claims, use groupOverrideDetails instead."""
-        self._data["claimsToAddOrOverride"] = value
 
-    @property
-    def claims_to_suppress(self) -> list[str]:
-        return self.get("claimsToSuppress") or []
-
-    @claims_to_suppress.setter
-    def claims_to_suppress(self, value: list[str]):
-        """A list that contains claims to be suppressed from the identity token."""
-        self._data["claimsToSuppress"] = value
-
+class TokenClaimsAndScopeOverrideDetails(ClaimsOverrideBase):
     @property
     def scopes_to_add(self) -> list[str]:
         return self.get("scopesToAdd") or []
@@ -586,8 +573,7 @@ class TokenClaimsAndScopeOverrideDetails(DictWrapper):
         self._data["scopesToSuppress"] = value
 
 
-class ClaimsAndScopeOverrideDetails(DictWrapper):
-
+class ClaimsAndScopeOverrideDetails(GroupConfigurationBase):
     @property
     def id_token_generation(self) -> TokenClaimsAndScopeOverrideDetails | None:
         id_token_generation_details = self._data.get("idTokenGeneration")
@@ -631,39 +617,6 @@ class ClaimsAndScopeOverrideDetails(DictWrapper):
         the tokenClaimsAndScopeOverrideDetails object in the response, and pass it back to the service.
         """
         self._data["accessTokenGeneration"] = value
-
-    @property
-    def group_configuration(self) -> GroupOverrideDetails | None:
-        group_override_details = self.get("groupOverrideDetails")
-        return None if group_override_details is None else GroupOverrideDetails(group_override_details)
-
-    @group_configuration.setter
-    def group_configuration(self, value: dict[str, Any]):
-        """The output object containing the current group configuration.
-
-        It includes groupsToOverride, iamRolesToOverride, and preferredRole.
-
-        The groupOverrideDetails object is replaced with the one you provide. If you provide an empty or null
-        object in the response, then the groups are suppressed. To leave the existing group configuration
-        as is, copy the value of the request's groupConfiguration object to the groupOverrideDetails object
-        in the response, and pass it back to the service.
-        """
-        self._data["groupOverrideDetails"] = value
-
-    def set_group_configuration_groups_to_override(self, value: list[str]):
-        """A list of the group names that are associated with the user that the identity token is issued for."""
-        self._data.setdefault("groupOverrideDetails", {})
-        self["groupOverrideDetails"]["groupsToOverride"] = value
-
-    def set_group_configuration_iam_roles_to_override(self, value: list[str]):
-        """A list of the current IAM roles associated with these groups."""
-        self._data.setdefault("groupOverrideDetails", {})
-        self["groupOverrideDetails"]["iamRolesToOverride"] = value
-
-    def set_group_configuration_preferred_role(self, value: str):
-        """A string indicating the preferred IAM role."""
-        self._data.setdefault("groupOverrideDetails", {})
-        self["groupOverrideDetails"]["preferredRole"] = value
 
 
 class PreTokenGenerationTriggerEventResponse(DictWrapper):
