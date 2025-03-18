@@ -205,7 +205,6 @@ class BaseProxyEvent(DictWrapper):
         """Parses the submitted body as json"""
         if self.decoded_body:
             return self._json_deserializer(self.decoded_body)
-
         return None
 
     @cached_property
@@ -370,81 +369,81 @@ class RequestContextClientCert(DictWrapper):
 class APIGatewayEventIdentity(DictWrapper):
     @property
     def access_key(self) -> str | None:
-        return self["requestContext"]["identity"].get("accessKey")
+        return self.get("accessKey")
 
     @property
     def account_id(self) -> str | None:
         """The AWS account ID associated with the request."""
-        return self["requestContext"]["identity"].get("accountId")
+        return self.get("accountId")
 
     @property
     def api_key(self) -> str | None:
         """For API methods that require an API key, this variable is the API key associated with the method request.
         For methods that don't require an API key, this variable is null."""
-        return self["requestContext"]["identity"].get("apiKey")
+        return self.get("apiKey")
 
     @property
     def api_key_id(self) -> str | None:
         """The API key ID associated with an API request that requires an API key."""
-        return self["requestContext"]["identity"].get("apiKeyId")
+        return self.get("apiKeyId")
 
     @property
     def caller(self) -> str | None:
         """The principal identifier of the caller making the request."""
-        return self["requestContext"]["identity"].get("caller")
+        return self.get("caller")
 
     @property
     def cognito_authentication_provider(self) -> str | None:
         """A comma-separated list of the Amazon Cognito authentication providers used by the caller
         making the request. Available only if the request was signed with Amazon Cognito credentials."""
-        return self["requestContext"]["identity"].get("cognitoAuthenticationProvider")
+        return self.get("cognitoAuthenticationProvider")
 
     @property
     def cognito_authentication_type(self) -> str | None:
         """The Amazon Cognito authentication type of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        return self["requestContext"]["identity"].get("cognitoAuthenticationType")
+        return self.get("cognitoAuthenticationType")
 
     @property
     def cognito_identity_id(self) -> str | None:
         """The Amazon Cognito identity ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        return self["requestContext"]["identity"].get("cognitoIdentityId")
+        return self.get("cognitoIdentityId")
 
     @property
     def cognito_identity_pool_id(self) -> str | None:
         """The Amazon Cognito identity pool ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        return self["requestContext"]["identity"].get("cognitoIdentityPoolId")
+        return self.get("cognitoIdentityPoolId")
 
     @property
     def principal_org_id(self) -> str | None:
         """The AWS organization ID."""
-        return self["requestContext"]["identity"].get("principalOrgId")
+        return self.get("principalOrgId")
 
     @property
     def source_ip(self) -> str:
         """The source IP address of the TCP connection making the request to API Gateway."""
-        return self["requestContext"]["identity"]["sourceIp"]
+        return self["sourceIp"]
 
     @property
     def user(self) -> str | None:
         """The principal identifier of the user making the request."""
-        return self["requestContext"]["identity"].get("user")
+        return self.get("user")
 
     @property
     def user_agent(self) -> str | None:
         """The User Agent of the API caller."""
-        return self["requestContext"]["identity"].get("userAgent")
+        return self.get("userAgent")
 
     @property
     def user_arn(self) -> str | None:
         """The Amazon Resource Name (ARN) of the effective user identified after authentication."""
-        return self["requestContext"]["identity"].get("userArn")
+        return self.get("userArn")
 
     @property
     def client_cert(self) -> RequestContextClientCert | None:
-        client_cert = self["requestContext"]["identity"].get("clientCert")
+        client_cert = self.get("clientCert")
         return None if client_cert is None else RequestContextClientCert(client_cert)
 
 
@@ -452,153 +451,153 @@ class BaseRequestContext(DictWrapper):
     @property
     def account_id(self) -> str:
         """The AWS account ID associated with the request."""
-        return self["requestContext"]["accountId"]
+        return self["accountId"]
 
     @property
     def api_id(self) -> str:
         """The identifier API Gateway assigns to your API."""
-        return self["requestContext"]["apiId"]
+        return self["apiId"]
 
     @property
     def domain_name(self) -> str | None:
         """A domain name"""
-        return self["requestContext"].get("domainName")
+        return self.get("domainName")
 
     @property
     def domain_prefix(self) -> str | None:
-        return self["requestContext"].get("domainPrefix")
+        return self.get("domainPrefix")
 
     @property
     def extended_request_id(self) -> str | None:
         """An automatically generated ID for the API call, which contains more useful information
         for debugging/troubleshooting."""
-        return self["requestContext"].get("extendedRequestId")
+        return self.get("extendedRequestId")
 
     @property
     def protocol(self) -> str:
         """The request protocol, for example, HTTP/1.1."""
-        return self["requestContext"]["protocol"]
+        return self["protocol"]
 
     @property
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
-        return self["requestContext"]["httpMethod"]
+        return self["httpMethod"]
 
     @property
     def identity(self) -> APIGatewayEventIdentity:
-        return APIGatewayEventIdentity(self._data)
+        return APIGatewayEventIdentity(self["identity"])
 
     @property
     def path(self) -> str:
-        return self["requestContext"]["path"]
+        return self["path"]
 
     @property
     def stage(self) -> str:
         """The deployment stage of the API request"""
-        return self["requestContext"]["stage"]
+        return self["stage"]
 
     @property
     def request_id(self) -> str:
         """The ID that API Gateway assigns to the API request."""
-        return self["requestContext"]["requestId"]
+        return self["requestId"]
 
     @property
     def request_time(self) -> str | None:
         """The CLF-formatted request time (dd/MMM/yyyy:HH:mm:ss +-hhmm)"""
-        return self["requestContext"].get("requestTime")
+        return self.get("requestTime")
 
     @property
     def request_time_epoch(self) -> int:
         """The Epoch-formatted request time."""
-        return self["requestContext"]["requestTimeEpoch"]
+        return self["requestTimeEpoch"]
 
     @property
     def resource_id(self) -> str:
-        return self["requestContext"]["resourceId"]
+        return self["resourceId"]
 
     @property
     def resource_path(self) -> str:
-        return self["requestContext"]["resourcePath"]
+        return self["resourcePath"]
 
 
 class RequestContextV2Http(DictWrapper):
     @property
     def method(self) -> str:
-        return self["requestContext"]["http"]["method"]
+        return self["method"]
 
     @property
     def path(self) -> str:
-        return self["requestContext"]["http"]["path"]
+        return self["path"]
 
     @property
     def protocol(self) -> str:
         """The request protocol, for example, HTTP/1.1."""
-        return self["requestContext"]["http"]["protocol"]
+        return self["protocol"]
 
     @property
     def source_ip(self) -> str:
         """The source IP address of the TCP connection making the request to API Gateway."""
-        return self["requestContext"]["http"]["sourceIp"]
+        return self["sourceIp"]
 
     @property
     def user_agent(self) -> str:
         """The User Agent of the API caller."""
-        return self["requestContext"]["http"]["userAgent"]
+        return self["userAgent"]
 
 
 class BaseRequestContextV2(DictWrapper):
     @property
     def account_id(self) -> str:
         """The AWS account ID associated with the request."""
-        return self["requestContext"]["accountId"]
+        return self["accountId"]
 
     @property
     def api_id(self) -> str:
         """The identifier API Gateway assigns to your API."""
-        return self["requestContext"]["apiId"]
+        return self["apiId"]
 
     @property
     def domain_name(self) -> str:
         """A domain name"""
-        return self["requestContext"]["domainName"]
+        return self["domainName"]
 
     @property
     def domain_prefix(self) -> str:
-        return self["requestContext"]["domainPrefix"]
+        return self["domainPrefix"]
 
     @property
     def http(self) -> RequestContextV2Http:
-        return RequestContextV2Http(self._data)
+        return RequestContextV2Http(self["http"])
 
     @property
     def request_id(self) -> str:
         """The ID that API Gateway assigns to the API request."""
-        return self["requestContext"]["requestId"]
+        return self["requestId"]
 
     @property
     def route_key(self) -> str:
         """The selected route key."""
-        return self["requestContext"]["routeKey"]
+        return self["routeKey"]
 
     @property
     def stage(self) -> str:
         """The deployment stage of the API request"""
-        return self["requestContext"]["stage"]
+        return self["stage"]
 
     @property
     def time(self) -> str:
         """The CLF-formatted request time (dd/MMM/yyyy:HH:mm:ss +-hhmm)."""
-        return self["requestContext"]["time"]
+        return self["time"]
 
     @property
     def time_epoch(self) -> int:
         """The Epoch-formatted request time."""
-        return self["requestContext"]["timeEpoch"]
+        return self["timeEpoch"]
 
     @property
     def authentication(self) -> RequestContextClientCert | None:
         """Optional when using mutual TLS authentication"""
         # FunctionURL might have NONE as AuthZ
-        authentication = self["requestContext"].get("authentication") or {}
+        authentication = self.get("authentication") or {}
         client_cert = authentication.get("clientCert")
         return None if client_cert is None else RequestContextClientCert(client_cert)

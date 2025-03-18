@@ -18,7 +18,7 @@ class S3Identity(DictWrapper):
 class S3RequestParameters(DictWrapper):
     @property
     def source_ip_address(self) -> str:
-        return self["requestParameters"]["sourceIPAddress"]
+        return self["sourceIPAddress"]
 
 
 class S3EventNotificationEventBridgeBucket(DictWrapper):
@@ -40,8 +40,8 @@ class S3EventBridgeNotificationObject(DictWrapper):
 
     @property
     def etag(self) -> str:
-        """Object etag. Object deletion event doesn't contain etag; we default to empty string"""
-        return self.get("etag", "")  # type: ignore[return-value]  # false positive
+        """Object eTag. Object deletion event doesn't contain eTag; we default to empty string"""
+        return self.get("etag") or ""
 
     @property
     def version_id(self) -> str:
@@ -156,77 +156,77 @@ class S3EventBridgeNotificationEvent(EventBridgeEvent):
 class S3Bucket(DictWrapper):
     @property
     def name(self) -> str:
-        return self["s3"]["bucket"]["name"]
+        return self["name"]
 
     @property
     def owner_identity(self) -> S3Identity:
-        return S3Identity(self["s3"]["bucket"]["ownerIdentity"])
+        return S3Identity(self["ownerIdentity"])
 
     @property
     def arn(self) -> str:
-        return self["s3"]["bucket"]["arn"]
+        return self["arn"]
 
 
 class S3Object(DictWrapper):
     @property
     def key(self) -> str:
         """Object key"""
-        return self["s3"]["object"]["key"]
+        return self["key"]
 
     @property
     def size(self) -> int:
         """Object byte size"""
-        return int(self["s3"]["object"]["size"])
+        return int(self["size"])
 
     @property
     def etag(self) -> str:
         """Object eTag. Object deletion event doesn't contain eTag; we default to empty string"""
-        return self["s3"]["object"].get("eTag", "")
+        return self.get("eTag") or ""
 
     @property
     def version_id(self) -> str | None:
         """Object version if bucket is versioning-enabled, otherwise null"""
-        return self["s3"]["object"].get("versionId")
+        return self.get("versionId")
 
     @property
     def sequencer(self) -> str:
         """A string representation of a hexadecimal value used to determine event sequence,
         only used with PUTs and DELETEs
         """
-        return self["s3"]["object"]["sequencer"]
+        return self["sequencer"]
 
 
 class S3Message(DictWrapper):
     @property
     def s3_schema_version(self) -> str:
-        return self["s3"]["s3SchemaVersion"]
+        return self["s3SchemaVersion"]
 
     @property
     def configuration_id(self) -> str:
         """ID found in the bucket notification configuration"""
-        return self["s3"]["configurationId"]
+        return self["configurationId"]
 
     @property
     def bucket(self) -> S3Bucket:
-        return S3Bucket(self._data)
+        return S3Bucket(self["bucket"])
 
     @property
     def get_object(self) -> S3Object:
         """Get the `object` property as an S3Object"""
         # Note: this name conflicts with existing python builtins
-        return S3Object(self._data)
+        return S3Object(self["object"])
 
 
 class S3EventRecordGlacierRestoreEventData(DictWrapper):
     @property
     def lifecycle_restoration_expiry_time(self) -> str:
         """Time when the object restoration will be expired."""
-        return self["restoreEventData"]["lifecycleRestorationExpiryTime"]
+        return self["lifecycleRestorationExpiryTime"]
 
     @property
     def lifecycle_restore_storage_class(self) -> str:
         """Source storage class for restore"""
-        return self["restoreEventData"]["lifecycleRestoreStorageClass"]
+        return self["lifecycleRestoreStorageClass"]
 
 
 class S3EventRecordGlacierEventData(DictWrapper):
@@ -236,7 +236,7 @@ class S3EventRecordGlacierEventData(DictWrapper):
 
         The glacierEventData key is only visible for s3:ObjectRestore:Completed events
         """
-        return S3EventRecordGlacierRestoreEventData(self._data)
+        return S3EventRecordGlacierRestoreEventData(self["restoreEventData"])
 
 
 class S3EventRecord(DictWrapper):
@@ -272,7 +272,7 @@ class S3EventRecord(DictWrapper):
 
     @property
     def request_parameters(self) -> S3RequestParameters:
-        return S3RequestParameters(self._data)
+        return S3RequestParameters(self["requestParameters"])
 
     @property
     def response_elements(self) -> dict[str, str]:
@@ -286,7 +286,7 @@ class S3EventRecord(DictWrapper):
 
     @property
     def s3(self) -> S3Message:
-        return S3Message(self._data)
+        return S3Message(self["s3"])
 
     @property
     def glacier_event_data(self) -> S3EventRecordGlacierEventData | None:

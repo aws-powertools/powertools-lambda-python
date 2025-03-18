@@ -178,29 +178,24 @@ class KinesisFirehoseDataTransformationResponse:
 
 class KinesisFirehoseRecordMetadata(DictWrapper):
     @property
-    def _metadata(self) -> dict:
-        """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
-        return self["kinesisRecordMetadata"]  # could raise KeyError
-
-    @property
     def shard_id(self) -> str:
         """Kinesis stream shard ID; present only when Kinesis Stream is source"""
-        return self._metadata["shardId"]
+        return self["shardId"]
 
     @property
     def partition_key(self) -> str:
         """Kinesis stream partition key; present only when Kinesis Stream is source"""
-        return self._metadata["partitionKey"]
+        return self["partitionKey"]
 
     @property
     def approximate_arrival_timestamp(self) -> int:
         """Kinesis stream approximate arrival ISO timestamp; present only when Kinesis Stream is source"""
-        return self._metadata["approximateArrivalTimestamp"]
+        return self["approximateArrivalTimestamp"]
 
     @property
     def sequence_number(self) -> str:
         """Kinesis stream sequence number; present only when Kinesis Stream is source"""
-        return self._metadata["sequenceNumber"]
+        return self["sequenceNumber"]
 
     @property
     def subsequence_number(self) -> int:
@@ -208,7 +203,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
 
         Note: this will only be present for Kinesis streams using record aggregation
         """
-        return self._metadata["subsequenceNumber"]
+        return self["subsequenceNumber"]
 
 
 class KinesisFirehoseRecord(DictWrapper):
@@ -230,7 +225,8 @@ class KinesisFirehoseRecord(DictWrapper):
     @property
     def metadata(self) -> KinesisFirehoseRecordMetadata | None:
         """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
-        return KinesisFirehoseRecordMetadata(self._data) if self.get("kinesisRecordMetadata") else None
+        metadata = self.get("kinesisRecordMetadata")
+        return KinesisFirehoseRecordMetadata(metadata) if metadata else None
 
     @property
     def data_as_bytes(self) -> bytes:
