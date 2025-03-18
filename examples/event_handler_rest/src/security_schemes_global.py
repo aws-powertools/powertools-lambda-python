@@ -12,6 +12,20 @@ tracer = Tracer()
 logger = Logger()
 
 app = APIGatewayRestResolver(enable_validation=True)
+app.configure_openapi(
+    title="My API",
+    security_schemes={
+        "oauth": OAuth2(
+            flows=OAuthFlows(
+                authorizationCode=OAuthFlowAuthorizationCode(
+                    authorizationUrl="https://xxx.amazoncognito.com/oauth2/authorize",
+                    tokenUrl="https://xxx.amazoncognito.com/oauth2/token",
+                ),
+            ),
+        ),
+    },
+    security=[{"oauth": ["admin"]}],  # (1)!)
+)
 
 
 @app.get("/")
@@ -26,19 +40,4 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    print(
-        app.get_openapi_json_schema(
-            title="My API",
-            security_schemes={
-                "oauth": OAuth2(
-                    flows=OAuthFlows(
-                        authorizationCode=OAuthFlowAuthorizationCode(
-                            authorizationUrl="https://xxx.amazoncognito.com/oauth2/authorize",
-                            tokenUrl="https://xxx.amazoncognito.com/oauth2/token",
-                        ),
-                    ),
-                ),
-            },
-            security=[{"oauth": ["admin"]}],  # (1)!
-        ),
-    )
+    print(app.get_openapi_json_schema())

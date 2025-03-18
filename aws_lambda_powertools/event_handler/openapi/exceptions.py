@@ -23,6 +23,16 @@ class RequestValidationError(ValidationException):
         self.body = body
 
 
+class ResponseValidationError(ValidationException):
+    """
+    Raised when the response body does not match the OpenAPI schema
+    """
+
+    def __init__(self, errors: Sequence[Any], *, body: Any = None) -> None:
+        super().__init__(errors)
+        self.body = body
+
+
 class SerializationError(Exception):
     """
     Base exception for all encoding errors

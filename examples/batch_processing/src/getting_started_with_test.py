@@ -11,15 +11,16 @@ def load_event(path: Path):
         return json.load(f)
 
 
-@pytest.fixture
-def lambda_context():
-    @dataclass
-    class LambdaContext:
-        function_name: str = "test"
-        memory_limit_in_mb: int = 128
-        invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-        aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+@dataclass
+class LambdaContext:
+    function_name: str = "test"
+    memory_limit_in_mb: int = 128
+    invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
+    aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
 
+
+@pytest.fixture
+def lambda_context() -> LambdaContext:
     return LambdaContext()
 
 
@@ -29,7 +30,7 @@ def sqs_event():
     return load_event(path=Path("events/sqs_event.json"))
 
 
-def test_app_batch_partial_response(sqs_event, lambda_context):
+def test_app_batch_partial_response(sqs_event, lambda_context: LambdaContext):
     # GIVEN
     processor_result = processor  # access processor for additional assertions
     successful_record = sqs_event["Records"][0]
