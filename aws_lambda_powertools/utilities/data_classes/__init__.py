@@ -4,6 +4,7 @@ Event Source Data Classes utility provides classes self-describing Lambda event 
 
 from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
+from .api_gateway_websocket_event import APIGatewayWebSocketEvent
 from .appsync_resolver_event import AppSyncResolverEvent
 from .aws_config_rule_event import AWSConfigRuleEvent
 from .bedrock_agent_event import BedrockAgentEvent
@@ -51,6 +52,7 @@ from .vpc_lattice import VPCLatticeEvent, VPCLatticeEventV2
 __all__ = [
     "APIGatewayProxyEvent",
     "APIGatewayProxyEventV2",
+    "APIGatewayWebSocketEvent",
     "SecretsManagerEvent",
     "AppSyncResolverEvent",
     "ALBEvent",
