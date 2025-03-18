@@ -16,6 +16,8 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import base64
 
 
 class VPCLatticeEventBase(BaseProxyEvent):
+    # is_base64_encoded and path are inherited from BaseProxyEvent class.
+
     @property
     def body(self) -> str:
         """The VPC Lattice body."""

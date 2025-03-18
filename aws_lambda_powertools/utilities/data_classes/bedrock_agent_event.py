@@ -57,6 +57,8 @@ class BedrockAgentEvent(BaseProxyEvent):
     See https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html
     """
 
+    # httpMethod is inherited from BaseProxyEvent class.
+
     @property
     def message_version(self) -> str:
         return self["messageVersion"]
