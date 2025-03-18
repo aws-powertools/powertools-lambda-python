@@ -170,16 +170,6 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
         return self["version"]
 
     @property
-    def is_base64_encoded(self) -> bool | None:
-        """A boolean flag to indicate if the applicable request payload is Base64-encode"""
-        return self.get("isBase64Encoded")
-
-    @property
-    def path(self) -> str:
-        """The VPC Lattice v2 Event path"""
-        return self["path"]
-
-    @property
     def request_context(self) -> vpcLatticeEventV2RequestContext:
         """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
