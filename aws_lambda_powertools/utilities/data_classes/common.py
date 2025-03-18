@@ -205,7 +205,6 @@ class BaseProxyEvent(DictWrapper):
         """Parses the submitted body as json"""
         if self.decoded_body:
             return self._json_deserializer(self.decoded_body)
-
         return None
 
     @cached_property
