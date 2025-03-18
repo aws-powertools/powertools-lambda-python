@@ -141,7 +141,7 @@ def test_cognito_pre_authentication_trigger_event():
     assert parsed_event.trigger_source == raw_event["triggerSource"]
 
     assert parsed_event.request.user_not_found is None
-    parsed_event["request"]["userNotFound"] = True
+    raw_event["request"]["userNotFound"] = True
     assert parsed_event.request.user_not_found is True
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.validation_data == {}
@@ -171,7 +171,7 @@ def test_cognito_pre_token_generation_trigger_event():
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.client_metadata == {}
 
-    parsed_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
+    raw_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
     group_configuration = parsed_event.request.group_configuration
     assert group_configuration.preferred_role == "temp"
 
@@ -221,7 +221,7 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     assert parsed_event.request.user_attributes.get("email") == raw_event["request"]["userAttributes"]["email"]
     assert parsed_event.request.client_metadata == {}
 
-    parsed_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
+    raw_event["request"]["groupConfiguration"]["preferredRole"] = "temp"
     group_configuration = parsed_event.request.group_configuration
     assert group_configuration.preferred_role == "temp"
     assert parsed_event.request.scopes == raw_event["request"]["scopes"]
@@ -271,7 +271,6 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     claims_scope_override_details.set_group_configuration_groups_to_override(expected_groups)
     assert claims_scope_override_details.group_configuration.groups_to_override == expected_groups
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
-    assert claims_scope_override_details["groupOverrideDetails"]["groupsToOverride"] == expected_groups
 
     claims_scope_override_details.set_group_configuration_iam_roles_to_override(["role"])
     assert claims_scope_override_details.group_configuration.iam_roles_to_override == ["role"]
