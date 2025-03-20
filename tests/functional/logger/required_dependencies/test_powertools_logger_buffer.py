@@ -470,7 +470,12 @@ def test_buffer_configuration_propagation_across_child_logger_instances(stdout, 
     assert primary_logger._buffer_cache != secondary_logger._buffer_cache
 
 
-def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_name, monkeypatch, lambda_context):
+def test_logger_buffer_is_cleared_between_lambda_invocations_with_decorator(
+    stdout,
+    service_name,
+    monkeypatch,
+    lambda_context,
+):
     # Set initial trace ID for first Lambda invocation
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
@@ -479,6 +484,33 @@ def test_logger_buffer_is_cleared_between_lambda_invocations(stdout, service_nam
     logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
 
     @logger.inject_lambda_context
+    def handler(event, context):
+        logger.debug("debug line")
+
+    # WHEN First Lambda invocation with initial trace ID
+    handler({}, lambda_context)
+
+    # WHEN New Lambda invocation arrives with different trace ID
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "2-ABC39786-5908a82a246fb67f3089263f")
+    handler({}, lambda_context)
+
+    # THEN Verify buffer for the original trace ID is cleared
+    assert not logger._buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")
+
+
+def test_logger_buffer_is_cleared_between_lambda_invocations_without_decoration(
+    stdout,
+    service_name,
+    monkeypatch,
+    lambda_context,
+):
+    # Set initial trace ID for first Lambda invocation
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with specific buffer parameters
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
     def handler(event, context):
         logger.debug("debug line")
 
