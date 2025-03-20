@@ -77,7 +77,7 @@ def test_datadog_coldstart_with_env_var(monkeypatch, capsys):
     # THEN ColdStart metric and function_name and service dimension should be logged
     # THEN use the env var function_name (second priority)
     assert "ColdStart" in logs
-    assert "example_fn_constructor" in logs
+    assert "example_fn_env_var" in logs
 
 
 def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
