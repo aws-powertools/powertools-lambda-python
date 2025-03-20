@@ -1127,6 +1127,12 @@ class Logger:
         tracer_id = get_tracer_id()
 
         if tracer_id and self._buffer_config:
+            if not self._buffer_cache.get(tracer_id):
+                # Detect new Lambda invocation context and reset buffer to maintain log isolation
+                # Ensures logs from previous invocations do not leak into current execution
+                # Prevent memory excessive usage
+                self._buffer_cache.clear()
+
             log_record: dict[str, Any] = _create_buffer_record(
                 level=level,
                 msg=msg,
