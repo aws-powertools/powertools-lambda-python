@@ -31,6 +31,55 @@ def test_datadog_coldstart(capsys):
     assert "example_fn2" in logs
 
 
+def test_datadog_coldstart_with_constructor_parameter(capsys):
+    reset_cold_start_flag()
+
+    # GIVEN DatadogMetrics is initialized
+    # AND DatadogMetrics is initialized with an explicit function_name parameter
+    dd_provider = DatadogProvider(flush_to_log=True, function_name="example_fn_constructor")
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
+
+    lambda_handler({}, LambdaContext("example_fn2"))
+    logs = capsys.readouterr().out.strip()
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    # THEN use the constructor-provided function_name (highest priority)
+    assert "ColdStart" in logs
+    assert "example_fn_constructor" in logs
+
+
+def test_datadog_coldstart_with_env_var(monkeypatch, capsys):
+    reset_cold_start_flag()
+
+    # GIVEN DatadogMetrics is initialized
+    # AND DatadogMetrics is initialized with an env var
+    monkeypatch.setenv("POWERTOOLS_METRICS_FUNCTION_NAME", "example_fn_env_var")
+    dd_provider = DatadogProvider(flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
+
+    lambda_handler({}, LambdaContext("example_fn2"))
+    logs = capsys.readouterr().out.strip()
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    # THEN use the env var function_name (second priority)
+    assert "ColdStart" in logs
+    assert "example_fn_env_var" in logs
+
+
 def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     # GIVEN DD_FLUSH_TO_LOG env is configured
     monkeypatch.setenv("DD_FLUSH_TO_LOG", "True")

@@ -34,13 +34,12 @@ If you're new to Amazon CloudWatch, there are five terminologies you must be awa
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
-Metric has three global settings that will be used across all metrics emitted:
+Metric has two global settings that will be used across all metrics emitted:
 
 | Setting                         | Description                                                                     | Environment variable           | Constructor parameter |
 | ------------------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
 | **Metric namespace**            | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
 | **Service**                     | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
-| **Disable Powertools Metrics**  | Optionally, disables all Powertools metrics.	                                | `POWERTOOLS_METRICS_DISABLED`  | N/A                   |
 
 ???+ info
     `POWERTOOLS_METRICS_DISABLED` will not disable default metrics created by AWS services.
@@ -48,7 +47,7 @@ Metric has three global settings that will be used across all metrics emitted:
 ???+ tip
     Use your application or main service as the metric namespace to easily group all metrics.
 
-```yaml hl_lines="13" title="AWS Serverless Application Model (SAM) example"
+```yaml hl_lines="12-14" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/metrics/sam/template.yaml"
 ```
 
@@ -214,13 +213,32 @@ This has the advantage of keeping cold start metric separate from your applicati
 ???+ info
     We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
+#### Customizing function name for cold start metrics
+
+When emitting cold start metrics, the `function_name` dimension defaults to `context.function_name`. If you want to change the value you can set the `function_name` parameter in the metrics constructor, or define the environment variable `POWERTOOLS_METRICS_FUNCTION_NAME`.
+
+The priority of the `function_name` dimension value is defined as:
+
+1. `function_name` constructor option
+2. `POWERTOOLS_METRICS_FUNCTION_NAME` environment variable
+3. `context.function_name` property
+
+=== "working_with_custom_cold_start_function_name.py"
+
+    ```python hl_lines="4"
+    --8<-- "examples/metrics/src/working_with_custom_cold_start_function_name.py"
+    ```
+
 ### Environment variables
 
 The following environment variable is available to configure Metrics at a global scope:
 
-| Setting            | Description                      | Environment variable           | Default |
-| ------------------ | -------------------------------- | ------------------------------ | ------- |
-| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
+| Setting            | Description                                                  | Environment variable               | Default |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------- | ------- |
+| **Namespace Name** | Sets **namespace** used for metrics.                             | `POWERTOOLS_METRICS_NAMESPACE`     | `None`  |
+| **Service**        | Sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `None`             |
+| **Function Name**  | Function name used as dimension for the **ColdStart** metric.  | `POWERTOOLS_METRICS_FUNCTION_NAME` | `None`  |
+| **Disable Powertools Metrics**  | **Disables** all metrics emitted by Powertools.	    | `POWERTOOLS_METRICS_DISABLED`      | `None`  |
 
 `POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
 
