@@ -11,6 +11,7 @@ Globals:
       Variables:
         POWERTOOLS_SERVICE_NAME: booking
         POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+        POWERTOOLS_METRICS_FUNCTION_NAME: my-function-name
 
     Layers:
       # Find the latest Layer version in the official documentation

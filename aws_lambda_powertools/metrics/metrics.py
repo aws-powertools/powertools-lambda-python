@@ -86,6 +86,7 @@ class Metrics:
         service: str | None = None,
         namespace: str | None = None,
         provider: AmazonCloudWatchEMFProvider | None = None,
+        function_name: str | None = None,
     ):
         self.metric_set = self._metrics
         self.metadata_set = self._metadata
@@ -102,6 +103,7 @@ class Metrics:
                 dimension_set=self.dimension_set,
                 metadata_set=self.metadata_set,
                 default_dimensions=self._default_dimensions,
+                function_name=function_name,
             )
         else:
             self.provider = provider

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -10,6 +11,9 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import strtobool
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 
 
 def extract_cloudwatch_metric_resolution_value(metric_resolutions: list, resolution: int | MetricResolution) -> int:
@@ -161,3 +165,37 @@ def is_metrics_disabled() -> bool:
     ]
 
     return any(disable_conditions)
+
+
+def resolve_cold_start_function_name(function_name: str | None, context: LambdaContext) -> str:
+    """
+    Resolve the function name for ColdStart metrics with a prioritized approach.
+
+    Parameters
+    ----------
+    function_name : str, optional
+        Explicitly provided function name (highest priority).
+    context : LambdaContext
+        AWS Lambda context object.
+
+    Returns
+    -------
+    str
+        Resolved function name.
+
+    Notes
+    -----
+    Function name resolution follows this priority:
+    1. Explicitly provided function_name
+    2. Environment variable POWERTOOLS_METRICS_FUNCTION_NAME
+    3. Lambda context function name
+    """
+
+    if function_name:
+        return function_name
+
+    metrics_function_name_env = os.getenv(constants.METRICS_FUNCTION_NAME_ENV)
+    if metrics_function_name_env:
+        return metrics_function_name_env
+
+    return context.function_name

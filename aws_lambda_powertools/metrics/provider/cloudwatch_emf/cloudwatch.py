@@ -16,6 +16,7 @@ from aws_lambda_powertools.metrics.functions import (
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
     is_metrics_disabled,
+    resolve_cold_start_function_name,
     validate_emf_timestamp,
 )
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
@@ -51,6 +52,10 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         metric namespace to be set for all metrics
     POWERTOOLS_SERVICE_NAME : str
         service name used for default dimension
+    POWERTOOLS_METRICS_FUNCTION_NAME: str
+        function name used as dimension for the ColdStart metric
+    POWERTOOLS_METRICS_DISABLED: bool
+        disables all metrics emitted by Powertools
 
     Raises
     ------
@@ -72,12 +77,14 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         metadata_set: dict[str, Any] | None = None,
         service: str | None = None,
         default_dimensions: dict[str, Any] | None = None,
+        function_name: str | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
         self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
+        self.function_name = function_name
 
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self.timestamp: int | None = None
@@ -445,9 +452,11 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         context : Any
             Lambda context
         """
+
+        cold_start_function_name = resolve_cold_start_function_name(function_name=self.function_name, context=context)
         logger.debug("Adding cold start metric and function_name dimension")
         with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
-            metric.add_dimension(name="function_name", value=context.function_name)
+            metric.add_dimension(name="function_name", value=cold_start_function_name)
             if self.service:
                 metric.add_dimension(name="service", value=str(self.service))
 

@@ -10,7 +10,7 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.functions import is_metrics_disabled
+from aws_lambda_powertools.metrics.functions import is_metrics_disabled, resolve_cold_start_function_name
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
@@ -58,8 +58,10 @@ class DatadogProvider(BaseProvider):
         namespace: str | None = None,
         flush_to_log: bool | None = None,
         default_tags: dict[str, Any] | None = None,
+        function_name: str | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else []
+        self.function_name = function_name
         self.namespace = (
             resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
             or DEFAULT_NAMESPACE
@@ -224,8 +226,11 @@ class DatadogProvider(BaseProvider):
         context : Any
             Lambda context
         """
+
+        cold_start_function_name = resolve_cold_start_function_name(function_name=self.function_name, context=context)
+
         logger.debug("Adding cold start metric and function_name tagging")
-        self.add_metric(name="ColdStart", value=1, function_name=context.function_name)
+        self.add_metric(name="ColdStart", value=1, function_name=cold_start_function_name)
 
     def log_metrics(
         self,

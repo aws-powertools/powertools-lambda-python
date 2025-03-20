@@ -668,8 +668,9 @@ def test_namespace_var_precedence(monkeypatch, capsys, metric, dimension, namesp
     assert namespace == output["_aws"]["CloudWatchMetrics"][0]["Namespace"]
 
 
-def test_log_metrics_capture_cold_start_metric(capsys, namespace, service):
-    # GIVEN Metrics is initialized
+def test_log_metrics_capture_cold_start_metric_with_default_name(capsys, namespace, service):
+    # GIVEN Metrics is initialized without an explicit function_name parameter
+    # AND no POWERTOOLS_METRICS_FUNCTION_NAME environment variable is set
     my_metrics = Metrics(service=service, namespace=namespace)
 
     # WHEN log_metrics is used with capture_cold_start_metric
@@ -683,8 +684,55 @@ def test_log_metrics_capture_cold_start_metric(capsys, namespace, service):
     output = capture_metrics_output(capsys)
 
     # THEN ColdStart metric and function_name and service dimension should be logged
+    # THEN use the Lambda context function_name as value (lowest priority fallback)
     assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
+    assert output["service"] == service
+
+
+def test_log_metrics_capture_cold_start_metric_with_constructor_parameter(monkeypatch, capsys, namespace, service):
+    # GIVEN Metrics is initialized with an explicit function_name parameter
+    # and POWERTOOLS_METRICS_FUNCTION_NAME environment variable is set
+    monkeypatch.setenv("POWERTOOLS_METRICS_FUNCTION_NAME", "example_fn_env_var")
+    my_metrics = Metrics(service=service, namespace=namespace, function_name="example_fn_constructor")
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = capture_metrics_output(capsys)
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    # THEN use the constructor-provided function_name as value (highest priority)
+    assert output["ColdStart"] == [1.0]
+    assert output["function_name"] == "example_fn_constructor"
+    assert output["service"] == service
+
+
+def test_log_metrics_capture_cold_start_metric_with_env_var(monkeypatch, capsys, namespace, service):
+    # GIVEN POWERTOOLS_METRICS_FUNCTION_NAME environment variable is set
+    # AND Metrics is initialized without an explicit function_name parameter
+    monkeypatch.setenv("POWERTOOLS_METRICS_FUNCTION_NAME", "example_fn_env_var")
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = capture_metrics_output(capsys)
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    # THEN use the environment variable value as function_name value (second priority)
+    assert output["ColdStart"] == [1.0]
+    assert output["function_name"] == "example_fn_env_var"
     assert output["service"] == service
 
 
