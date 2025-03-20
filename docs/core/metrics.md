@@ -223,6 +223,12 @@ The priority of the `function_name` dimension value is defined as:
 2. `POWERTOOLS_METRICS_FUNCTION_NAME` environment variable
 3. `context.function_name` property
 
+=== "working_with_custom_cold_start_function_name.py"
+
+    ```python hl_lines="4"
+    --8<-- "examples/metrics/src/working_with_custom_cold_start_function_name.py"
+    ```
+
 ### Environment variables
 
 The following environment variable is available to configure Metrics at a global scope:
