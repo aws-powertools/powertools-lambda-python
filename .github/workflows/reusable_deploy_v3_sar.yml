@@ -182,7 +182,7 @@ jobs:
           echo "Creating canary stack"
           echo "Stack name: $TEST_STACK_NAME"
           aws serverlessrepo create-cloud-formation-change-set \
-            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ secrets.AWS_SAR_V3_ACCOUNTID }}:applications/${{ env.SAR_NAME }} \
             --stack-name "${TEST_STACK_NAME/serverlessrepo-/}" \
             --capabilities CAPABILITY_NAMED_IAM
 
@@ -207,5 +207,5 @@ jobs:
           sleep 15
           echo "Make SAR app public"
           aws serverlessrepo put-application-policy \
-            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ steps.aws-credentials-sar-role.outputs.aws-account-id }}:applications/${{ env.SAR_NAME }} \
+            --application-id arn:aws:serverlessrepo:${{ env.AWS_REGION }}:${{ secrets.AWS_SAR_V3_ACCOUNTID }}:applications/${{ env.SAR_NAME }} \
             --statements Principals='*',Actions=Deploy
