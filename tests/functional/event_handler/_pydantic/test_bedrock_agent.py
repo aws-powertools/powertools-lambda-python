@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import pytest
 from typing_extensions import Annotated
 
-from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
+from aws_lambda_powertools.event_handler import BedrockAgentResolver, BedrockResponse, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
@@ -200,3 +200,43 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
     # THEN the schema must be a valid 3.0.3 version
     assert openapi30_schema(schema)
     assert schema.get("openapi") == "3.0.3"
+
+
+def test_bedrock_agent_with_bedrock_response():
+    # GIVEN a Bedrock Agent resolver
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims():
+        return BedrockResponse(
+            status_code=200,
+            body={"output": claims_response},
+            session_attributes={"last_request": "get_claims"},
+            prompt_session_attributes={"context": "claims_query"},
+            knowledge_bases_configuration={
+                "knowledgeBaseId": "kb-123",
+                "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 3}},
+            },
+        )
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/claims"
+    assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
+    assert result["response"]["httpMethod"] == "GET"
+    assert result["response"]["httpStatusCode"] == 200
+
+    # AND return the correct body
+    body = result["response"]["responseBody"]["application/json"]["body"]
+    assert json.loads(body) == {"output": claims_response}
+
+    # AND include the optional configurations
+    assert result["sessionAttributes"] == {"last_request": "get_claims"}
+    assert result["promptSessionAttributes"] == {"context": "claims_query"}
+    assert result["knowledgeBasesConfiguration"] == {
+        "knowledgeBaseId": "kb-123",
+        "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 3}},
+    }

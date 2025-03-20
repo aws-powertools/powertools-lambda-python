@@ -313,6 +313,19 @@ To implement these customizations, include extra parameters when defining your r
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
 
+### Fine grained responses
+
+`BedrockResponse` class that provides full control over Bedrock Agent responses.
+
+You can use this class to add additional fields as needed, such as [session attributes, prompt session attributes, and knowledge base configurations](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-response).
+
+???+ info "Note"
+	The default response only includes the essential fields to keep the payload size minimal, as AWS Lambda has a maximum response size of 25 KB.
+
+```python title="bedrockresponse.py" title="Customzing your Bedrock Response"
+--8<-- "examples/event_handler_bedrock_agents/src/bedrockresponse.py"
+```
+
 ## Testing your code
 
 Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-input) request:
