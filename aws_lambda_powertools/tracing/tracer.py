@@ -30,6 +30,32 @@ aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_S
 T = TypeVar("T")
 
 
+def _is_cold_start() -> bool:
+    """Verifies whether is cold start
+
+    Returns
+    -------
+    bool
+        cold start bool value
+    """
+    global is_cold_start
+
+    initialization_type = os.getenv(constants.LAMBDA_INITIALIZATION_TYPE)
+
+    # Check for Provisioned Concurrency environment
+    # AWS_LAMBDA_INITIALIZATION_TYPE is set when using Provisioned Concurrency
+    if initialization_type == "provisioned-concurrency":
+        is_cold_start = False
+        return False
+
+    if not is_cold_start:
+        return False
+
+    # This is a cold start - flip the flag and return True
+    is_cold_start = False
+    return True
+
+
 class Tracer:
     """Tracer using AWS-XRay to provide decorators with known defaults for Lambda functions
 
@@ -340,12 +366,9 @@ class Tracer:
 
                     raise
                 finally:
-                    global is_cold_start
+                    cold_start = _is_cold_start()
                     logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=is_cold_start)
-
-                    if is_cold_start:
-                        is_cold_start = False
+                    subsegment.put_annotation(key="ColdStart", value=cold_start)
 
                     if self.service:
                         subsegment.put_annotation(key="Service", value=self.service)

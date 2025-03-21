@@ -7,7 +7,7 @@ from aws_lambda_powertools.metrics import (
     Metrics,
     MetricUnit,
 )
-from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_flag
+from aws_lambda_powertools.metrics.base import reset_cold_start_flag
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -336,6 +336,33 @@ def test_inject_lambda_cold_start(lambda_context, stdout, service_name):
     assert second_log["cold_start"] is False
 
 
+def test_inject_lambda_cold_start_with_provisioned_concurrency(monkeypatch, lambda_context, stdout, service_name):
+
+    # GIVEN Provisioned Concurrency is enabled via AWS_LAMBDA_INITIALIZATION_TYPE environment variable
+    # AND Logger's cold start flag is explicitly set to True (simulating fresh module import)
+    monkeypatch.setenv("AWS_LAMBDA_INITIALIZATION_TYPE", "provisioned-concurrency")
+    from aws_lambda_powertools.logging import logger
+
+    logger.is_cold_start = True
+
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN a lambda function is decorated with logger, and called twice
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    # THEN cold_start should be False in both invocations
+    # because Provisioned Concurrency environment variable forces cold_start to always be False
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    assert first_log["cold_start"] is False
+    assert second_log["cold_start"] is False
+
+
 def test_logger_append_duplicated(stdout, service_name):
     # GIVEN Logger is initialized with request_id field
     logger = Logger(service=service_name, stream=stdout, request_id="value")

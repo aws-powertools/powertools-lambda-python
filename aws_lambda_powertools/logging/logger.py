@@ -64,14 +64,22 @@ def _is_cold_start() -> bool:
     bool
         cold start bool value
     """
-    cold_start = False
-
     global is_cold_start
-    if is_cold_start:
-        cold_start = is_cold_start
-        is_cold_start = False
 
-    return cold_start
+    initialization_type = os.getenv(constants.LAMBDA_INITIALIZATION_TYPE)
+
+    # Check for Provisioned Concurrency environment
+    # AWS_LAMBDA_INITIALIZATION_TYPE is set when using Provisioned Concurrency
+    if initialization_type == "provisioned-concurrency":
+        is_cold_start = False
+        return False
+
+    if not is_cold_start:
+        return False
+
+    # This is a cold start - flip the flag and return True
+    is_cold_start = False
+    return True
 
 
 class Logger:

@@ -630,6 +630,40 @@ def test_tracer_lambda_handler_cold_start(mocker, dummy_response, provider_stub,
     assert in_subsegment_mock.put_annotation.call_args_list[2] == mocker.call(key="ColdStart", value=False)
 
 
+def test_tracer_lambda_handler_cold_start_with_provisioned_concurrency(
+    monkeypatch,
+    mocker,
+    dummy_response,
+    provider_stub,
+    in_subsegment_mock,
+):
+    # GIVEN Provisioned Concurrency is enabled via AWS_LAMBDA_INITIALIZATION_TYPE environment variable
+    monkeypatch.setenv("AWS_LAMBDA_INITIALIZATION_TYPE", "provisioned-concurrency")
+    # GIVEN
+    provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
+    tracer = Tracer(provider=provider, service="booking")
+
+    # WHEN a Lambda handler is decorated with capture_lambda_handler
+    # AND the handler is invoked twice consecutively
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    # First invocation
+    handler({}, mocker.MagicMock())
+
+    # THEN the ColdStart annotation should be set to False for the first invocation
+    # because Provisioned Concurrency forces cold start to be false regardless of actual state
+    assert in_subsegment_mock.put_annotation.call_args_list[0] == mocker.call(key="ColdStart", value=False)
+
+    # WHEN the same handler is invoked a second time
+    handler({}, mocker.MagicMock())
+
+    # THEN the ColdStart annotation should also be False for the second invocation
+    # confirming that Provisioned Concurrency consistently overrides cold start detection
+    assert in_subsegment_mock.put_annotation.call_args_list[2] == mocker.call(key="ColdStart", value=False)
+
+
 def test_tracer_lambda_handler_add_service_annotation(mocker, dummy_response, provider_stub, in_subsegment_mock):
     # GIVEN
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)
