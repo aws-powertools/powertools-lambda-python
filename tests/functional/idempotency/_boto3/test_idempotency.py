@@ -771,6 +771,54 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_expires_in_progress_before_expire_with_sort_key(
+    idempotency_config: IdempotencyConfig,
+    persistence_store_compound_static_pk_value: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    stubber = stub.Stubber(persistence_store_compound_static_pk_value.client)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(seconds=5)
+    timestamp_expires_in_progress = int((now + period).timestamp() * 1000)
+
+    expected_params_get_item = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": {"S": "static-value"}, "sk": {"S": hashed_idempotency_key}},
+        "ConsistentRead": True,
+    }
+    ddb_response_get_item = {
+        "Item": {
+            "id": {"S": "static-value"},
+            "expiration": {"N": timestamp_future},
+            "in_progress_expiration": {"N": str(timestamp_expires_in_progress)},
+            "data": {"S": '{"message": "test", "statusCode": 200'},
+            "status": {"S": "INPROGRESS"},
+            "sk": {"S": hashed_idempotency_key},
+        },
+    }
+    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store_compound_static_pk_value)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyAlreadyInProgressError, match="and sort key"):
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expires_in_progress_after_expire(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
