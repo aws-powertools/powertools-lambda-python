@@ -2153,7 +2153,7 @@ class ApiGatewayResolver(BaseRouter):
             try:
                 custom_response_validation_http_code = HTTPStatus(custom_response_validation_http_code)
             except ValueError:
-                msg = f"'{custom_response_validation_http_code}' must be an integer representing an HTTP status code."
+                msg = f"'{custom_response_validation_http_code}' must be an integer representing an HTTP status code or an enum of type HTTPStatus."  # noqa: E501
                 raise ValueError(msg) from None
 
         return custom_response_validation_http_code

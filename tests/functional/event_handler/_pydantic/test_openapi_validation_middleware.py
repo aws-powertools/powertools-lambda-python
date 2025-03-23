@@ -1381,7 +1381,7 @@ def test_custom_response_validation_error_bad_http_code(response_validation_erro
 
 
 def test_custom_route_response_validation_error__custom_route_in_app_with_default_validation(gw_event):
-    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
     class Model(BaseModel):
@@ -1392,6 +1392,7 @@ def test_custom_route_response_validation_error__custom_route_in_app_with_defaul
     def handler_incomplete_model_not_allowed() -> Model:
         return {"age": 18}  # type: ignore
 
+    # HAVING route with custom response validation error
     @app.get(
         "/custom_incomplete_model_not_allowed",
         custom_response_validation_http_code=500,
@@ -1406,7 +1407,7 @@ def test_custom_route_response_validation_error__custom_route_in_app_with_defaul
     gw_event["path"] = "/custom_incomplete_model_not_allowed"
     custom_result = app(gw_event, {})
 
-    # THEN it should return a validation error with the custom status code provided
+    # THEN it must return a validation error with the custom status code provided
     assert result["statusCode"] == 422
     assert custom_result["statusCode"] == 500
     assert json.loads(result["body"])["detail"] == json.loads(custom_result["body"])["detail"]
@@ -1414,7 +1415,6 @@ def test_custom_route_response_validation_error__custom_route_in_app_with_defaul
 
 def test_custom_route_response_validation_error__sanitized_response(gw_event):
     # GIVEN an APIGatewayRestResolver with custom response validation enabled
-    # with a sanitized response validation error response
     app = APIGatewayRestResolver(enable_validation=True)
 
     class Model(BaseModel):
@@ -1428,6 +1428,7 @@ def test_custom_route_response_validation_error__sanitized_response(gw_event):
     def handler_custom_route_response_validation_error() -> Model:
         return {"age": 18}  # type: ignore
 
+    # HAVING a sanitized response validation error response
     @app.exception_handler(ResponseValidationError)
     def handle_response_validation_error(ex: ResponseValidationError):
         return Response(
@@ -1439,20 +1440,20 @@ def test_custom_route_response_validation_error__sanitized_response(gw_event):
     gw_event["path"] = "/custom_incomplete_model_not_allowed"
     result = app(gw_event, {})
 
-    # THEN it should return the sanitized response
+    # THEN it must return the sanitized response
     assert result["statusCode"] == 500
     assert result["body"] == "Unexpected response."
 
 
-def test_custom_route_response_validation_error__in_app_with_custom_validation_code(gw_event):
-    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+def test_custom_route_response_validation_error__with_app_custom_response_validation(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation and custom response validation enabled
     app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=500)
 
     class Model(BaseModel):
         name: str
         age: int
 
-    # and a route with custom response validation
+    # HAVING a route with custom response validation
     @app.get(
         "/custom_incomplete_model_not_allowed",
         custom_response_validation_http_code=422,
