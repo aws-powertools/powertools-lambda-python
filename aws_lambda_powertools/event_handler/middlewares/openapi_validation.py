@@ -175,14 +175,16 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             errors: list[dict[str, Any]] = []
             value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
             if errors:
-                if self._has_response_validation_error:
-                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+                # route-level validation must take precedence over app-level
                 if has_route_custom_response_validation:
                     raise ResponseValidationError(
                         errors=_normalize_errors(errors),
                         body=response_content,
                         source="route",
                     )
+                if self._has_response_validation_error:
+                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
 
             if hasattr(field, "serialize"):

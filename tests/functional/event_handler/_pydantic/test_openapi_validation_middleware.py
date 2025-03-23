@@ -1380,7 +1380,7 @@ def test_custom_response_validation_error_bad_http_code(response_validation_erro
     )
 
 
-def test_custom_route_response_validation_error_http_code_invalid_response_incomplete_model(gw_event):
+def test_custom_route_response_validation_error__custom_route_in_app_with_default_validation(gw_event):
     # GIVEN an APIGatewayRestResolver with custom response validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -1412,7 +1412,7 @@ def test_custom_route_response_validation_error_http_code_invalid_response_incom
     assert json.loads(result["body"])["detail"] == json.loads(custom_result["body"])["detail"]
 
 
-def test_custom_route_response_validation_error_sanitized_response(gw_event):
+def test_custom_route_response_validation_error__sanitized_response(gw_event):
     # GIVEN an APIGatewayRestResolver with custom response validation enabled
     # with a sanitized response validation error response
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1442,3 +1442,30 @@ def test_custom_route_response_validation_error_sanitized_response(gw_event):
     # THEN it should return the sanitized response
     assert result["statusCode"] == 500
     assert result["body"] == "Unexpected response."
+
+
+def test_custom_route_response_validation_error__in_app_with_custom_validation_code(gw_event):
+    # GIVEN an APIGatewayRestResolver with custom response validation enabled
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=500)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # and a route with custom response validation
+    @app.get(
+        "/custom_incomplete_model_not_allowed",
+        custom_response_validation_http_code=422,
+    )
+    def handler_custom_route_response_validation_error() -> Model:
+        return {"age": 18}  # type: ignore
+
+    # WHEN returning incomplete model for a non-Optional type on route with custom response validation
+    gw_event["path"] = "/custom_incomplete_model_not_allowed"
+    result = app(gw_event, {})
+
+    # THEN route's custom response validation must take precedence over the app's.
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert body["detail"][0]["type"] == "missing"
+    assert body["detail"][0]["loc"] == ["response", "name"]

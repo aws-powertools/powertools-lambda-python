@@ -319,7 +319,7 @@ class Route:
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
-        custom_response_validation_http_code: HTTPStatus | None = None,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Response]] | None = None,
     ):
         """
@@ -361,6 +361,8 @@ class Route:
             Additional OpenAPI extensions as a dictionary.
         deprecated: bool
             Whether or not to mark this route as deprecated in the OpenAPI schema
+        custom_response_validation_http_code: int | HTTPStatus | None, optional
+            Whether to have custom http status code for this route if response validation fails
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
         # TODO
@@ -569,7 +571,13 @@ class Route:
             },
         }
 
-        # TODO update responses
+        # Add custom response validation response, if exists
+        if self.custom_response_validation_http_code:
+            http_code = self.custom_response_validation_http_code.value
+            operation_responses[http_code] = {
+                "description": "Response Validation Error",
+                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}}},
+            }
 
         # Add the response to the OpenAPI operation
         if self.responses:
@@ -948,6 +956,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         raise NotImplementedError()
@@ -2573,10 +2582,11 @@ class ApiGatewayResolver(BaseRouter):
         # 'self._response_validation_error_http_code' is not None or
         # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
+            # route validation must take precedence over app validation
             http_code = (
-                self._response_validation_error_http_code
-                if exp.source == "app"
-                else route.custom_response_validation_http_code
+                route.custom_response_validation_http_code
+                if exp.source == "route"
+                else self._response_validation_error_http_code
             )
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
             return self._response_builder_class(
