@@ -1469,3 +1469,52 @@ def test_custom_route_response_validation_error__in_app_with_custom_validation_c
     body = json.loads(result["body"])
     assert body["detail"][0]["type"] == "missing"
     assert body["detail"][0]["loc"] == ["response", "name"]
+
+
+def test_custom_route_response_validation__error_no_app_validation():
+    # GIVEN an APIGatewayRestResolver with validation not enabled
+    with pytest.raises(ValueError) as exception_info:
+        app = APIGatewayRestResolver()
+
+        class Model(BaseModel):
+            name: str
+            age: int
+
+        # HAVING a route with custom response validation http code
+        @app.get(
+            "/custom_incomplete_model_not_allowed",
+            custom_response_validation_http_code=422,
+        )
+        def handler_custom_route_response_validation_error() -> Model:
+            return {"age": 18}  # type: ignore
+
+    # THEN it must raise ValueError describing the issue
+    assert (
+        str(exception_info.value)
+        == "'custom_response_validation_http_code' cannot be set for route when enable_validation is False on resolver."
+    )
+
+
+@pytest.mark.parametrize("response_validation_error_http_code", [(20), ("hi"), (1.21), (True), (False)])
+def test_custom_route_response_validation__error_bad_http_code(response_validation_error_http_code):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    with pytest.raises(ValueError) as exception_info:
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        class Model(BaseModel):
+            name: str
+            age: int
+
+        # HAVING a route with custom response validation which is not a valid HTTP code
+        @app.get(
+            "/custom_incomplete_model_not_allowed",
+            custom_response_validation_http_code=response_validation_error_http_code,
+        )
+        def handler_custom_route_response_validation_error() -> Model:
+            return {"age": 18}  # type: ignore
+
+    # THEN it must raise ValueError describing the issue
+    assert (
+        str(exception_info.value)
+        == f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code or an enum of type HTTPStatus."  # noqa: E501
+    )
