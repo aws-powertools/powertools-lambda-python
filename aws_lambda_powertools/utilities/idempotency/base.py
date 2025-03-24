@@ -250,10 +250,14 @@ class IdempotencyHandler:
                     "item should have been expired in-progress because it already time-outed.",
                 )
 
-            raise IdempotencyAlreadyInProgressError(
+            inprogress_error_message = (
                 f"Execution already in progress with idempotency key: "
-                f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
+                f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}"
             )
+            if data_record.sort_key is not None:
+                inprogress_error_message += f" and sort key: {data_record.sort_key}"
+
+            raise IdempotencyAlreadyInProgressError(inprogress_error_message)
 
         response_dict = data_record.response_json_as_dict()
         serialized_response = self.output_serializer.from_dict(response_dict) if response_dict else None
