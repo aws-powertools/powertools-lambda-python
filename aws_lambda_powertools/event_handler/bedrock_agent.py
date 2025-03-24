@@ -22,40 +22,54 @@ if TYPE_CHECKING:
 
 
 class BedrockResponse:
-    """
-    Response class for Bedrock Agents Lambda functions.
-
-    Parameters
-    ----------
-    status_code: int
-        HTTP status code for the response
-    body: Any
-        Response body content
-    content_type: str, optional
-        Content type of the response (default: application/json)
-    session_attributes: dict[str, Any], optional
-        Session attributes to maintain state
-    prompt_session_attributes: dict[str, Any], optional
-        Prompt-specific session attributes
-    knowledge_bases_configuration: dict[str, Any], optional
-        Knowledge base configuration settings
-    """
-
     def __init__(
         self,
-        status_code: int,
         body: Any,
+        status_code: int = 200,
         content_type: str = "application/json",
         session_attributes: dict[str, Any] | None = None,
         prompt_session_attributes: dict[str, Any] | None = None,
-        knowledge_bases_configuration: dict[str, Any] | None = None,
+        knowledge_bases_configuration: list[dict[str, Any]] | None = None,
     ) -> None:
-        self.status_code = status_code
         self.body = body
+        self.status_code = status_code
         self.content_type = content_type
         self.session_attributes = session_attributes
         self.prompt_session_attributes = prompt_session_attributes
+
+        if knowledge_bases_configuration is not None:
+            if not isinstance(knowledge_bases_configuration, list) or not all(
+                isinstance(item, dict) for item in knowledge_bases_configuration
+            ):
+                raise ValueError("knowledge_bases_configuration must be a list of dictionaries")
+
         self.knowledge_bases_configuration = knowledge_bases_configuration
+
+    def to_dict(self, event) -> dict[str, Any]:
+        result = {
+            "messageVersion": "1.0",
+            "response": {
+                "apiPath": event.api_path,
+                "actionGroup": event.action_group,
+                "httpMethod": event.http_method,
+                "httpStatusCode": self.status_code,
+                "responseBody": {
+                    self.content_type: {"body": json.dumps(self.body) if isinstance(self.body, dict) else self.body},
+                },
+            },
+        }
+
+        # Add optional attributes if they exist
+        if self.session_attributes is not None:
+            result["sessionAttributes"] = self.session_attributes
+
+        if self.prompt_session_attributes is not None:
+            result["promptSessionAttributes"] = self.prompt_session_attributes
+
+        if self.knowledge_bases_configuration is not None:
+            result["knowledgeBasesConfiguration"] = self.knowledge_bases_configuration
+
+        return result
 
 
 class BedrockResponseBuilder(ResponseBuilder):
@@ -72,6 +86,10 @@ class BedrockResponseBuilder(ResponseBuilder):
         """
         self._route(event, None)
 
+        body = self.response.body
+        if self.response.is_json() and not isinstance(self.response.body, str):
+            body = self.serializer(self.response.body)
+
         base_response = {
             "messageVersion": "1.0",
             "response": {
@@ -81,7 +99,7 @@ class BedrockResponseBuilder(ResponseBuilder):
                 "httpStatusCode": self.response.status_code,
                 "responseBody": {
                     self.response.content_type: {
-                        "body": self._get_formatted_body(),
+                        "body": body,
                     },
                 },
             },
@@ -92,22 +110,7 @@ class BedrockResponseBuilder(ResponseBuilder):
 
         return base_response
 
-    def _get_formatted_body(self) -> Any:
-        """Format the response body based on content type"""
-        if not isinstance(self.response, BedrockResponse):
-            if self.response.is_json() and not isinstance(self.response.body, str):
-                return self.serializer(self.response.body)
-        return self.response.body
-
     def _add_bedrock_specific_configs(self, response: dict[str, Any]) -> None:
-        """
-        Add Bedrock-specific configurations to the response if present.
-
-        Parameters
-        ----------
-        response: dict[str, Any]
-            The base response dictionary to be updated
-        """
         if not isinstance(self.response, BedrockResponse):
             return
 
