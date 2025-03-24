@@ -45,8 +45,8 @@ class BedrockResponse:
 
         self.knowledge_bases_configuration = knowledge_bases_configuration
 
-    def to_dict(self, event) -> dict[str, Any]:
-        result = {
+    def to_dict(self, event: BedrockAgentEvent) -> dict[str, Any]:
+        result: dict[str, Any] = {
             "messageVersion": "1.0",
             "response": {
                 "apiPath": event.api_path,
