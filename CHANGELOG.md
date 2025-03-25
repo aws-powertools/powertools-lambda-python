@@ -4,18 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Bug Fixes
 
-* **idempotency:** include sk in error msgs when using composite key ([#6325](https://github.com/aws-powertools/powertools-lambda-python/issues/6325))
-* **metrics:** ensure proper type conversion for `DD_FLUSH_TO_LOG` env var ([#6280](https://github.com/aws-powertools/powertools-lambda-python/issues/6280))
+<a name="v3.9.0"></a>
+## [v3.9.0] - 2025-03-25
+## Maintenance
 
-## Code Refactoring
-
-* **data_classes:** Add base class with common code ([#6297](https://github.com/aws-powertools/powertools-lambda-python/issues/6297))
-* **data_classes:** remove duplicated code ([#6288](https://github.com/aws-powertools/powertools-lambda-python/issues/6288))
-* **data_classes:** simplify nested data classes ([#6289](https://github.com/aws-powertools/powertools-lambda-python/issues/6289))
-* **tests:** add LambdaContext type in tests ([#6214](https://github.com/aws-powertools/powertools-lambda-python/issues/6214))
-
+* version bump
+* **documentation:** v2 end of support ([#6343](https://github.com/aws-powertools/powertools-lambda-python/issues/6343))
 ## Documentation
 
 * **homepage:** update layer instructions link ([#6242](https://github.com/aws-powertools/powertools-lambda-python/issues/6242))
@@ -6273,7 +6268,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.8.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.9.0...HEAD
+[v3.9.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.8.0...v3.9.0
 [v3.8.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.7.0...v3.8.0
 [v3.7.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.5.0...v3.6.0
