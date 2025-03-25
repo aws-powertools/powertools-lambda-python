@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class BedrockResponse:
     def __init__(
         self,
-        body: Any,
+        body: Any = None,
         status_code: int = 200,
         content_type: str = "application/json",
         session_attributes: dict[str, Any] | None = None,
@@ -36,61 +36,38 @@ class BedrockResponse:
         self.content_type = content_type
         self.session_attributes = session_attributes
         self.prompt_session_attributes = prompt_session_attributes
-
-        if knowledge_bases_configuration is not None:
-            if not isinstance(knowledge_bases_configuration, list) or not all(
-                isinstance(item, dict) for item in knowledge_bases_configuration
-            ):
-                raise ValueError("knowledge_bases_configuration must be a list of dictionaries")
-
         self.knowledge_bases_configuration = knowledge_bases_configuration
 
-    def to_dict(self, event: BedrockAgentEvent) -> dict[str, Any]:
-        result: dict[str, Any] = {
-            "messageVersion": "1.0",
-            "response": {
-                "apiPath": event.api_path,
-                "actionGroup": event.action_group,
-                "httpMethod": event.http_method,
-                "httpStatusCode": self.status_code,
-                "responseBody": {
-                    self.content_type: {"body": json.dumps(self.body) if isinstance(self.body, dict) else self.body},
-                },
-            },
+    def is_json(self) -> bool:
+        return self.content_type == "application/json"
+
+    def to_dict(self) -> dict:
+        return {
+            "body": self.body,
+            "status_code": self.status_code,
+            "content_type": self.content_type,
+            "session_attributes": self.session_attributes,
+            "prompt_session_attributes": self.prompt_session_attributes,
+            "knowledge_bases_configuration": self.knowledge_bases_configuration,
         }
-
-        # Add optional attributes if they exist
-        if self.session_attributes is not None:
-            result["sessionAttributes"] = self.session_attributes
-
-        if self.prompt_session_attributes is not None:
-            result["promptSessionAttributes"] = self.prompt_session_attributes
-
-        if self.knowledge_bases_configuration is not None:
-            result["knowledgeBasesConfiguration"] = self.knowledge_bases_configuration
-
-        return result
 
 
 class BedrockResponseBuilder(ResponseBuilder):
-    """
-    Bedrock Response Builder. This builds the response dict to be returned by Lambda when using Bedrock Agents.
-
-    Since the payload format is different from the standard API Gateway Proxy event, we override the build method.
-    """
-
     @override
     def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
-        """
-        Build the response dictionary to be returned by the Lambda function.
-        """
         self._route(event, None)
 
-        body = self.response.body
-        if self.response.is_json() and not isinstance(self.response.body, str):
-            body = self.serializer(self.response.body)
+        bedrock_response = None
+        if isinstance(self.response.body, dict) and "body" in self.response.body:
+            bedrock_response = BedrockResponse(**self.response.body)
+            body = bedrock_response.body
+        else:
+            body = self.response.body
 
-        base_response = {
+        if self.response.is_json() and not isinstance(body, str):
+            body = self.serializer(body)
+
+        response = {
             "messageVersion": "1.0",
             "response": {
                 "actionGroup": event.action_group,
@@ -105,22 +82,16 @@ class BedrockResponseBuilder(ResponseBuilder):
             },
         }
 
-        if isinstance(self.response, BedrockResponse):
-            self._add_bedrock_specific_configs(base_response)
+        # Add Bedrock-specific attributes
+        if bedrock_response:
+            if bedrock_response.session_attributes:
+                response["sessionAttributes"] = bedrock_response.session_attributes
+            if bedrock_response.prompt_session_attributes:
+                response["promptSessionAttributes"] = bedrock_response.prompt_session_attributes
+            if bedrock_response.knowledge_bases_configuration:
+                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration
 
-        return base_response
-
-    def _add_bedrock_specific_configs(self, response: dict[str, Any]) -> None:
-        if not isinstance(self.response, BedrockResponse):
-            return
-
-        optional_configs = {
-            "sessionAttributes": self.response.session_attributes,
-            "promptSessionAttributes": self.response.prompt_session_attributes,
-            "knowledgeBasesConfiguration": self.response.knowledge_bases_configuration,
-        }
-
-        response.update({k: v for k, v in optional_configs.items() if v is not None})
+        return response
 
 
 class BedrockAgentResolver(ApiGatewayResolver):

@@ -208,16 +208,35 @@ def test_bedrock_agent_with_bedrock_response():
 
     # WHEN using BedrockResponse
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims():
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
-        return BedrockResponse(body={"message": "success"}, session_attributes={"last_request": "get_claims"})
+        return BedrockResponse(
+            session_attributes={"user_id": "123"},
+            prompt_session_attributes={"context": "testing"},
+            knowledge_bases_configuration=[
+                {
+                    "knowledgeBaseId": "kb-123",
+                    "retrievalConfiguration": {
+                        "vectorSearchConfiguration": {"numberOfResults": 3, "overrideSearchType": "HYBRID"},
+                    },
+                },
+            ],
+        )
 
     result = app(load_event("bedrockAgentEvent.json"), {})
-    print(result)
 
-    # To be implemented: check if session_attributes
     assert result["messageVersion"] == "1.0"
     assert result["response"]["apiPath"] == "/claims"
     assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
     assert result["response"]["httpMethod"] == "GET"
+    assert result["sessionAttributes"] == {"user_id": "123"}
+    assert result["promptSessionAttributes"] == {"context": "testing"}
+    assert result["knowledgeBasesConfiguration"] == [
+        {
+            "knowledgeBaseId": "kb-123",
+            "retrievalConfiguration": {
+                "vectorSearchConfiguration": {"numberOfResults": 3, "overrideSearchType": "HYBRID"},
+            },
+        },
+    ]
