@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 
 if TYPE_CHECKING:
+    from http import HTTPStatus
     from re import Match
 
     from aws_lambda_powertools.event_handler.openapi.models import Contact, License, SecurityScheme, Server, Tag
@@ -109,6 +110,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         operation_id: str | None = None,
         include_in_schema: bool = True,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         openapi_extensions = None
@@ -129,6 +131,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            custom_response_validation_http_code,
             middlewares,
         )
 
@@ -148,6 +151,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         operation_id: str | None = None,
         include_in_schema: bool = True,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -168,6 +172,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            custom_response_validation_http_code,
             middlewares,
         )
 
@@ -187,6 +192,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         operation_id: str | None = None,
         include_in_schema: bool = True,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -207,6 +213,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            custom_response_validation_http_code,
             middlewares,
         )
 
@@ -226,6 +233,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         operation_id: str | None = None,
         include_in_schema: bool = True,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ):
         openapi_extensions = None
@@ -246,6 +254,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            custom_response_validation_http_code,
             middlewares,
         )
 
@@ -265,6 +274,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         operation_id: str | None = None,
         include_in_schema: bool = True,
         deprecated: bool = False,
+        custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         openapi_extensions = None
@@ -285,6 +295,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            custom_response_validation_http_code,
             middlewares,
         )
 
