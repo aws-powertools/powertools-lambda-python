@@ -522,6 +522,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
 { .card }
 
+[**Guild**](https://guild.com/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**LocalStack**](https://www.localstack.cloud/){target="_blank" rel="nofollow"}
 { .card }
 
