@@ -27,6 +27,7 @@ class DataRecord:
         in_progress_expiry_timestamp: int | None = None,
         response_data: str = "",
         payload_hash: str = "",
+        sort_key: str | None = None,
     ) -> None:
         """
 
@@ -44,6 +45,8 @@ class DataRecord:
             hashed representation of payload
         response_data: str, optional
             response data from previous executions using the record
+        sort_key: str, optional
+            sort key when using composite key
         """
         self.idempotency_key = idempotency_key
         self.payload_hash = payload_hash
@@ -51,6 +54,7 @@ class DataRecord:
         self.in_progress_expiry_timestamp = in_progress_expiry_timestamp
         self._status = status
         self.response_data = response_data
+        self.sort_key = sort_key
 
     @property
     def is_expired(self) -> bool:

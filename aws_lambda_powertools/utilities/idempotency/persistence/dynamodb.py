@@ -168,6 +168,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             in_progress_expiry_timestamp=data.get(self.in_progress_expiry_attr),
             response_data=data.get(self.data_attr),
             payload_hash=data.get(self.validation_key_attr),
+            sort_key=data[self.sort_key_attr] if self.sort_key_attr is not None else None,
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
