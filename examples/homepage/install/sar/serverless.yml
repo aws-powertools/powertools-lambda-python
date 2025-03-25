@@ -2,7 +2,7 @@ service: powertools-lambda
 
 provider:
   name: aws
-  runtime: python3.12
+  runtime: python3.13
   region: us-east-1
 
 functions:
@@ -16,5 +16,5 @@ resources:
       Type: AWS::Serverless::Application
       Properties:
         Location:
-          ApplicationId:  arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer
-          SemanticVersion: 2.43.1
+          ApplicationId:  arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64
+          SemanticVersion: 3.0.9

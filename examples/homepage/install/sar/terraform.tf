@@ -21,13 +21,13 @@ resource "aws_serverlessapplicationrepository_cloudformation_stack" "deploy_sar_
 }
 
 data "aws_serverlessapplicationrepository_application" "sar_app" {
-  application_id   = "arn:aws:serverlessrepo:us-east-1:057560766410:applications/aws-lambda-powertools-python-layer"
+  application_id   = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64"
   semantic_version = var.aws_powertools_version
 }
 
 variable "aws_powertools_version" {
   type        = string
-  default     = "2.43.1"
+  default     = "3.0.9"
   description = "The Powertools for AWS Lambda (Python) release version"
 }
 

@@ -67,10 +67,10 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
 
-    | Architecture | Layer ARN                                                                                                 |
-    | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
+    | Architecture | Layer ARN                                                                                                                     |
+    | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+    | x86_64       | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard: |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard:  |
 
     === "AWS Console"
 
@@ -234,12 +234,12 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     We provide a SAR App that deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
 
-    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version.
+    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version. Make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
 
-    | App                                                                                                                                                                                 |     |     | ARN                                                                                                                           |
-    | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer__{: .copyMe}:clipboard:       |
-    | [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64__{: .copyMe}:clipboard: |
+    | App | ARN | Architecture |
+    | --- | --- | ------------ |
+    | aws-lambda-powertools-python-layer-v3-{python_version}-x86-64 | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-{python_version}-x86-64 | X86_64 |
+    | aws-lambda-powertools-python-layer-v3-{python_version}-arm64 | arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-{python_version}-arm64 | ARM64 |
 
     ??? question "Don't have enough permissions? Expand for a least-privilege IAM policy example"
 
@@ -328,10 +328,18 @@ Serverless Application Repository (SAR) App deploys a CloudFormation stack with 
 
 Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to choose a semantic version and deploys a Layer in your target account.
 
-| App                                                                                                                                                                                 | ARN                                                                                                                            | Description                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
-| [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
+| App | ARN | Python version | Architecture |
+| --- | --- | -------------- | ------------ |
+| [aws-lambda-powertools-python-layer-v3-python39-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-x86-64](#){: .copyMe}:clipboard: | Python 3.9 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python310-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-x86-64](#){: .copyMe}:clipboard: | Python 3.10 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python311-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-x86-64](#){: .copyMe}:clipboard: | Python 3.11 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python312-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86-64](#){: .copyMe}:clipboard: | Python 3.12 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python313-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64](#){: .copyMe}:clipboard: | Python 3.13 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python39-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-arm64](#){: .copyMe}:clipboard: | Python 3.9 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python310-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-arm64](#){: .copyMe}:clipboard: | Python 3.10 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python311-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-arm64](#){: .copyMe}:clipboard: | Python 3.11 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python312-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-arm64](#){: .copyMe}:clipboard: | Python 3.12 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python313-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-arm64](#){: .copyMe}:clipboard: | Python 3.13 | ARM64 |
 
 ??? note "Click to expand and copy SAR code snippets for popular frameworks"
 
@@ -351,7 +359,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
     === "CDK"
 
-        ```python hl_lines="7 16-20 23-27"
+        ```python hl_lines="8 16-20 23-27"
         --8<-- "examples/homepage/install/sar/cdk_sar.py"
         ```
 
