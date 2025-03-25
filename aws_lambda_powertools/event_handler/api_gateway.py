@@ -2583,9 +2583,10 @@ class ApiGatewayResolver(BaseRouter):
         # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
             # route validation must take precedence over app validation
+            route_response_validation_http_code = route.custom_response_validation_http_code
             http_code = (
-                route.custom_response_validation_http_code
-                if exp.source == "route"
+                route_response_validation_http_code
+                if route_response_validation_http_code
                 else self._response_validation_error_http_code
             )
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
