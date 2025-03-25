@@ -319,7 +319,7 @@ class Route:
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
+        custom_response_validation_http_code: HTTPStatus | None = None,
         middlewares: list[Callable[..., Response]] | None = None,
     ):
         """
@@ -361,7 +361,7 @@ class Route:
             Additional OpenAPI extensions as a dictionary.
         deprecated: bool
             Whether or not to mark this route as deprecated in the OpenAPI schema
-        custom_response_validation_http_code: int | HTTPStatus | None, optional
+        custom_response_validation_http_code: HTTPStatus | None, optional
             Whether to have custom http status code for this route if response validation fails
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
@@ -401,7 +401,7 @@ class Route:
         # _body_field is used to cache the dependant model for the body field
         self._body_field: ModelField | None = None
 
-        self.custom_response_validation_http_code: HTTPStatus | None = custom_response_validation_http_code
+        self.custom_response_validation_http_code = custom_response_validation_http_code
 
     def __call__(
         self,
@@ -511,7 +511,7 @@ class Route:
 
         return self._body_field
 
-    def _get_openapi_path(
+    def _get_openapi_path(  # noqa: PLR0912
         self,
         *,
         dependant: Dependant,
@@ -937,6 +937,29 @@ class BaseRouter(ABC):
     context: dict
     _router_middlewares: list[Callable] = []
     processed_stack_frames: list[str] = []
+
+    def _validate_route_response_validation_error_http_code(
+        self,
+        custom_response_validation_http_code: int | HTTPStatus | None,
+    ) -> HTTPStatus | None:
+        if custom_response_validation_http_code and not self._enable_validation:
+            msg = (
+                "'custom_response_validation_http_code' cannot be set for route when enable_validation is False "
+                "on resolver."
+            )
+            raise ValueError(msg)
+
+        if (
+            not isinstance(custom_response_validation_http_code, HTTPStatus)
+            and custom_response_validation_http_code is not None
+        ):
+            try:
+                custom_response_validation_http_code = HTTPStatus(custom_response_validation_http_code)
+            except ValueError:
+                msg = f"'{custom_response_validation_http_code}' must be an integer representing an HTTP status code or an enum of type HTTPStatus."  # noqa: E501
+                raise ValueError(msg) from None
+
+        return custom_response_validation_http_code
 
     @abstractmethod
     def route(
@@ -2135,29 +2158,6 @@ class ApiGatewayResolver(BaseRouter):
                 body=body,
             )
 
-    def _validate_route_response_validation_error_http_code(
-        self,
-        custom_response_validation_http_code: int | HTTPStatus | None,
-    ) -> HTTPStatus | None:
-        if custom_response_validation_http_code and not self._enable_validation:
-            msg = (
-                "'custom_response_validation_http_code' cannot be set for route when enable_validation is False "
-                "on resolver."
-            )
-            raise ValueError(msg)
-
-        if (
-            not isinstance(custom_response_validation_http_code, HTTPStatus)
-            and custom_response_validation_http_code is not None
-        ):
-            try:
-                custom_response_validation_http_code = HTTPStatus(custom_response_validation_http_code)
-            except ValueError:
-                msg = f"'{custom_response_validation_http_code}' must be an integer representing an HTTP status code or an enum of type HTTPStatus."  # noqa: E501
-                raise ValueError(msg) from None
-
-        return custom_response_validation_http_code
-
     def route(
         self,
         rule: str,
@@ -2754,6 +2754,9 @@ class Router(BaseRouter):
             frozen_tags = frozenset(tags) if tags else None
             frozen_security = _FrozenListDict(security) if security else None
             frozen_openapi_extensions = _FrozenDict(openapi_extensions) if openapi_extensions else None
+            response_validation_http_code = self._validate_route_response_validation_error_http_code(
+                custom_response_validation_http_code,
+            )
 
             route_key = (
                 rule,
@@ -2771,7 +2774,7 @@ class Router(BaseRouter):
                 frozen_security,
                 frozen_openapi_extensions,
                 deprecated,
-                custom_response_validation_http_code,
+                response_validation_http_code,
             )
 
             # Collate Middleware for routes
