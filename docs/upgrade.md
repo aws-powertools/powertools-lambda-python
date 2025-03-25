@@ -5,6 +5,12 @@ description: Guide to update between major Powertools for AWS Lambda (Python) ve
 
 <!-- markdownlint-disable MD043 -->
 
+## End of support v2
+
+!!! warning "On March 25st, 2025, Powertools for AWS Lambda (Python) v2 reached end of support and will no longer receive updates or releases. If you are still using v2, we strongly recommend you to read our upgrade guide and update to the latest version."
+
+Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/){target="_blank"} v2 releases and documentation 2.x versions to prevent any disruption.
+
 ## Migrate to v3 from v2
 
 !!! info "We strongly encourage you to migrate to v3. However, if you still need to upgrade from v1 to v2, you can find the [upgrade guide](/lambda/python/2.43.1/upgrade/)."
