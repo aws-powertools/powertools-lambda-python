@@ -469,14 +469,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.37.18"
-description = "Type annotations for boto3 1.37.18 generated with mypy-boto3-builder 8.10.1"
+version = "1.37.19"
+description = "Type annotations for boto3 1.37.19 generated with mypy-boto3-builder 8.10.1"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.37.18-py3-none-any.whl", hash = "sha256:db866104d3b9bea63c4769255759ad5c61bc5e5591cea0b692df4c08082a841e"},
-    {file = "boto3_stubs-1.37.18.tar.gz", hash = "sha256:30ecf8dfaa848469f55279e41248ff46b1ecf5e2ee7b3b292e3ec39332e2f90e"},
+    {file = "boto3_stubs-1.37.19-py3-none-any.whl", hash = "sha256:af67bca13956004eaab81a7af179c689392fd8341f761a27d5b49cd17639a472"},
+    {file = "boto3_stubs-1.37.19.tar.gz", hash = "sha256:95c665b1375b6578067fdc3a7854b58eca710b288240bd1cd2c9b1954e3f5f5d"},
 ]
 
 [package.dependencies]
@@ -543,7 +543,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.37.0,<1.38.0)"]
 billing = ["mypy-boto3-billing (>=1.37.0,<1.38.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.37.0,<1.38.0)"]
-boto3 = ["boto3 (==1.37.18)"]
+boto3 = ["boto3 (==1.37.19)"]
 braket = ["mypy-boto3-braket (>=1.37.0,<1.38.0)"]
 budgets = ["mypy-boto3-budgets (>=1.37.0,<1.38.0)"]
 ce = ["mypy-boto3-ce (>=1.37.0,<1.38.0)"]
@@ -1869,14 +1869,14 @@ test = ["coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock ; python_version < \"3.
 
 [[package]]
 name = "griffe"
-version = "1.6.1"
+version = "1.6.2"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "griffe-1.6.1-py3-none-any.whl", hash = "sha256:b0131670db16834f82383bcf4f788778853c9bf4dc7a1a2b708bb0808ca56a98"},
-    {file = "griffe-1.6.1.tar.gz", hash = "sha256:ff0acf706b2680f8c721412623091c891e752b2c61b7037618f7b77d06732cf5"},
+    {file = "griffe-1.6.2-py3-none-any.whl", hash = "sha256:6399f7e663150e4278a312a8e8a14d2f3d7bd86e2ef2f8056a1058e38579c2ee"},
+    {file = "griffe-1.6.2.tar.gz", hash = "sha256:3a46fa7bd83280909b63c12b9a975732a927dd97809efe5b7972290b606c5d91"},
 ]
 
 [package.dependencies]
@@ -2679,18 +2679,18 @@ python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
 
 [[package]]
 name = "mkdocstrings-python"
-version = "1.16.7"
+version = "1.16.8"
 description = "A Python handler for mkdocstrings."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "mkdocstrings_python-1.16.7-py3-none-any.whl", hash = "sha256:a5589a5be247a28ba651287f83630c69524042f8055d93b5c203d804a3409333"},
-    {file = "mkdocstrings_python-1.16.7.tar.gz", hash = "sha256:cdfc1a99fe5f6f0d90446a364ef7cac12014a4ef46114b2677a58cec84007117"},
+    {file = "mkdocstrings_python-1.16.8-py3-none-any.whl", hash = "sha256:211b7aaf776cd45578ecb531e5ad0d3a35a8be9101a6bfa10de38a69af9d8fd8"},
+    {file = "mkdocstrings_python-1.16.8.tar.gz", hash = "sha256:9453ccae69be103810c1cf6435ce71c8f714ae37fef4d87d16aa92a7c800fe1d"},
 ]
 
 [package.dependencies]
-griffe = ">=0.49"
+griffe = ">=1.6.2"
 mkdocs-autorefs = ">=1.4"
 mkdocstrings = ">=0.28.3"
 typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
