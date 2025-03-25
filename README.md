@@ -65,6 +65,7 @@ The following companies, among others, use Powertools:
 * [CyberArk](https://www.cyberark.com/)
 * [Flyweight](https://flyweight.io/)
 * [globaldatanet](https://globaldatanet.com/)
+* [Guild](https://guild.com/)
 * [IMS](https://ims.tech/)
 * [Jit Security](https://www.jit.io/)
 * [LocalStack](https://www.localstack.cloud/)
