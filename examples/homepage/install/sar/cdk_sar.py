@@ -3,9 +3,9 @@ from constructs import Construct
 
 POWERTOOLS_BASE_NAME = "AWSLambdaPowertools"
 # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
-POWERTOOLS_VER = "2.43.1"
+POWERTOOLS_VER = "3.0.9"
 POWERTOOLS_ARN = (
-    "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
+    "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64"
 )
 
 
@@ -31,7 +31,7 @@ class SampleApp(Stack):
         aws_lambda.Function(
             self,
             "sample-app-lambda",
-            runtime=aws_lambda.Runtime.PYTHON_3_12,
+            runtime=aws_lambda.Runtime.PYTHON_3_13,
             function_name="sample-lambda",
             code=aws_lambda.Code.from_asset("lambda"),
             handler="hello.handler",
