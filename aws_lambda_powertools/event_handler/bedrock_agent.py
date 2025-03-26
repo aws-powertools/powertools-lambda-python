@@ -41,7 +41,7 @@ class BedrockResponse:
     def is_json(self) -> bool:
         return self.content_type == "application/json"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "body": self.body,
             "status_code": self.status_code,
