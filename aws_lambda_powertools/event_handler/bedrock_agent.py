@@ -89,7 +89,7 @@ class BedrockResponseBuilder(ResponseBuilder):
             if bedrock_response.prompt_session_attributes:
                 response["promptSessionAttributes"] = bedrock_response.prompt_session_attributes
             if bedrock_response.knowledge_bases_configuration:
-                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration
+                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration # type: ignore
 
         return response
 
