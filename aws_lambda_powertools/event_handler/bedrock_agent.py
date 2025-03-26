@@ -22,6 +22,10 @@ if TYPE_CHECKING:
 
 
 class BedrockResponse:
+    """
+    Contains the response body, status code, content type, and optional attributes
+    for session management and knowledge base configuration.
+    """
     def __init__(
         self,
         body: Any = None,
@@ -38,9 +42,6 @@ class BedrockResponse:
         self.prompt_session_attributes = prompt_session_attributes
         self.knowledge_bases_configuration = knowledge_bases_configuration
 
-    def is_json(self) -> bool:
-        return self.content_type == "application/json"
-
     def to_dict(self) -> dict[str, Any]:
         return {
             "body": self.body,
@@ -53,6 +54,11 @@ class BedrockResponse:
 
 
 class BedrockResponseBuilder(ResponseBuilder):
+    """
+    Bedrock Response Builder. This builds the response dict to be returned by Lambda when using Bedrock Agents.
+
+    Since the payload format is different from the standard API Gateway Proxy event, we override the build method.
+    """
     @override
     def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
         self._route(event, None)
@@ -89,7 +95,7 @@ class BedrockResponseBuilder(ResponseBuilder):
             if bedrock_response.prompt_session_attributes:
                 response["promptSessionAttributes"] = bedrock_response.prompt_session_attributes
             if bedrock_response.knowledge_bases_configuration:
-                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration # type: ignore
+                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration  # type: ignore
 
         return response
 
