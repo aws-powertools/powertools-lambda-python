@@ -43,6 +43,7 @@ class BedrockResponse:
         self.prompt_session_attributes = prompt_session_attributes
         self.knowledge_bases_configuration = knowledge_bases_configuration
 
+
 class BedrockResponseBuilder(ResponseBuilder):
     """
     Bedrock Response Builder. This builds the response dict to be returned by Lambda when using Bedrock Agents.
@@ -52,6 +53,7 @@ class BedrockResponseBuilder(ResponseBuilder):
 
     @override
     def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
+        """Build the full response dict to be returned by the lambda"""
         self._route(event, None)
 
         bedrock_response = None
