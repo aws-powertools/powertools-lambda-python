@@ -469,14 +469,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.37.19"
-description = "Type annotations for boto3 1.37.19 generated with mypy-boto3-builder 8.10.1"
+version = "1.37.20"
+description = "Type annotations for boto3 1.37.20 generated with mypy-boto3-builder 8.10.1"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.37.19-py3-none-any.whl", hash = "sha256:af67bca13956004eaab81a7af179c689392fd8341f761a27d5b49cd17639a472"},
-    {file = "boto3_stubs-1.37.19.tar.gz", hash = "sha256:95c665b1375b6578067fdc3a7854b58eca710b288240bd1cd2c9b1954e3f5f5d"},
+    {file = "boto3_stubs-1.37.20-py3-none-any.whl", hash = "sha256:fff1796431191ec23a7f2d69c9de8c8ff10220cc773cb7c626ef0a34e2f1189a"},
+    {file = "boto3_stubs-1.37.20.tar.gz", hash = "sha256:7e41a293bcdbbea99b21d6a7380822e7c8a31992f6d67d88989aebba6b35cdc2"},
 ]
 
 [package.dependencies]
@@ -543,7 +543,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.37.0,<1.38.0)"]
 billing = ["mypy-boto3-billing (>=1.37.0,<1.38.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.37.0,<1.38.0)"]
-boto3 = ["boto3 (==1.37.19)"]
+boto3 = ["boto3 (==1.37.20)"]
 braket = ["mypy-boto3-braket (>=1.37.0,<1.38.0)"]
 budgets = ["mypy-boto3-budgets (>=1.37.0,<1.38.0)"]
 ce = ["mypy-boto3-ce (>=1.37.0,<1.38.0)"]
@@ -1122,14 +1122,14 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.32.0"
+version = "1.32.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "cfn_lint-1.32.0-py3-none-any.whl", hash = "sha256:b3e8cae8b37ef6794efa6cd747f3398a8c8f4dc4d39d69b068be2fec277545a2"},
-    {file = "cfn_lint-1.32.0.tar.gz", hash = "sha256:1289184aaca0275dd62638598fd07c6f01023fa6a37d966b3b6f089e30a3d194"},
+    {file = "cfn_lint-1.32.1-py3-none-any.whl", hash = "sha256:a8ea63ac8daa69a66a54a796998362fd063d9ba1e9c1fc3c932213b0c027669c"},
+    {file = "cfn_lint-1.32.1.tar.gz", hash = "sha256:10282c0ec7fc6391da4877d9381a6b954f3c54ddcc0d3c97ee86f4783b5ae680"},
 ]
 
 [package.dependencies]
@@ -3442,18 +3442,19 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments
 
 [[package]]
 name = "pytest-asyncio"
-version = "0.25.3"
+version = "0.26.0"
 description = "Pytest support for asyncio"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pytest_asyncio-0.25.3-py3-none-any.whl", hash = "sha256:9e89518e0f9bd08928f97a3482fdc4e244df17529460bc038291ccaf8f85c7c3"},
-    {file = "pytest_asyncio-0.25.3.tar.gz", hash = "sha256:fc1da2cf9f125ada7e710b4ddad05518d4cee187ae9412e9ac9271003497f07a"},
+    {file = "pytest_asyncio-0.26.0-py3-none-any.whl", hash = "sha256:7b51ed894f4fbea1340262bdae5135797ebbe21d8638978e35d31c6d19f72fb0"},
+    {file = "pytest_asyncio-0.26.0.tar.gz", hash = "sha256:c4df2a697648241ff39e7f0e4a73050b03f123f760673956cf0d72a4990e312f"},
 ]
 
 [package.dependencies]
 pytest = ">=8.2,<9"
+typing-extensions = {version = ">=4.12", markers = "python_version < \"3.10\""}
 
 [package.extras]
 docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)"]
@@ -4918,4 +4919,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "1a853fc471bbd9b8bffcbeeb1e2e5beac44c77be4fc5dc75ed91764dbcb952b7"
+content-hash = "4eb0bd5fbaa1d7a023151e07f520ebbe2a99675fb2225d6ab9f58e2672548617"
