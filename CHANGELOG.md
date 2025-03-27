@@ -10,6 +10,7 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.9.1a1 ([#6356](https://github.com/aws-powertools/powertools-lambda-python/issues/6356))
 * **ci:** new pre-release 3.9.1a0 ([#6354](https://github.com/aws-powertools/powertools-lambda-python/issues/6354))
 * **deps:** bump actions/setup-python from 5.4.0 to 5.5.0 ([#6349](https://github.com/aws-powertools/powertools-lambda-python/issues/6349))
 * **deps-dev:** bump aws-cdk from 2.1005.0 to 2.1006.0 ([#6350](https://github.com/aws-powertools/powertools-lambda-python/issues/6350))
