@@ -10,13 +10,17 @@
 
 ## Maintenance
 
-* **ci:** new pre-release 3.9.1a1 ([#6356](https://github.com/aws-powertools/powertools-lambda-python/issues/6356))
 * **ci:** new pre-release 3.9.1a0 ([#6354](https://github.com/aws-powertools/powertools-lambda-python/issues/6354))
+* **ci:** new pre-release 3.9.1a2 ([#6364](https://github.com/aws-powertools/powertools-lambda-python/issues/6364))
+* **ci:** new pre-release 3.9.1a1 ([#6356](https://github.com/aws-powertools/powertools-lambda-python/issues/6356))
 * **deps:** bump actions/setup-python from 5.4.0 to 5.5.0 ([#6349](https://github.com/aws-powertools/powertools-lambda-python/issues/6349))
+* **deps:** bump aws-encryption-sdk from 4.0.0 to 4.0.1 ([#6360](https://github.com/aws-powertools/powertools-lambda-python/issues/6360))
+* **deps-dev:** bump cfn-lint from 1.32.0 to 1.32.1 ([#6351](https://github.com/aws-powertools/powertools-lambda-python/issues/6351))
 * **deps-dev:** bump aws-cdk from 2.1005.0 to 2.1006.0 ([#6350](https://github.com/aws-powertools/powertools-lambda-python/issues/6350))
 * **deps-dev:** bump pytest-asyncio from 0.25.3 to 0.26.0 ([#6352](https://github.com/aws-powertools/powertools-lambda-python/issues/6352))
+* **deps-dev:** bump boto3-stubs from 1.37.20 to 1.37.22 ([#6362](https://github.com/aws-powertools/powertools-lambda-python/issues/6362))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.185.0a0 to 2.186.0a0 ([#6363](https://github.com/aws-powertools/powertools-lambda-python/issues/6363))
 * **deps-dev:** bump boto3-stubs from 1.37.19 to 1.37.20 ([#6353](https://github.com/aws-powertools/powertools-lambda-python/issues/6353))
-* **deps-dev:** bump cfn-lint from 1.32.0 to 1.32.1 ([#6351](https://github.com/aws-powertools/powertools-lambda-python/issues/6351))
 
 
 <a name="v3.9.0"></a>
