@@ -27,6 +27,10 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .appsync import (
+    AppSyncResolverEventModel,
+    AppSyncBatchResolverEventModel,
+)
 from .bedrock_agent import (
     BedrockAgentEventModel,
     BedrockAgentModel,
