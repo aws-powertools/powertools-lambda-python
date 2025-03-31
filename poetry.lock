@@ -211,18 +211,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.185.0a0"
+version = "2.186.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk.aws_lambda_python_alpha-2.185.0a0-py3-none-any.whl", hash = "sha256:e6146d8af18d045c7ab1ff39bd4769ad9f8d52a2d44c73d74df817fb2fda5c85"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.185.0a0.tar.gz", hash = "sha256:f85f8c0ed51b6e09acb45ac28efcf65225517d5b0b05ff3d2cf583429823b5b6"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.186.0a0-py3-none-any.whl", hash = "sha256:716c64c9fe7e87f50428726e48cb1a67ba7f2dbfdc20327ecb503dd7324522ef"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.186.0a0.tar.gz", hash = "sha256:e067e20aa1b5e9c698a7f66568471a6a0b66bf72e46d1ab1961d497473c503a0"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.185.0,<3.0.0"
+aws-cdk-lib = ">=2.186.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.109.0,<2.0.0"
 publication = ">=0.0.3"
@@ -247,14 +247,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.185.0"
+version = "2.186.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.185.0-py3-none-any.whl", hash = "sha256:e58db294db7265962a7122319b708fce1815e0e5b46451d93bac9789ad33a798"},
-    {file = "aws_cdk_lib-2.185.0.tar.gz", hash = "sha256:d96216f444d9560e4f8b0cfd7f25b84c66b8570a264bead8142f40261425e24e"},
+    {file = "aws_cdk_lib-2.186.0-py3-none-any.whl", hash = "sha256:230bfb2bcef5f9a7d763ba20d72eb3d225f34ad43d894083e0a02a5c248e8e5c"},
+    {file = "aws_cdk_lib-2.186.0.tar.gz", hash = "sha256:d1371c158ae7ebd0ed5ac047cff66a349836f0bcf7c85654d1c78e207f305350"},
 ]
 
 [package.dependencies]
@@ -268,15 +268,15 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "4.0.0"
+version = "4.0.1"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"datamasking\""
 files = [
-    {file = "aws-encryption-sdk-4.0.0.tar.gz", hash = "sha256:57df8b5c1b9f18db4373c6e8e65563791063a71be93d0849950ed365272db354"},
-    {file = "aws_encryption_sdk-4.0.0-py2.py3-none-any.whl", hash = "sha256:a94483785dff2cd166ccb8f3a15cdfe5cba7a3717f6604543c816a3a32f7c412"},
+    {file = "aws-encryption-sdk-4.0.1.tar.gz", hash = "sha256:7320dc4cf8d8d5a9b4c88a343be93835da18756e05308d3536554be0ca2889a5"},
+    {file = "aws_encryption_sdk-4.0.1-py2.py3-none-any.whl", hash = "sha256:5c2ca9a207e1732542a1370ac7efd630ab6e04d05f98e68badf20927eb95ed1d"},
 ]
 
 [package.dependencies]
@@ -286,7 +286,7 @@ cryptography = ">=3.4.6"
 wrapt = ">=1.10.11"
 
 [package.extras]
-mpl = ["aws-cryptographic-material-providers (==1.7.4)"]
+mpl = ["aws-cryptographic-material-providers (>=1.7.4,<=1.10.0)"]
 
 [[package]]
 name = "aws-requests-auth"
@@ -469,14 +469,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.37.20"
-description = "Type annotations for boto3 1.37.20 generated with mypy-boto3-builder 8.10.1"
+version = "1.37.23"
+description = "Type annotations for boto3 1.37.23 generated with mypy-boto3-builder 8.10.1"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.37.20-py3-none-any.whl", hash = "sha256:fff1796431191ec23a7f2d69c9de8c8ff10220cc773cb7c626ef0a34e2f1189a"},
-    {file = "boto3_stubs-1.37.20.tar.gz", hash = "sha256:7e41a293bcdbbea99b21d6a7380822e7c8a31992f6d67d88989aebba6b35cdc2"},
+    {file = "boto3_stubs-1.37.23-py3-none-any.whl", hash = "sha256:a00884a3df819bdc6b040c857e57a87b4f33df963ee88f8f406b13bf2cd983ca"},
+    {file = "boto3_stubs-1.37.23.tar.gz", hash = "sha256:011f06dadcd5ef3c627ec9808b9afa4e1837b0f009d82b8209f12a84ffbb3867"},
 ]
 
 [package.dependencies]
@@ -543,7 +543,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.37.0,<1.38.0)"]
 billing = ["mypy-boto3-billing (>=1.37.0,<1.38.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.37.0,<1.38.0)"]
-boto3 = ["boto3 (==1.37.20)"]
+boto3 = ["boto3 (==1.37.23)"]
 braket = ["mypy-boto3-braket (>=1.37.0,<1.38.0)"]
 budgets = ["mypy-boto3-budgets (>=1.37.0,<1.38.0)"]
 ce = ["mypy-boto3-ce (>=1.37.0,<1.38.0)"]
