@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import (
@@ -44,7 +45,7 @@ class TransferFamilyAuthorizerResponse:
         role_arn: str,
         policy: str | None = None,
         home_directory: str | None = None,
-        home_directory_details: dict | None = None,
+        home_directory_details: list[dict] | None = None,
         home_directory_type: Literal["LOGICAL", "PATH"] = "PATH",
         user_gid: int | None = None,
         user_uid: int | None = None,
@@ -62,7 +63,7 @@ class TransferFamilyAuthorizerResponse:
             if not home_directory_details:
                 raise ValueError("home_directory_details must be set when home_directory_type is LOGICAL")
 
-            response["HomeDirectoryDetails"] = [home_directory_details]
+            response["HomeDirectoryDetails"] = json.dumps(home_directory_details)
 
         else:
             raise ValueError(f"Invalid home_directory_type: {home_directory_type}")
@@ -88,7 +89,7 @@ class TransferFamilyAuthorizerResponse:
         user_uid: int,
         policy: str | None = None,
         home_directory: str | None = None,
-        home_directory_details: dict | None = None,
+        home_directory_details: list[dict] | None = None,
         home_directory_type: Literal["LOGICAL", "PATH"] = "PATH",
         public_keys: str | None = None,
     ) -> dict[str, Any]:
@@ -143,7 +144,7 @@ class TransferFamilyAuthorizerResponse:
         role_arn: str,
         policy: str | None = None,
         home_directory: str | None = None,
-        home_directory_details: dict | None = None,
+        home_directory_details: list[dict] | None = None,
         home_directory_type: Literal["LOGICAL", "PATH"] = "PATH",
         public_keys: str | None = None,
     ) -> dict[str, Any]:
