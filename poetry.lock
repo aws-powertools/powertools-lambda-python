@@ -990,40 +990,40 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.35.48"
+version = "2.35.61"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdk_nag-2.35.48-py3-none-any.whl", hash = "sha256:b90c94f2007f2ca9ce30ee85629a5fa2130f7e5cc89327a195049c255e7919f2"},
-    {file = "cdk_nag-2.35.48.tar.gz", hash = "sha256:6d1804b4770c2aed60dcbbaae87aff795e558b304acfa1d3d2c9161b2cfc7580"},
+    {file = "cdk_nag-2.35.61-py3-none-any.whl", hash = "sha256:b1d7e1bbe91b514a84a32dd81959eab98f3155f5135bb36a37531db3755e3d2f"},
+    {file = "cdk_nag-2.35.61.tar.gz", hash = "sha256:f12329b0e307ab6baea8be83708056911914672a43f360f6ed532d9b476b793d"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.156.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.109.0,<2.0.0"
+jsii = ">=1.110.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.298"
+version = "0.1.299"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.298-py3-none-any.whl", hash = "sha256:a4ae2cd3bc6c5ebf1bf314ef9bedde448170f05f4945097176f72b3b24f48040"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.298.tar.gz", hash = "sha256:43d10f42ea5c79b5ce5b79412cf580929a8a08be78c28acbe527c4d45ec2176a"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.299-py3-none-any.whl", hash = "sha256:126accbde4c61276bbe1229b343e55f6c59809f3f57572a8ed4d448c7b38fa46"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.299.tar.gz", hash = "sha256:dde502abdad8d605acc7404439ac4baff3369224828e709c1b06091e7dc8284d"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.181.1,<3.0.0"
-cdk-nag = ">=2.35.46,<3.0.0"
+aws-cdk-lib = ">=2.187.0,<3.0.0"
+cdk-nag = ">=2.35.60,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.109.0,<2.0.0"
+jsii = ">=1.110.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
