@@ -111,6 +111,7 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **APIGatewayWebSocketMessageEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API message body                 |
 | **APIGatewayWebSocketConnectEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API $connect message             |
 | **APIGatewayWebSocketDisconnectEventModel** | Lambda Event Source payload for Amazon API Gateway WebSocket API $disconnect message          |
+| **AppSyncResolverEventModel**               | Lambda Event Source payload for AWS AppSync Resolver                                          |
 | **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents                                                |
 | **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                         |
 | **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
