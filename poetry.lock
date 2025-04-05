@@ -1517,24 +1517,24 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "6.106.0"
+version = "6.107.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
 python-versions = "<4,>=3.8.0"
 groups = ["main", "dev"]
 files = [
-    {file = "datadog_lambda-6.106.0-py3-none-any.whl", hash = "sha256:0b648c4d16e11e3bc95536f41b26d6ca3a973217221b705bd0a40aece364eee2"},
-    {file = "datadog_lambda-6.106.0.tar.gz", hash = "sha256:17abb2a4f1fe803e54bc4b35a6977e3e873c290c38b4c963096e054052fd0eea"},
+    {file = "datadog_lambda-6.107.0-py3-none-any.whl", hash = "sha256:3de4d1a9019649e82d9736d6170b6a9ba6ee5a531cb477675b45cfec2784bd86"},
+    {file = "datadog_lambda-6.107.0.tar.gz", hash = "sha256:6389e9342c0b9900509f62c4b3581a25bbb0916f6aa76e1e0065126c58b8f6e7"},
 ]
 
 [package.dependencies]
 datadog = ">=0.51.0,<1.0.0"
-ddtrace = ">=2.20.0"
+ddtrace = ">=2.20.0,<4"
 ujson = ">=5.9.0"
 wrapt = ">=1.11.2,<2.0.0"
 
 [package.extras]
-dev = ["boto3 (>=1.34.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "pytest (>=8.0.0,<9.0.0)", "pytest-benchmark (>=4.0,<5.0)", "requests (>=2.22.0,<3.0.0)"]
+dev = ["botocore (>=1.34.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "pytest (>=8.0.0,<9.0.0)", "pytest-benchmark (>=4.0,<5.0)", "requests (>=2.22.0,<3.0.0)"]
 
 [[package]]
 name = "ddtrace"
