@@ -26,6 +26,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+def prepare_data(data: Any) -> Any:
+    if hasattr(data, "__dataclass_fields__"):
+        import dataclasses
+        return dataclasses.asdict(data)
+
+    if callable(getattr(data, "model_dump", None)):
+        return data.model_dump()
+
+    if callable(getattr(data, "dict", None)):
+        return data.dict()
+
+    return data
 
 class DataMasking:
     """
@@ -93,6 +105,7 @@ class DataMasking:
             data_masker = DataMasking(provider=encryption_provider)
             encrypted = data_masker.encrypt({"secret": "value"})
         """
+        data = prepare_data(data)
         return self._apply_action(
             data=data,
             fields=None,
@@ -135,7 +148,7 @@ class DataMasking:
             data_masker = DataMasking(provider=encryption_provider)
             encrypted = data_masker.decrypt(encrypted_data)
         """
-
+        data = prepare_data(data)
         return self._apply_action(
             data=data,
             fields=None,
@@ -184,6 +197,7 @@ class DataMasking:
         Any
             The data with sensitive information erased or masked.
         """
+        data = prepare_data(data)
         if masking_rules:
             return self._apply_masking_rules(data=data, masking_rules=masking_rules)
         else:
