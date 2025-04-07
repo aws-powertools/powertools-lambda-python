@@ -26,19 +26,72 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-def prepare_data(data: Any) -> Any:
+def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
+    """
+    Recursively convert complex objects into dictionaries (or simple types) so that they can be
+    processed by the data masking utility. This function handles:
+
+    - Dataclasses (using dataclasses.asdict)
+    - Pydantic models (using model_dump)
+    - Custom classes with a dict() method
+    - Fallback to using __dict__ if available
+    - Recursively traverses dicts, lists, tuples, and sets
+    - Guards against circular references
+
+    Parameters
+    ----------
+    data : Any
+        The input data which may be a complex type.
+    _visited : set, optional
+        Internal set of visited object IDs to prevent infinite recursion on cyclic references.
+
+    Returns
+    -------
+    Any
+        A primitive type, or a recursively converted structure (dict, list, etc.)
+    """
+    # Initialize _visited set if not provided.
+    if _visited is None:
+        _visited = set()
+
+    # Prevent circular references by checking if the object's id has been seen.
+    data_id = id(data)
+    if data_id in _visited:
+        return data  # Return the object as-is if it has already been processed.
+    _visited.add(data_id)
+
+    # If data is a primitive type, return it directly.
+    if isinstance(data, (str, int, float, bool, type(None))):
+        return data
+
+    # Handle dataclasses by converting them to a dictionary.
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
-        return dataclasses.asdict(data)
+        return prepare_data(dataclasses.asdict(data), _visited=_visited)
 
+    # Handle Pydantic models (Pydantic v2 uses 'model_dump').
     if callable(getattr(data, "model_dump", None)):
-        return data.model_dump()
+        return prepare_data(data.model_dump(), _visited=_visited)
 
-    if callable(getattr(data, "dict", None)):
-        return data.dict()
+    # Handle custom objects that implement a dict() method (but are not already a dict).
+    if callable(getattr(data, "dict", None)) and not isinstance(data, dict):
+        return prepare_data(data.dict(), _visited=_visited)
 
+    # If data is a dictionary, process both keys and values recursively.
+    if isinstance(data, dict):
+        return {prepare_data(key, _visited=_visited): prepare_data(value, _visited=_visited)
+                for key, value in data.items()}
+
+    # If data is an iterable (like a list, tuple, or set), process each element recursively.
+    if isinstance(data, (list, tuple, set)):
+        return type(data)(prepare_data(item, _visited=_visited) for item in data)
+
+    # As a fallback, if the object has a __dict__, convert its attributes.
+    if hasattr(data, "__dict__"):
+        return prepare_data(vars(data), _visited=_visited)
+
+    # If no conversion is applicable, return the data as is.
     return data
-
 class DataMasking:
     """
     The DataMasking class orchestrates erasing, encrypting, and decrypting
