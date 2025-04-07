@@ -1,8 +1,9 @@
 import pytest
 
-from aws_lambda_powertools.utilities.parser import parse, ValidationError
+from aws_lambda_powertools.utilities.parser import ValidationError, parse
 from aws_lambda_powertools.utilities.parser.models import AppSyncResolverEventModel
 from tests.functional.utils import load_event
+
 
 def test_appsync_event_model_parses_successfully():
     """
