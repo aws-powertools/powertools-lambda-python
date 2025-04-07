@@ -9,6 +9,7 @@ from __future__ import annotations
 import functools
 import logging
 import warnings
+import dataclasses
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
@@ -66,7 +67,6 @@ def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
 
     # Handle dataclasses by converting them to a dictionary.
     if hasattr(data, "__dataclass_fields__"):
-        import dataclasses
         return prepare_data(dataclasses.asdict(data), _visited=_visited)
 
     # Handle Pydantic models (Pydantic v2 uses 'model_dump').

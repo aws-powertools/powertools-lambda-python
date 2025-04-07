@@ -125,49 +125,15 @@ Examples below show how `erase()` works with each type.
 
 === "Pydantic Model"
 
-```python
-from pydantic import BaseModel
-from aws_lambda_powertools.utilities.data_masking import DataMasking
-
-class User(BaseModel):
-    name: str
-    age: int
-
-model = User(name="powertools", age=42)
-masked = DataMasking().erase(model, fields=["age"])
-print(masked)  # {'name': 'powertools', 'age': '*****'}
-```
+--8<-- "examples/data_masking/src/lambda_mask_pydantic.py"
 
 === "Dataclass"
 
-```python
-from dataclasses import dataclass
-from aws_lambda_powertools.utilities.data_masking import DataMasking
-
-@dataclass
-class User:
-    name: str
-    age: int
-
-model = User(name="powertools", age=42)
-masked = DataMasking().erase(model, fields=["age"])
-print(masked)  # {'name': 'powertools', 'age': '*****'}
-```
+--8<-- "examples/data_masking/src/lambda_mask_dataclass.py"
 
 === "Custom Class with dict()"
 
-```python
-class User:
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
-    def dict(self):
-        return {"name": self.name, "age": self.age}
-
-model = User("powertools", 42)
-masked = DataMasking().erase(model, fields=["age"])
-print(masked)  # {'name': 'powertools', 'age': '*****'}
-```
+--8<-- "examples/data_masking/src/lambda_mask_custom.py"
 
 #### Custom masking
 
@@ -493,7 +459,7 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ### Data serialization
 
 ???+ tip "Extended input support"
-    We now support `Pydantic models`, `Dataclasses`, and custom classes with `dict()` or `__dict__` for input.
+    We support `Pydantic models`, `Dataclasses`, and custom classes with `dict()` or `__dict__` for input.
 
     These types are automatically converted into dictionaries before masking, encrypting, or decrypting.
 
