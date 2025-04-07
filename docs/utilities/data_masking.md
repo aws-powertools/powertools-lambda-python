@@ -117,6 +117,58 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
     ```
 
+### Supported Input Types
+
+You can pass in different types of Python objects. Internally, we convert these to dictionaries for processing.
+
+Examples below show how `erase()` works with each type.
+
+=== "Pydantic Model"
+
+```python
+from pydantic import BaseModel
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+
+class User(BaseModel):
+    name: str
+    age: int
+
+model = User(name="powertools", age=42)
+masked = DataMasking().erase(model, fields=["age"])
+print(masked)  # {'name': 'powertools', 'age': '*****'}
+```
+
+=== "Dataclass"
+
+```python
+from dataclasses import dataclass
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+
+@dataclass
+class User:
+    name: str
+    age: int
+
+model = User(name="powertools", age=42)
+masked = DataMasking().erase(model, fields=["age"])
+print(masked)  # {'name': 'powertools', 'age': '*****'}
+```
+
+=== "Custom Class with dict()"
+
+```python
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    def dict(self):
+        return {"name": self.name, "age": self.age}
+
+model = User("powertools", 42)
+masked = DataMasking().erase(model, fields=["age"])
+print(masked)  # {'name': 'powertools', 'age': '*****'}
+```
+
 #### Custom masking
 
 The `erase` method also supports additional flags for more advanced and flexible masking:
@@ -440,8 +492,14 @@ Note that the return will be a deserialized JSON and your desired fields updated
 
 ### Data serialization
 
-???+ note "Current limitations"
-    1. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
+???+ tip "Extended input support"
+    We now support `Pydantic models`, `Dataclasses`, and custom classes with `dict()` or `__dict__` for input.
+
+    These types are automatically converted into dictionaries before masking, encrypting, or decrypting.
+
+    However, please note that we don't convert the result **back** into the original object type. The returned object will be a dictionary.
+
+    This may impact validation or schema enforcement when using tools like Pydantic.
 
 Before we traverse the data structure, we perform two important operations on input data:
 
