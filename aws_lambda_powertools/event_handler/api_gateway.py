@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Mapping, Matc
 from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
 from aws_lambda_powertools.event_handler.openapi.constants import (
@@ -1543,6 +1544,7 @@ class ApiGatewayResolver(BaseRouter):
         self.processed_stack_frames = []
         self._response_builder_class = ResponseBuilder[BaseProxyEvent]
         self.openapi_config = OpenAPIConfig()  # starting an empty dataclass
+        self.exception_handler_manager = ExceptionHandlerManager()
         self._has_response_validation_error = response_validation_error_http_code is not None
         self._response_validation_error_http_code = self._validate_response_validation_error_http_code(
             response_validation_error_http_code,
@@ -2409,7 +2411,7 @@ class ApiGatewayResolver(BaseRouter):
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
             # Customer registered 404 route? Call it.
-            custom_not_found_handler = self._lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -2482,26 +2484,10 @@ class ApiGatewayResolver(BaseRouter):
         return self.exception_handler(NotFoundError)(func)
 
     def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
-        def register_exception_handler(func: Callable):
-            if isinstance(exc_class, list):  # pragma: no cover
-                for exp in exc_class:
-                    self._exception_handlers[exp] = func
-            else:
-                self._exception_handlers[exc_class] = func
-            return func
-
-        return register_exception_handler
-
-    def _lookup_exception_handler(self, exp_type: type) -> Callable | None:
-        # Use "Method Resolution Order" to allow for matching against a base class
-        # of an exception
-        for cls in exp_type.__mro__:
-            if cls in self._exception_handlers:
-                return self._exception_handlers[cls]
-        return None
+        return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
     def _call_exception_handler(self, exp: Exception, route: Route) -> ResponseBuilder | None:
-        handler = self._lookup_exception_handler(type(exp))
+        handler = self.exception_handler_manager.lookup_exception_handler(type(exp))
         if handler:
             try:
                 return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
@@ -2595,7 +2581,7 @@ class ApiGatewayResolver(BaseRouter):
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
         logger.debug("Appending Router exception_handler into App exception_handler.")
-        self._exception_handlers.update(router._exception_handlers)
+        self.exception_handler_manager.update_exception_handlers(router._exception_handlers)
 
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
