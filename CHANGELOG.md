@@ -4,18 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Bug Fixes
-
-* **event_source:** Added missing properties in APIGatewayWebSocketEvent class ([#6411](https://github.com/aws-powertools/powertools-lambda-python/issues/6411))
-* **event_source:** fix HomeDirectoryDetails type in TransferFamilyAuthorizerResponse method ([#6403](https://github.com/aws-powertools/powertools-lambda-python/issues/6403))
-* **logger:** improve behavior with `exc_info=True` to prevent errors ([#6417](https://github.com/aws-powertools/powertools-lambda-python/issues/6417))
-
 ## Documentation
 
-* **homepage:** add SAR documentation ([#6347](https://github.com/aws-powertools/powertools-lambda-python/issues/6347))
+<a name="v3.10.0"></a>
+## [v3.10.0] - 2025-04-08
+## Maintenance
 
-## Features
-
+* version bump
+* **ci:** new pre-release 3.9.1a9 ([#6422](https://github.com/aws-powertools/powertools-lambda-python/issues/6422))
 * **parser:** add AppSyncResolver model ([#6400](https://github.com/aws-powertools/powertools-lambda-python/issues/6400))
 
 ## Maintenance
@@ -6342,7 +6338,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.9.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.10.0...HEAD
+[v3.10.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.9.0...v3.10.0
 [v3.9.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.8.0...v3.9.0
 [v3.8.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.7.0...v3.8.0
 [v3.7.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.6.0...v3.7.0
