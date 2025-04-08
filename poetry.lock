@@ -990,14 +990,14 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.35.64"
+version = "2.35.65"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdk_nag-2.35.64-py3-none-any.whl", hash = "sha256:9272c25b1be7dba8d4bed0ae05a09417ba7de5488e68599d465f378a8eadfa2c"},
-    {file = "cdk_nag-2.35.64.tar.gz", hash = "sha256:0cfac4ecfdee7df515ee0970e97d490a4135390f1b2b23ec6b0311f9788054ff"},
+    {file = "cdk_nag-2.35.65-py3-none-any.whl", hash = "sha256:94a558e7fad48e89008aa1880248adb12dcf2f02257a6ba524d6b5fca81625ac"},
+    {file = "cdk_nag-2.35.65.tar.gz", hash = "sha256:4e001e3d06bd5014f380e4000163894c74cdca591500cea5929ec0a365fd061a"},
 ]
 
 [package.dependencies]
@@ -1009,19 +1009,19 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.300"
+version = "0.1.301"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.300-py3-none-any.whl", hash = "sha256:c81c8b14ebf05b9d904e60b63a85b5ede13304cc0ebc2b620778869448bfdc2b"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.300.tar.gz", hash = "sha256:7ce6767563cacc52125c7dbdbbcf76c34d4385a5cd1c3dd0a09340dc6b0ab1b1"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.301-py3-none-any.whl", hash = "sha256:693e2932c596a00e3440fc7c7a902d7152f961a694e28887b8478bad3bfa0e2e"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.301.tar.gz", hash = "sha256:fda0227e30b90a6367e3c5753b69b1dfd735faa17fca7e498e3181e4550c5f04"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.187.0,<3.0.0"
-cdk-nag = ">=2.35.62,<3.0.0"
+aws-cdk-lib = ">=2.188.0,<3.0.0"
+cdk-nag = ">=2.35.65,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.111.0,<2.0.0"
 publication = ">=0.0.3"
@@ -1122,14 +1122,14 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.32.3"
+version = "1.32.4"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "cfn_lint-1.32.3-py3-none-any.whl", hash = "sha256:94ec87e9186dc2cd7d718eb14b4330cbc77889753310fa35600d8c94470bf8d5"},
-    {file = "cfn_lint-1.32.3.tar.gz", hash = "sha256:a5723e7c7ef537d70b098d43f42f9670ea9856cb21d1699efd7fd9e3aaab26c1"},
+    {file = "cfn_lint-1.32.4-py3-none-any.whl", hash = "sha256:c3b51ba752b6d715c077e559a8daa7fc9fc62e3ab2d7bc24191fee01c06dcab0"},
+    {file = "cfn_lint-1.32.4.tar.gz", hash = "sha256:697099a7952e025646024ca09c92777d2200ff1f8b31303f947df3b057ede2b4"},
 ]
 
 [package.dependencies]
@@ -4515,14 +4515,14 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.12.2"
+version = "4.13.1"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
-    {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
+    {file = "typing_extensions-4.13.1-py3-none-any.whl", hash = "sha256:4b6cf02909eb5495cfbc3f6e8fd49217e6cc7944e145cdda8caa3734777f9e69"},
+    {file = "typing_extensions-4.13.1.tar.gz", hash = "sha256:98795af00fb9640edec5b8e31fc647597b4691f099ad75f469a2616be1a76dff"},
 ]
 
 [[package]]
@@ -4935,4 +4935,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "be318254531b7f297fdadd0a15a82418da8a0dfc1128e70c1ddfb1609982c286"
+content-hash = "2db246a372cfc31ab115efd3c19cd86e894ec65ec167bbc1c6bea4d3d95816c3"
