@@ -4,21 +4,36 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Documentation
+## Maintenance
+
+* **deps:** bump pydantic from 2.11.2 to 2.11.3 ([#6427](https://github.com/aws-powertools/powertools-lambda-python/issues/6427))
+* **deps-dev:** bump pytest-cov from 6.1.0 to 6.1.1 ([#6429](https://github.com/aws-powertools/powertools-lambda-python/issues/6429))
+* **deps-dev:** bump cfn-lint from 1.32.4 to 1.33.0 ([#6430](https://github.com/aws-powertools/powertools-lambda-python/issues/6430))
+* **deps-dev:** bump ruff from 0.11.3 to 0.11.4 ([#6428](https://github.com/aws-powertools/powertools-lambda-python/issues/6428))
+
 
 <a name="v3.10.0"></a>
 ## [v3.10.0] - 2025-04-08
-## Maintenance
+## Bug Fixes
 
-* version bump
-* **ci:** new pre-release 3.9.1a9 ([#6422](https://github.com/aws-powertools/powertools-lambda-python/issues/6422))
+* **event_source:** Added missing properties in APIGatewayWebSocketEvent class ([#6411](https://github.com/aws-powertools/powertools-lambda-python/issues/6411))
+* **event_source:** fix HomeDirectoryDetails type in TransferFamilyAuthorizerResponse method ([#6403](https://github.com/aws-powertools/powertools-lambda-python/issues/6403))
+* **logger:** improve behavior with `exc_info=True` to prevent errors ([#6417](https://github.com/aws-powertools/powertools-lambda-python/issues/6417))
+
+## Documentation
+
+* **homepage:** add SAR documentation ([#6347](https://github.com/aws-powertools/powertools-lambda-python/issues/6347))
+
+## Features
+
 * **parser:** add AppSyncResolver model ([#6400](https://github.com/aws-powertools/powertools-lambda-python/issues/6400))
 
 ## Maintenance
 
+* version bump
 * **ci:** new pre-release 3.9.1a4 ([#6377](https://github.com/aws-powertools/powertools-lambda-python/issues/6377))
-* **ci:** new pre-release 3.9.1a9 ([#6422](https://github.com/aws-powertools/powertools-lambda-python/issues/6422))
 * **ci:** new pre-release 3.9.1a8 ([#6415](https://github.com/aws-powertools/powertools-lambda-python/issues/6415))
+* **ci:** new pre-release 3.9.1a9 ([#6422](https://github.com/aws-powertools/powertools-lambda-python/issues/6422))
 * **ci:** new pre-release 3.9.1a0 ([#6354](https://github.com/aws-powertools/powertools-lambda-python/issues/6354))
 * **ci:** new pre-release 3.9.1a5 ([#6385](https://github.com/aws-powertools/powertools-lambda-python/issues/6385))
 * **ci:** new pre-release 3.9.1a7 ([#6401](https://github.com/aws-powertools/powertools-lambda-python/issues/6401))
