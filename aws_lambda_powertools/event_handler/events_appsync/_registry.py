@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
+from aws_lambda_powertools.event_handler.events_appsync.functions import find_best_route
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,7 @@ class ResolverEventsRegistry:
             A dictionary with the resolver and if raise exception on error
         """
         logger.debug(f"Looking for resolver for path={path}")
-        return self.resolvers.get(f"{path}")
+        return self.resolvers.get(find_best_route(self.resolvers, path))
 
     def merge(self, other_registry: ResolverEventsRegistry):
         """Update current registry with incoming registry
