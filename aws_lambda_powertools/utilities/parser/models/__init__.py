@@ -27,6 +27,9 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .appsync import (
+    AppSyncResolverEventModel,
+)
 from .bedrock_agent import (
     BedrockAgentEventModel,
     BedrockAgentModel,
@@ -137,6 +140,7 @@ __all__ = [
     "AlbModel",
     "AlbRequestContext",
     "AlbRequestContextData",
+    "AppSyncResolverEventModel",
     "DynamoDBStreamModel",
     "EventBridgeModel",
     "DynamoDBStreamChangedRecordModel",

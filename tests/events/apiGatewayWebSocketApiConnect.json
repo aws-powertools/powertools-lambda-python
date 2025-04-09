@@ -19,6 +19,15 @@
       "X-Forwarded-Port": ["443"],
       "X-Forwarded-Proto": ["https"]
   },
+  "queryStringParameters": {
+    "userId": "user123",
+    "token": "abc.def.ghi"
+  },
+  "multiValueQueryStringParameters": {
+    "userId": ["123"],
+    "token": ["abc.def.ghi"],
+    "filter": ["new", "unread"]
+  },
   "requestContext": {
       "routeKey": "$connect",
       "eventType": "CONNECT",
