@@ -578,6 +578,8 @@ class Route:
                 "description": "Response Validation Error",
                 "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}}},
             }
+            # Add model definition
+            definitions.update({"ResponseValidationError": response_validation_error_response_definition})
 
         # Add the response to the OpenAPI operation
         if self.responses:
@@ -650,7 +652,6 @@ class Route:
                 {
                     "ValidationError": validation_error_definition,
                     "HTTPValidationError": validation_error_response_definition,
-                    "ResponseValidationError": response_validation_error_response_definition,
                 },
             )
 
@@ -1616,6 +1617,33 @@ class ApiGatewayResolver(BaseRouter):
 
         return response_validation_error_http_code or HTTPStatus.UNPROCESSABLE_ENTITY
 
+    def _add_resolver_response_validation_error_response_to_route(
+        self,
+        route_openapi_path: tuple[dict[str, Any], dict[str, Any]],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Adds resolver response validation error response to route's operations."""
+        path, path_definitions = route_openapi_path
+        if self._has_response_validation_error and "ResponseValidationError" not in path_definitions:
+            response_validation_error_response = {
+                "description": "Response Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"},
+                    },
+                },
+            }
+            http_code = self._response_validation_error_http_code.value
+            for operation in path.values():
+                operation["responses"][http_code] = response_validation_error_response
+        return path, path_definitions
+
+    def _generate_schemas(self, definitions: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        schemas = {k: definitions[k] for k in sorted(definitions)}
+        # add response validation error definition
+        if self._response_validation_error_http_code:
+            schemas.setdefault("ResponseValidationError", response_validation_error_response_definition)
+        return schemas
+
     def get_openapi_schema(
         self,
         *,
@@ -1767,14 +1795,14 @@ class ApiGatewayResolver(BaseRouter):
                 field_mapping=field_mapping,
             )
             if result:
-                path, path_definitions = result
+                path, path_definitions = self._add_resolver_response_validation_error_response_to_route(result)
                 if path:
                     paths.setdefault(route.openapi_path, {}).update(path)
                 if path_definitions:
                     definitions.update(path_definitions)
 
         if definitions:
-            components["schemas"] = {k: definitions[k] for k in sorted(definitions)}
+            components["schemas"] = self._generate_schemas(definitions)
         if security_schemes:
             components["securitySchemes"] = security_schemes
         if components:
