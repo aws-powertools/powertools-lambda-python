@@ -35,6 +35,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     OpenAPIResponse,
     OpenAPIResponseContentModel,
     OpenAPIResponseContentSchema,
+    response_validation_error_response_definition,
     validation_error_definition,
     validation_error_response_definition,
 )
@@ -365,7 +366,6 @@ class Route:
             Whether to have custom http status code for this route if response validation fails
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
-        # TODO
         """
         self.method = method.upper()
         self.path = "/" if path.strip() == "" else path
@@ -650,6 +650,7 @@ class Route:
                 {
                     "ValidationError": validation_error_definition,
                     "HTTPValidationError": validation_error_response_definition,
+                    "ResponseValidationError": response_validation_error_response_definition,
                 },
             )
 
