@@ -401,7 +401,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 You can use `response_validation_error_http_code` to set a custom HTTP code for failed response validation. When this field is set, we will raise a `ResponseValidationError` instead of a `RequestValidationError`.
 
 For a more granular control over the failed response validation http code, the `custom_response_validation_http_code` argument can be set per route.
-This value will override the value of the failed response validation http code set at app-level (if any).
+This value will override the value of the failed response validation http code set at constructor level (if any).
 
 === "customizing_response_validation.py"
 

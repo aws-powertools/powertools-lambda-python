@@ -362,13 +362,13 @@ class Route:
             Additional OpenAPI extensions as a dictionary.
         deprecated: bool
             Whether or not to mark this route as deprecated in the OpenAPI schema
-        custom_response_validation_http_code: HTTPStatus | None, optional
+        custom_response_validation_http_code: int | HTTPStatus | None, optional
             Whether to have custom http status code for this route if response validation fails
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
         """
         self.method = method.upper()
-        self.path = "/" if path.strip() == "" else path
+        self.path = path if path.strip() else "/"
 
         # OpenAPI spec only understands paths with { }. So we'll have to convert Powertools' < >.
         # https://swagger.io/specification/#path-templating
@@ -511,7 +511,7 @@ class Route:
 
         return self._body_field
 
-    def _get_openapi_path(  # noqa: PLR0912
+    def _get_openapi_path(
         self,
         *,
         dependant: Dependant,
@@ -579,7 +579,7 @@ class Route:
                 "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}}},
             }
             # Add model definition
-            definitions.update({"ResponseValidationError": response_validation_error_response_definition})
+            definitions["ResponseValidationError"] = response_validation_error_response_definition
 
         # Add the response to the OpenAPI operation
         if self.responses:
@@ -1600,6 +1600,7 @@ class ApiGatewayResolver(BaseRouter):
         response_validation_error_http_code: HTTPStatus | int | None,
         enable_validation: bool,
     ) -> HTTPStatus:
+
         if response_validation_error_http_code and not enable_validation:
             msg = "'response_validation_error_http_code' cannot be set when enable_validation is False."
             raise ValueError(msg)
@@ -2612,12 +2613,7 @@ class ApiGatewayResolver(BaseRouter):
         # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
             # route validation must take precedence over app validation
-            route_response_validation_http_code = route.custom_response_validation_http_code
-            http_code = (
-                route_response_validation_http_code
-                if route_response_validation_http_code
-                else self._response_validation_error_http_code
-            )
+            http_code = route.custom_response_validation_http_code or self._response_validation_error_http_code
             errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
             return self._response_builder_class(
                 response=Response(

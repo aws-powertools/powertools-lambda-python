@@ -1380,7 +1380,7 @@ def test_custom_response_validation_error_bad_http_code(response_validation_erro
     )
 
 
-def test_custom_route_response_validation_error__custom_route_in_app_with_default_validation(gw_event):
+def test_custom_route_response_validation_error_custom_route_and_app_with_default_validation(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -1413,7 +1413,7 @@ def test_custom_route_response_validation_error__custom_route_in_app_with_defaul
     assert json.loads(result["body"])["detail"] == json.loads(custom_result["body"])["detail"]
 
 
-def test_custom_route_response_validation_error__sanitized_response(gw_event):
+def test_custom_route_response_validation_error_sanitized_response(gw_event):
     # GIVEN an APIGatewayRestResolver with custom response validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -1445,7 +1445,7 @@ def test_custom_route_response_validation_error__sanitized_response(gw_event):
     assert result["body"] == "Unexpected response."
 
 
-def test_custom_route_response_validation_error__with_app_custom_response_validation(gw_event):
+def test_custom_route_response_validation_error_with_app_custom_response_validation(gw_event):
     # GIVEN an APIGatewayRestResolver with validation and custom response validation enabled
     app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=500)
 
@@ -1472,7 +1472,7 @@ def test_custom_route_response_validation_error__with_app_custom_response_valida
     assert body["detail"][0]["loc"] == ["response", "name"]
 
 
-def test_custom_route_response_validation__error_no_app_validation():
+def test_custom_route_response_validation_error_no_app_validation():
     # GIVEN an APIGatewayRestResolver with validation not enabled
     with pytest.raises(ValueError) as exception_info:
         app = APIGatewayRestResolver()
@@ -1497,7 +1497,7 @@ def test_custom_route_response_validation__error_no_app_validation():
 
 
 @pytest.mark.parametrize("response_validation_error_http_code", [(20), ("hi"), (1.21), (True), (False)])
-def test_custom_route_response_validation__error_bad_http_code(response_validation_error_http_code):
+def test_custom_route_response_validation_error_bad_http_code(response_validation_error_http_code):
     # GIVEN an APIGatewayRestResolver with validation enabled
     with pytest.raises(ValueError) as exception_info:
         app = APIGatewayRestResolver(enable_validation=True)
