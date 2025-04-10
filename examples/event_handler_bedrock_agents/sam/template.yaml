@@ -38,10 +38,10 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Action:
-                - sts:assumeRole
               Service:
                 - bedrock.amazonaws.com
+            Action:
+              - sts:AssumeRole
       Policies:
         - PolicyName: bedrock
           PolicyDocument:
