@@ -6,9 +6,13 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.10.1a1 ([#6437](https://github.com/aws-powertools/powertools-lambda-python/issues/6437))
+* **ci:** new pre-release 3.10.1a0 ([#6431](https://github.com/aws-powertools/powertools-lambda-python/issues/6431))
 * **deps:** bump pydantic from 2.11.2 to 2.11.3 ([#6427](https://github.com/aws-powertools/powertools-lambda-python/issues/6427))
 * **deps-dev:** bump pytest-cov from 6.1.0 to 6.1.1 ([#6429](https://github.com/aws-powertools/powertools-lambda-python/issues/6429))
 * **deps-dev:** bump cfn-lint from 1.32.4 to 1.33.0 ([#6430](https://github.com/aws-powertools/powertools-lambda-python/issues/6430))
+* **deps-dev:** bump boto3-stubs from 1.37.29 to 1.37.31 ([#6433](https://github.com/aws-powertools/powertools-lambda-python/issues/6433))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.187.0a0 to 2.188.0a0 ([#6434](https://github.com/aws-powertools/powertools-lambda-python/issues/6434))
 * **deps-dev:** bump ruff from 0.11.3 to 0.11.4 ([#6428](https://github.com/aws-powertools/powertools-lambda-python/issues/6428))
 
 
