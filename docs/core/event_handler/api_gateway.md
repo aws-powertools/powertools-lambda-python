@@ -400,7 +400,20 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 You can use `response_validation_error_http_code` to set a custom HTTP code for failed response validation. When this field is set, we will raise a `ResponseValidationError` instead of a `RequestValidationError`.
 
+For a more granular control over the failed response validation http code, the `custom_response_validation_http_code` argument can be set per route.
+This value will override the value of the failed response validation http code set at constructor level (if any).
+
 === "customizing_response_validation.py"
+
+    ```python hl_lines="1 16 29 33 38"
+    --8<-- "examples/event_handler_rest/src/customizing_response_validation.py"
+    ```
+
+    1. A response with status code set here will be returned if response data is not valid.
+    2. Operation returns a string as oppose to a `Todo` object. This will lead to a `500` response as set in line 16.
+    3. Operation will return a `422 Unprocessable Entity` response if response is not a `Todo` object. This overrides the custom http code set in line 16.
+
+=== "customizing_route_response_validation.py"
 
     ```python hl_lines="1 16 29 33"
     --8<-- "examples/event_handler_rest/src/customizing_response_validation.py"
