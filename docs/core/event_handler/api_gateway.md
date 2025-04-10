@@ -410,7 +410,7 @@ This value will override the value of the failed response validation http code s
     ```
 
     1. A response with status code set here will be returned if response data is not valid.
-    2. Operation returns a string as oppose to a `Todo` object. This will lead to a `500` response as set in line 18.
+    2. Operation returns a string as oppose to a `Todo` object. This will lead to a `500` response as set in line 16.
     3. Operation will return a `422 Unprocessable Entity` response if response is not a `Todo` object. This overrides the custom http code set in line 16.
 
 === "customizing_route_response_validation.py"
