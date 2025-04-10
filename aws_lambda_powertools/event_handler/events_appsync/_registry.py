@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable
+import warnings
+from typing import Any, Callable, Literal
 
-from aws_lambda_powertools.event_handler.events_appsync.functions import find_best_route
+from aws_lambda_powertools.event_handler.events_appsync.functions import find_best_route, is_valid_path
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
-
 
 class ResolverEventsRegistry:
     def __init__(self):
@@ -15,7 +16,8 @@ class ResolverEventsRegistry:
     def register(
         self,
         path: str = "/default/*",
-        aggregate: bool = True,
+        aggregate: bool = False,
+        operation: Literal["on_publish", "async_on_publish", "on_subscribe"] = "on_publish",
     ) -> Callable:
         """Registers the resolver for path that includes namespace + channel
 
@@ -25,17 +27,27 @@ class ResolverEventsRegistry:
             Path including namespace + channel
         aggregate: bool
             A flag indicating whether the batch items should be processed at once or individually.
-            If True (default), the batch resolver will process all items in the batch as a single event.
-            If False, the batch resolver will process each item in the batch individually.
+            If True , the batch resolver will process all items in the batch as a single event.
+            If False (default), the batch resolver will process each item in the batch individually.
 
         Return
         ----------
         Callable
             A Callable
         """
+        if not is_valid_path(path):
+            warnings.warn(
+                f"The path `{path}` registered for `{operation}` is not valid and will be skipped."
+                f"A path should always have a namespace starting with '/'"
+                "A path can have multiple namespaces, all separated by '/'." 
+                "Wildcards are allowed only at the end of the path.",
+                stacklevel=2,
+                category=PowertoolsUserWarning,
+            )
+
 
         def _register(func) -> Callable:
-            logger.debug(f"Adding resolver `{func.__name__}` for path `{path}`")
+            logger.debug(f"Adding resolver `{func.__name__}` for path `{path}` and event `{operation}`")
             self.resolvers[f"{path}"] = {
                 "func": func,
                 "aggregate": aggregate,

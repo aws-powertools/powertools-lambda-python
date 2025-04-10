@@ -30,13 +30,6 @@ class BaseRouter(ABC):
     ) -> Callable:
         raise NotImplementedError
 
-    @abstractmethod
-    def async_on_subscribe(
-        self,
-        path: str = "/default/*",
-    ) -> Callable:
-        raise NotImplementedError
-    @abstractmethod
     def append_context(self, **additional_context) -> None:
         """
         Appends context information available under any route.

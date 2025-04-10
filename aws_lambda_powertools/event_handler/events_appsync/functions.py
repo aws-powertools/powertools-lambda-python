@@ -4,6 +4,39 @@ import re
 from functools import lru_cache
 from typing import Any
 
+PATH_REGEX = re.compile(r"^\/([^\/\*]+)(\/[^\/\*]+)*(\/\*)?$")
+
+def is_valid_path(path: str) -> bool:
+    """
+    Checks if a given path is valid based on specific rules.
+
+    Parameters
+    ----------
+    path: str
+        The path to validate
+
+    Returns:
+    --------
+    bool: 
+        True if the path is valid, False otherwise
+
+    Examples:
+        >>> is_valid_path('/*')
+        True
+        >>> is_valid_path('/users')
+        True
+        >>> is_valid_path('/users/profile')
+        True
+        >>> is_valid_path('/users/*/details')
+        False
+        >>> is_valid_path('/users/*')
+        True
+        >>> is_valid_path('users')
+        False
+    """
+    if path == "/*":
+        return True
+    return bool(PATH_REGEX.fullmatch(path))
 
 def find_best_route(routes: dict[str, Any], path: str):
     """
@@ -42,11 +75,13 @@ def find_best_route(routes: dict[str, Any], path: str):
 
         Parameters
         ----------
-            route (str): Route pattern with wildcards
+        route: str
+            Route pattern with wildcards
 
         Returns
         -------
-            Pattern: Compiled regex pattern
+        Pattern: 
+            Compiled regex pattern
         """
         # Escape special regex chars but convert * to regex pattern
         pattern = re.escape(route).replace("\\*", "[^/]+")

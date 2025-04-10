@@ -22,33 +22,26 @@ class Router(BaseRouter):
         self._publish_registry = ResolverEventsRegistry()
         self._async_publish_registry = ResolverEventsRegistry()
         self._subscribe_registry = ResolverEventsRegistry()
-        self._async_subscribe_registry = ResolverEventsRegistry()
 
     def on_publish(
         self,
         path: str = "/default/*",
-        aggregate: bool = True,
+        aggregate: bool = False,
     ) -> Callable:
-        return self._publish_registry.register(path=path, aggregate=aggregate)
+        return self._publish_registry.register(path=path, aggregate=aggregate, operation="on_publish")
 
     def async_on_publish(
         self,
         path: str = "/default/*",
-        aggregate: bool = True,
+        aggregate: bool = False,
     ) -> Callable:
-        return self._async_publish_registry.register(path=path, aggregate=aggregate)
+        return self._async_publish_registry.register(path=path, aggregate=aggregate, operation="async_on_publish")
 
     def on_subscribe(
         self,
         path: str = "/default/*",
     ) -> Callable:
-        return self._subscribe_registry.register(path=path)
-
-    def async_on_subscribe(
-        self,
-        path: str = "/default/*",
-    ) -> Callable:
-        return self._async_subscribe_registry.register(path=path)
+        return self._subscribe_registry.register(path=path, operation="on_subscribe")
 
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""
