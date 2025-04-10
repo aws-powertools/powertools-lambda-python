@@ -9,15 +9,17 @@ from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
 
+KIND_EVENT = Literal["on_publish", "async_on_publish", "on_subscribe"]
+
 class ResolverEventsRegistry:
-    def __init__(self):
+    def __init__(self, kind_resolver: str):
         self.resolvers: dict[str, dict[str, Any]] = {}
+        self.kind_resolver = kind_resolver
 
     def register(
         self,
         path: str = "/default/*",
         aggregate: bool = False,
-        operation: Literal["on_publish", "async_on_publish", "on_subscribe"] = "on_publish",
     ) -> Callable:
         """Registers the resolver for path that includes namespace + channel
 
@@ -27,8 +29,8 @@ class ResolverEventsRegistry:
             Path including namespace + channel
         aggregate: bool
             A flag indicating whether the batch items should be processed at once or individually.
-            If True , the batch resolver will process all items in the batch as a single event.
-            If False (default), the batch resolver will process each item in the batch individually.
+            If True, the resolver will process all items as a single event.
+            If False (default), the resolver will process each item individually.
 
         Return
         ----------
@@ -37,7 +39,7 @@ class ResolverEventsRegistry:
         """
         if not is_valid_path(path):
             warnings.warn(
-                f"The path `{path}` registered for `{operation}` is not valid and will be skipped."
+                f"The path `{path}` registered for `{self.kind_resolver}` is not valid and will be skipped."
                 f"A path should always have a namespace starting with '/'"
                 "A path can have multiple namespaces, all separated by '/'." 
                 "Wildcards are allowed only at the end of the path.",
@@ -47,7 +49,7 @@ class ResolverEventsRegistry:
 
 
         def _register(func) -> Callable:
-            logger.debug(f"Adding resolver `{func.__name__}` for path `{path}` and event `{operation}`")
+            print(f"Adding resolver `{func.__name__}` for path `{path}` and kind_resolver `{self.kind_resolver}`")
             self.resolvers[f"{path}"] = {
                 "func": func,
                 "aggregate": aggregate,
@@ -65,10 +67,10 @@ class ResolverEventsRegistry:
             Type name
         Return
         ----------
-        Optional[Dict]
-            A dictionary with the resolver and if raise exception on error
+        dict | None
+            A dictionary with the resolver and if this is aggregated or not
         """
-        logger.debug(f"Looking for resolver for path={path}")
+        logger.debug(f"Looking for resolver for path `{path}` and kind_resolver `{self.kind_resolver}`")
         return self.resolvers.get(find_best_route(self.resolvers, path))
 
     def merge(self, other_registry: ResolverEventsRegistry):

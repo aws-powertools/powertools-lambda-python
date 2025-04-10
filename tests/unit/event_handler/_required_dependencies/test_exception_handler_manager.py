@@ -72,9 +72,9 @@ def test_register_handler_for_multiple_exceptions(exception_manager):
     # THEN the handler is properly registered for all exceptions in the list
     handlers = exception_manager.get_registered_handlers()
     assert KeyError in handlers
-    assert TypeError in handlers
+    assert ValueError in handlers
     assert handlers[KeyError] == handle_error
-    assert handlers[TypeError] == handle_error
+    assert handlers[ValueError] == handle_error
 
 
 def test_update_exception_handlers_with_dictionary(exception_manager):
