@@ -1,4 +1,5 @@
 import dataclasses
+
 import pytest
 from pydantic import BaseModel
 
@@ -120,9 +121,7 @@ def test_prepare_data_nested_structure():
         "dc": NestedDC(x=10, y="foo"),
         "pm": NestedPM(a=5, b="bar"),
         "custom": NestedCustom(z="baz"),
-        "nested": {
-            "list": [NestedDC(x=1, y="inner"), NestedPM(a=2, b="inner2")]
-        }
+        "nested": {"list": [NestedDC(x=1, y="inner"), NestedPM(a=2, b="inner2")]},
     }
     result = prepare_data(data)
     assert result["dc"]["x"] == 10
