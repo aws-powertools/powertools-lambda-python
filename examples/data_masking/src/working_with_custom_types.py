@@ -1,3 +1,8 @@
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+
+data_masker = DataMasking()
+
+
 class User:
     def __init__(self, name, age):
         self.name = name
@@ -8,8 +13,5 @@ class User:
 
 
 def lambda_handler(event, context):
-    from aws_lambda_powertools.utilities.data_masking import DataMasking
-
     user = User("powertools", 42)
-    masked = DataMasking().erase(user, fields=["age"])
-    return masked
+    return data_masker.erase(user, fields=["age"])

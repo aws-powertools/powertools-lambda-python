@@ -117,24 +117,6 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
     ```
 
-### Supported Input Types
-
-You can pass in different types of Python objects. Internally, we convert these to dictionaries for processing.
-
-Examples below show how `erase()` works with each type.
-
-=== "Pydantic Model"
-
---8<-- "examples/data_masking/src/lambda_mask_pydantic.py"
-
-=== "Dataclass"
-
---8<-- "examples/data_masking/src/lambda_mask_dataclass.py"
-
-=== "Custom Class with dict()"
-
---8<-- "examples/data_masking/src/lambda_mask_custom.py"
-
 #### Custom masking
 
 The `erase` method also supports additional flags for more advanced and flexible masking:
@@ -461,24 +443,38 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ???+ tip "Extended input support"
     We support `Pydantic models`, `Dataclasses`, and custom classes with `dict()` or `__dict__` for input.
 
-    These types are automatically converted into dictionaries before masking, encrypting, or decrypting.
-
-    However, please note that we don't convert the result **back** into the original object type. The returned object will be a dictionary.
-
-    This may impact validation or schema enforcement when using tools like Pydantic.
+    These types are automatically converted into dictionaries before `masking` and `encrypting` operations. Please not that we **don't convert back** to the original type, and the returned object will be a dictionary.
 
 Before we traverse the data structure, we perform two important operations on input data:
 
 1. If `JSON string`, **deserialize** using default or provided deserializer.
-2. If `dictionary`, **normalize** into `JSON` to prevent traversing unsupported data types.
-
-When decrypting, we revert the operation to restore the original data structure.
+2. If `dictionary or complex types`, **normalize** into `JSON` to prevent traversing unsupported data types.
 
 For compatibility or performance, you can optionally pass your own JSON serializer and deserializer to replace `json.dumps` and `json.loads` respectively:
 
-```python hl_lines="17-18" title="advanced_custom_serializer.py"
---8<-- "examples/data_masking/src/advanced_custom_serializer.py"
-```
+=== "Working with custom types"
+
+    ```python
+    --8<-- "examples/data_masking/src/working_with_custom_types.py"
+    ```
+
+=== "Working with Pydantic"
+
+    ```python
+    --8<-- "examples/data_masking/src/working_with_pydantic_types.py"
+    ```
+
+=== "Working with dataclasses"
+
+    ```python
+    --8<-- "examples/data_masking/src/working_with_dataclass_types.py"
+    ```
+
+=== "Working with serializer"
+
+    ```python
+    --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
+    ```
 
 ### Using multiple keys
 
