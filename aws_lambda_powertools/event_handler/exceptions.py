@@ -31,6 +31,13 @@ class UnauthorizedError(ServiceError):
         super().__init__(HTTPStatus.UNAUTHORIZED, msg)
 
 
+class ForbiddenError(ServiceError):
+    """API Gateway and ALB Forbidden Error (403)"""
+
+    def __init__(self, msg: str):
+        super().__init__(HTTPStatus.FORBIDDEN, msg)
+
+
 class NotFoundError(ServiceError):
     """API Gateway and ALB Not Found Error (404)"""
 
@@ -38,8 +45,29 @@ class NotFoundError(ServiceError):
         super().__init__(HTTPStatus.NOT_FOUND, msg)
 
 
+class RequestTimeoutError(ServiceError):
+    """API Gateway and ALB Request Timeout Error (408)"""
+
+    def __init__(self, msg: str):
+        super().__init__(HTTPStatus.REQUEST_TIMEOUT, msg)
+
+
+class RequestEntityTooLargeError(ServiceError):
+    """API Gateway and ALB Request Entity Too Large Error (413)"""
+
+    def __init__(self, msg: str):
+        super().__init__(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, msg)
+
+
 class InternalServerError(ServiceError):
     """API Gateway and ALB Internal Server Error (500)"""
 
     def __init__(self, message: str):
         super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, message)
+
+
+class ServiceUnavailableError(ServiceError):
+    """API Gateway and ALB Service Unavailable Error (503)"""
+
+    def __init__(self, msg: str):
+        super().__init__(HTTPStatus.SERVICE_UNAVAILABLE, msg)
