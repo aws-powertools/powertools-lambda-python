@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 class Router(BaseRouter):
 
     context: dict
-    current_event: AppSyncResolverEventsEvent | None = None
-    lambda_context: LambdaContext | None = None
+    current_event: AppSyncResolverEventsEvent
+    lambda_context: LambdaContext
 
     def __init__(self):
         self.context = {}  # early init as customers might add context before event resolution

@@ -6,6 +6,7 @@ from typing import Any
 
 PATH_REGEX = re.compile(r"^\/([^\/\*]+)(\/[^\/\*]+)*(\/\*)?$")
 
+
 def is_valid_path(path: str) -> bool:
     """
     Checks if a given path is valid based on specific rules.
@@ -17,7 +18,7 @@ def is_valid_path(path: str) -> bool:
 
     Returns:
     --------
-    bool: 
+    bool:
         True if the path is valid, False otherwise
 
     Examples:
@@ -37,6 +38,7 @@ def is_valid_path(path: str) -> bool:
     if path == "/*":
         return True
     return bool(PATH_REGEX.fullmatch(path))
+
 
 def find_best_route(routes: dict[str, Any], path: str):
     """
@@ -58,13 +60,14 @@ def find_best_route(routes: dict[str, Any], path: str):
                     '/path/specific/*': {'func': callable, 'aggregate': bool}
                 }
             }
-    path: str 
+    path: str
         Actual path to match (e.g., '/default/v1/users')
 
     Returns
     -------
         str: Most specific matching route or None if no match
     """
+
     @lru_cache(maxsize=1024)
     def pattern_to_regex(route):
         """
@@ -80,7 +83,7 @@ def find_best_route(routes: dict[str, Any], path: str):
 
         Returns
         -------
-        Pattern: 
+        Pattern:
             Compiled regex pattern
         """
         # Escape special regex chars but convert * to regex pattern
@@ -94,10 +97,7 @@ def find_best_route(routes: dict[str, Any], path: str):
         return re.compile(f"^{pattern}$")
 
     # Find all matching routes
-    matches = [
-        route for route in routes.keys()
-        if pattern_to_regex(route).match(path)
-    ]
+    matches = [route for route in routes.keys() if pattern_to_regex(route).match(path)]
 
     # Return the most specific route (longest length minus wildcards)
     # Examples of specificity:

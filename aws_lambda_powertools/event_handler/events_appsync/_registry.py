@@ -2,18 +2,24 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import Any, Callable, Literal
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler.events_appsync.functions import find_best_route, is_valid_path
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from aws_lambda_powertools.event_handler.events_appsync.types import ResolverTypeDef
+
+
 logger = logging.getLogger(__name__)
 
-KIND_EVENT = Literal["on_publish", "async_on_publish", "on_subscribe"]
 
 class ResolverEventsRegistry:
+
     def __init__(self, kind_resolver: str):
-        self.resolvers: dict[str, dict[str, Any]] = {}
+        self.resolvers: dict[str, ResolverTypeDef] = {}
         self.kind_resolver = kind_resolver
 
     def register(
@@ -41,14 +47,14 @@ class ResolverEventsRegistry:
             warnings.warn(
                 f"The path `{path}` registered for `{self.kind_resolver}` is not valid and will be skipped."
                 f"A path should always have a namespace starting with '/'"
-                "A path can have multiple namespaces, all separated by '/'." 
+                "A path can have multiple namespaces, all separated by '/'."
                 "Wildcards are allowed only at the end of the path.",
                 stacklevel=2,
                 category=PowertoolsUserWarning,
             )
 
-
         def _register(func) -> Callable:
+
             print(f"Adding resolver `{func.__name__}` for path `{path}` and kind_resolver `{self.kind_resolver}`")
             self.resolvers[f"{path}"] = {
                 "func": func,
@@ -58,7 +64,7 @@ class ResolverEventsRegistry:
 
         return _register
 
-    def find_resolver(self, path: str) -> dict | None:
+    def find_resolver(self, path: str) -> ResolverTypeDef | None:
         """Find resolver based on type_name and field_name
 
         Parameters

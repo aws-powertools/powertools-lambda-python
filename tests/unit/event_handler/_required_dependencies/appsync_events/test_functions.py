@@ -15,7 +15,7 @@ from aws_lambda_powertools.event_handler.events_appsync.functions import find_be
         ("/users/", False, "Path with trailing slash is invalid"),
         ("", False, "Empty path is invalid"),
         ("/", False, "Root path / is invalid according to the regex"),
-    ]
+    ],
 )
 def test_path_validation(path, expected, description):
     """Test various path validation scenarios."""
@@ -64,7 +64,6 @@ def test_find_best_route_specific_wildcard(routes, path, expected_route, descrip
     assert result == expected_route, description
 
 
-
 @pytest.mark.parametrize(
     "routes, path, expected_route, description",
     [
@@ -90,7 +89,6 @@ def test_find_best_route_exact_match(routes, path, expected_route, description):
     assert result == expected_route, description
 
 
-
 @pytest.mark.parametrize(
     "routes, path, expected_route, description",
     [
@@ -114,7 +112,6 @@ def test_find_best_route_fallback(routes, path, expected_route, description):
 
     # THEN
     assert result == expected_route, description
-
 
 
 @pytest.mark.parametrize(

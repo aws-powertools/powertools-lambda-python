@@ -42,8 +42,7 @@ class ExceptionHandlerManager:
         """Initialize an empty dictionary to store exception handlers."""
         self._exception_handlers: dict[type[Exception], Callable] = {}
 
-    def exception_handler(self, 
-                         exc_class: type[Exception] | list[type[Exception]]):
+    def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
         """
         A decorator function that registers a handler for one or more exception types.
 

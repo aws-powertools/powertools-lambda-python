@@ -1,4 +1,3 @@
-
 import pytest
 
 from aws_lambda_powertools.event_handler.exception_handling import (
@@ -11,7 +10,9 @@ def exception_manager() -> ExceptionHandlerManager:
     """Fixture to provide a fresh ExceptionHandlerManager instance for each test."""
     return ExceptionHandlerManager()
 
+
 # ----- Tests for exception_handler decorator -----
+
 
 def test_decorator_registers_single_exception_handler(exception_manager):
     """
@@ -19,6 +20,7 @@ def test_decorator_registers_single_exception_handler(exception_manager):
     GIVEN a function decorated with @manager.exception_handler(ValueError)
     THEN the function is registered as a handler for ValueError
     """
+
     @exception_manager.exception_handler(ValueError)
     def handle_value_error(e):
         return "ValueError handled"
@@ -27,12 +29,14 @@ def test_decorator_registers_single_exception_handler(exception_manager):
     assert ValueError in handlers
     assert handlers[ValueError] == handle_value_error
 
+
 def test_decorator_registers_multiple_exception_handlers(exception_manager):
     """
     GIVEN a function decorated with @manager.exception_handler([KeyError, TypeError])
     WHEN the exception_handler decorator is used with multiple exception types
     THEN the function is registered as a handler for both KeyError and TypeError
     """
+
     @exception_manager.exception_handler([KeyError, TypeError])
     def handle_multiple_errors(e):
         return f"{type(e).__name__} handled"
@@ -42,6 +46,7 @@ def test_decorator_registers_multiple_exception_handlers(exception_manager):
     assert TypeError in handlers
     assert handlers[KeyError] == handle_multiple_errors
     assert handlers[TypeError] == handle_multiple_errors
+
 
 def test_lookup_uses_inheritance_hierarchy(exception_manager):
     # GIVEN a handler has been registered for a base exception type
@@ -54,6 +59,7 @@ def test_lookup_uses_inheritance_hierarchy(exception_manager):
     handler = exception_manager.lookup_exception_handler(ValueError)
     assert handler == handle_exception
 
+
 def test_lookup_returns_none_for_unregistered_handler(exception_manager):
     """
     GIVEN no handler has been registered for that type or its base classes
@@ -62,6 +68,7 @@ def test_lookup_returns_none_for_unregistered_handler(exception_manager):
     """
     handler = exception_manager.lookup_exception_handler(ValueError)
     assert handler is None
+
 
 def test_register_handler_for_multiple_exceptions(exception_manager):
     # GIVEN a valid handler function
@@ -83,6 +90,7 @@ def test_update_exception_handlers_with_dictionary(exception_manager):
     GIVEN the dictionary maps exception types to handler functions
     THEN all handlers in the dictionary are properly registered
     """
+
     def handle_value_error(e):
         return "ValueError handled"
 
@@ -90,10 +98,12 @@ def test_update_exception_handlers_with_dictionary(exception_manager):
         return "KeyError handled"
 
     # Update with a dictionary of handlers
-    exception_manager.update_exception_handlers({
-        ValueError: handle_value_error,
-        KeyError: handle_key_error,
-    })
+    exception_manager.update_exception_handlers(
+        {
+            ValueError: handle_value_error,
+            KeyError: handle_key_error,
+        },
+    )
 
     handlers = exception_manager.get_registered_handlers()
     assert ValueError in handlers
@@ -147,6 +157,7 @@ def test_handler_executes_correctly(exception_manager):
         result = handler(e)
         assert result == "Handled: Test error"
 
+
 def test_registering_new_handler_overrides_previous(exception_manager):
     # WHEN a new handler is registered for an exception type
     @exception_manager.exception_handler(ValueError)
@@ -157,7 +168,6 @@ def test_registering_new_handler_overrides_previous(exception_manager):
     @exception_manager.exception_handler(ValueError)
     def second_handler(e):
         return "Second handler"
-
 
     # THEN the new handler replaces the previous one
     # Check that the second handler overrode the first
