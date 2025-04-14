@@ -357,18 +357,24 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return message
 
     def _serialize_stacktrace(self, log_record: logging.LogRecord) -> LogStackTrace | None:
-        if log_record.exc_info:
+        # Check if the first element of exc_info has the __name__ attribute,
+        # which indicates it is likely an exception class or object.
+        # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6358
+        if isinstance(log_record.exc_info, tuple) and hasattr(log_record.exc_info[0], "__name__"):
             exception_info: LogStackTrace = {
                 "type": log_record.exc_info[0].__name__,  # type: ignore
                 "value": log_record.exc_info[1],  # type: ignore
                 "module": log_record.exc_info[1].__class__.__module__,
-                "frames": [],
+                "frames": [
+                    {
+                        "file": fs.filename,
+                        "line": fs.lineno,
+                        "function": fs.name,
+                        "statement": fs.line,
+                    }
+                    for fs in traceback.extract_tb(log_record.exc_info[2])
+                ],
             }
-
-            exception_info["frames"] = [
-                {"file": fs.filename, "line": fs.lineno, "function": fs.name, "statement": fs.line}
-                for fs in traceback.extract_tb(log_record.exc_info[2])
-            ]
 
             return exception_info
 
@@ -387,7 +393,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         log_record: tuple[str, str] | tuple[None, None]
             Log record with constant traceback info and exception name
         """
-        if log_record.exc_info:
+        if isinstance(log_record.exc_info, tuple) and hasattr(log_record.exc_info[0], "__name__"):
             return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__  # type: ignore
 
         return None, None

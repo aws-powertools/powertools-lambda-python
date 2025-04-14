@@ -638,6 +638,19 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     assert "ValueError" == log["exception_name"]
 
 
+def test_logger_exception_should_not_fail_with_exception_block(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN calling a logger.exception with a ValueError and outside of a try/except block
+    logger.exception("Received an exception")
+
+    # THEN the log output should not contain "exception_name" or "exception" and not fail
+    log = capture_logging_output(stdout)
+    assert "exception_name" not in log
+    assert "exception" not in log
+
+
 def test_logger_set_correlation_id(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)

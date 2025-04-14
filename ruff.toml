@@ -74,11 +74,11 @@ lint.typing-modules = [
 
 [lint.mccabe]
 # Maximum cyclomatic complexity
-max-complexity = 15
+max-complexity = 16
 
 [lint.pylint]
 # Maximum number of nested blocks
-max-branches = 15
+max-branches = 16
 # Maximum number of if statements in a function
 max-statements = 70
 

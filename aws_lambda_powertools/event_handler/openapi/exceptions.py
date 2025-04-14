@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 
 class ValidationException(Exception):
@@ -28,9 +28,10 @@ class ResponseValidationError(ValidationException):
     Raised when the response body does not match the OpenAPI schema
     """
 
-    def __init__(self, errors: Sequence[Any], *, body: Any = None) -> None:
+    def __init__(self, errors: Sequence[Any], *, body: Any = None, source: Literal["route", "app"] = "app") -> None:
         super().__init__(errors)
         self.body = body
+        self.source = source
 
 
 class SerializationError(Exception):
