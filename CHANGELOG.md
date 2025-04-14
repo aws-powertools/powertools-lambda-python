@@ -15,22 +15,22 @@
 
 ## Maintenance
 
-* **ci:** new pre-release 3.10.1a2 ([#6446](https://github.com/aws-powertools/powertools-lambda-python/issues/6446))
 * **ci:** new pre-release 3.10.1a0 ([#6431](https://github.com/aws-powertools/powertools-lambda-python/issues/6431))
+* **ci:** new pre-release 3.10.1a2 ([#6446](https://github.com/aws-powertools/powertools-lambda-python/issues/6446))
 * **ci:** new pre-release 3.10.1a1 ([#6437](https://github.com/aws-powertools/powertools-lambda-python/issues/6437))
-* **deps:** bump pydantic from 2.11.2 to 2.11.3 ([#6427](https://github.com/aws-powertools/powertools-lambda-python/issues/6427))
 * **deps:** bump typing-extensions from 4.13.1 to 4.13.2 ([#6451](https://github.com/aws-powertools/powertools-lambda-python/issues/6451))
-* **deps-dev:** bump cfn-lint from 1.33.0 to 1.33.1 ([#6442](https://github.com/aws-powertools/powertools-lambda-python/issues/6442))
+* **deps:** bump pydantic from 2.11.2 to 2.11.3 ([#6427](https://github.com/aws-powertools/powertools-lambda-python/issues/6427))
+* **deps-dev:** bump ruff from 0.11.3 to 0.11.4 ([#6428](https://github.com/aws-powertools/powertools-lambda-python/issues/6428))
 * **deps-dev:** bump ruff from 0.11.4 to 0.11.5 ([#6443](https://github.com/aws-powertools/powertools-lambda-python/issues/6443))
 * **deps-dev:** bump boto3-stubs from 1.37.29 to 1.37.31 ([#6433](https://github.com/aws-powertools/powertools-lambda-python/issues/6433))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.187.0a0 to 2.188.0a0 ([#6434](https://github.com/aws-powertools/powertools-lambda-python/issues/6434))
-* **deps-dev:** bump ruff from 0.11.3 to 0.11.4 ([#6428](https://github.com/aws-powertools/powertools-lambda-python/issues/6428))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.188.0a0 to 2.189.0a0 ([#6444](https://github.com/aws-powertools/powertools-lambda-python/issues/6444))
 * **deps-dev:** bump pytest-cov from 6.1.0 to 6.1.1 ([#6429](https://github.com/aws-powertools/powertools-lambda-python/issues/6429))
 * **deps-dev:** bump cfn-lint from 1.32.4 to 1.33.0 ([#6430](https://github.com/aws-powertools/powertools-lambda-python/issues/6430))
-* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.188.0a0 to 2.189.0a0 ([#6444](https://github.com/aws-powertools/powertools-lambda-python/issues/6444))
 * **deps-dev:** bump aws-cdk-lib from 2.188.0 to 2.189.0 ([#6445](https://github.com/aws-powertools/powertools-lambda-python/issues/6445))
 * **deps-dev:** bump boto3-stubs from 1.37.31 to 1.37.33 ([#6449](https://github.com/aws-powertools/powertools-lambda-python/issues/6449))
 * **deps-dev:** bump cfn-lint from 1.33.1 to 1.33.2 ([#6450](https://github.com/aws-powertools/powertools-lambda-python/issues/6450))
+* **deps-dev:** bump cfn-lint from 1.33.0 to 1.33.1 ([#6442](https://github.com/aws-powertools/powertools-lambda-python/issues/6442))
 
 
 <a name="v3.10.0"></a>
