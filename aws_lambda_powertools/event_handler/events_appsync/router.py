@@ -33,20 +33,20 @@ class Router(BaseRouter):
     Create a router and define resolvers:
 
     >>> chat_router = Router()
-    >>> 
+    >>>
     >>> # Register a resolver for publish operations
     >>> @chat_router.on_publish(path="/chat/message")
     >>> def handle_message(payload):
     >>>     # Process message
     >>>     return {"success": True, "messageId": payload.get("id")}
-    >>> 
+    >>>
     >>> # Register an async resolver for publish operations
     >>> @chat_router.async_on_publish(path="/chat/typing")
     >>> async def handle_typing(event):
     >>>     # Process typing indicator
     >>>     await some_async_operation()
     >>>     return {"processed": True}
-    >>> 
+    >>>
     >>> # Register a resolver for subscribe operations
     >>> @chat_router.on_subscribe(path="/chat/room/*")
     >>> def handle_subscribe(event):
@@ -92,13 +92,13 @@ class Router(BaseRouter):
         Examples
         --------
         >>> router = Router()
-        >>> 
+        >>>
         >>> # Basic usage
         >>> @router.on_publish(path="/notifications/new")
         >>> def handle_notification(payload):
         >>>     # Process a single notification
         >>>     return {"processed": True, "notificationId": payload.get("id")}
-        >>>     
+        >>>
         >>> # Aggregate mode for batch processing
         >>> @router.on_publish(path="/notifications/batch", aggregate=True)
         >>> def handle_batch_notifications(payload):
@@ -134,14 +134,14 @@ class Router(BaseRouter):
         Examples
         --------
         >>> router = Router()
-        >>> 
+        >>>
         >>> # Basic async usage
         >>> @router.async_on_publish(path="/messages/send")
         >>> async def handle_message(event):
         >>>     # Perform async operations
         >>>     result = await database.save_message(event)
         >>>     return {"saved": True, "messageId": result.id}
-        >>>     
+        >>>
         >>> # Aggregate mode for batch processing
         >>> @router.async_on_publish(path="/messages/batch", aggregate=True)
         >>> async def handle_batch_messages(events):
@@ -172,17 +172,17 @@ class Router(BaseRouter):
         Examples
         --------
         >>> router = Router()
-        >>> 
+        >>>
         >>> # Handle subscription request
         >>> @router.on_subscribe(path="/chat/room/*")
         >>> def authorize_subscription(event):
         >>>     # Verify if the client can subscribe to this room
         >>>     room_id = event.info.channel_path.split('/')[-1]
         >>>     user_id = event.identity.username
-        >>>     
+        >>>
         >>>     # Check if user is allowed in this room
         >>>     is_allowed = check_permission(user_id, room_id)
-        >>>     
+        >>>
         >>>     return {
         >>>         "allowed": is_allowed,
         >>>         "roomId": room_id

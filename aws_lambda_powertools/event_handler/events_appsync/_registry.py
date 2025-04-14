@@ -26,7 +26,7 @@ class ResolverEventsRegistry:
         self,
         path: str = "/default/*",
         aggregate: bool = False,
-    ) -> Callable:
+    ) -> Callable | None:
         """Registers the resolver for path that includes namespace + channel
 
         Parameters
@@ -43,19 +43,23 @@ class ResolverEventsRegistry:
         Callable
             A Callable
         """
-        if not is_valid_path(path):
-            warnings.warn(
-                f"The path `{path}` registered for `{self.kind_resolver}` is not valid and will be skipped."
-                f"A path should always have a namespace starting with '/'"
-                "A path can have multiple namespaces, all separated by '/'."
-                "Wildcards are allowed only at the end of the path.",
-                stacklevel=2,
-                category=PowertoolsUserWarning,
+
+        def _register(func) -> Callable | None:
+
+            if not is_valid_path(path):
+                warnings.warn(
+                    f"The path `{path}` registered for `{self.kind_resolver}` is not valid and will be skipped."
+                    f"A path should always have a namespace starting with '/'"
+                    "A path can have multiple namespaces, all separated by '/'."
+                    "Wildcards are allowed only at the end of the path.",
+                    stacklevel=2,
+                    category=PowertoolsUserWarning,
+                )
+                return None
+
+            logger.debug(
+                f"Adding resolver `{func.__name__}` for path `{path}` and kind_resolver `{self.kind_resolver}`",
             )
-
-        def _register(func) -> Callable:
-
-            print(f"Adding resolver `{func.__name__}` for path `{path}` and kind_resolver `{self.kind_resolver}`")
             self.resolvers[f"{path}"] = {
                 "func": func,
                 "aggregate": aggregate,

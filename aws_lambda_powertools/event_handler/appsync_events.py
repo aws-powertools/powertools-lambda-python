@@ -129,9 +129,9 @@ class AppSyncEventsResolver(Router):
         self._setup_context(event, context)
 
         if self.current_event.info.operation == "PUBLISH":
-            return self._publish_events(payload=self.current_event.events)
-
-        response = self._subscribe_events()
+            response = self._publish_events(payload=self.current_event.events)
+        else:
+            response = self._subscribe_events()
 
         self.clear_context()
 
@@ -231,16 +231,17 @@ class AppSyncEventsResolver(Router):
 
                 return {"events": response}
             except Exception as error:
-                return {"error": self.format_error_response(error)}
+                return {"error": self._format_error_response(error)}
 
         # By default, we gracefully append `None` for any records that failed processing
         results = []
         for idx, event in enumerate(self.current_event.events):
             try:
-                results.append(resolver["func"](payload=event))
+                result_return = resolver["func"](payload=event.get("payload"))
+                results.append({"id": event.get("id"), "payload": result_return})
             except Exception as error:
                 logger.debug(f"Failed to process event number {idx}")
-                error_return = {"id": event.get("id"), "error": self.format_error_response(error)}
+                error_return = {"id": event.get("id"), "error": self._format_error_response(error)}
                 results.append(error_return)
 
         return {"events": results}
@@ -272,7 +273,7 @@ class AppSyncEventsResolver(Router):
         if resolver["aggregate"]:
             try:
                 # Process the entire batch
-                response = await resolver["func"](event=self.current_event.events)
+                response = await resolver["func"](payload=self.current_event.events)
                 if not isinstance(response, list):
                     warnings.warn(
                         "Response must be a list when using aggregate, AppSync will drop those events.",
@@ -282,12 +283,12 @@ class AppSyncEventsResolver(Router):
 
                 return {"events": response}
             except Exception as error:
-                return {"error": self.format_error_response(error)}
+                return {"error": self._format_error_response(error)}
 
         response_async: list = []
 
         # Prime coroutines
-        tasks = [resolver["func"](event=e) for e in self.current_event.events]
+        tasks = [resolver["func"](payload=e.get("payload")) for e in self.current_event.events]
 
         # Aggregate results and exceptions, then filter them out
         # Use `None` upon exception for graceful error handling at GraphQL engine level
@@ -298,12 +299,16 @@ class AppSyncEventsResolver(Router):
         results = await asyncio.gather(*tasks, return_exceptions=True)
         response_async.extend(
             [
-                {"id": e.get("id"), "error": self.format_error_response(ret)} if isinstance(ret, Exception) else ret
+                (
+                    {"id": e.get("id"), "error": self._format_error_response(ret)}
+                    if isinstance(ret, Exception)
+                    else {"id": e.get("id"), "payload": ret}
+                )
                 for e, ret in zip(self.current_event.events, results)
             ],
         )
 
-        return {"events": response_async} 
+        return {"events": response_async}
 
     def include_router(self, router: Router) -> None:
         """
@@ -343,7 +348,7 @@ class AppSyncEventsResolver(Router):
         self._async_publish_registry.merge(router._async_publish_registry)
         self._subscribe_registry.merge(router._subscribe_registry)
 
-    def format_error_response(self, error=None) -> str:
+    def _format_error_response(self, error=None) -> str:
         """
         Format error responses consistently.
 

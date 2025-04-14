@@ -58,13 +58,13 @@
         "payload":{
            "event_1":"data_1"
         },
-        "id":"96bc1d46-5b01-40ae-9859-173a5bb3a46a"
+        "id":"1"
      },
      {
         "payload":{
            "event_2":"data_2"
         },
-        "id":"48cde766-afe9-4c2c-9708-2fed930efe56"
+        "id":"2"
      }
   ]
 }
