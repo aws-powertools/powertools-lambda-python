@@ -595,7 +595,7 @@ You can easily raise any HTTP Error back to the client using `ServiceError` exce
 ???+ info
     If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
 
-We provide pre-defined errors for the most popular ones based on [AWS Lambda API Reference Common Erros](https://docs.aws.amazon.com/lambda/latest/api/CommonErrors.html)
+We provide pre-defined errors for the most popular ones based on [AWS Lambda API Reference Common Erros](https://docs.aws.amazon.com/lambda/latest/api/CommonErrors.html).
 
 ```python hl_lines="7-15 27 32 37 42 47 52 57 62 67" title="Raising common HTTP Status errors (4xx, 5xx)"
 --8<-- "examples/event_handler_rest/src/raising_http_errors.py"
