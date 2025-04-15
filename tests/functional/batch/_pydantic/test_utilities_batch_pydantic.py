@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import json
 import uuid
 from random import randint
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import pytest
 from pydantic import BaseModel, field_validator
@@ -241,7 +239,7 @@ def async_dynamodb_record_handler() -> Callable[..., Awaitable[Any]]:
 
 @pytest.fixture(scope="module")
 def order_event_factory() -> Callable:
-    def factory(item: dict[str, Any]) -> str:
+    def factory(item: Dict) -> str:
         return json.dumps({"item": item})
 
     return factory
@@ -312,12 +310,12 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
-        def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
+        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: OrderDynamoDB | None = None
-        OldImage: OrderDynamoDB | None = None
+        NewImage: Optional[OrderDynamoDB] = None
+        OldImage: Optional[OrderDynamoDB] = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
@@ -356,12 +354,12 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
-        def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
+        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: OrderDynamoDB | None = None
-        OldImage: OrderDynamoDB | None = None
+        NewImage: Optional[OrderDynamoDB] = None
+        OldImage: Optional[OrderDynamoDB] = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
