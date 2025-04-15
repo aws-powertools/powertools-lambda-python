@@ -1,11 +1,13 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
     from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
     from aws_lambda_powertools.shared.types import AnyCallableT
