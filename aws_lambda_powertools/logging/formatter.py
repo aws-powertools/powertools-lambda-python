@@ -11,12 +11,14 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator, Iterable
+
     from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 
 RESERVED_LOG_ATTRS = (
@@ -68,7 +70,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
         yield
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
-    # They prevent race conditions and ensure data consistency across multiple threads.
+    # They prevent race conditions and ensure data consistency across multiple threads and logger.
     def thread_safe_append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
@@ -194,9 +196,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         # exception and exception_name fields can be added as extra key
         # in any log level, we try to extract and use them first
-        extracted_exception, extracted_exception_name = self._extract_log_exception(log_record=record)
+        extracted_exception, extracted_exception_name, exception_notes = self._extract_log_exception(log_record=record)
         formatted_log["exception"] = formatted_log.get("exception", extracted_exception)
         formatted_log["exception_name"] = formatted_log.get("exception_name", extracted_exception_name)
+        formatted_log["exception_notes"] = formatted_log.get("exception_notes", exception_notes)
         if self.serialize_stacktrace:
             # Generate the traceback from the traceback library
             formatted_log["stack_trace"] = self._serialize_stacktrace(log_record=record)
@@ -380,7 +383,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         return None
 
-    def _extract_log_exception(self, log_record: logging.LogRecord) -> tuple[str, str] | tuple[None, None]:
+    def _extract_log_exception(self, log_record: logging.LogRecord) -> tuple[str, str, list] | tuple[None, None, None]:
         """Format traceback information, if available
 
         Parameters
@@ -393,10 +396,12 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         log_record: tuple[str, str] | tuple[None, None]
             Log record with constant traceback info and exception name
         """
-        if isinstance(log_record.exc_info, tuple) and hasattr(log_record.exc_info[0], "__name__"):
-            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__  # type: ignore
 
-        return None, None
+        if isinstance(log_record.exc_info, tuple) and hasattr(log_record.exc_info[0], "__name__"):
+            exception_notes = getattr(log_record.exc_info[1], "__notes__", None)
+            return self.formatException(log_record.exc_info), log_record.exc_info[0].__name__, exception_notes  # type: ignore
+
+        return None, None, None
 
     def _extract_log_keys(self, log_record: logging.LogRecord) -> dict[str, Any]:
         """Extract and parse custom and reserved log keys

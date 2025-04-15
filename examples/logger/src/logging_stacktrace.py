@@ -3,7 +3,7 @@ import requests
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-ENDPOINT = "http://httpbin.org/status/500"
+ENDPOINT = "https://httpbin.org/status/500"
 logger = Logger(serialize_stacktrace=True)
 
 
