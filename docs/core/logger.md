@@ -476,6 +476,22 @@ By default, the Logger will automatically include the full stack trace in JSON f
     --8<-- "examples/logger/src/logging_stacktrace_output.json"
     ```
 
+#### Adding exception notes
+
+You can add notes to exceptions, which `logger.exception` propagates via a new `exception_notes` key in the log line. This works only in [Python 3.11 and later](https://peps.python.org/pep-0678/){target="_blank" rel="nofollow"}.
+
+=== "logging_exception_notes.py"
+
+    ```python hl_lines="15"
+    --8<-- "examples/logger/src/logging_exception_notes.py"
+    ```
+
+=== "logging_exception_notes_output.json"
+
+    ```json hl_lines="9-11"
+    --8<-- "examples/logger/src/logging_exception_notes_output.json"
+    ```
+
 ### Date formatting
 
 Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0000`.
