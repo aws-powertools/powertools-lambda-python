@@ -9,8 +9,9 @@ import secrets
 import string
 import sys
 from collections import namedtuple
+from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pytest
 
