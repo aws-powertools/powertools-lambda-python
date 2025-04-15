@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes.s3_object_event import (
     S3ObjectLambdaEvent,
 )

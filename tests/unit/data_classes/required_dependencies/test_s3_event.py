@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from urllib.parse import quote_plus
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
