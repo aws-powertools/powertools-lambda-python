@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import io
@@ -11,7 +13,7 @@ import sys
 from collections import namedtuple
 from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import pytest
 
@@ -834,12 +836,12 @@ def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, la
     class CustomFormatter(LambdaPowertoolsFormatter):
         def __init__(
             self,
-            json_serializer: Optional[Callable[[Dict], str]] = None,
-            json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
-            json_default: Optional[Callable[[Any], Any]] = None,
-            datefmt: Optional[str] = None,
+            json_serializer: Callable[[dict], str] | None = None,
+            json_deserializer: Callable[[dict, str, bool, int, float], str] | None = None,
+            json_default: Callable[[Any], Any] | None = None,
+            datefmt: str | None = None,
             use_datetime_directive: bool = False,
-            log_record_order: Optional[List[str]] = None,
+            log_record_order: list[str] | None = None,
             utc: bool = False,
             **kwargs,
         ):
