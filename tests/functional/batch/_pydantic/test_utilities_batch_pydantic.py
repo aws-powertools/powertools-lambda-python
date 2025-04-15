@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import uuid
 from random import randint
-from typing import Any, Awaitable, Callable, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pydantic import BaseModel, field_validator
@@ -32,6 +34,9 @@ from tests.functional.batch._pydantic.sample_models import (
     OrderSqs,
 )
 from tests.functional.utils import b64_to_str, str_to_b64
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 
 @pytest.fixture(scope="module")
@@ -236,7 +241,7 @@ def async_dynamodb_record_handler() -> Callable[..., Awaitable[Any]]:
 
 @pytest.fixture(scope="module")
 def order_event_factory() -> Callable:
-    def factory(item: Dict) -> str:
+    def factory(item: dict[str, Any]) -> str:
         return json.dumps({"item": item})
 
     return factory
@@ -307,12 +312,12 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
-        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+        def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB] = None
-        OldImage: Optional[OrderDynamoDB] = None
+        NewImage: OrderDynamoDB | None = None
+        OldImage: OrderDynamoDB | None = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
@@ -351,12 +356,12 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
-        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+        def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB] = None
-        OldImage: Optional[OrderDynamoDB] = None
+        NewImage: OrderDynamoDB | None = None
+        OldImage: OrderDynamoDB | None = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
