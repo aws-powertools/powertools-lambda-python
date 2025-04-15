@@ -22,9 +22,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
-**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
-
-As of now, both Pydantic V1 and V2 are supported. For a future major version, we will only support Pydantic V2.
+**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
 
 ### Required resources
 
