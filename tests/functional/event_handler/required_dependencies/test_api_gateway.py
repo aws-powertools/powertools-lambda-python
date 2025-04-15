@@ -26,9 +26,13 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
+    ForbiddenError,
     InternalServerError,
     NotFoundError,
+    RequestEntityTooLargeError,
+    RequestTimeoutError,
     ServiceError,
+    ServiceUnavailableError,
     UnauthorizedError,
 )
 from aws_lambda_powertools.shared import constants
@@ -873,6 +877,21 @@ def test_service_error_responses(json_dump):
     expected = {"statusCode": 401, "message": "Unauthorized"}
     assert result["body"] == json_dump(expected)
 
+    # GIVEN a ForbiddenError
+    @app.get(rule="/forbidden-error", cors=False)
+    def forbidden_error():
+        raise ForbiddenError("Access denied")
+
+    # WHEN calling the handler
+    # AND path is /forbidden-error
+    result = app({"path": "/forbidden-error", "httpMethod": "GET"}, None)
+    # THEN return the forbidden error response
+    # AND status code equals 403
+    assert result["statusCode"] == 403
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 403, "message": "Access denied"}
+    assert result["body"] == json_dump(expected)
+
     # GIVEN an NotFoundError
     @app.get(rule="/not-found-error", cors=False)
     def not_found_error():
@@ -888,6 +907,36 @@ def test_service_error_responses(json_dump):
     expected = {"statusCode": 404, "message": "Not found"}
     assert result["body"] == json_dump(expected)
 
+    # GIVEN a RequestTimeoutError
+    @app.get(rule="/request-timeout-error", cors=False)
+    def request_timeout_error():
+        raise RequestTimeoutError("Request timed out")
+
+    # WHEN calling the handler
+    # AND path is /request-timeout-error
+    result = app({"path": "/request-timeout-error", "httpMethod": "GET"}, None)
+    # THEN return the request timeout error response
+    # AND status code equals 408
+    assert result["statusCode"] == 408
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 408, "message": "Request timed out"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN a RequestEntityTooLargeError
+    @app.get(rule="/request-entity-too-large-error", cors=False)
+    def request_entity_too_large_error():
+        raise RequestEntityTooLargeError("Request payload too large")
+
+    # WHEN calling the handler
+    # AND path is /request-entity-too-large-error
+    result = app({"path": "/request-entity-too-large-error", "httpMethod": "GET"}, None)
+    # THEN return the request entity too large error response
+    # AND status code equals 413
+    assert result["statusCode"] == 413
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 413, "message": "Request payload too large"}
+    assert result["body"] == json_dump(expected)
+
     # GIVEN an InternalServerError
     @app.get(rule="/internal-server-error", cors=False)
     def internal_server_error():
@@ -901,6 +950,21 @@ def test_service_error_responses(json_dump):
     assert result["statusCode"] == 500
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected = {"statusCode": 500, "message": "Internal server error"}
+    assert result["body"] == json_dump(expected)
+
+    # GIVEN a ServiceUnavailableError
+    @app.get(rule="/service-unavailable-error", cors=False)
+    def service_unavailable_error():
+        raise ServiceUnavailableError("Service is temporarily unavailable")
+
+    # WHEN calling the handler
+    # AND path is /service-unavailable-error
+    result = app({"path": "/service-unavailable-error", "httpMethod": "GET"}, None)
+    # THEN return the service unavailable error response
+    # AND status code equals 503
+    assert result["statusCode"] == 503
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 503, "message": "Service is temporarily unavailable"}
     assert result["body"] == json_dump(expected)
 
     # GIVEN an ServiceError with a custom status code

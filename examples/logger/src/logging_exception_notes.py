@@ -12,7 +12,8 @@ def lambda_handler(event: dict, context: LambdaContext) -> str:
         ret = requests.get(ENDPOINT)
         ret.raise_for_status()
     except requests.HTTPError as e:
-        logger.exception("Received a HTTP 5xx error")
+        e.add_note("Can't connect to the endpoint")  # type: ignore[attr-defined]
+        logger.exception(e)
         raise RuntimeError("Unable to fullfil request") from e
 
     return "hello world"

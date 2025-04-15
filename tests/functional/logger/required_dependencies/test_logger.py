@@ -638,6 +638,28 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     assert "ValueError" == log["exception_name"]
 
 
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="This only works in Python 3.11+")
+def test_logger_exception_extract_exception_notes(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN calling a logger.exception with a ValueError and notes
+    try:
+        raise ValueError("something went wrong")
+    except Exception as error:
+        error.add_note("something went wrong")
+        error.add_note("something went wrong again")
+        logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    # THEN we except to have exception_notes in the exception
+    log = capture_logging_output(stdout)
+    assert len(log["exception_notes"]) == 2
+    assert log["exception_notes"][0] == "something went wrong"
+    assert log["exception_notes"][1] == "something went wrong again"
+    assert "ValueError" == log["exception_name"]
+
+
 def test_logger_exception_should_not_fail_with_exception_block(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
