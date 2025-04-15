@@ -6,7 +6,7 @@ import functools
 import inspect
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Callable, Sequence, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, TypeVar, cast, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -19,6 +19,7 @@ from aws_lambda_powertools.shared.types import AnyCallableT
 
 if TYPE_CHECKING:
     import numbers
+    from collections.abc import Callable, Sequence
 
     from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
 
