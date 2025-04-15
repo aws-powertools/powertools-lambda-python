@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import uuid
 from random import randint
-from typing import Any, Awaitable, Callable, Dict
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -25,6 +27,9 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 from tests.functional.utils import b64_to_str, str_to_b64
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 
 @pytest.fixture(scope="module")
@@ -169,7 +174,7 @@ def dynamodb_record_handler() -> Callable:
 
 @pytest.fixture(scope="module")
 def order_event_factory() -> Callable:
-    def factory(item: Dict) -> str:
+    def factory(item: dict[str, Any]) -> str:
         return json.dumps({"item": item})
 
     return factory
