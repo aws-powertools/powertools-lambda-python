@@ -1,7 +1,7 @@
 import json
 import uuid
 from random import randint
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 import pytest
 from pydantic import BaseModel, field_validator
@@ -32,9 +32,6 @@ from tests.functional.batch._pydantic.sample_models import (
     OrderSqs,
 )
 from tests.functional.utils import b64_to_str, str_to_b64
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
 
 
 @pytest.fixture(scope="module")
