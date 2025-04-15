@@ -22,9 +22,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
-**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
-
-As of now, both Pydantic V1 and V2 are supported. For a future major version, we will only support Pydantic V2.
+**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
 
 ### Required resources
 
@@ -595,9 +593,9 @@ You can easily raise any HTTP Error back to the client using `ServiceError` exce
 ???+ info
     If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
 
-We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
+We provide pre-defined errors for the most popular ones based on [AWS Lambda API Reference Common Erros](https://docs.aws.amazon.com/lambda/latest/api/CommonErrors.html).
 
-```python hl_lines="6-11 23 28 33 38 43" title="Raising common HTTP Status errors (4xx, 5xx)"
+```python hl_lines="7-15 27 32 37 42 47 52 57 62 67" title="Raising common HTTP Status errors (4xx, 5xx)"
 --8<-- "examples/event_handler_rest/src/raising_http_errors.py"
 ```
 

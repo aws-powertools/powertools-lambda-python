@@ -14,7 +14,7 @@ import random
 import sys
 import warnings
 from contextlib import contextmanager
-from typing import IO, TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, TypeVar, cast, overload
+from typing import IO, TYPE_CHECKING, Any, TypeVar, cast, overload
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
 from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level, _create_buffer_record
@@ -45,6 +45,8 @@ from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator, Iterable, Mapping
+
     from aws_lambda_powertools.logging.buffer.config import LoggerBufferConfig
     from aws_lambda_powertools.shared.types import AnyCallableT
 

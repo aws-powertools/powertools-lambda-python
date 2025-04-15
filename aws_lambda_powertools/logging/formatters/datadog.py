@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.logging.types import LogRecord
 
 
