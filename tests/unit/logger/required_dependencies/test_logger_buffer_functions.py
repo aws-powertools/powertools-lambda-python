@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level
 
 
