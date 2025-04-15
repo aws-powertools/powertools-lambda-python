@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import sys
 import time
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import logging
+    from collections.abc import Mapping
 
 
 def _create_buffer_record(

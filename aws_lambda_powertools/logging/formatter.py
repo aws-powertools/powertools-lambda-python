@@ -11,12 +11,14 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator, Iterable
+
     from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 
 RESERVED_LOG_ATTRS = (
@@ -68,7 +70,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
         yield
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
-    # They prevent race conditions and ensure data consistency across multiple threads.
+    # They prevent race conditions and ensure data consistency across multiple threads and logger.
     def thread_safe_append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
