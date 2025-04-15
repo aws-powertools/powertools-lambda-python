@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
