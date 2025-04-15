@@ -70,7 +70,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
         yield
 
     # These specific thread-safe methods are necessary to manage shared context in concurrent environments.
-    # They prevent race conditions and ensure data consistency across multiple threads.
+    # They prevent race conditions and ensure data consistency across multiple threads and logger.
     def thread_safe_append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
