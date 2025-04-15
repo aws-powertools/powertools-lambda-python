@@ -11,7 +11,7 @@ import functools
 import logging
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any
 
 from jsonpath_ng.ext import parse
 
@@ -23,6 +23,7 @@ from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
     from numbers import Number
 
 logger = logging.getLogger(__name__)
