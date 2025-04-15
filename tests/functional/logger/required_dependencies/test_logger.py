@@ -638,7 +638,7 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     assert "ValueError" == log["exception_name"]
 
 
-@pytest.mark.skipif(sys.version_info <= (3, 10), reason="This only works in Python 3.11+")
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="This only works in Python 3.11+")
 def test_logger_exception_extract_exception_notes(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
