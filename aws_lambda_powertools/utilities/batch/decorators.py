@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import deprecated
 
@@ -16,6 +16,8 @@ from aws_lambda_powertools.utilities.batch.exceptions import UnexpectedBatchType
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
     from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
