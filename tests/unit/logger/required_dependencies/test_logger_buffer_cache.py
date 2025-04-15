@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache

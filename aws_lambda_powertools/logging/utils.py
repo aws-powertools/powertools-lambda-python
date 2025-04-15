@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.logging.logger import Logger
 
 PACKAGE_LOGGER = "aws_lambda_powertools"
