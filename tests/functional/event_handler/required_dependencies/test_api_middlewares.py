@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import pytest
 
@@ -362,14 +362,14 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     router = Router()
 
     def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("app")
 
         app.append_context(middleware_order=middleware_order)
         return next_middleware(app)
 
     def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("router")
 
         router.append_context(middleware_order=middleware_order)
@@ -439,14 +439,14 @@ def test_api_gateway_middleware_order_with_include_router_first(app: EventHandle
     router = Router()
 
     def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("app")
 
         app.append_context(middleware_order=middleware_order)
         return next_middleware(app)
 
     def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("router")
 
         router.append_context(middleware_order=middleware_order)

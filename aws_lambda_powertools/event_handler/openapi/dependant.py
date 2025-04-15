@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, Callable, ForwardRef, cast
+from typing import TYPE_CHECKING, Any, ForwardRef, cast
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
@@ -27,6 +27,8 @@ from aws_lambda_powertools.event_handler.openapi.params import (
 from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse, OpenAPIResponseContentModel
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pydantic import BaseModel
 
 """

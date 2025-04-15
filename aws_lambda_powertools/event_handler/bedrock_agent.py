@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from http import HTTPStatus
     from re import Match
 
