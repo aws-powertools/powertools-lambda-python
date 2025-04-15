@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import abc
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Generator, Sequence
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import numbers
     import traceback
+    from collections.abc import Generator, Sequence
 
 
 class BaseSegment(abc.ABC):
