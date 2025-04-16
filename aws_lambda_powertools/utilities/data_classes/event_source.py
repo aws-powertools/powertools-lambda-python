@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
     from aws_lambda_powertools.utilities.typing import LambdaContext
 

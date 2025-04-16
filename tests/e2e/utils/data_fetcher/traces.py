@@ -1,17 +1,19 @@
 import json
 from datetime import datetime, timedelta
-from typing import Any, Dict, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 import boto3
 from botocore.paginate import PageIterator
 from mypy_boto3_xray.client import XRayClient
-from mypy_boto3_xray.type_defs import TraceSummaryTypeDef
 from pydantic import BaseModel
 from retry import retry
 
+if TYPE_CHECKING:
+    from mypy_boto3_xray.type_defs import TraceSummaryTypeDef
+
 
 class TraceSubsegment(BaseModel):
-    id: str  # noqa: A003 VNE003  # id is a field we can't change
+    id: str  # noqa: A003 # id is a field we can't change
     name: str
     start_time: float
     end_time: float
@@ -22,7 +24,7 @@ class TraceSubsegment(BaseModel):
 
 
 class TraceDocument(BaseModel):
-    id: str  # noqa: A003 VNE003  # id is a field we can't change
+    id: str  # noqa: A003 # id is a field we can't change
     name: str
     start_time: float
     end_time: float

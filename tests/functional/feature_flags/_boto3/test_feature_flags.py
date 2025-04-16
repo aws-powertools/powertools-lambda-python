@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from io import BytesIO
 from json import dumps
-from typing import Dict, List, Optional
 
 import boto3
 import pytest
@@ -37,10 +38,10 @@ def config():
 
 def init_feature_flags(
     mocker,
-    mock_schema: Dict,
+    mock_schema: dict,
     config: Config,
     envelope: str = "",
-    jmespath_options: Optional[Dict] = None,
+    jmespath_options: dict | None = None,
 ) -> FeatureFlags:
     environment = "test_env"
     application = "test_app"
@@ -689,7 +690,7 @@ def test_multiple_features_enabled(mocker, config):
         },
     }
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    enabled_list: list[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
 
 
@@ -1430,7 +1431,7 @@ def test_get_all_enabled_features_boolean_and_non_boolean(mocker, config):
     }
 
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    enabled_list: list[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
 
 
@@ -1442,7 +1443,7 @@ def test_get_all_enabled_features_non_boolean_truthy_defaults(mocker, config):
     }
 
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
-    enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
+    enabled_list: list[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
 
 

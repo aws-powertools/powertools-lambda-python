@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from decimal import Clamped, Context, Decimal, Inexact, Overflow, Rounded, Underflow
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
 
 # NOTE: DynamoDB supports up to 38 digits precision
 # Therefore, this ensures our Decimal follows what's stored in the table

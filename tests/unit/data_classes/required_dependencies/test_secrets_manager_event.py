@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes.secrets_manager_event import SecretsManagerEvent
 from tests.functional.utils import load_event
 

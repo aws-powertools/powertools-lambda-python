@@ -3,12 +3,17 @@ from __future__ import annotations
 import functools
 import json
 import re
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 PRESERVE_CHARS = set("-_. ")
 _regex_cache = {}
+
+JSON_DUMPS_CALL = functools.partial(json.dumps, ensure_ascii=False)
 
 
 class BaseProvider:
@@ -49,7 +54,7 @@ class BaseProvider:
 
     def __init__(
         self,
-        json_serializer: Callable[..., str] = functools.partial(json.dumps, ensure_ascii=False),
+        json_serializer: Callable[..., str] = JSON_DUMPS_CALL,
         json_deserializer: Callable[[str], Any] = json.loads,
     ) -> None:
         self.json_serializer = json_serializer

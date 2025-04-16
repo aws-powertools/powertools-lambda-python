@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes import ALBEvent
 from tests.functional.utils import load_event
 

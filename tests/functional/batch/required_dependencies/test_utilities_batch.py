@@ -18,9 +18,6 @@ from aws_lambda_powertools.utilities.batch import (
     process_partial_response,
 )
 from aws_lambda_powertools.utilities.batch.exceptions import BatchProcessingError, UnexpectedBatchTypeError
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
-    DynamoDBRecord,
-)
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
@@ -30,6 +27,10 @@ from tests.functional.utils import b64_to_str, str_to_b64
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
+
+    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+        DynamoDBRecord,
+    )
 
 
 @pytest.fixture(scope="module")
