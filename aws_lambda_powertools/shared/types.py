@@ -1,3 +1,4 @@
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
-AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
+AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])

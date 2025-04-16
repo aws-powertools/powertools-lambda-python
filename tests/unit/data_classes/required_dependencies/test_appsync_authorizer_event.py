@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import (
     AppSyncAuthorizerEvent,
     AppSyncAuthorizerResponse,

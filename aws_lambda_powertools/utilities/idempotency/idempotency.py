@@ -9,7 +9,7 @@ import logging
 import os
 import warnings
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
@@ -23,6 +23,8 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.idempotency.persistence.base import (
         BasePersistenceLayer,
     )

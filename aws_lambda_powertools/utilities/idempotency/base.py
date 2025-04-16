@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -29,6 +29,8 @@ from aws_lambda_powertools.utilities.idempotency.serialization.no_op import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.idempotency.config import (
         IdempotencyConfig,
     )

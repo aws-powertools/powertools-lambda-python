@@ -4,7 +4,7 @@ import functools
 import json
 import logging
 from binascii import Error
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import botocore
 from aws_encryption_sdk import (
@@ -41,7 +41,12 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
 )
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 logger = logging.getLogger(__name__)
+
+JSON_DUMPS_CALL = functools.partial(json.dumps, ensure_ascii=False)
 
 
 class AWSEncryptionSDKProvider(BaseProvider):
@@ -81,7 +86,7 @@ class AWSEncryptionSDKProvider(BaseProvider):
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
         max_bytes_encrypted: int = MAX_BYTES_ENCRYPTED,
-        json_serializer: Callable[..., str] = functools.partial(json.dumps, ensure_ascii=False),
+        json_serializer: Callable[..., str] = JSON_DUMPS_CALL,
         json_deserializer: Callable[[str], Any] = json.loads,
     ):
         super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)

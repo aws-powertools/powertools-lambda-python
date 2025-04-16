@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import json
 import random
@@ -5,7 +7,7 @@ import string
 import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import boto3
 import pytest
@@ -52,9 +54,9 @@ def mock_binary_value() -> str:
 
 
 def build_get_parameters_stub(
-    params: Dict[str, Any],
-    invalid_parameters: Optional[List[str]] = None,
-) -> Dict[str, List]:
+    params: dict[str, Any],
+    invalid_parameters: list[str] | None = None,
+) -> dict[str, list]:
     invalid_parameters = invalid_parameters or []
     version = random.randrange(1, 1000)
     return {
@@ -527,7 +529,7 @@ def test_set_parameter(monkeypatch, mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -685,7 +687,7 @@ def test_set_secret(monkeypatch, mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
@@ -1025,7 +1027,7 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
         def _get(self, name: str, **kwargs) -> str:
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]: ...
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]: ...
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
@@ -1875,7 +1877,7 @@ def test_base_provider_get_exception(mock_name):
             assert name == mock_name
             raise Exception("test exception raised")
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -1895,7 +1897,7 @@ def test_base_provider_get_multiple_exception(mock_name):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             raise Exception("test exception raised")
 
@@ -1919,7 +1921,7 @@ def test_base_provider_get_transform_json(mock_name, mock_value):
             assert name == mock_name
             return mock_data
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -1943,7 +1945,7 @@ def test_base_provider_get_transform_json_exception(mock_name, mock_value):
             assert name == mock_name
             return mock_data
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -1967,7 +1969,7 @@ def test_base_provider_get_transform_binary(mock_name, mock_value):
             assert name == mock_name
             return mock_data
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -1991,7 +1993,7 @@ def test_base_provider_get_transform_binary_exception(mock_name):
             assert name == mock_name
             return mock_data
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -2013,7 +2015,7 @@ def test_base_provider_get_multiple_transform_json(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data}
 
@@ -2036,7 +2038,7 @@ def test_base_provider_get_multiple_transform_json_partial_failure(mock_name, mo
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data, "B": mock_data + "{"}
 
@@ -2060,7 +2062,7 @@ def test_base_provider_get_multiple_transform_json_exception(mock_name, mock_val
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data}
 
@@ -2084,7 +2086,7 @@ def test_base_provider_get_multiple_transform_binary(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data}
 
@@ -2109,7 +2111,7 @@ def test_base_provider_get_multiple_transform_binary_partial_failure(mock_name, 
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data_a, "B": mock_data_b}
 
@@ -2133,7 +2135,7 @@ def test_base_provider_get_multiple_transform_binary_exception(mock_name):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_data}
 
@@ -2154,7 +2156,7 @@ def test_base_provider_get_multiple_cached(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -2177,7 +2179,7 @@ def test_base_provider_get_multiple_expired(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_value}
 
@@ -2201,7 +2203,7 @@ def test_get_parameter(monkeypatch, mock_name, mock_value):
             assert name == mock_name
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -2218,7 +2220,7 @@ def test_get_parameters_by_name(monkeypatch, mock_name, mock_value, config):
         def __init__(self, boto_config: Config = config, **kwargs):
             super().__init__(boto_config=boto_config, **kwargs)
 
-        def get_parameters_by_name(self, *args, **kwargs) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
+        def get_parameters_by_name(self, *args, **kwargs) -> dict[str, str] | dict[str, bytes] | dict[str, dict]:
             return {mock_name: mock_value}
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -2247,7 +2249,7 @@ def test_get_parameters_by_name_with_decrypt_override(monkeypatch, mock_name, mo
             assert decrypt
             return decrypted_response
 
-        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
+        def _get_parameters_by_name(self, *args, **kwargs) -> tuple[dict[str, Any], list[str]]:
             return {mock_name: mock_value}, []
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
@@ -2276,10 +2278,10 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
         # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         def _get_parameters_by_name(
             self,
-            parameters: Dict[str, Dict],
+            parameters: dict[str, dict],
             raise_on_error: bool = True,
             decrypt: bool = False,
-        ) -> Tuple[Dict[str, Any], List[str]]:
+        ) -> tuple[dict[str, Any], list[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[mock_name]["max_age"] == 0
             assert parameters["no-override"]["max_age"] == default_cache_period
@@ -2302,10 +2304,10 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
 
         def _get_parameters_by_name(
             self,
-            parameters: Dict[str, Dict],
+            parameters: dict[str, dict],
             raise_on_error: bool = True,
             decrypt: bool = False,
-        ) -> Tuple[Dict[str, Any], List[str]]:
+        ) -> tuple[dict[str, Any], list[str]]:
             # THEN we should always split to respect GetParameters max
             assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
             return {}, []
@@ -2325,7 +2327,7 @@ def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config
         def __init__(self, boto_config: Config = config, **kwargs):
             super().__init__(boto_config=boto_config, **kwargs)
 
-        def _get_parameters_by_name(self, *args, **kwargs) -> Tuple[Dict[str, Any], List[str]]:
+        def _get_parameters_by_name(self, *args, **kwargs) -> tuple[dict[str, Any], list[str]]:
             raise RuntimeError("Should not be called if it's in cache")
 
     provider = TestProvider()
@@ -2389,7 +2391,7 @@ def test_get_parameter_new(monkeypatch, mock_name, mock_value):
             assert not kwargs["decrypt"]
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
@@ -2409,7 +2411,7 @@ def test_get_parameters(monkeypatch, mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_value}
 
@@ -2430,7 +2432,7 @@ def test_get_parameters_new(monkeypatch, mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             assert kwargs["recursive"]
             assert not kwargs["decrypt"]
@@ -2454,7 +2456,7 @@ def test_get_parameters_by_name_new(monkeypatch, mock_name, mock_value, config):
         def __init__(self, boto_config: Config = config, **kwargs):
             super().__init__(boto_config=boto_config, **kwargs)
 
-        def get_parameters_by_name(self, *args, **kwargs) -> Union[Dict[str, str], Dict[str, bytes], Dict[str, dict]]:
+        def get_parameters_by_name(self, *args, **kwargs) -> dict[str, str] | dict[str, bytes] | dict[str, dict]:
             return {mock_name: mock_value}
 
     monkeypatch.setattr(parameters.ssm, "DEFAULT_PROVIDERS", {})
@@ -2475,7 +2477,7 @@ def test_get_secret(monkeypatch, mock_name, mock_value):
             assert name == mock_name
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
@@ -2495,7 +2497,7 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
             assert name == mock_name
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setattr(parameters.secrets, "DEFAULT_PROVIDERS", {})
@@ -2689,7 +2691,7 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
             assert name == mock_name
             return mock_body_bytes
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
@@ -2714,7 +2716,7 @@ def test_appconf_get_app_config_transform_json(monkeypatch, mock_name):
             assert name == mock_name
             return mock_body_bytes
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
@@ -2737,7 +2739,7 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     monkeypatch.setattr(parameters.appconfig, "DEFAULT_PROVIDERS", {})
@@ -2877,7 +2879,7 @@ def test_base_provider_get_multiple_force_update(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             raise NotImplementedError()
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             assert path == mock_name
             return {"A": mock_value}
 
@@ -2900,7 +2902,7 @@ def test_base_provider_get_force_update(mock_name, mock_value):
         def _get(self, name: str, **kwargs) -> str:
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
     provider = TestProvider()
@@ -2934,7 +2936,7 @@ def test_base_provider_single_and_nested_parameters_cached(mock_name, mock_value
         def _get(self, name: str, **kwargs) -> str:
             raise ValueError("This parameter doesn't exist")
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             return {"A": mock_value}
 
     provider = TestProvider()
