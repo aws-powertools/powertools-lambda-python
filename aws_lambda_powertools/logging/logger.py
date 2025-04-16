@@ -1047,6 +1047,20 @@ class Logger:
                     stacklevel=2,
                 )
 
+            # Check if buffer level is less verbose than ALC
+            if (
+                hasattr(self, "_buffer_config")
+                and self._buffer_config
+                and logging.getLevelName(lambda_log_level)
+                > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+            ):
+                warnings.warn(
+                    "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
+                    "Buffered logs will be filtered by ALC",
+                    UserWarning,
+                    stacklevel=2,
+                )
+
         # AWS Lambda Advanced Logging Controls takes precedence over Powertools log level and we use this
         if lambda_log_level:
             return lambda_log_level
@@ -1190,6 +1204,20 @@ class Logger:
         buffer = self._buffer_cache.get(tracer_id)
         if not buffer:
             return
+
+        # Check ALC level before flushing
+        alc_level = self._get_aws_lambda_log_level()
+        if (
+            alc_level is not None
+            and self._buffer_config
+            and logging.getLevelName(alc_level) > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+        ):
+            warnings.warn(
+                message="Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level." 
+                "Some logs might be missing.",
+                category=UserWarning,
+                stacklevel=2,
+            )
 
         # Process log records
         for log_line in buffer:
