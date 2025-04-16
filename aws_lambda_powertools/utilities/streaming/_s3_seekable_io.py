@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 import logging
-from typing import IO, TYPE_CHECKING, Any, Iterable, Sequence, TypeVar, cast
+from typing import IO, TYPE_CHECKING, Any, TypeVar, cast
 
 import boto3
 
@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreaming
 from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
     from mmap import mmap
 
     from mypy_boto3_s3.client import S3Client
