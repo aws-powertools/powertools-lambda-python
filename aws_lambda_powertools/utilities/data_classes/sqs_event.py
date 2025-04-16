@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Dict, ItemsView, Iterator, TypeVar
+from typing import TYPE_CHECKING, Any, ItemsView, Iterator, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class SQSRecordAttributes(DictWrapper):
@@ -86,7 +89,7 @@ class SQSMessageAttribute(DictWrapper):
         return self["dataType"]
 
 
-class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
+class SQSMessageAttributes(dict[str, SQSMessageAttribute]):
     def __getitem__(self, key: str) -> SQSMessageAttribute | None:  # type: ignore
         item = super().get(key)
         return None if item is None else SQSMessageAttribute(item)  # type: ignore

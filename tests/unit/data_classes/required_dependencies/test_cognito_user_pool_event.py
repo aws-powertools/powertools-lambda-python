@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from secrets import compare_digest
 
 from aws_lambda_powertools.utilities.data_classes.cognito_user_pool_event import (
