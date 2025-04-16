@@ -1,9 +1,12 @@
 import json
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent
-from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSMessageAttributes
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 
 
 def test_seq_trigger_event():

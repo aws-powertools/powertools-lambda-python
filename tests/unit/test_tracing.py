@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import contextlib
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 from unittest import mock
-from unittest.mock import MagicMock
 
 import pytest
 
 from aws_lambda_powertools import Tracer
+
+if TYPE_CHECKING:
+    from unittest.mock import MagicMock
 
 # Maintenance: This should move to Functional tests and use Fake over mocks.
 
