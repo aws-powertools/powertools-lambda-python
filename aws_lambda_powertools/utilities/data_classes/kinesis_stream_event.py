@@ -3,12 +3,15 @@ from __future__ import annotations
 import base64
 import json
 import zlib
-from typing import Iterator
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
     CloudWatchLogsDecodedData,
 )
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class KinesisStreamRecordPayload(DictWrapper):

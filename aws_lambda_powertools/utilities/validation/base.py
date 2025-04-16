@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-import fastjsonschema  # type: ignore
+import fastjsonschema
 
 from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
 

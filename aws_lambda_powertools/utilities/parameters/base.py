@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple, cast, overload
+from typing import TYPE_CHECKING, Any, NamedTuple, cast, overload
 
 from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
