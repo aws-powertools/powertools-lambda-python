@@ -98,5 +98,5 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 # Maintenance: we're keeping EphemeralMetrics code in case of Hyrum's law so we can quickly revert it
 "aws_lambda_powertools/metrics/metrics.py" = ["ERA001"]
 "examples/*" = ["FA100", "TCH"]
-"tests/*" = ["FA100", "TCH"]
+"tests/*" = ["FA100"]
 "aws_lambda_powertools/utilities/parser/models/*" = ["FA100"]
