@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import json
-from typing import Dict, List
 
 from aws_lambda_powertools.utilities.data_classes import CloudWatchAlarmEvent
 from tests.functional.utils import load_event
@@ -36,7 +37,7 @@ def test_cloud_watch_alarm_event_single_metric():
     assert parsed_event.alarm_data.configuration.alarm_actions_suppressor_extension_period is None
     assert parsed_event.alarm_data.configuration.alarm_actions_suppressor_wait_period is None
 
-    assert isinstance(parsed_event.alarm_data.configuration.metrics, List)
+    assert isinstance(parsed_event.alarm_data.configuration.metrics, list)
     # metric position 0
     metric_0 = parsed_event.alarm_data.configuration.metrics[0]
     raw_metric_0 = raw_event["alarmData"]["configuration"]["metrics"][0]
@@ -53,7 +54,7 @@ def test_cloud_watch_alarm_event_single_metric():
     assert metric_1.metric_stat.stat == raw_metric_1["metricStat"]["stat"]
     assert metric_1.metric_stat.period == raw_metric_1["metricStat"]["period"]
     assert metric_1.metric_stat.unit is None
-    assert isinstance(metric_1.metric_stat.metric, Dict)
+    assert isinstance(metric_1.metric_stat.metric, dict)
 
 
 def test_cloud_watch_alarm_event_composite_metric():
@@ -102,4 +103,4 @@ def test_cloud_watch_alarm_event_composite_metric():
         parsed_event.alarm_data.configuration.alarm_actions_suppressor
         == raw_event["alarmData"]["configuration"]["actionsSuppressor"]
     )
-    assert isinstance(parsed_event.alarm_data.configuration.metrics, List)
+    assert isinstance(parsed_event.alarm_data.configuration.metrics, list)
