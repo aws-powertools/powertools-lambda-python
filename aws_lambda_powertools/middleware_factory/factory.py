@@ -4,7 +4,7 @@ import functools
 import inspect
 import logging
 import os
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.middleware_factory.exceptions import MiddlewareInvalidArgumentError
 from aws_lambda_powertools.shared import constants
@@ -12,6 +12,9 @@ from aws_lambda_powertools.shared.functions import resolve_truthy_env_var_choice
 from aws_lambda_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 # Maintenance: we can't yet provide an accurate return type without ParamSpec etc. see #1066
