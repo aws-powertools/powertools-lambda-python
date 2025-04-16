@@ -1,16 +1,21 @@
+from __future__ import annotations
+
 import json
 import zipfile
 from io import StringIO
+from typing import TYPE_CHECKING
 
 import pytest
 from botocore.response import StreamingBody
-from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import CodePipelineJobEvent
 from aws_lambda_powertools.utilities.data_classes.code_pipeline_job_event import (
     CodePipelineData,
 )
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_code_pipeline_event():

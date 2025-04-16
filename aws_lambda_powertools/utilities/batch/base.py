@@ -14,7 +14,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Tuple, Union, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
@@ -31,6 +31,8 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.batch.types import (
         PartialItemFailureResponse,
         PartialItemFailures,

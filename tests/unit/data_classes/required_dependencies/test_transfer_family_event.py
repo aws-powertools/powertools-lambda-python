@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes.transfer_family_event import (
@@ -28,7 +30,7 @@ def test_build_authentication_response_s3(home_directory_type):
     policy = '{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "s3:*", "Resource": "*"}]}'
     home_directory = "/bucket/user" if home_directory_type == "PATH" else None
     home_directory_details = (
-        {"Entry": "/", "Target": "/bucket/${transfer:UserName}"} if home_directory_type == "LOGICAL" else None
+        [{"Entry": "/", "Target": "/bucket/${transfer:UserName}"}] if home_directory_type == "LOGICAL" else None
     )
     public_keys = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0g+Z"
 
@@ -52,7 +54,7 @@ def test_build_authentication_response_s3(home_directory_type):
         assert response.get("HomeDirectory") == home_directory
         assert "HomeDirectoryDetails" not in response
     else:
-        assert response.get("HomeDirectoryDetails") == [home_directory_details]
+        assert response.get("HomeDirectoryDetails") == '[{"Entry": "/", "Target": "/bucket/${transfer:UserName}"}]'
         assert "HomeDirectory" not in response
 
 
@@ -65,7 +67,7 @@ def test_build_authentication_response_efs(home_directory_type):
     role_arn = "arn:aws:iam::123456789012:role/S3Access"
     home_directory = "/bucket/user" if home_directory_type == "PATH" else None
     home_directory_details = (
-        {"Entry": "/", "Target": "/bucket/${transfer:UserName}"} if home_directory_type == "LOGICAL" else None
+        [{"Entry": "/", "Target": "/bucket/${transfer:UserName}"}] if home_directory_type == "LOGICAL" else None
     )
 
     # WHEN building an authentication response for EFS with different home directory types
@@ -86,7 +88,7 @@ def test_build_authentication_response_efs(home_directory_type):
         assert response.get("HomeDirectory") == home_directory
         assert "HomeDirectoryDetails" not in response
     else:
-        assert response.get("HomeDirectoryDetails") == [home_directory_details]
+        assert response.get("HomeDirectoryDetails") == '[{"Entry": "/", "Target": "/bucket/${transfer:UserName}"}]'
         assert "HomeDirectory" not in response
 
 
@@ -97,7 +99,7 @@ def test_build_authentication_missing_home_directory():
 
     # WHEN home_directory_details is empty and type is LOGICAL
     role_arn = "arn:aws:iam::123456789012:role/S3Access"
-    home_directory_details = {}
+    home_directory_details = []
     home_directory_type = "LOGICAL"
 
     # THEN must raise an exception

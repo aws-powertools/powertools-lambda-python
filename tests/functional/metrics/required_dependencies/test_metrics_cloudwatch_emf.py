@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import json
 import warnings
 from collections import namedtuple
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -23,16 +25,18 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
 )
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
-    CloudWatchEMFOutput,
-)
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
+        CloudWatchEMFOutput,
+    )
 
 
 def serialize_metrics(
-    metrics: List[Dict],
-    dimensions: List[Dict],
+    metrics: list[dict[str, Any]],
+    dimensions: list[dict[str, Any]],
     namespace: str,
-    metadatas: Optional[List[Dict]] = None,
+    metadatas: list[dict] | None = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a list of metrics, dimensions"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -51,11 +55,11 @@ def serialize_metrics(
 
 
 def serialize_single_metric(
-    metric: Dict,
-    dimension: Dict,
+    metric: dict[str, Any],
+    dimension: dict[str, Any],
     namespace: str,
-    metadata: Optional[Dict] = None,
-    timestamp: Union[int, datetime.datetime, None] = None,
+    metadata: dict[str, Any] | None = None,
+    timestamp: int | datetime.datetime | None = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -71,7 +75,7 @@ def serialize_single_metric(
     return my_metrics.serialize_metric_set()
 
 
-def remove_timestamp(metrics: List):
+def remove_timestamp(metrics: list):
     """Helper function to remove Timestamp key from EMF objects as they're built at serialization"""
     for metric in metrics:
         del metric["_aws"]["Timestamp"]
@@ -81,7 +85,7 @@ def capture_metrics_output(capsys):
     return json.loads(capsys.readouterr().out.strip())
 
 
-def capture_metrics_output_multiple_emf_objects(capsys) -> List[CloudWatchEMFOutput]:
+def capture_metrics_output_multiple_emf_objects(capsys) -> list[CloudWatchEMFOutput]:
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from aws_lambda_powertools.utilities.data_classes.iot_registry_event import (

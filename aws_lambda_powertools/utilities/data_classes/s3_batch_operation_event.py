@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, Iterator, Literal
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -10,6 +10,9 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 # list of valid result code. Used both in S3BatchOperationResponse and S3BatchOperationResponseRecord
 VALID_RESULT_CODES: tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
 RESULT_CODE_TYPE = Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass(repr=False, order=False)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import io
@@ -10,7 +12,7 @@ import string
 import sys
 from collections import namedtuple
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -23,6 +25,9 @@ from aws_lambda_powertools.logging.formatter import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 
 @pytest.fixture
@@ -638,6 +643,41 @@ def test_logger_exception_extract_exception_name(stdout, service_name):
     assert "ValueError" == log["exception_name"]
 
 
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="This only works in Python 3.11+")
+def test_logger_exception_extract_exception_notes(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN calling a logger.exception with a ValueError and notes
+    try:
+        raise ValueError("something went wrong")
+    except Exception as error:
+        error.add_note("something went wrong")
+        error.add_note("something went wrong again")
+        logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    # THEN we except to have exception_notes in the exception
+    log = capture_logging_output(stdout)
+    assert len(log["exception_notes"]) == 2
+    assert log["exception_notes"][0] == "something went wrong"
+    assert log["exception_notes"][1] == "something went wrong again"
+    assert "ValueError" == log["exception_name"]
+
+
+def test_logger_exception_should_not_fail_with_exception_block(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN calling a logger.exception with a ValueError and outside of a try/except block
+    logger.exception("Received an exception")
+
+    # THEN the log output should not contain "exception_name" or "exception" and not fail
+    log = capture_logging_output(stdout)
+    assert "exception_name" not in log
+    assert "exception" not in log
+
+
 def test_logger_set_correlation_id(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
@@ -820,12 +860,12 @@ def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, la
     class CustomFormatter(LambdaPowertoolsFormatter):
         def __init__(
             self,
-            json_serializer: Optional[Callable[[Dict], str]] = None,
-            json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
-            json_default: Optional[Callable[[Any], Any]] = None,
-            datefmt: Optional[str] = None,
+            json_serializer: Callable[[dict], str] | None = None,
+            json_deserializer: Callable[[dict, str, bool, int, float], str] | None = None,
+            json_default: Callable[[Any], Any] | None = None,
+            datefmt: str | None = None,
             use_datetime_directive: bool = False,
-            log_record_order: Optional[List[str]] = None,
+            log_record_order: list[str] | None = None,
             utc: bool = False,
             **kwargs,
         ):

@@ -124,5 +124,13 @@ class APIGatewayWebSocketEvent(DictWrapper):
         return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
+    def query_string_parameters(self) -> dict[str, str]:
+        return CaseInsensitiveDict(self.get("queryStringParameters"))
+
+    @property
+    def multi_value_query_string_parameters(self) -> dict[str, list[str]]:
+        return CaseInsensitiveDict(self.get("multiValueQueryStringParameters"))
+
+    @property
     def request_context(self) -> APIGatewayWebSocketEventRequestContext:
         return APIGatewayWebSocketEventRequestContext(self["requestContext"])

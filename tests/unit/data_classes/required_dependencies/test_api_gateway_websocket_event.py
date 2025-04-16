@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 from aws_lambda_powertools.utilities.data_classes import APIGatewayWebSocketEvent
@@ -14,6 +16,8 @@ def test_connect_api_gateway_websocket_event():
     assert parsed_event.json_body is None
     assert parsed_event.headers == raw_event["headers"]
     assert parsed_event.multi_value_headers == raw_event["multiValueHeaders"]
+    assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
+    assert parsed_event.multi_value_query_string_parameters == raw_event["multiValueQueryStringParameters"]
 
     request_context = parsed_event.request_context
     request_context_raw = raw_event["requestContext"]
@@ -84,6 +88,8 @@ def test_message_api_gateway_websocket_event():
     assert parsed_event.json_body == json.loads(raw_event["body"])
     assert parsed_event.headers == {}
     assert parsed_event.multi_value_headers == {}
+    assert parsed_event.query_string_parameters == {}
+    assert parsed_event.multi_value_query_string_parameters == {}
 
     request_context = parsed_event.request_context
     request_context_raw = raw_event["requestContext"]

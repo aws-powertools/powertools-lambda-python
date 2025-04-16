@@ -74,11 +74,11 @@ lint.typing-modules = [
 
 [lint.mccabe]
 # Maximum cyclomatic complexity
-max-complexity = 15
+max-complexity = 16
 
 [lint.pylint]
 # Maximum number of nested blocks
-max-branches = 15
+max-branches = 16
 # Maximum number of if statements in a function
 max-statements = 70
 
@@ -98,5 +98,5 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 # Maintenance: we're keeping EphemeralMetrics code in case of Hyrum's law so we can quickly revert it
 "aws_lambda_powertools/metrics/metrics.py" = ["ERA001"]
 "examples/*" = ["FA100", "TCH"]
-"tests/*" = ["FA100", "TCH"]
+"tests/*" = ["FA100"]
 "aws_lambda_powertools/utilities/parser/models/*" = ["FA100"]

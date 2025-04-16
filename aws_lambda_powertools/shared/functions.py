@@ -8,9 +8,12 @@ import re
 import warnings
 from binascii import Error as BinAsciiError
 from pathlib import Path
-from typing import Any, Generator, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from aws_lambda_powertools.shared import constants
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 logger = logging.getLogger(__name__)
 

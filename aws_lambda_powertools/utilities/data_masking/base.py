@@ -6,11 +6,12 @@ Base class for Data Masking
 
 from __future__ import annotations
 
+import dataclasses
 import functools
 import logging
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any
 
 from jsonpath_ng.ext import parse
 
@@ -22,9 +23,55 @@ from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
     from numbers import Number
 
 logger = logging.getLogger(__name__)
+
+
+def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
+    """
+    Recursively convert complex objects into dictionaries or simple types.
+    Handles dataclasses, Pydantic models, and prevents circular references.
+    """
+    _visited = _visited or set()
+
+    # Handle circular references and primitive types
+    data_id = id(data)
+    if data_id in _visited or isinstance(data, (str, int, float, bool, type(None))):
+        return data
+
+    _visited.add(data_id)
+
+    # Define handlers as (condition, transformer) pairs
+    handlers: list[tuple[Callable[[Any], bool], Callable[[Any], Any]]] = [
+        # Dataclasses
+        (lambda x: hasattr(x, "__dataclass_fields__"), lambda x: prepare_data(dataclasses.asdict(x), _visited)),
+        # Pydantic models
+        (lambda x: callable(getattr(x, "model_dump", None)), lambda x: prepare_data(x.model_dump(), _visited)),
+        # Objects with dict() method
+        (
+            lambda x: callable(getattr(x, "dict", None)) and not isinstance(x, dict),
+            lambda x: prepare_data(x.dict(), _visited),
+        ),
+        # Dictionaries
+        (
+            lambda x: isinstance(x, dict),
+            lambda x: {prepare_data(k, _visited): prepare_data(v, _visited) for k, v in x.items()},
+        ),
+        # Lists, tuples, sets
+        (lambda x: isinstance(x, (list, tuple, set)), lambda x: type(x)(prepare_data(item, _visited) for item in x)),
+        # Objects with __dict__
+        (lambda x: hasattr(x, "__dict__"), lambda x: prepare_data(vars(x), _visited)),
+    ]
+
+    # Find and apply the first matching handler
+    for condition, transformer in handlers:
+        if condition(data):
+            return transformer(data)
+
+    # Default fallback
+    return data
 
 
 class DataMasking:
@@ -93,6 +140,7 @@ class DataMasking:
             data_masker = DataMasking(provider=encryption_provider)
             encrypted = data_masker.encrypt({"secret": "value"})
         """
+        data = prepare_data(data)
         return self._apply_action(
             data=data,
             fields=None,
@@ -135,7 +183,7 @@ class DataMasking:
             data_masker = DataMasking(provider=encryption_provider)
             encrypted = data_masker.decrypt(encrypted_data)
         """
-
+        data = prepare_data(data)
         return self._apply_action(
             data=data,
             fields=None,
@@ -184,6 +232,7 @@ class DataMasking:
         Any
             The data with sensitive information erased or masked.
         """
+        data = prepare_data(data)
         if masking_rules:
             return self._apply_masking_rules(data=data, masking_rules=masking_rules)
         else:

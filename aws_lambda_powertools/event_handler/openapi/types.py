@@ -49,6 +49,18 @@ validation_error_response_definition = {
     },
 }
 
+response_validation_error_response_definition = {
+    "title": "ResponseValidationError",
+    "type": "object",
+    "properties": {
+        "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {"$ref": f"{COMPONENT_REF_PREFIX}ValidationError"},
+        },
+    },
+}
+
 
 class OpenAPIResponseContentSchema(TypedDict, total=False):
     schema: dict

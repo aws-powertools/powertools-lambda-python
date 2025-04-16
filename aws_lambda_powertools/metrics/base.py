@@ -15,7 +15,7 @@ import os
 import warnings
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Callable, Generator
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,
@@ -34,6 +34,8 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
     from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 
 logger = logging.getLogger(__name__)

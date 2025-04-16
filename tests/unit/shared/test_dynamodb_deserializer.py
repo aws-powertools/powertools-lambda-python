@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any
 
 import pytest
 
@@ -10,14 +12,14 @@ class DeserialiserModel:
         self._data = data
         self._deserializer = TypeDeserializer()
 
-    def _deserialize_dynamodb_dict(self) -> Optional[Dict[str, Any]]:
+    def _deserialize_dynamodb_dict(self) -> dict[str, Any] | None:
         if self._data is None:
             return None
 
         return {k: self._deserializer.deserialize(v) for k, v in self._data.items()}
 
     @property
-    def data(self) -> Optional[Dict[str, Any]]:
+    def data(self) -> dict[str, Any] | None:
         """The primary key attribute(s) for the DynamoDB item that was modified."""
         return self._deserialize_dynamodb_dict()
 

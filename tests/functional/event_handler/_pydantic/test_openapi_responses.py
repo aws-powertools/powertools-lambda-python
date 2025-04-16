@@ -170,3 +170,51 @@ def test_openapi_union_partial_response():
     assert 202 in responses.keys()
     assert responses[202].description == "202 Response"
     assert responses[202].content["application/json"].schema_.ref == "#/components/schemas/Order"
+
+
+def test_openapi_route_with_custom_response_validation():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/", custom_response_validation_http_code=418)
+    def handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 418 in responses
+    assert responses[418].description == "Response Validation Error"
+
+
+def test_openapi_resolver_with_custom_response_validation():
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=418)
+
+    @app.get("/")
+    def handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 418 in responses
+    assert responses[418].description == "Response Validation Error"
+
+
+def test_openapi_route_and_resolver_with_custom_response_validation():
+    app = APIGatewayRestResolver(enable_validation=True, response_validation_error_http_code=417)
+
+    @app.get("/", custom_response_validation_http_code=418)
+    def handler():
+        return {"message": "hello world"}
+
+    @app.get("/hi")
+    def another_handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses_with_route_response_validation = schema.paths["/"].get.responses
+    responses_with_resolver_response_validation = schema.paths["/hi"].get.responses
+    assert 418 in responses_with_route_response_validation
+    assert 417 not in responses_with_route_response_validation
+    assert responses_with_route_response_validation[418].description == "Response Validation Error"
+    assert 417 in responses_with_resolver_response_validation
+    assert 418 not in responses_with_resolver_response_validation
+    assert responses_with_resolver_response_validation[417].description == "Response Validation Error"

@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import json
-from typing import Any, List
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics import (
     SchemaValidationError,
 )
 from aws_lambda_powertools.metrics.metrics import Metrics
 from aws_lambda_powertools.metrics.provider import BaseProvider
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def capture_metrics_output(capsys):
@@ -15,9 +19,9 @@ def capture_metrics_output(capsys):
 
 class FakeMetricsProvider(BaseProvider):
     def __init__(self):
-        self.metric_store: List = []
+        self.metric_store: list = []
 
-    def add_metric(self, name: str, value: float, tag: List = None, *args, **kwargs):
+    def add_metric(self, name: str, value: float, tag: list = None, *args, **kwargs):
         self.metric_store.append({"name": name, "value": value})
 
     def serialize_metric_set(self, raise_on_empty_metrics: bool = False, *args, **kwargs):

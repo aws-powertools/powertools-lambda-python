@@ -11,6 +11,15 @@
         "X-Forwarded-For": [""],
         "x-restapi": [""]
     },
+    "queryStringParameters": {
+        "userId": "user123",
+        "token": "abc.def.ghi"
+    },
+    "multiValueQueryStringParameters": {
+    "userId": ["123"],
+    "token": ["abc.def.ghi"],
+    "filter": ["new", "unread"]
+    },
     "requestContext": {
         "routeKey": "$disconnect",
         "disconnectStatusCode": 1005,

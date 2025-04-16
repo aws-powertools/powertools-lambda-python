@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from aws_lambda_powertools.shared.cookies import Cookie, SameSite
