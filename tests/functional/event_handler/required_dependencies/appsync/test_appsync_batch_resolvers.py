@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import InvalidBatchResponse, ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
-from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 
 
 # TESTS RECEIVING THE EVENT PARTIALLY AND PROCESS EACH RECORD PER TIME.

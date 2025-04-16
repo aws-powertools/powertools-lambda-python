@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from aws_lambda_powertools.event_handler import content_types
@@ -20,8 +22,11 @@ from aws_lambda_powertools.event_handler.middlewares import (
 from aws_lambda_powertools.event_handler.middlewares.schema_validation import (
     SchemaValidationMiddleware,
 )
-from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.types import EventHandlerInstance
+
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
 API_RESTV2_EVENT = load_event("apiGatewayProxyV2Event_GET.json")
