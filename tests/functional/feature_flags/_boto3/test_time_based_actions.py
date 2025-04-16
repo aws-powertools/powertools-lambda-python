@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import datetime
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from botocore.config import Config
 from dateutil.tz import gettz
@@ -23,9 +25,9 @@ from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 
 def evaluate_mocked_schema(
     mocker,
-    rules: Dict[str, Any],
-    mocked_time: Tuple[int, int, int, int, int, int, datetime.tzinfo],  # year, month, day, hour, minute, second
-    context: Optional[Dict[str, Any]] = None,
+    rules: dict[str, Any],
+    mocked_time: tuple[int, int, int, int, int, int, datetime.tzinfo],  # year, month, day, hour, minute, second
+    context: dict[str, Any] | None = None,
 ) -> JSONType:
     """
     This helper does the following:
@@ -510,7 +512,7 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
 
 
 def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule_match(mocker):
-    def evaluate(mocked_time: Tuple[int, int, int, int, int, int, datetime.tzinfo]):
+    def evaluate(mocked_time: tuple[int, int, int, int, int, int, datetime.tzinfo]):
         evaluate_mocked_schema(
             mocker=mocker,
             rules={

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from csv import DictReader
 from gzip import GzipFile
 

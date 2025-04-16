@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import io
-from typing import IO, TYPE_CHECKING, Any, Iterable, Literal, Sequence, TypeVar, cast, overload
+from collections.abc import Sequence
+from typing import IO, TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
@@ -12,6 +13,7 @@ from aws_lambda_powertools.utilities.streaming.transformations import (
 from aws_lambda_powertools.utilities.streaming.types import T
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from mmap import mmap
 
     from mypy_boto3_s3.client import S3Client
