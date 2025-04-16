@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from tests.e2e.idempotency.infrastructure import IdempotencyDynamoDBStack

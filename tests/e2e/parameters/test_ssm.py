@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -12,7 +14,7 @@ def ssm_get_parameters_by_name_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
-def parameters_list(infrastructure: dict) -> List[str]:
+def parameters_list(infrastructure: dict) -> list[str]:
     param_list = infrastructure.get("ParametersNameList", "[]")
     return json.loads(param_list)
 
@@ -24,7 +26,7 @@ def test_get_parameters_by_name(
 ):
     # GIVEN/WHEN
     function_response, _ = data_fetcher.get_lambda_response(lambda_arn=ssm_get_parameters_by_name_fn_arn)
-    parameter_values: Dict[str, Any] = json.loads(function_response["Payload"].read().decode("utf-8"))
+    parameter_values: dict[str, Any] = json.loads(function_response["Payload"].read().decode("utf-8"))
 
     # THEN
     for param in parameters_list:

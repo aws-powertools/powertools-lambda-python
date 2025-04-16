@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import subprocess
-from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING
 
 from aws_cdk.aws_lambda import Architecture
 from dirhash import dirhash
@@ -8,6 +9,9 @@ from dirhash import dirhash
 from aws_lambda_powertools import PACKAGE_PATH
 from tests.e2e.utils.constants import CDK_OUT_PATH, SOURCE_CODE_ROOT_PATH
 from tests.e2e.utils.lambda_layer.base import BaseLocalLambdaLayer
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
@@ -79,5 +83,5 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
         return self._build_platform_args(platforms)
 
-    def _build_platform_args(self, platforms: List[str]):
+    def _build_platform_args(self, platforms: list[str]):
         return " ".join([f"--platform {platform}" for platform in platforms])

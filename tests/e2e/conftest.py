@@ -1,11 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import pytest
 
 from tests.e2e.utils.infrastructure import call_once
 from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 
 @pytest.fixture(scope="session", autouse=True)
-def lambda_layer_build(tmp_path_factory: pytest.TempPathFactory, worker_id: str) -> str:
+def lambda_layer_build(tmp_path_factory: pytest.TempPathFactory, worker_id: str) -> Generator[Any, Any, Any]:
     """Build Lambda Layer once before stacks are created
 
     Parameters

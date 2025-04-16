@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from tests.e2e.utils.data_builder.common import build_random_value, build_service_name
 from tests.e2e.utils.data_builder.metrics import (
     build_add_dimensions_input,
