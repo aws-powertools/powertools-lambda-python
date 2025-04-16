@@ -11,9 +11,8 @@ import secrets
 import string
 import sys
 from collections import namedtuple
-from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -26,6 +25,9 @@ from aws_lambda_powertools.logging.formatter import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 
 @pytest.fixture
