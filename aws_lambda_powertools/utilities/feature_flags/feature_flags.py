@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, List, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.utilities.feature_flags import schema
 from aws_lambda_powertools.utilities.feature_flags.comparators import (
@@ -16,6 +16,8 @@ from aws_lambda_powertools.utilities.feature_flags.comparators import (
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.logging import Logger
     from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
     from aws_lambda_powertools.utilities.feature_flags.types import JSONType, P, T
@@ -103,7 +105,7 @@ class FeatureFlags:
     ) -> bool:
         """Evaluates whether context matches conditions, return False otherwise"""
         rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
-        conditions = cast(List[dict], rule.get(schema.CONDITIONS_KEY))
+        conditions = cast(list[dict], rule.get(schema.CONDITIONS_KEY))
 
         if not conditions:
             self.logger.debug(
