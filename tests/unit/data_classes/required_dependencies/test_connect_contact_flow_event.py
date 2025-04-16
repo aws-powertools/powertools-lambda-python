@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
     ConnectContactFlowChannel,
     ConnectContactFlowEndpointType,

@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 import pytest
 
@@ -18,7 +18,7 @@ from tests.functional.utils import load_event
     ],
     ids=["object_created", "object_deleted", "object_expired", "object_restored"],
 )
-def test_s3_eventbridge_notification_detail_parsed(raw_event: Dict):
+def test_s3_eventbridge_notification_detail_parsed(raw_event: dict):
     parsed_event = S3EventBridgeNotificationEvent(raw_event)
 
     assert parsed_event.version == raw_event["version"]
