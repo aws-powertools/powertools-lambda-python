@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -7,6 +9,9 @@ from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.middleware_factory.exceptions import (
     MiddlewareInvalidArgumentError,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @pytest.fixture

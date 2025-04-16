@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Iterator
+from typing import TYPE_CHECKING
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.event_bridge_event import (
     EventBridgeEvent,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class S3Identity(DictWrapper):

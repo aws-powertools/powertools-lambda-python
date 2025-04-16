@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
 from aws_lambda_powertools.utilities.data_classes.api_gateway_proxy_event import RequestContextV2Authorizer
 from tests.functional.utils import load_event
