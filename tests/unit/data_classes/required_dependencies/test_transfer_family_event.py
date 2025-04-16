@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from aws_lambda_powertools.utilities.data_classes.transfer_family_event import (

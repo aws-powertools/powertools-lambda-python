@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, Iterator
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class ActiveMQMessage(DictWrapper):

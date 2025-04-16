@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
