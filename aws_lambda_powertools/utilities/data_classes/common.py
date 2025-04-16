@@ -9,14 +9,17 @@ from __future__ import annotations
 import base64
 import json
 import warnings
+from collections.abc import Mapping
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Iterator, Mapping, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from typing_extensions import deprecated
 
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
     from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (

@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import (
     BasicProperties,
@@ -29,7 +29,7 @@ def test_rabbit_mq_event():
         properties.content_type == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["contentType"]
     )
     assert properties.content_encoding is None
-    assert isinstance(properties.headers, Dict)
+    assert isinstance(properties.headers, dict)
     assert properties.headers.get("header1") is not None
     assert (
         properties.delivery_mode
