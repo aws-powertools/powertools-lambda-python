@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseIdempotencySerializer
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CustomDictSerializer(BaseIdempotencySerializer):
