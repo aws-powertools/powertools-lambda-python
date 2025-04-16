@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import re
 
 import pytest
 
-from aws_lambda_powertools.logging.logger import Logger  # noqa: F401
 from aws_lambda_powertools.utilities.feature_flags.exceptions import (
     SchemaValidationError,
 )
