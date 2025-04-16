@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import base64
 from functools import cached_property
-from typing import Any, Iterator
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class KafkaEventRecord(DictWrapper):
