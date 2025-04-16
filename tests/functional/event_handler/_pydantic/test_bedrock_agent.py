@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import json
-from typing import Any
+from typing import Any, Dict, Optional
 
 import pytest
 from typing_extensions import Annotated
@@ -19,7 +17,7 @@ def test_bedrock_agent_event():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> dict[str, Any]:
+    def claims() -> Dict[str, Any]:
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
         return {"output": claims_response}
@@ -112,7 +110,7 @@ def test_bedrock_agent_event_with_validation_error():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> dict[str, Any]:
+    def claims() -> Dict[str, Any]:
         return "oh no, this is not a dict"  # type: ignore
 
     # WHEN calling the event handler
@@ -193,7 +191,7 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
 
     # WHEN we have a simple handler
     @app.get("/", description="Testing")
-    def handler() -> dict | None:
+    def handler() -> Optional[Dict]:
         pass
 
     # WHEN we get the schema
