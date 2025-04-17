@@ -1511,3 +1511,62 @@ def test_channel_path_normalization(lambda_context, mock_event):
         ],
     }
     assert result2 == expected_result2
+
+
+def test_subscribe_event_with_error_handling(lambda_context, mock_event):
+    """Test error handling during publish event processing."""
+    # GIVEN a sample publish event
+    mock_event["info"]["operation"] = "SUBSCRIBE"
+    del mock_event["events"]  # SUBSCRIBE events are not supported
+
+    # GIVEN an AppSyncEventsResolver with a resolver that raises an exception
+    app = AppSyncEventsResolver()
+
+    @app.on_subscribe(path="/default/*")
+    def test_handler():
+        raise ValueError("Test error")
+
+    # WHEN we resolve the event
+    result = app.resolve(mock_event, lambda_context)
+
+    # THEN we should get an error response
+    assert "error" in result
+    assert "ValueError - Test error" in result["error"]
+
+def test_subscribe_event_with_valid_return(lambda_context, mock_event):
+    """Test error handling during publish event processing."""
+    # GIVEN a sample publish event
+    mock_event["info"]["operation"] = "SUBSCRIBE"
+    del mock_event["events"]  # SUBSCRIBE events are not supported
+
+    # GIVEN an AppSyncEventsResolver with a resolver that returns ok
+    app = AppSyncEventsResolver()
+
+    @app.on_publish(path="/default/*")
+    def test_handler():
+        return 1
+
+    # WHEN we resolve the event
+    result = app.resolve(mock_event, lambda_context)
+
+    # THEN we should get an error response
+    assert result == 1
+
+def test_subscribe_event_with_no_resolver(lambda_context, mock_event):
+    """Test error handling during publish event processing."""
+    # GIVEN a sample publish event
+    mock_event["info"]["operation"] = "SUBSCRIBE"
+    del mock_event["events"]  # SUBSCRIBE events are not supported
+
+    # GIVEN an AppSyncEventsResolver with a resolver that returns ok
+    app = AppSyncEventsResolver()
+
+    @app.on_subscribe(path="/test")
+    def test_handler():
+        return 1
+
+    # WHEN we resolve the event
+    result = app.resolve(mock_event, lambda_context)
+
+    # THEN we should get an error response
+    assert not result
