@@ -1151,7 +1151,7 @@ class Logger:
         """
         if not self._buffer_cache or not self._buffer_config:
             return
-        
+
         # Determine tracer ID, defaulting to first invoke marker
         tracer_id = get_tracer_id()
 
@@ -1256,9 +1256,10 @@ class Logger:
         -------
         None
         """
-        if self._buffer_config:
-            self._buffer_cache.clear()
-
+        if not self._buffer_config or not self._buffer_cache:
+            return
+            
+        self._buffer_cache.clear()
 
 def set_package_logger(
     level: str | int = logging.DEBUG,
