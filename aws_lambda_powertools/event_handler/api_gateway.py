@@ -12,7 +12,7 @@ from enum import Enum
 from functools import partial
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Mapping, Match, Pattern, Sequence, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, Literal, Match, Pattern, TypeVar, cast
 
 from typing_extensions import override
 
@@ -59,6 +59,9 @@ from aws_lambda_powertools.utilities.data_classes import (
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
+
 logger = logging.getLogger(__name__)
 
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
@@ -68,6 +71,7 @@ _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
+_JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
 ResponseT = TypeVar("ResponseT")
@@ -830,7 +834,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def __init__(
         self,
         response: Response,
-        serializer: Callable[[Any], str] = partial(json.dumps, separators=(",", ":"), cls=Encoder),
+        serializer: Callable[[Any], str] = _JSON_DUMP_CALL,
         route: Route | None = None,
     ):
         self.response = response
@@ -1723,8 +1727,9 @@ class ApiGatewayResolver(BaseRouter):
         security = security or self.openapi_config.security
         openapi_extensions = openapi_extensions or self.openapi_config.openapi_extensions
 
+        from pydantic.json_schema import GenerateJsonSchema
+
         from aws_lambda_powertools.event_handler.openapi.compat import (
-            GenerateJsonSchema,
             get_compat_model_name_map,
             get_definitions,
         )

@@ -1,36 +1,30 @@
 # mypy: ignore-errors
-# flake8: noqa
 from __future__ import annotations
 
 from collections import deque
-from copy import copy
+from collections.abc import Mapping, Sequence
 
 # MAINTENANCE: remove when deprecating Pydantic v1. Mypy doesn't handle two different code paths that import different
 # versions of a module, so we need to ignore errors here.
-
 from dataclasses import dataclass, is_dataclass
-from enum import Enum
-from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Mapping, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Set, Tuple, Union
 
-from typing_extensions import Annotated, Literal, get_origin, get_args
-
-from pydantic import BaseModel, create_model
-from pydantic.fields import FieldInfo
-
-from aws_lambda_powertools.event_handler.openapi.types import COMPONENT_REF_PREFIX, UnionType
-
-from pydantic import TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError, create_model
 
 # Importing from internal libraries in Pydantic may introduce potential risks, as these internal libraries
 # are not part of the public API and may change without notice in future releases.
 # We use this for forward reference, as it allows us to handle forward references in type annotations.
 from pydantic._internal._typing_extra import eval_type_lenient
-from pydantic.fields import FieldInfo
 from pydantic._internal._utils import lenient_issubclass
-from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
+from typing_extensions import Annotated, Literal, get_args, get_origin
+
+from aws_lambda_powertools.event_handler.openapi.types import UnionType
 
 if TYPE_CHECKING:
+    from pydantic.fields import FieldInfo
+    from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
+
     from aws_lambda_powertools.event_handler.openapi.types import IncEx, ModelNameMap
 
 Undefined = PydanticUndefined
@@ -119,7 +113,10 @@ class ModelField:
         )
 
     def validate(
-        self, value: Any, values: dict[str, Any] = {}, *, loc: tuple[int | str, ...] = ()
+        self,
+        value: Any,
+        *,
+        loc: tuple[int | str, ...] = (),
     ) -> tuple[Any, list[dict[str, Any]] | None]:
         try:
             return (self._type_adapter.validate_python(value, from_attributes=True), None)
@@ -184,7 +181,8 @@ def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
 
 def get_missing_field_error(loc: tuple[str, ...]) -> dict[str, Any]:
     error = ValidationError.from_exception_data(
-        "Field required", [{"type": "missing", "loc": loc, "input": {}}]
+        "Field required",
+        [{"type": "missing", "loc": loc, "input": {}}],
     ).errors()[0]
     error["input"] = None
     return error
@@ -308,7 +306,7 @@ def value_is_sequence(value: Any) -> bool:
 
 def _annotation_is_complex(annotation: type[Any] | None) -> bool:
     return (
-        lenient_issubclass(annotation, (BaseModel, Mapping))  # TODO: UploadFile
+        lenient_issubclass(annotation, (BaseModel, Mapping))  # Keep it to UploadFile
         or _annotation_is_sequence(annotation)
         or is_dataclass(annotation)
     )

@@ -1,14 +1,18 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import InvalidBatchResponse, ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
-from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 
 
 # TESTS RECEIVING THE EVENT PARTIALLY AND PROCESS EACH RECORD PER TIME.
@@ -95,7 +99,7 @@ def test_resolve_batch_processing_with_related_events_one_at_time():
     app = AppSyncResolver()
 
     @app.batch_resolver(type_name="Post", field_name="relatedPosts", aggregate=False)
-    def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+    def related_posts(event: AppSyncResolverEvent) -> list | None:
         return posts_related[event.source["post_id"]]
 
     # WHEN related_posts function, which is the batch resolver, is called with the event.
@@ -155,7 +159,7 @@ def test_resolve_batch_processing_with_simple_queries_one_at_time():
 
     # WHEN the batch resolver for the listLocations field is defined
     @app.batch_resolver(field_name="listLocations", aggregate=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         return event.source["id"] if event.source else None
 
     # THEN the resolver should correctly process the batch of queries
@@ -211,7 +215,7 @@ def test_resolve_batch_processing_with_raise_on_exception_one_at_time():
 
     # WHEN the sync batch resolver for the 'listLocations' field is defined with raise_on_error=True
     @app.batch_resolver(field_name="listLocations", raise_on_error=True, aggregate=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise RuntimeError
 
     # THEN the resolver should raise a RuntimeError when processing the batch of queries
@@ -264,7 +268,7 @@ def test_async_resolve_batch_processing_with_raise_on_exception_one_at_time():
 
     # WHEN the async batch resolver for the 'listLocations' field is defined with raise_on_error=True
     @app.async_batch_resolver(field_name="listLocations", raise_on_error=True, aggregate=False)
-    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise RuntimeError
 
     # THEN the resolver should raise a RuntimeError when processing the batch of queries
@@ -315,7 +319,7 @@ def test_resolve_batch_processing_without_exception_one_at_time():
     app = AppSyncResolver()
 
     @app.batch_resolver(field_name="listLocations", raise_on_error=False, aggregate=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise RuntimeError
 
     # Call the implicit handler
@@ -371,7 +375,7 @@ def test_resolve_async_batch_processing_without_exception_one_at_time():
 
     # WHEN the batch resolver for the 'listLocations' field is defined with raise_on_error=False
     @app.async_batch_resolver(field_name="listLocations", raise_on_error=False, aggregate=False)
-    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise RuntimeError
 
     result = app.resolve(event, LambdaContext())
@@ -548,7 +552,7 @@ def test_resolve_async_batch_processing():
 
     # WHEN the async batch resolver for the 'listLocations' field is defined
     @app.async_batch_resolver(field_name="listLocations", aggregate=False)
-    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:
+    async def create_something(event: AppSyncResolverEvent) -> list | None:
         return event.source["id"] if event.source else None
 
     # THEN the resolver should correctly process the batch of queries asynchronously
@@ -699,7 +703,7 @@ def test_resolve_batch_processing_with_simple_queries_with_aggregate():
     # WHEN using an aggregated event
     # WHEN function returns a List
     @app.batch_resolver(field_name="listLocations")
-    def create_something(event: List[AppSyncResolverEvent]) -> List:  # noqa AA03 VNE003
+    def create_something(event: list[AppSyncResolverEvent]) -> list:  # noqa AA03 VNE003
         results = []
         for record in event:
             results.append(record.source.get("id") if record.source else None)
@@ -760,7 +764,7 @@ def test_resolve_async_batch_processing_with_simple_queries_with_aggregate():
     # WHEN using an aggregated event
     # WHEN function returns a List
     @app.async_batch_resolver(field_name="listLocations")
-    async def create_something(event: List[AppSyncResolverEvent]) -> List:  # noqa AA03 VNE003
+    async def create_something(event: list[AppSyncResolverEvent]) -> list:  # noqa AA03 VNE003
         results = []
         for record in event:
             results.append(record.source.get("id") if record.source else None)
@@ -797,7 +801,7 @@ def test_resolve_batch_processing_with_aggregate_and_returning_a_non_list():
     # WHEN using an aggregated event
     # WHEN function return something different than a List
     @app.batch_resolver(field_name="listLocations")
-    def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+    def create_something(event: list[AppSyncResolverEvent]) -> list | None:  # noqa AA03 VNE003
         return event[0].source.get("id") if event[0].source else None
 
     # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
@@ -828,7 +832,7 @@ def test_resolve_async_batch_processing_with_aggregate_and_returning_a_non_list(
     # WHEN using an aggregated event
     # WHEN function return something different than a List
     @app.async_batch_resolver(field_name="listLocations")
-    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+    async def create_something(event: list[AppSyncResolverEvent]) -> list | None:  # noqa AA03 VNE003
         return event[0].source.get("id") if event[0].source else None
 
     # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
@@ -859,7 +863,7 @@ def test_resolve_sync_batch_processing_with_aggregate_and_without_return():
     # WHEN using an aggregated event
     # WHEN function there is no return statement
     @app.batch_resolver(field_name="listLocations")
-    def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+    def create_something(event: list[AppSyncResolverEvent]) -> list | None:  # noqa AA03 VNE003
         def do_something_with_post_id(post_id): ...
 
         post_id = event[0].source.get("id") if event[0].source else None
@@ -895,7 +899,7 @@ def test_resolve_async_batch_processing_with_aggregate_and_without_return():
     # WHEN using an aggregated event
     # WHEN function there is no return statement
     @app.async_batch_resolver(field_name="listLocations")
-    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+    async def create_something(event: list[AppSyncResolverEvent]) -> list | None:  # noqa AA03 VNE003
         def do_something_with_post_id(post_id): ...
 
         post_id = event[0].source.get("id") if event[0].source else None
@@ -916,7 +920,7 @@ def test_include_router_access_batch_current_event():
     router = Router()
 
     @router.batch_resolver(field_name="createSomething")
-    def get_user(event: List) -> List:
+    def get_user(event: list) -> list:
         return [router.current_batch_event[0].identity.sub]
 
     app.include_router(router)
@@ -935,7 +939,7 @@ def test_app_access_batch_current_event():
     app = AppSyncResolver()
 
     @app.batch_resolver(field_name="createSomething")
-    def get_user(event: List) -> List:
+    def get_user(event: list) -> list:
         return [app.current_batch_event[0].identity.sub]
 
     # WHEN we resolve the event
@@ -952,7 +956,7 @@ def test_context_is_accessible_in_sync_batch_resolver():
     app = AppSyncResolver()
 
     @app.batch_resolver(field_name="createSomething")
-    def get_user(event: List) -> List:
+    def get_user(event: list) -> list:
         return [app.context.get("project_name")]
 
     # WHEN we resolve the event
@@ -971,7 +975,7 @@ def test_context_is_accessible_in_async_batch_resolver():
     app = AppSyncResolver()
 
     @app.async_batch_resolver(field_name="createSomething")
-    async def get_user(event: List) -> List:
+    async def get_user(event: list) -> list:
         return [app.context.get("project_name")]
 
     # WHEN we resolve the event
@@ -1034,7 +1038,7 @@ def test_exception_handler_with_batch_resolver_and_raise_exception():
 
     # WHEN the sync batch resolver for the 'listLocations' field is defined with raise_on_error=True
     @app.batch_resolver(field_name="listLocations", raise_on_error=True, aggregate=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise ValueError
 
     # Call the implicit handler
@@ -1095,7 +1099,7 @@ def test_exception_handler_with_batch_resolver_and_no_raise_exception():
 
     # WHEN the sync batch resolver for the 'listLocations' field is defined with raise_on_error=False
     @app.batch_resolver(field_name="listLocations", raise_on_error=False, aggregate=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: AppSyncResolverEvent) -> list | None:  # noqa AA03 VNE003
         raise ValueError
 
     # Call the implicit handler
