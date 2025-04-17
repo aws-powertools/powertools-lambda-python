@@ -242,10 +242,6 @@ class Logger:
         buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
-
-        # Used in case of sampling
-        self.initial_log_level = self._determine_log_level(level)
-
         self.service = resolve_env_var_choice(
             choice=service,
             env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
@@ -284,6 +280,9 @@ class Logger:
         self._buffer_config = buffer_config
         if self._buffer_config:
             self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
+
+        # Used in case of sampling
+        self.initial_log_level = self._determine_log_level(level)
 
         self._init_logger(
             formatter_options=formatter_options,
@@ -1047,6 +1046,20 @@ class Logger:
                     stacklevel=2,
                 )
 
+            # Check if buffer level is less verbose than ALC
+            if (
+                hasattr(self, "_buffer_config")
+                and self._buffer_config
+                and logging.getLevelName(lambda_log_level)
+                > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+            ):
+                warnings.warn(
+                    "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
+                    "Buffered logs will be filtered by ALC",
+                    PowertoolsUserWarning,
+                    stacklevel=2,
+                )
+
         # AWS Lambda Advanced Logging Controls takes precedence over Powertools log level and we use this
         if lambda_log_level:
             return lambda_log_level
@@ -1133,6 +1146,7 @@ class Logger:
         Handles special first invocation buffering and migration of log records
         between different tracer contexts.
         """
+
         # Determine tracer ID, defaulting to first invoke marker
         tracer_id = get_tracer_id()
 
@@ -1180,6 +1194,7 @@ class Logger:
         Any exceptions from underlying logging or buffer mechanisms
         will be propagated to caller
         """
+
         tracer_id = get_tracer_id()
 
         # Flushing log without a tracer id? Return
@@ -1190,6 +1205,21 @@ class Logger:
         buffer = self._buffer_cache.get(tracer_id)
         if not buffer:
             return
+        
+        if not self._buffer_config:
+            return
+        
+        # Check ALC level against buffer level
+        lambda_log_level = self._get_aws_lambda_log_level()
+        if lambda_log_level:
+            # Check if buffer level is less verbose than ALC
+            if (logging.getLevelName(lambda_log_level) > logging.getLevelName(self._buffer_config.buffer_at_verbosity)):
+                warnings.warn(
+                    "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
+                    "Some logs might be missing",
+                    PowertoolsUserWarning,
+                    stacklevel=2,
+                )
 
         # Process log records
         for log_line in buffer:
