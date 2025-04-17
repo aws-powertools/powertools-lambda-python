@@ -197,7 +197,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().put(
@@ -239,7 +238,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().patch(
@@ -281,7 +279,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().delete(
@@ -368,8 +365,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
             The OpenAPI schema as a JSON serializable dict.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
-
-        openapi_extensions = None
 
         schema = super().get_openapi_schema(
             title=title,
