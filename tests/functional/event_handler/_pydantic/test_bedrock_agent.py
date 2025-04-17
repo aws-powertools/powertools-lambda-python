@@ -212,8 +212,6 @@ def test_bedrock_resolver_with_openapi_extensions():
         pass
 
     # WHEN we get the schema
-    schema = app.get_openapi_schema()
-
     schema = json.loads(app.get_openapi_json_schema())
 
     # THEN the OpenAPI schema must contain the "x-requireConfirmation" extension at the operation level
