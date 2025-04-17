@@ -1,30 +1,25 @@
-from __future__ import annotations
-
 import json
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import List, Optional, Union
 
 import boto3
+from mypy_boto3_logs.client import CloudWatchLogsClient
 from pydantic import BaseModel
 from retry import retry
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from mypy_boto3_logs.client import CloudWatchLogsClient
 
 
 class Log(BaseModel, extra="allow"):
     level: str
     location: str
-    message: dict | str
+    message: Union[dict, str]
     timestamp: str
     service: str
-    cold_start: bool | None = None
-    function_name: str | None = None
-    function_memory_size: str | None = None
-    function_arn: str | None = None
-    function_request_id: str | None = None
-    xray_trace_id: str | None = None
+    cold_start: Optional[bool] = None
+    function_name: Optional[str] = None
+    function_memory_size: Optional[str] = None
+    function_arn: Optional[str] = None
+    function_request_id: Optional[str] = None
+    xray_trace_id: Optional[str] = None
 
 
 class LogFetcher:
@@ -32,8 +27,8 @@ class LogFetcher:
         self,
         function_name: str,
         start_time: datetime,
-        log_client: CloudWatchLogsClient | None = None,
-        filter_expression: str | None = None,
+        log_client: Optional[CloudWatchLogsClient] = None,
+        filter_expression: Optional[str] = None,
         minimum_log_entries: int = 1,
     ):
         """Fetch and expose Powertools for AWS Lambda (Python) Logger logs from CloudWatch Logs
@@ -57,9 +52,9 @@ class LogFetcher:
         self.filter_expression = filter_expression or "message"  # Logger message key
         self.log_group = f"/aws/lambda/{self.function_name}"
         self.minimum_log_entries = minimum_log_entries
-        self.logs: list[Log] = self._get_logs()
+        self.logs: List[Log] = self._get_logs()
 
-    def get_log(self, key: str, value: any | None = None) -> list[Log]:
+    def get_log(self, key: str, value: Optional[any] = None) -> List[Log]:
         """Get logs based on key or key and value
 
         Parameters
@@ -83,7 +78,7 @@ class LogFetcher:
                 logs.append(log)
         return logs
 
-    def get_cold_start_log(self) -> list[Log]:
+    def get_cold_start_log(self) -> List[Log]:
         """Get logs where cold start was true
 
         Returns
@@ -103,7 +98,7 @@ class LogFetcher:
         """
         return all(hasattr(log, key) for log in self.logs for key in keys)
 
-    def _get_logs(self) -> list[Log]:
+    def _get_logs(self) -> List[Log]:
         ret = self.log_client.filter_log_events(
             logGroupName=self.log_group,
             startTime=self.start_time,
@@ -137,8 +132,8 @@ def get_logs(
     function_name: str,
     start_time: datetime,
     minimum_log_entries: int = 1,
-    filter_expression: str | None = None,
-    log_client: CloudWatchLogsClient | None = None,
+    filter_expression: Optional[str] = None,
+    log_client: Optional[CloudWatchLogsClient] = None,
 ) -> LogFetcher:
     """_summary_
 

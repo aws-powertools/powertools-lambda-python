@@ -30,6 +30,6 @@ class PartialFailureCallback(BaseModel):
 OrderCallback = Annotated[Union[SuccessCallback, ErrorCallback, PartialFailureCallback], Field(discriminator="status")]
 
 
-@event_parser
+@event_parser(model=OrderCallback)
 def lambda_handler(event: OrderCallback, context: LambdaContext):
     return {"error_msg": event.error_msg}

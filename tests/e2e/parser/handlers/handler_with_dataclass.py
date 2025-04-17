@@ -15,6 +15,6 @@ class BasicDataclass:
     version: str
 
 
-@event_parser
+@event_parser(model=BasicDataclass)
 def lambda_handler(event: BasicDataclass, context: LambdaContext):
     return {"product": event.product}
