@@ -1,11 +1,13 @@
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import Any
 
 
 def build_trace_default_query(function_name: str) -> str:
     return f'service(id(name: "{function_name}"))'
 
 
-def build_put_annotations_input(**annotations: str) -> List[Dict]:
+def build_put_annotations_input(**annotations: str) -> list[dict]:
     """Create trace annotations input to be used with Tracer.put_annotation()
 
     Parameters
@@ -21,7 +23,7 @@ def build_put_annotations_input(**annotations: str) -> List[Dict]:
     return [{"key": key, "value": value} for key, value in annotations.items()]
 
 
-def build_put_metadata_input(namespace: Optional[str] = None, **metadata: Any) -> List[Dict]:
+def build_put_metadata_input(namespace: str | None = None, **metadata: Any) -> list[dict]:
     """Create trace metadata input to be used with Tracer.put_metadata()
 
     All metadata will be under `test` namespace

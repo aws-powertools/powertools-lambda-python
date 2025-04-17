@@ -1,14 +1,15 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
 
 
 class InfrastructureProvider(ABC):
     @abstractmethod
-    def create_lambda_functions(self, function_props: Optional[Dict] = None) -> Dict:
+    def create_lambda_functions(self, function_props: dict | None = None) -> dict:
         pass
 
     @abstractmethod
-    def deploy(self) -> Dict[str, str]:
+    def deploy(self) -> dict[str, str]:
         pass
 
     @abstractmethod

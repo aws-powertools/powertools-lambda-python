@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 
