@@ -200,3 +200,21 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
     # THEN the schema must be a valid 3.0.3 version
     assert openapi30_schema(schema)
     assert schema.get("openapi") == "3.0.3"
+
+
+def test_bedrock_resolver_with_openapi_extensions():
+    # GIVEN BedrockAgentResolver is initialized with enable_validation=True
+    app = BedrockAgentResolver(enable_validation=True)
+
+    # WHEN we have a simple handler with openapi extension
+    @app.get("/", description="Testing", openapi_extensions={"x-requireConfirmation": "ENABLED"})
+    def handler() -> Optional[Dict]:
+        pass
+
+    # WHEN we get the schema
+    schema = app.get_openapi_schema()
+
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the OpenAPI schema must contain the "x-requireConfirmation" extension at the operation level
+    assert schema["paths"]["/"]["get"]["x-requireConfirmation"] == "ENABLED"

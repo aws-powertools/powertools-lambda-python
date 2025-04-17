@@ -110,11 +110,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        openapi_extensions = None
         security = None
 
         return super().get(
@@ -151,11 +151,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().post(
@@ -192,6 +192,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
@@ -233,6 +234,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
@@ -274,6 +276,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
@@ -325,6 +328,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         license_info: License | None = None,
         security_schemes: dict[str, SecurityScheme] | None = None,
         security: list[dict[str, list[str]]] | None = None,
+        openapi_extensions: dict[str, Any] | None = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict.
