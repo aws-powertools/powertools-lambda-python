@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from aws_lambda_powertools.event_handler.events_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_events_event import AppSyncResolverEventsEvent
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
+from aws_lambda_powertools.event_handler.events_appsync.exceptions import UnauthorizedException
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -153,6 +154,8 @@ class AppSyncEventsResolver(Router):
         if resolver:
             try:
                 return resolver["func"]()
+            except UnauthorizedException:
+                raise
             except Exception as error:
                 return {"error": self._format_error_response(error)}
 
@@ -239,6 +242,8 @@ class AppSyncEventsResolver(Router):
                     )
 
                 return {"events": response}
+            except UnauthorizedException:
+                raise
             except Exception as error:
                 return {"error": self._format_error_response(error)}
 
@@ -291,6 +296,8 @@ class AppSyncEventsResolver(Router):
                     )
 
                 return {"events": response}
+            except UnauthorizedException:
+                raise
             except Exception as error:
                 return {"error": self._format_error_response(error)}
 

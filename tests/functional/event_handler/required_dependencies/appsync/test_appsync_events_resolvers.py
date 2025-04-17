@@ -4,6 +4,7 @@ from copy import deepcopy
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncEventsResolver
+from aws_lambda_powertools.event_handler.events_appsync.exceptions import UnauthorizedException
 from aws_lambda_powertools.event_handler.events_appsync.router import Router
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.utils import load_event
@@ -1571,3 +1572,40 @@ def test_subscribe_event_with_no_resolver(lambda_context, mock_event):
 
     # THEN we should get an error response
     assert not result
+
+def test_publish_events_throw_unauthorized_exception(lambda_context, mock_event):
+    """Test handling events with an empty payload."""
+    # GIVEN a sample publish event with empty events
+    mock_event["info"]["operation"] = "PUBLISH"
+    mock_event["info"]["channel"]["path"] = "/default/test"
+    mock_event["events"] = [
+        {"id": "123", "payload": {"data": "test data"}},
+    ]
+
+    # GIVEN an AppSyncEventsResolver
+    app = AppSyncEventsResolver()
+
+    @app.on_publish(path="/default/*", aggregate=True)
+    def handle_events(payload):
+        raise UnauthorizedException
+
+    # WHEN we resolve the event with unauthorized route
+    with pytest.raises(UnauthorizedException):
+        app.resolve(mock_event, lambda_context)
+
+def test_subscribe_events_throw_unauthorized_exception(lambda_context, mock_event):
+    """Test handling events with an empty payload."""
+    # GIVEN a sample publish event with empty events
+    mock_event["info"]["operation"] = "SUBSCRIBE"
+    mock_event["info"]["channel"]["path"] = "/default/test"
+
+    # GIVEN an AppSyncEventsResolver
+    app = AppSyncEventsResolver()
+
+    @app.on_subscribe(path="/default/*")
+    def handle_events():
+        raise UnauthorizedException
+
+    # WHEN we resolve the event with unauthorized route
+    with pytest.raises(UnauthorizedException):
+        app.resolve(mock_event, lambda_context)
