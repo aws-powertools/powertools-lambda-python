@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from aws_cdk import CfnOutput, Duration, RemovalPolicy
 from aws_cdk import aws_dynamodb as dynamodb
-from aws_cdk.aws_dynamodb import Table
+
+if TYPE_CHECKING:
+    from aws_cdk.aws_dynamodb import Table
 
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
