@@ -524,3 +524,23 @@ def test_logger_buffer_is_cleared_between_lambda_invocations_without_decoration(
 
     # THEN Verify buffer for the original trace ID is cleared
     assert not logger._buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")
+
+
+def test_warning_when_alc_less_verbose_than_buffer(stdout, monkeypatch):
+    # GIVEN Lambda ALC set to INFO
+    monkeypatch.setenv("AWS_LAMBDA_LOG_LEVEL", "INFO")
+    # Set initial trace ID for first Lambda invocation
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # WHEN creating a logger with DEBUG buffer level
+    # THEN a warning should be emitted
+    with pytest.warns(PowertoolsUserWarning, match="Advanced Logging Controls*"):
+        logger = Logger(service="test", level="DEBUG", buffer_config=LoggerBufferConfig(buffer_at_verbosity="DEBUG"))
+
+    # AND logging a debug message
+    logger.debug("This is a debug")
+
+    # AND flushing buffer
+    # THEN another warning should be emitted about ALC and buffer level mismatch
+    with pytest.warns(PowertoolsUserWarning, match="Advanced Logging Controls*"):
+        logger.flush_buffer()
