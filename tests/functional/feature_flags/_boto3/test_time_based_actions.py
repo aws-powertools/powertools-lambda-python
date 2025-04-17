@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from botocore.config import Config
 from dateutil.tz import gettz
@@ -20,7 +20,9 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
-from aws_lambda_powertools.utilities.feature_flags.types import JSONType
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.feature_flags.types import JSONType
 
 
 def evaluate_mocked_schema(

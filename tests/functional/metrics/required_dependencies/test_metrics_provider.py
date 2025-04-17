@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics import (
     SchemaValidationError,
 )
 from aws_lambda_powertools.metrics.metrics import Metrics
 from aws_lambda_powertools.metrics.provider import BaseProvider
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def capture_metrics_output(capsys):

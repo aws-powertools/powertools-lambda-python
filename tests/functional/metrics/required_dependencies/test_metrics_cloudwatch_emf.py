@@ -4,7 +4,7 @@ import datetime
 import json
 import warnings
 from collections import namedtuple
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -25,9 +25,11 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
 )
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
-    CloudWatchEMFOutput,
-)
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
+        CloudWatchEMFOutput,
+    )
 
 
 def serialize_metrics(
