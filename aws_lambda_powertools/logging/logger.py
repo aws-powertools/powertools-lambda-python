@@ -1206,6 +1206,9 @@ class Logger:
         if not buffer:
             return
         
+        if not self._buffer_config:
+            return
+        
         # Check ALC level against buffer level
         lambda_log_level = self._get_aws_lambda_log_level()
         if lambda_log_level:
