@@ -242,6 +242,8 @@ class Logger:
         buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
+        self._buffer_config = buffer_config
+        self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes) if buffer_config else None
 
         # Used in case of sampling
         self.initial_log_level = self._determine_log_level(level)
@@ -1057,7 +1059,7 @@ class Logger:
                 warnings.warn(
                     "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
                     "Buffered logs will be filtered by ALC",
-                    UserWarning,
+                    PowertoolsUserWarning,
                     stacklevel=2,
                 )
 
@@ -1196,6 +1198,23 @@ class Logger:
         """
         tracer_id = get_tracer_id()
 
+        # Check ALC level against buffer level
+        lambda_log_level = self._get_aws_lambda_log_level()
+        if lambda_log_level:
+            # Check if buffer level is less verbose than ALC
+            if (
+                hasattr(self, "_buffer_config")
+                and self._buffer_config
+                and logging.getLevelName(lambda_log_level)
+                > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+            ):
+                warnings.warn(
+                    "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
+                    "Some logs might be missing",
+                    PowertoolsUserWarning,
+                    stacklevel=2,
+                )
+
         # Flushing log without a tracer id? Return
         if not tracer_id:
             return
@@ -1204,20 +1223,6 @@ class Logger:
         buffer = self._buffer_cache.get(tracer_id)
         if not buffer:
             return
-
-        # Check ALC level before flushing
-        alc_level = self._get_aws_lambda_log_level()
-        if (
-            alc_level is not None
-            and self._buffer_config
-            and logging.getLevelName(alc_level) > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
-        ):
-            warnings.warn(
-                message="Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level." 
-                "Some logs might be missing.",
-                category=UserWarning,
-                stacklevel=2,
-            )
 
         # Process log records
         for log_line in buffer:

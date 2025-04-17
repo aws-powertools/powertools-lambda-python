@@ -527,15 +527,22 @@ def test_logger_buffer_is_cleared_between_lambda_invocations_without_decoration(
     assert not logger._buffer_cache.get("1-67c39786-5908a82a246fb67f3089263f")
 
 
-def test_warning_when_alc_less_verbose_than_buffer(monkeypatch):
+def test_warning_when_alc_less_verbose_than_buffer(stdout, monkeypatch):
     # GIVEN Lambda ALC set to INFO
     monkeypatch.setenv("AWS_LAMBDA_LOG_LEVEL", "INFO")
 
-    # WHEN creating a logger with DEBUG buffer level AND logging a debug message
+    # WHEN creating a logger with DEBUG buffer level
     # THEN a warning should be emitted
-    with pytest.warns(UserWarning, match="Advanced Logging Controls .* Buffered logs will be filtered by ALC"):
+    with pytest.warns(PowertoolsUserWarning, match="Advanced Logging Controls*"):
         logger = Logger(service="test", level="DEBUG", buffer_config=LoggerBufferConfig(buffer_at_verbosity="DEBUG"))
-        logger.debug("This is a debug")
+
+    # AND logging a debug message
+    logger.debug("This is a debug")
+
+    # AND flushing buffer
+    # THEN another warning should be emitted about ALC and buffer level mismatch
+    with pytest.warns(PowertoolsUserWarning, match="Advanced Logging Controls*"):
+        logger.flush_buffer()
 
 
 def test_warning_on_buffer_flush_when_alc_less_verbose(monkeypatch):
@@ -551,6 +558,8 @@ def test_warning_on_buffer_flush_when_alc_less_verbose(monkeypatch):
         logger.flush_buffer()
 
     # THEN appropriate warnings should be emitted
-    assert len(warning_info) == 2
-    assert "Buffered logs will be filtered by ALC" in str(warning_info[0].message)
-    assert "Some logs might be missing" in str(warning_info[1].message)
+    assert any("Some logs might be missing" in str(w.message) for w in warning_info)
+    assert any(
+        "Current log level (DEBUG) does not match AWS Lambda Advanced Logging Controls" in str(w.message)
+        for w in warning_info
+    )
