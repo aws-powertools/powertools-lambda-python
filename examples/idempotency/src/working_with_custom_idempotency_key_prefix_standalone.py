@@ -29,15 +29,15 @@ class Order:
     data_keyword_argument="order",
     config=config,
     persistence_store=dynamodb,
-    key_prefix="my_custom_prefix", # (1)!
+    key_prefix="my_custom_prefix",  # (1)!
 )
-def process_order(order: Order): 
+def process_order(order: Order):
     return f"processed order {order.order_id}"
 
 
 def lambda_handler(event: dict, context: LambdaContext):
     # see Lambda timeouts section
-    config.register_lambda_context(context) 
+    config.register_lambda_context(context)
 
     order_item = OrderItem(sku="fake", description="sample")
     order = Order(item=order_item, order_id=1)

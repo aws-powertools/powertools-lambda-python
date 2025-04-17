@@ -9,7 +9,6 @@ dynamodb_provider = parameters.DynamoDBProvider(table_name="ParameterTable")
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-
     try:
         # Retrieve multiple parameters using HASH KEY
         all_parameters: Any = dynamodb_provider.get_multiple("config")
@@ -17,7 +16,6 @@ def lambda_handler(event: dict, context: LambdaContext):
         limit = 2
 
         for parameter, value in all_parameters.items():
-
             if parameter == "endpoint_comments":
                 endpoint_comments = value
 

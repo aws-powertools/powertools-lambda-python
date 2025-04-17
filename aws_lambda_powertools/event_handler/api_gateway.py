@@ -1606,7 +1606,6 @@ class ApiGatewayResolver(BaseRouter):
         response_validation_error_http_code: HTTPStatus | int | None,
         enable_validation: bool,
     ) -> HTTPStatus:
-
         if response_validation_error_http_code and not enable_validation:
             msg = "'response_validation_error_http_code' cannot be set when enable_validation is False."
             raise ValueError(msg)
@@ -1615,7 +1614,6 @@ class ApiGatewayResolver(BaseRouter):
             not isinstance(response_validation_error_http_code, HTTPStatus)
             and response_validation_error_http_code is not None
         ):
-
             try:
                 response_validation_error_http_code = HTTPStatus(response_validation_error_http_code)
             except ValueError:

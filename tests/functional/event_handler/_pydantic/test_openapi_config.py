@@ -28,7 +28,6 @@ def test_export_openapi_schema_with_custom_configuration():
 
 
 def test_prioritize_direct_parameters_over_stored_configuration():
-
     # GIVEN
     stored_config = {
         "title": "Stored API Title",

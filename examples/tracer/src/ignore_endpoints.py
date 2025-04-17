@@ -13,8 +13,7 @@ tracer.ignore_endpoint(hostname=ENDPOINT, urls=IGNORE_URLS)
 tracer.ignore_endpoint(hostname=f"*.{ENDPOINT}", urls=IGNORE_URLS)  # `<stage>.ENDPOINT`
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @tracer.capture_method(capture_error=False)

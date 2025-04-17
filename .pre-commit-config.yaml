@@ -12,13 +12,13 @@ repos:
       - id: check-toml
   - repo: local
     hooks:
-      - id: black
-        name: formatting::black
-        entry: poetry run black
+      - id: ruff
+        name: formatting::ruff
+        entry: poetry run ruff format
         language: system
         types: [python]
       - id: ruff
-        name: linting-format::ruff
+        name: linting::ruff
         entry: poetry run ruff check
         language: system
         types: [python]

@@ -14,8 +14,7 @@ posts_related = {
 }
 
 
-class PostRelatedNotFound(Exception):
-    ...
+class PostRelatedNotFound(Exception): ...
 
 
 @app.batch_resolver(type_name="Query", field_name="relatedPosts", raise_on_error=True)  # (1)!

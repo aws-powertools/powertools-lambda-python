@@ -16,8 +16,7 @@ persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(event_key_jmespath="powertools_json(body)")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @idempotent(config=config, persistence_store=persistence_layer)

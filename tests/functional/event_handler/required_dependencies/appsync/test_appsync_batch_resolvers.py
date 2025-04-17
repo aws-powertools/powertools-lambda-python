@@ -988,7 +988,6 @@ def test_context_is_accessible_in_async_batch_resolver():
 
 
 def test_exception_handler_with_batch_resolver_and_raise_exception():
-
     # GIVEN a AppSyncResolver instance
     app = AppSyncResolver()
 
@@ -1049,7 +1048,6 @@ def test_exception_handler_with_batch_resolver_and_raise_exception():
 
 
 def test_exception_handler_with_batch_resolver_and_no_raise_exception():
-
     # GIVEN a AppSyncResolver instance
     app = AppSyncResolver()
 

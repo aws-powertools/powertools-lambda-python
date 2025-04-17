@@ -16,7 +16,8 @@ encryption_provider = AWSEncryptionSDKProvider(
     local_cache_capacity=200,
     max_cache_age_seconds=400,
     max_messages_encrypted=200,
-    max_bytes_encrypted=2000)
+    max_bytes_encrypted=2000,
+)
 
 data_masker = DataMasking(provider=encryption_provider)
 

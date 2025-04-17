@@ -66,6 +66,7 @@ def service_error():
 def service_unavailable_error():
     raise ServiceUnavailableError("Service is temporarily unavailable")  # HTTP 503
 
+
 @app.get("/todos")
 @tracer.capture_method
 def get_todos():

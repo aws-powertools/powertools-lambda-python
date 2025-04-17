@@ -9,8 +9,7 @@ tracer = Tracer()
 ENDPOINT = os.getenv("PAYMENT_API", "")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @tracer.capture_method(capture_error=False)

@@ -39,7 +39,6 @@ class TransferFamilyAuthorizer(DictWrapper):
 
 
 class TransferFamilyAuthorizerResponse:
-
     def _build_authentication_response(
         self,
         role_arn: str,
@@ -51,7 +50,6 @@ class TransferFamilyAuthorizerResponse:
         user_uid: int | None = None,
         public_keys: str | None = None,
     ) -> dict[str, Any]:
-
         response: dict[str, Any] = {}
 
         if home_directory_type == "PATH":

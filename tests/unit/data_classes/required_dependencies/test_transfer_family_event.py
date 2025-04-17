@@ -22,7 +22,6 @@ def test_transfer_family_authorizer_event():
 
 @pytest.mark.parametrize("home_directory_type", ["LOGICAL", "PATH"])
 def test_build_authentication_response_s3(home_directory_type):
-
     # GIVEN a Authorizer response
     response = TransferFamilyAuthorizerResponse()
 
@@ -60,7 +59,6 @@ def test_build_authentication_response_s3(home_directory_type):
 
 @pytest.mark.parametrize("home_directory_type", ["LOGICAL", "PATH"])
 def test_build_authentication_response_efs(home_directory_type):
-
     # GIVEN a Authorizer response
     response = TransferFamilyAuthorizerResponse()
 
@@ -93,7 +91,6 @@ def test_build_authentication_response_efs(home_directory_type):
 
 
 def test_build_authentication_missing_home_directory():
-
     # GIVEN a Authorizer response
     response = TransferFamilyAuthorizerResponse()
 
