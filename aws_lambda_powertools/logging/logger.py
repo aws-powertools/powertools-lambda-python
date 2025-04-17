@@ -242,12 +242,6 @@ class Logger:
         buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
-        self._buffer_config = buffer_config
-        self._buffer_cache = LoggerBufferCache(max_size_bytes=buffer_config.max_bytes) if buffer_config else None
-
-        # Used in case of sampling
-        self.initial_log_level = self._determine_log_level(level)
-
         self.service = resolve_env_var_choice(
             choice=service,
             env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
@@ -286,6 +280,9 @@ class Logger:
         self._buffer_config = buffer_config
         if self._buffer_config:
             self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
+
+        # Used in case of sampling
+        self.initial_log_level = self._determine_log_level(level)
 
         self._init_logger(
             formatter_options=formatter_options,
@@ -1149,8 +1146,6 @@ class Logger:
         Handles special first invocation buffering and migration of log records
         between different tracer contexts.
         """
-        if not self._buffer_cache or not self._buffer_config:
-            return
 
         # Determine tracer ID, defaulting to first invoke marker
         tracer_id = get_tracer_id()
@@ -1199,9 +1194,6 @@ class Logger:
         Any exceptions from underlying logging or buffer mechanisms
         will be propagated to caller
         """
-        if not self._buffer_config or not self._buffer_cache:
-            return
-
         # Check ALC level against buffer level
         lambda_log_level = self._get_aws_lambda_log_level()
         if lambda_log_level:
@@ -1256,10 +1248,9 @@ class Logger:
         -------
         None
         """
-        if not self._buffer_config or not self._buffer_cache:
-            return
-            
-        self._buffer_cache.clear()
+        if self._buffer_config:
+            self._buffer_cache.clear()
+
 
 def set_package_logger(
     level: str | int = logging.DEBUG,
