@@ -222,7 +222,6 @@ def test_raw_code_pipeline_get_artifact(mocker: MockerFixture):
 
 
 def test_code_pipeline_put_artifact(mocker: MockerFixture):
-
     raw_content = json.dumps({"steve": "french"})
     artifact_content_type = "application/json"
     event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
@@ -268,7 +267,6 @@ def test_code_pipeline_put_artifact(mocker: MockerFixture):
 
 
 def test_code_pipeline_put_unencrypted_artifact(mocker: MockerFixture):
-
     raw_content = json.dumps({"steve": "french"})
     artifact_content_type = "application/json"
     event_without_artifact_encryption = load_event("codePipelineEventData.json")

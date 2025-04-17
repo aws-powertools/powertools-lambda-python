@@ -60,7 +60,6 @@ def test_iot_core_thing_type_association_event():
 
 
 def test_iot_core_thing_group_event():
-
     raw_event = load_event("iotRegistryEventsThingGroupEvent.json")
     parsed_event: IoTCoreThingGroupEvent = IoTCoreThingGroupEvent(**raw_event)
 
@@ -81,7 +80,6 @@ def test_iot_core_thing_group_event():
 
 
 def test_iot_core_add_or_remove_from_thing_group_event():
-
     raw_event = load_event("iotRegistryEventsAddOrRemoveFromThingGroupEvent.json")
     parsed_event: IoTCoreAddOrRemoveFromThingGroupEvent = IoTCoreAddOrRemoveFromThingGroupEvent(**raw_event)
 
@@ -99,7 +97,6 @@ def test_iot_core_add_or_remove_from_thing_group_event():
 
 
 def test_iot_core_add_or_delete_from_thing_group_event():
-
     raw_event = load_event("iotRegistryEventsAddOrDeleteFromThingGroupEvent.json")
     parsed_event: IoTCoreAddOrDeleteFromThingGroupEvent = IoTCoreAddOrDeleteFromThingGroupEvent(**raw_event)
 

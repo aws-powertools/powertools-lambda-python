@@ -36,7 +36,6 @@ class OpenAPIExtensions(BaseModel):
     @model_validator(mode="before")
     def serialize_openapi_extension_v2(self):
         if isinstance(self, dict) and self.get("openapi_extensions"):
-
             openapi_extension_value = self.get("openapi_extensions")
 
             for extension_key in openapi_extension_value:

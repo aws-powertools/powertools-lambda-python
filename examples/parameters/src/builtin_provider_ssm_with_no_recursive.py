@@ -8,8 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 ssm_provider = parameters.SSMProvider()
 
 
-class ConfigNotFound(Exception):
-    ...
+class ConfigNotFound(Exception): ...
 
 
 def lambda_handler(event: dict, context: LambdaContext):
@@ -22,7 +21,6 @@ def lambda_handler(event: dict, context: LambdaContext):
         endpoint_comments = "https://jsonplaceholder.typicode.com/comments/"
 
         for parameter, value in all_parameters.items():
-
             # query parameter is used to query endpoint
             if "query" in parameter:
                 endpoint_comments = f"{endpoint_comments}{value}"

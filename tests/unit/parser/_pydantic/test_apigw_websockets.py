@@ -31,7 +31,7 @@ def test_apigw_websocket_message_event():
     assert request_context.extended_request_id == raw_event["requestContext"]["extendedRequestId"]
 
     identity = request_context.identity
-    assert str(identity.source_ip) == f'{raw_event["requestContext"]["identity"]["sourceIp"]}/32'
+    assert str(identity.source_ip) == f"{raw_event['requestContext']['identity']['sourceIp']}/32"
 
     assert request_context.request_id == raw_event["requestContext"]["requestId"]
     assert request_context.request_time == raw_event["requestContext"]["requestTime"]
@@ -67,7 +67,7 @@ def test_apigw_websocket_connect_event():
     assert request_context.extended_request_id == raw_event["requestContext"]["extendedRequestId"]
 
     identity = request_context.identity
-    assert str(identity.source_ip) == f'{raw_event["requestContext"]["identity"]["sourceIp"]}/32'
+    assert str(identity.source_ip) == f"{raw_event['requestContext']['identity']['sourceIp']}/32"
 
     assert request_context.request_id == raw_event["requestContext"]["requestId"]
     assert request_context.request_time == raw_event["requestContext"]["requestTime"]
@@ -96,7 +96,7 @@ def test_apigw_websocket_disconnect_event():
     assert request_context.extended_request_id == raw_event["requestContext"]["extendedRequestId"]
 
     identity = request_context.identity
-    assert str(identity.source_ip) == f'{raw_event["requestContext"]["identity"]["sourceIp"]}/32'
+    assert str(identity.source_ip) == f"{raw_event['requestContext']['identity']['sourceIp']}/32"
 
     assert request_context.request_id == raw_event["requestContext"]["requestId"]
     assert request_context.request_time == raw_event["requestContext"]["requestTime"]

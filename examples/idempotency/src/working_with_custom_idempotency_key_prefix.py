@@ -22,7 +22,7 @@ class Payment:
 class PaymentError(Exception): ...
 
 
-@idempotent(persistence_store=persistence_layer, key_prefix="my_custom_prefix") # (1)!
+@idempotent(persistence_store=persistence_layer, key_prefix="my_custom_prefix")  # (1)!
 def lambda_handler(event: dict, context: LambdaContext):
     try:
         payment: Payment = create_subscription_payment(event)

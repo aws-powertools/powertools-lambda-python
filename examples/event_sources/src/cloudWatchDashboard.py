@@ -26,6 +26,6 @@ def lambda_handler(event: CloudWatchDashboardCustomWidgetEvent, context):
         "markdown": f"""
         Dashboard: {event.widget_context.dashboard_name}
         Time Range: {time_range.start} to {time_range.end}
-        Theme: {event.widget_context.theme or 'default'}
+        Theme: {event.widget_context.theme or "default"}
         """,
     }

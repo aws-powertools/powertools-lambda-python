@@ -20,7 +20,6 @@ def test_openapi_extensions_with_invalid_key():
 
 
 def test_openapi_extensions_with_proxy_models():
-
     # GIVEN we create an models using OpenAPIExtensions as a "Proxy" Model
     class MyModelFoo(OpenAPIExtensions):
         foo: str

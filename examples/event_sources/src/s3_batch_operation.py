@@ -33,5 +33,4 @@ def lambda_handler(event: S3BatchOperationEvent, context: LambdaContext):
     return response.asdict()
 
 
-def do_some_work(s3_client, src_bucket: str, src_key: str):
-    ...
+def do_some_work(s3_client, src_bucket: str, src_key: str): ...

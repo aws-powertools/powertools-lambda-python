@@ -7,7 +7,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-
     try:
         # Usually an endpoint is not sensitive data, so we store it in SSM Parameters
         endpoint_comments: Any = parameters.get_parameter("/lambda-powertools/endpoint_comments")

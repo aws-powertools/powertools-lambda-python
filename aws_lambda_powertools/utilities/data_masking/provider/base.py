@@ -82,7 +82,6 @@ class BaseProvider:
         masking_rules: dict | None = None,
         **kwargs,
     ) -> Any:
-
         result: Any = DATA_MASKING_STRING
 
         if not any([dynamic_mask, custom_mask, regex_pattern, mask_format, masking_rules]):

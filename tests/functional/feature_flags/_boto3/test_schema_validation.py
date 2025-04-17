@@ -844,9 +844,7 @@ def test_validate_time_condition_between_days_range_invalid_condition_value(cond
         CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK.value,
     }
     rule_name = "dummy"
-    match_str = (
-        f"condition value DAYS must represent a day of the week in 'TimeValues' enum, rule={rule_name}"  # noqa: E501
-    )
+    match_str = f"condition value DAYS must represent a day of the week in 'TimeValues' enum, rule={rule_name}"  # noqa: E501
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
     with pytest.raises(
