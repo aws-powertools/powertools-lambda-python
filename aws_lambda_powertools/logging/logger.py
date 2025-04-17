@@ -1149,6 +1149,9 @@ class Logger:
         Handles special first invocation buffering and migration of log records
         between different tracer contexts.
         """
+        if not self._buffer_cache or not self._buffer_config:
+            return
+        
         # Determine tracer ID, defaulting to first invoke marker
         tracer_id = get_tracer_id()
 
