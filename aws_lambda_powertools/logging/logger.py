@@ -243,7 +243,7 @@ class Logger:
         **kwargs,
     ) -> None:
         self._buffer_config = buffer_config
-        self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes) if buffer_config else None
+        self._buffer_cache = LoggerBufferCache(max_size_bytes=buffer_config.max_bytes) if buffer_config else None
 
         # Used in case of sampling
         self.initial_log_level = self._determine_log_level(level)
@@ -1196,7 +1196,8 @@ class Logger:
         Any exceptions from underlying logging or buffer mechanisms
         will be propagated to caller
         """
-        tracer_id = get_tracer_id()
+        if not self._buffer_config or not self._buffer_cache:
+            return
 
         # Check ALC level against buffer level
         lambda_log_level = self._get_aws_lambda_log_level()
@@ -1214,6 +1215,8 @@ class Logger:
                     PowertoolsUserWarning,
                     stacklevel=2,
                 )
+
+        tracer_id = get_tracer_id()
 
         # Flushing log without a tracer id? Return
         if not tracer_id:
