@@ -1535,6 +1535,7 @@ def test_subscribe_event_with_error_handling(lambda_context, mock_event):
     assert "error" in result
     assert "ValueError - Test error" in result["error"]
 
+
 def test_subscribe_event_with_valid_return(lambda_context, mock_event):
     """Test error handling during publish event processing."""
     # GIVEN a sample publish event
@@ -1551,8 +1552,9 @@ def test_subscribe_event_with_valid_return(lambda_context, mock_event):
     # WHEN we resolve the event
     result = app.resolve(mock_event, lambda_context)
 
-    # THEN we should get an error response
-    assert result == 1
+    # THEN we should return None because subscribe always must return None
+    assert result is None
+
 
 def test_subscribe_event_with_no_resolver(lambda_context, mock_event):
     """Test error handling during publish event processing."""
@@ -1573,6 +1575,7 @@ def test_subscribe_event_with_no_resolver(lambda_context, mock_event):
     # THEN we should get an error response
     assert not result
 
+
 def test_publish_events_throw_unauthorized_exception(lambda_context, mock_event):
     """Test handling events with an empty payload."""
     # GIVEN a sample publish event with empty events
@@ -1592,6 +1595,7 @@ def test_publish_events_throw_unauthorized_exception(lambda_context, mock_event)
     # WHEN we resolve the event with unauthorized route
     with pytest.raises(UnauthorizedException):
         app.resolve(mock_event, lambda_context)
+
 
 def test_subscribe_events_throw_unauthorized_exception(lambda_context, mock_event):
     """Test handling events with an empty payload."""

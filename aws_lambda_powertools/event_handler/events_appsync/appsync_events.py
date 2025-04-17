@@ -5,10 +5,10 @@ import logging
 import warnings
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.event_handler.events_appsync.exceptions import UnauthorizedException
 from aws_lambda_powertools.event_handler.events_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_events_event import AppSyncResolverEventsEvent
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
-from aws_lambda_powertools.event_handler.events_appsync.exceptions import UnauthorizedException
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -153,7 +153,8 @@ class AppSyncEventsResolver(Router):
         resolver = self._subscribe_registry.find_resolver(channel_path)
         if resolver:
             try:
-                return resolver["func"]()
+                resolver["func"]()
+                return None  # Must return None in subscribe events
             except UnauthorizedException:
                 raise
             except Exception as error:
