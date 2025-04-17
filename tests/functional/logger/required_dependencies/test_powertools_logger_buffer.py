@@ -50,7 +50,6 @@ def capture_multiple_logging_statements_output(stdout):
 
 @pytest.mark.parametrize("log_level", ["DEBUG", "WARNING", "INFO"])
 def test_logger_buffer_with_minimum_level_warning(log_level, stdout, service_name, monkeypatch):
-
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # GIVEN A logger configured with a buffer and minimum log level set to WARNING

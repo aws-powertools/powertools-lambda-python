@@ -314,7 +314,6 @@ class CodePipelineJobEvent(DictWrapper):
         # So we are using if/else instead.
 
         if self.data.encryption_key:
-
             encryption_key_id = self.data.encryption_key.get_id
             encryption_key_type = self.data.encryption_key.get_type
             if encryption_key_type == "KMS":

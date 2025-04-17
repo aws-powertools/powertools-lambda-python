@@ -242,7 +242,6 @@ class Logger:
         buffer_config: LoggerBufferConfig | None = None,
         **kwargs,
     ) -> None:
-
         # Used in case of sampling
         self.initial_log_level = self._determine_log_level(level)
 

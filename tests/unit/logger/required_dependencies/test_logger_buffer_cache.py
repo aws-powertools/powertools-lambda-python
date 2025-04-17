@@ -6,7 +6,6 @@ from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
 
 
 def test_initialization():
-
     # GIVEN a new instance of LoggerBufferCache
     logger_cache = LoggerBufferCache(1000)
 
