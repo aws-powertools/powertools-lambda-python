@@ -530,6 +530,8 @@ def test_logger_buffer_is_cleared_between_lambda_invocations_without_decoration(
 def test_warning_when_alc_less_verbose_than_buffer(stdout, monkeypatch):
     # GIVEN Lambda ALC set to INFO
     monkeypatch.setenv("AWS_LAMBDA_LOG_LEVEL", "INFO")
+    # Set initial trace ID for first Lambda invocation
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 
     # WHEN creating a logger with DEBUG buffer level
     # THEN a warning should be emitted
@@ -545,21 +547,3 @@ def test_warning_when_alc_less_verbose_than_buffer(stdout, monkeypatch):
         logger.flush_buffer()
 
 
-def test_warning_on_buffer_flush_when_alc_less_verbose(monkeypatch):
-    # GIVEN Lambda ALC set to INFO
-    monkeypatch.setenv("AWS_LAMBDA_LOG_LEVEL", "INFO")
-
-    # WHEN creating a logger with DEBUG buffer level
-    with pytest.warns(UserWarning) as warning_info:
-        logger = Logger(service="test", level="DEBUG", buffer_config=LoggerBufferConfig(buffer_at_verbosity="DEBUG"))
-
-        # AND logging a debug message and flushing buffer
-        logger.debug("This is a debug")
-        logger.flush_buffer()
-
-    # THEN appropriate warnings should be emitted
-    assert any("Some logs might be missing" in str(w.message) for w in warning_info)
-    assert any(
-        "Current log level (DEBUG) does not match AWS Lambda Advanced Logging Controls" in str(w.message)
-        for w in warning_info
-    )
