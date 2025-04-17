@@ -138,17 +138,26 @@ class AppSyncEventsResolver(Router):
         return response
 
     def _subscribe_events(self) -> Any:
-        """Handle subscribe events"""
+        """
+        Handle subscribe events.
+
+        Returns
+        -------
+        Any
+            Any response
+        """
         channel_path = self.current_event.info.channel_path
         logger.debug(f"Processing subscribe events for path {channel_path}")
 
         resolver = self._subscribe_registry.find_resolver(channel_path)
-        if not resolver:
-            self._warn_no_resolver("subscribe", channel_path)
-            return None
+        if resolver:
+            try:
+                return resolver["func"]()
+            except Exception as error:
+                return {"error": self._format_error_response(error)}
 
-        # Implementation for subscribe events would go here
-        pass
+        self._warn_no_resolver("subscribe", channel_path)
+        return None
 
     def _publish_events(self, payload: list[dict[str, Any]]) -> list[dict[str, Any]] | dict[str, Any]:
         """
