@@ -1517,6 +1517,7 @@ def test_subscribe_event_with_error_handling(lambda_context, mock_event):
     """Test error handling during publish event processing."""
     # GIVEN a sample publish event
     mock_event["info"]["operation"] = "SUBSCRIBE"
+    mock_event["info"]["channel"]["path"] = "/default/powertools"
     del mock_event["events"]  # SUBSCRIBE events are not supported
 
     # GIVEN an AppSyncEventsResolver with a resolver that raises an exception
@@ -1537,12 +1538,12 @@ def test_subscribe_event_with_valid_return(lambda_context, mock_event):
     """Test error handling during publish event processing."""
     # GIVEN a sample publish event
     mock_event["info"]["operation"] = "SUBSCRIBE"
-    del mock_event["events"]  # SUBSCRIBE events are not supported
+    mock_event["info"]["channel"]["path"] = "/default/powertools"
 
     # GIVEN an AppSyncEventsResolver with a resolver that returns ok
     app = AppSyncEventsResolver()
 
-    @app.on_publish(path="/default/*")
+    @app.on_subscribe(path="/default/*")
     def test_handler():
         return 1
 
@@ -1556,7 +1557,7 @@ def test_subscribe_event_with_no_resolver(lambda_context, mock_event):
     """Test error handling during publish event processing."""
     # GIVEN a sample publish event
     mock_event["info"]["operation"] = "SUBSCRIBE"
-    del mock_event["events"]  # SUBSCRIBE events are not supported
+    mock_event["info"]["channel"]["path"] = "/default/powertools"
 
     # GIVEN an AppSyncEventsResolver with a resolver that returns ok
     app = AppSyncEventsResolver()
