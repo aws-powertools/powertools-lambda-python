@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import InvalidBatchResponse, ResolverNotFoundError
@@ -11,6 +11,8 @@ from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from aws_lambda_powertools.warnings import PowertoolsUserWarning

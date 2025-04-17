@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import json
 import re
@@ -8,7 +10,6 @@ from decimal import Decimal
 from enum import Enum
 from json import JSONEncoder
 from pathlib import Path
-from typing import Dict
 
 import pytest
 
@@ -48,7 +49,7 @@ from tests.functional.utils import load_event
 
 
 def read_media(file_name: str) -> bytes:
-    path = Path(str(Path(__file__).parent.parent.parent.parent) + "/../docs/media/" + file_name)
+    path = Path(f"{str(Path(__file__).parent.parent.parent.parent)}/../docs/media/{file_name}")
     return path.read_bytes()
 
 
@@ -642,7 +643,7 @@ def test_rest_api():
     expected_dict = {"foo": "value", "second": Decimal("100.01")}
 
     @app.get("/my/path")
-    def rest_func() -> Dict:
+    def rest_func() -> dict:
         return expected_dict
 
     # WHEN calling the event handler
@@ -1187,7 +1188,7 @@ def test_custom_serializer():
     app = ApiGatewayResolver(serializer=custom_serializer)
 
     @app.get("/custom_serializer")
-    def get_custom_values() -> Dict:
+    def get_custom_values() -> dict:
         return {"values": deque(["name", "age"])}
 
     # WHEN calling handler

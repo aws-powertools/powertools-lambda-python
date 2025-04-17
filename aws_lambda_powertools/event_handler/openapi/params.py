@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
@@ -20,6 +20,8 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.event_handler.openapi.models import Example
     from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 

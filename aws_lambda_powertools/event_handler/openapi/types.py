@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import types
-from typing import TYPE_CHECKING, Any, Callable, Dict, Set, Type, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, Set, Type, TypedDict, Union
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from enum import Enum
 
     from pydantic import BaseModel

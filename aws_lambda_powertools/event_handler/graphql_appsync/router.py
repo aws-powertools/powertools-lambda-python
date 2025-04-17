@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler.graphql_appsync._registry import ResolverRegistry
 from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseRouter
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncResolverEvent
     from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 
