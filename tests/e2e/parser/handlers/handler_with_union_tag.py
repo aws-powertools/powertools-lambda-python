@@ -1,10 +1,14 @@
-from typing import Literal, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal, Union
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.utilities.parser import event_parser
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class SuccessCallback(BaseModel):
@@ -26,6 +30,6 @@ class PartialFailureCallback(BaseModel):
 OrderCallback = Annotated[Union[SuccessCallback, ErrorCallback, PartialFailureCallback], Field(discriminator="status")]
 
 
-@event_parser
+@event_parser(model=OrderCallback)
 def lambda_handler(event: OrderCallback, context: LambdaContext):
     return {"error_msg": event.error_msg}

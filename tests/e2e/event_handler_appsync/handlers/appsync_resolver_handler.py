@@ -1,10 +1,14 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
-from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = AppSyncResolver()
 
@@ -84,29 +88,29 @@ def get_post(post_id: str = "") -> dict:
 
 
 @app.resolver(type_name="Query", field_name="allPosts")
-def all_posts() -> List[dict]:
+def all_posts() -> list[dict]:
     return list(posts.values())
 
 
 # PROCESSING BATCH WITHOUT AGGREGATION
 @app.batch_resolver(type_name="Post", field_name="relatedPosts", aggregate=False)
-def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+def related_posts(event: AppSyncResolverEvent) -> list | None:
     return posts_related[event.source["post_id"]] if event.source else None
 
 
 @app.async_batch_resolver(type_name="Post", field_name="relatedPostsAsync", aggregate=False)
-async def related_posts_async(event: AppSyncResolverEvent) -> Optional[list]:
+async def related_posts_async(event: AppSyncResolverEvent) -> list | None:
     return posts_related[event.source["post_id"]] if event.source else None
 
 
 # PROCESSING BATCH WITH AGGREGATION
 @app.batch_resolver(type_name="Post", field_name="relatedPostsAggregate")
-def related_posts_aggregate(event: List[AppSyncResolverEvent]) -> Optional[list]:
+def related_posts_aggregate(event: list[AppSyncResolverEvent]) -> list | None:
     return [posts_related[record.source.get("post_id")] for record in event]
 
 
 @app.async_batch_resolver(type_name="Post", field_name="relatedPostsAsyncAggregate")
-async def related_posts_async_aggregate(event: List[AppSyncResolverEvent]) -> Optional[list]:
+async def related_posts_async_aggregate(event: list[AppSyncResolverEvent]) -> list | None:
     return [posts_related[record.source.get("post_id")] for record in event]
 
 

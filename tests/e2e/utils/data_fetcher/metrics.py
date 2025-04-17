@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import TYPE_CHECKING
 
 import boto3
-from mypy_boto3_cloudwatch.client import CloudWatchClient
-from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef
 from retry import retry
 
 from tests.e2e.utils.data_builder import build_metric_query_data
+
+if TYPE_CHECKING:
+    from mypy_boto3_cloudwatch.client import CloudWatchClient
+    from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef
 
 
 @retry(ValueError, delay=2, jitter=1.5, tries=10)
@@ -14,12 +18,12 @@ def get_metrics(
     namespace: str,
     start_date: datetime,
     metric_name: str,
-    dimensions: Optional[List[DimensionTypeDef]] = None,
-    cw_client: Optional[CloudWatchClient] = None,
-    end_date: Optional[datetime] = None,
+    dimensions: list[DimensionTypeDef] | None = None,
+    cw_client: CloudWatchClient | None = None,
+    end_date: datetime | None = None,
     period: int = 60,
     stat: str = "Sum",
-) -> List[float]:
+) -> list[float]:
     """Fetch CloudWatch Metrics
 
     It takes into account eventual consistency with up to 10 retries and 1.5s jitter.

@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
     idempotent,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
-    DataRecord,
-)
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
+        DataRecord,
+    )
 
 TABLE_NAME = os.getenv("IdempotencyTable", "")
 persistence_layer = DynamoDBPersistenceLayer(table_name=TABLE_NAME)

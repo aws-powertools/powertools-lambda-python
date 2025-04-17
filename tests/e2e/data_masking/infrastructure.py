@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aws_cdk.aws_kms as kms
 from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_iam as iam

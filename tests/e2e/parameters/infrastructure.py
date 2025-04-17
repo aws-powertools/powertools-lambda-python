@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import json
-from typing import List
+from typing import TYPE_CHECKING
 
 from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_appconfig as appconfig
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_ssm as ssm
-from aws_cdk.aws_lambda import Function
 
 from tests.e2e.utils.data_builder import build_random_value, build_service_name
 from tests.e2e.utils.infrastructure import BaseInfrastructure
+
+if TYPE_CHECKING:
+    from aws_cdk.aws_lambda import Function
 
 
 class ParametersStack(BaseInfrastructure):
@@ -125,8 +129,8 @@ class ParametersStack(BaseInfrastructure):
             ),
         )
 
-    def _create_ssm_parameters(self) -> List[str]:
-        parameters: List[str] = []
+    def _create_ssm_parameters(self) -> list[str]:
+        parameters: list[str] = []
 
         for _ in range(10):
             param = f"/powertools/e2e/parameters/{build_random_value()}"
