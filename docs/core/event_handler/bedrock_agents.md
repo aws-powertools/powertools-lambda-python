@@ -313,6 +313,16 @@ To implement these customizations, include extra parameters when defining your r
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
 
+#### Enabling user confirmation
+
+You can enable user confirmation with Bedrock Agents to have your application ask for explicit user approval before invoking an action.
+
+```python hl_lines="14" title="enabling_user_confirmation.py" title="Enabling user confirmation"
+--8<-- "examples/event_handler_bedrock_agents/src/enabling_user_confirmation.py"
+```
+
+1. Add an openapi extension
+
 ## Testing your code
 
 Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-input) request:
