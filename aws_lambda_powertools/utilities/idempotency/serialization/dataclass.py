@@ -38,7 +38,6 @@ class DataclassSerializer(BaseIdempotencyModelSerializer):
 
     @classmethod
     def instantiate(cls, model_type: Any) -> BaseIdempotencySerializer:
-
         model_type = get_actual_type(model_type=model_type)
 
         if model_type is None:

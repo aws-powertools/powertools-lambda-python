@@ -296,8 +296,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
         if self._entire_batch_failed() and self.raise_on_entire_batch_failure:
             raise BatchProcessingError(
-                msg=f"All records failed processing. {len(self.exceptions)} individual errors logged "
-                f"separately below.",
+                msg=f"All records failed processing. {len(self.exceptions)} individual errors logged separately below.",
                 child_exceptions=self.exceptions,
             )
 

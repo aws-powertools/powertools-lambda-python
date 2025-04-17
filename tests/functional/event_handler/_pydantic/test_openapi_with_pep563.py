@@ -59,7 +59,6 @@ def test_openapi_with_pep563_and_input_model():
 
 
 def test_openapi_with_pep563_and_output_model():
-
     app = APIGatewayRestResolver()
 
     @app.get("/")
@@ -89,7 +88,6 @@ def test_openapi_with_pep563_and_output_model():
 
 
 def test_openapi_with_pep563_and_annotated_body():
-
     app = APIGatewayRestResolver()
 
     @app.post("/todo")

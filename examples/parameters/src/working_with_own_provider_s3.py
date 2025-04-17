@@ -12,7 +12,6 @@ s3_provider = S3Provider(bucket_name="bucket_name")
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-
     try:
         # Retrieve a single parameter using key
         endpoint_comments: Any = s3_provider.get("comments_endpoint")
