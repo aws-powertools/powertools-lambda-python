@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
 from aws_cdk import CfnOutput, Duration
 from aws_cdk import aws_apigateway as apigwv1
@@ -28,7 +28,7 @@ class EventHandlerStack(BaseInfrastructure):
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
 
-    def _create_alb(self, function: List[Function]):
+    def _create_alb(self, function: list[Function]):
         vpc = ec2.Vpc.from_lookup(
             self.stack,
             "VPC",
@@ -58,7 +58,7 @@ class EventHandlerStack(BaseInfrastructure):
         name: str,
         port: int,
         function: Function,
-        attributes: Optional[Dict[str, str]] = None,
+        attributes: dict[str, str] | None = None,
     ):
         listener = alb.add_listener(name, port=port, protocol=elbv2.ApplicationProtocol.HTTP)
         target = listener.add_targets(f"ALB{name}Target", targets=[targets.LambdaTarget(function)])
@@ -82,7 +82,7 @@ class EventHandlerStack(BaseInfrastructure):
 
         CfnOutput(self.stack, "APIGatewayHTTPUrl", value=(apigw.url or ""))
 
-    def _create_api_gateway_rest(self, function: List[Function]):
+    def _create_api_gateway_rest(self, function: list[Function]):
         apigw = apigwv1.RestApi(
             self.stack,
             "APIGatewayRest",

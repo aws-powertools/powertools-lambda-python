@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 class _FrozenDict(dict):
@@ -18,7 +21,7 @@ class _FrozenDict(dict):
         return hash(frozenset(self.keys()))
 
 
-class _FrozenListDict(List[Dict[str, List[str]]]):
+class _FrozenListDict(list[dict[str, list[str]]]):
     """
     Freezes a list of dictionaries containing lists of strings.
 

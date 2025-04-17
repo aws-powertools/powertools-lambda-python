@@ -1,9 +1,12 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
-from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTypeDef
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.metrics import MetricUnit
 from tests.e2e.utils.data_builder.common import build_random_value
+
+if TYPE_CHECKING:
+    from mypy_boto3_cloudwatch.type_defs import DimensionTypeDef, MetricDataQueryTypeDef
 
 
 def build_metric_query_data(
@@ -11,8 +14,8 @@ def build_metric_query_data(
     metric_name: str,
     period: int = 60,
     stat: str = "Sum",
-    dimensions: Optional[List[DimensionTypeDef]] = None,
-) -> List[MetricDataQueryTypeDef]:
+    dimensions: list[DimensionTypeDef] | None = None,
+) -> list[MetricDataQueryTypeDef]:
     """Create input for CloudWatch GetMetricData API call
 
     Parameters
@@ -34,7 +37,7 @@ def build_metric_query_data(
         _description_
     """
     dimensions = dimensions or []
-    data_query: List[MetricDataQueryTypeDef] = [
+    data_query: list[MetricDataQueryTypeDef] = [
         {
             "Id": metric_name.lower(),
             "MetricStat": {
@@ -52,7 +55,7 @@ def build_metric_query_data(
     return data_query
 
 
-def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUnit.Count.value) -> Dict:
+def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUnit.Count.value) -> dict:
     """Create a metric input to be used with Metrics.add_metric()
 
     Parameters
@@ -77,7 +80,7 @@ def build_multiple_add_metric_input(
     value: float,
     unit: str = MetricUnit.Count.value,
     quantity: int = 1,
-) -> List[Dict]:
+) -> list[dict]:
     """Create list of metrics input to be used with Metrics.add_metric()
 
     Parameters
@@ -99,7 +102,7 @@ def build_multiple_add_metric_input(
     return [{"name": metric_name, "unit": unit, "value": value} for _ in range(quantity)]
 
 
-def build_add_dimensions_input(**dimensions) -> List[DimensionTypeDef]:
+def build_add_dimensions_input(**dimensions) -> list[DimensionTypeDef]:
     """Create dimensions input to be used with either get_metrics or Metrics.add_dimension()
 
     Parameters
