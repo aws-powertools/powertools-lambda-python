@@ -4,12 +4,19 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **logger:** warn customers when the ALC log level is less verbose than log buffer ([#6509](https://github.com/aws-powertools/powertools-lambda-python/issues/6509))
+
 ## Code Refactoring
 
 * **batch:** use standard collections for types ([#6475](https://github.com/aws-powertools/powertools-lambda-python/issues/6475))
 * **data_masking:** use standard collections for types ([#6493](https://github.com/aws-powertools/powertools-lambda-python/issues/6493))
+* **e2e-tests:** use standard collections for types + refactor code ([#6505](https://github.com/aws-powertools/powertools-lambda-python/issues/6505))
+* **event_handler:** use standard collections for types + refactor code ([#6495](https://github.com/aws-powertools/powertools-lambda-python/issues/6495))
 * **event_source:** use standard collections for types ([#6479](https://github.com/aws-powertools/powertools-lambda-python/issues/6479))
 * **feature_flags:** use standard collections for type ([#6489](https://github.com/aws-powertools/powertools-lambda-python/issues/6489))
+* **general:** add support for `ruff format` ([#6512](https://github.com/aws-powertools/powertools-lambda-python/issues/6512))
 * **idempotency:** use standard collections for types ([#6487](https://github.com/aws-powertools/powertools-lambda-python/issues/6487))
 * **logger:** use standard collections for types ([#6471](https://github.com/aws-powertools/powertools-lambda-python/issues/6471))
 * **metrics:** use standard collections for types ([#6472](https://github.com/aws-powertools/powertools-lambda-python/issues/6472))
@@ -27,6 +34,7 @@
 
 ## Features
 
+* **bedrock:** add `openapi_extensions` in BedrockAgentResolver ([#6510](https://github.com/aws-powertools/powertools-lambda-python/issues/6510))
 * **data-masking:** add support for Pydantic models, dataclasses, and standard classes ([#6413](https://github.com/aws-powertools/powertools-lambda-python/issues/6413))
 * **event_handler:** add extras HTTP Error Code Exceptions ([#6454](https://github.com/aws-powertools/powertools-lambda-python/issues/6454))
 * **event_handler:** add route-level custom response validation in OpenAPI utility  ([#6341](https://github.com/aws-powertools/powertools-lambda-python/issues/6341))
@@ -34,34 +42,37 @@
 
 ## Maintenance
 
-* **ci:** new pre-release 3.10.1a5 ([#6498](https://github.com/aws-powertools/powertools-lambda-python/issues/6498))
+* **ci:** new pre-release 3.10.1a6 ([#6506](https://github.com/aws-powertools/powertools-lambda-python/issues/6506))
 * **ci:** new pre-release 3.10.1a4 ([#6463](https://github.com/aws-powertools/powertools-lambda-python/issues/6463))
+* **ci:** new pre-release 3.10.1a5 ([#6498](https://github.com/aws-powertools/powertools-lambda-python/issues/6498))
 * **ci:** new pre-release 3.10.1a0 ([#6431](https://github.com/aws-powertools/powertools-lambda-python/issues/6431))
 * **ci:** new pre-release 3.10.1a1 ([#6437](https://github.com/aws-powertools/powertools-lambda-python/issues/6437))
 * **ci:** new pre-release 3.10.1a2 ([#6446](https://github.com/aws-powertools/powertools-lambda-python/issues/6446))
 * **ci:** new pre-release 3.10.1a3 ([#6455](https://github.com/aws-powertools/powertools-lambda-python/issues/6455))
+* **deps:** bump actions/setup-node from 4.3.0 to 4.4.0 ([#6457](https://github.com/aws-powertools/powertools-lambda-python/issues/6457))
 * **deps:** bump codecov/codecov-action from 5.4.0 to 5.4.2 ([#6458](https://github.com/aws-powertools/powertools-lambda-python/issues/6458))
 * **deps:** bump pydantic from 2.11.2 to 2.11.3 ([#6427](https://github.com/aws-powertools/powertools-lambda-python/issues/6427))
 * **deps:** bump typing-extensions from 4.13.1 to 4.13.2 ([#6451](https://github.com/aws-powertools/powertools-lambda-python/issues/6451))
-* **deps:** bump actions/setup-node from 4.3.0 to 4.4.0 ([#6457](https://github.com/aws-powertools/powertools-lambda-python/issues/6457))
+* **deps:** bump squidfunk/mkdocs-material from sha256:23b69789b1dd836c53ea25b32f62ef8e1a23366037acd07c90959a219fd1f285 to sha256:95f2ff42251979c043d6cb5b1c82e6ae8189e57e02105813dd1ce124021a418b in /docs ([#6513](https://github.com/aws-powertools/powertools-lambda-python/issues/6513))
 * **deps-dev:** bump cfn-lint from 1.33.1 to 1.33.2 ([#6450](https://github.com/aws-powertools/powertools-lambda-python/issues/6450))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.301 to 0.1.302 ([#6460](https://github.com/aws-powertools/powertools-lambda-python/issues/6460))
 * **deps-dev:** bump ruff from 0.11.4 to 0.11.5 ([#6443](https://github.com/aws-powertools/powertools-lambda-python/issues/6443))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.188.0a0 to 2.189.0a0 ([#6444](https://github.com/aws-powertools/powertools-lambda-python/issues/6444))
 * **deps-dev:** bump aws-cdk-lib from 2.188.0 to 2.189.0 ([#6445](https://github.com/aws-powertools/powertools-lambda-python/issues/6445))
 * **deps-dev:** bump cfn-lint from 1.33.0 to 1.33.1 ([#6442](https://github.com/aws-powertools/powertools-lambda-python/issues/6442))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.301 to 0.1.302 ([#6460](https://github.com/aws-powertools/powertools-lambda-python/issues/6460))
 * **deps-dev:** bump boto3-stubs from 1.37.33 to 1.37.34 ([#6459](https://github.com/aws-powertools/powertools-lambda-python/issues/6459))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.189.0a0 to 2.189.1a0 ([#6462](https://github.com/aws-powertools/powertools-lambda-python/issues/6462))
+* **deps-dev:** bump pytest-cov from 6.1.0 to 6.1.1 ([#6429](https://github.com/aws-powertools/powertools-lambda-python/issues/6429))
 * **deps-dev:** bump aws-cdk-lib from 2.189.0 to 2.189.1 ([#6461](https://github.com/aws-powertools/powertools-lambda-python/issues/6461))
 * **deps-dev:** bump boto3-stubs from 1.37.29 to 1.37.31 ([#6433](https://github.com/aws-powertools/powertools-lambda-python/issues/6433))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.187.0a0 to 2.188.0a0 ([#6434](https://github.com/aws-powertools/powertools-lambda-python/issues/6434))
 * **deps-dev:** bump ruff from 0.11.3 to 0.11.4 ([#6428](https://github.com/aws-powertools/powertools-lambda-python/issues/6428))
-* **deps-dev:** bump pytest-cov from 6.1.0 to 6.1.1 ([#6429](https://github.com/aws-powertools/powertools-lambda-python/issues/6429))
-* **deps-dev:** bump cfn-lint from 1.32.4 to 1.33.0 ([#6430](https://github.com/aws-powertools/powertools-lambda-python/issues/6430))
-* **deps-dev:** bump boto3-stubs from 1.37.31 to 1.37.33 ([#6449](https://github.com/aws-powertools/powertools-lambda-python/issues/6449))
-* **deps-dev:** bump sentry-sdk from 2.25.1 to 2.26.1 ([#6477](https://github.com/aws-powertools/powertools-lambda-python/issues/6477))
 * **deps-dev:** bump boto3-stubs from 1.37.34 to 1.37.35 ([#6504](https://github.com/aws-powertools/powertools-lambda-python/issues/6504))
+* **deps-dev:** bump cfn-lint from 1.32.4 to 1.33.0 ([#6430](https://github.com/aws-powertools/powertools-lambda-python/issues/6430))
+* **deps-dev:** bump sentry-sdk from 2.25.1 to 2.26.1 ([#6477](https://github.com/aws-powertools/powertools-lambda-python/issues/6477))
 * **deps-dev:** bump cfn-lint from 1.33.2 to 1.34.0 ([#6502](https://github.com/aws-powertools/powertools-lambda-python/issues/6502))
+* **deps-dev:** bump aws-cdk from 2.1007.0 to 2.1010.0 ([#6501](https://github.com/aws-powertools/powertools-lambda-python/issues/6501))
+* **deps-dev:** bump boto3-stubs from 1.37.31 to 1.37.33 ([#6449](https://github.com/aws-powertools/powertools-lambda-python/issues/6449))
 
 
 <a name="v3.10.0"></a>
