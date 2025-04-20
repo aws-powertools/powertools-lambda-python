@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Type, Union
+from typing import Dict, List, Literal, Optional, Type, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -14,12 +14,16 @@ class KafkaRecordModel(BaseModel):
     offset: int
     timestamp: datetime
     timestampType: str
-    key: bytes
+    key: Optional[bytes] = None
     value: Union[str, Type[BaseModel]]
     headers: List[Dict[str, bytes]]
 
-    # Added type ignore to keep compatibility between Pydantic v1 and v2
-    _decode_key = field_validator("key")(base64_decode)  # type: ignore[type-var, unused-ignore]
+    # key is optional; only decode if not None
+    @field_validator("key", mode="before")
+    def decode_key(cls, value):
+        if value is not None:
+            return base64_decode(value)
+        return value
 
     @field_validator("value", mode="before")
     def data_base64_decode(cls, value):

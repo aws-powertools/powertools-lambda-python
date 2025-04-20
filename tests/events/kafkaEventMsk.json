@@ -29,6 +29,57 @@
                  ]
               }
            ]
+        },
+        {
+           "topic":"mytopic",
+           "partition":0,
+           "offset":15,
+           "timestamp":1545084650987,
+           "timestampType":"CREATE_TIME",
+           "value":"eyJrZXkiOiJ2YWx1ZSJ9",
+           "headers":[
+              {
+                 "headerKey":[
+                    104,
+                    101,
+                    97,
+                    100,
+                    101,
+                    114,
+                    86,
+                    97,
+                    108,
+                    117,
+                    101
+                 ]
+              }
+           ]
+        },
+        {
+           "topic":"mytopic",
+           "partition":0,
+           "offset":15,
+           "timestamp":1545084650987,
+           "timestampType":"CREATE_TIME",
+           "key": null,
+           "value":"eyJrZXkiOiJ2YWx1ZSJ9",
+           "headers":[
+              {
+                 "headerKey":[
+                    104,
+                    101,
+                    97,
+                    100,
+                    101,
+                    114,
+                    86,
+                    97,
+                    108,
+                    117,
+                    101
+                 ]
+              }
+           ]
         }
      ]
   }

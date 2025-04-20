@@ -37,14 +37,25 @@ class KafkaEventRecord(DictWrapper):
         return self["timestampType"]
 
     @property
-    def key(self) -> str:
-        """The raw (base64 encoded) Kafka record key."""
-        return self["key"]
+    def key(self) -> str | None:
+        """
+        The raw (base64 encoded) Kafka record key.
+
+        This key is optional; if not provided,
+        a round-robin algorithm will be used to determine
+        the partition for the message.
+        """
+
+        return self.get("key")
 
     @property
-    def decoded_key(self) -> bytes:
-        """Decode the base64 encoded key as bytes."""
-        return base64.b64decode(self.key)
+    def decoded_key(self) -> bytes | None:
+        """
+        Decode the base64 encoded key as bytes.
+
+        If the key is not provided, this will return None.
+        """
+        return None if self.key is None else base64.b64decode(self.key)
 
     @property
     def value(self) -> str:
