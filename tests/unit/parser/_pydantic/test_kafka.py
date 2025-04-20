@@ -15,9 +15,9 @@ def test_kafka_msk_event_with_envelope():
         model=MyLambdaKafkaBusiness,
         envelope=envelopes.KafkaEnvelope,
     )
-    for i in [0, 1]:
+    for i in range(3):
         assert parsed_event[i].key == "value"
-    assert len(parsed_event) == 2
+    assert len(parsed_event) == 3
 
 
 def test_kafka_self_managed_event_with_envelope():
@@ -27,9 +27,9 @@ def test_kafka_self_managed_event_with_envelope():
         model=MyLambdaKafkaBusiness,
         envelope=envelopes.KafkaEnvelope,
     )
-    for i in [0, 1]:
+    for i in range(3):
         assert parsed_event[i].key == "value"
-    assert len(parsed_event) == 2
+    assert len(parsed_event) == 3
 
 
 def test_self_managed_kafka_event():
@@ -41,7 +41,7 @@ def test_self_managed_kafka_event():
     assert parsed_event.bootstrapServers == raw_event["bootstrapServers"].split(",")
 
     records = list(parsed_event.records["mytopic-0"])
-    assert len(records) == 2
+    assert len(records) == 3
     record: KafkaRecordModel = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -68,7 +68,7 @@ def test_kafka_msk_event():
     assert parsed_event.eventSourceArn == raw_event["eventSourceArn"]
 
     records = list(parsed_event.records["mytopic-0"])
-    assert len(records) == 2
+    assert len(records) == 3
     record: KafkaRecordModel = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -82,5 +82,6 @@ def test_kafka_msk_event():
     assert record.value == '{"key":"value"}'
     assert len(record.headers) == 1
     assert record.headers[0]["headerKey"] == b"headerValue"
-    record: KafkaRecordModel = records[1]
-    assert record.key is None
+    for i in range(1, 3):
+        record: KafkaRecordModel = records[i]
+        assert record.key is None

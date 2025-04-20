@@ -21,7 +21,7 @@ def test_kafka_msk_event():
     assert parsed_event.decoded_bootstrap_servers == bootstrap_servers_list
 
     records = list(parsed_event.records)
-    assert len(records) == 2
+    assert len(records) == 3
     record = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -36,9 +36,9 @@ def test_kafka_msk_event():
     assert record.decoded_headers["HeaderKey"] == b"headerValue"
 
     assert parsed_event.record == records[0]
-
-    record = records[1]
-    assert record.key is None
+    for i in range(1, 3):
+        record = records[i]
+        assert record.key is None
 
 
 def test_kafka_self_managed_event():
@@ -55,7 +55,7 @@ def test_kafka_self_managed_event():
     assert parsed_event.decoded_bootstrap_servers == bootstrap_servers_list
 
     records = list(parsed_event.records)
-    assert len(records) == 2
+    assert len(records) == 3
     record = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -71,8 +71,9 @@ def test_kafka_self_managed_event():
 
     assert parsed_event.record == records[0]
 
-    record = records[1]
-    assert record.key is None
+    for i in range(1, 3):
+        record = records[i]
+        assert record.key is None
 
 
 def test_kafka_record_property_with_stopiteration_error():
@@ -83,6 +84,5 @@ def test_kafka_record_property_with_stopiteration_error():
     # WHEN calling record property thrice
     # THEN raise StopIteration
     with pytest.raises(StopIteration):
-        assert parsed_event.record.topic is not None
-        assert parsed_event.record.topic is not None
-        assert parsed_event.record.topic is not None
+        for _ in range(4):
+            assert parsed_event.record.topic is not None
