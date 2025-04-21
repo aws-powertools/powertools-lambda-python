@@ -57,6 +57,12 @@ stateDiagram-v2
 
 You must have an existing AppSync Events API with real-time capabilities enabled and IAM permissions to invoke your Lambda function. That said, there are no additional permissions required to use Event Handler as routing requires no dependency (_standard library_).
 
+=== "getting_started_with_appsync_events.yaml"
+
+    ```python hl_lines="5 10 12"
+    --8<-- "examples/event_handler_appsync_events/src/getting_started_with_appsync_events.yaml"
+    ```
+
 ### AppSync request and response format
 
 AppSync Events uses a specific event format for Lambda requests and responses. In most scenarios, Powertools simplifies this interaction by automatically formatting resolver returns to match the expected AppSync response structure.
@@ -79,12 +85,13 @@ AppSync Events uses a specific event format for Lambda requests and responses. I
     --8<-- "examples/event_handler_appsync_events/src/appsync_payload_response_with_error.json"
     ```
 
-#### Events Response with Error
+#### Events response with error
 
-When processing events with Lambda, you can return errors to AppSync in two ways:
+When processing events with Lambda, you can return errors to AppSync in three ways:
 
 * **Error per item:** Return an `error` key within each individual item's response. AppSync Events expects this format for item-specific errors.
 * **Fail entire request:** Return a JSON object with a top-level `error` key. This signals a general failure, and AppSync treats the entire request as unsuccessful.
+* **Unauthorized exception**: Raise the **UnauthorizedException** exception to reject a subscribe or publish request with HTTP 403.
 
 ### Resolver decorator
 
@@ -129,21 +136,6 @@ When multiple handlers could match the same event, the most specific pattern tak
 
     More specific routes will always take precedence over less specific ones. For example, `/default/channel1` will take precedence over `/default/*`, which will take precedence over `/*`.
 
-### Processing events with async resolvers
-
-Use the `@app.async_on_publish()` decorator to process events asynchronously.
-
-We use `asyncio` module to support async functions, and we ensure reliable execution by managing the event loop.
-
-???+ note "Events order and AppSync Events"
-    AppSync does not rely on event order. As long as each event includes the original `id`, AppSync processes them correctly regardless of the order in which they are received.
-
-=== "working_with_async_resolvers.py"
-
-    ```python hl_lines="5 6 13"
-    --8<-- "examples/event_handler_appsync_events/src/working_with_async_resolvers.py"
-    ```
-
 ### Aggregated processing
 
 ???+ note "Aggregate Processing"
@@ -165,11 +157,27 @@ You can enable this with the `aggregate` parameter:
 
 ### Handling errors
 
-You can filter or reject events by raising exceptions in your handlers. The event handler will catch these exceptions and include appropriate error information in the response.
+You can filter or reject events by throwing exceptions in your resolvers or by formatting the payload according to the expected response structure. This instructs AppSync not to propagate that specific message, so subscribers will not receive the corresponding message.
 
-#### Error with individual itens
+#### Handling errors with individual items
 
-**Note:** When using `aggregate=True`, you are responsible for formatting the error response according to the expected format.
+When processing items individually with `aggregate=False`, you can raise an exception to fail a specific item. When an exception is raised, the Event Handler will catch it and include the exception name and message in the response.
+
+=== "working_with_error_handling.py"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling.py"
+    ```
+
+=== "working_with_error_handling_response.json"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
+    ```
+
+#### Handling errors with batch of items
+
+When processing batch of items with `aggregate=False`, you can must format the payload according the expected response.
 
 === "working_with_error_handling.py"
 
@@ -185,121 +193,75 @@ You can filter or reject events by raising exceptions in your handlers. The even
 
 #### Rejecting the entire request
 
+??? warning "Raising `UnauthorizedException` will cause the Lambda invocation to fail."
+
+You can also reject the entire payload by raising an `UnauthorizedException`. This prevents Powertools from processing any messages and causes the Lambda invocation to fail, returning an error to AppSync.
+
+=== "working_with_error_handling.py"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling.py"
+    ```
+
+=== "working_with_error_handling_response.json"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
+    ```
+
+### Processing events with async resolvers
+
+Use the `@app.async_on_publish()` decorator to process events asynchronously.
+
+We use `asyncio` module to support async functions, and we ensure reliable execution by managing the event loop.
+
+???+ note "Events order and AppSync Events"
+    AppSync does not rely on event order. As long as each event includes the original `id`, AppSync processes them correctly regardless of the order in which they are received.
+
+=== "working_with_async_resolvers.py"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_async_resolvers.py"
+    ```
 
 ### Accessing Lambda context and event
 
-You might need access to the original Lambda event or context for additional information. These are accessible via the app instance:
+You can access to the original Lambda event or context for additional information. These are accessible via the app instance:
 
-=== "context_access.py"
+=== "accessing_event_and_context.py"
 
-    ```python
-    from aws_lambda_powertools.event_handler.appsync_events import AppSyncEventsResolver
-    
-    app = AppSyncEventsResolver()
-    
-    @app.on_publish("/default/channel1")
-    def handle_channel1_publish(payload):
-        # Access the full event and context
-        full_event = app.event
-        lambda_context = app.context
-        
-        # Access request headers
-        headers = full_event.get("request", {}).get("headers", {})
-        
-        # Check remaining time
-        remaining_time = lambda_context.get_remaining_time_in_millis()
-        
-        return {
-            "payload": payload,
-            "userAgent": headers.get("User-Agent"),
-            "timeRemaining": remaining_time
-        }
-    
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/accessing_event_and_context.py"
     ```
 
 ## Testing your code
 
 You can test your event handlers by passing a mocked or actual AppSync Events Lambda event.
 
-=== "test_publish_handler.py"
+### Testing publish events
 
-    ```python
-    import json
-    from my_lambda_function import app
-    
-    def test_publish_handler():
-        # Load a sample event
-        with open("sample_publish_event.json", "r") as f:
-            event = json.load(f)
-        
-        # Test the handler directly
-        result = app.resolve(event, {})
-        
-        # Verify the result
-        assert len(result["events"]) == 2
-        assert result["events"][0]["payload"]["processed"] is True
+=== "getting_started_with_testing_publish.py"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_publish.py"
     ```
 
-=== "sample_publish_event.json"
+=== "getting_started_with_testing_publish_event.json"
 
-    ```json
-    {
-      "events": [
-        {
-          "id": "event1",
-          "payload": {"message": "Hello World"},
-          "channel": {
-            "path": "/default/channel1"
-          }
-        },
-        {
-          "id": "event2",
-          "payload": {"message": "Test Message"},
-          "channel": {
-            "path": "/default/channel2"
-          }
-        }
-      ],
-      "request": {
-        "headers": {
-          "x-api-key": "test-api-key"
-        }
-      }
-    }
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_publish_event.json"
     ```
 
-For subscription events:
+### Testing subscribe events
 
-=== "test_subscribe_handler.py"
+=== "getting_started_with_testing_subscribe.py"
 
-    ```python
-    import json
-    from my_lambda_function import app
-    
-    def test_subscribe_handler():
-        # Load a sample subscription event
-        with open("sample_subscribe_event.json", "r") as f:
-            event = json.load(f)
-        
-        # Test the handler directly
-        result = app.resolve(event, {})
-        
-        # Verify the result
-        assert result is True
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_subscribe.py"
     ```
 
-=== "sample_subscribe_event.json"
+=== "getting_started_with_testing_subscribe_event.json"
 
-    ```json
-    {
-      "type": "SUBSCRIBE",
-      "channel": {
-        "path": "/default/channel1"
-      },
-      "identity": {
-        "username": "testuser"
-      }
-    }
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_subscribe_event.json"
     ```

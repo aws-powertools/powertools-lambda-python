@@ -39,7 +39,6 @@ def test_publish_event_with_synchronous_resolver(lambda_context, mock_event):
     mock_event["events"] = [
         {"id": "123", "payload": {"data": "test data"}},
     ]
-    lambda_context = LambdaContext()
 
     # GIVEN an AppSyncEventsResolver with a synchronous resolver
     app = AppSyncEventsResolver()
