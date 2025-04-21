@@ -401,6 +401,24 @@ toml = ["tomli (>=1.1.0) ; python_version < \"3.11\""]
 yaml = ["PyYAML"]
 
 [[package]]
+name = "boolean-py"
+version = "5.0"
+description = "Define boolean algebras, create and parse boolean expressions and create custom boolean DSL."
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "boolean_py-5.0-py3-none-any.whl", hash = "sha256:ef28a70bd43115208441b53a045d1549e2f0ec6e3d08a9d142cbc41c1938e8d9"},
+    {file = "boolean_py-5.0.tar.gz", hash = "sha256:60cbc4bad079753721d32649545505362c754e121570ada4658b852a3a318d95"},
+]
+
+[package.extras]
+dev = ["build", "twine"]
+docs = ["Sphinx (>=3.3.1)", "doc8 (>=0.8.1)", "sphinx-rtd-theme (>=0.5.0)", "sphinxcontrib-apidoc (>=0.3.0)"]
+linting = ["black", "isort", "pycodestyle"]
+testing = ["pytest (>=6,!=7.0.0)", "pytest-xdist (>=2)"]
+
+[[package]]
 name = "boto3"
 version = "1.37.14"
 description = "The AWS SDK for Python"
@@ -2252,29 +2270,49 @@ files = [
 ]
 
 [[package]]
-name = "licensecheck"
-version = "2024.3"
-description = "Output the licenses used by dependencies and check if these are compatible with the project license"
+name = "license-expression"
+version = "30.4.1"
+description = "license-expression is a comprehensive utility library to parse, compare, simplify and normalize license expressions (such as SPDX license expressions) using boolean logic."
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "licensecheck-2024.3-py3-none-any.whl", hash = "sha256:0baef4c1865e0325a35ff25ed12a0c7094035b7dcfbab9a1abfe43d7735adebe"},
-    {file = "licensecheck-2024.3.tar.gz", hash = "sha256:e838e1c87a7ede553df376ad35a69d7c4b02676df0fba9dd1c6a6866eb0e0ee5"},
+    {file = "license_expression-30.4.1-py3-none-any.whl", hash = "sha256:679646bc3261a17690494a3e1cada446e5ee342dbd87dcfa4a0c24cc5dce13ee"},
+    {file = "license_expression-30.4.1.tar.gz", hash = "sha256:9f02105f9e0fcecba6a85dfbbed7d94ea1c3a70cf23ddbfb5adf3438a6f6fce0"},
 ]
 
 [package.dependencies]
-appdirs = ">=1.4.4,<2"
-fhconfparser = ">=2024.1,<2026"
-loguru = ">=0.7.2,<2"
-markdown = ">=3.6,<4"
-packaging = ">=24.0,<25"
-requests = ">=2.31.0,<3"
-requests-cache = ">=1.2.0,<2"
-requirements-parser = ">=0.11.0,<2"
-rich = ">=13.7.1,<14"
-tomli = ">=2.0.1,<3"
-uv = ">=0.3.3,<2"
+"boolean.py" = ">=4.0"
+
+[package.extras]
+docs = ["Sphinx (>=5.0.2)", "doc8 (>=0.11.2)", "sphinx-autobuild", "sphinx-copybutton", "sphinx-reredirects (>=0.1.2)", "sphinx-rtd-dark-mode (>=1.3.0)", "sphinx-rtd-theme (>=1.0.0)", "sphinxcontrib-apidoc (>=0.4.0)"]
+testing = ["black", "isort", "pytest (>=6,!=7.0.0)", "pytest-xdist (>=2)", "twine"]
+
+[[package]]
+name = "licensecheck"
+version = "2025.1.0"
+description = "Output the licenses used by dependencies and check if these are compatible with the project license"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "licensecheck-2025.1.0-py3-none-any.whl", hash = "sha256:eb20131cd8f877e5396958fd7b00cdb2225436c37a59dba4cf36d36079133a17"},
+    {file = "licensecheck-2025.1.0.tar.gz", hash = "sha256:411a1d81606b8be695794c1e7e79cc899b51fe5c501164155361cd2d6f3c5969"},
+]
+
+[package.dependencies]
+appdirs = ">=1.4.4"
+fhconfparser = ">=2024.1"
+license-expression = ">=30.4.1"
+loguru = ">=0.7.3"
+markdown = ">=3.7"
+packaging = ">=24.2"
+requests = ">=2.32.3"
+requests-cache = ">=1.2.1"
+requirements-parser = ">=0.11.0"
+rich = ">=13.9.4"
+tomli = ">=2.2.1"
+uv = ">=0.6.8"
 
 [[package]]
 name = "loguru"
@@ -4622,30 +4660,30 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "uv"
-version = "0.6.7"
+version = "0.6.14"
 description = "An extremely fast Python package and project manager, written in Rust."
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "uv-0.6.7-py3-none-linux_armv6l.whl", hash = "sha256:d069bf5f02a5ccc7bff5f4a047e9b11569cb8c1f26db5ec3ee78e30b36ade0a6"},
-    {file = "uv-0.6.7-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:b4beed4004f3cc9b2691d21c40a9a2ff3ddb0e2bb42cacc9545b58bec19c9df7"},
-    {file = "uv-0.6.7-py3-none-macosx_11_0_arm64.whl", hash = "sha256:33707fba877cf58cc47406d5910cbfd22cdb2e19451e8b79857d4699650ed37c"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:04125921e6c670480254f8e63b863b1040bc84d6286f7a8c0b5a4d29f0aa55e9"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:2f09db1158bcc3edad033ee0b5b6a4848af8291e3b271cd76ace3524825d84ea"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:32ba45607c9140e8d391a5fd22d5d0b22fc7e0ce76988a39c6aeeb0065bc348a"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:02bcb6e57aaa147b89bdcd55f5ef6c23b18883c8ce0859dafb2f1cf32ae010e3"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:04832e48d87328f75d7b59a2d00ee3ed3060eaca4777924dba1515f0c00ff5ac"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:8efd1da986f1380d4b225e1a2e39d5870697487775a3db5a24358b09946a431d"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:840aa6212289f27d56b2c0cbeb4e95cb5726da8674663ab27d4ec80e3be2a081"},
-    {file = "uv-0.6.7-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:97e57773e6107ee578d2483e2cb1342dc2b9379d20f9e559668f053599347caf"},
-    {file = "uv-0.6.7-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:2cfc48a4b0cd10df5950d41503798f1b785f33eb0ab1cadf9ceb4a03839e5a48"},
-    {file = "uv-0.6.7-py3-none-musllinux_1_1_i686.whl", hash = "sha256:a572ce4c1286092414ada69ed05de4b2aca3666f30aa5b119191ccb30c7d96d6"},
-    {file = "uv-0.6.7-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:57be4e71104bf0244c9b19940bc877d1a7966c0ef43851950f56d2b8d18a8a5b"},
-    {file = "uv-0.6.7-py3-none-win32.whl", hash = "sha256:10465c6ec8a02b75deeef45f7b97fe74ae1ee9148b8f6fdd4c84fc4876de5745"},
-    {file = "uv-0.6.7-py3-none-win_amd64.whl", hash = "sha256:9bccdef3983f0d31830f3cbe6d00384a1d2d5a7175023ba6c5a8acea2804106a"},
-    {file = "uv-0.6.7-py3-none-win_arm64.whl", hash = "sha256:8c968ecabb39f3a6909435afc1ed84dc58cae05c99398f1975a0c5e22e4e8b1e"},
-    {file = "uv-0.6.7.tar.gz", hash = "sha256:aa558764265fb69c89c6b5dc7124265d74fb8265d81a91079912df376ff4a3b2"},
+    {file = "uv-0.6.14-py3-none-linux_armv6l.whl", hash = "sha256:c775e5d7a80ff43cb88856bbdcd838918d5ac3dc362414317e6bbaeb615fff98"},
+    {file = "uv-0.6.14-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:2578f6f8cdbcc036ffad1043f9f66ade3ac0babf29def6abd9eefd4a7c6621cb"},
+    {file = "uv-0.6.14-py3-none-macosx_11_0_arm64.whl", hash = "sha256:9fc8fe58871b4fe02a863b05b8b1b25ef1b6c60d4d224e85338f5c2be0ab4f0e"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl", hash = "sha256:2fb2cd7f6aae21b81474b0051d30e7ed939a9a71714948c47f58b0e7acdd2a80"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:d6ca3f99c1a6c1c430ae8f451133fb4e8c3a22f661c257425402a5d9430bb797"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ed41877b679e0a1af9ab65427d829b87a81b499017e59c70756d4ba02ca43fcb"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:fe9b4361b1c8055301b715fdd94d94eb512053dc4545fec40d3fe3657f655987"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:998b67bb1cebbe044fc2c5cb251c29cffc56f62a6d55719d6f4e960461d6edad"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:6d433925db6e2ef46047b68962d136ff2ef17a7b5609168615f19e60674232c9"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:36aaeb00a70a10f748e16c7a1fc410862e2ba905806e7e9dfbc3e64596309404"},
+    {file = "uv-0.6.14-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:11779beb3bd1f92814bc8d8cd350d5228e8f9198cca2f52138b53030a4061d93"},
+    {file = "uv-0.6.14-py3-none-musllinux_1_1_armv7l.whl", hash = "sha256:bf1ec103cf9a0850f03935dc6a93cacc680fa2c90c3b41cfc10da311afab8f5b"},
+    {file = "uv-0.6.14-py3-none-musllinux_1_1_i686.whl", hash = "sha256:955e36c98a438a249e178988d4f13b1bb831eb57264d73c459f171b5afd7b023"},
+    {file = "uv-0.6.14-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:2d534e7dc1299c8b53eb7b4c7575e4f0933673ea8b1275d3f3022f5670e311db"},
+    {file = "uv-0.6.14-py3-none-win32.whl", hash = "sha256:7cdf3c8d927b07d4eaffc44809eb57523d449705f10dabbdd6f34f7bdfc7d5fe"},
+    {file = "uv-0.6.14-py3-none-win_amd64.whl", hash = "sha256:012f46bef6909209c4a6749e4019eb755ba762d37d7ceaaf76da9cb4b7f771e9"},
+    {file = "uv-0.6.14-py3-none-win_arm64.whl", hash = "sha256:7465081b4d0b213d0055ccb48de7fe546b5cf0853c6d3601115760760634f6d8"},
+    {file = "uv-0.6.14.tar.gz", hash = "sha256:a117466f307d164a74444949cc94ec4328ec880fb489cbaa7df324dab14c5c98"},
 ]
 
 [[package]]
@@ -4894,4 +4932,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "df6834296cbd5f59576dfc96c953124a9ec4d14b94bbeb5182b6a889ad1d92eb"
+content-hash = "f81a2e94b8b2ea2ce1f7a3fdf7ccf026e42a8cb908cd4c4012897444903502b4"
