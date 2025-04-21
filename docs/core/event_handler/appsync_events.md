@@ -67,22 +67,28 @@ You must have an existing AppSync Events API with real-time capabilities enabled
 
 AppSync Events uses a specific event format for Lambda requests and responses. In most scenarios, Powertools simplifies this interaction by automatically formatting resolver returns to match the expected AppSync response structure.
 
-=== "appsync_payload_request.json"
+=== "payload_request.json"
 
     ```python hl_lines="5 10 12"
-    --8<-- "examples/event_handler_appsync_events/src/appsync_payload_request.json"
+    --8<-- "examples/event_handler_appsync_events/src/payload_request.json"
     ```
 
-=== "appsync_payload_response.json"
+=== "payload_response.json"
 
     ```python hl_lines="5 10 12"
-    --8<-- "examples/event_handler_appsync_events/src/appsync_payload_response.json"
+    --8<-- "examples/event_handler_appsync_events/src/payload_response.json"
     ```
 
-=== "appsync_payload_response_with_error.json"
+=== "payload_response_with_error.json"
 
     ```python hl_lines="5 10 12"
-    --8<-- "examples/event_handler_appsync_events/src/appsync_payload_response_with_error.json"
+    --8<-- "examples/event_handler_appsync_events/src/payload_response_with_error.json"
+    ```
+
+=== "payload_response_fail_request.json"
+
+    ```python hl_lines="5 10 12"
+    --8<-- "examples/event_handler_appsync_events/src/payload_response_fail_request.json"
     ```
 
 #### Events response with error
@@ -177,12 +183,12 @@ When processing items individually with `aggregate=False`, you can raise an exce
 
 #### Handling errors with batch of items
 
-When processing batch of items with `aggregate=False`, you can must format the payload according the expected response.
+When processing batch of items with `aggregate=True`, you must format the payload according the expected response.
 
-=== "working_with_error_handling.py"
+=== "working_with_error_handling_multiple.py"
 
     ```python hl_lines="5 6 13"
-    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling.py"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_multiple.py"
     ```
 
 === "working_with_error_handling_response.json"

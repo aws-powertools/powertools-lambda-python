@@ -15,8 +15,15 @@ def handle_default_namespace_batch(payload_list: list[dict[str, Any]]):
 
     # Process all events in the batch together
     for event in payload_list:
-        # Process each event
-        results.append({"id": event.get("id"), "payload": {"processed": True, "originalEvent": event}})
+        try:
+            # Process each event
+            results.append({"id": event.get("id"), "payload": {"processed": True, "originalEvent": event}})
+        except Exception as e:
+            # Handle errors for individual events
+            results.append({
+                "error": str(e),
+                "id": event.get("id"),
+            })
 
     return results
 
