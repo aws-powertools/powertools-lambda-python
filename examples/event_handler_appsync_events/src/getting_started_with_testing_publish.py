@@ -14,6 +14,7 @@ class LambdaContext:
     def get_remaining_time_in_millis(self) -> int:
         return 1000
 
+
 def test_publish_event_with_synchronous_resolver():
     """Test handling a publish event with a synchronous resolver."""
     # GIVEN a sample publish event

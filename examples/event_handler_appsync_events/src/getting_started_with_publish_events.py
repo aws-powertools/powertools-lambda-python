@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 @app.on_publish("/default/channel")
 def handle_channel1_publish(payload: dict[str, Any]):
     # Process the payload for this specific channel
@@ -16,6 +17,7 @@ def handle_channel1_publish(payload: dict[str, Any]):
         "processed": True,
         "original_payload": payload,
     }
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)

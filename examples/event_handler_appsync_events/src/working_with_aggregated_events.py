@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 @app.on_publish("/default/*", aggregate=True)
 def handle_default_namespace_batch(payload_list: list[dict[str, Any]]):
     results: list = []
@@ -19,6 +20,7 @@ def handle_default_namespace_batch(payload_list: list[dict[str, Any]]):
         results.append({"id": event.get("id"), "payload": {"processed": True, "originalEvent": event}})
 
     return results
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)

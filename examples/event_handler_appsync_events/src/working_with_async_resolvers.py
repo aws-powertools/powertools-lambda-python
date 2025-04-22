@@ -10,14 +10,17 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 @app.async_on_publish("/default/channel1")
 async def handle_channel1_publish(payload: dict[str, Any]):
     result = await async_process_data(payload)
     return result
 
+
 async def async_process_data(payload: dict[str, Any]):
     await asyncio.sleep(0.1)
     return {"processed": payload, "async": True}
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)

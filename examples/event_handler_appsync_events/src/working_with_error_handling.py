@@ -9,8 +9,10 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 class ValidationError(Exception):
     pass
+
 
 @app.on_publish("/default/channel")
 def handle_channel1_publish(payload: dict[str, Any]):
@@ -19,11 +21,14 @@ def handle_channel1_publish(payload: dict[str, Any]):
 
     return process_payload(payload)
 
+
 def is_valid_payload(payload: dict[str, Any]):
     return "data" in payload
 
+
 def process_payload(payload: dict[str, Any]):
     return {"processed": payload["data"]}
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)

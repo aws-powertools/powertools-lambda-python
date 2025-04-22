@@ -1,15 +1,15 @@
 {
-    "events":[
-       {
-          "error": "Error message",
-          "id":"1"
-       },
-       {
-          "payload":{
-             "data":"data_2"
-          },
-          "id":"2"
-       }
-    ]
-  }
+   "events":[
+      {
+         "error": "Error message",
+         "id":"1"
+      },
+      {
+         "payload":{
+            "data":"data_2"
+         },
+         "id":"2"
+      }
+   ]
+}
   

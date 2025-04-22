@@ -65,7 +65,7 @@ You must have an existing AppSync Events API with real-time capabilities enabled
 
 ### AppSync request and response format
 
-AppSync Events uses a specific event format for Lambda requests and responses. In most scenarios, Powertools simplifies this interaction by automatically formatting resolver returns to match the expected AppSync response structure.
+AppSync Events uses a specific event format for Lambda requests and responses. In most scenarios, Powertools for AWS simplifies this interaction by automatically formatting resolver returns to match the expected AppSync response structure.
 
 === "payload_request.json"
 
@@ -95,7 +95,7 @@ AppSync Events uses a specific event format for Lambda requests and responses. I
 
 When processing events with Lambda, you can return errors to AppSync in three ways:
 
-* **Error per item:** Return an `error` key within each individual item's response. AppSync Events expects this format for item-specific errors.
+* **Item specific error:** Return an `error` key within each individual item's response. AppSync Events expects this format for item-specific errors.
 * **Fail entire request:** Return a JSON object with a top-level `error` key. This signals a general failure, and AppSync treats the entire request as unsuccessful.
 * **Unauthorized exception**: Raise the **UnauthorizedException** exception to reject a subscribe or publish request with HTTP 403.
 
@@ -124,7 +124,7 @@ You can define your handlers for different event types using the `app.on_publish
 
 You can use wildcard patterns to create catch-all handlers for multiple channels or namespaces. This is particularly useful for centralizing logic that applies to multiple channels.
 
-When multiple handlers could match the same event, the most specific pattern takes precedence.
+When an event matches with multiple handlers, the most specific pattern takes precedence.
 
 === "working_with_wildcard_resolvers.py"
 
@@ -197,11 +197,28 @@ When processing batch of items with `aggregate=True`, you must format the payloa
     --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
     ```
 
-#### Rejecting the entire request
+If instead you want to fail the entire batch, you can throw an exception. This will cause the Event Handler to return an error response to AppSync and fail the entire batch.
 
-??? warning "Raising `UnauthorizedException` will cause the Lambda invocation to fail."
+=== "working_with_error_handling_multiple.py"
 
-You can also reject the entire payload by raising an `UnauthorizedException`. This prevents Powertools from processing any messages and causes the Lambda invocation to fail, returning an error to AppSync.
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_multiple.py"
+    ```
+
+=== "working_with_error_handling_response.json"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
+    ```
+
+#### Authorization control
+
+!!! warning "Raising `UnauthorizedException` will cause the Lambda invocation to fail."
+
+You can also do content based authorization for channel by raising the `UnauthorizedException` exception. This can cause two situations:
+
+- **When working with publish events** Powertools for AWS stop processing messages and subscribers will not receive any message.
+- **When working with subscribe events** the subscription won't be established.
 
 === "working_with_error_handling.py"
 
@@ -239,6 +256,107 @@ You can access to the original Lambda event or context for additional informatio
     ```python hl_lines="5 6 13"
     --8<-- "examples/event_handler_appsync_events/src/accessing_event_and_context.py"
     ```
+
+## Event Handler workflow
+
+#### Working with single items
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant EventHandler
+    note over Client,EventHandler: Individual Event Processing (aggregate=False)
+    Client->>+AppSync: Send multiple events to channel
+    AppSync->>+Lambda: Invoke Lambda with batch of events
+    Lambda->>+EventHandler: Process events with aggregate=False
+    loop For each event in batch
+        EventHandler->>EventHandler: Process individual event
+    end
+    EventHandler-->>-Lambda: Return array of processed events
+    Lambda-->>-AppSync: Return event-by-event responses
+    AppSync-->>-Client: Report individual event statuses
+```
+</center>
+
+
+#### Working with aggregated items
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant EventHandler
+    note over Client,EventHandler: Aggregate Processing Workflow
+    Client->>+AppSync: Send multiple events to channel
+    AppSync->>+Lambda: Invoke Lambda with batch of events
+    Lambda->>+EventHandler: Process events with aggregate=True
+    EventHandler->>EventHandler: Batch of events
+    EventHandler->>EventHandler: Process entire batch at once
+    EventHandler->>EventHandler: Format response for each event
+    EventHandler-->>-Lambda: Return aggregated results
+    Lambda-->>-AppSync: Return success responses
+    AppSync-->>-Client: Confirm all events processed
+```
+</center>
+
+#### Authorization fails for publish
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant EventHandler
+    note over Client,EventHandler: Publish Event Authorization Flow
+    Client->>AppSync: Publish message to channel
+    AppSync->>Lambda: Invoke Lambda with publish event
+    Lambda->>EventHandler: Process publish event
+    alt Authorization Failed
+        EventHandler->>EventHandler: Authorization check fails
+        EventHandler->>Lambda: Raise UnauthorizedException
+        Lambda->>AppSync: Return error response
+        AppSync--xClient: Message not delivered
+        AppSync--xAppSync: No distribution to subscribers
+    else Authorization Passed
+        EventHandler->>Lambda: Return successful response
+        Lambda->>AppSync: Return processed event
+        AppSync->>Client: Acknowledge message
+        AppSync->>AppSync: Distribute to subscribers
+    end
+```
+</center>
+
+#### Authorization fails for subscribe
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant EventHandler
+    note over Client,EventHandler: Subscribe Event Authorization Flow
+    Client->>AppSync: Request subscription to channel
+    AppSync->>Lambda: Invoke Lambda with subscribe event
+    Lambda->>EventHandler: Process subscribe event
+    alt Authorization Failed
+        EventHandler->>EventHandler: Authorization check fails
+        EventHandler->>Lambda: Raise UnauthorizedException
+        Lambda->>AppSync: Return error response
+        AppSync--xClient: Subscription denied (HTTP 403)
+    else Authorization Passed
+        EventHandler->>Lambda: Return successful response
+        Lambda->>AppSync: Return authorization success
+        AppSync->>Client: Subscription established
+    end
+```
+</center>
+
+
+
 
 ## Testing your code
 

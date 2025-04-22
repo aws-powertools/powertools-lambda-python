@@ -14,6 +14,7 @@ class LambdaContext:
     def get_remaining_time_in_millis(self) -> int:
         return 1000
 
+
 def test_subscribe_event_with_valid_return():
     """Test error handling during publish event processing."""
     # GIVEN a sample publish event

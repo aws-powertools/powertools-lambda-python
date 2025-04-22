@@ -10,8 +10,10 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 class ValidationError(Exception):
     pass
+
 
 @app.on_publish("/default/channel1")
 def handle_channel1_publish(payload: dict[str, Any]):
@@ -30,6 +32,7 @@ def handle_channel1_publish(payload: dict[str, Any]):
         "userAgent": headers.get("User-Agent"),
         "timeRemaining": remaining_time,
     }
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)

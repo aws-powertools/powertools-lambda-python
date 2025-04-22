@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 app = AppSyncEventsResolver()
 
+
 @app.on_subscribe("/*")
 def handle_all_subscriptions():
     path = app.current_event.info.channel_path
@@ -20,12 +21,14 @@ def handle_all_subscriptions():
 
     return True
 
+
 def is_authorized(path: str):
     # Your authorization logic here
     if path == "not_allowed_path_here":
         return False
 
     return True
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)
