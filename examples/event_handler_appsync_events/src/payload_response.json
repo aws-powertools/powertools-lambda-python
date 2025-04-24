@@ -1,0 +1,16 @@
+{
+   "events":[
+      {
+         "payload":{
+            "data":"data_1"
+         },
+         "id":"1"
+      },
+      {
+         "payload":{
+            "data":"data_2"
+         },
+         "id":"2"
+      }
+   ]
+}
