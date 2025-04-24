@@ -1041,7 +1041,7 @@ def test_integration_with_external_service(lambda_context, mock_event):
             return {
                 "order_id": order_id,
                 "status": "processed",
-                "total_amount": quantity * 10.99,
+                "total_amount": quantity * 10,
             }
 
     order_service = MockOrderService()
@@ -1070,7 +1070,7 @@ def test_integration_with_external_service(lambda_context, mock_event):
     assert result["events"][0]["payload"]["order_processed"] is True
     assert result["events"][0]["payload"]["order_details"]["order_id"] == "order-123"
     assert result["events"][0]["payload"]["order_details"]["status"] == "processed"
-    assert result["events"][0]["payload"]["order_details"]["total_amount"] == 21.98  # 2 * 10.99
+    assert result["events"][0]["payload"]["order_details"]["total_amount"] == 20  # 2 * 10
 
 
 def test_complex_resolver_hierarchy(lambda_context, mock_event):

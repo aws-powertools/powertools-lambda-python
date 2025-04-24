@@ -35,9 +35,7 @@ def is_valid_path(path: str) -> bool:
         >>> is_valid_path('users')
         False
     """
-    if path == "/*":
-        return True
-    return bool(PATH_REGEX.fullmatch(path))
+    return True if path == "/*" else bool(PATH_REGEX.fullmatch(path))
 
 
 def find_best_route(routes: dict[str, Any], path: str):

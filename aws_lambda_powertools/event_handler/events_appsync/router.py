@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler.events_appsync._registry import ResolverEventsRegistry
-from aws_lambda_powertools.event_handler.events_appsync.base import BaseRouter
+from aws_lambda_powertools.event_handler.events_appsync.base import DEFAULT_ROUTE, BaseRouter
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -71,7 +71,7 @@ class Router(BaseRouter):
 
     def on_publish(
         self,
-        path: str = "/default/*",
+        path: str = DEFAULT_ROUTE,
         aggregate: bool = False,
     ) -> Callable:
         """
@@ -113,7 +113,7 @@ class Router(BaseRouter):
 
     def async_on_publish(
         self,
-        path: str = "/default/*",
+        path: str = DEFAULT_ROUTE,
         aggregate: bool = False,
     ) -> Callable:
         """
@@ -154,7 +154,7 @@ class Router(BaseRouter):
 
     def on_subscribe(
         self,
-        path: str = "/default/*",
+        path: str = DEFAULT_ROUTE,
     ) -> Callable:
         """
         Register a resolver function for subscribe operations.
