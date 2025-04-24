@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.event_handler import AppSyncEventsResolver  # type: ignore[attr-defined]
+from aws_lambda_powertools.event_handler import AppSyncEventsResolver
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -11,11 +11,11 @@ app = AppSyncEventsResolver()
 
 
 @app.on_publish("/default/*", aggregate=True)
-def handle_default_namespace_batch(payload_list: list[dict[str, Any]]):
+def handle_default_namespace_batch(payload: list[dict[str, Any]]):
     results: list = []
 
     # Process all events in the batch together
-    for event in payload_list:
+    for event in payload:
         try:
             # Process each event
             results.append({"id": event.get("id"), "payload": {"processed": True, "originalEvent": event}})

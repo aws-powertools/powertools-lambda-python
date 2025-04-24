@@ -65,25 +65,25 @@ AppSync Events uses a specific event format for Lambda requests and responses. I
 
 === "payload_request.json"
 
-    ```python hl_lines="5 10 12"
+    ```json hl_lines="13 22 32-45"
     --8<-- "examples/event_handler_appsync_events/src/payload_request.json"
     ```
 
 === "payload_response.json"
 
-    ```python hl_lines="5 10 12"
+    ```json hl_lines="4-7 10-13"
     --8<-- "examples/event_handler_appsync_events/src/payload_response.json"
     ```
 
 === "payload_response_with_error.json"
 
-    ```python hl_lines="5 10 12"
+    ```json hl_lines="4"
     --8<-- "examples/event_handler_appsync_events/src/payload_response_with_error.json"
     ```
 
 === "payload_response_fail_request.json"
 
-    ```python hl_lines="5 10 12"
+    ```json hl_lines="2"
     --8<-- "examples/event_handler_appsync_events/src/payload_response_fail_request.json"
     ```
 
@@ -104,13 +104,13 @@ You can define your handlers for different event types using the `app.on_publish
 
 === "getting_started_with_publish_events.py"
 
-    ```python hl_lines="5 10 12"
+    ```python hl_lines="5 10 13"
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_publish_events.py"
     ```
 
 === "getting_started_with_subscribe_events.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="6 7 13 17"
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_subscribe_events.py"
     ```
 
@@ -134,7 +134,7 @@ When an event matches with multiple handlers, the most specific pattern takes pr
 
 === "working_with_wildcard_resolvers.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="5 10 13 19 26"
     --8<-- "examples/event_handler_appsync_events/src/working_with_wildcard_resolvers.py"
     ```
 
@@ -155,7 +155,7 @@ You can enable this with the `aggregate` parameter:
 
 === "working_with_aggregated_events.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="8 15 22"
     --8<-- "examples/event_handler_appsync_events/src/working_with_aggregated_events.py"
     ```
 
@@ -169,13 +169,13 @@ When processing items individually with `aggregate=False`, you can raise an exce
 
 === "working_with_error_handling.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="5 13 17 20"
     --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling.py"
     ```
 
 === "working_with_error_handling_response.json"
 
-    ```python hl_lines="5 6 13"
+    ```json hl_lines="4"
     --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
     ```
 
@@ -185,13 +185,13 @@ When processing batch of items with `aggregate=True`, you must format the payloa
 
 === "working_with_error_handling_multiple.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="5 10 13 24-29"
     --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_multiple.py"
     ```
 
 === "working_with_error_handling_response.json"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="4"
     --8<-- "examples/event_handler_appsync_events/src/working_with_error_handling_response.json"
     ```
 

@@ -6,6 +6,7 @@ from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from .api_gateway_websocket_event import APIGatewayWebSocketEvent
 from .appsync_resolver_event import AppSyncResolverEvent
+from .appsync_resolver_events_event import AppSyncResolverEventsEvent
 from .aws_config_rule_event import AWSConfigRuleEvent
 from .bedrock_agent_event import BedrockAgentEvent
 from .cloud_watch_alarm_event import (
@@ -55,6 +56,7 @@ __all__ = [
     "APIGatewayWebSocketEvent",
     "SecretsManagerEvent",
     "AppSyncResolverEvent",
+    "AppSyncResolverEventsEvent",
     "ALBEvent",
     "BedrockAgentEvent",
     "CloudWatchAlarmData",

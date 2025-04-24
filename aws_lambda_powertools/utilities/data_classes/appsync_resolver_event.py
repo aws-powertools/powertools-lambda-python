@@ -26,6 +26,46 @@ def get_identity_object(identity: dict | None) -> Any:
     return AppSyncIdentityIAM(identity)
 
 
+class AppSyncEventBase(DictWrapper):
+    """AppSync resolver event base to work with AppSync GraphQL + Events"""
+
+    @property
+    def request_headers(self) -> dict[str, str]:
+        """Request headers"""
+        return CaseInsensitiveDict(self["request"]["headers"])
+
+    @property
+    def domain_name(self) -> str | None:
+        """The domain name when using custom domain"""
+        return self["request"].get("domainName")
+
+    @property
+    def prev_result(self) -> dict[str, Any] | None:
+        """It represents the result of whatever previous operation was executed in a pipeline resolver."""
+        prev = self.get("prev")
+        return prev.get("result") if prev else None
+
+    @property
+    def stash(self) -> dict:
+        """The stash is a map that is made available inside each resolver and function mapping template.
+        The same stash instance lives through a single resolver execution. This means that you can use the
+        stash to pass arbitrary data across request and response mapping templates, and across functions in
+        a pipeline resolver."""
+        return self.get("stash") or {}
+
+    @property
+    def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | None:
+        """An object that contains information about the caller.
+        Depending on the type of identify found:
+        - API_KEY authorization - returns None
+        - AWS_IAM authorization - returns AppSyncIdentityIAM
+        - AMAZON_COGNITO_USER_POOLS authorization - returns AppSyncIdentityCognito
+        - AWS_LAMBDA authorization - returns None - NEED TO TEST
+        - OPENID_CONNECT authorization - returns None - NEED TO TEST
+        """
+        return get_identity_object(self.get("identity"))
+
+
 class AppSyncIdentityIAM(DictWrapper):
     """AWS_IAM authorization"""
 
@@ -141,7 +181,7 @@ class AppSyncResolverEventInfo(DictWrapper):
         return self.get("selectionSetGraphQL")
 
 
-class AppSyncResolverEvent(DictWrapper):
+class AppSyncResolverEvent(AppSyncEventBase):
     """AppSync resolver event
 
     **NOTE:** AppSync Resolver Events can come in various shapes this data class
@@ -179,47 +219,14 @@ class AppSyncResolverEvent(DictWrapper):
         return self["arguments"]
 
     @property
-    def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | None:
-        """An object that contains information about the caller.
-
-        Depending on the type of identify found:
-
-        - API_KEY authorization - returns None
-        - AWS_IAM authorization - returns AppSyncIdentityIAM
-        - AMAZON_COGNITO_USER_POOLS authorization - returns AppSyncIdentityCognito
-        """
-        return get_identity_object(self.get("identity"))
-
-    @property
     def source(self) -> dict[str, Any]:
         """A map that contains the resolution of the parent field."""
         return self.get("source") or {}
 
     @property
-    def request_headers(self) -> dict[str, str]:
-        """Request headers"""
-        return CaseInsensitiveDict(self["request"]["headers"])
-
-    @property
-    def prev_result(self) -> dict[str, Any] | None:
-        """It represents the result of whatever previous operation was executed in a pipeline resolver."""
-        prev = self.get("prev")
-        if not prev:
-            return None
-        return prev.get("result")
-
-    @property
     def info(self) -> AppSyncResolverEventInfo:
         """The info section contains information about the GraphQL request."""
         return self._info
-
-    @property
-    def stash(self) -> dict:
-        """The stash is a map that is made available inside each resolver and function mapping template.
-        The same stash instance lives through a single resolver execution. This means that you can use the
-        stash to pass arbitrary data across request and response mapping templates, and across functions in
-        a pipeline resolver."""
-        return self.get("stash") or {}
 
     @overload
     def get_header_value(

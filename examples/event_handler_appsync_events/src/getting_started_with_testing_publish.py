@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from aws_lambda_powertools.event_handler import AppSyncEventsResolver  # type: ignore[attr-defined]
+from aws_lambda_powertools.event_handler import AppSyncEventsResolver
 
 
 class LambdaContext:
