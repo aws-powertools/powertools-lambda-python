@@ -1,0 +1,46 @@
+{
+   "identity":"None",
+   "result":"None",
+   "request":{
+      "headers": {
+      "x-forwarded-for": "1.1.1.1, 2.2.2.2",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+   },
+      "domainName":"None"
+   },
+   "info":{
+      "channel":{
+         "path":"/default/channel",
+         "segments":[
+            "default",
+            "channel"
+         ]
+      },
+      "channelNamespace":{
+         "name":"default"
+      },
+      "operation":"PUBLISH"
+   },
+   "error":"None",
+   "prev":"None",
+   "stash":{
+
+   },
+   "outErrors":[
+
+   ],
+   "events":[
+      {
+         "payload":{
+            "data":"data_1"
+         },
+         "id":"1"
+      },
+      {
+         "payload":{
+            "data":"data_2"
+         },
+         "id":"2"
+      }
+   ]
+}
