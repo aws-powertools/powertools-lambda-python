@@ -1,6 +1,7 @@
 ---
 title: AppSync Events
 description: Core utility
+status: new
 ---
 
 Event Handler for AWS AppSync real-time events.
@@ -40,13 +41,14 @@ stateDiagram-v2
 * Easily handle publish and subscribe events with dedicated handler methods
 * Automatic routing based on namespace and channel patterns
 * Support for wildcard patterns to create catch-all handlers
-* Process events in parallel or sequentially
-* Control over event aggregation for batch processing
+* Process events in parallel corontrol aggregation for batch processing
 * Graceful error handling for individual events
 
 ## Terminology
 
-**[AWS AppSync Events](https://docs.aws.amazon.com/appsync/latest/eventapi/event-api-welcome.html){target="_blank"}**. A service that enables you to quickly build secure, scalable real-time WebSocket APIs without managing infrastructure or writing API code. It handles connection management, message broadcasting, authentication, and monitoring, reducing time to market and operational costs.
+**[AWS AppSync Events](https://docs.aws.amazon.com/appsync/latest/eventapi/event-api-welcome.html){target="_blank"}**. A service that enables you to quickly build secure, scalable real-time WebSocket APIs without managing infrastructure or writing API code. 
+
+It handles connection management, message broadcasting, authentication, and monitoring, reducing time to market and operational costs.
 
 ## Getting started
 
@@ -126,12 +128,6 @@ You can use wildcard patterns to create catch-all handlers for multiple channels
 
 When an event matches with multiple handlers, the most specific pattern takes precedence.
 
-=== "working_with_wildcard_resolvers.py"
-
-    ```python hl_lines="5 6 13"
-    --8<-- "examples/event_handler_appsync_events/src/working_with_wildcard_resolvers.py"
-    ```
-
 ???+ note "Supported wildcard patterns"
     Only the following patterns are supported:
 
@@ -141,6 +137,14 @@ When an event matches with multiple handlers, the most specific pattern takes pr
     Patterns like `/namespace/channel*` or `/namespace/*/subpath` are not supported.
 
     More specific routes will always take precedence over less specific ones. For example, `/default/channel1` will take precedence over `/default/*`, which will take precedence over `/*`.
+
+=== "working_with_wildcard_resolvers.py"
+
+    ```python hl_lines="5 6 13"
+    --8<-- "examples/event_handler_appsync_events/src/working_with_wildcard_resolvers.py"
+    ```
+
+If the event doesn't match any registered handler, the Event Handler will log a warning and skip processing the event.
 
 ### Aggregated processing
 
@@ -163,11 +167,11 @@ You can enable this with the `aggregate` parameter:
 
 ### Handling errors
 
-You can filter or reject events by throwing exceptions in your resolvers or by formatting the payload according to the expected response structure. This instructs AppSync not to propagate that specific message, so subscribers will not receive the corresponding message.
+You can filter or reject events by raising exceptions in your resolvers or by formatting the payload according to the expected response structure. This instructs AppSync not to propagate that specific message, so subscribers will not receive it.
 
 #### Handling errors with individual items
 
-When processing items individually with `aggregate=False`, you can raise an exception to fail a specific item. When an exception is raised, the Event Handler will catch it and include the exception name and message in the response.
+When processing items individually with `aggregate=False`, you can raise an exception to fail a specific message. When this happens, the Event Handler will catch it and include the exception name and message in the response.
 
 === "working_with_error_handling.py"
 
