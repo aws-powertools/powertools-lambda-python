@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.event_handler import AppSyncEventsResolver  # type: ignore[attr-defined]
+from aws_lambda_powertools.event_handler import AppSyncEventsResolver
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
