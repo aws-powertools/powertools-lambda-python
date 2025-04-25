@@ -29,12 +29,14 @@ class BedrockAgentFunctionResolver:
         return app.resolve(event, context)
     ```
     """
+
     def __init__(self) -> None:
         self._tools: dict[str, dict[str, Any]] = {}
         self.current_event: BedrockAgentFunctionEvent | None = None
 
     def tool(self, description: str | None = None) -> Callable:
         """Decorator to register a tool function"""
+
         def decorator(func: Callable) -> Callable:
             if not description:
                 raise ValueError("Tool description is required")
@@ -48,6 +50,7 @@ class BedrockAgentFunctionResolver:
                 "description": description,
             }
             return func
+
         return decorator
 
     def resolve(self, event: dict[str, Any], context: Any) -> dict[str, Any]:
@@ -60,6 +63,9 @@ class BedrockAgentFunctionResolver:
 
     def _resolve(self) -> dict[str, Any]:
         """Internal resolution logic"""
+        if self.current_event is None:
+            raise ValueError("No event to process")
+
         function_name = self.current_event.function
         action_group = self.current_event.action_group
 
@@ -67,21 +73,17 @@ class BedrockAgentFunctionResolver:
             return self._create_response(
                 action_group=action_group,
                 function_name=function_name,
-                result=f"Function not found: {function_name}"
+                result=f"Function not found: {function_name}",
             )
 
         try:
             result = self._tools[function_name]["function"]()
-            return self._create_response(
-                action_group=action_group,
-                function_name=function_name,
-                result=result
-            )
+            return self._create_response(action_group=action_group, function_name=function_name, result=result)
         except Exception as e:
             return self._create_response(
                 action_group=action_group,
                 function_name=function_name,
-                result=f"Error: {str(e)}"
+                result=f"Error: {str(e)}",
             )
 
     def _create_response(self, action_group: str, function_name: str, result: Any) -> dict[str, Any]:
@@ -91,12 +93,6 @@ class BedrockAgentFunctionResolver:
             "response": {
                 "actionGroup": action_group,
                 "function": function_name,
-                "functionResponse": {
-                    "responseBody": {
-                        "TEXT": {
-                            "body": str(result)
-                        }
-                    }
-                }
-            }
+                "functionResponse": {"responseBody": {"TEXT": {"body": str(result)}}},
+            },
         }

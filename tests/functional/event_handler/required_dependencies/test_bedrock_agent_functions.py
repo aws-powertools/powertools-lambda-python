@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+
 from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
 from tests.functional.utils import load_event
@@ -74,6 +75,7 @@ def test_bedrock_agent_function_missing_description():
     # WHEN registering a tool without description
     # THEN raise ValueError
     with pytest.raises(ValueError, match="Tool description is required"):
+
         @app.tool()
         def test_function():
             return "test"
@@ -90,6 +92,7 @@ def test_bedrock_agent_function_duplicate_registration():
 
     # THEN raise ValueError on second registration
     with pytest.raises(ValueError, match="Tool 'test_function' already registered"):
+
         @app.tool(description="Second registration")
         def test_function():  # noqa: F811
             return "test"
