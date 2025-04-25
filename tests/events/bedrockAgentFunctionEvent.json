@@ -1,0 +1,33 @@
+{
+    "messageVersion": "1.0",
+    "agent": {
+        "alias": "PROD",
+        "name": "hr-assistant-function-def",
+        "version": "1",
+        "id": "1234abcd"
+    },
+    "sessionId": "123456789123458",
+    "sessionAttributes": {
+        "employeeId": "EMP123",
+        "department": "Engineering"
+    },
+    "promptSessionAttributes": {
+        "lastInteraction": "2024-02-01T15:30:00Z",
+        "requestType": "vacation"
+    },
+    "inputText": "I want to request vacation from March 15 to March 20",
+    "actionGroup": "VacationsActionGroup",
+    "function": "submitVacationRequest",
+    "parameters": [
+        {
+            "name": "startDate",
+            "type": "string",
+            "value": "2024-03-15"
+        },
+        {
+            "name": "endDate",
+            "type": "string",
+            "value": "2024-03-20"
+        }
+    ]
+}

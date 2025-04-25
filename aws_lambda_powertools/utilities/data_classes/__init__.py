@@ -9,6 +9,7 @@ from .appsync_resolver_event import AppSyncResolverEvent
 from .appsync_resolver_events_event import AppSyncResolverEventsEvent
 from .aws_config_rule_event import AWSConfigRuleEvent
 from .bedrock_agent_event import BedrockAgentEvent
+from .bedrock_agent_function_event import BedrockAgentFunctionEvent
 from .cloud_watch_alarm_event import (
     CloudWatchAlarmConfiguration,
     CloudWatchAlarmData,
@@ -59,6 +60,7 @@ __all__ = [
     "AppSyncResolverEventsEvent",
     "ALBEvent",
     "BedrockAgentEvent",
+    "BedrockAgentFunctionEvent",
     "CloudWatchAlarmData",
     "CloudWatchAlarmEvent",
     "CloudWatchAlarmMetric",
