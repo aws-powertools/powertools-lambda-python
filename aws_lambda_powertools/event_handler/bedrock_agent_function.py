@@ -2,10 +2,57 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import override
+
+from aws_lambda_powertools.event_handler.api_gateway import Response, ResponseBuilder
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+from enum import Enum
+
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
+
+
+class ResponseState(Enum):
+    FAILURE = "FAILURE"
+    REPROMPT = "REPROMPT"
+
+
+class BedrockFunctionsResponseBuilder(ResponseBuilder):
+    """
+    Bedrock Functions Response Builder. This builds the response dict to be returned by Lambda
+    when using Bedrock Agent Functions.
+
+    Since the payload format is different from the standard API Gateway Proxy event,
+    we override the build method.
+    """
+
+    @override
+    def build(self, event: BedrockAgentFunctionEvent, *args) -> dict[str, Any]:
+        """Build the full response dict to be returned by the lambda"""
+        self._route(event, None)
+
+        body = self.response.body
+        if self.response.is_json() and not isinstance(self.response.body, str):
+            body = self.serializer(body)
+
+        response: dict[str, Any] = {
+            "messageVersion": "1.0",
+            "response": {
+                "actionGroup": event.action_group,
+                "function": event.function,
+                "functionResponse": {"responseBody": {"TEXT": {"body": str(body)}}},
+            },
+        }
+
+        # Add responseState if it's an error
+        if self.response.status_code >= 400:
+            response["response"]["functionResponse"]["responseState"] = (
+                ResponseState.REPROMPT.value if self.response.status_code == 400 else ResponseState.FAILURE.value
+            )
+
+        return response
 
 
 class BedrockAgentFunctionResolver:
@@ -13,8 +60,6 @@ class BedrockAgentFunctionResolver:
 
     Examples
     --------
-    Simple example with a custom lambda handler
-
     ```python
     from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver
 
@@ -33,6 +78,7 @@ class BedrockAgentFunctionResolver:
     def __init__(self) -> None:
         self._tools: dict[str, dict[str, Any]] = {}
         self.current_event: BedrockAgentFunctionEvent | None = None
+        self._response_builder_class = BedrockFunctionsResponseBuilder
 
     def tool(self, description: str | None = None) -> Callable:
         """Decorator to register a tool function"""
@@ -67,32 +113,28 @@ class BedrockAgentFunctionResolver:
             raise ValueError("No event to process")
 
         function_name = self.current_event.function
-        action_group = self.current_event.action_group
 
         if function_name not in self._tools:
-            return self._create_response(
-                action_group=action_group,
-                function_name=function_name,
-                result=f"Function not found: {function_name}",
-            )
+            return self._response_builder_class(
+                Response(
+                    status_code=400,  # Using 400 to trigger REPROMPT
+                    body=f"Function not found: {function_name}",
+                ),
+            ).build(self.current_event)
 
         try:
             result = self._tools[function_name]["function"]()
-            return self._create_response(action_group=action_group, function_name=function_name, result=result)
+            # Always wrap the result in a Response object
+            if not isinstance(result, Response):
+                result = Response(
+                    status_code=200,  # Success
+                    body=result,
+                )
+            return self._response_builder_class(result).build(self.current_event)
         except Exception as e:
-            return self._create_response(
-                action_group=action_group,
-                function_name=function_name,
-                result=f"Error: {str(e)}",
-            )
-
-    def _create_response(self, action_group: str, function_name: str, result: Any) -> dict[str, Any]:
-        """Create response in Bedrock Agent format"""
-        return {
-            "messageVersion": "1.0",
-            "response": {
-                "actionGroup": action_group,
-                "function": function_name,
-                "functionResponse": {"responseBody": {"TEXT": {"body": str(result)}}},
-            },
-        }
+            return self._response_builder_class(
+                Response(
+                    status_code=500,  # Using 500 to trigger FAILURE
+                    body=f"Error: {str(e)}",
+                ),
+            ).build(self.current_event)
