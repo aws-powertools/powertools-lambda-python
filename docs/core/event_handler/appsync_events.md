@@ -369,7 +369,7 @@ You can test your event handlers by passing a mocked or actual AppSync Events La
 
 === "getting_started_with_testing_publish_event.json"
 
-    ```python
+    ```json
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_publish_event.json"
     ```
 
@@ -383,6 +383,6 @@ You can test your event handlers by passing a mocked or actual AppSync Events La
 
 === "getting_started_with_testing_subscribe_event.json"
 
-    ```python
+    ```json
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_subscribe_event.json"
     ```
