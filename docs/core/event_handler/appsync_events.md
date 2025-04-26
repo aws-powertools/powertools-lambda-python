@@ -241,7 +241,7 @@ We use `asyncio` module to support async functions, and we ensure reliable execu
 
 === "working_with_async_resolvers.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="6 11 14"
     --8<-- "examples/event_handler_appsync_events/src/working_with_async_resolvers.py"
     ```
 
@@ -251,7 +251,7 @@ You can access to the original Lambda event or context for additional informatio
 
 === "accessing_event_and_context.py"
 
-    ```python hl_lines="5 6 13"
+    ```python hl_lines="5 6 14"
     --8<-- "examples/event_handler_appsync_events/src/accessing_event_and_context.py"
     ```
 
@@ -363,13 +363,13 @@ You can test your event handlers by passing a mocked or actual AppSync Events La
 
 === "getting_started_with_testing_publish.py"
 
-    ```python hl_lines="5 6 13"
+    ```python
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_publish.py"
     ```
 
 === "getting_started_with_testing_publish_event.json"
 
-    ```python hl_lines="5 6 13"
+    ```python
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_publish_event.json"
     ```
 
@@ -377,12 +377,12 @@ You can test your event handlers by passing a mocked or actual AppSync Events La
 
 === "getting_started_with_testing_subscribe.py"
 
-    ```python hl_lines="5 6 13"
+    ```python
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_subscribe.py"
     ```
 
 === "getting_started_with_testing_subscribe_event.json"
 
-    ```python hl_lines="5 6 13"
+    ```python
     --8<-- "examples/event_handler_appsync_events/src/getting_started_with_testing_subscribe_event.json"
     ```
