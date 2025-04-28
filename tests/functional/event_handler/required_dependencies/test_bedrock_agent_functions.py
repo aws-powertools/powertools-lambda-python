@@ -128,3 +128,23 @@ def test_bedrock_agent_function_invalid_event():
     # THEN raise ValueError
     with pytest.raises(ValueError, match="Missing required field"):
         app.resolve({}, {})
+
+
+def test_bedrock_agent_function_with_custom_name():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool(name="customName", description="Function with custom name")
+    def test_function():
+        return "Hello from custom named function"
+
+    # WHEN calling the event handler
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "customName"  # Use custom name instead of function name
+    result = app.resolve(raw_event, {})
+
+    # THEN process event correctly
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["actionGroup"] == raw_event["actionGroup"]
+    assert result["response"]["function"] == "customName"
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "Hello from custom named function"

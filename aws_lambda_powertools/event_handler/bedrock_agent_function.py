@@ -80,14 +80,26 @@ class BedrockAgentFunctionResolver:
         self.current_event: BedrockAgentFunctionEvent | None = None
         self._response_builder_class = BedrockFunctionsResponseBuilder
 
-    def tool(self, description: str | None = None) -> Callable:
-        """Decorator to register a tool function"""
+    def tool(
+        self,
+        description: str | None = None,
+        name: str | None = None,
+    ) -> Callable:
+        """Decorator to register a tool function
+
+        Parameters
+        ----------
+        description : str | None
+            Description of what the tool does
+        name : str | None
+            Custom name for the tool. If not provided, uses the function name
+        """
 
         def decorator(func: Callable) -> Callable:
             if not description:
                 raise ValueError("Tool description is required")
 
-            function_name = func.__name__
+            function_name = name or func.__name__
             if function_name in self._tools:
                 raise ValueError(f"Tool '{function_name}' already registered")
 
