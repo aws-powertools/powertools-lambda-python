@@ -4,9 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **appsync_events:** improve AppSync events documentation ([#6572](https://github.com/aws-powertools/powertools-lambda-python/issues/6572))
+
 ## Maintenance
 
+* **ci:** new pre-release 3.11.1a1 ([#6574](https://github.com/aws-powertools/powertools-lambda-python/issues/6574))
 * **ci:** new pre-release 3.11.1a0 ([#6561](https://github.com/aws-powertools/powertools-lambda-python/issues/6561))
+* **deps-dev:** bump h11 from 0.14.0 to 0.16.0 ([#6575](https://github.com/aws-powertools/powertools-lambda-python/issues/6575))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.191.0a0 to 2.192.0a0 ([#6566](https://github.com/aws-powertools/powertools-lambda-python/issues/6566))
 * **deps-dev:** bump aws-cdk-lib from 2.191.0 to 2.192.0 ([#6565](https://github.com/aws-powertools/powertools-lambda-python/issues/6565))
 * **deps-dev:** bump boto3-stubs from 1.38.2 to 1.38.3 ([#6569](https://github.com/aws-powertools/powertools-lambda-python/issues/6569))
