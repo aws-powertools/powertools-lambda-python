@@ -284,6 +284,22 @@ def test_bedrock_agent_with_partial_bedrock_response():
     assert "knowledgeBasesConfiguration" not in result
 
 
+def test_bedrock_agent_with_string():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> str:
+        return "a"
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly with only session_attributes
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["httpStatusCode"] == 200
+
+
 def test_bedrock_agent_with_different_attributes_combination():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()

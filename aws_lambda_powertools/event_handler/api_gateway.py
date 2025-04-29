@@ -73,6 +73,7 @@ _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 _JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
+_DEFAULT_CONTENT_TYPE = "application/json"
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
 ResponseT = TypeVar("ResponseT")
@@ -265,7 +266,7 @@ class BedrockResponse(Generic[ResponseT]):
         self,
         body: Any = None,
         status_code: int = 200,
-        content_type: str = "application/json",
+        content_type: str = _DEFAULT_CONTENT_TYPE,
         session_attributes: dict[str, Any] | None = None,
         prompt_session_attributes: dict[str, Any] | None = None,
         knowledge_bases_configuration: list[dict[str, Any]] | None = None,
@@ -329,7 +330,7 @@ class Response(Generic[ResponseT]):
         content_type = self.headers.get("Content-Type", "")
         if isinstance(content_type, list):
             content_type = content_type[0]
-        return content_type.startswith("application/json")
+        return content_type.startswith(_DEFAULT_CONTENT_TYPE)
 
 
 class Route:
@@ -601,7 +602,7 @@ class Route:
         operation_responses: dict[int, OpenAPIResponse] = {
             422: {
                 "description": "Validation Error",
-                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
+                "content": {_DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
             },
         }
 
@@ -610,7 +611,9 @@ class Route:
             http_code = self.custom_response_validation_http_code.value
             operation_responses[http_code] = {
                 "description": "Response Validation Error",
-                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}}},
+                "content": {
+                    _DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}},
+                },
             }
             # Add model definition
             definitions["ResponseValidationError"] = response_validation_error_response_definition
@@ -623,7 +626,7 @@ class Route:
                 # Case 1: there is not 'content' key
                 if "content" not in response:
                     response["content"] = {
-                        "application/json": self._openapi_operation_return(
+                        _DEFAULT_CONTENT_TYPE: self._openapi_operation_return(
                             param=dependant.return_param,
                             model_name_map=model_name_map,
                             field_mapping=field_mapping,
@@ -674,7 +677,7 @@ class Route:
             # Add the response schema to the OpenAPI 200 response
             operation_responses[200] = {
                 "description": self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-                "content": {"application/json": response_schema},
+                "content": {_DEFAULT_CONTENT_TYPE: response_schema},
             }
 
         operation["responses"] = operation_responses
@@ -1664,7 +1667,7 @@ class ApiGatewayResolver(BaseRouter):
             response_validation_error_response = {
                 "description": "Response Validation Error",
                 "content": {
-                    "application/json": {
+                    _DEFAULT_CONTENT_TYPE: {
                         "schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"},
                     },
                 },
@@ -2183,7 +2186,7 @@ class ApiGatewayResolver(BaseRouter):
             if query_params.get("format") == "json":
                 return Response(
                     status_code=200,
-                    content_type="application/json",
+                    content_type=_DEFAULT_CONTENT_TYPE,
                     body=escaped_spec,
                 )
 
