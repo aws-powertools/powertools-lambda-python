@@ -266,7 +266,7 @@ def test_bedrock_agent_with_partial_bedrock_response():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims():
+    def claims() -> Dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             session_attributes={"user_id": "123"},
@@ -289,7 +289,7 @@ def test_bedrock_agent_with_different_attributes_combination():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims():
+    def claims() -> Dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             prompt_session_attributes={"context": "testing"},

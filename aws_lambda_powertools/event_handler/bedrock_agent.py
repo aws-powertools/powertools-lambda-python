@@ -8,6 +8,7 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.api_gateway import (
     _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+    BedrockResponse,
     ProxyEventType,
     ResponseBuilder,
 )
@@ -23,29 +24,6 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 
 
-class BedrockResponse:
-    """
-    Contains the response body, status code, content type, and optional attributes
-    for session management and knowledge base configuration.
-    """
-
-    def __init__(
-        self,
-        body: Any = None,
-        status_code: int = 200,
-        content_type: str = "application/json",
-        session_attributes: dict[str, Any] | None = None,
-        prompt_session_attributes: dict[str, Any] | None = None,
-        knowledge_bases_configuration: list[dict[str, Any]] | None = None,
-    ) -> None:
-        self.body = body
-        self.status_code = status_code
-        self.content_type = content_type
-        self.session_attributes = session_attributes
-        self.prompt_session_attributes = prompt_session_attributes
-        self.knowledge_bases_configuration = knowledge_bases_configuration
-
-
 class BedrockResponseBuilder(ResponseBuilder):
     """
     Bedrock Response Builder. This builds the response dict to be returned by Lambda when using Bedrock Agents.
@@ -55,18 +33,9 @@ class BedrockResponseBuilder(ResponseBuilder):
 
     @override
     def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
-        """Build the full response dict to be returned by the lambda"""
-        self._route(event, None)
-
-        bedrock_response = None
-        if isinstance(self.response.body, dict) and "body" in self.response.body:
-            bedrock_response = BedrockResponse(**self.response.body)
-            body = bedrock_response.body
-        else:
-            body = self.response.body
-
-        if self.response.is_json() and not isinstance(body, str):
-            body = self.serializer(body)
+        body = self.response.body
+        if self.response.is_json() and not isinstance(self.response.body, str):
+            body = self.serializer(self.response.body)
 
         response = {
             "messageVersion": "1.0",
@@ -84,13 +53,15 @@ class BedrockResponseBuilder(ResponseBuilder):
         }
 
         # Add Bedrock-specific attributes
-        if bedrock_response:
-            if bedrock_response.session_attributes:
-                response["sessionAttributes"] = bedrock_response.session_attributes
-            if bedrock_response.prompt_session_attributes:
-                response["promptSessionAttributes"] = bedrock_response.prompt_session_attributes
-            if bedrock_response.knowledge_bases_configuration:
-                response["knowledgeBasesConfiguration"] = bedrock_response.knowledge_bases_configuration  # type: ignore
+        if isinstance(self.response, BedrockResponse):
+            if self.response.session_attributes:
+                response["sessionAttributes"] = self.response.session_attributes
+
+            if self.response.prompt_session_attributes:
+                response["promptSessionAttributes"] = self.response.prompt_session_attributes
+
+            if self.response.knowledge_bases_configuration:
+                response["knowledgeBasesConfiguration"] = self.response.knowledge_bases_configuration
 
         return response
 

@@ -255,6 +255,35 @@ class CORSConfig:
         return ",".join(sorted(methods))
 
 
+class BedrockResponse(Generic[ResponseT]):
+    """
+    Contains the response body, status code, content type, and optional attributes
+    for session management and knowledge base configuration.
+    """
+
+    def __init__(
+        self,
+        body: Any = None,
+        status_code: int = 200,
+        content_type: str = "application/json",
+        session_attributes: dict[str, Any] | None = None,
+        prompt_session_attributes: dict[str, Any] | None = None,
+        knowledge_bases_configuration: list[dict[str, Any]] | None = None,
+    ) -> None:
+        self.body = body
+        self.status_code = status_code
+        self.content_type = content_type
+        self.session_attributes = session_attributes
+        self.prompt_session_attributes = prompt_session_attributes
+        self.knowledge_bases_configuration = knowledge_bases_configuration
+
+    def is_json(self) -> bool:
+        """
+        Returns True if the response is JSON, based on the Content-Type.
+        """
+        return True
+
+
 class Response(Generic[ResponseT]):
     """Response data class that provides greater control over what is returned from the proxy event"""
 
@@ -1474,7 +1503,10 @@ class MiddlewareFrame:
         return self.current_middleware(app, self.next_middleware)
 
 
-def _registered_api_adapter(app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> dict | tuple | Response:
+def _registered_api_adapter(
+    app: ApiGatewayResolver,
+    next_middleware: Callable[..., Any],
+) -> dict | tuple | Response | BedrockResponse:
     """
     Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
     in the chain will match the API route function signature and ensure that Powertools passes the API
@@ -2538,7 +2570,7 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             return self._response_builder_class(
-                response=self._to_response(
+                response=self._to_response(  # type: ignore[arg-type]
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
                 serializer=self._serializer,
@@ -2627,7 +2659,7 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def _to_response(self, result: dict | tuple | Response) -> Response:
+    def _to_response(self, result: dict | tuple | Response | BedrockResponse) -> Response | BedrockResponse:
         """Convert the route's result to a Response
 
          3 main result types are supported:
@@ -2638,7 +2670,7 @@ class ApiGatewayResolver(BaseRouter):
         - Response: returned as is, and allows for more flexibility
         """
         status_code = HTTPStatus.OK
-        if isinstance(result, Response):
+        if isinstance(result, (Response, BedrockResponse)):
             return result
         elif isinstance(result, tuple) and len(result) == 2:
             # Unpack result dict and status code from tuple
@@ -2971,8 +3003,9 @@ class ALBResolver(ApiGatewayResolver):
         # ALB doesn't have a stage variable, so we just return an empty string
         return ""
 
+    # BedrockResponse is not used here but adding the same signature to keep strong typing
     @override
-    def _to_response(self, result: dict | tuple | Response) -> Response:
+    def _to_response(self, result: dict | tuple | Response | BedrockResponse) -> Response | BedrockResponse:
         """Convert the route's result to a Response
 
         ALB requires a non-null body otherwise it converts as HTTP 5xx
