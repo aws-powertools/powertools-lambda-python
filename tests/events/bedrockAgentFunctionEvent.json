@@ -8,8 +8,7 @@
     },
     "sessionId": "123456789123458",
     "sessionAttributes": {
-        "employeeId": "EMP123",
-        "department": "Engineering"
+        "employeeId": "EMP123"
     },
     "promptSessionAttributes": {
         "lastInteraction": "2024-02-01T15:30:00Z",

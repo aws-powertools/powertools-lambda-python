@@ -2,10 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from typing_extensions import override
-
-from aws_lambda_powertools.event_handler.api_gateway import Response, ResponseBuilder
-
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -19,7 +15,49 @@ class ResponseState(Enum):
     REPROMPT = "REPROMPT"
 
 
-class BedrockFunctionsResponseBuilder(ResponseBuilder):
+class BedrockResponse:
+    """Response class for Bedrock Agent Functions
+
+    Parameters
+    ----------
+    body : Any, optional
+        Response body
+    session_attributes : dict[str, str] | None
+        Session attributes to include in the response
+    prompt_session_attributes : dict[str, str] | None
+        Prompt session attributes to include in the response
+    status_code : int
+        Status code to determine responseState (400 for REPROMPT, >=500 for FAILURE)
+
+    Examples
+    --------
+    ```python
+    @app.tool(description="Function that uses session attributes")
+    def test_function():
+        return BedrockResponse(
+            body="Hello",
+            session_attributes={"userId": "123"},
+            prompt_session_attributes={"lastAction": "login"}
+        )
+    ```
+    """
+
+    def __init__(
+        self,
+        body: Any = None,
+        session_attributes: dict[str, str] | None = None,
+        prompt_session_attributes: dict[str, str] | None = None,
+        knowledge_bases: list[dict[str, Any]] | None = None,
+        status_code: int = 200,
+    ) -> None:
+        self.body = body
+        self.session_attributes = session_attributes
+        self.prompt_session_attributes = prompt_session_attributes
+        self.knowledge_bases = knowledge_bases
+        self.status_code = status_code
+
+
+class BedrockFunctionsResponseBuilder:
     """
     Bedrock Functions Response Builder. This builds the response dict to be returned by Lambda
     when using Bedrock Agent Functions.
@@ -28,29 +66,49 @@ class BedrockFunctionsResponseBuilder(ResponseBuilder):
     we override the build method.
     """
 
-    @override
-    def build(self, event: BedrockAgentFunctionEvent, *args) -> dict[str, Any]:
-        """Build the full response dict to be returned by the lambda"""
-        self._route(event, None)
+    def __init__(self, result: BedrockResponse | Any, status_code: int = 200) -> None:
+        self.result = result
+        self.status_code = status_code if not isinstance(result, BedrockResponse) else result.status_code
 
-        body = self.response.body
-        if self.response.is_json() and not isinstance(self.response.body, str):
-            body = self.serializer(body)
+    def build(self, event: BedrockAgentFunctionEvent) -> dict[str, Any]:
+        """Build the full response dict to be returned by the lambda"""
+        if isinstance(self.result, BedrockResponse):
+            body = self.result.body
+            session_attributes = self.result.session_attributes
+            prompt_session_attributes = self.result.prompt_session_attributes
+            knowledge_bases = self.result.knowledge_bases
+        else:
+            body = self.result
+            session_attributes = None
+            prompt_session_attributes = None
+            knowledge_bases = None
 
         response: dict[str, Any] = {
             "messageVersion": "1.0",
             "response": {
                 "actionGroup": event.action_group,
                 "function": event.function,
-                "functionResponse": {"responseBody": {"TEXT": {"body": str(body)}}},
+                "functionResponse": {"responseBody": {"TEXT": {"body": str(body if body is not None else "")}}},
             },
         }
 
         # Add responseState if it's an error
-        if self.response.status_code >= 400:
+        if self.status_code >= 400:
             response["response"]["functionResponse"]["responseState"] = (
-                ResponseState.REPROMPT.value if self.response.status_code == 400 else ResponseState.FAILURE.value
+                ResponseState.REPROMPT.value if self.status_code == 400 else ResponseState.FAILURE.value
             )
+
+        # Add session attributes if provided in response or maintain from input
+        response.update(
+            {
+                "sessionAttributes": session_attributes or event.session_attributes or {},
+                "promptSessionAttributes": prompt_session_attributes or event.prompt_session_attributes or {},
+            },
+        )
+
+        # Add knowledge bases configuration if provided
+        if knowledge_bases:
+            response["knowledgeBasesConfiguration"] = knowledge_bases
 
         return response
 
@@ -127,26 +185,20 @@ class BedrockAgentFunctionResolver:
         function_name = self.current_event.function
 
         if function_name not in self._tools:
-            return self._response_builder_class(
-                Response(
-                    status_code=400,  # Using 400 to trigger REPROMPT
+            return BedrockFunctionsResponseBuilder(
+                BedrockResponse(
                     body=f"Function not found: {function_name}",
+                    status_code=400,  # Using 400 to trigger REPROMPT
                 ),
             ).build(self.current_event)
 
         try:
             result = self._tools[function_name]["function"]()
-            # Always wrap the result in a Response object
-            if not isinstance(result, Response):
-                result = Response(
-                    status_code=200,  # Success
-                    body=result,
-                )
-            return self._response_builder_class(result).build(self.current_event)
+            return BedrockFunctionsResponseBuilder(result).build(self.current_event)
         except Exception as e:
-            return self._response_builder_class(
-                Response(
-                    status_code=500,  # Using 500 to trigger FAILURE
+            return BedrockFunctionsResponseBuilder(
+                BedrockResponse(
                     body=f"Error: {str(e)}",
+                    status_code=500,  # Using 500 to trigger FAILURE
                 ),
             ).build(self.current_event)
