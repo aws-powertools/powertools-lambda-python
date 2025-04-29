@@ -313,6 +313,14 @@ To implement these customizations, include extra parameters when defining your r
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
 
+#### Enabling user confirmation
+
+You can enable user confirmation with Bedrock Agents to have your application ask for explicit user approval before invoking an action.
+
+```python hl_lines="14" title="enabling_user_confirmation.py" title="Enabling user confirmation"
+--8<-- "examples/event_handler_bedrock_agents/src/enabling_user_confirmation.py"
+```
+
 ### Fine grained responses
 
 `BedrockResponse` class that provides full control over Bedrock Agent responses.
@@ -325,6 +333,8 @@ You can use this class to add additional fields as needed, such as [session attr
 ```python title="bedrockresponse.py" title="Customzing your Bedrock Response"
 --8<-- "examples/event_handler_bedrock_agents/src/bedrockresponse.py"
 ```
+
+1. Add an openapi extension
 
 ## Testing your code
 

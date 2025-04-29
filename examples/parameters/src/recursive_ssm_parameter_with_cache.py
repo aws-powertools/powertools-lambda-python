@@ -13,7 +13,6 @@ def lambda_handler(event: dict, context: LambdaContext):
         endpoint_comments = "https://jsonplaceholder.typicode.com/noexists/"
 
         for parameter, value in all_parameters.items():
-
             if parameter == "endpoint_comments":
                 endpoint_comments = value
 

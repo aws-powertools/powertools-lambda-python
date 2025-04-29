@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import json
 import warnings
-from typing import Dict
 
 import pytest
 
@@ -73,7 +74,7 @@ def test_openapi_swagger_json_view_with_default_path():
 
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
-    assert isinstance(json.loads(result["body"]), Dict)
+    assert isinstance(json.loads(result["body"]), dict)
     assert "OpenAPI JSON View" in result["body"]
 
 
@@ -87,7 +88,7 @@ def test_openapi_swagger_json_view_with_custom_path():
 
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
-    assert isinstance(json.loads(result["body"]), Dict)
+    assert isinstance(json.loads(result["body"]), dict)
     assert "OpenAPI JSON View" in result["body"]
 
 

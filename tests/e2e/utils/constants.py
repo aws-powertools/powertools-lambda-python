@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 
 from aws_lambda_powertools import PACKAGE_PATH

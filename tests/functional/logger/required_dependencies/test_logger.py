@@ -182,12 +182,12 @@ def test_setup_sampling_rate_env_var_with_percent_and_decorator(
 
     # THEN verify the number of logs falls within the expected range
     logs = list(stdout.getvalue().strip().split("\n"))
-    assert (
-        len(logs) >= minimum_logs_excepted
-    ), f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
-    assert (
-        len(logs) <= maximum_logs_excepted
-    ), f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
+    assert len(logs) >= minimum_logs_excepted, (
+        f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
+    )
+    assert len(logs) <= maximum_logs_excepted, (
+        f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
+    )
 
 
 @pytest.mark.parametrize(
@@ -223,12 +223,12 @@ def test_setup_sampling_rate_env_var_with_percent_and_recalculate_manual_method(
 
     # THEN verify the number of logs falls within the expected range
     logs = list(stdout.getvalue().strip().split("\n"))
-    assert (
-        len(logs) >= minimum_logs_excepted
-    ), f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
-    assert (
-        len(logs) <= maximum_logs_excepted
-    ), f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
+    assert len(logs) >= minimum_logs_excepted, (
+        f"Log count {len(logs)} should be at least {minimum_logs_excepted} for sampling rate {sampling_rate}"
+    )
+    assert len(logs) <= maximum_logs_excepted, (
+        f"Log count {len(logs)} should be at most {maximum_logs_excepted} for sampling rate {sampling_rate}"
+    )
 
 
 def test_inject_lambda_context(lambda_context, stdout, service_name):
@@ -342,7 +342,6 @@ def test_inject_lambda_cold_start(lambda_context, stdout, service_name):
 
 
 def test_inject_lambda_cold_start_with_provisioned_concurrency(monkeypatch, lambda_context, stdout, service_name):
-
     # GIVEN Provisioned Concurrency is enabled via AWS_LAMBDA_INITIALIZATION_TYPE environment variable
     # AND Logger's cold start flag is explicitly set to True (simulating fresh module import)
     monkeypatch.setenv("AWS_LAMBDA_INITIALIZATION_TYPE", "provisioned-concurrency")

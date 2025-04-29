@@ -19,7 +19,6 @@ DECIMAL_CONTEXT = Context(
 
 
 def test_dynamodb_stream_trigger_event():
-
     raw_event = load_event("dynamoStreamEvent.json")
     parsed_event = DynamoDBStreamEvent(raw_event)
 
@@ -78,7 +77,6 @@ def test_dynamodb_stream_record_deserialization_large_int_without_trailing_zeros
 
 
 def test_dynamodb_stream_record_deserialization_zero_value():
-
     data = {
         "Keys": {"key1": {"attr1": "value1"}},
         "NewImage": {

@@ -8,7 +8,7 @@ from enum import Enum
 from pathlib import Path, PurePath
 from re import Pattern
 from types import GeneratorType
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -17,6 +17,8 @@ from pydantic.types import SecretBytes, SecretStr
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
 from aws_lambda_powertools.event_handler.openapi.exceptions import SerializationError

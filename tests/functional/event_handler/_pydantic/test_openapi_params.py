@@ -278,7 +278,7 @@ def test_openapi_with_pydantic_returns():
 
     @app.get("/")
     def handler() -> User:
-        return User(name="Ruben Fonseca")
+        return User(name="Powertools")
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1

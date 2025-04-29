@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from http import HTTPStatus
     from re import Match
 
@@ -149,11 +150,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        openapi_extensions = None
         security = None
 
         return super().get(
@@ -190,11 +191,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().post(
@@ -231,11 +232,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().put(
@@ -272,11 +273,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().patch(
@@ -313,11 +314,11 @@ class BedrockAgentResolver(ApiGatewayResolver):
         tags: list[str] | None = None,
         operation_id: str | None = None,
         include_in_schema: bool = True,
+        openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
-        openapi_extensions = None
         security = None
 
         return super().delete(
@@ -364,6 +365,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         license_info: License | None = None,
         security_schemes: dict[str, SecurityScheme] | None = None,
         security: list[dict[str, list[str]]] | None = None,
+        openapi_extensions: dict[str, Any] | None = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict.
@@ -403,8 +405,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
             The OpenAPI schema as a JSON serializable dict.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
-
-        openapi_extensions = None
 
         schema = super().get_openapi_schema(
             title=title,

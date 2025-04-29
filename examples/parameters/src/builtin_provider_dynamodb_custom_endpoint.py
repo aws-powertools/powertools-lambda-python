@@ -9,7 +9,6 @@ dynamodb_provider = parameters.DynamoDBProvider(table_name="ParameterTable", end
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-
     try:
         # Usually an endpoint is not sensitive data, so we store it in DynamoDB Table
         endpoint_comments: Any = dynamodb_provider.get("comments_endpoint")

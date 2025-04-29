@@ -3,13 +3,16 @@ from __future__ import annotations
 import asyncio
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import InvalidBatchResponse, ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
@@ -53,6 +56,7 @@ class AppSyncResolver(Router):
         """
         super().__init__()
         self.context = {}  # early init as customers might add context before event resolution
+        self.exception_handler_manager = ExceptionHandlerManager()
         self._exception_handlers: dict[type, Callable] = {}
 
     def __call__(
@@ -151,7 +155,7 @@ class AppSyncResolver(Router):
                 Router.current_event = data_model(event)
                 response = self._call_single_resolver(event=event, data_model=data_model)
         except Exception as exp:
-            response_builder = self._lookup_exception_handler(type(exp))
+            response_builder = self.exception_handler_manager.lookup_exception_handler(type(exp))
             if response_builder:
                 return response_builder(exp)
             raise
@@ -493,31 +497,4 @@ class AppSyncResolver(Router):
             A decorator function that registers the exception handler.
         """
 
-        def register_exception_handler(func: Callable):
-            if isinstance(exc_class, list):  # pragma: no cover
-                for exp in exc_class:
-                    self._exception_handlers[exp] = func
-            else:
-                self._exception_handlers[exc_class] = func
-            return func
-
-        return register_exception_handler
-
-    def _lookup_exception_handler(self, exp_type: type) -> Callable | None:
-        """
-        Looks up the registered exception handler for the given exception type or its base classes.
-
-        Parameters
-        ----------
-        exp_type (type):
-            The exception type to look up the handler for.
-
-        Returns
-        -------
-        Callable | None:
-            The registered exception handler function if found, otherwise None.
-        """
-        for cls in exp_type.__mro__:
-            if cls in self._exception_handlers:
-                return self._exception_handlers[cls]
-        return None
+        return self.exception_handler_manager.exception_handler(exc_class=exc_class)

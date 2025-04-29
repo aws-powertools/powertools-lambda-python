@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from aws_cdk import CfnOutput, Duration, Expiration
 from aws_cdk import aws_appsync_alpha as appsync
-from aws_cdk.aws_lambda import Function
 
 from tests.e2e.utils.data_builder import build_random_value
 from tests.e2e.utils.infrastructure import BaseInfrastructure
+
+if TYPE_CHECKING:
+    from aws_cdk.aws_lambda import Function
 
 
 class EventHandlerAppSyncStack(BaseInfrastructure):

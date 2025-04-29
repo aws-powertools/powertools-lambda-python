@@ -311,3 +311,19 @@ def test_bedrock_agent_with_different_attributes_combination():
     assert "sessionAttributes" not in result
     assert result["promptSessionAttributes"] == {"context": "testing"}
     assert result["knowledgeBasesConfiguration"][0]["knowledgeBaseId"] == "kb-123"
+
+
+def test_bedrock_resolver_with_openapi_extensions():
+    # GIVEN BedrockAgentResolver is initialized with enable_validation=True
+    app = BedrockAgentResolver(enable_validation=True)
+
+    # WHEN we have a simple handler with openapi extension
+    @app.get("/", description="Testing", openapi_extensions={"x-requireConfirmation": "ENABLED"})
+    def handler() -> Optional[Dict]:
+        pass
+
+    # WHEN we get the schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the OpenAPI schema must contain the "x-requireConfirmation" extension at the operation level
+    assert schema["paths"]["/"]["get"]["x-requireConfirmation"] == "ENABLED"

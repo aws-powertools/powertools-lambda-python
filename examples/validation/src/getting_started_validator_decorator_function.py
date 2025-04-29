@@ -12,8 +12,7 @@ from aws_lambda_powertools.utilities.validation import validator
 ALLOWED_IPS = parameters.get_parameter("/lambda-powertools/allowed_ips")
 
 
-class UserPermissionsError(Exception):
-    ...
+class UserPermissionsError(Exception): ...
 
 
 @dataclass

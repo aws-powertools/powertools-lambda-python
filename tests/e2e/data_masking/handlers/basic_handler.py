@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_masking import DataMasking
 from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
@@ -17,7 +19,4 @@ def lambda_handler(event, context):
     data_masker = DataMasking(provider=AWSEncryptionSDKProvider(keys=[kms_key]))
     value = [1, 2, "string", 4.5]
     encrypted_data = data_masker.encrypt(value)
-    response = {}
-    response["encrypted_data"] = encrypted_data
-
-    return response
+    return {"encrypted_data": encrypted_data}

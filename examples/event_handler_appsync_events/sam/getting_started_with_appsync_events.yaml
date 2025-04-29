@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Metadata:
+  cfn-lint:
+    ignore_checks:
+      - E3002
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 256
+    Runtime: python3.13
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_LOG_LEVEL: INFO
+        POWERTOOLS_SERVICE_NAME: hello
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: hello_world
+
+  WebsocketAPI:
+    Type: AWS::AppSync::Api
+    Properties:
+      EventConfig:
+        AuthProviders:
+          - AuthType: API_KEY
+        ConnectionAuthModes:
+          - AuthType: API_KEY
+        DefaultPublishAuthModes:
+          - AuthType: API_KEY
+        DefaultSubscribeAuthModes:
+          - AuthType: API_KEY
+      Name: RealTimeEventAPI
+
+  NameSpaceDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt WebsocketAPI.ApiId
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt HelloWorldFunction.Arn
+      Name: powertools_lambda
+      ServiceRoleArn: !GetAtt DataSourceIAMRole.Arn
+      Type: AWS_LAMBDA
+
+  WebsocketApiKey:
+    Type: AWS::AppSync::ApiKey
+    Properties:
+      ApiId: !GetAtt WebsocketAPI.ApiId
+
+  WebsocketAPINamespace:
+    Type: AWS::AppSync::ChannelNamespace
+    Properties:
+      ApiId: !GetAtt WebsocketAPI.ApiId
+      Name: powertools
+      HandlerConfigs:
+        OnPublish:
+          Behavior: DIRECT
+          Integration:
+            DataSourceName: powertools_lambda
+            LambdaConfig:
+              InvokeType: REQUEST_RESPONSE
+        OnSubscribe:
+          Behavior: DIRECT
+          Integration:
+            DataSourceName: powertools_lambda
+            LambdaConfig:
+              InvokeType: REQUEST_RESPONSE
+
+  DataSourceIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaInvokePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt HelloWorldFunction.Arn

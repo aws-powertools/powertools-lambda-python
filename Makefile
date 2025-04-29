@@ -25,8 +25,11 @@ dev-gitpod:
 check-licenses:
 	poetry run licensecheck -u poetry:dev
 
+format-check:
+	poetry run ruff format aws_lambda_powertools tests examples --check
+
 format:
-	poetry run black aws_lambda_powertools tests examples
+	poetry run ruff format aws_lambda_powertools tests examples
 
 lint: format
 	poetry run ruff check aws_lambda_powertools tests examples

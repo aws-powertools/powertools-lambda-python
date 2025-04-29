@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -5,11 +7,10 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import Callable, Dict, Generator, Optional
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import boto3
-import pytest
 from aws_cdk import App, CfnOutput, Environment, RemovalPolicy, Stack, aws_logs
 from aws_cdk.aws_lambda import (
     Architecture,
@@ -29,6 +30,12 @@ from tests.e2e.utils.constants import (
 )
 from tests.e2e.utils.lambda_layer.powertools_layer import LocalLambdaPowertoolsLayer
 
+if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
+    import pytest
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +46,7 @@ class BaseInfrastructure(InfrastructureProvider):
         self.feature_path = Path(sys.modules[self.__class__.__module__].__file__).parent  # absolute path to feature
         self.feature_name = self.feature_path.parts[-1].replace("_", "-")  # logger, tracer, event-handler, etc.
         self.stack_name = f"test{PYTHON_RUNTIME_VERSION}-{self.feature_name}-{self.RANDOM_STACK_VALUE}"
-        self.stack_outputs: Dict[str, str] = {}
+        self.stack_outputs: dict[str, str] = {}
 
         # NOTE: CDK stack account and region are tokens, we need to resolve earlier
         self.session = boto3.session.Session()
@@ -56,7 +63,7 @@ class BaseInfrastructure(InfrastructureProvider):
         self._feature_infra_file = self.feature_path / "infrastructure.py"
         self._handlers_dir = self.feature_path / "handlers"
         self._cdk_out_dir: Path = CDK_OUT_PATH / self.feature_name
-        self._stack_outputs_file = f'{self._cdk_out_dir / "stack_outputs.json"}'
+        self._stack_outputs_file = f"{self._cdk_out_dir / 'stack_outputs.json'}"
 
         if not self._feature_infra_file.exists():
             raise FileNotFoundError(
@@ -65,9 +72,9 @@ class BaseInfrastructure(InfrastructureProvider):
 
     def create_lambda_functions(
         self,
-        function_props: Optional[Dict] = None,
+        function_props: dict | None = None,
         architecture: Architecture = Architecture.X86_64,
-    ) -> Dict[str, Function]:
+    ) -> dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
         It creates CloudFormation Outputs for every function found in PascalCase. For example,
@@ -130,7 +137,7 @@ class BaseInfrastructure(InfrastructureProvider):
         logger.debug(f"Creating functions for handlers: {handlers}")
 
         function_settings_override = function_props or {}
-        output: Dict[str, Function] = {}
+        output: dict[str, Function] = {}
 
         for fn in handlers:
             fn_name = fn.stem
@@ -164,7 +171,7 @@ class BaseInfrastructure(InfrastructureProvider):
 
         return output
 
-    def deploy(self) -> Dict[str, str]:
+    def deploy(self) -> dict[str, str]:
         """Synthesize and deploy a CDK app, and return its stack outputs
 
         NOTE: It auto-generates a temporary CDK app to benefit from CDK CLI lookup features
@@ -191,7 +198,7 @@ class BaseInfrastructure(InfrastructureProvider):
         logger.debug(f"Deleting stack: {self.stack_name}")
         self.cfn.delete_stack(StackName=self.stack_name)
 
-    def _sync_stack_name(self, stack_output: Dict):
+    def _sync_stack_name(self, stack_output: dict):
         """Synchronize initial stack name with CDK final stack name
 
         When using `cdk synth` with context methods (`from_lookup`),
@@ -207,7 +214,7 @@ class BaseInfrastructure(InfrastructureProvider):
 
     def _read_stack_output(self):
         content = Path(self._stack_outputs_file).read_text()
-        outputs: Dict = json.loads(content)
+        outputs: dict = json.loads(content)
         self._sync_stack_name(stack_output=outputs)
 
         # discard stack_name and get outputs as dict
@@ -308,7 +315,7 @@ def call_once(
     task: Callable,
     tmp_path_factory: pytest.TempPathFactory,
     worker_id: str,
-    callback: Optional[Callable] = None,
+    callback: Callable | None = None,
 ) -> Generator[object, None, None]:
     """Call function and serialize results once whether CPU parallelization is enabled or not
 
@@ -345,7 +352,7 @@ def call_once(
                 if cache.is_file():
                     callable_result = json.loads(cache.read_text())
                 else:
-                    callable_result: Dict = task()
+                    callable_result: dict = task()
                     cache.write_text(json.dumps(callable_result))
             yield callable_result
     finally:

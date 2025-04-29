@@ -12,8 +12,7 @@ tracer = Tracer()
 logger = Logger()
 
 
-class InvalidPayload(Exception):
-    ...
+class InvalidPayload(Exception): ...
 
 
 @tracer.capture_method

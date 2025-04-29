@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -20,8 +22,11 @@ from aws_lambda_powertools.event_handler.middlewares import (
 from aws_lambda_powertools.event_handler.middlewares.schema_validation import (
     SchemaValidationMiddleware,
 )
-from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.types import EventHandlerInstance
+
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
 API_RESTV2_EVENT = load_event("apiGatewayProxyV2Event_GET.json")
@@ -362,14 +367,14 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     router = Router()
 
     def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("app")
 
         app.append_context(middleware_order=middleware_order)
         return next_middleware(app)
 
     def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("router")
 
         router.append_context(middleware_order=middleware_order)
@@ -439,14 +444,14 @@ def test_api_gateway_middleware_order_with_include_router_first(app: EventHandle
     router = Router()
 
     def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("app")
 
         app.append_context(middleware_order=middleware_order)
         return next_middleware(app)
 
     def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
-        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order: list[str] = router.context.get("middleware_order", [])
         middleware_order.append("router")
 
         router.append_context(middleware_order=middleware_order)
