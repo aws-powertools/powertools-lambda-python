@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
@@ -44,32 +42,6 @@ class BedrockAgentFunctionEvent(DictWrapper):
     Documentation:
     https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
     """
-
-    @classmethod
-    def validate_required_fields(cls, data: dict[str, Any]) -> None:
-        required_fields = {
-            "messageVersion": str,
-            "agent": dict,
-            "inputText": str,
-            "sessionId": str,
-            "actionGroup": str,
-            "function": str,
-        }
-
-        for field, field_type in required_fields.items():
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
-            if not isinstance(data[field], field_type):
-                raise TypeError(f"Field {field} must be of type {field_type}")
-
-        # Validate agent structure
-        required_agent_fields = {"name", "id", "alias", "version"}
-        if not all(field in data["agent"] for field in required_agent_fields):
-            raise ValueError("Agent object missing required fields")
-
-    def __init__(self, data: dict[str, Any]) -> None:
-        super().__init__(data)
-        self.validate_required_fields(data)
 
     @property
     def message_version(self) -> str:

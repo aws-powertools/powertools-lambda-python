@@ -5,17 +5,10 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-from enum import Enum
-
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
 
 
-class ResponseState(Enum):
-    FAILURE = "FAILURE"
-    REPROMPT = "REPROMPT"
-
-
-class BedrockResponse:
+class BedrockFunctionResponse:
     """Response class for Bedrock Agent Functions
 
     Parameters
@@ -26,15 +19,15 @@ class BedrockResponse:
         Session attributes to include in the response
     prompt_session_attributes : dict[str, str] | None
         Prompt session attributes to include in the response
-    status_code : int
-        Status code to determine responseState (400 for REPROMPT, >=500 for FAILURE)
+    response_state : str | None
+        Response state ("FAILURE" or "REPROMPT")
 
     Examples
     --------
     ```python
     @app.tool(description="Function that uses session attributes")
     def test_function():
-        return BedrockResponse(
+        return BedrockFunctionResponse(
             body="Hello",
             session_attributes={"userId": "123"},
             prompt_session_attributes={"lastAction": "login"}
@@ -48,40 +41,39 @@ class BedrockResponse:
         session_attributes: dict[str, str] | None = None,
         prompt_session_attributes: dict[str, str] | None = None,
         knowledge_bases: list[dict[str, Any]] | None = None,
-        status_code: int = 200,
+        response_state: str | None = None,
     ) -> None:
         self.body = body
         self.session_attributes = session_attributes
         self.prompt_session_attributes = prompt_session_attributes
         self.knowledge_bases = knowledge_bases
-        self.status_code = status_code
+        self.response_state = response_state
 
 
 class BedrockFunctionsResponseBuilder:
     """
     Bedrock Functions Response Builder. This builds the response dict to be returned by Lambda
     when using Bedrock Agent Functions.
-
-    Since the payload format is different from the standard API Gateway Proxy event,
-    we override the build method.
     """
 
-    def __init__(self, result: BedrockResponse | Any, status_code: int = 200) -> None:
+    def __init__(self, result: BedrockFunctionResponse | Any) -> None:
         self.result = result
-        self.status_code = status_code if not isinstance(result, BedrockResponse) else result.status_code
 
     def build(self, event: BedrockAgentFunctionEvent) -> dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
-        if isinstance(self.result, BedrockResponse):
+        if isinstance(self.result, BedrockFunctionResponse):
             body = self.result.body
             session_attributes = self.result.session_attributes
             prompt_session_attributes = self.result.prompt_session_attributes
             knowledge_bases = self.result.knowledge_bases
+            response_state = self.result.response_state
+
         else:
             body = self.result
             session_attributes = None
             prompt_session_attributes = None
             knowledge_bases = None
+            response_state = None
 
         response: dict[str, Any] = {
             "messageVersion": "1.0",
@@ -92,11 +84,9 @@ class BedrockFunctionsResponseBuilder:
             },
         }
 
-        # Add responseState if it's an error
-        if self.status_code >= 400:
-            response["response"]["functionResponse"]["responseState"] = (
-                ResponseState.REPROMPT.value if self.status_code == 400 else ResponseState.FAILURE.value
-            )
+        # Add responseState if provided
+        if response_state:
+            response["response"]["functionResponse"]["responseState"] = response_state
 
         # Add session attributes if provided in response or maintain from input
         response.update(
@@ -186,9 +176,8 @@ class BedrockAgentFunctionResolver:
 
         if function_name not in self._tools:
             return BedrockFunctionsResponseBuilder(
-                BedrockResponse(
+                BedrockFunctionResponse(
                     body=f"Function not found: {function_name}",
-                    status_code=400,  # Using 400 to trigger REPROMPT
                 ),
             ).build(self.current_event)
 
@@ -197,8 +186,7 @@ class BedrockAgentFunctionResolver:
             return BedrockFunctionsResponseBuilder(result).build(self.current_event)
         except Exception as e:
             return BedrockFunctionsResponseBuilder(
-                BedrockResponse(
+                BedrockFunctionResponse(
                     body=f"Error: {str(e)}",
-                    status_code=500,  # Using 500 to trigger FAILURE
                 ),
             ).build(self.current_event)

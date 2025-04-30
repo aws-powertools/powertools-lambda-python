@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
 from tests.functional.utils import load_event
 
@@ -61,34 +59,3 @@ def test_bedrock_agent_function_event_minimal():
     assert parsed_event.session_attributes == {}
     assert parsed_event.prompt_session_attributes == {}
     assert parsed_event.parameters == []
-
-
-def test_bedrock_agent_function_event_validation():
-    """Test validation of required fields"""
-    # Test missing required field
-    with pytest.raises(ValueError, match="Missing required field: messageVersion"):
-        BedrockAgentFunctionEvent({})
-
-    # Test invalid field type
-    invalid_event = {
-        "messageVersion": 1,  # should be string
-        "agent": {"alias": "PROD", "name": "hr-assistant", "version": "1", "id": "1234"},
-        "inputText": "",
-        "sessionId": "",
-        "actionGroup": "",
-        "function": "",
-    }
-    with pytest.raises(TypeError, match="Field messageVersion must be of type <class 'str'>"):
-        BedrockAgentFunctionEvent(invalid_event)
-
-    # Test missing agent fields
-    invalid_agent_event = {
-        "messageVersion": "1.0",
-        "agent": {"name": "test"},  # missing required agent fields
-        "inputText": "",
-        "sessionId": "",
-        "actionGroup": "",
-        "function": "",
-    }
-    with pytest.raises(ValueError, match="Agent object missing required fields"):
-        BedrockAgentFunctionEvent(invalid_agent_event)
