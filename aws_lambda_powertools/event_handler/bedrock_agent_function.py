@@ -174,13 +174,6 @@ class BedrockAgentFunctionResolver:
 
         function_name = self.current_event.function
 
-        if function_name not in self._tools:
-            return BedrockFunctionsResponseBuilder(
-                BedrockFunctionResponse(
-                    body=f"Function not found: {function_name}",
-                ),
-            ).build(self.current_event)
-
         try:
             result = self._tools[function_name]["function"]()
             return BedrockFunctionsResponseBuilder(result).build(self.current_event)
