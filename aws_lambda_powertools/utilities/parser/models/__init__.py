@@ -32,6 +32,7 @@ from .appsync import (
 )
 from .bedrock_agent import (
     BedrockAgentEventModel,
+    BedrockAgentFunctionEventModel,
     BedrockAgentModel,
     BedrockAgentPropertyModel,
     BedrockAgentRequestBodyModel,
@@ -208,6 +209,7 @@ __all__ = [
     "BedrockAgentEventModel",
     "BedrockAgentRequestBodyModel",
     "BedrockAgentRequestMediaModel",
+    "BedrockAgentFunctionEventModel",
     "S3BatchOperationJobModel",
     "S3BatchOperationModel",
     "S3BatchOperationTaskModel",

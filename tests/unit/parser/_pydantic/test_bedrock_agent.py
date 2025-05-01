@@ -1,5 +1,5 @@
 from aws_lambda_powertools.utilities.parser import envelopes, parse
-from aws_lambda_powertools.utilities.parser.models import BedrockAgentEventModel
+from aws_lambda_powertools.utilities.parser.models import BedrockAgentEventModel, BedrockAgentFunctionEventModel
 from tests.functional.utils import load_event
 from tests.unit.parser._pydantic.schemas import MyBedrockAgentBusiness
 
@@ -76,3 +76,35 @@ def test_bedrock_agent_event_with_post():
     assert properties[1].name == raw_properties[1]["name"]
     assert properties[1].type_ == raw_properties[1]["type"]
     assert properties[1].value == raw_properties[1]["value"]
+
+
+def test_bedrock_agent_function_event():
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    model = BedrockAgentFunctionEventModel(**raw_event)
+
+    assert model.message_version == raw_event["messageVersion"]
+    assert model.session_id == raw_event["sessionId"]
+    assert model.input_text == raw_event["inputText"]
+    assert model.action_group == raw_event["actionGroup"]
+    assert model.function == raw_event["function"]
+    assert model.session_attributes == {"employeeId": "EMP123"}
+    assert model.prompt_session_attributes == {"lastInteraction": "2024-02-01T15:30:00Z", "requestType": "vacation"}
+
+    agent = model.agent
+    raw_agent = raw_event["agent"]
+    assert agent.alias == raw_agent["alias"]
+    assert agent.name == raw_agent["name"]
+    assert agent.version == raw_agent["version"]
+    assert agent.id_ == raw_agent["id"]
+
+    parameters = model.parameters
+    assert parameters is not None
+    assert len(parameters) == 2
+
+    assert parameters[0].name == "startDate"
+    assert parameters[0].type_ == "string"
+    assert parameters[0].value == "2024-03-15"
+
+    assert parameters[1].name == "endDate"
+    assert parameters[1].type_ == "string"
+    assert parameters[1].value == "2024-03-20"
