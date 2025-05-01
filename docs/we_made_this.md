@@ -15,6 +15,18 @@ This space is dedicated to highlight our awesome community content featuring Pow
 
 Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"} to connect with the Powertools for AWS Lambda (Python) community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
 
+## Unofficial MCP Server
+
+**Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
+
+A Model Context Protocol (MCP) server that provides search functionality for Powertools for AWS Lambda documentation across all the runtimes.
+
+See this video where Michael demonstrates how to use the Powertools MCP server with [Amazon Q](https://aws.amazon.com/q/?nc1=h_ls), query cross-runtime documentation, and writes a serverless application with embedded Powertools best practices.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/5qz8ysWT4eM?si=Sx-K4v4W6RQKWYb6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+GitHub: [https://github.com/serverless-dna/powertools-mcp](https://github.com/serverless-dna/powertools-mcp)
+
 ## Blog posts
 
 ### AWS Lambda Cookbook — Following best practices with Powertools for AWS Lambda
