@@ -184,7 +184,7 @@ This session covers an opinionated approach to Python project setup, testing, pr
 
 Join to discover tools and patterns for effective serverless development with Python. To maximize your learning experience, the session includes a sample application that implements what’s described.
 
-<iframe width="620" height="378" src="https://www.youtube.com/watch?v=52W3Qyg242Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/52W3Qyg242Y?si=NL-k4Wwt1WNfgb_b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Workshops
 
