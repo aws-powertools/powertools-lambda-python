@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import pytest
 from typing_extensions import Annotated
 
-from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
+from aws_lambda_powertools.event_handler import BedrockAgentResolver, BedrockResponse, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
@@ -200,6 +200,133 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
     # THEN the schema must be a valid 3.0.3 version
     assert openapi30_schema(schema)
     assert schema.get("openapi") == "3.0.3"
+
+
+def test_bedrock_agent_with_bedrock_response():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    # WHEN using BedrockResponse
+    @app.get("/claims", description="Gets claims")
+    def claims():
+        assert isinstance(app.current_event, BedrockAgentEvent)
+        assert app.lambda_context == {}
+        return BedrockResponse(
+            session_attributes={"user_id": "123"},
+            prompt_session_attributes={"context": "testing"},
+            knowledge_bases_configuration=[
+                {
+                    "knowledgeBaseId": "kb-123",
+                    "retrievalConfiguration": {
+                        "vectorSearchConfiguration": {"numberOfResults": 3, "overrideSearchType": "HYBRID"},
+                    },
+                },
+            ],
+        )
+
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/claims"
+    assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
+    assert result["response"]["httpMethod"] == "GET"
+    assert result["sessionAttributes"] == {"user_id": "123"}
+    assert result["promptSessionAttributes"] == {"context": "testing"}
+    assert result["knowledgeBasesConfiguration"] == [
+        {
+            "knowledgeBaseId": "kb-123",
+            "retrievalConfiguration": {
+                "vectorSearchConfiguration": {"numberOfResults": 3, "overrideSearchType": "HYBRID"},
+            },
+        },
+    ]
+
+
+def test_bedrock_agent_with_empty_bedrock_response():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims():
+        return BedrockResponse(body={"message": "test"})
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly without optional attributes
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["httpStatusCode"] == 200
+    assert "sessionAttributes" not in result
+    assert "promptSessionAttributes" not in result
+    assert "knowledgeBasesConfiguration" not in result
+
+
+def test_bedrock_agent_with_partial_bedrock_response():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> Dict[str, Any]:
+        return BedrockResponse(
+            body={"message": "test"},
+            session_attributes={"user_id": "123"},
+            # Only include session_attributes to test partial response
+        )
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly with only session_attributes
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["httpStatusCode"] == 200
+    assert result["sessionAttributes"] == {"user_id": "123"}
+    assert "promptSessionAttributes" not in result
+    assert "knowledgeBasesConfiguration" not in result
+
+
+def test_bedrock_agent_with_string():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> str:
+        return "a"
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly with only session_attributes
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["httpStatusCode"] == 200
+
+
+def test_bedrock_agent_with_different_attributes_combination():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> Dict[str, Any]:
+        return BedrockResponse(
+            body={"message": "test"},
+            prompt_session_attributes={"context": "testing"},
+            knowledge_bases_configuration=[
+                {
+                    "knowledgeBaseId": "kb-123",
+                    "retrievalConfiguration": {"vectorSearchConfiguration": {"numberOfResults": 3}},
+                },
+            ],
+            # Omit session_attributes to test different combination
+        )
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly with specific attributes
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["httpStatusCode"] == 200
+    assert "sessionAttributes" not in result
+    assert result["promptSessionAttributes"] == {"context": "testing"}
+    assert result["knowledgeBasesConfiguration"][0]["knowledgeBaseId"] == "kb-123"
 
 
 def test_bedrock_resolver_with_openapi_extensions():

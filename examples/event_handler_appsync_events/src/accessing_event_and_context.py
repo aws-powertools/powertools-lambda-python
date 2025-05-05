@@ -11,10 +11,6 @@ if TYPE_CHECKING:
 app = AppSyncEventsResolver()
 
 
-class ValidationError(Exception):
-    pass
-
-
 @app.on_publish("/default/channel1")
 def handle_channel1_publish(payload: dict[str, Any]):
     # Access the full event and context

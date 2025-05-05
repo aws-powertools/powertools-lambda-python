@@ -1,0 +1,2 @@
+ignore_templates:
+  - examples/event_handler_appsync_events/sam/getting_started_with_appsync_events.yaml
