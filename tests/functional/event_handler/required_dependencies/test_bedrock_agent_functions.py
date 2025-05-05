@@ -114,3 +114,21 @@ def test_bedrock_agent_function_invalid_event():
     # WHEN calling with invalid event
     with pytest.raises(ValueError, match="Missing required field"):
         app.resolve({}, {})
+
+
+def test_resolve_raises_value_error_on_missing_required_field():
+    """Test that resolve() raises ValueError when a required field is missing from the event"""
+    # GIVEN a Bedrock Agent Function resolver and an incomplete event
+    resolver = BedrockAgentFunctionResolver()
+    incomplete_event = {
+        "messageVersion": "1.0",
+        "agent": {"alias": "PROD", "name": "hr-assistant-function-def", "version": "1", "id": "1234abcd"},
+        "sessionId": "123456789123458",
+    }
+
+    # WHEN calling resolve with the incomplete event
+    # THEN a ValueError is raised with information about the missing field
+    with pytest.raises(ValueError) as excinfo:
+        resolver.resolve(incomplete_event, {})
+
+    assert "Missing required field:" in str(excinfo.value)
