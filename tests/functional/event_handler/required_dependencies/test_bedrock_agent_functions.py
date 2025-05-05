@@ -152,3 +152,24 @@ def test_resolve_with_no_registered_function():
 
     # THEN the response should contain an error message
     assert "Error: 'non_existent_function'" in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+
+
+def test_bedrock_function_response_state_validation():
+    # GIVEN invalid and valid response states
+    valid_states = [None, "FAILURE", "REPROMPT"]
+    invalid_state = "INVALID"
+
+    # WHEN creating responses with valid states
+    # THEN no error should be raised
+    for state in valid_states:
+        try:
+            BedrockFunctionResponse(body="test", response_state=state)
+        except ValueError:
+            pytest.fail(f"Unexpected ValueError for response_state={state}")
+
+    # WHEN creating a response with invalid state
+    # THEN ValueError should be raised with correct message
+    with pytest.raises(ValueError) as exc_info:
+        BedrockFunctionResponse(body="test", response_state=invalid_state)
+
+    assert str(exc_info.value) == "responseState must be None, 'FAILURE' or 'REPROMPT'"

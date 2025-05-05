@@ -43,6 +43,9 @@ class BedrockFunctionResponse:
         knowledge_bases: list[dict[str, Any]] | None = None,
         response_state: str | None = None,
     ) -> None:
+        if response_state is not None and response_state not in ["FAILURE", "REPROMPT"]:
+            raise ValueError("responseState must be None, 'FAILURE' or 'REPROMPT'")
+
         self.body = body
         self.session_attributes = session_attributes
         self.prompt_session_attributes = prompt_session_attributes
