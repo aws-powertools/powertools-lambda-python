@@ -8,6 +8,7 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.api_gateway import (
     _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+    BedrockResponse,
     ProxyEventType,
     ResponseBuilder,
 )
@@ -32,14 +33,11 @@ class BedrockResponseBuilder(ResponseBuilder):
 
     @override
     def build(self, event: BedrockAgentEvent, *args) -> dict[str, Any]:
-        """Build the full response dict to be returned by the lambda"""
-        self._route(event, None)
-
         body = self.response.body
         if self.response.is_json() and not isinstance(self.response.body, str):
             body = self.serializer(self.response.body)
 
-        return {
+        response = {
             "messageVersion": "1.0",
             "response": {
                 "actionGroup": event.action_group,
@@ -53,6 +51,19 @@ class BedrockResponseBuilder(ResponseBuilder):
                 },
             },
         }
+
+        # Add Bedrock-specific attributes
+        if isinstance(self.response, BedrockResponse):
+            if self.response.session_attributes:
+                response["sessionAttributes"] = self.response.session_attributes
+
+            if self.response.prompt_session_attributes:
+                response["promptSessionAttributes"] = self.response.prompt_session_attributes
+
+            if self.response.knowledge_bases_configuration:
+                response["knowledgeBasesConfiguration"] = self.response.knowledge_bases_configuration
+
+        return response
 
 
 class BedrockAgentResolver(ApiGatewayResolver):

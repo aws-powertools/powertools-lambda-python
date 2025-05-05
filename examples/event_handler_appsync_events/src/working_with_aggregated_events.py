@@ -20,12 +20,11 @@ def marshall(item: dict[str, Any]) -> dict[str, Any]:
 
 
 @app.on_publish("/default/foo/*", aggregate=True)
-async def handle_default_namespace_batch(payload: list[dict[str, Any]]):
+async def handle_default_namespace_batch(payload: list[dict[str, Any]]):  # (1)!
     write_operations: list = []
 
     write_operations.extend({"PutRequest": {"Item": marshall(item)}} for item in payload)
 
-    # Executar operação de lote no DynamoDB
     if write_operations:
         dynamodb.batch_write_item(
             RequestItems={

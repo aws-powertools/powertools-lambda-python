@@ -15,6 +15,18 @@ This space is dedicated to highlight our awesome community content featuring Pow
 
 Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"} to connect with the Powertools for AWS Lambda (Python) community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
 
+## Unofficial MCP Server
+
+**Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
+
+A Model Context Protocol (MCP) server that provides search functionality for Powertools for AWS Lambda documentation across all the runtimes.
+
+See this video where Michael demonstrates how to use the Powertools MCP server with [Amazon Q](https://aws.amazon.com/q/?nc1=h_ls), query cross-runtime documentation, and writes a serverless application with embedded Powertools best practices.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/5qz8ysWT4eM?si=Sx-K4v4W6RQKWYb6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+GitHub: [https://github.com/serverless-dna/powertools-mcp](https://github.com/serverless-dna/powertools-mcp)
+
 ## Blog posts
 
 ### AWS Lambda Cookbook — Following best practices with Powertools for AWS Lambda
@@ -44,6 +56,8 @@ A collection of articles explaining in detail how Powertools for AWS Lambda help
 * [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){target="_blank" rel="nofollow"}
 
 * [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools){target="_blank" rel="nofollow"}
+
+* [Build Serverless WebSockets with AWS AppSync Events and Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/aws-appsync-events-and-powertools-for-aws-lambda){target="_blank" rel="nofollow"}
 
 ### Making all your APIs idempotent
 
@@ -172,7 +186,7 @@ This session covers an opinionated approach to Python project setup, testing, pr
 
 Join to discover tools and patterns for effective serverless development with Python. To maximize your learning experience, the session includes a sample application that implements what’s described.
 
-<iframe width="620" height="378" src="https://www.youtube.com/watch?v=52W3Qyg242Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/52W3Qyg242Y?si=NL-k4Wwt1WNfgb_b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Workshops
 

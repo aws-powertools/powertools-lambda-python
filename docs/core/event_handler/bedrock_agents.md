@@ -323,6 +323,17 @@ You can enable user confirmation with Bedrock Agents to have your application as
 
 1. Add an openapi extension
 
+### Fine grained responses
+
+???+ info "Note"
+	The default response only includes the essential fields to keep the payload size minimal, as AWS Lambda has a maximum response size of 25 KB.
+
+You can use `BedrockResponse` class to add additional fields as needed, such as [session attributes, prompt session attributes, and knowledge base configurations](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-response){target="_blank"}.
+
+```python title="working_with_bedrockresponse.py" title="Customzing your Bedrock Response" hl_lines="5 16"
+--8<-- "examples/event_handler_bedrock_agents/src/working_with_bedrockresponse.py"
+```
+
 ## Testing your code
 
 Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-input) request:

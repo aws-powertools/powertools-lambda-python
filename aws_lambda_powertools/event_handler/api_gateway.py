@@ -73,6 +73,7 @@ _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 _JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
+_DEFAULT_CONTENT_TYPE = "application/json"
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
 ResponseT = TypeVar("ResponseT")
@@ -255,6 +256,35 @@ class CORSConfig:
         return ",".join(sorted(methods))
 
 
+class BedrockResponse(Generic[ResponseT]):
+    """
+    Contains the response body, status code, content type, and optional attributes
+    for session management and knowledge base configuration.
+    """
+
+    def __init__(
+        self,
+        body: Any = None,
+        status_code: int = 200,
+        content_type: str = _DEFAULT_CONTENT_TYPE,
+        session_attributes: dict[str, Any] | None = None,
+        prompt_session_attributes: dict[str, Any] | None = None,
+        knowledge_bases_configuration: list[dict[str, Any]] | None = None,
+    ) -> None:
+        self.body = body
+        self.status_code = status_code
+        self.content_type = content_type
+        self.session_attributes = session_attributes
+        self.prompt_session_attributes = prompt_session_attributes
+        self.knowledge_bases_configuration = knowledge_bases_configuration
+
+    def is_json(self) -> bool:
+        """
+        Returns True if the response is JSON, based on the Content-Type.
+        """
+        return True
+
+
 class Response(Generic[ResponseT]):
     """Response data class that provides greater control over what is returned from the proxy event"""
 
@@ -300,7 +330,7 @@ class Response(Generic[ResponseT]):
         content_type = self.headers.get("Content-Type", "")
         if isinstance(content_type, list):
             content_type = content_type[0]
-        return content_type.startswith("application/json")
+        return content_type.startswith(_DEFAULT_CONTENT_TYPE)
 
 
 class Route:
@@ -572,7 +602,7 @@ class Route:
         operation_responses: dict[int, OpenAPIResponse] = {
             422: {
                 "description": "Validation Error",
-                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
+                "content": {_DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
             },
         }
 
@@ -581,7 +611,9 @@ class Route:
             http_code = self.custom_response_validation_http_code.value
             operation_responses[http_code] = {
                 "description": "Response Validation Error",
-                "content": {"application/json": {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}}},
+                "content": {
+                    _DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"}},
+                },
             }
             # Add model definition
             definitions["ResponseValidationError"] = response_validation_error_response_definition
@@ -594,7 +626,7 @@ class Route:
                 # Case 1: there is not 'content' key
                 if "content" not in response:
                     response["content"] = {
-                        "application/json": self._openapi_operation_return(
+                        _DEFAULT_CONTENT_TYPE: self._openapi_operation_return(
                             param=dependant.return_param,
                             model_name_map=model_name_map,
                             field_mapping=field_mapping,
@@ -645,7 +677,7 @@ class Route:
             # Add the response schema to the OpenAPI 200 response
             operation_responses[200] = {
                 "description": self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-                "content": {"application/json": response_schema},
+                "content": {_DEFAULT_CONTENT_TYPE: response_schema},
             }
 
         operation["responses"] = operation_responses
@@ -1474,7 +1506,10 @@ class MiddlewareFrame:
         return self.current_middleware(app, self.next_middleware)
 
 
-def _registered_api_adapter(app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> dict | tuple | Response:
+def _registered_api_adapter(
+    app: ApiGatewayResolver,
+    next_middleware: Callable[..., Any],
+) -> dict | tuple | Response | BedrockResponse:
     """
     Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
     in the chain will match the API route function signature and ensure that Powertools passes the API
@@ -1632,7 +1667,7 @@ class ApiGatewayResolver(BaseRouter):
             response_validation_error_response = {
                 "description": "Response Validation Error",
                 "content": {
-                    "application/json": {
+                    _DEFAULT_CONTENT_TYPE: {
                         "schema": {"$ref": f"{COMPONENT_REF_PREFIX}ResponseValidationError"},
                     },
                 },
@@ -2151,7 +2186,7 @@ class ApiGatewayResolver(BaseRouter):
             if query_params.get("format") == "json":
                 return Response(
                     status_code=200,
-                    content_type="application/json",
+                    content_type=_DEFAULT_CONTENT_TYPE,
                     body=escaped_spec,
                 )
 
@@ -2538,7 +2573,7 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             return self._response_builder_class(
-                response=self._to_response(
+                response=self._to_response(  # type: ignore[arg-type]
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
                 serializer=self._serializer,
@@ -2627,7 +2662,7 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def _to_response(self, result: dict | tuple | Response) -> Response:
+    def _to_response(self, result: dict | tuple | Response | BedrockResponse) -> Response | BedrockResponse:
         """Convert the route's result to a Response
 
          3 main result types are supported:
@@ -2638,7 +2673,7 @@ class ApiGatewayResolver(BaseRouter):
         - Response: returned as is, and allows for more flexibility
         """
         status_code = HTTPStatus.OK
-        if isinstance(result, Response):
+        if isinstance(result, (Response, BedrockResponse)):
             return result
         elif isinstance(result, tuple) and len(result) == 2:
             # Unpack result dict and status code from tuple
@@ -2971,8 +3006,9 @@ class ALBResolver(ApiGatewayResolver):
         # ALB doesn't have a stage variable, so we just return an empty string
         return ""
 
+    # BedrockResponse is not used here but adding the same signature to keep strong typing
     @override
-    def _to_response(self, result: dict | tuple | Response) -> Response:
+    def _to_response(self, result: dict | tuple | Response | BedrockResponse) -> Response | BedrockResponse:
         """Convert the route's result to a Response
 
         ALB requires a non-null body otherwise it converts as HTTP 5xx
