@@ -57,6 +57,8 @@ A collection of articles explaining in detail how Powertools for AWS Lambda help
 
 * [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools){target="_blank" rel="nofollow"}
 
+* [Build Serverless WebSockets with AWS AppSync Events and Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/aws-appsync-events-and-powertools-for-aws-lambda){target="_blank" rel="nofollow"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
