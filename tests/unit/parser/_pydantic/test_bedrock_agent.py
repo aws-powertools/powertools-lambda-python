@@ -108,3 +108,16 @@ def test_bedrock_agent_function_event():
     assert parameters[1].name == "endDate"
     assert parameters[1].type_ == "string"
     assert parameters[1].value == "2024-03-20"
+
+
+def test_bedrock_agent_function_event_with_envelope():
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["inputText"] = '{"username": "Jane", "name": "Doe"}'
+    parsed_event: MyBedrockAgentBusiness = parse(
+        event=raw_event,
+        model=MyBedrockAgentBusiness,
+        envelope=envelopes.BedrockAgentFunctionEnvelope,
+    )
+
+    assert parsed_event.username == "Jane"
+    assert parsed_event.name == "Doe"

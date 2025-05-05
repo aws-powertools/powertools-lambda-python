@@ -132,3 +132,23 @@ def test_resolve_raises_value_error_on_missing_required_field():
         resolver.resolve(incomplete_event, {})
 
     assert "Missing required field:" in str(excinfo.value)
+
+
+def test_resolve_with_no_registered_function():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    # AND a valid event but with a non-existent function
+    raw_event = {
+        "messageVersion": "1.0",
+        "agent": {"name": "TestAgent", "id": "test-id", "alias": "test", "version": "1"},
+        "actionGroup": "test_group",
+        "function": "non_existent_function",
+        "parameters": [],
+    }
+
+    # WHEN calling resolve with a non-existent function
+    result = app.resolve(raw_event, {})
+
+    # THEN the response should contain an error message
+    assert "Error: 'non_existent_function'" in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
