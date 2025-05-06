@@ -26,6 +26,7 @@ allow-licenses:
   - 'BSD-3-Clause-No-Nuclear-License-2014'
   - 'BSD-3-Clause-No-Nuclear-Warranty'
   - 'BSD-3-Clause-Open-MPI'
-  - 'Python2.0'
+  - 'Python-2.0'
+  - 'Python-2.0.1'
   - 'ISC'
 comment-summary-in-pr: on-failure
