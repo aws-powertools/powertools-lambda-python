@@ -30,3 +30,4 @@ allow-licenses:
   - 'Python-2.0.1'
   - 'ISC'
 comment-summary-in-pr: on-failure
+fail-on-scopes: runtime
