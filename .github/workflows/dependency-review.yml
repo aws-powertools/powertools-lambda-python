@@ -24,5 +24,4 @@ jobs:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@ce3cf9537a52e8119d91fd484ab5b8a807627bf8 # v4.6.0
         with:
-          config-file: './.github/dependency-review-config.yml'
-
+          allow-licenses: "Apache-1.1"
