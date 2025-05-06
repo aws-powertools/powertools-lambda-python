@@ -17,3 +17,4 @@ allow-licenses:
   - 'BSD-3-Clause-No-Nuclear-Warranty'
   - 'BSD-3-Clause-Open-MPI'
 comment-summary-in-pr: on-failure
+fail-on-scopes: "development"
