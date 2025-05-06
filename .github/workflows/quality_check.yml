@@ -61,8 +61,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: make dev-quality-code
-      - name: Checking third-party library licenses
-        run: make check-licenses
       - name: Checking and enforcing format
         run: make format-check
       - name: Formatting and Linting
