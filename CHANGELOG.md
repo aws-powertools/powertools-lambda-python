@@ -6,6 +6,7 @@
 
 ## Maintenance
 
+* **deps:** bump aws-actions/configure-aws-credentials from 4.1.0 to 4.2.0 ([#6619](https://github.com/aws-powertools/powertools-lambda-python/issues/6619))
 
 
 <a name="v3.12.0"></a>
