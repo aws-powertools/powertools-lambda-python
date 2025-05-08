@@ -4,6 +4,7 @@ import pytest
 
 from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver, BedrockFunctionResponse
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.utils import load_event
 
 
@@ -59,22 +60,25 @@ def test_bedrock_agent_function_registration():
     # GIVEN a Bedrock Agent Function resolver
     app = BedrockAgentFunctionResolver()
 
-    # WHEN registering without description or with duplicate name
-    with pytest.raises(ValueError, match="Tool description is required"):
-
-        @app.tool()
-        def test_function():
-            return "test"
-
+    # WHEN registering with duplicate name
     @app.tool(name="custom", description="First registration")
     def first_function():
-        return "test"
+        return "first test"
 
-    with pytest.raises(ValueError, match="Tool 'custom' already registered"):
+    # THEN a warning should be issued when registering a duplicate
+    with pytest.warns(PowertoolsUserWarning, match="Tool 'custom' already registered"):
 
         @app.tool(name="custom", description="Second registration")
         def second_function():
-            return "test"
+            return "second test"
+
+    # AND the most recent function should be registered
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "custom"
+    result = app.resolve(raw_event, {})
+
+    # The second function should be used
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "second test"
 
 
 def test_bedrock_agent_function_with_optional_fields():
@@ -156,7 +160,7 @@ def test_resolve_with_no_registered_function():
 
 def test_bedrock_function_response_state_validation():
     # GIVEN invalid and valid response states
-    valid_states = [None, "FAILURE", "REPROMPT"]
+    valid_states = ["FAILURE", "REPROMPT"]
     invalid_state = "INVALID"
 
     # WHEN creating responses with valid states
@@ -172,4 +176,32 @@ def test_bedrock_function_response_state_validation():
     with pytest.raises(ValueError) as exc_info:
         BedrockFunctionResponse(body="test", response_state=invalid_state)
 
-    assert str(exc_info.value) == "responseState must be None, 'FAILURE' or 'REPROMPT'"
+    assert str(exc_info.value) == "responseState must be 'FAILURE' or 'REPROMPT'"
+
+
+def test_bedrock_agent_function_with_parameters():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    # Track received parameters
+    received_params = {}
+
+    @app.tool(description="Function that accepts parameters")
+    def vacation_request(startDate, endDate):
+        # Store received parameters for assertion
+        received_params["startDate"] = startDate
+        received_params["endDate"] = endDate
+        return f"Vacation request from {startDate} to {endDate} submitted"
+
+    # WHEN calling the event handler with parameters
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "vacation_request"
+    result = app.resolve(raw_event, {})
+
+    # THEN parameters should be correctly passed to the function
+    assert received_params["startDate"] == "2024-03-15"
+    assert received_params["endDate"] == "2024-03-20"
+    assert (
+        "Vacation request from 2024-03-15 to 2024-03-20 submitted"
+        in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    )

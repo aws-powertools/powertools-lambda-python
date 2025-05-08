@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import inspect
+import warnings
+from typing import TYPE_CHECKING, Any, Literal
+
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -19,7 +23,7 @@ class BedrockFunctionResponse:
         Session attributes to include in the response
     prompt_session_attributes : dict[str, str] | None
         Prompt session attributes to include in the response
-    response_state : str | None
+    response_state : Literal["FAILURE", "REPROMPT"] | None
         Response state ("FAILURE" or "REPROMPT")
 
     Examples
@@ -41,10 +45,10 @@ class BedrockFunctionResponse:
         session_attributes: dict[str, str] | None = None,
         prompt_session_attributes: dict[str, str] | None = None,
         knowledge_bases: list[dict[str, Any]] | None = None,
-        response_state: str | None = None,
+        response_state: Literal["FAILURE", "REPROMPT"] | None = None,
     ) -> None:
         if response_state is not None and response_state not in ["FAILURE", "REPROMPT"]:
-            raise ValueError("responseState must be None, 'FAILURE' or 'REPROMPT'")
+            raise ValueError("responseState must be 'FAILURE' or 'REPROMPT'")
 
         self.body = body
         self.session_attributes = session_attributes
@@ -78,6 +82,8 @@ class BedrockFunctionsResponseBuilder:
             knowledge_bases = None
             response_state = None
 
+        # Per AWS Bedrock documentation, currently only "TEXT" is supported as the responseBody content type
+        # https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
         response: dict[str, Any] = {
             "messageVersion": "1.0",
             "response": {
@@ -147,12 +153,13 @@ class BedrockAgentFunctionResolver:
         """
 
         def decorator(func: Callable) -> Callable:
-            if not description:
-                raise ValueError("Tool description is required")
-
             function_name = name or func.__name__
             if function_name in self._tools:
-                raise ValueError(f"Tool '{function_name}' already registered")
+                warnings.warn(
+                    f"Tool '{function_name}' already registered. Overwriting with new definition.",
+                    PowertoolsUserWarning,
+                    stacklevel=2,
+                )
 
             self._tools[function_name] = {
                 "function": func,
@@ -178,7 +185,20 @@ class BedrockAgentFunctionResolver:
         function_name = self.current_event.function
 
         try:
-            result = self._tools[function_name]["function"]()
+            parameters = {}
+            if hasattr(self.current_event, "parameters"):
+                for param in self.current_event.parameters:
+                    parameters[param.name] = param.value
+
+            func = self._tools[function_name]["function"]
+            sig = inspect.signature(func)
+
+            valid_params = {}
+            for name, value in parameters.items():
+                if name in sig.parameters:
+                    valid_params[name] = value
+
+            result = func(**valid_params)
             return BedrockFunctionsResponseBuilder(result).build(self.current_event)
         except Exception as e:
             return BedrockFunctionsResponseBuilder(
