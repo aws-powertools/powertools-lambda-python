@@ -247,20 +247,20 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.194.0"
+version = "2.195.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.194.0-py3-none-any.whl", hash = "sha256:ed331e6afa90eaa7d84ef73f15344053fc2070727c0d504edb910fed53197b54"},
-    {file = "aws_cdk_lib-2.194.0.tar.gz", hash = "sha256:0c42f13bc710b200fcf1a0f6c8a86354d24d05a565418b861d25776ca5355dae"},
+    {file = "aws_cdk_lib-2.195.0-py3-none-any.whl", hash = "sha256:9087fca8dbe5cf256cdcbf00f0c6e452ceeb66452aea5878728633a379e7aa56"},
+    {file = "aws_cdk_lib-2.195.0.tar.gz", hash = "sha256:6617bc60dc1e37826f16d8932df73e6a062922cef12bf11e9f12becbdda73f33"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = ">=2.2.229,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=41.0.0,<42.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=41.2.0,<42.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.110.0,<2.0.0"
 publication = ">=0.0.3"
