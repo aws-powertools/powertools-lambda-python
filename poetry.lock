@@ -1075,14 +1075,14 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.35.0"
+version = "1.35.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "cfn_lint-1.35.0-py3-none-any.whl", hash = "sha256:cac80684f22afb795cb8dd1b0247f1dc0efc9ff491d1bcb60f481aba6f995c95"},
-    {file = "cfn_lint-1.35.0.tar.gz", hash = "sha256:110795daa7d34a93ca411b22406d2278a224a66702a4b32be3871cfd786af28f"},
+    {file = "cfn_lint-1.35.1-py3-none-any.whl", hash = "sha256:2bf930d7b61fd4f2e7470ea503caa8628761c4ab75030944f7932e7508aaca63"},
+    {file = "cfn_lint-1.35.1.tar.gz", hash = "sha256:0a564819088c95ba88c5dca23ba1fb3c6cdb86b2f6a40219f1abf2134c5b47d7"},
 ]
 
 [package.dependencies]
@@ -1470,14 +1470,14 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "6.108.0"
+version = "6.109.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
 python-versions = "<4,>=3.8.0"
 groups = ["main", "dev"]
 files = [
-    {file = "datadog_lambda-6.108.0-py3-none-any.whl", hash = "sha256:42efcd71b51a2ca68e829a7980b54cf70ab4acd86a06da7aed04c774c9ebcff4"},
-    {file = "datadog_lambda-6.108.0.tar.gz", hash = "sha256:d4fc2410b3ef5af21943f1d3cf2328383002caba5ca2c7f08f9d98ea182f4e55"},
+    {file = "datadog_lambda-6.109.0-py3-none-any.whl", hash = "sha256:0b1315fb27f867c6a01dd9c43a227c442bdb8f4f8878cca855b1583b744ee297"},
+    {file = "datadog_lambda-6.109.0.tar.gz", hash = "sha256:f61d068acf032ab32573e3d00a601b2d56d92a95f5670bb3d02c5b7a94f32229"},
 ]
 
 [package.dependencies]
@@ -4885,4 +4885,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "ff1028bac86c6e6a9e6ed61b815fc1f6754ea214a3009337deced4c89d285d1c"
+content-hash = "0168da0763239e3fc07fc0e7f90eb43d9bb4028c023335e011139baf3b342501"
