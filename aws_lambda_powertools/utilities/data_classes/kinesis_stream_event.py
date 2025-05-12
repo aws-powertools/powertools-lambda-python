@@ -100,6 +100,18 @@ class KinesisStreamRecord(DictWrapper):
         return KinesisStreamRecordPayload(self["kinesis"])
 
 
+class KinesisStreamWindow(DictWrapper):
+    @property
+    def start(self) -> str:
+        """The time window started"""
+        return self["start"]
+
+    @property
+    def end(self) -> str:
+        """The time window will end"""
+        return self["end"]
+
+
 class KinesisStreamEvent(DictWrapper):
     """Kinesis stream event
 
@@ -112,6 +124,30 @@ class KinesisStreamEvent(DictWrapper):
     def records(self) -> Iterator[KinesisStreamRecord]:
         for record in self["Records"]:
             yield KinesisStreamRecord(record)
+
+    @property
+    def window(self) -> KinesisStreamWindow:
+        return KinesisStreamWindow(self["window"])
+
+    @property
+    def state(self) -> dict:
+        return self["state"]
+
+    @property
+    def shard_id(self) -> str:
+        return self["shardId"]
+
+    @property
+    def event_source_arn(self) -> str:
+        return self["eventSourceARN"]
+
+    @property
+    def is_final_invoke_for_window(self) -> bool:
+        return self["isFinalInvokeForWindow"]
+
+    @property
+    def is_window_terminated_early(self) -> bool:
+        return self["isWindowTerminatedEarly"]
 
 
 def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> list[CloudWatchLogsDecodedData]:
