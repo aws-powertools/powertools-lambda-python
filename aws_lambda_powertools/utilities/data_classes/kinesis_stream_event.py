@@ -128,7 +128,11 @@ class KinesisStreamEvent(DictWrapper):
 
     @property
     def window(self) -> KinesisStreamWindow | None:
-        return KinesisStreamWindow(self["window"])
+	window = self.get("window")
+	if window:
+        	return KinesisStreamWindow(window)
+        	
+        return window
 
     @property
     def state(self) -> dict[str, Any]:
