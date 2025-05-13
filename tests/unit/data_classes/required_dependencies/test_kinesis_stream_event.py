@@ -41,6 +41,13 @@ def test_kinesis_stream_event():
     assert kinesis.data_as_bytes() == b"Hello, this is a test."
     assert kinesis.data_as_text() == "Hello, this is a test."
 
+    assert parsed_event.window.raw_event == raw_event["window"]
+    assert parsed_event.state == raw_event["state"]
+    assert parsed_event.shard_id == raw_event["shardId"]
+    assert parsed_event.event_source_arn == raw_event["eventSourceARN"]
+    assert parsed_event.is_final_invoke_for_window == raw_event["isFinalInvokeForWindow"]
+    assert parsed_event.is_window_terminated_early == raw_event["isWindowTerminatedEarly"]
+
 
 def test_kinesis_stream_event_json_data():
     json_value = {"test": "value"}

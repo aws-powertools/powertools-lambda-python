@@ -118,6 +118,7 @@ class KinesisStreamEvent(DictWrapper):
     Documentation:
     --------------
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-kinesis-windows.html
     """
 
     @property
