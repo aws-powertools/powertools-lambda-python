@@ -148,7 +148,7 @@ class KinesisStreamEvent(DictWrapper):
 
     @property
     def is_window_terminated_early(self) -> bool | None:
-        return self["isWindowTerminatedEarly"]
+        return self.get("isWindowTerminatedEarly")
 
 
 def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> list[CloudWatchLogsDecodedData]:
