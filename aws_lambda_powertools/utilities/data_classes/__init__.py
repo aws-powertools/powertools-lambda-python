@@ -46,7 +46,7 @@ from .s3_event import S3Event, S3EventBridgeNotificationEvent
 from .secrets_manager_event import SecretsManagerEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
-from .sqs_event import SQSEvent
+from .sqs_event import SQSEvent, SQSRecord
 from .transfer_family_event import TransferFamilyAuthorizer, TransferFamilyAuthorizerResponse
 from .vpc_lattice import VPCLatticeEvent, VPCLatticeEventV2
 
@@ -87,6 +87,7 @@ __all__ = [
     "SESEvent",
     "SNSEvent",
     "SQSEvent",
+    "SQSRecord",
     "event_source",
     "AWSConfigRuleEvent",
     "VPCLatticeEvent",
