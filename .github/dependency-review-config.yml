@@ -29,6 +29,7 @@ allow-licenses:
   - 'Python-2.0'
   - 'Python-2.0.1'
   - 'ISC'
-  - 'MIT AND Apache-2.0'
+  - 'Apache-2.0 AND MIT'
+  - 'MIT AND Python-2.0'
 comment-summary-in-pr: on-failure
 fail-on-scopes: runtime
