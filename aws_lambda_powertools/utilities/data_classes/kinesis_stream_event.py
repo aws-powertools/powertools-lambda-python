@@ -147,7 +147,7 @@ class KinesisStreamEvent(DictWrapper):
         return self.get("isFinalInvokeForWindow")
 
     @property
-    def is_window_terminated_early(self) -> bool:
+    def is_window_terminated_early(self) -> bool | None:
         return self["isWindowTerminatedEarly"]
 
 
