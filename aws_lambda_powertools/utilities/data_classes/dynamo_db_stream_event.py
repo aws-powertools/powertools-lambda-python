@@ -140,7 +140,7 @@ class DynamoDBRecord(DictWrapper):
         return self.get("userIdentity") or {}
 
 
-class KinesisStreamWindow(DictWrapper):
+class DynamoDBStreamWindow(DictWrapper):
     @property
     def start(self) -> str:
         """The time window started"""
