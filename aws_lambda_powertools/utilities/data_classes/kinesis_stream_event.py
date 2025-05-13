@@ -127,7 +127,7 @@ class KinesisStreamEvent(DictWrapper):
             yield KinesisStreamRecord(record)
 
     @property
-    def window(self) -> KinesisStreamWindow:
+    def window(self) -> KinesisStreamWindow | None:
         return KinesisStreamWindow(self["window"])
 
     @property
