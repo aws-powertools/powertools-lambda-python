@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import zlib
 from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
@@ -45,5 +46,19 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
         for record in parsed_envelope.Records:
             # We allow either AWS expected contract (bytes) or a custom Model, see #943
             data = cast(bytes, record.kinesis.data)
-            models.append(self._parse(data=data.decode("utf-8"), model=model))
+            try:
+                models.append(self._parse(data=data.decode("utf-8"), model=model))
+            # If the Data Stream contains compressed data eg. CloudWatch Logs
+            # `decode` method will throw a UnicodeDecodeError
+            # which signals that decompression might be required
+            except UnicodeDecodeError as ude:
+                try:
+                    logger.debug(f"{type(ude).__name__}: {str(ude)} encountered. "
+                                "Data will be decompressed with gzip.decompress().")
+                    decompressed_data = zlib.decompress(data, zlib.MAX_WBITS | 32)
+                    models.append(
+                        self._parse(data=decompressed_data.decode("utf-8"), model=model)
+                    )
+                except Exception:
+                    raise ValueError("Unable to decode and/or decompress data.")
         return models

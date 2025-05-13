@@ -105,3 +105,17 @@ def test_kinesis_stream_event_cloudwatch_logs_data_extraction_fails_with_custom_
         for record in stream_data.Records:
             record.kinesis.data = DummyModel()
             record.decompress_zlib_record_data_as_json()
+
+
+def test_kinesis_stream_event_with_cloud_watch_logs_data_using_envelope():
+    # GIVEN Kinesis Data Stream event with compressed data
+    # such as CloudWatch Logs
+    raw_event = load_event("kinesisStreamCloudWatchLogsEvent.json")
+
+    # WHEN parsing using KinesisDataStreamEvelope to CloudWatchLogsDecode
+    logs = envelopes.KinesisDataStreamEnvelope().parse(
+        raw_event, CloudWatchLogsDecode
+    )
+
+    # THEN logs should be extracted as CloudWatchLogsDecode objects
+    assert isinstance(logs[0], CloudWatchLogsDecode)
