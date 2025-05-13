@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-class KafkaEventRecord(DictWrapper):
+class KafkaEventBase(DictWrapper):
     @property
     def topic(self) -> str:
         """The Kafka topic."""
@@ -36,6 +36,8 @@ class KafkaEventRecord(DictWrapper):
         """The Kafka record timestamp type."""
         return self["timestampType"]
 
+
+class KafkaEventRecord(KafkaEventBase):
     @property
     def key(self) -> str | None:
         """

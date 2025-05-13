@@ -91,7 +91,7 @@ version = "1.12.0"
 description = "Avro is a serialization and RPC framework."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "avro-1.12.0-py2.py3-none-any.whl", hash = "sha256:9a255c72e1837341dd4f6ff57b2b6f68c0f0cecdef62dd04962e10fd33bec05b"},
     {file = "avro-1.12.0.tar.gz", hash = "sha256:cad9c53b23ceed699c7af6bddced42e2c572fd6b408c257a7d4fc4e8cf2e2d6b"},
@@ -4895,6 +4895,7 @@ all = ["aws-encryption-sdk", "aws-xray-sdk", "fastjsonschema", "jsonpath-ng", "p
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
 datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
+kafka-consumer = ["avro", "protobuf"]
 parser = ["pydantic"]
 redis = ["redis"]
 tracer = ["aws-xray-sdk"]
@@ -4904,4 +4905,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "007cfd4e58eff0555ff262af12f44f1b3fd6abc25a7a2f533594a2b472b334c3"
+content-hash = "be2af008501945b6c1a64ededf6e49374cf41a13cba9a561b241a841f60e6912"
