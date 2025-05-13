@@ -29,5 +29,7 @@ allow-licenses:
   - 'Python-2.0'
   - 'Python-2.0.1'
   - 'ISC'
+  - 'MPL-1.1'
+  - 'MPL-2.0'
 comment-summary-in-pr: on-failure
 fail-on-scopes: runtime
