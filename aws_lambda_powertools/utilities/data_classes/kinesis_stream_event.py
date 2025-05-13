@@ -132,7 +132,7 @@ class KinesisStreamEvent(DictWrapper):
 
     @property
     def state(self) -> dict[str, Any]:
-        return self["state"]
+        return self.get("state") or {}
 
     @property
     def shard_id(self) -> str | None:
