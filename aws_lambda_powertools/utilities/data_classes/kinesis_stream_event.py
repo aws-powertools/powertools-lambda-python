@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import zlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
     CloudWatchLogsDecodedData,
@@ -128,10 +128,9 @@ class KinesisStreamEvent(DictWrapper):
 
     @property
     def window(self) -> KinesisStreamWindow | None:
-	window = self.get("window")
-	if window:
-        	return KinesisStreamWindow(window)
-        	
+        window = self.get("window")
+        if window:
+            return KinesisStreamWindow(window)
         return window
 
     @property
