@@ -182,7 +182,7 @@ class DynamoDBStreamEvent(DictWrapper):
             yield DynamoDBRecord(record)
 
     @property
-    def window(self) -> KinesisStreamWindow | None:
+    def window(self) -> DynamoDBStreamWindow | None:
         window = self.get("window")
         if window:
             return KinesisStreamWindow(window)
