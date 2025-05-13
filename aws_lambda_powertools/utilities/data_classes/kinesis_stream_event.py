@@ -143,7 +143,7 @@ class KinesisStreamEvent(DictWrapper):
         return self.get("eventSourceARN")
 
     @property
-    def is_final_invoke_for_window(self) -> bool:
+    def is_final_invoke_for_window(self) -> bool | None:
         return self["isFinalInvokeForWindow"]
 
     @property
