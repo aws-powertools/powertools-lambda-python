@@ -136,7 +136,7 @@ class KinesisStreamEvent(DictWrapper):
 
     @property
     def shard_id(self) -> str | None:
-        return self["shardId"]
+        return self.get("shardId")
 
     @property
     def event_source_arn(self) -> str:
