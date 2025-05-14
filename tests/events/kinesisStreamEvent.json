@@ -32,5 +32,17 @@
       "awsRegion": "us-east-2",
       "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream"
     }
-  ]
+  ],
+  "window": {
+    "start": "2020-12-09T07:04:00Z",
+    "end": "2020-12-09T07:06:00Z"
+  },
+  "state": {
+    "1": 282,
+    "2": 715
+  },
+  "shardId": "shardId-000000000006",
+  "eventSourceARN": "arn:aws:kinesis:us-east-1:123456789012:stream/lambda-stream",
+  "isFinalInvokeForWindow": false,
+  "isWindowTerminatedEarly": false
 }
