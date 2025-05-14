@@ -140,12 +140,25 @@ class DynamoDBRecord(DictWrapper):
         return self.get("userIdentity") or {}
 
 
+class DynamoDBStreamWindow(DictWrapper):
+    @property
+    def start(self) -> str:
+        """The time window started"""
+        return self["start"]
+
+    @property
+    def end(self) -> str:
+        """The time window will end"""
+        return self["end"]
+
+
 class DynamoDBStreamEvent(DictWrapper):
     """Dynamo DB Stream Event
 
     Documentation:
     -------------
     - https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-ddb-windows.html
 
     Example
     -------
@@ -167,3 +180,30 @@ class DynamoDBStreamEvent(DictWrapper):
     def records(self) -> Iterator[DynamoDBRecord]:
         for record in self["Records"]:
             yield DynamoDBRecord(record)
+
+    @property
+    def window(self) -> DynamoDBStreamWindow | None:
+        window = self.get("window")
+        if window:
+            return DynamoDBStreamWindow(window)
+        return window
+
+    @property
+    def state(self) -> dict[str, Any]:
+        return self.get("state") or {}
+
+    @property
+    def shard_id(self) -> str | None:
+        return self.get("shardId")
+
+    @property
+    def event_source_arn(self) -> str | None:
+        return self.get("eventSourceARN")
+
+    @property
+    def is_final_invoke_for_window(self) -> bool | None:
+        return self.get("isFinalInvokeForWindow")
+
+    @property
+    def is_window_terminated_early(self) -> bool | None:
+        return self.get("isWindowTerminatedEarly")

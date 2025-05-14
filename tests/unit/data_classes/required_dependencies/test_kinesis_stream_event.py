@@ -41,6 +41,13 @@ def test_kinesis_stream_event():
     assert kinesis.data_as_bytes() == b"Hello, this is a test."
     assert kinesis.data_as_text() == "Hello, this is a test."
 
+    assert parsed_event.window.raw_event == raw_event["window"]
+    assert parsed_event.state == raw_event["state"]
+    assert parsed_event.shard_id == raw_event["shardId"]
+    assert parsed_event.event_source_arn == raw_event["eventSourceARN"]
+    assert parsed_event.is_final_invoke_for_window == raw_event["isFinalInvokeForWindow"]
+    assert parsed_event.is_window_terminated_early == raw_event["isWindowTerminatedEarly"]
+
 
 def test_kinesis_stream_event_json_data():
     json_value = {"test": "value"}
@@ -56,3 +63,43 @@ def test_kinesis_stream_event_cloudwatch_logs_data_extraction():
     individual_logs = [extract_cloudwatch_logs_from_record(record) for record in event.records]
 
     assert len(extracted_logs) == len(individual_logs)
+
+
+def test_kinesis_stream_with_tumbling_window_event():
+    raw_event = load_event("kinesisStreamTumblingWindowEvent.json")
+    parsed_event = KinesisStreamEvent(raw_event)
+
+    records = list(parsed_event.records)
+    assert len(records) == 1
+    record = records[0]
+
+    record_raw = raw_event["Records"][0]
+
+    assert record.aws_region == record_raw["awsRegion"]
+    assert record.event_id == record_raw["eventID"]
+    assert record.event_name == record_raw["eventName"]
+    assert record.event_source == record_raw["eventSource"]
+    assert record.event_source_arn == record_raw["eventSourceARN"]
+    assert record.event_version == record_raw["eventVersion"]
+    assert record.invoke_identity_arn == record_raw["invokeIdentityArn"]
+
+    kinesis = record.kinesis
+    kinesis_raw = raw_event["Records"][0]["kinesis"]
+
+    assert kinesis.approximate_arrival_timestamp == kinesis_raw["approximateArrivalTimestamp"]
+    assert kinesis.data == kinesis_raw["data"]
+    assert kinesis.kinesis_schema_version == kinesis_raw["kinesisSchemaVersion"]
+    assert kinesis.partition_key == kinesis_raw["partitionKey"]
+    assert kinesis.sequence_number == kinesis_raw["sequenceNumber"]
+
+    assert kinesis.data_as_bytes() == b"Hello, this is a test."
+    assert kinesis.data_as_text() == "Hello, this is a test."
+
+    assert parsed_event.window.raw_event == raw_event["window"]
+    assert parsed_event.window.start == raw_event["window"]["start"]
+    assert parsed_event.window.end == raw_event["window"]["end"]
+    assert parsed_event.state == raw_event["state"]
+    assert parsed_event.shard_id == raw_event["shardId"]
+    assert parsed_event.event_source_arn == raw_event["eventSourceARN"]
+    assert parsed_event.is_final_invoke_for_window == raw_event["isFinalInvokeForWindow"]
+    assert parsed_event.is_window_terminated_early == raw_event["isWindowTerminatedEarly"]
