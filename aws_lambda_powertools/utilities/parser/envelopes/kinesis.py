@@ -54,7 +54,7 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
             except UnicodeDecodeError as ude:
                 try:
                     logger.debug(f"{type(ude).__name__}: {str(ude)} encountered. "
-                                "Data will be decompressed with gzip.decompress().")
+                                "Data will be decompressed with zlib.decompress().")
                     decompressed_data = zlib.decompress(data, zlib.MAX_WBITS | 32)
                     models.append(
                         self._parse(data=decompressed_data.decode("utf-8"), model=model)
