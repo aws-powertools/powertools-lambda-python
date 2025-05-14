@@ -422,14 +422,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.38.13"
-description = "Type annotations for boto3 1.38.13 generated with mypy-boto3-builder 8.11.0"
+version = "1.38.15"
+description = "Type annotations for boto3 1.38.15 generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.38.13-py3-none-any.whl", hash = "sha256:19361506afd23f47692264be90c668c952ef27b08cc7acaf6d9fddea81ce7455"},
-    {file = "boto3_stubs-1.38.13.tar.gz", hash = "sha256:8f73a745745d5ed3a206427ff46ae82c48c37f86d0d264395898bdf0e5563520"},
+    {file = "boto3_stubs-1.38.15-py3-none-any.whl", hash = "sha256:b4c28839868f4a6b6d1004b2993f6054e33bc2c635eb6dd170ce93bb75842f4f"},
+    {file = "boto3_stubs-1.38.15.tar.gz", hash = "sha256:0be0b5857d080de92c6b40b35950c62224c50858b26a530cdebfad9802cd467f"},
 ]
 
 [package.dependencies]
@@ -496,7 +496,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.38.0,<1.39.0)"]
 billing = ["mypy-boto3-billing (>=1.38.0,<1.39.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.38.0,<1.39.0)"]
-boto3 = ["boto3 (==1.38.13)"]
+boto3 = ["boto3 (==1.38.15)"]
 braket = ["mypy-boto3-braket (>=1.38.0,<1.39.0)"]
 budgets = ["mypy-boto3-budgets (>=1.38.0,<1.39.0)"]
 ce = ["mypy-boto3-ce (>=1.38.0,<1.39.0)"]
@@ -2554,14 +2554,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.12"
+version = "9.6.14"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_material-9.6.12-py3-none-any.whl", hash = "sha256:92b4fbdc329e4febc267ca6e2c51e8501fa97b2225c5f4deb4d4e43550f8e61e"},
-    {file = "mkdocs_material-9.6.12.tar.gz", hash = "sha256:add6a6337b29f9ea7912cb1efc661de2c369060b040eb5119855d794ea85b473"},
+    {file = "mkdocs_material-9.6.14-py3-none-any.whl", hash = "sha256:3b9cee6d3688551bf7a8e8f41afda97a3c39a12f0325436d76c86706114b721b"},
+    {file = "mkdocs_material-9.6.14.tar.gz", hash = "sha256:39d795e90dce6b531387c255bd07e866e027828b7346d3eba5ac3de265053754"},
 ]
 
 [package.dependencies]
@@ -3661,14 +3661,14 @@ toml = ["tomli (>=2.0.1)"]
 
 [[package]]
 name = "redis"
-version = "5.2.1"
+version = "6.1.0"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "redis-5.2.1-py3-none-any.whl", hash = "sha256:ee7e1056b9aea0f04c6c2ed59452947f34c4940ee025f5dd83e6a6418b6989e4"},
-    {file = "redis-5.2.1.tar.gz", hash = "sha256:16f2e22dff21d5125e8481515e386711a34cbec50f0e44413dd7d9c060a54e0f"},
+    {file = "redis-6.1.0-py3-none-any.whl", hash = "sha256:3b72622f3d3a89df2a6041e82acd896b0e67d9f54e9bcd906d091d23ba5219f6"},
+    {file = "redis-6.1.0.tar.gz", hash = "sha256:c928e267ad69d3069af28a9823a07726edf72c7e37764f43dc0123f37928c075"},
 ]
 markers = {main = "extra == \"redis\""}
 
@@ -3677,7 +3677,8 @@ async-timeout = {version = ">=4.0.3", markers = "python_full_version < \"3.11.3\
 
 [package.extras]
 hiredis = ["hiredis (>=3.0.0)"]
-ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"]
+jwt = ["pyjwt (>=2.9.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
 
 [[package]]
 name = "referencing"
@@ -4080,14 +4081,14 @@ pathspec = ">=0.10.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.27.0"
+version = "2.28.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["dev"]
 files = [
-    {file = "sentry_sdk-2.27.0-py2.py3-none-any.whl", hash = "sha256:c58935bfff8af6a0856d37e8adebdbc7b3281c2b632ec823ef03cd108d216ff0"},
-    {file = "sentry_sdk-2.27.0.tar.gz", hash = "sha256:90f4f883f9eff294aff59af3d58c2d1b64e3927b28d5ada2b9b41f5aeda47daf"},
+    {file = "sentry_sdk-2.28.0-py2.py3-none-any.whl", hash = "sha256:51496e6cb3cb625b99c8e08907c67a9112360259b0ef08470e532c3ab184a232"},
+    {file = "sentry_sdk-2.28.0.tar.gz", hash = "sha256:14d2b73bc93afaf2a9412490329099e6217761cbab13b6ee8bc0e82927e1504e"},
 ]
 
 [package.dependencies]
@@ -4885,4 +4886,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "90c07e598f85e5a9245620a68b6e19ed2d5e2d732df0c646afc3d1372878c678"
+content-hash = "d8a5061deeca782ab3ea4fbe8e2d77b9144c4922cc0b465da9450e994e1ec82a"
