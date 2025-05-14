@@ -47,18 +47,17 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
             # We allow either AWS expected contract (bytes) or a custom Model, see #943
             data = cast(bytes, record.kinesis.data)
             try:
-                models.append(self._parse(data=data.decode("utf-8"), model=model))
+                decoded_data = data.decode("utf-8")
             # If the Data Stream contains compressed data eg. CloudWatch Logs
             # `decode` method will throw a UnicodeDecodeError
             # which signals that decompression might be required
             except UnicodeDecodeError as ude:
                 try:
                     logger.debug(f"{type(ude).__name__}: {str(ude)} encountered. "
-                                "Data will be decompressed with zlib.decompress().")
+                                 "Data will be decompressed with zlib.decompress().")
                     decompressed_data = zlib.decompress(data, zlib.MAX_WBITS | 32)
-                    models.append(
-                        self._parse(data=decompressed_data.decode("utf-8"), model=model)
-                    )
+                    decoded_data = decompressed_data.decode("utf-8")
                 except Exception:
                     raise ValueError("Unable to decode and/or decompress data.")
+            models.append(self._parse(data=decoded_data, model=model))
         return models
