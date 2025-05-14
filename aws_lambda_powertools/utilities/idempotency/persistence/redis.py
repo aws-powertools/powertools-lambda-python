@@ -8,6 +8,7 @@ from datetime import timedelta
 from typing import Any, Literal, Protocol
 
 import redis
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -25,11 +26,12 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 logger = logging.getLogger(__name__)
 
 
+@deprecated("RedisPersistenceLayer will be removed in v4.0.0. Please use CacheProtocol instead.")
 class RedisClientProtocol(Protocol):
     """
-    Protocol class defining the interface for a Redis client.
+    Protocol class defining the interface for a Cache client.
 
-    This protocol outlines the expected behavior of a Redis client, allowing for
+    This protocol outlines the expected behavior of a Cache client, allowing for
     standardization among different implementations and allowing customers to extend it
     in their own implementation.
 
@@ -78,6 +80,7 @@ class RedisClientProtocol(Protocol):
         raise NotImplementedError
 
 
+@deprecated("RedisConnection will be removed in v4.0.0. Please use CacheConnection instead.")
 class RedisConnection:
     def __init__(
         self,
@@ -91,26 +94,26 @@ class RedisConnection:
         ssl: bool = True,
     ) -> None:
         """
-        Initialize Redis connection which will be used in Redis persistence_store to support Idempotency
+        Initialize Cache connection which will be used in Cache persistence_store to support Idempotency
 
         Parameters
         ----------
         host: str, optional
-            Redis host
+            Cache host
         port: int, optional: default 6379
-            Redis port
+            Cache port
         username: str, optional
-            Redis username
+            Cache username
         password: str, optional
-            Redis password
+            Cache password
         url: str, optional
-            Redis connection string, using url will override the host/port in the previous parameters
+            Cache connection string, using url will override the host/port in the previous parameters
         db_index: int, optional: default 0
-            Redis db index
+            Cache db index
         mode: str, Literal["standalone","cluster"]
-            set Redis client mode, choose from standalone/cluster. The default is standalone
+            set Cache client mode, choose from standalone/cluster. The default is standalone
         ssl: bool, optional: default True
-            set whether to use ssl for Redis connection
+            set whether to use ssl for Cache connection
 
         Example
         --------
@@ -122,8 +125,8 @@ class RedisConnection:
         from aws_lambda_powertools.utilities.idempotency import (
             idempotent,
         )
-        from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
-            RedisCachePersistenceLayer,
+        from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
+            CachePersistenceLayer,
         )
 
         from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -204,6 +207,7 @@ class RedisConnection:
             raise IdempotencyPersistenceConnectionError("Could not to connect to Redis", exc) from exc
 
 
+@deprecated("RedisCachePersistenceLayer will be removed in v4.0.0. Please use CachePersistenceLayer instead.")
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
