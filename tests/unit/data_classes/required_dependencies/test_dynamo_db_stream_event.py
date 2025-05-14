@@ -73,6 +73,8 @@ def test_dynamodb_stream_trigger_with_tumbling_window_event():
     assert dynamodb.stream_view_type == StreamViewType.NEW_AND_OLD_IMAGES
 
     assert parsed_event.window.raw_event == raw_event["window"]
+    assert parsed_event.window.start == raw_event["window"]["start"]
+    assert parsed_event.window.end == raw_event["window"]["end"]
     assert parsed_event.state == raw_event["state"]
     assert parsed_event.shard_id == raw_event["shardId"]
     assert parsed_event.event_source_arn == raw_event["eventSourceARN"]
