@@ -113,9 +113,7 @@ def test_kinesis_stream_event_with_cloud_watch_logs_data_using_envelope():
     raw_event = load_event("kinesisStreamCloudWatchLogsEvent.json")
 
     # WHEN parsing using KinesisDataStreamEvelope to CloudWatchLogsDecode
-    logs = envelopes.KinesisDataStreamEnvelope().parse(
-        raw_event, CloudWatchLogsDecode
-    )
+    logs = envelopes.KinesisDataStreamEnvelope().parse(raw_event, CloudWatchLogsDecode)
 
     # THEN logs should be extracted as CloudWatchLogsDecode objects
     assert isinstance(logs[0], CloudWatchLogsDecode)
