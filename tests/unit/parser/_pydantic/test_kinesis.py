@@ -126,8 +126,7 @@ def test_kinesis_stream_event_with_cloud_watch_logs_data_fails_using_envelope():
 
     # WHEN parsing using KinesisDataStreamEvelope to CloudWatchLogsDecode
     # and the data is corrupted
-    raw_event["Records"][0]["kinesis"]["data"] = "123"
-
+    raw_event["Records"][0]["kinesis"]["data"] = "eyJ4eXoiOiAiYWJjIn0KH4sIAK25JWgAA6tWqqisUrJSUEpMSlaq5QIAbdJPfw8AAAA="
     # THEN a ValueError should be thrown
     with pytest.raises(ValueError):
         envelopes.KinesisDataStreamEnvelope().parse(raw_event, CloudWatchLogsDecode)
