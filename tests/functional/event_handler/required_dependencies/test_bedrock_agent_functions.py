@@ -12,7 +12,7 @@ def test_bedrock_agent_function_with_string_response():
     # GIVEN a Bedrock Agent Function resolver
     app = BedrockAgentFunctionResolver()
 
-    @app.tool(description="Returns a string")
+    @app.tool()
     def test_function():
         assert isinstance(app.current_event, BedrockAgentFunctionEvent)
         return "Hello from string"

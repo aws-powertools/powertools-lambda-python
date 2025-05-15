@@ -1,0 +1,16 @@
+{
+  "messageVersion": "1.0",
+  "agent": {
+    "name": "TimeAgent",
+    "id": "XLHH72XNF2",
+    "alias": "TSTALIASID",
+    "version": "DRAFT"
+  },
+  "inputText": "What is the current time?",
+  "sessionId": "123456789012345",
+  "actionGroup": "CurrentTime",
+  "function": "CurrentTime",
+  "parameters": [],
+  "sessionAttributes": {},
+  "promptSessionAttributes": {}
+}

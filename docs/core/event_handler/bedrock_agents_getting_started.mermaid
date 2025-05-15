@@ -14,7 +14,10 @@ sequenceDiagram
         participant Your Code
     end
 
-    Agent->>Lambda: GET /current_time
+    alt Function-based
+        Agent->>Lambda: {function: "current_time", parameters: [], ...}
+    end
+
     activate Lambda
     Lambda->>Parsing: parses parameters
     Parsing->>Validation: validates input
@@ -26,7 +29,10 @@ sequenceDiagram
     Routing->>Validation: returns output
     Validation->>Parsing: validates output
     Parsing->>Lambda: formats response
-    Lambda->>Agent: 1709215709
+
+    alt Function-based
+        Lambda->>Agent: {response: {functionResponse: {responseBody: {...}}}}
+    end
     deactivate Lambda
 
     Agent-->>Agent: LLM interaction

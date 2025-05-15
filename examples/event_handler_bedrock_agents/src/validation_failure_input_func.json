@@ -1,0 +1,16 @@
+{
+    "messageVersion": "1.0",
+    "agent": {
+        "name": "TestAgent",
+        "id": "XXXXX",
+        "alias": "LATEST",
+        "version": "DRAFT"
+    },
+    "parameters": [
+        {
+            "name": "email",
+            "value": "not-an-email"
+        }
+    ],
+    "function": "schedule_meeting"
+}

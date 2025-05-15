@@ -1,0 +1,17 @@
+{
+    "messageVersion": "1.0",
+    "response": {
+        "actionGroup": "TestActionGroup",
+        "function": "schedule_meeting",
+        "functionResponse": {
+            "responseBody": {
+                "TEXT": {
+                    "body": "true"
+                }
+            }
+        }
+    },
+    "sessionAttributes": {
+        "last_email": "john@example.com"
+    }
+}
