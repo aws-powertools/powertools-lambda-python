@@ -370,7 +370,7 @@ You can enable user confirmation with Bedrock Agents to have your application as
 
 1. Add an openapi extension
 
-#### Fine grained responses
+#### OpenAPI-based Responses
 
 ???+ info "Note"
 	The default response only includes the essential fields to keep the payload size minimal, as AWS Lambda has a maximum response size of 25 KB.
@@ -411,7 +411,7 @@ The `BedrockAgentFunctionResolver` handles three main aspects:
 2. **Parameter Processing**: Automatic parsing and validation of input parameters
 3. **Response Formatting**: Converting function outputs into Bedrock Agent compatible responses
 
-### Fine grained responses
+### Function-based Responses
 
 ???+ info "Note"
 	The default response only includes the essential fields to keep the payload size minimal, as AWS Lambda has a maximum response size of 25 KB.
