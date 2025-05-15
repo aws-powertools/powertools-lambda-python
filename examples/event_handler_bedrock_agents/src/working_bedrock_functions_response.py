@@ -1,7 +1,6 @@
-from aws_lambda_powertools.event_handler import BedrockFunctionAgentResolver
-from aws_lambda_powertools.event_handler.api_gateway import BedrockFunctionResponse
+from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver, BedrockFunctionResponse
 
-app = BedrockFunctionAgentResolver()
+app = BedrockAgentFunctionResolver()
 
 
 @app.tool(description="Function that demonstrates response customization")

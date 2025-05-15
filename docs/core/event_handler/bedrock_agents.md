@@ -401,15 +401,15 @@ Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://do
 
 The `BedrockAgentFunctionResolver` handles three main aspects:
 
-1. **Function Registration**: Using the `@app.tool()` decorator
+* **Function Registration**: Using the `@app.tool()` decorator
 
 | Field | Required | Description |
 |-------|----------|-------------|
 | description | No | Human-readable description of what the function does. |
 | name | No | Custom name for the function. Defaults to the function name. |
 
-2. **Parameter Processing**: Automatic parsing and validation of input parameters
-3. **Response Formatting**: Converting function outputs into Bedrock Agent compatible responses
+* **Parameter Processing**: Automatic parsing and validation of input parameters
+* **Response Formatting**: Converting function outputs into Bedrock Agent compatible responses
 
 ### Function-based Responses
 
