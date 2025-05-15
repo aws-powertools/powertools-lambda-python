@@ -117,3 +117,17 @@ def test_kinesis_stream_event_with_cloud_watch_logs_data_using_envelope():
 
     # THEN logs should be extracted as CloudWatchLogsDecode objects
     assert isinstance(logs[0], CloudWatchLogsDecode)
+
+
+def test_kinesis_stream_event_with_cloud_watch_logs_data_fails_using_envelope():
+    # GIVEN Kinesis Data Stream event with corrupted compressed data
+    # such as CloudWatch Logs
+    raw_event = load_event("kinesisStreamCloudWatchLogsEvent.json")
+
+    # WHEN parsing using KinesisDataStreamEvelope to CloudWatchLogsDecode
+    # and the data is corrupted
+    raw_event["Records"][0]["kinesis"]["data"] = "123"
+
+    # THEN a ValueError should be thrown
+    with pytest.raises(ValueError):
+        envelopes.KinesisDataStreamEnvelope().parse(raw_event, CloudWatchLogsDecode)
