@@ -411,7 +411,7 @@ The `BedrockAgentFunctionResolver` handles three main aspects:
 2. **Parameter Processing**: Automatic parsing and validation of input parameters
 3. **Response Formatting**: Converting function outputs into Bedrock Agent compatible responses
 
-#### Fine grained responses
+### Fine grained responses
 
 ???+ info "Note"
 	The default response only includes the essential fields to keep the payload size minimal, as AWS Lambda has a maximum response size of 25 KB.
