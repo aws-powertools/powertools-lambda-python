@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import zlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
     CloudWatchLogsDecodedData,
@@ -100,18 +100,58 @@ class KinesisStreamRecord(DictWrapper):
         return KinesisStreamRecordPayload(self["kinesis"])
 
 
+class KinesisStreamWindow(DictWrapper):
+    @property
+    def start(self) -> str:
+        """The time window started"""
+        return self["start"]
+
+    @property
+    def end(self) -> str:
+        """The time window will end"""
+        return self["end"]
+
+
 class KinesisStreamEvent(DictWrapper):
     """Kinesis stream event
 
     Documentation:
     --------------
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-kinesis-windows.html
     """
 
     @property
     def records(self) -> Iterator[KinesisStreamRecord]:
         for record in self["Records"]:
             yield KinesisStreamRecord(record)
+
+    @property
+    def window(self) -> KinesisStreamWindow | None:
+        window = self.get("window")
+        if window:
+            return KinesisStreamWindow(window)
+        return window
+
+    @property
+    def state(self) -> dict[str, Any]:
+        return self.get("state") or {}
+
+    @property
+    def shard_id(self) -> str | None:
+        return self.get("shardId")
+
+    @property
+    def event_source_arn(self) -> str | None:
+        return self.get("eventSourceARN")
+
+    @property
+    def is_final_invoke_for_window(self) -> bool | None:
+        return self.get("isFinalInvokeForWindow")
+
+    @property
+    def is_window_terminated_early(self) -> bool | None:
+        return self.get("isWindowTerminatedEarly")
 
 
 def extract_cloudwatch_logs_from_event(event: KinesisStreamEvent) -> list[CloudWatchLogsDecodedData]:
