@@ -15,12 +15,12 @@ cache_values: dict[str, Any] = parameters.get_secret("cache_info", transform="js
 client_config = GlideClientConfiguration(
     addresses=[
         NodeAddress(
-            host=cache_values.get("REDIS_HOST", "localhost"),
-            port=cache_values.get("REDIS_PORT", 6379),
+            host=cache_values.get("CACHE_HOST", "localhost"),
+            port=cache_values.get("CACHE_PORT", 6379),
         ),
     ],
     credentials=ServerCredentials(
-        password=cache_values.get("REDIS_PASSWORD", ""),
+        password=cache_values.get("CACHE_PASSWORD", ""),
     ),
     request_timeout=10,
     use_tls=True,

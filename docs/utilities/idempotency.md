@@ -500,16 +500,16 @@ We recommend using AWS Secrets Manager to store and rotate certificates safely, 
 For advanced configurations, we recommend using an existing Valkey client for optimal compatibility like SSL certificates and timeout.
 
 === "Advanced configuration using AWS Secrets"
-    ```python title="using_redis_client_with_aws_secrets.py" hl_lines="9-11 13 15 25"
-    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
+    ```python title="using_cache_client_with_aws_secrets.py" hl_lines="5 9-11 13 15 18 19 23"
+    --8<-- "examples/idempotency/src/using_cache_client_with_aws_secrets.py"
     ```
 
     1. JSON stored:
     ```json
     {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
+    "CACHE_HOST": "127.0.0.1",
+    "CACHE_PORT": "6379",
+    "CACHE_PASSWORD": "cache-secret"
     }
     ```
 
@@ -521,14 +521,14 @@ For advanced configurations, we recommend using an existing Valkey client for op
     1. JSON stored:
     ```json
     {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
+    "CACHE_HOST": "127.0.0.1",
+    "CACHE_PORT": "6379",
+    "CACHE_PASSWORD": "cache-secret"
     }
     ```
-    2. redis_user.crt file stored in the "certs" directory of your Lambda function
-    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
-    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
+    2. cache_user.crt file stored in the "certs" directory of your Lambda function
+    3. cache_user_private.key file stored in the "certs" directory of your Lambda function
+    4. cache_ca.pem file stored in the "certs" directory of your Lambda function
 
 ##### Cache attributes
 

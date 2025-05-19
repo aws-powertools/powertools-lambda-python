@@ -11,20 +11,20 @@ from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
     CachePersistenceLayer,
 )
 
-redis_values: dict[str, Any] = parameters.get_secret("redis_info", transform="json")  # (1)!
+cache_values: dict[str, Any] = parameters.get_secret("cache_info", transform="json")  # (1)!
 
 
 redis_client = Redis(
-    host=redis_values.get("REDIS_HOST", "localhost"),
-    port=redis_values.get("REDIS_PORT", 6379),
-    password=redis_values.get("REDIS_PASSWORD"),
+    host=cache_values.get("REDIS_HOST", "localhost"),
+    port=cache_values.get("REDIS_PORT", 6379),
+    password=cache_values.get("REDIS_PASSWORD"),
     decode_responses=True,
     socket_timeout=10.0,
     ssl=True,
     retry_on_timeout=True,
-    ssl_certfile=f"{abs_lambda_path()}/certs/redis_user.crt",  # (2)!
-    ssl_keyfile=f"{abs_lambda_path()}/certs/redis_user_private.key",  # (3)!
-    ssl_ca_certs=f"{abs_lambda_path()}/certs/redis_ca.pem",  # (4)!
+    ssl_certfile=f"{abs_lambda_path()}/certs/cache_user.crt",  # (2)!
+    ssl_keyfile=f"{abs_lambda_path()}/certs/cache_user_private.key",  # (3)!
+    ssl_ca_certs=f"{abs_lambda_path()}/certs/cache_ca.pem",  # (4)!
 )
 
 persistence_layer = CachePersistenceLayer(client=redis_client)
