@@ -7,8 +7,8 @@ from redis import Redis
 from aws_lambda_powertools.shared.functions import abs_lambda_path
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.idempotency import IdempotencyConfig, idempotent
-from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
-    RedisCachePersistenceLayer,
+from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
+    CachePersistenceLayer,
 )
 
 redis_values: dict[str, Any] = parameters.get_secret("redis_info", transform="json")  # (1)!
@@ -27,7 +27,7 @@ redis_client = Redis(
     ssl_ca_certs=f"{abs_lambda_path()}/certs/redis_ca.pem",  # (4)!
 )
 
-persistence_layer = RedisCachePersistenceLayer(client=redis_client)
+persistence_layer = CachePersistenceLayer(client=redis_client)
 config = IdempotencyConfig(
     expires_after_seconds=2 * 60,  # 2 minutes
 )

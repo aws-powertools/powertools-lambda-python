@@ -12,7 +12,7 @@ The idempotency utility allows you to retry operations within a time window with
 * Produces the previous successful result when a function is called repeatedly with the same idempotency key
 * Choose your idempotency key from one or more fields, or entire payload
 * Safeguard concurrent requests, timeouts, missing idempotency keys, and payload tampering
-* Support for Amazon DynamoDB, Redis, bring your own persistence layer, and in-memory caching
+* Support for Amazon DynamoDB, Valkey, Redis OSS, or any Redis-compatible cache as the persistence layer
 
 ## Terminology
 
@@ -82,7 +82,7 @@ To start, you'll need:
 
     ---
 
-    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-database)
+    [Amazon DynamoDB](#dynamodb-table) or [Valkey/Redis OSS/Redis compatible](#cache-database)
 
 *   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
 
@@ -139,13 +139,13 @@ You **can** use a single DynamoDB table for all functions annotated with Idempot
 
 * **Old boto3 versions can increase costs**. For cost optimization, we use a conditional `PutItem` to always lock a new idempotency record. If locking fails, it means we already have an idempotency record saving us an additional `GetItem` call. However, this is only supported in boto3 `1.26.194` and higher _([June 30th 2023](https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-dynamodb-cost-failed-conditional-writes/){target="_blank"})_.
 
-#### Redis database
+#### Cache database
 
-We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
+We recommend starting with a managed cache service, such as [Amazon ElastiCache for Valkey and for Redis OSS](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB](https://aws.amazon.com/memorydb/){target="_blank"}.
 
 In both services, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
 
-##### Redis IaC examples
+##### Cache configuration
 
 === "AWS CloudFormation example"
 
@@ -160,7 +160,7 @@ In both services, you'll need to configure [VPC access](https://docs.aws.amazon.
     1. Replace the Security Group ID and Subnet ID to match your VPC settings.
     2. Replace the Security Group ID and Subnet ID to match your VPC settings.
 
-Once setup, you can find a quick start and advanced examples for Redis in [the persistent layers section](#redispersistencelayer).
+Once setup, you can find a quick start and advanced examples for Cache in [the persistent layers section](#cachepersistencelayer).
 
 <!-- markdownlint-enable MD013 -->
 
@@ -464,17 +464,22 @@ You can customize the attribute names during initialization:
 | **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
 | **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
 
-#### RedisPersistenceLayer
+#### CachePersistenceLayer
 
-!!! info "We recommend Redis version 7 or higher for optimal performance."
+The `CachePersistenceLayer` enables you to use Valkey, Redis OSS, or any Redis-compatible cache as the persistence layer for idempotency state.
 
-For simple setups, initialize `RedisCachePersistenceLayer` with your Redis endpoint and port to connect.
+We recommend using [`valkey-glide`](https://pypi.org/project/valkey-glide/){target="_blank"} for Valkey or [`redis`](https://pypi.org/project/redis/){target="_blank"} for Redis. However, any Redis OSS-compatible client should work.
 
-For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
+For simple setups, initialize `CachePersistenceLayer` with your Cache endpoint and port to connect. Note that for security, we enforce SSL connections by default; to disable it, set `ssl=False`.
 
-=== "Redis quick start"
-    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="8-10 14 27"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
+=== "Cache quick start"
+    ```python title="getting_started_with_idempotency_cache_config.py" hl_lines="8-10 14 27"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_cache_config.py"
+    ```
+
+=== "Using an existing Valkey Glide client"
+    ```python title="getting_started_with_idempotency_valkey_client.py" hl_lines="5 10-12 16-22 24 37"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_valkey_client.py"
     ```
 
 === "Using an existing Redis client"
@@ -488,11 +493,11 @@ For security, we enforce SSL connections by default; to disable it, set `ssl=Fal
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
     ```
 
-##### Redis SSL connections
+##### Cache SSL connections
 
 We recommend using AWS Secrets Manager to store and rotate certificates safely, and the [Parameters feature](./parameters.md){target="_blank"} to fetch and cache optimally.
 
-For advanced configurations, we recommend using an existing Redis client for optimal compatibility like SSL certificates and timeout.
+For advanced configurations, we recommend using an existing Valkey client for optimal compatibility like SSL certificates and timeout.
 
 === "Advanced configuration using AWS Secrets"
     ```python title="using_redis_client_with_aws_secrets.py" hl_lines="9-11 13 15 25"
@@ -525,7 +530,7 @@ For advanced configurations, we recommend using an existing Redis client for opt
     3. redis_user_private.key file stored in the "certs" directory of your Lambda function
     4. redis_ca.pem file stored in the "certs" directory of your Lambda function
 
-##### Redis attributes
+##### Cache attributes
 
 You can customize the attribute names during initialization:
 
@@ -811,28 +816,28 @@ sequenceDiagram
 <i>Optional idempotency key</i>
 </center>
 
-#### Race condition with Redis
+#### Race condition with Cache
 
 <center>
 ```mermaid
 graph TD;
-    A(Existing orphan record in redis)-->A1;
+    A(Existing orphan record in cache)-->A1;
     A1[Two Lambda invoke at same time]-->B1[Lambda handler1];
-    B1-->B2[Fetch from Redis];
+    B1-->B2[Fetch from Cache];
     B2-->B3[Handler1 got orphan record];
     B3-->B4[Handler1 acquired lock];
     B4-->B5[Handler1 overwrite orphan record]
     B5-->B6[Handler1 continue to execution];
     A1-->C1[Lambda handler2];
-    C1-->C2[Fetch from Redis];
+    C1-->C2[Fetch from Cache];
     C2-->C3[Handler2 got orphan record];
     C3-->C4[Handler2 failed to acquire lock];
-    C4-->C5[Handler2 wait and fetch from Redis];
+    C4-->C5[Handler2 wait and fetch from Cache];
     C5-->C6[Handler2 return without executing];
     B6-->D(Lambda handler executed only once);
     C6-->D;
 ```
-<i>Race condition with Redis</i>
+<i>Race condition with Cache</i>
 </center>
 
 ## Advanced

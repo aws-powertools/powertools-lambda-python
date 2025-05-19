@@ -7,18 +7,18 @@ target:
 dev:
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
 dev-quality-code:
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
 # Running licensecheck with zero to break the pipeline if there is an invalid license

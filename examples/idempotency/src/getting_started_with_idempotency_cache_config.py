@@ -2,8 +2,6 @@ import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 
-from redis import Redis
-
 from aws_lambda_powertools.utilities.idempotency import (
     idempotent,
 )
@@ -12,16 +10,8 @@ from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-cache_endpoint = os.getenv("CACHE_CLUSTER_ENDPOINT", "localhost")
-client = Redis(
-    host=cache_endpoint,
-    port=6379,
-    socket_connect_timeout=5,
-    socket_timeout=5,
-    max_connections=1000,
-)
-
-persistence_layer = CachePersistenceLayer(client=client)
+redis_endpoint = os.getenv("CACHE_CLUSTER_ENDPOINT", "localhost")
+persistence_layer = CachePersistenceLayer(host=redis_endpoint, port=6379)
 
 
 @dataclass
@@ -44,7 +34,7 @@ def lambda_handler(event: dict, context: LambdaContext):
             "statusCode": 200,
         }
     except Exception as exc:
-        raise PaymentError(f"Error creating payment {str(exc)}")
+        raise PaymentError(f"Error creating payment {str(exc)}") from exc
 
 
 def create_subscription_payment(event: dict) -> Payment:
