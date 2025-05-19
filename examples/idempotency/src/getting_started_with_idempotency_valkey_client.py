@@ -2,16 +2,28 @@ import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 
+from glide import GlideClient, GlideClientConfiguration, NodeAddress
+
 from aws_lambda_powertools.utilities.idempotency import (
     idempotent,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
-    RedisCachePersistenceLayer,
+from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
+    CachePersistenceLayer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-redis_endpoint = os.getenv("REDIS_CLUSTER_ENDPOINT", "localhost")
-persistence_layer = RedisCachePersistenceLayer(host=redis_endpoint, port=6379)
+cache_endpoint = os.getenv("CACHE_CLUSTER_ENDPOINT", "localhost")
+client_config = GlideClientConfiguration(
+    addresses=[
+        NodeAddress(
+            host="localhost",
+            port=6379,
+        ),
+    ],
+)
+client = GlideClient.create(config=client_config)
+
+persistence_layer = CachePersistenceLayer(client=client)  # type: ignore[arg-type]
 
 
 @dataclass
