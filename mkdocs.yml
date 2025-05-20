@@ -39,6 +39,9 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Resources:
+          - "llms.txt": ./llms.txt
+          - "llms.txt (full version)": ./llms-full.txt
   - Tutorial: tutorial/index.md
   - Processes:
       - Security: security.md
@@ -194,6 +197,50 @@ plugins:
   - privacy
   - git-revision-date
   - search
+  - llmstxt:
+      markdown_description: Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity. It provides a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
+      full_output: llms-full.txt
+      sections:
+        Project Overview:
+          - index.md
+          - changelog.md
+          - upgrade.md
+          - roadmap.md
+        Core Utilities:
+          - core/tracer.md
+          - core/logger.md
+          - core/metrics/index.md
+          - core/metrics.md
+          - core/metrics/datadog.md
+          - core/event_handler/api_gateway.md
+          - core/event_handler/appsync.md
+          - core/event_handler/appsync_events.md
+          - core/event_handler/bedrock_agents.md
+        Utilities:
+          - utilities/parameters.md
+          - utilities/batch.md
+          - utilities/typing.md
+          - utilities/validation.md
+          - utilities/data_classes.md
+          - utilities/parser.md
+          - utilities/idempotency.md
+          - utilities/data_masking.md
+          - utilities/feature_flags.md
+          - utilities/streaming.md
+          - utilities/middleware_factory.md
+          - utilities/jmespath_functions.md
+        Tutorial:
+          - tutorial/index.md
+        Processes:
+          - security.md
+          - automation.md
+          - versioning.md
+          - maintainers.md
+        Contributing:
+          - contributing/setup.md
+          - contributing/getting_started.md
+          - contributing/conventions.md
+          
   - mkdocstrings:
       default_handler: python
       enable_inventory: true
