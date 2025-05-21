@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.13.1a0 ([#6696](https://github.com/aws-powertools/powertools-lambda-python/issues/6696))
+* **deps-dev:** bump aws-cdk-lib from 2.196.0 to 2.196.1 ([#6695](https://github.com/aws-powertools/powertools-lambda-python/issues/6695))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.196.0a0 to 2.196.1a0 ([#6694](https://github.com/aws-powertools/powertools-lambda-python/issues/6694))
 
 
 <a name="v3.13.0"></a>
