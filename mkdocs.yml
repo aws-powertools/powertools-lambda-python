@@ -231,11 +231,6 @@ plugins:
           - utilities/jmespath_functions.md
         Tutorial:
           - tutorial/index.md
-        Processes:
-          - security.md
-          - automation.md
-          - versioning.md
-          - maintainers.md
         Contributing:
           - contributing/setup.md
           - contributing/getting_started.md
