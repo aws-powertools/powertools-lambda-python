@@ -1,1 +1,3 @@
 mkdocs-git-revision-date-plugin==0.3.2
+mkdocstrings-python==1.16.10
+mkdocs-llmstxt==0.2.0
