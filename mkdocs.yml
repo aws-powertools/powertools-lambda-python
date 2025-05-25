@@ -231,11 +231,7 @@ plugins:
           - utilities/jmespath_functions.md
         Tutorial:
           - tutorial/index.md
-        Contributing:
-          - contributing/setup.md
-          - contributing/getting_started.md
-          - contributing/conventions.md
-          
+
   - mkdocstrings:
       default_handler: python
       enable_inventory: true

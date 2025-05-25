@@ -124,6 +124,7 @@ boto3-stubs = {extras = ["appconfig", "appconfigdata", "cloudformation", "cloudw
 nox = "^2024.4.15"
 mkdocstrings-python = "^1.13.0"
 datadog-lambda = "^6.106.0"
+mkdocs-llmstxt = "^0.2.0"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
