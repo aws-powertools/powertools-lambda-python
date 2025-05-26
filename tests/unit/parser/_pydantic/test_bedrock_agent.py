@@ -101,11 +101,11 @@ def test_bedrock_agent_function_event():
     assert parameters is not None
     assert len(parameters) == 2
 
-    assert parameters[0].name == "startDate"
+    assert parameters[0].name == "start_date"
     assert parameters[0].type_ == "string"
     assert parameters[0].value == "2024-03-15"
 
-    assert parameters[1].name == "endDate"
+    assert parameters[1].name == "end_date"
     assert parameters[1].type_ == "string"
     assert parameters[1].value == "2024-03-20"
 
