@@ -546,20 +546,20 @@ class Route:
 
         return self._body_field
 
-    def _get_openapi_path(
+    def _get_openapi_path(  # noqa PLR0912
         self,
         *,
         dependant: Dependant,
         operation_ids: set[str],
         model_name_map: dict[TypeModelOrEnum, str],
         field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+        enable_validation: bool = False,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """
         Returns the OpenAPI path and definitions for the route.
         """
         from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params
 
-        path = {}
         definitions: dict[str, Any] = {}
 
         # Gather all the route parameters
@@ -598,13 +598,18 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
-        # Validation failure response (422) will always be part of the schema
-        operation_responses: dict[int, OpenAPIResponse] = {
-            422: {
-                "description": "Validation Error",
-                "content": {_DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}}},
-            },
-        }
+        operation_responses: dict[int, OpenAPIResponse] = {}
+
+        if enable_validation:
+            # Validation failure response (422) is added only if Enable Validation feature is true
+            operation_responses = {
+                422: {
+                    "description": "Validation Error",
+                    "content": {
+                        _DEFAULT_CONTENT_TYPE: {"schema": {"$ref": f"{COMPONENT_REF_PREFIX}HTTPValidationError"}},
+                    },
+                },
+            }
 
         # Add custom response validation response, if exists
         if self.custom_response_validation_http_code:
@@ -681,8 +686,7 @@ class Route:
             }
 
         operation["responses"] = operation_responses
-        path[self.method.lower()] = operation
-
+        path = {self.method.lower(): operation}
         # Add the validation error schema to the definitions, but only if it hasn't been added yet
         if "ValidationError" not in definitions:
             definitions.update(
@@ -1834,6 +1838,7 @@ class ApiGatewayResolver(BaseRouter):
                 operation_ids=operation_ids,
                 model_name_map=model_name_map,
                 field_mapping=field_mapping,
+                enable_validation=self._enable_validation,
             )
             if result:
                 path, path_definitions = self._add_resolver_response_validation_error_response_to_route(result)
