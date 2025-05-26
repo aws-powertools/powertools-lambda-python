@@ -1579,6 +1579,7 @@ class ApiGatewayResolver(BaseRouter):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """
         Parameters
@@ -1600,6 +1601,9 @@ class ApiGatewayResolver(BaseRouter):
             Enables validation of the request body against the route schema, by default False.
         response_validation_error_http_code
             Sets the returned status code if response is not validated. enable_validation must be True.
+        json_body_deserializer: Callable[[str], dict], optional
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
+            by default json.loads when integrating with EventSource data class
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: list[Route] = []
@@ -1625,6 +1629,7 @@ class ApiGatewayResolver(BaseRouter):
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+        self._json_body_deserializer = json_body_deserializer
 
         if self._enable_validation:
             from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
@@ -2436,24 +2441,24 @@ class ApiGatewayResolver(BaseRouter):
         """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
             logger.debug("Converting event to API Gateway REST API contract")
-            return APIGatewayProxyEvent(event)
+            return APIGatewayProxyEvent(event, self._json_body_deserializer)
         if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
             logger.debug("Converting event to API Gateway HTTP API contract")
-            return APIGatewayProxyEventV2(event)
+            return APIGatewayProxyEventV2(event, self._json_body_deserializer)
         if self._proxy_type == ProxyEventType.BedrockAgentEvent:
             logger.debug("Converting event to Bedrock Agent contract")
-            return BedrockAgentEvent(event)
+            return BedrockAgentEvent(event, self._json_body_deserializer)
         if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
             logger.debug("Converting event to Lambda Function URL contract")
-            return LambdaFunctionUrlEvent(event)
+            return LambdaFunctionUrlEvent(event, self._json_body_deserializer)
         if self._proxy_type == ProxyEventType.VPCLatticeEvent:
             logger.debug("Converting event to VPC Lattice contract")
-            return VPCLatticeEvent(event)
+            return VPCLatticeEvent(event, self._json_body_deserializer)
         if self._proxy_type == ProxyEventType.VPCLatticeEventV2:
             logger.debug("Converting event to VPC LatticeV2 contract")
-            return VPCLatticeEventV2(event)
+            return VPCLatticeEventV2(event, self._json_body_deserializer)
         logger.debug("Converting event to ALB contract")
-        return ALBEvent(event)
+        return ALBEvent(event, self._json_body_deserializer)
 
     def _resolve(self) -> ResponseBuilder:
         """Resolves the response or return the not found response"""
@@ -2870,6 +2875,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(
@@ -2880,6 +2886,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
             response_validation_error_http_code,
+            json_body_deserializer=json_body_deserializer,
         )
 
     def _get_base_path(self) -> str:
@@ -2956,6 +2963,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(
@@ -2966,6 +2974,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
             response_validation_error_http_code,
+            json_body_deserializer=json_body_deserializer,
         )
 
     def _get_base_path(self) -> str:
@@ -2995,6 +3004,7 @@ class ALBResolver(ApiGatewayResolver):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(
@@ -3005,6 +3015,7 @@ class ALBResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
             response_validation_error_http_code,
+            json_body_deserializer=json_body_deserializer,
         )
 
     def _get_base_path(self) -> str:
