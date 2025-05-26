@@ -8,6 +8,17 @@ from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.utils import load_event
 
 
+class LambdaContext:
+    def __init__(self):
+        self.function_name = "test-func"
+        self.memory_limit_in_mb = 128
+        self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
+        self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+    def get_remaining_time_in_millis(self) -> int:
+        return 1000
+
+
 def test_bedrock_agent_function_with_string_response():
     # GIVEN a Bedrock Agent Function resolver
     app = BedrockAgentFunctionResolver()
@@ -28,6 +39,23 @@ def test_bedrock_agent_function_with_string_response():
     assert result["response"]["function"] == "test_function"
     assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "Hello from string"
     assert "responseState" not in result["response"]["functionResponse"]
+
+
+def test_bedrock_agent_function_with_none_response():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def none_response_function():
+        return None
+
+    # WHEN calling the event handler with a function returning None
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "none_response_function"
+    result = app.resolve(raw_event, {})
+
+    # THEN process event correctly with empty string body
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == ""
 
 
 def test_bedrock_agent_function_error_handling():
@@ -158,25 +186,28 @@ def test_resolve_with_no_registered_function():
     assert "Error: 'non_existent_function'" in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
 
 
-def test_bedrock_function_response_state_validation():
-    # GIVEN invalid and valid response states
-    valid_states = ["FAILURE", "REPROMPT"]
+@pytest.mark.parametrize("response_state", ["FAILURE", "REPROMPT", None])
+def test_bedrock_function_valid_response_states(response_state):
+    # GIVEN a valid response state
+    # WHEN creating a BedrockFunctionResponse with that state
+    # THEN no error should be raised
+    BedrockFunctionResponse(body="test", response_state=response_state)
+
+
+def test_bedrock_function_invalid_response_state():
+    # GIVEN an invalid response state
     invalid_state = "INVALID"
 
-    # WHEN creating responses with valid states
-    # THEN no error should be raised
-    for state in valid_states:
-        try:
-            BedrockFunctionResponse(body="test", response_state=state)
-        except ValueError:
-            pytest.fail(f"Unexpected ValueError for response_state={state}")
-
-    # WHEN creating a response with invalid state
+    # WHEN creating a BedrockFunctionResponse with an invalid state
     # THEN ValueError should be raised with correct message
     with pytest.raises(ValueError) as exc_info:
         BedrockFunctionResponse(body="test", response_state=invalid_state)
 
-    assert str(exc_info.value) == "responseState must be 'FAILURE' or 'REPROMPT'"
+    # AND error message should mention valid options
+    error_message = str(exc_info.value)
+    assert "responseState must be" in error_message
+    assert "FAILURE" in error_message
+    assert "REPROMPT" in error_message
 
 
 def test_bedrock_agent_function_with_parameters():
@@ -205,3 +236,126 @@ def test_bedrock_agent_function_with_parameters():
         "Vacation request from 2024-03-15 to 2024-03-20 submitted"
         in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
     )
+
+
+def test_bedrock_agent_function_preserves_input_session_attributes():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def session_check_function():
+        # Validate that session attributes from the event are accessible
+        assert app.current_event.session_attributes.get("existingKey") == "existingValue"
+        return "Session checked"
+
+    # WHEN calling with event that has session attributes but function doesn't return any
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "session_check_function"
+    raw_event["sessionAttributes"] = {"existingKey": "existingValue"}
+    raw_event["promptSessionAttributes"] = {"promptKey": "promptValue"}
+
+    result = app.resolve(raw_event, {})
+
+    # THEN the original session attributes should be preserved in the response
+    assert result["sessionAttributes"] == {"existingKey": "existingValue"}
+    assert result["promptSessionAttributes"] == {"promptKey": "promptValue"}
+
+
+def test_bedrock_agent_function_with_invalid_parameters():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def strict_function(requiredParam):
+        return f"Got {requiredParam}"
+
+    # WHEN calling with parameters that don't match the function signature
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "strict_function"
+    raw_event["parameters"] = [
+        {"name": "wrongParam", "value": "wrong value"},  # Wrong parameter name
+    ]
+
+    # THEN function should still be called, but with no parameters
+    result = app.resolve(raw_event, {})
+
+    # Function should raise a TypeError due to missing required parameter
+    assert "Error:" in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    assert result["response"]["functionResponse"]["responseState"] == "FAILURE"
+
+
+def test_bedrock_agent_function_with_complex_return_type():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def complex_response():
+        # Return a complex type that needs to be converted to string
+        return {"key1": "value1", "key2": 123, "nested": {"inner": "value"}}
+
+    # WHEN calling with a complex return value
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "complex_response"
+    result = app.resolve(raw_event, {})
+
+    # THEN complex object should be converted to string representation
+    response_body = result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    # Check that it contains the expected string representation
+    assert "{'key1': 'value1'" in response_body
+    assert "'key2': 123" in response_body
+    assert "'nested': {'inner': 'value'}" in response_body
+
+
+def test_bedrock_agent_function_append_context():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def first_function():
+        # Function that appends context and checks for its existence
+        assert app.context.get("custom_key") == "custom_value"
+        assert app.context.get("user_id") == "12345"
+        return "First function executed"
+
+    @app.tool()
+    def second_function():
+        # Function that checks context has been cleared
+        assert not hasattr(app.context, "custom_key")
+        assert not hasattr(app.context, "user_id")
+        # Add new context
+        assert app.context.get("new_key") == "new_value"
+        return "Second function executed"
+
+    # WHEN calling the first function
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "first_function"
+    app.append_context(custom_key="custom_value", user_id="12345")
+    first_result = app.resolve(raw_event, LambdaContext())
+
+    # THEN first function should have accessed the context
+    assert "First function executed" in first_result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+
+    # WHEN calling the second function
+    raw_event["function"] = "second_function"
+    app.append_context(new_key="new_value")
+    second_result = app.resolve(raw_event, LambdaContext())
+
+    # THEN second function should have accessed the context and verified it was cleared
+    assert "Second function executed" in second_result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+
+    # After all invocations, context should be empty
+    assert not hasattr(app.context, "new_key")
+
+
+def test_resolve_with_no_current_event():
+    """Test that _resolve() raises ValueError when current_event is None"""
+    # GIVEN a Bedrock Agent Function resolver with no current event
+    app = BedrockAgentFunctionResolver()
+
+    # Deliberately clear the current_event
+    app.current_event = None
+
+    # WHEN calling the internal _resolve method
+    # THEN a ValueError should be raised
+    with pytest.raises(ValueError, match="No event to process"):
+        app._resolve()

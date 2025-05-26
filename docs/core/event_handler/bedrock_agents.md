@@ -44,13 +44,13 @@ Create [Amazon Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/usergu
 
 An action group defines actions that the agent can help the user perform. You can define action groups as OpenAPI-based or Function-based.
 
-| Aspect | OpenAPI-based Actions | Function-based Actions |
-|--------|---------------------|----------------------|
-| Definition Style | `@app.get("/path", description="")`<br>`@app.post("/path", description="")`| `@app.tool()` |
-| Parameter Handling | Path, query, and body parameters | Function parameters |
-| Use Case | REST-like APIs, complex request/response structures | Direct function calls, simpler input/output |
-| Session Management | Via `BedrockResponse` | Via `BedrockFunctionResponse` |
-| Best For | - Complex APIs with multiple endpoints<br>- When OpenAPI spec is required<br>- Integration with existing REST APIs | - Simple function-based actions<br>- Direct LLM-to-function mapping<br>- When function descriptions are sufficient |
+| Aspect               | OpenAPI-based Actions                                           | Function-based Actions                                          |
+|----------------------|------------------------------------------------------------------|----------------------------------------------------------------|
+| Definition Style      | `@app.get("/path", description="")`<br>`@app.post("/path", description="")` | `@app.tool(name="")`                                            |
+| Parameter Handling    | Path, query, and body parameters                                 | Function parameters                                             |
+| Use Case              | REST-like APIs, complex request/response structures              | Direct function calls, simpler input/output                     |
+| Response object       | Via `BedrockResponse`                                            | Via `BedrockFunctionResponse`                                   |
+| Best For              | - Complex APIs with multiple endpoints<br>- When OpenAPI spec is required<br>- Integration with existing REST APIs | - Simple function-based actions<br>- Direct LLM-to-function mapping<br>- When function descriptions are sufficient |
 
 ## Getting started
 
@@ -58,7 +58,7 @@ An action group defines actions that the agent can help the user perform. You ca
 
 !!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
-If you define the action group setting up an OpenAPI schema, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
+If you define the action group setting up an **OpenAPI schema**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
 
 ### Your first Agent
 
@@ -130,106 +130,6 @@ For reference, we use [Logger](../logger.md) and [Tracer](../tracer.md) in this 
 	--8<-- "docs/core/event_handler/bedrock_agents_getting_started.mermaid"
 	```
 	</center>
-
-### Validating input and output
-
-You can define the expected format for incoming data and responses by using type annotations.
-Define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/).
-Pydantic is a popular library for data validation using Python type annotations.
-
-The examples below uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function.
-The function then returns a boolean indicating if the meeting was successfully scheduled.
-
-**OpenAPI-based validation**
-
-=== "Lambda handler"
-
-	```python hl_lines="1 2 6 16-18"
-	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
-	```
-
-	1. No need to add the `enable_validation` parameter, as it's enabled by default.
-	2. Describe each input using human-readable descriptions
-	3. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
-
-=== "OpenAPI schema"
-
-	```json
-	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
-	```
-
-=== "Input payload"
-
-	```json hl_lines="6-13 20"
-	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.json"
-	```
-
-=== "Output payload"
-
-	```json hl_lines="10"
-	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
-	```
-**Function-based validation**
-
-Uses direct type hints and focuses on function parameters
-
-=== "Lambda handler"
-
-	```python hl_lines="1 3-4 12"
-	--8<-- "examples/event_handler_bedrock_agents/src/validation_schema_func.py"
-	```
-
-=== "Input payload"
-
-	```json
-	--8<-- "examples/event_handler_bedrock_agents/src/input_validation_schema_func.json"
-	```
-
-=== "Output payload"
-
-	```json
-	--8<-- "examples/event_handler_bedrock_agents/src/output_validation_schema_func.json"
-	```
-
-#### When validation fails
-
-If the request validation fails, your event handler will not be called, and an error message is returned to Bedrock.
-Similarly, if the response fails validation, your handler will abort the response.
-
-???+ info "What does this mean for my Agent?"
-	The event handler will always return a response according to the schema (OpenAPI) or type hints (Function-based).
-	A validation failure in OpenAPI-based actions results in a [422 response](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422).
-	For both approaches, how Amazon Bedrock interprets that failure is non-deterministic, since it depends on the characteristics of the LLM being used.
-
-=== "OpenAPI-based Input payload"
-
-	```json hl_lines="11"
-	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_input.json"
-	```
-
-=== "OpenAPI-based Output payload"
-
-	```json hl_lines="10"
-	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_output.json"
-	```
-
-=== "Function-based Input payload"
-
-	```json hl_lines="12"
-	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_input_func.json"
-	```
-
-=== "Function-based Output payload"
-
-	```json hl_lines="9"
-	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_output_func.json"
-	```
-
-<center>
-```mermaid
---8<-- "docs/core/event_handler/bedrock_agents_validation_sequence_diagram.mermaid"
-```
-</center>
 
 ### Accessing custom request fields
 
@@ -316,6 +216,71 @@ To achieve that, keep the following suggestions in mind:
 * When refactoring, update your description field to match the function outcomes
 * Use distinct `description` for each function to have clear separation of semantics
 
+### Validating input and output
+
+You can define the expected format for incoming data and responses by using type annotations.
+Define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/).
+Pydantic is a popular library for data validation using Python type annotations.
+
+The examples below uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function.
+The function then returns a boolean indicating if the meeting was successfully scheduled.
+
+=== "Lambda handler"
+
+	```python hl_lines="1 2 6 16-18"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
+	```
+
+	1. No need to add the `enable_validation` parameter, as it's enabled by default.
+	2. Describe each input using human-readable descriptions
+	3. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
+
+=== "OpenAPI schema"
+
+	```json
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
+	```
+
+=== "Input payload"
+
+	```json hl_lines="6-13 20"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.json"
+	```
+
+=== "Output payload"
+
+	```json hl_lines="10"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
+	```
+
+#### When validation fails
+
+If the request validation fails, your event handler will not be called, and an error message is returned to Bedrock.
+Similarly, if the response fails validation, your handler will abort the response.
+
+???+ info "What does this mean for my Agent?"
+	The event handler will always return a response according to the schema (OpenAPI) or type hints (Function-based).
+	A validation failure in OpenAPI-based actions results in a [422 response](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422).
+	For both approaches, how Amazon Bedrock interprets that failure is non-deterministic, since it depends on the characteristics of the LLM being used.
+
+=== "OpenAPI-based Input payload"
+
+	```json hl_lines="11"
+	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_input.json"
+	```
+
+=== "OpenAPI-based Output payload"
+
+	```json hl_lines="10"
+	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_output.json"
+	```
+
+<center>
+```mermaid
+--8<-- "docs/core/event_handler/bedrock_agents_validation_sequence_diagram.mermaid"
+```
+</center>
+
 ### Video walkthrough
 
 To create an Agent for Amazon Bedrock, refer to the [official documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html) provided by AWS.
@@ -399,17 +364,17 @@ Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://do
 
 ## Function-based Actions
 
-The `BedrockAgentFunctionResolver` handles three main aspects:
+The `BedrockAgentFunctionResolver` streamlines agent function development through three core capabilities:
 
-* **Function Registration**: Using the `@app.tool()` decorator
+* **Register Functions**: Use the `@app.tool()` decorator to expose your functions to Bedrock Agents
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| description | No | Human-readable description of what the function does. |
-| name | No | Custom name for the function. Defaults to the function name. |
+| name | No | Custom name for your function. Uses the actual function name if omitted. |
+| description | No | Explain what your function does to guide the agent's usage. |
 
-* **Parameter Processing**: Automatic parsing and validation of input parameters
-* **Response Formatting**: Converting function outputs into Bedrock Agent compatible responses
+* **Process Parameters**: Automatically maps input parameters from the agent to your function arguments
+* **Format Responses**: Transforms your function outputs into properly structured Bedrock Agent responses
 
 ### Function-based Responses
 
@@ -423,6 +388,8 @@ You can use `BedrockFunctionResponse` class to customize your response [with add
 * Set knowledge bases configurations
 * Control the response state ("FAILURE" or "REPROMPT")
 
-```python title="working_with_bedrockresponse.py" title="Customzing your Bedrock Function Response" hl_lines="2 8"
+```python title="working_with_bedrockresponse.py" title="Customzing your Bedrock Function Response" hl_lines="1 4 7"
 --8<-- "examples/event_handler_bedrock_agents/src/working_bedrock_functions_response.py"
 ```
+
+<!-- markdownlint-disable MD043 -->

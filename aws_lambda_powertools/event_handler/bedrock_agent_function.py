@@ -2,41 +2,45 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from typing import TYPE_CHECKING, Any, Literal
-
-from aws_lambda_powertools.warnings import PowertoolsUserWarning
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
+from collections.abc import Callable
+from typing import Any, Literal, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentFunctionEvent
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
+
+# Define a generic type for the function
+T = TypeVar("T", bound=Callable[..., Any])
 
 
 class BedrockFunctionResponse:
-    """Response class for Bedrock Agent Functions
+    """Response class for Bedrock Agent Functions.
 
     Parameters
     ----------
     body : Any, optional
-        Response body
-    session_attributes : dict[str, str] | None
-        Session attributes to include in the response
-    prompt_session_attributes : dict[str, str] | None
-        Prompt session attributes to include in the response
-    response_state : Literal["FAILURE", "REPROMPT"] | None
-        Response state ("FAILURE" or "REPROMPT")
+        Response body to be returned to the caller.
+    session_attributes : dict[str, str] or None, optional
+        Session attributes to include in the response for maintaining state.
+    prompt_session_attributes : dict[str, str] or None, optional
+        Prompt session attributes to include in the response.
+    knowledge_bases : list[dict[str, Any]] or None, optional
+        Knowledge bases to include in the response.
+    response_state : {"FAILURE", "REPROMPT"} or None, optional
+        Response state indicating if the function failed or needs reprompting.
 
     Examples
     --------
-    ```python
-    @app.tool(description="Function that uses session attributes")
-    def test_function():
-        return BedrockFunctionResponse(
-            body="Hello",
-            session_attributes={"userId": "123"},
-            prompt_session_attributes={"lastAction": "login"}
-        )
-    ```
+    >>> @app.tool(description="Function that uses session attributes")
+    >>> def test_function():
+    ...     return BedrockFunctionResponse(
+    ...         body="Hello",
+    ...         session_attributes={"userId": "123"},
+    ...         prompt_session_attributes={"lastAction": "login"}
+    ...     )
+
+    Notes
+    -----
+    The `response_state` parameter can only be set to "FAILURE" or "REPROMPT".
     """
 
     def __init__(
@@ -47,7 +51,7 @@ class BedrockFunctionResponse:
         knowledge_bases: list[dict[str, Any]] | None = None,
         response_state: Literal["FAILURE", "REPROMPT"] | None = None,
     ) -> None:
-        if response_state is not None and response_state not in ["FAILURE", "REPROMPT"]:
+        if response_state and response_state not in ["FAILURE", "REPROMPT"]:
             raise ValueError("responseState must be 'FAILURE' or 'REPROMPT'")
 
         self.body = body
@@ -67,21 +71,16 @@ class BedrockFunctionsResponseBuilder:
         self.result = result
 
     def build(self, event: BedrockAgentFunctionEvent) -> dict[str, Any]:
-        """Build the full response dict to be returned by the lambda"""
-        if isinstance(self.result, BedrockFunctionResponse):
-            body = self.result.body
-            session_attributes = self.result.session_attributes
-            prompt_session_attributes = self.result.prompt_session_attributes
-            knowledge_bases = self.result.knowledge_bases
-            response_state = self.result.response_state
+        result_obj = self.result
 
-        else:
-            body = self.result
-            session_attributes = None
-            prompt_session_attributes = None
-            knowledge_bases = None
-            response_state = None
+        # Extract attributes from BedrockFunctionResponse or use defaults
+        body = getattr(result_obj, "body", result_obj)
+        session_attributes = getattr(result_obj, "session_attributes", None)
+        prompt_session_attributes = getattr(result_obj, "prompt_session_attributes", None)
+        knowledge_bases = getattr(result_obj, "knowledge_bases", None)
+        response_state = getattr(result_obj, "response_state", None)
 
+        # Build base response structure
         # Per AWS Bedrock documentation, currently only "TEXT" is supported as the responseBody content type
         # https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
         response: dict[str, Any] = {
@@ -89,23 +88,18 @@ class BedrockFunctionsResponseBuilder:
             "response": {
                 "actionGroup": event.action_group,
                 "function": event.function,
-                "functionResponse": {"responseBody": {"TEXT": {"body": str(body if body is not None else "")}}},
+                "functionResponse": {
+                    "responseBody": {"TEXT": {"body": str(body if body is not None else "")}},
+                },
             },
+            "sessionAttributes": session_attributes or event.session_attributes or {},
+            "promptSessionAttributes": prompt_session_attributes or event.prompt_session_attributes or {},
         }
 
-        # Add responseState if provided
+        # Add optional fields when present
         if response_state:
             response["response"]["functionResponse"]["responseState"] = response_state
 
-        # Add session attributes if provided in response or maintain from input
-        response.update(
-            {
-                "sessionAttributes": session_attributes or event.session_attributes or {},
-                "promptSessionAttributes": prompt_session_attributes or event.prompt_session_attributes or {},
-            },
-        )
-
-        # Add knowledge bases configuration if provided
         if knowledge_bases:
             response["knowledgeBasesConfiguration"] = knowledge_bases
 
@@ -132,27 +126,35 @@ class BedrockAgentFunctionResolver:
     ```
     """
 
+    context: dict
+
     def __init__(self) -> None:
         self._tools: dict[str, dict[str, Any]] = {}
         self.current_event: BedrockAgentFunctionEvent | None = None
+        self.context = {}
         self._response_builder_class = BedrockFunctionsResponseBuilder
 
     def tool(
         self,
-        description: str | None = None,
         name: str | None = None,
-    ) -> Callable:
+        description: str | None = None,
+    ) -> Callable[[T], T]:
         """Decorator to register a tool function
 
         Parameters
         ----------
-        description : str | None
-            Description of what the tool does
         name : str | None
             Custom name for the tool. If not provided, uses the function name
+        description : str | None
+            Description of what the tool does
+
+        Returns
+        -------
+        Callable
+            Decorator function that registers and returns the original function
         """
 
-        def decorator(func: Callable) -> Callable:
+        def decorator(func: T) -> T:
             function_name = name or func.__name__
             if function_name in self._tools:
                 warnings.warn(
@@ -175,7 +177,7 @@ class BedrockAgentFunctionResolver:
             self.current_event = BedrockAgentFunctionEvent(event)
             return self._resolve()
         except KeyError as e:
-            raise ValueError(f"Missing required field: {str(e)}")
+            raise ValueError(f"Missing required field: {str(e)}") from e
 
     def _resolve(self) -> dict[str, Any]:
         """Internal resolution logic"""
@@ -185,24 +187,30 @@ class BedrockAgentFunctionResolver:
         function_name = self.current_event.function
 
         try:
-            parameters = {}
-            if hasattr(self.current_event, "parameters"):
-                for param in self.current_event.parameters:
-                    parameters[param.name] = param.value
+            # Extract parameters from the event
+            parameters = {param.name: param.value for param in getattr(self.current_event, "parameters", [])}
 
             func = self._tools[function_name]["function"]
+            # Filter parameters to only include those expected by the function
             sig = inspect.signature(func)
+            valid_params = {name: value for name, value in parameters.items() if name in sig.parameters}
 
-            valid_params = {}
-            for name, value in parameters.items():
-                if name in sig.parameters:
-                    valid_params[name] = value
-
+            # Call the function with the filtered parameters
             result = func(**valid_params)
+
+            self.clear_context()
+
+            # Build and return the response
             return BedrockFunctionsResponseBuilder(result).build(self.current_event)
-        except Exception as e:
-            return BedrockFunctionsResponseBuilder(
-                BedrockFunctionResponse(
-                    body=f"Error: {str(e)}",
-                ),
-            ).build(self.current_event)
+        except Exception as error:
+            # Return a formatted error response
+            error_response = BedrockFunctionResponse(body=f"Error: {str(error)}", response_state="FAILURE")
+            return BedrockFunctionsResponseBuilder(error_response).build(self.current_event)
+
+    def append_context(self, **additional_context):
+        """Append key=value data as routing context"""
+        self.context.update(**additional_context)
+
+    def clear_context(self):
+        """Resets routing context"""
+        self.context.clear()

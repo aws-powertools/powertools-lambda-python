@@ -1,4 +1,5 @@
 from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver, BedrockFunctionResponse
+from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 
 app = BedrockAgentFunctionResolver()
 
@@ -12,3 +13,7 @@ def custom_response():
         response_state="REPROMPT",
         knowledge_bases=[{"name": "kb1", "enabled": True}],
     )
+
+
+def lambda_handler(event: dict, context: LambdaContext):
+    return app.resolve(event, context)
