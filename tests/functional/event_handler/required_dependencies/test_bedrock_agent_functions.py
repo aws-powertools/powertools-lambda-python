@@ -266,8 +266,8 @@ def test_bedrock_agent_function_with_invalid_parameters():
     app = BedrockAgentFunctionResolver()
 
     @app.tool()
-    def strict_function(requiredParam):
-        return f"Got {requiredParam}"
+    def strict_function(required_param):
+        return f"Got {required_param}"
 
     # WHEN calling with parameters that don't match the function signature
     raw_event = load_event("bedrockAgentFunctionEvent.json")
