@@ -218,11 +218,11 @@ def test_bedrock_agent_function_with_parameters():
     received_params = {}
 
     @app.tool(description="Function that accepts parameters")
-    def vacation_request(startDate, endDate):
+    def vacation_request(start_date, end_date):
         # Store received parameters for assertion
-        received_params["startDate"] = startDate
-        received_params["endDate"] = endDate
-        return f"Vacation request from {startDate} to {endDate} submitted"
+        received_params["start_date"] = start_date
+        received_params["end_date"] = end_date
+        return f"Vacation request from {start_date} to {end_date} submitted"
 
     # WHEN calling the event handler with parameters
     raw_event = load_event("bedrockAgentFunctionEvent.json")
@@ -230,8 +230,8 @@ def test_bedrock_agent_function_with_parameters():
     result = app.resolve(raw_event, {})
 
     # THEN parameters should be correctly passed to the function
-    assert received_params["startDate"] == "2024-03-15"
-    assert received_params["endDate"] == "2024-03-20"
+    assert received_params["start_date"] == "2024-03-15"
+    assert received_params["end_date"] == "2024-03-20"
     assert (
         "Vacation request from 2024-03-15 to 2024-03-20 submitted"
         in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]

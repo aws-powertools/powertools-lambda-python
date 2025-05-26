@@ -19,12 +19,12 @@
     "function": "submitVacationRequest",
     "parameters": [
         {
-            "name": "startDate",
+            "name": "start_date",
             "type": "string",
             "value": "2024-03-15"
         },
         {
-            "name": "endDate",
+            "name": "end_date",
             "type": "string",
             "value": "2024-03-20"
         }
