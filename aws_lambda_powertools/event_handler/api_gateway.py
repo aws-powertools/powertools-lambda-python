@@ -1603,7 +1603,7 @@ class ApiGatewayResolver(BaseRouter):
             Sets the returned status code if response is not validated. enable_validation must be True.
         json_body_deserializer: Callable[[str], dict], optional
             function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
-            by default json.loads
+            by default json.loads when integrating with EventSource data class
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: list[Route] = []
