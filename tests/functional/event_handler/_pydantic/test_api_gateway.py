@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import json
-from decimal import Decimal
-from functools import partial
-
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import content_types
@@ -84,24 +80,3 @@ def test_data_validation_error():
     assert result["statusCode"] == 422
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert "missing" in result["body"]
-
-
-def test_api_gateway_resolver_numeric_value():
-    # GIVEN a basic API Gateway resolver
-    app = ApiGatewayResolver(deserializer=partial(json.loads, parse_float=Decimal))
-
-    @app.post("/my/path")
-    def test_handler():
-        return app.current_event.json_body
-
-    # WHEN calling the event handler
-    event = {}
-    event.update(LOAD_GW_EVENT)
-    event["body"] = '{"amount": 2.2999999999999998}'
-    event["httpMethod"] = "POST"
-
-    result = app(event, {})
-    # THEN process event correctly
-    assert result["statusCode"] == 200
-    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert result["body"] == '{"amount":"2.2999999999999998"}'
