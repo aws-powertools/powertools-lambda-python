@@ -57,6 +57,7 @@ class VPCLatticeResolver(ApiGatewayResolver):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """Amazon VPC Lattice resolver"""
         super().__init__(
@@ -67,6 +68,7 @@ class VPCLatticeResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
             response_validation_error_http_code,
+            json_body_deserializer=json_body_deserializer,
         )
 
     def _get_base_path(self) -> str:
@@ -115,6 +117,7 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
         strip_prefixes: list[str | Pattern] | None = None,
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
+        json_body_deserializer: Callable[[str], dict] | None = None,
     ):
         """Amazon VPC Lattice resolver"""
         super().__init__(
@@ -125,6 +128,7 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
             response_validation_error_http_code,
+            json_body_deserializer=json_body_deserializer,
         )
 
     def _get_base_path(self) -> str:

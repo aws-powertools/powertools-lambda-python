@@ -103,6 +103,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             serializer=None,
             strip_prefixes=None,
             enable_validation=enable_validation,
+            json_body_deserializer=None,
         )
         self._response_builder_class = BedrockResponseBuilder
 

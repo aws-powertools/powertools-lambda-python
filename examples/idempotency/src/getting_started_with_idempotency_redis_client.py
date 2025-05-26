@@ -7,21 +7,21 @@ from redis import Redis
 from aws_lambda_powertools.utilities.idempotency import (
     idempotent,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
-    RedisCachePersistenceLayer,
+from aws_lambda_powertools.utilities.idempotency.persistence.cache import (
+    CachePersistenceLayer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-redis_endpoint = os.getenv("REDIS_CLUSTER_ENDPOINT", "localhost")
+cache_endpoint = os.getenv("CACHE_CLUSTER_ENDPOINT", "localhost")
 client = Redis(
-    host=redis_endpoint,
+    host=cache_endpoint,
     port=6379,
     socket_connect_timeout=5,
     socket_timeout=5,
     max_connections=1000,
 )
 
-persistence_layer = RedisCachePersistenceLayer(client=client)
+persistence_layer = CachePersistenceLayer(client=client)
 
 
 @dataclass

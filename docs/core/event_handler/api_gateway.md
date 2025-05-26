@@ -1182,6 +1182,14 @@ You can instruct event handler to use a custom serializer to best suit your need
 --8<-- "examples/event_handler_rest/src/custom_serializer.py"
 ```
 
+### Custom body deserializer
+
+You can customize how the integrated [Event Source Data Classes](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_classes/#api-gateway-proxy) parse the JSON request body by providing your own deserializer function. By default it is `json.loads`
+
+```python hl_lines="15" title="Using a custom JSON deserializer for body"
+--8<-- "examples/event_handler_rest/src/custom_json_deserializer.py"
+```
+
 ### Split routes with Router
 
 As you grow the number of routes a given Lambda function should handle, it is natural to either break into smaller Lambda functions, or split routes into separate files to ease maintenance - that's where the `Router` feature is useful.

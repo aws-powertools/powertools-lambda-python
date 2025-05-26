@@ -8,12 +8,15 @@ from collections import deque
 from copy import deepcopy
 from decimal import Decimal
 from enum import Enum
+from functools import partial
 from json import JSONEncoder
 from pathlib import Path
 
 import pytest
 
-from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler import (
+    content_types,
+)
 from aws_lambda_powertools.event_handler.api_gateway import (
     ALBResolver,
     APIGatewayHttpResolver,
@@ -1968,3 +1971,24 @@ def test_alb_empty_response_object():
     # THEN body should be converted to an empty string
     assert result["statusCode"] == 200
     assert result["body"] == ""
+
+
+def test_api_gateway_resolver_with_custom_deserializer():
+    # GIVEN a basic API Gateway resolver
+    app = ApiGatewayResolver(json_body_deserializer=partial(json.loads, parse_float=Decimal))
+
+    @app.post("/my/path")
+    def test_handler():
+        return app.current_event.json_body
+
+    # WHEN calling the event handler
+    event = {}
+    event.update(LOAD_GW_EVENT)
+    event["body"] = '{"amount": 2.2999999999999998}'
+    event["httpMethod"] = "POST"
+
+    result = app(event, {})
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert result["body"] == '{"amount":"2.2999999999999998"}'
