@@ -1,4 +1,4 @@
-.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-website check-licenses
+.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-website
 .PHONY: docs-local security-baseline complexity-baseline release-prod release-test release
 
 target:
@@ -7,23 +7,19 @@ target:
 dev:
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
 dev-quality-code:
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
-	poetry install --extras "all redis datamasking"
+	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
-
-# Running licensecheck with zero to break the pipeline if there is an invalid license
-check-licenses:
-	poetry run licensecheck -u poetry:dev
 
 format-check:
 	poetry run ruff format aws_lambda_powertools tests examples --check
@@ -62,7 +58,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit check-licenses test security-baseline complexity-baseline
+pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build

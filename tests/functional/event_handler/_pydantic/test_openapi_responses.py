@@ -218,3 +218,22 @@ def test_openapi_route_and_resolver_with_custom_response_validation():
     assert 417 in responses_with_resolver_response_validation
     assert 418 not in responses_with_resolver_response_validation
     assert responses_with_resolver_response_validation[417].description == "Response Validation Error"
+
+
+def test_openapi_enable_validation_disabled():
+    # GIVEN An API Gateway resolver without validation
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler():
+        pass
+
+    # WHEN we retrieve the OpenAPI schema for the application
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+
+    # THE the schema should include a 200 successful response
+    # but not a 422 validation error response since validation is disabled
+    assert 200 in responses.keys()
+    assert responses[200].description == "Successful Response"
+    assert 422 not in responses.keys()
