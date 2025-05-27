@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import warnings
 from collections.abc import Callable
 from typing import Any, Literal, TypeVar
@@ -10,6 +11,8 @@ from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 # Define a generic type for the function
 T = TypeVar("T", bound=Callable[..., Any])
+
+logger = logging.getLogger(__name__)
 
 
 class BedrockFunctionResponse:
@@ -156,6 +159,9 @@ class BedrockAgentFunctionResolver:
 
         def decorator(func: T) -> T:
             function_name = name or func.__name__
+
+            logger.debug(f"Registering {function_name} tool")
+
             if function_name in self._tools:
                 warnings.warn(
                     f"Tool '{function_name}' already registered. Overwriting with new definition.",
@@ -186,9 +192,32 @@ class BedrockAgentFunctionResolver:
 
         function_name = self.current_event.function
 
+        logger.debug(f"Resolving {function_name} tool")
+
         try:
+            parameters: dict[str, Any] = {}
             # Extract parameters from the event
-            parameters = {param.name: param.value for param in getattr(self.current_event, "parameters", [])}
+            for param in getattr(self.current_event, "parameters", []):
+                param_type = getattr(param, "type", None)
+                if param_type == "string":
+                    parameters[param.name] = str(param.value)
+                elif param_type == "integer":
+                    try:
+                        parameters[param.name] = int(param.value)
+                    except (ValueError, TypeError):
+                        parameters[param.name] = param.value
+                elif param_type == "number":
+                    try:
+                        parameters[param.name] = float(param.value)
+                    except (ValueError, TypeError):
+                        parameters[param.name] = param.value
+                elif param_type == "boolean":
+                    if isinstance(param.value, str):
+                        parameters[param.name] = param.value.lower() == "true"
+                    else:
+                        parameters[param.name] = bool(param.value)
+                else:  # "array" or any other type
+                    parameters[param.name] = param.value
 
             func = self._tools[function_name]["function"]
             # Filter parameters to only include those expected by the function
@@ -204,7 +233,8 @@ class BedrockAgentFunctionResolver:
             return BedrockFunctionsResponseBuilder(result).build(self.current_event)
         except Exception as error:
             # Return a formatted error response
-            error_response = BedrockFunctionResponse(body=f"Error: {str(error)}", response_state="FAILURE")
+            logger.error(f"Error processing function: {function_name}", exc_info=True)
+            error_response = BedrockFunctionResponse(body=f"Error: {error.__class__.__name__}: {str(error)}")
             return BedrockFunctionsResponseBuilder(error_response).build(self.current_event)
 
     def append_context(self, **additional_context):

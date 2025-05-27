@@ -281,7 +281,6 @@ def test_bedrock_agent_function_with_invalid_parameters():
 
     # Function should raise a TypeError due to missing required parameter
     assert "Error:" in result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
-    assert result["response"]["functionResponse"]["responseState"] == "FAILURE"
 
 
 def test_bedrock_agent_function_with_complex_return_type():
@@ -359,3 +358,67 @@ def test_resolve_with_no_current_event():
     # THEN a ValueError should be raised
     with pytest.raises(ValueError, match="No event to process"):
         app._resolve()
+
+
+def test_bedrock_agent_function_with_parameters_casting():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool(description="Function that accepts parameters")
+    def vacation_request(month: int, payment: float, approved: bool):
+        # Store received parameters for assertion
+        assert isinstance(month, int)
+        assert isinstance(payment, float)
+        assert isinstance(approved, bool)
+        return "Vacation request"
+
+    # WHEN calling the event handler with parameters
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "vacation_request"
+    raw_event["parameters"] = [
+        {"name": "month", "value": "3", "type": "integer"},
+        {"name": "payment", "value": "1000.5", "type": "number"},
+        {"name": "approved", "value": False, "type": "boolean"},
+    ]
+    result = app.resolve(raw_event, {})
+
+    # THEN parameters should be correctly passed to the function
+    assert "Vacation request" == result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+
+
+def test_bedrock_agent_function_with_parameters_casting_errors():
+    # GIVEN a Bedrock Agent Function resolver
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool(description="Function that handles parameter casting errors")
+    def process_data(id_product: str, quantity: int, price: float, available: bool, items: list):
+        # Check that invalid values maintain their original types
+        assert isinstance(id_product, str)
+        # For invalid integer, the original string should be preserved
+        assert quantity == "invalid_number"
+        # For invalid float, the original string should be preserved
+        assert price == "not_a_price"
+        # For invalid boolean, should evaluate based on Python's bool rules
+        assert isinstance(available, bool)
+        assert not available
+        # Arrays should remain as is
+        assert isinstance(items, list)
+        return "Processed with casting errors handled"
+
+    # WHEN calling the event handler with parameters that cause casting errors
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "process_data"
+    raw_event["parameters"] = [
+        {"name": "id_product", "value": 12345, "type": "string"},  # Integer to string (should work)
+        {"name": "quantity", "value": "invalid_number", "type": "integer"},  # Will cause ValueError
+        {"name": "price", "value": "not_a_price", "type": "number"},  # Will cause ValueError
+        {"name": "available", "value": "invalid_bool", "type": "boolean"},  # Not "true"/"false"
+        {"name": "items", "value": ["item1", "item2"], "type": "array"},  # Array should remain as is
+    ]
+    result = app.resolve(raw_event, {})
+
+    # THEN parameters should be handled properly despite casting errors
+    assert (
+        "Processed with casting errors handled"
+        == result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    )
