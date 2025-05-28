@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 import logging
 import warnings
 from collections.abc import Callable
@@ -73,7 +74,7 @@ class BedrockFunctionsResponseBuilder:
     def __init__(self, result: BedrockFunctionResponse | Any) -> None:
         self.result = result
 
-    def build(self, event: BedrockAgentFunctionEvent) -> dict[str, Any]:
+    def build(self, event: BedrockAgentFunctionEvent, serializer: Callable) -> dict[str, Any]:
         result_obj = self.result
 
         # Extract attributes from BedrockFunctionResponse or use defaults
@@ -92,7 +93,7 @@ class BedrockFunctionsResponseBuilder:
                 "actionGroup": event.action_group,
                 "function": event.function,
                 "functionResponse": {
-                    "responseBody": {"TEXT": {"body": str(body if body is not None else "")}},
+                    "responseBody": {"TEXT": {"body": serializer(body if body is not None else "")}},
                 },
             },
             "sessionAttributes": session_attributes or event.session_attributes or {},
@@ -119,7 +120,7 @@ class BedrockAgentFunctionResolver:
 
     app = BedrockAgentFunctionResolver()
 
-    @app.tool(description="Gets the current UTC time")
+    @app.tool(name="get_current_time", description="Gets the current UTC time")
     def get_current_time():
         from datetime import datetime
         return datetime.utcnow().isoformat()
@@ -131,11 +132,12 @@ class BedrockAgentFunctionResolver:
 
     context: dict
 
-    def __init__(self) -> None:
+    def __init__(self, serializer: Callable | None = None) -> None:
         self._tools: dict[str, dict[str, Any]] = {}
         self.current_event: BedrockAgentFunctionEvent | None = None
         self.context = {}
         self._response_builder_class = BedrockFunctionsResponseBuilder
+        self.serializer = serializer or json.dumps
 
     def tool(
         self,
@@ -230,12 +232,12 @@ class BedrockAgentFunctionResolver:
             self.clear_context()
 
             # Build and return the response
-            return BedrockFunctionsResponseBuilder(result).build(self.current_event)
+            return BedrockFunctionsResponseBuilder(result).build(self.current_event, serializer=self.serializer)
         except Exception as error:
             # Return a formatted error response
             logger.error(f"Error processing function: {function_name}", exc_info=True)
             error_response = BedrockFunctionResponse(body=f"Error: {error.__class__.__name__}: {str(error)}")
-            return BedrockFunctionsResponseBuilder(error_response).build(self.current_event)
+            return BedrockFunctionsResponseBuilder(error_response).build(self.current_event, serializer=self.serializer)
 
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""

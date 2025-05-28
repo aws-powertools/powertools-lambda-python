@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import decimal
+import json
+
 import pytest
 
 from aws_lambda_powertools.event_handler import BedrockAgentFunctionResolver, BedrockFunctionResponse
@@ -37,7 +40,7 @@ def test_bedrock_agent_function_with_string_response():
     assert result["messageVersion"] == "1.0"
     assert result["response"]["actionGroup"] == raw_event["actionGroup"]
     assert result["response"]["function"] == "test_function"
-    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "Hello from string"
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps("Hello from string")
     assert "responseState" not in result["response"]["functionResponse"]
 
 
@@ -55,7 +58,7 @@ def test_bedrock_agent_function_with_none_response():
     result = app.resolve(raw_event, {})
 
     # THEN process event correctly with empty string body
-    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == ""
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps("")
 
 
 def test_bedrock_agent_function_error_handling():
@@ -106,7 +109,7 @@ def test_bedrock_agent_function_registration():
     result = app.resolve(raw_event, {})
 
     # The second function should be used
-    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "second test"
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps("second test")
 
 
 def test_bedrock_agent_function_with_optional_fields():
@@ -133,7 +136,7 @@ def test_bedrock_agent_function_with_optional_fields():
     result = app.resolve(raw_event, {})
 
     # THEN include all optional fields in response
-    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == "Hello"
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps("Hello")
     assert result["sessionAttributes"] == {"userId": "123"}
     assert result["promptSessionAttributes"] == {"context": "test"}
     assert result["knowledgeBasesConfiguration"][0]["knowledgeBaseId"] == "kb1"
@@ -300,9 +303,10 @@ def test_bedrock_agent_function_with_complex_return_type():
     # THEN complex object should be converted to string representation
     response_body = result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
     # Check that it contains the expected string representation
-    assert "{'key1': 'value1'" in response_body
-    assert "'key2': 123" in response_body
-    assert "'nested': {'inner': 'value'}" in response_body
+
+    assert response_body == json.dumps(
+        {"key1": "value1", "key2": 123, "nested": {"inner": "value"}},
+    )
 
 
 def test_bedrock_agent_function_append_context():
@@ -383,7 +387,7 @@ def test_bedrock_agent_function_with_parameters_casting():
     result = app.resolve(raw_event, {})
 
     # THEN parameters should be correctly passed to the function
-    assert "Vacation request" == result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps("Vacation request")
 
 
 def test_bedrock_agent_function_with_parameters_casting_errors():
@@ -418,7 +422,35 @@ def test_bedrock_agent_function_with_parameters_casting_errors():
     result = app.resolve(raw_event, {})
 
     # THEN parameters should be handled properly despite casting errors
-    assert (
-        "Processed with casting errors handled"
-        == result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    assert result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps(
+        "Processed with casting errors handled",
     )
+
+
+def test_bedrock_agent_function_with_custom_serializer():
+    """Test BedrockAgentFunctionResolver with a custom serializer for non-standard JSON types."""
+
+    def decimal_serializer(obj):
+        if isinstance(obj, decimal.Decimal):
+            return float(obj)
+        raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+    # GIVEN a Bedrock Agent Function resolver with that custom serializer
+    app = BedrockAgentFunctionResolver(serializer=lambda obj: json.dumps(obj, default=decimal_serializer))
+
+    @app.tool()
+    def decimal_response():
+        # Return a response with Decimal type that standard JSON can't serialize
+        return {"price": decimal.Decimal("99.99")}
+
+    # WHEN calling with a response containing non-standard JSON types
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "decimal_response"
+    result = app.resolve(raw_event, {})
+
+    # THEN non-standard types should be properly serialized
+    response_body = result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    parsed_response = json.loads(response_body)
+
+    # VERIFY that decimal was converted to float and datetime to ISO string
+    assert parsed_response["price"] == 99.99
