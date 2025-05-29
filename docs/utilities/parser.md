@@ -117,6 +117,18 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
 | **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                         |
 | **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
+| **CognitoPreSignupTriggerModel**            | Lambda User Pool Pre-Sign-Up trigger event                                                    |
+| **CognitoPostConfirmationTriggerModel**     | Lambda User Pool Post Confirmation trigger event                                              |
+| **CognitoPreAuthenticationTriggerModel**    | Lambda User Pool Pre Authentication trigger event                                             |
+| **CognitoPostAuthenticationTriggerModel**   | Lambda User Pool Post Authentication trigger event                                            |
+| **CognitoPreTokenGenerationTriggerModel**   | Lambda User Pool Pre Token Generation trigger event                                           |
+| **CognitoMigrateUserTriggerModel**          | Lambda User Pool Migrate User trigger event                                                   |
+| **CognitoCustomMessageTriggerModel**        | Lambda User Pool Custom Message trigger event                                                 |
+| **CognitoCustomEmailSenderTriggerModel**    | Lambda User Pool Custom Email Sender trigger event                                            |
+| **CognitoCustomSMSSenderTriggerModel**      | Lambda User Pool Custom SMS Sender trigger event                                              |
+| **CognitoDefineAuthChallengeTriggerModel**  | Lambda User Pool Define Auth Challenge trigger event                                          |
+| **CognitoCreateAuthChallengeTriggerModel**  | Lambda User Pool Create Auth Challenge trigger event                                          |
+| **CognitoVerifyAuthChallengeTriggerModel**  | Lambda User Pool Verify Auth Challenge trigger event                                          |
 | **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                                       |
 | **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                            |
 | **IoTCoreThingEvent**                       | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
