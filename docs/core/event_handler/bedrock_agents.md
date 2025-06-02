@@ -32,7 +32,7 @@ Create [Amazon Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/usergu
 
 **Function details** consist of a list of parameters, defined by their name, [data type](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_ParameterDetail.html), and whether they are required. The agent uses these configurations to determine what information it needs to elicit from the user.
 
-**Action group** is a collection of two resources where you define the actions that the agent should carry out: an OpenAPI schema to define the APIs that the agent can invoke to carry out its tasks, and a Lambda function to execute those actions.
+**Action group** is a collection of two resources where you define the actions that the agent should carry out when invoking your Lambda function.
 
 **Large Language Models (LLM)** are very large deep learning models that are pre-trained on vast amounts of data, capable of extracting meanings from a sequence of text and understanding the relationship between words and phrases on it.
 
@@ -46,11 +46,11 @@ An action group defines actions that the agent can help the user perform. You ca
 
 | Aspect               | OpenAPI-based Actions                                           | Function-based Actions                                          |
 |----------------------|------------------------------------------------------------------|----------------------------------------------------------------|
-| Definition Style      | `@app.get("/path", description="")`<br>`@app.post("/path", description="")` | `@app.tool(name="")`                                            |
-| Parameter Handling    | Path, query, and body parameters                                 | Function parameters                                             |
-| Use Case              | REST-like APIs, complex request/response structures              | Direct function calls, simpler input/output                     |
-| Response object       | Via `BedrockResponse`                                            | Via `BedrockFunctionResponse`                                   |
-| Best For              | - Complex APIs with multiple endpoints<br>- When OpenAPI spec is required<br>- Integration with existing REST APIs | - Simple function-based actions<br>- Direct LLM-to-function mapping<br>- When function descriptions are sufficient |
+| Definition Style      | `@app.get("/path", description="")`<br>`@app.post("/path", description="")` | `@app.tool(name="")`                               |
+| Parameter Handling    | Path, query, and body parameters                                 | Function parameters                                           |
+| Use Case              | REST-like APIs, complex request/response structures              | Direct function calls, simpler input                          |
+| Response object       | Via `BedrockResponse`                                            | Via `BedrockFunctionResponse`                                 |
+| Best For              | - Complex APIs with multiple endpoints<br>- When OpenAPI spec is required<br>- Integration with existing REST APIs | - Simple function-based actions<br>- Direct LLM-to-function mapping |
 
 ## Getting started
 
@@ -120,16 +120,6 @@ For reference, we use [Logger](../logger.md) and [Tracer](../tracer.md) in this 
 	```json hl_lines="9"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output_func.json"
 	```
-
-??? note "What happens under the hood?"
-	Powertools will handle the request from the Agent, parse, validate, and route it to the correct method in your code.
-	The response is then validated and formatted back to the Agent.
-
-	<center>
-	```mermaid
-	--8<-- "docs/core/event_handler/bedrock_agents_getting_started.mermaid"
-	```
-	</center>
 
 ### Accessing custom request fields
 
@@ -345,6 +335,16 @@ You can use `BedrockResponse` class to add additional fields as needed, such as 
 ```python title="working_with_bedrockresponse.py" title="Customzing your Bedrock Response" hl_lines="5 16"
 --8<-- "examples/event_handler_bedrock_agents/src/working_with_bedrockresponse.py"
 ```
+
+#### Bedrock requests under the hood
+
+Powertools handle the request from the Agent, parse, validate, and route it to the correct method in your code. The response is then validated and formatted back to the Agent.
+
+<center>
+```mermaid
+--8<-- "docs/core/event_handler/bedrock_agents_getting_started.mermaid"
+```
+</center>
 
 ### Testing your code
 
