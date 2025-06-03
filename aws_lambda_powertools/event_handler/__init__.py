@@ -12,6 +12,10 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 from aws_lambda_powertools.event_handler.appsync import AppSyncResolver
 from aws_lambda_powertools.event_handler.bedrock_agent import BedrockAgentResolver, BedrockResponse
+from aws_lambda_powertools.event_handler.bedrock_agent_function import (
+    BedrockAgentFunctionResolver,
+    BedrockFunctionResponse,
+)
 from aws_lambda_powertools.event_handler.events_appsync.appsync_events import AppSyncEventsResolver
 from aws_lambda_powertools.event_handler.lambda_function_url import (
     LambdaFunctionUrlResolver,
@@ -26,7 +30,9 @@ __all__ = [
     "ALBResolver",
     "ApiGatewayResolver",
     "BedrockAgentResolver",
+    "BedrockAgentFunctionResolver",
     "BedrockResponse",
+    "BedrockFunctionResponse",
     "CORSConfig",
     "LambdaFunctionUrlResolver",
     "Response",

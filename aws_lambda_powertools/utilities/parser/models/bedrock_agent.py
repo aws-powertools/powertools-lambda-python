@@ -36,3 +36,21 @@ class BedrockAgentEventModel(BaseModel):
     agent: BedrockAgentModel
     parameters: Optional[List[BedrockAgentPropertyModel]] = None
     request_body: Optional[BedrockAgentRequestBodyModel] = Field(None, alias="requestBody")
+
+
+class BedrockAgentFunctionEventModel(BaseModel):
+    """Bedrock Agent Function event model
+
+    Documentation:
+    https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
+    """
+
+    message_version: str = Field(..., alias="messageVersion")
+    agent: BedrockAgentModel
+    input_text: str = Field(..., alias="inputText")
+    session_id: str = Field(..., alias="sessionId")
+    action_group: str = Field(..., alias="actionGroup")
+    function: str
+    parameters: Optional[List[BedrockAgentPropertyModel]] = None
+    session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
+    prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")

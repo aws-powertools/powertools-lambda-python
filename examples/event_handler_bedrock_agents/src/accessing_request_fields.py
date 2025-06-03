@@ -8,7 +8,7 @@ logger = Logger()
 app = BedrockAgentResolver()
 
 
-@app.get("/current_time", description="Gets the current time in seconds")  # (1)!
+@app.get("/current_time", description="Gets the current time in seconds")
 def current_time() -> int:
     logger.append_keys(
         session_id=app.current_event.session_id,

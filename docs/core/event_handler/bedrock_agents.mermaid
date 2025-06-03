@@ -2,10 +2,15 @@ flowchart LR
     Bedrock[LLM] <-- uses --> Agent
     You[User input] --> Agent
     Agent -- consults --> OpenAPI
-    Agent[Agents for Amazon Bedrock] -- invokes --> Lambda
+    Agent -- consults --> Functions
+    Agent[Amazon Bedrock Agents] -- invokes --> Lambda
 
     subgraph OpenAPI
         Schema
+    end
+
+    subgraph Functions
+        ToolDescriptions[Tool Descriptions]
     end
 
     subgraph Lambda[Lambda Function]
@@ -19,10 +24,8 @@ flowchart LR
 
     subgraph ActionGroup[Action Group]
         OpenAPI -. generated from .-> Lambda
+        Functions -. defined in .-> Lambda
     end
 
     style Code fill:#ffa500,color:black,font-weight:bold,stroke-width:3px
     style You stroke:#0F0,stroke-width:2px
-
-
-

@@ -1,0 +1,14 @@
+{
+    "messageVersion": "1.0",
+    "response": {
+        "actionGroup": "CurrentTime",
+        "function": "CurrentTime",
+        "functionResponse": {
+            "responseBody": {
+                "application/json": {
+                    "body": "1704708165"
+                }
+            }
+        }
+    }
+}
