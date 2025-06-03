@@ -33,7 +33,7 @@ def build_and_run_test(session: nox.Session, folders: list, extras: str = "") ->
     """
 
     # Required install to execute any test
-    session.install("poetry", "pytest", "pytest-mock", "pytest_socket")
+    session.install("poetry", "pytest", "pytest-mock", "pytest_socket", "pytest-asyncio")
 
     # Powertools project folder is in the root
     if extras:
