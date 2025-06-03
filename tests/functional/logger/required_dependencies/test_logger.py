@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from _pytest.logging import LogCaptureHandler
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging import correlation_paths
@@ -1556,3 +1557,24 @@ def test_powertools_logger_handler_is_created_only_once_and_propagated(lambda_co
     # THEN we must be able to inject context
     log = capture_logging_output(stdout)
     assert request_id == log["correlation_id"]
+
+
+def test_non_preconfigured_logger_with_caplog(caplog, service_name):
+    caplog.set_level("INFO")
+    logger = Logger(service=service_name)
+    logger.info("testing, testing...")
+    pytest_handler_existence = any(isinstance(item, LogCaptureHandler) for item in logger._logger.root.handlers)
+
+    assert pytest_handler_existence is True
+    assert len(caplog.records) == 1
+    assert caplog.records[0].message == "testing, testing..."
+
+
+def test_child_logger_with_caplog(caplog):
+    caplog.set_level("INFO")
+    logger = Logger(child=True)
+    logger.info("testing, testing...")
+    pytest_handler_existence = any(isinstance(item, LogCaptureHandler) for item in logger._logger.root.handlers)
+
+    assert len(caplog.records) == 1
+    assert pytest_handler_existence is True

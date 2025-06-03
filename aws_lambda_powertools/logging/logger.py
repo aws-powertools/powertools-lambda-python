@@ -374,6 +374,8 @@ class Logger:
         if not self._is_deduplication_disabled:
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
+                if type(handler).__name__ == "LogCaptureHandler" and type(handler).__module__ == "_pytest.logging":
+                    continue
                 # It'll add a filter to suppress any child logger from self.service
                 # Example: `Logger(service="order")`, where service is Order
                 # It'll reject all loggers starting with `order` e.g. order.checkout, order.shared
