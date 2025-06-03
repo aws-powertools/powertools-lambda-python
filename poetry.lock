@@ -199,18 +199,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.199.0a0"
+version = "2.200.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.199.0a0-py3-none-any.whl", hash = "sha256:8aad9f4f69385e778fe63a3c61aa1fe8a766cd45e16d2f22ff75797e1f00cfd8"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.199.0a0.tar.gz", hash = "sha256:962c6d692fe6df4d4a85d344281040f9a515f5587af9afff9e300fe5b7a74dfd"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.200.0a0-py3-none-any.whl", hash = "sha256:a08f7da025f6f25ee29aba1f6b56d19679f96c04564452b14962b8824dd1be1d"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.200.0a0.tar.gz", hash = "sha256:4dbfe2d36ddf05cb598d4fd79d62549fc2659bc9ecc93343569417ce4e772955"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.199.0,<3.0.0"
+aws-cdk-lib = ">=2.200.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.112.0,<2.0.0"
 publication = ">=0.0.3"
@@ -433,14 +433,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.38.27"
-description = "Type annotations for boto3 1.38.27 generated with mypy-boto3-builder 8.11.0"
+version = "1.38.28"
+description = "Type annotations for boto3 1.38.28 generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.38.27-py3-none-any.whl", hash = "sha256:87e6c47b76173df91f55387a91fd1f382f130821e4492e14748fe49d46598bc5"},
-    {file = "boto3_stubs-1.38.27.tar.gz", hash = "sha256:8a45f32b83d29ec3db28b37ea68ea5f179b141863211497ef92ba18e2a896aec"},
+    {file = "boto3_stubs-1.38.28-py3-none-any.whl", hash = "sha256:accd8c0943a8d960c5c2d4a7aa661fd43e842893e76adf1b5b163c02f4f62537"},
+    {file = "boto3_stubs-1.38.28.tar.gz", hash = "sha256:fae8e009ea4d810b77e49d88247183b5d8d153bf268ebde8b4abdf58a701802f"},
 ]
 
 [package.dependencies]
@@ -507,7 +507,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.38.0,<1.39.0)"]
 billing = ["mypy-boto3-billing (>=1.38.0,<1.39.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.38.0,<1.39.0)"]
-boto3 = ["boto3 (==1.38.27)"]
+boto3 = ["boto3 (==1.38.28)"]
 braket = ["mypy-boto3-braket (>=1.38.0,<1.39.0)"]
 budgets = ["mypy-boto3-budgets (>=1.38.0,<1.39.0)"]
 ce = ["mypy-boto3-ce (>=1.38.0,<1.39.0)"]
