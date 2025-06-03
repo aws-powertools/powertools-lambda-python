@@ -1,6 +1,7 @@
 ---
 title: Amazon Bedrock Agents
 description: Core utility
+status: new
 ---
 
 Create [Amazon Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html#agents-how){target="_blank"} using event handlers with two different action groups approaches:

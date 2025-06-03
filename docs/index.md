@@ -527,6 +527,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**Guild**](https://guild.com/){target="_blank" rel="nofollow"}
 { .card }
 
+[**Instil**](https://instil.co/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**IMS**](https://ims.tech/){target="_blank" rel="nofollow"}
 { .card }
 
