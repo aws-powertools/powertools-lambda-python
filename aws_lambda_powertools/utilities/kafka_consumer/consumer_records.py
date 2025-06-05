@@ -4,10 +4,8 @@ from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
 from aws_lambda_powertools.utilities.data_classes.kafka_event import KafkaEvent, KafkaEventBase
-from aws_lambda_powertools.utilities.kafka_consumer.functions import (
-    deserialize_avro,
-    deserialize_protobuf_with_compiled_classes,
-)
+from aws_lambda_powertools.utilities.kafka_consumer.deserializer.deserializer import get_deserializer
+from aws_lambda_powertools.utilities.kafka_consumer.serialization.serialization import serialize_to_output_type
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -25,32 +23,43 @@ class ConsumerRecordRecords(KafkaEventBase):
         self.deserialize = deserialize
 
     @property
-    def key(self) -> str | None:
+    def key(self) -> Any:
         key = self.get("key")
-        if key and self.deserialize.key_schema_type:
-            if self.deserialize.value_schema_type == "AVRO":
-                return deserialize_avro(key, self.deserialize.value_schema_str)
-            elif self.deserialize.value_schema_type == "PROTOBUF":
-                return deserialize_protobuf_with_compiled_classes(key, self.deserialize.value_schema_str)
-            elif self.deserialize.value_schema_type == "JSON":
-                return self._json_deserializer(key)
-            else:
-                raise ValueError("Invalid value_schema_type")
+        if key and (self.deserialize and self.deserialize.key_schema_type):
+            deserializer = get_deserializer(
+                self.deserialize.value_schema_type,
+                self.deserialize.value_schema_str,
+            )
+            deserialized_key = deserializer.deserialize(key)
+
+            if self.deserialize.key_output_serializer:
+                return serialize_to_output_type(
+                    deserialized_key,
+                    self.deserialize.key_output_serializer,
+                )
+
+            return deserialized_key
 
         return key
 
     @property
-    def value(self) -> str:
+    def value(self) -> Any:
         value = self["value"]
-        if self.deserialize.value_schema_type:
-            if self.deserialize.value_schema_type == "AVRO":
-                return deserialize_avro(value, self.deserialize.value_schema_str)
-            elif self.deserialize.value_schema_type == "PROTOBUF":
-                return deserialize_protobuf_with_compiled_classes(value, self.deserialize.value_schema_str)
-            elif self.deserialize.value_schema_type == "JSON":
-                return self._json_deserializer(value)
-            else:
-                raise ValueError("Invalid value_schema_type")
+        if value and (self.deserialize and self.deserialize.value_schema_type):
+            deserializer = get_deserializer(
+                self.deserialize.value_schema_type,
+                self.deserialize.value_schema_str,
+            )
+            deserialized_value = deserializer.deserialize(value)
+
+            if self.deserialize.value_output_serializer:
+                return serialize_to_output_type(
+                    deserialized_value,
+                    self.deserialize.value_output_serializer,
+                )
+
+            return deserialized_value
+
         return value
 
     @property
@@ -81,7 +90,7 @@ class ConsumerRecordRecords(KafkaEventBase):
         return self["headers"]
 
 
-class ConsumerRecord(KafkaEvent):
+class ConsumerRecords(KafkaEvent):
     """Self-managed or MSK Apache Kafka event trigger
     Documentation:
     --------------

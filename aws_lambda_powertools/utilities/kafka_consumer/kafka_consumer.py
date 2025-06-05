@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
-from aws_lambda_powertools.utilities.kafka_consumer.consumer_record import ConsumerRecord
+from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import ConsumerRecords
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -16,7 +16,7 @@ def kafka_consumer(
     handler: Callable[[Any, LambdaContext], Any],
     event: dict[str, Any],
     context: LambdaContext,
-    schema_registry_config: Any | None = None,
+    schema_config: Any | None = None,
 ):
     """Middleware to create an instance of the passed in event source data class
 
@@ -42,4 +42,4 @@ def kafka_consumer(
         def handler(event: S3Event, context):
              return {"key": event.object_key}
     """
-    return handler(ConsumerRecord(event, schema_registry_config), context)
+    return handler(ConsumerRecords(event, schema_config), context)

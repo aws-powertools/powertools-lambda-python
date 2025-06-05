@@ -76,7 +76,8 @@ all = [
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
 datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
-kafka-consumer = ["avro", "protobuf"]
+kafka-consumer-avro = ["avro"]
+kafka-consumer-protobuf = ["protobuf"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = { extras = ["toml"], version = "^7.6" }
@@ -129,6 +130,7 @@ datadog-lambda = "^6.106.0"
 mkdocs-llmstxt = "^0.2.0"
 avro = "^1.12.0"
 protobuf = "^6.30.2"
+types-protobuf = "^6.30.2.20250516"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
