@@ -27,8 +27,8 @@ class ConsumerRecordRecords(KafkaEventBase):
         key = self.get("key")
         if key and (self.deserialize and self.deserialize.key_schema_type):
             deserializer = get_deserializer(
-                self.deserialize.value_schema_type,
-                self.deserialize.value_schema_str,
+                self.deserialize.key_schema_type,
+                self.deserialize.key_schema_str,
             )
             deserialized_key = deserializer.deserialize(key)
 

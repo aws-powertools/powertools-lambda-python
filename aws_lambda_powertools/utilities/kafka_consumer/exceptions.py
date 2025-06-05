@@ -1,16 +1,16 @@
-class KafkaConsumerAvroSchemaMismatchError(Exception):
+class KafkaConsumerAvroSchemaParserError(Exception):
     """
-    Avro schema mismatch
+    Error raised when parsing Avro schema definition fails.
     """
 
 
 class KafkaConsumerDeserializationError(Exception):
     """
-    Avro schema impossible to deserialize
+    Error raised when message deserialization fails.
     """
 
 
-class KafkaConsumerAvroMissingSchemaError(Exception):
+class KafkaConsumerMissingSchemaError(Exception):
     """
-    Avro schema mismatch
+    Error raised when a required schema is not provided.
     """

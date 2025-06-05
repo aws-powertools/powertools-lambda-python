@@ -8,6 +8,7 @@ from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import Cons
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -16,30 +17,44 @@ def kafka_consumer(
     handler: Callable[[Any, LambdaContext], Any],
     event: dict[str, Any],
     context: LambdaContext,
-    schema_config: Any | None = None,
+    schema_config: SchemaConfig | None = None,
 ):
-    """Middleware to create an instance of the passed in event source data class
+    """
+    Decorator for processing Kafka consumer records in AWS Lambda functions.
+
+    This decorator transforms the raw Lambda event into a ConsumerRecords object,
+    making it easier to process Kafka messages with optional schema validation
+    and deserialization.
 
     Parameters
     ----------
-    handler: Callable
-        Lambda's handler
-    event: dict[str, Any]
-        Lambda's Event
-    context: LambdaContext
-        Lambda's Context
-    data_class: type[DictWrapper]
-        Data class type to instantiate
+    handler : Callable[[Any, LambdaContext], Any]
+        The Lambda handler function being decorated.
+    event : dict[str, Any]
+        The Lambda event containing Kafka records.
+    context : LambdaContext
+        The Lambda context object.
+    schema_config : SchemaConfig, optional
+        Schema configuration for deserializing Kafka records.
+        Must be an instance of SchemaConfig.
 
-    Example
+    Returns
+    -------
+    Any
+        The return value from the handler function.
+
+    Examples
     --------
-
-    **Sample usage**
-
-        from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
-
-        @event_source(data_class=S3Event)
-        def handler(event: S3Event, context):
-             return {"key": event.object_key}
+    >>> from aws_lambda_powertools.utilities.kafka_consumer import kafka_consumer, SchemaConfig
+    >>>
+    >>> # With schema validation using SchemaConfig
+    >>> schema_config = SchemaConfig(value_schema_type="JSON")
+    >>>
+    >>> @kafka_consumer(schema_config=schema_config)
+    >>> def handler_with_schema(records, context):
+    >>>     for record in records:
+    >>>         # record.value will be automatically deserialized according to schema_config
+    >>>         process_message(record.value)
+    >>>     return {"statusCode": 200}
     """
     return handler(ConsumerRecords(event, schema_config), context)

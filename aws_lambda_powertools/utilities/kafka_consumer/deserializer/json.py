@@ -7,7 +7,43 @@ from aws_lambda_powertools.utilities.kafka_consumer.exceptions import KafkaConsu
 
 
 class JsonDeserializer(DeserializerBase):
+    """
+    Deserializer for JSON formatted data.
+
+    This class provides functionality to deserialize JSON data from bytes or string
+    into Python dictionaries.
+    """
+
     def deserialize(self, data: bytes | str) -> dict:
+        """
+        Deserialize JSON data to a Python dictionary.
+
+        Parameters
+        ----------
+        data : bytes or str
+            The JSON data to deserialize. If provided as bytes, it will be decoded as UTF-8.
+            If provided as a string, it's assumed to be base64-encoded and will be decoded first.
+
+        Returns
+        -------
+        dict
+            Deserialized data as a dictionary.
+
+        Raises
+        ------
+        KafkaConsumerDeserializationError
+            When the data cannot be deserialized as valid JSON.
+
+        Examples
+        --------
+        >>> deserializer = JsonDeserializer()
+        >>> json_data = '{"key": "value", "number": 123}'
+        >>> try:
+        ...     result = deserializer.deserialize(json_data)
+        ...     print(result["key"])  # Output: value
+        ... except KafkaConsumerDeserializationError as e:
+        ...     print(f"Failed to deserialize: {e}")
+        """
         try:
             value = self._decode_input(data)
             return json.loads(value.decode("utf-8"))

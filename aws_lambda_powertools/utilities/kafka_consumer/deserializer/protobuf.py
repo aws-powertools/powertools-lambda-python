@@ -11,10 +11,49 @@ from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
 
 
 class ProtobufDeserializer(DeserializerBase):
+    """
+    Deserializer for Protocol Buffer formatted data.
+
+    This class provides functionality to deserialize Protocol Buffer binary data
+    into Python dictionaries using the provided Protocol Buffer message class.
+    """
+
     def __init__(self, message_class: Any):
         self.message_class = message_class
 
     def deserialize(self, data: bytes | str) -> dict:
+        """
+        Deserialize Protocol Buffer binary data to a Python dictionary.
+
+        Parameters
+        ----------
+        data : bytes or str
+            The Protocol Buffer binary data to deserialize. If provided as a string,
+            it's assumed to be base64-encoded and will be decoded first.
+
+        Returns
+        -------
+        dict
+            Deserialized data as a dictionary with field names preserved from the
+            Protocol Buffer definition.
+
+        Raises
+        ------
+        KafkaConsumerDeserializationError
+            When the data cannot be deserialized according to the message class,
+            typically due to data format incompatibility or incorrect message class.
+
+        Example
+        --------
+        >>> # Assuming proper protobuf setup
+        >>> deserializer = ProtobufDeserializer(my_proto_module.MyMessage)
+        >>> proto_data = b'...'  # binary protobuf data
+        >>> try:
+        ...     result = deserializer.deserialize(proto_data)
+        ...     # Process the deserialized dictionary
+        ... except KafkaConsumerDeserializationError as e:
+        ...     print(f"Failed to deserialize: {e}")
+        """
         try:
             value = self._decode_input(data)
             message = self.message_class()

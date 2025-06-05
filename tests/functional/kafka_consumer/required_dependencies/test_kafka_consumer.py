@@ -13,22 +13,6 @@ from aws_lambda_powertools.utilities.kafka_consumer.kafka_consumer import kafka_
 from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
 
 
-class LambdaContext:
-    def __init__(self):
-        self.function_name = "test-func"
-        self.memory_limit_in_mb = 128
-        self.invoked_function_arn = "arn:aws:lambda:eu-west-1:809313241234:function:test-func"
-        self.aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-    def get_remaining_time_in_millis(self) -> int:
-        return 1000
-
-
-@pytest.fixture
-def lambda_context():
-    return LambdaContext()
-
-
 @pytest.fixture
 def avro_schema():
     return """
@@ -66,12 +50,6 @@ def avro_encoded_data():
 
 
 @pytest.fixture
-def json_encoded_data():
-    data = {"name": "John Doe", "age": 30}
-    return base64.b64encode(json.dumps(data).encode("utf-8")).decode("utf-8")
-
-
-@pytest.fixture
 def kafka_event_with_avro_data(avro_encoded_data):
     return {
         "eventSource": "aws:kafka",
@@ -93,56 +71,12 @@ def kafka_event_with_avro_data(avro_encoded_data):
     }
 
 
-@pytest.fixture
-def kafka_event_with_json_data(json_encoded_data):
-    return {
-        "eventSource": "aws:kafka",
-        "eventSourceArn": "arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abcdefg",
-        "records": {
-            "my-topic-1": [
-                {
-                    "topic": "my-topic-1",
-                    "partition": 0,
-                    "offset": 15,
-                    "timestamp": 1545084650987,
-                    "timestampType": "CREATE_TIME",
-                    "key": None,
-                    "value": json_encoded_data,
-                    "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
-                },
-            ],
-        },
-    }
-
-
 # Test Models
 
 
 class UserSchema(BaseModel):
     name: str
     age: int
-
-
-@dataclass
-class UserDataClass:
-    name: str
-    age: int
-
-
-class UserDict:
-    def __init__(self, name=None, age=None):
-        self.name = name
-        self.age = age
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(name=data.get("name"), age=data.get("age"))
-
-    def to_dict(self):
-        return {"name": self.name, "age": self.age}
-
-
-# Tests for Kafka Consumer with Avro Deserializer
 
 
 def test_kafka_consumer_with_avro_and_pydantic(kafka_event_with_avro_data, avro_schema, lambda_context):
