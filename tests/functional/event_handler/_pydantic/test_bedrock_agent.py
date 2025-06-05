@@ -5,7 +5,7 @@ import pytest
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, BedrockResponse, Response, content_types
-from aws_lambda_powertools.event_handler.openapi.params import Body
+from aws_lambda_powertools.event_handler.openapi.params import Body, Query
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
 
@@ -343,3 +343,46 @@ def test_bedrock_resolver_with_openapi_extensions():
 
     # THEN the OpenAPI schema must contain the "x-requireConfirmation" extension at the operation level
     assert schema["paths"]["/"]["get"]["x-requireConfirmation"] == "ENABLED"
+def test_bedrock_agent_with_comma_parameters():
+    # GIVEN a Bedrock Agent resolver
+    app = BedrockAgentResolver()
+    received_query = None
+
+    @app.post("/sql-query", description="Run a SQL query")
+    def run_sql_query(query: Annotated[str, Query()]):
+        nonlocal received_query
+        received_query = query
+        return {"result": "Query executed"}
+
+    # WHEN calling the event handler with a parameter containing commas
+    event = {
+        "actionGroup": "TestActionGroup",
+        "messageVersion": "1.0",
+        "sessionId": "12345678912345",
+        "sessionAttributes": {},
+        "promptSessionAttributes": {},
+        "inputText": "Run a SQL query",
+        "agent": {
+            "alias": "TEST",
+            "name": "test",
+            "version": "1",
+            "id": "test123",
+        },
+        "httpMethod": "POST",
+        "apiPath": "/sql-query",
+        "parameters": [
+            {
+                "name": "query",
+                "type": "string",
+                "value": "SELECT a.source_name, b.thing FROM table",
+            },
+        ],
+    }
+
+    result = app(event, {})
+
+    # THEN the parameter with commas should be correctly passed to the handler
+    assert received_query == "SELECT a.source_name, b.thing FROM table"
+    assert result["response"]["httpStatusCode"] == 200
+    body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
+    assert body["result"] == "Query executed"

@@ -62,3 +62,34 @@ def test_bedrock_agent_event_with_post():
     assert properties[1].name == raw_properties[1]["name"]
     assert properties[1].type == raw_properties[1]["type"]
     assert properties[1].value == raw_properties[1]["value"]
+
+def test_bedrock_agent_event_with_comma_parameters():
+    event = {
+        "actionGroup": "TestActionGroup",
+        "messageVersion": "1.0",
+        "sessionId": "12345678912345",
+        "sessionAttributes": {},
+        "promptSessionAttributes": {},
+        "inputText": "Run a SQL query",
+        "agent": {
+            "alias": "TEST",
+            "name": "test",
+            "version": "1",
+            "id": "test123",
+        },
+        "httpMethod": "POST",
+        "apiPath": "/sql-query",
+        "parameters": [
+            {
+                "name": "query",
+                "type": "string",
+                "value": "SELECT a.source_name, b.thing FROM table",
+            },
+        ],
+    }
+
+    parsed_event = BedrockAgentEvent(event)
+
+    assert parsed_event.query_string_parameters["query"] == "SELECT a.source_name, b.thing FROM table"
+    assert parsed_event.resolved_query_string_parameters["query"] == ["SELECT a.source_name, b.thing FROM table"]
+    assert len(parsed_event.resolved_query_string_parameters["query"]) == 1
