@@ -63,6 +63,7 @@ def test_bedrock_agent_event_with_post():
     assert properties[1].type == raw_properties[1]["type"]
     assert properties[1].value == raw_properties[1]["value"]
 
+
 def test_bedrock_agent_event_with_comma_parameters():
     event = {
         "actionGroup": "TestActionGroup",

@@ -343,6 +343,8 @@ def test_bedrock_resolver_with_openapi_extensions():
 
     # THEN the OpenAPI schema must contain the "x-requireConfirmation" extension at the operation level
     assert schema["paths"]["/"]["get"]["x-requireConfirmation"] == "ENABLED"
+
+
 def test_bedrock_agent_with_comma_parameters():
     # GIVEN a Bedrock Agent resolver
     app = BedrockAgentResolver()
