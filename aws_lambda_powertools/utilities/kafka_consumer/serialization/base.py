@@ -28,6 +28,7 @@ class OutputSerializerBase(ABC):
     ...             return output_class(**data)
     ...         return data  # Return as is if no output class provided
     """
+
     @abstractmethod
     def serialize(self, data: dict[str, Any], output_class: type[T] | None = None) -> T | dict[str, Any]:
         """
