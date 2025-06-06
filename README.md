@@ -67,6 +67,7 @@ The following companies, among others, use Powertools:
 * [globaldatanet](https://globaldatanet.com/)
 * [Guild](https://guild.com/)
 * [IMS](https://ims.tech/)
+* [Instil](https://instil.co/)
 * [Jit Security](https://www.jit.io/)
 * [LocalStack](https://www.localstack.cloud/)
 * [Propellor.ai](https://www.propellor.ai/)
