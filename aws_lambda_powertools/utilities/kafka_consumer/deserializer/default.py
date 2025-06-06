@@ -1,24 +1,24 @@
 from __future__ import annotations
 
+import base64
 from typing import Any
 
 from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
 
 
-class NoOpDeserializer(DeserializerBase):
+class DefaultDeserializer(DeserializerBase):
     """
-    A pass-through deserializer that performs no transformation on the input data.
+    A default deserializer that performs base64 decode + binary decode on the input data.
 
-    This deserializer simply returns the input data unchanged, which is useful when
-    no deserialization is needed or when handling raw data formats.
+    This deserializer simply returns the input data with base64 decode, which is useful when
+    no customized deserialization is needed or when handling raw data formats.
     """
 
     def deserialize(self, data: bytes | str) -> dict[str, Any]:
         """
-        Return the input data unchanged.
+        Return the input data base64 decoded.
 
-        This method implements the deserialize interface but performs no transformation,
-        simply returning the input data as-is.
+        This method implements the deserialize interface and performs base64 decode.
 
         Parameters
         ----------
@@ -28,9 +28,7 @@ class NoOpDeserializer(DeserializerBase):
         Returns
         -------
         dict[str, Any]
-            The input data unchanged. Note that despite the type annotation,
-            this method returns the exact same object that was passed in,
-            preserving its original type.
+            The input data base64 decoded.
 
         Example
         --------
@@ -46,4 +44,4 @@ class NoOpDeserializer(DeserializerBase):
         >>> result = deserializer.deserialize(bytes_data)
         >>> print(result == bytes_data)  # Output: True
         """
-        return data
+        return base64.b64decode(data).decode("utf-8")

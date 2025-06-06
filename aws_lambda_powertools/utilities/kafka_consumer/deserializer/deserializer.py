@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.utilities.kafka_consumer.deserializer.default import DefaultDeserializer
 from aws_lambda_powertools.utilities.kafka_consumer.deserializer.json import JsonDeserializer
-from aws_lambda_powertools.utilities.kafka_consumer.deserializer.no_op import NoOpDeserializer
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
@@ -68,4 +68,5 @@ def get_deserializer(schema_type: str | object, schema_value: Any) -> Deserializ
     elif schema_type == "JSON":
         return JsonDeserializer()
 
-    return NoOpDeserializer()
+    # Default to default deserializer that is base64 decode + bytes decoded
+    return DefaultDeserializer()

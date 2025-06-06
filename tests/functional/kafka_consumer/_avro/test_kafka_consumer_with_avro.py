@@ -87,7 +87,10 @@ def kafka_event_with_avro_data(avro_encoded_value, avro_encoded_key):
 
 
 def test_kafka_consumer_with_avro_and_dataclass(
-    kafka_event_with_avro_data, avro_value_schema, lambda_context, user_value_dataclass,
+    kafka_event_with_avro_data,
+    avro_value_schema,
+    lambda_context,
+    user_value_dataclass,
 ):
     """Test Kafka consumer with Avro deserialization and dataclass output serialization."""
 
@@ -120,7 +123,10 @@ def test_kafka_consumer_with_avro_and_dataclass(
 
 
 def test_kafka_consumer_with_avro_and_custom_object(
-    kafka_event_with_avro_data, avro_value_schema, lambda_context, user_value_dict,
+    kafka_event_with_avro_data,
+    avro_value_schema,
+    lambda_context,
+    user_value_dict,
 ):
     """Test Kafka consumer with Avro deserialization and custom object serialization."""
 
@@ -280,7 +286,12 @@ def test_kafka_consumer_with_key_deserialization(
 
 
 def test_kafka_consumer_with_different_serializers_for_key_and_value(
-    kafka_event_with_avro_data, lambda_context, avro_value_schema, avro_key_schema, user_key_dataclass, user_value_dict,
+    kafka_event_with_avro_data,
+    lambda_context,
+    avro_value_schema,
+    avro_key_schema,
+    user_key_dataclass,
+    user_value_dict,
 ):
     """Test using different serializer types for key and value."""
 
