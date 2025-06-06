@@ -112,7 +112,7 @@ class BedrockAgentEvent(BaseProxyEvent):
         parameters = self.get("parameters") or []
         return {x["name"]: x["value"] for x in parameters}
 
-    @cached_property
+    @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
         """
         Override the base implementation to prevent splitting parameter values by commas.

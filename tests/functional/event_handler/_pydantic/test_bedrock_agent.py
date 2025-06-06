@@ -348,13 +348,10 @@ def test_bedrock_resolver_with_openapi_extensions():
 def test_bedrock_agent_with_comma_parameters():
     # GIVEN a Bedrock Agent resolver
     app = BedrockAgentResolver()
-    received_query = None
 
     @app.post("/sql-query", description="Run a SQL query")
     def run_sql_query(query: Annotated[str, Query()]):
-        nonlocal received_query
-        received_query = query
-        return {"result": "Query executed"}
+        return {"result": query}
 
     # WHEN calling the event handler with a parameter containing commas
     event = {
@@ -384,7 +381,5 @@ def test_bedrock_agent_with_comma_parameters():
     result = app(event, {})
 
     # THEN the parameter with commas should be correctly passed to the handler
-    assert received_query == "SELECT a.source_name, b.thing FROM table"
-    assert result["response"]["httpStatusCode"] == 200
     body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
-    assert body["result"] == "Query executed"
+    assert body["result"] == "SELECT a.source_name, b.thing FROM table"
