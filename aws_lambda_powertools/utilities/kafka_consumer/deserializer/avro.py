@@ -30,7 +30,7 @@ class AvroDeserializer(DeserializerBase):
                 f"Invalid Avro schema. Please ensure the provided avro schema is valid: {type(e).__name__}: {str(e)}",
             ) from e
 
-    def deserialize(self, data: bytes | str) -> dict[str, Any]:
+    def deserialize(self, data: bytes | str) -> object:
         """
         Deserialize Avro binary data to a Python dictionary.
 

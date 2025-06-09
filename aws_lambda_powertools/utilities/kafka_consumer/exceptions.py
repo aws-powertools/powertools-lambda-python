@@ -14,3 +14,9 @@ class KafkaConsumerMissingSchemaError(Exception):
     """
     Error raised when a required schema is not provided.
     """
+
+
+class KafkaConsumerOutputSerializerError(Exception):
+    """
+    Error raised when output serializer fails.
+    """

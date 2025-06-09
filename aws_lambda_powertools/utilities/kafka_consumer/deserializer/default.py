@@ -14,7 +14,7 @@ class DefaultDeserializer(DeserializerBase):
     no customized deserialization is needed or when handling raw data formats.
     """
 
-    def deserialize(self, data: bytes | str) -> dict[str, Any]:
+    def deserialize(self, data: bytes | str) -> str:
         """
         Return the input data base64 decoded.
 

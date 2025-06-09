@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.utilities.kafka_consumer.exceptions import KafkaConsumerOutputSerializerError
 from aws_lambda_powertools.utilities.kafka_consumer.serialization.base import OutputSerializerBase
 
 if TYPE_CHECKING:
@@ -13,14 +14,11 @@ class CustomDictOutputSerializer(OutputSerializerBase):
         if output_class is None:
             return data
 
-        if not hasattr(output_class, "to_dict") and not hasattr(output_class, "from_dict"):
-            raise ValueError("Output class must have to_dict or from_dict method")
-
-        if hasattr(output_class, "from_dict"):
-            return output_class.from_dict(data)
+        if not hasattr(output_class, "to_dict"):
+            raise KafkaConsumerOutputSerializerError("The output serialization class must have to_dict method")
 
         # Instantiate and then populate
-        instance = output_class()
+        instance = output_class
         for key, value in data.items():
             setattr(instance, key, value)
         return instance

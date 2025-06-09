@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-class KafkaEventBase(DictWrapper):
+class KafkaEventRecordBase(DictWrapper):
     @property
     def topic(self) -> str:
         """The Kafka topic."""
@@ -37,7 +37,7 @@ class KafkaEventBase(DictWrapper):
         return self["timestampType"]
 
 
-class KafkaEventRecord(KafkaEventBase):
+class KafkaEventRecord(KafkaEventRecordBase):
     @property
     def key(self) -> str | None:
         """
@@ -85,18 +85,7 @@ class KafkaEventRecord(KafkaEventBase):
         return CaseInsensitiveDict((k, bytes(v)) for chunk in self.headers for k, v in chunk.items())
 
 
-class KafkaEvent(DictWrapper):
-    """Self-managed or MSK Apache Kafka event trigger
-    Documentation:
-    --------------
-    - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
-    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
-    """
-
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
-        self._records: Iterator[KafkaEventRecord] | None = None
-
+class KafkaEventBase(DictWrapper):
     @property
     def event_source(self) -> str:
         """The AWS service from which the Kafka event record originated."""
@@ -116,6 +105,19 @@ class KafkaEvent(DictWrapper):
     def decoded_bootstrap_servers(self) -> list[str]:
         """The decoded Kafka bootstrap URL."""
         return self.bootstrap_servers.split(",")
+
+
+class KafkaEvent(KafkaEventBase):
+    """Self-managed or MSK Apache Kafka event trigger
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
+    """
+
+    def __init__(self, data: dict[str, Any]):
+        super().__init__(data)
+        self._records: Iterator[KafkaEventRecord] | None = None
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:

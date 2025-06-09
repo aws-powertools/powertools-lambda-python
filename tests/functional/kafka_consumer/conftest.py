@@ -81,7 +81,7 @@ class UserValueDict:
 
 @pytest.fixture
 def user_value_dict():
-    return UserValueDict
+    return UserValueDict()
 
 
 class UserKeyDict:

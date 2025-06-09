@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, overload
 
 
 class DeserializerBase(ABC):
@@ -29,7 +29,7 @@ class DeserializerBase(ABC):
     """
 
     @abstractmethod
-    def deserialize(self, data: bytes | str) -> dict[str, Any]:
+    def deserialize(self, data: bytes | str) -> dict[str, Any] | str | object:
         """
         Deserialize input data to a Python dictionary.
 

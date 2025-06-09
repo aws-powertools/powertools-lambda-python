@@ -51,4 +51,4 @@ class OutputSerializerBase(ABC):
             An instance of output_class if provided, otherwise a processed dictionary.
             The generic type T represents the type of the output_class.
         """
-        pass
+        raise NotImplementedError("Subclasses must implement this method")
