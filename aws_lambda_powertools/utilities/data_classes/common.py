@@ -168,7 +168,7 @@ class BaseProxyEvent(DictWrapper):
     def multi_value_query_string_parameters(self) -> dict[str, list[str]]:
         return self.get("multiValueQueryStringParameters") or {}
 
-    @cached_property
+    @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
         """
         This property determines the appropriate query string parameter to be used
