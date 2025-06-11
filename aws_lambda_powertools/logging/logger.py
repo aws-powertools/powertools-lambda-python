@@ -1197,6 +1197,10 @@ class Logger:
 
         tracer_id = get_tracer_id()
 
+        # no buffer config? return
+        if not self._buffer_config:
+            return
+
         # Flushing log without a tracer id? Return
         if not tracer_id:
             return
@@ -1204,9 +1208,6 @@ class Logger:
         # is buffer empty? return
         buffer = self._buffer_cache.get(tracer_id)
         if not buffer:
-            return
-
-        if not self._buffer_config:
             return
 
         # Check ALC level against buffer level
