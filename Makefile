@@ -11,6 +11,8 @@ dev:
 	pre-commit install
 
 dev-quality-code:
+	rm -rf poetry.lock
+	poetry lock
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
 	poetry install --extras "all redis datamasking valkey"
