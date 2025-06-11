@@ -49,5 +49,5 @@ class JsonDeserializer(DeserializerBase):
             return json.loads(base64.b64decode(data).decode("utf-8"))
         except Exception as e:
             raise KafkaConsumerDeserializationError(
-                f"JSON deserialization error: {type(e).__name__}: {str(e)}",
+                f"Error trying to deserialize json data -  {type(e).__name__}: {str(e)}",
             ) from e
