@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 from abc import ABC, abstractmethod
-from typing import Any, overload
+from typing import Any
 
 
 class DeserializerBase(ABC):
@@ -29,7 +29,7 @@ class DeserializerBase(ABC):
     """
 
     @abstractmethod
-    def deserialize(self, data: bytes | str) -> dict[str, Any] | str | object:
+    def deserialize(self, data: str) -> dict[str, Any] | str | object:
         """
         Deserialize input data to a Python dictionary.
 
@@ -38,8 +38,8 @@ class DeserializerBase(ABC):
 
         Parameters
         ----------
-        data : bytes or str
-            The data to deserialize, either as bytes or as a string.
+        data : str
+            The data to deserialize, it's always a base64 encoded string
 
         Returns
         -------
@@ -49,14 +49,9 @@ class DeserializerBase(ABC):
         raise NotImplementedError("Subclasses must implement the deserialize method")
 
     def _decode_input(self, data: bytes | str) -> bytes:
-        if isinstance(data, str):
+        try:
             return base64.b64decode(data)
-        elif isinstance(data, bytes):
-            return data
-        else:
-            try:
-                return base64.b64decode(data)
-            except Exception as e:
-                raise TypeError(
-                    f"Expected bytes or base64-encoded string, got {type(data).__name__}. Error: {str(e)}",
-                ) from e
+        except Exception as e:
+            raise TypeError(
+                f"Expected bytes or base64-encoded string, got {type(data).__name__}. Error: {str(e)}",
+            ) from e

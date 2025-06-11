@@ -61,5 +61,5 @@ class ProtobufDeserializer(DeserializerBase):
             return MessageToDict(message, preserving_proto_field_name=True)
         except Exception as e:
             raise KafkaConsumerDeserializationError(
-                f"Protocol Buffer deserialization error: {type(e).__name__}: {str(e)}",
+                f"Error trying to deserialize protobuf data - {type(e).__name__}: {str(e)}",
             ) from e

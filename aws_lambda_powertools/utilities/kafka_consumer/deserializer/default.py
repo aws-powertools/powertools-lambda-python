@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-from typing import Any
 
 from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
 

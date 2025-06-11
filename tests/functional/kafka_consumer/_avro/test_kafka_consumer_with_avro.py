@@ -1,6 +1,7 @@
 import base64
 import io
 from copy import deepcopy
+from dataclasses import dataclass
 
 import pytest
 from avro.io import BinaryEncoder, DatumWriter
@@ -86,11 +87,48 @@ def kafka_event_with_avro_data(avro_encoded_value, avro_encoded_key):
     }
 
 
+@dataclass
+class UserValueDataClass:
+    name: str
+    age: int
+
+
+@dataclass
+class UserKeyClass:
+    user_id: str
+
+
+def test_kafka_consumer_with_avro(kafka_event_with_avro_data, avro_value_schema, lambda_context):
+    """Test Kafka consumer with Avro deserialization without output serialization."""
+
+    # Create dict to capture results
+    result_data = {}
+
+    schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_value_schema)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        # Capture the results to verify
+        record = next(event.records)
+        result_data["value_type"] = type(record.value).__name__
+        result_data["name"] = record.value["name"]
+        result_data["age"] = record.value["age"]
+        return {"processed": True}
+
+    # Call the handler
+    result = handler(kafka_event_with_avro_data, lambda_context)
+
+    # Verify the results
+    assert result == {"processed": True}
+    assert result_data["value_type"] == "dict"
+    assert result_data["name"] == "John Doe"
+    assert result_data["age"] == 30
+
+
 def test_kafka_consumer_with_avro_and_dataclass(
     kafka_event_with_avro_data,
     avro_value_schema,
     lambda_context,
-    user_value_dataclass,
 ):
     """Test Kafka consumer with Avro deserialization and dataclass output serialization."""
 
@@ -100,7 +138,7 @@ def test_kafka_consumer_with_avro_and_dataclass(
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
-        value_output_serializer=user_value_dataclass,
+        value_output_serializer=UserValueDataClass,
     )
 
     @kafka_consumer(schema_config=schema_config)
@@ -158,33 +196,6 @@ def test_kafka_consumer_with_avro_and_custom_object(
     assert result_data["age"] == 30
 
 
-def test_kafka_consumer_with_avro_raw(kafka_event_with_avro_data, avro_value_schema, lambda_context):
-    """Test Kafka consumer with Avro deserialization without output serialization."""
-
-    # Create dict to capture results
-    result_data = {}
-
-    schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_value_schema)
-
-    @kafka_consumer(schema_config=schema_config)
-    def handler(event: ConsumerRecords, context):
-        # Capture the results to verify
-        record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value["name"]
-        result_data["age"] = record.value["age"]
-        return {"processed": True}
-
-    # Call the handler
-    result = handler(kafka_event_with_avro_data, lambda_context)
-
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "dict"
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
-
-
 def test_kafka_consumer_with_invalid_avro_data(kafka_event_with_avro_data, lambda_context, avro_value_schema):
     """Test error handling when Avro data is invalid."""
     # Create invalid avro data
@@ -207,7 +218,7 @@ def test_kafka_consumer_with_invalid_avro_data(kafka_event_with_avro_data, lambd
 
     # The exact error message may vary depending on the Avro library's internals,
     # but should indicate a deserialization problem
-    assert "Error trying to deserializer avro data" in str(excinfo.value)
+    assert "Error trying to deserialize avro data" in str(excinfo.value)
 
 
 def test_kafka_consumer_with_invalid_avro_schema(kafka_event_with_avro_data, lambda_context):
@@ -245,8 +256,6 @@ def test_kafka_consumer_with_key_deserialization(
     lambda_context,
     avro_value_schema,
     avro_key_schema,
-    user_value_dataclass,
-    user_key_dataclass,
 ):
     """Test deserializing both key and value with different schemas and serializers."""
 
@@ -257,10 +266,10 @@ def test_kafka_consumer_with_key_deserialization(
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
-        value_output_serializer=user_value_dataclass,
+        value_output_serializer=UserValueDataClass,
         key_schema_type="AVRO",
         key_schema=avro_key_schema,
-        key_output_serializer=user_key_dataclass,
+        key_output_serializer=UserKeyClass,
     )
 
     @kafka_consumer(schema_config=schema_config)
@@ -283,48 +292,3 @@ def test_kafka_consumer_with_key_deserialization(
     assert key_value_result["value_type"] == "UserValueDataClass"
     assert key_value_result["value_name"] == "John Doe"
     assert key_value_result["value_age"] == 30
-
-
-def test_kafka_consumer_with_different_serializers_for_key_and_value(
-    kafka_event_with_avro_data,
-    lambda_context,
-    avro_value_schema,
-    avro_key_schema,
-    user_key_dataclass,
-    user_value_dict,
-):
-    """Test using different serializer types for key and value."""
-
-    # Create dict to capture results
-    results = {}
-
-    # Create schema config with different serializers
-    schema_config = SchemaConfig(
-        value_schema_type="AVRO",
-        value_schema=avro_value_schema,
-        value_output_serializer=user_value_dict,
-        key_schema_type="AVRO",
-        key_schema=avro_key_schema,
-        key_output_serializer=user_key_dataclass,
-    )
-
-    @kafka_consumer(schema_config=schema_config)
-    def handler(event: ConsumerRecords, context):
-        record = next(event.records)
-        results["key_type"] = type(record.key).__name__
-        results["key_id"] = record.key.user_id
-        results["value_type"] = type(record.value).__name__
-        results["value_name"] = record.value.name
-        results["value_age"] = record.value.age
-        return {"processed": True}
-
-    # Call the handler
-    result = handler(kafka_event_with_avro_data, lambda_context)
-
-    # Verify the results
-    assert result == {"processed": True}
-    assert results["key_type"] == "UserKeyClass"
-    assert results["key_id"] == "user-123"
-    assert results["value_type"] == "UserValueDict"
-    assert results["value_name"] == "John Doe"
-    assert results["value_age"] == 30

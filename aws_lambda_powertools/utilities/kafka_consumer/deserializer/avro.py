@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import io
-from typing import Any
 
 from avro.io import BinaryDecoder, DatumReader
 from avro.schema import parse as parse_schema
@@ -68,5 +67,5 @@ class AvroDeserializer(DeserializerBase):
             return self.reader.read(decoder)
         except Exception as e:
             raise KafkaConsumerDeserializationError(
-                f"Error trying to deserializer avro data - {type(e).__name__}: {str(e)}",
+                f"Error trying to deserialize avro data - {type(e).__name__}: {str(e)}",
             ) from e
