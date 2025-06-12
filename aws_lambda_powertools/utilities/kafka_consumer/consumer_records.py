@@ -41,7 +41,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
 
             return deserialized_key
 
-        return key
+        return key  # MISSING DESERIALIZER
 
     @cached_property
     def value(self) -> Any:
@@ -61,7 +61,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
 
             return deserialized_value
 
-        return value
+        return value  # MISSING DESERIALIZER
 
     @property
     def original_value(self) -> str:
