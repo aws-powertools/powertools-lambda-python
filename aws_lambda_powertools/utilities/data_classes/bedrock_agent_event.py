@@ -113,6 +113,19 @@ class BedrockAgentEvent(BaseProxyEvent):
         return {x["name"]: x["value"] for x in parameters}
 
     @property
+    def resolved_query_string_parameters(self) -> dict[str, list[str]]:
+        """
+        Override the base implementation to prevent splitting parameter values by commas.
+
+        For Bedrock Agent events, parameters are already properly structured and should not
+        be split by commas as they might contain commas as part of their actual values
+        (e.g., SQL queries).
+        """
+        # Return each parameter value as a single-item list without splitting by commas
+        parameters = self.get("parameters") or []
+        return {x["name"]: [x["value"]] for x in parameters}
+
+    @property
     def resolved_headers_field(self) -> dict[str, Any]:
         return {}
 
