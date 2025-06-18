@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 
-from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
+from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
 
 
 class DefaultDeserializer(DeserializerBase):

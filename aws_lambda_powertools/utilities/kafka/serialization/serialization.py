@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import is_dataclass
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.utilities.kafka_consumer.serialization.custom_dict import CustomDictOutputSerializer
-from aws_lambda_powertools.utilities.kafka_consumer.serialization.dataclass import DataclassOutputSerializer
+from aws_lambda_powertools.utilities.kafka.serialization.custom_dict import CustomDictOutputSerializer
+from aws_lambda_powertools.utilities.kafka.serialization.dataclass import DataclassOutputSerializer
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.kafka_consumer.serialization.types import T
+    from aws_lambda_powertools.utilities.kafka.serialization.types import T
 
 
 def _get_output_serializer(output_class: type[T] | None = None) -> Any:
@@ -24,7 +24,7 @@ def _get_output_serializer(output_class: type[T] | None = None) -> Any:
         return DataclassOutputSerializer()
 
     if _is_pydantic_model(output_class):
-        from aws_lambda_powertools.utilities.kafka_consumer.serialization.pydantic import PydanticOutputSerializer
+        from aws_lambda_powertools.utilities.kafka.serialization.pydantic import PydanticOutputSerializer
 
         return PydanticOutputSerializer()
 

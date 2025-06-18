@@ -4,13 +4,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import ConsumerRecords
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
+from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerDeserializationError,
     KafkaConsumerMissingSchemaError,
 )
-from aws_lambda_powertools.utilities.kafka_consumer.kafka_consumer import kafka_consumer
-from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
+from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
+from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
 
 # Import the generated protobuf classes
 from .user_pb2 import Key, User

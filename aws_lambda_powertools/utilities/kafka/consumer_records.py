@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 from aws_lambda_powertools.utilities.data_classes.kafka_event import KafkaEventBase, KafkaEventRecordBase
-from aws_lambda_powertools.utilities.kafka_consumer.deserializer.deserializer import get_deserializer
-from aws_lambda_powertools.utilities.kafka_consumer.serialization.serialization import serialize_to_output_type
+from aws_lambda_powertools.utilities.kafka.deserializer.deserializer import get_deserializer
+from aws_lambda_powertools.utilities.kafka.serialization.serialization import serialize_to_output_type
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
+    from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
 
 
 class ConsumerRecordSchemaMetadata(DictWrapper):

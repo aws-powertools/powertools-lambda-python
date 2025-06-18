@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import KafkaConsumerOutputSerializerError
-from aws_lambda_powertools.utilities.kafka_consumer.serialization.base import OutputSerializerBase
+from aws_lambda_powertools.utilities.kafka.exceptions import KafkaConsumerOutputSerializerError
+from aws_lambda_powertools.utilities.kafka.serialization.base import OutputSerializerBase
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.kafka_consumer.serialization.types import T
+    from aws_lambda_powertools.utilities.kafka.serialization.types import T
 
 
 class CustomDictOutputSerializer(OutputSerializerBase):

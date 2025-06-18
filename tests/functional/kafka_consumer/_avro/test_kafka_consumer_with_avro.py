@@ -7,14 +7,14 @@ import pytest
 from avro.io import BinaryEncoder, DatumWriter
 from avro.schema import parse as parse_schema
 
-from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import ConsumerRecords
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
+from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
     KafkaConsumerMissingSchemaError,
 )
-from aws_lambda_powertools.utilities.kafka_consumer.kafka_consumer import kafka_consumer
-from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
+from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
+from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
 
 
 @pytest.fixture

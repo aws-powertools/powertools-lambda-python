@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import KafkaConsumerMissingSchemaError
+from aws_lambda_powertools.utilities.kafka.exceptions import KafkaConsumerMissingSchemaError
 
 
 class SchemaConfig:

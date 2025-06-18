@@ -4,8 +4,8 @@ from typing import Any
 
 from google.protobuf.json_format import MessageToDict
 
-from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
+from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
+from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerDeserializationError,
 )
 

@@ -5,8 +5,8 @@ import io
 from avro.io import BinaryDecoder, DatumReader
 from avro.schema import parse as parse_schema
 
-from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
-from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
+from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
+from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
 )
