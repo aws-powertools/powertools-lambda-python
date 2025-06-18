@@ -1,8 +1,9 @@
 import base64
 import json
+from typing import Literal, Union
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
@@ -57,6 +58,44 @@ def test_kafka_consumer_with_json_value_and_pydantic(kafka_event_with_json_data,
 
     # Create dict to capture results
     result_data = {}
+
+    schema_config = SchemaConfig(value_schema_type="JSON", value_output_serializer=UserValueModel)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        # Capture the results to verify
+        record = next(event.records)
+        result_data["value_type"] = type(record.value).__name__
+        result_data["name"] = record.value.name
+        result_data["age"] = record.value.age
+        return {"processed": True}
+
+    # Call the handler
+    result = handler(kafka_event_with_json_data, lambda_context)
+
+    # Verify the results
+    assert result == {"processed": True}
+    assert result_data["value_type"] == "UserValueModel"
+    assert result_data["name"] == "John Doe"
+    assert result_data["age"] == 30
+
+
+def test_kafka_consumer_with_json_value_and_union_tag(kafka_event_with_json_data, lambda_context):
+    """Test Kafka consumer with JSON deserialization and dataclass output serialization."""
+
+    # Create dict to capture results
+    result_data = {}
+
+    class UserValueModel(BaseModel):
+        name: Literal["John Doe"]
+        age: int
+
+    class UserValueModel2(BaseModel):
+        name: Literal["Not using"]
+        email: str
+
+    class Model(BaseModel):
+        name: Union[UserValueModel, UserValueModel2] = Field(discriminator="name")
 
     schema_config = SchemaConfig(value_schema_type="JSON", value_output_serializer=UserValueModel)
 
