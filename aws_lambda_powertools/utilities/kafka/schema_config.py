@@ -77,8 +77,8 @@ class SchemaConfig:
             )
 
         self.value_schema_type = value_schema_type
-        self.value_schema_str = value_schema
+        self.value_schema = value_schema
         self.value_output_serializer = value_output_serializer
         self.key_schema_type = key_schema_type
-        self.key_schema_str = key_schema
+        self.key_schema = key_schema
         self.key_output_serializer = key_output_serializer

@@ -7,23 +7,25 @@ from aws_lambda_powertools.utilities.kafka.serialization.custom_dict import Cust
 from aws_lambda_powertools.utilities.kafka.serialization.dataclass import DataclassOutputSerializer
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.kafka.serialization.types import T
 
 
-def _get_output_serializer(output_class: type[T] | None = None) -> Any:
+def _get_output_serializer(output: type[T] | Callable | None = None) -> Any:
     """
     Returns the appropriate serializer for the given output class.
     Uses lazy imports to avoid unnecessary dependencies.
     """
-    if output_class is None:
+    if output is None:
         # Return a pass-through serializer if no output class is specified
         return CustomDictOutputSerializer()
 
     # Check if it's a dataclass
-    if is_dataclass(output_class):
+    if is_dataclass(output):
         return DataclassOutputSerializer()
 
-    if _is_pydantic_model(output_class):
+    if _is_pydantic_model(output):
         from aws_lambda_powertools.utilities.kafka.serialization.pydantic import PydanticOutputSerializer
 
         return PydanticOutputSerializer()
@@ -41,9 +43,12 @@ def _is_pydantic_model(obj: Any) -> bool:
     return False
 
 
-def serialize_to_output_type(data: object | dict[str, Any], output_class: type[T] | None = None) -> T | dict[str, Any]:
+def serialize_to_output_type(
+    data: object | dict[str, Any],
+    output: type[T] | Callable | None = None,
+) -> T | dict[str, Any]:
     """
     Helper function to directly serialize data to the specified output class
     """
-    serializer = _get_output_serializer(output_class)
-    return serializer.serialize(data, output_class)
+    serializer = _get_output_serializer(output)
+    return serializer.serialize(data, output)

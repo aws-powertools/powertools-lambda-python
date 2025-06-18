@@ -165,9 +165,11 @@ def test_kafka_consumer_with_avro_and_custom_object(
     kafka_event_with_avro_data,
     avro_value_schema,
     lambda_context,
-    user_value_dict,
 ):
     """Test Kafka consumer with Avro deserialization and custom object serialization."""
+
+    def dict_output(data: dict) -> dict:
+        return data
 
     # Create dict to capture results
     result_data = {}
@@ -175,16 +177,15 @@ def test_kafka_consumer_with_avro_and_custom_object(
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
-        value_output_serializer=user_value_dict,
+        value_output_serializer=dict_output,
     )
 
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
         # Capture the results to verify
         record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value.name
-        result_data["age"] = record.value.age
+        result_data["name"] = record.value.get("name")
+        result_data["age"] = record.value.get("age")
         return {"processed": True}
 
     # Call the handler
@@ -192,7 +193,6 @@ def test_kafka_consumer_with_avro_and_custom_object(
 
     # Verify the results
     assert result == {"processed": True}
-    assert result_data["value_type"] == "UserValueDict"
     assert result_data["name"] == "John Doe"
     assert result_data["age"] == 30
 

@@ -50,7 +50,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
 
         if self.schema_config and self.schema_config.key_schema_type:
             schema_type = self.schema_config.key_schema_type
-            schema_str = self.schema_config.key_schema_str
+            schema_str = self.schema_config.key_schema
             output_serializer = self.schema_config.key_output_serializer
 
         # Always use get_deserializer if None it will default to DEFAULT
@@ -74,7 +74,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
 
         if self.schema_config and self.schema_config.value_schema_type:
             schema_type = self.schema_config.value_schema_type
-            schema_str = self.schema_config.value_schema_str
+            schema_str = self.schema_config.value_schema
             output_serializer = self.schema_config.value_output_serializer
 
         # Always use get_deserializer if None it will default to DEFAULT
