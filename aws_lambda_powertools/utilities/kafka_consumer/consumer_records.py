@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 from aws_lambda_powertools.utilities.data_classes.kafka_event import KafkaEventBase, KafkaEventRecordBase
 from aws_lambda_powertools.utilities.kafka_consumer.deserializer.deserializer import get_deserializer
 from aws_lambda_powertools.utilities.kafka_consumer.serialization.serialization import serialize_to_output_type
@@ -12,6 +12,18 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
+
+
+class ConsumerRecordSchemaMetadata(DictWrapper):
+    @property
+    def data_format(self) -> str | None:
+        """The data format of the Kafka record."""
+        return self.get("dataFormat", None)
+
+    @property
+    def schema_id(self) -> str | None:
+        """The schema id of the Kafka record."""
+        return self.get("schemaId", None)
 
 
 class ConsumerRecordRecords(KafkaEventRecordBase):
@@ -26,42 +38,54 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
     @cached_property
     def key(self) -> Any:
         key = self.get("key")
-        if key and (self.schema_config and self.schema_config.key_schema_type):
-            deserializer = get_deserializer(
-                self.schema_config.key_schema_type,
-                self.schema_config.key_schema_str,
-            )
-            deserialized_key = deserializer.deserialize(key)
 
-            if self.schema_config.key_output_serializer:
-                return serialize_to_output_type(
-                    deserialized_key,
-                    self.schema_config.key_output_serializer,
-                )
+        # Return None if key doesn't exist
+        if not key:
+            return None
 
-            return deserialized_key
+        # Determine schema type and schema string
+        schema_type = None
+        schema_str = None
+        output_serializer = None
 
-        return key  # MISSING DESERIALIZER
+        if self.schema_config and self.schema_config.key_schema_type:
+            schema_type = self.schema_config.key_schema_type
+            schema_str = self.schema_config.key_schema_str
+            output_serializer = self.schema_config.key_output_serializer
+
+        # Always use get_deserializer if None it will default to DEFAULT
+        deserializer = get_deserializer(schema_type, schema_str)
+        deserialized_value = deserializer.deserialize(key)
+
+        # Apply output serializer if specified
+        if output_serializer:
+            return serialize_to_output_type(deserialized_value, output_serializer)
+
+        return deserialized_value
 
     @cached_property
     def value(self) -> Any:
         value = self["value"]
-        if value and (self.schema_config and self.schema_config.value_schema_type):
-            deserializer = get_deserializer(
-                self.schema_config.value_schema_type,
-                self.schema_config.value_schema_str,
-            )
-            deserialized_value = deserializer.deserialize(value)
 
-            if self.schema_config.value_output_serializer:
-                return serialize_to_output_type(
-                    deserialized_value,
-                    self.schema_config.value_output_serializer,
-                )
+        # Determine schema type and schema string
+        schema_type = None
+        schema_str = None
+        output_serializer = None
 
-            return deserialized_value
+        if self.schema_config and self.schema_config.value_schema_type:
+            schema_type = self.schema_config.value_schema_type
+            schema_str = self.schema_config.value_schema_str
+            output_serializer = self.schema_config.value_output_serializer
 
-        return value  # MISSING DESERIALIZER
+        # Always use get_deserializer if None it will default to DEFAULT
+        deserializer = get_deserializer(schema_type, schema_str)
+        deserialized_value = deserializer.deserialize(value)
+
+        # Apply output serializer if specified
+        if output_serializer:
+            return serialize_to_output_type(deserialized_value, output_serializer)
+
+        return deserialized_value
 
     @property
     def original_value(self) -> str:
@@ -89,6 +113,22 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
     def headers(self) -> dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
         return CaseInsensitiveDict((k, bytes(v)) for chunk in self.original_headers for k, v in chunk.items())
+
+    @property
+    def key_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
+        """The metadata of the Key Kafka record."""
+        return (
+            None if self.get("keySchemaMetadata") is None else ConsumerRecordSchemaMetadata(self["keySchemaMetadata"])
+        )
+
+    @property
+    def value_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
+        """The metadata of the Value Kafka record."""
+        return (
+            None
+            if self.get("valueSchemaMetadata") is None
+            else ConsumerRecordSchemaMetadata(self["valueSchemaMetadata"])
+        )
 
 
 class ConsumerRecords(KafkaEventBase):

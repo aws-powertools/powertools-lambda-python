@@ -7,6 +7,7 @@ import pytest
 from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import ConsumerRecords
 from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
     KafkaConsumerDeserializationError,
+    KafkaConsumerMissingSchemaError,
 )
 from aws_lambda_powertools.utilities.kafka_consumer.kafka_consumer import kafka_consumer
 from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
@@ -316,3 +317,17 @@ def test_kafka_consumer_with_multiple_records(lambda_context):
     assert processed_records[0]["age"] == 30
     assert processed_records[1]["name"] == "Jane Smith"
     assert processed_records[1]["age"] == 25
+
+
+def test_kafka_consumer_without_protobuf_value_schema():
+    """Test error handling when Avro data is invalid."""
+
+    with pytest.raises(KafkaConsumerMissingSchemaError):
+        SchemaConfig(value_schema_type="PROTOBUF", value_schema=None)
+
+
+def test_kafka_consumer_without_protobuf_key_schema():
+    """Test error handling when Avro data is invalid."""
+
+    with pytest.raises(KafkaConsumerMissingSchemaError):
+        SchemaConfig(key_schema_type="PROTOBUF", key_schema=None)

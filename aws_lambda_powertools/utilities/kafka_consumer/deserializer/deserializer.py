@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.kafka_consumer.deserializer.default import DefaultDeserializer
@@ -7,6 +8,23 @@ from aws_lambda_powertools.utilities.kafka_consumer.deserializer.json import Jso
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.kafka_consumer.deserializer.base import DeserializerBase
+
+# Cache for deserializers
+_deserializer_cache: dict[str, DeserializerBase] = {}
+
+
+def _get_cache_key(schema_type: str | object, schema_value: Any) -> str:
+    if schema_value is None:
+        return str(schema_type)
+
+    if isinstance(schema_value, str):
+        # For string schemas like Avro, hash the content
+        schema_hash = hashlib.md5(schema_value.encode("utf-8")).hexdigest()
+    else:
+        # For objects like Protobuf, use the object id
+        schema_hash = str(id(schema_value))
+
+    return f"{schema_type}_{schema_hash}"
 
 
 def get_deserializer(schema_type: str | object, schema_value: Any) -> DeserializerBase:
@@ -55,18 +73,35 @@ def get_deserializer(schema_type: str | object, schema_value: Any) -> Deserializ
     >>> # Get a no-op deserializer for raw data
     >>> no_op_deserializer = get_deserializer("RAW", None)
     """
+
+    # Generate a cache key based on schema type and value
+    cache_key = _get_cache_key(schema_type, schema_value)
+
+    # Check if we already have this deserializer in cache
+    if cache_key in _deserializer_cache:
+        return _deserializer_cache[cache_key]
+
+    deserializer: DeserializerBase
+
     if schema_type == "AVRO":
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka_consumer.deserializer.avro import AvroDeserializer
 
-        return AvroDeserializer(schema_value)
+        deserializer = AvroDeserializer(schema_value)
     elif schema_type == "PROTOBUF":
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka_consumer.deserializer.protobuf import ProtobufDeserializer
 
-        return ProtobufDeserializer(schema_value)
+        deserializer = ProtobufDeserializer(schema_value)
     elif schema_type == "JSON":
-        return JsonDeserializer()
+        deserializer = JsonDeserializer()
+
+    else:
+        # Default to no-op deserializer
+        deserializer = DefaultDeserializer()
+
+    # Store in cache for future use
+    _deserializer_cache[cache_key] = deserializer
 
     # Default to default deserializer that is base64 decode + bytes decoded
-    return DefaultDeserializer()
+    return deserializer

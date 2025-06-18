@@ -213,23 +213,62 @@ def test_kafka_consumer_with_multiple_records(lambda_context):
     assert any(r["name"] == "Bob Johnson" and r["age"] == 40 for r in processed_records)
 
 
-def test_kafka_consumer_without_schema_config(kafka_event_with_json_data, lambda_context):
+def test_kafka_consumer_default_deserializer_value(kafka_event_with_json_data, lambda_context):
     """Test Kafka consumer when no schema config is provided."""
 
-    # Create dict to capture results
-    result_data = {}
+    base64_data = base64.b64encode(b"data")
+    kafka_event_with_json_data = deepcopy(kafka_event_with_json_data)
+    kafka_event_with_json_data["records"]["my-topic-1"][0]["value"] = base64_data
 
     @kafka_consumer()
     def handler(event: ConsumerRecords, context):
         # Capture the results to verify
         record = next(event.records)
         # Should get raw base64-encoded data with no deserialization
-        result_data["value_type"] = type(record.value).__name__
-        return {"processed": True}
+        return record.value
 
     # Call the handler
     result = handler(kafka_event_with_json_data, lambda_context)
 
     # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "str"  # Raw base64 string
+    assert result == "data"
+
+
+def test_kafka_consumer_default_deserializer_key(kafka_event_with_json_data, lambda_context):
+    """Test Kafka consumer when no schema config is provided."""
+
+    base64_data = base64.b64encode(b"data")
+    kafka_event_with_json_data = deepcopy(kafka_event_with_json_data)
+    kafka_event_with_json_data["records"]["my-topic-1"][0]["key"] = base64_data
+
+    @kafka_consumer()
+    def handler(event: ConsumerRecords, context):
+        # Capture the results to verify
+        record = next(event.records)
+        # Should get raw base64-encoded data with no deserialization
+        return record.key
+
+    # Call the handler
+    result = handler(kafka_event_with_json_data, lambda_context)
+
+    # Verify the results
+    assert result == "data"
+
+
+def test_kafka_consumer_default_deserializer_key_is_none(kafka_event_with_json_data, lambda_context):
+    """Test Kafka consumer when no schema config is provided."""
+
+    kafka_event_with_json_data["records"]["my-topic-1"][0]["key"] = None
+
+    @kafka_consumer()
+    def handler(event: ConsumerRecords, context):
+        # Capture the results to verify
+        record = next(event.records)
+        # Should get raw base64-encoded data with no deserialization
+        return record.key
+
+    # Call the handler
+    result = handler(kafka_event_with_json_data, lambda_context)
+
+    # Verify the results
+    assert result is None

@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.kafka_consumer.consumer_records import Cons
 from aws_lambda_powertools.utilities.kafka_consumer.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
+    KafkaConsumerMissingSchemaError,
 )
 from aws_lambda_powertools.utilities.kafka_consumer.kafka_consumer import kafka_consumer
 from aws_lambda_powertools.utilities.kafka_consumer.schema_config import SchemaConfig
@@ -292,3 +293,17 @@ def test_kafka_consumer_with_key_deserialization(
     assert key_value_result["value_type"] == "UserValueDataClass"
     assert key_value_result["value_name"] == "John Doe"
     assert key_value_result["value_age"] == 30
+
+
+def test_kafka_consumer_without_avro_value_schema():
+    """Test error handling when Avro data is invalid."""
+
+    with pytest.raises(KafkaConsumerMissingSchemaError):
+        SchemaConfig(value_schema_type="AVRO", value_schema=None)
+
+
+def test_kafka_consumer_without_avro_key_schema():
+    """Test error handling when Avro data is invalid."""
+
+    with pytest.raises(KafkaConsumerMissingSchemaError):
+        SchemaConfig(key_schema_type="AVRO", key_schema=None)
