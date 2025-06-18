@@ -55,6 +55,8 @@ def test_self_managed_kafka_event():
     assert record.value == '{"key":"value"}'
     assert len(record.headers) == 1
     assert record.headers[0]["headerKey"] == b"headerValue"
+    assert record.keySchemaMetadata is None
+    assert record.valueSchemaMetadata is None
     record: KafkaRecordModel = records[1]
     assert record.key is None
 
@@ -82,6 +84,10 @@ def test_kafka_msk_event():
     assert record.value == '{"key":"value"}'
     assert len(record.headers) == 1
     assert record.headers[0]["headerKey"] == b"headerValue"
+    assert record.keySchemaMetadata.dataFormat == "AVRO"
+    assert record.keySchemaMetadata.schemaId == "1234"
+    assert record.valueSchemaMetadata.dataFormat == "AVRO"
+    assert record.valueSchemaMetadata.schemaId == "1234"
     for i in range(1, 3):
         record: KafkaRecordModel = records[i]
         assert record.key is None

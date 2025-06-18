@@ -8,6 +8,11 @@ from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_strin
 SERVERS_DELIMITER = ","
 
 
+class KafkaRecordSchemaMetadata(BaseModel):
+    dataFormat: str
+    schemaId: str
+
+
 class KafkaRecordModel(BaseModel):
     topic: str
     partition: int
@@ -17,6 +22,8 @@ class KafkaRecordModel(BaseModel):
     key: Optional[bytes] = None
     value: Union[str, Type[BaseModel]]
     headers: List[Dict[str, bytes]]
+    keySchemaMetadata: Optional[KafkaRecordSchemaMetadata] = None
+    valueSchemaMetadata: Optional[KafkaRecordSchemaMetadata] = None
 
     # key is optional; only decode if not None
     @field_validator("key", mode="before")
