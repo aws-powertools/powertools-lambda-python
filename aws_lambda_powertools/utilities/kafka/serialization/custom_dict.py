@@ -12,4 +12,4 @@ if TYPE_CHECKING:
 
 class CustomDictOutputSerializer(OutputSerializerBase):
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
-        return data if output is None else output(data)
+        return data if output is None else output(data)  # type: ignore[call-arg]

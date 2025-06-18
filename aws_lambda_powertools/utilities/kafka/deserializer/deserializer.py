@@ -19,7 +19,7 @@ def _get_cache_key(schema_type: str | object, schema_value: Any) -> str:
 
     if isinstance(schema_value, str):
         # For string schemas like Avro, hash the content
-        schema_hash = hashlib.md5(schema_value.encode("utf-8")).hexdigest()
+        schema_hash = hashlib.md5(schema_value.encode("utf-8"), usedforsecurity=False).hexdigest()
     else:
         # For objects like Protobuf, use the object id
         schema_hash = str(id(schema_value))
