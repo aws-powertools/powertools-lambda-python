@@ -272,3 +272,22 @@ def test_kafka_consumer_default_deserializer_key_is_none(kafka_event_with_json_d
 
     # Verify the results
     assert result is None
+
+
+def test_kafka_consumer_metadata_fields(kafka_event_with_json_data, lambda_context):
+    """Test Kafka consumer when no schema config is provided."""
+
+    kafka_event_with_json_data["records"]["my-topic-1"][0]["key"] = None
+
+    @kafka_consumer()
+    def handler(event: ConsumerRecords, context):
+        return event.record
+
+    # Call the handler
+    result = handler(kafka_event_with_json_data, lambda_context)
+
+    # Verify the results
+    assert result.original_value == kafka_event_with_json_data["records"]["my-topic-1"][0]["value"]
+    assert result.original_key == kafka_event_with_json_data["records"]["my-topic-1"][0]["key"]
+    assert result.original_headers == kafka_event_with_json_data["records"]["my-topic-1"][0]["headers"]
+    assert result.headers

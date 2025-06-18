@@ -12,9 +12,6 @@ if TYPE_CHECKING:
 
 class DataclassOutputSerializer(OutputSerializerBase):
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
-        if output is None:
-            return data
-
         if not is_dataclass(output):
             raise ValueError("Output class must be a dataclass")
 

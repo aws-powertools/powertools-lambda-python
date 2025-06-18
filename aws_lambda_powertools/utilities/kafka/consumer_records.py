@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
 from aws_lambda_powertools.utilities.data_classes.kafka_event import KafkaEventBase, KafkaEventRecordBase
 from aws_lambda_powertools.utilities.kafka.deserializer.deserializer import get_deserializer
 from aws_lambda_powertools.utilities.kafka.serialization.serialization import serialize_to_output_type
@@ -12,18 +12,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
-
-
-class ConsumerRecordSchemaMetadata(DictWrapper):
-    @property
-    def data_format(self) -> str | None:
-        """The data format of the Kafka record."""
-        return self.get("dataFormat", None)
-
-    @property
-    def schema_id(self) -> str | None:
-        """The schema id of the Kafka record."""
-        return self.get("schemaId", None)
 
 
 class ConsumerRecordRecords(KafkaEventRecordBase):
@@ -113,22 +101,6 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
     def headers(self) -> dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
         return CaseInsensitiveDict((k, bytes(v)) for chunk in self.original_headers for k, v in chunk.items())
-
-    @property
-    def key_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
-        """The metadata of the Key Kafka record."""
-        return (
-            None if self.get("keySchemaMetadata") is None else ConsumerRecordSchemaMetadata(self["keySchemaMetadata"])
-        )
-
-    @property
-    def value_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
-        """The metadata of the Value Kafka record."""
-        return (
-            None
-            if self.get("valueSchemaMetadata") is None
-            else ConsumerRecordSchemaMetadata(self["valueSchemaMetadata"])
-        )
 
 
 class ConsumerRecords(KafkaEventBase):
