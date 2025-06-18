@@ -11,8 +11,15 @@ if TYPE_CHECKING:
 
 
 class DataclassOutputSerializer(OutputSerializerBase):
+    """
+    Serializer that converts dictionary data into dataclass instances.
+
+    This serializer takes dictionary data and converts it into an instance of the specified
+    dataclass type.
+    """
+
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
-        if not is_dataclass(output):
+        if not is_dataclass(output):  # pragma: no cover
             raise ValueError("Output class must be a dataclass")
 
         return cast(T, output(**data))

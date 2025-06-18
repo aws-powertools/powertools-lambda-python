@@ -11,5 +11,12 @@ if TYPE_CHECKING:
 
 
 class CustomDictOutputSerializer(OutputSerializerBase):
+    """
+    Serializer that allows custom dict transformations.
+
+    This serializer takes dictionary data and either returns it as-is or passes it
+    through a custom transformation function provided as the output parameter.
+    """
+
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
         return data if output is None else output(data)  # type: ignore[call-arg]

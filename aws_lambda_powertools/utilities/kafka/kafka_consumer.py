@@ -45,7 +45,7 @@ def kafka_consumer(
 
     Examples
     --------
-    >>> from aws_lambda_powertools.utilities.kafka_consumer import kafka_consumer, SchemaConfig
+    >>> from aws_lambda_powertools.utilities.kafka import kafka_consumer, SchemaConfig
     >>>
     >>> # With schema validation using SchemaConfig
     >>> schema_config = SchemaConfig(value_schema_type="JSON")
