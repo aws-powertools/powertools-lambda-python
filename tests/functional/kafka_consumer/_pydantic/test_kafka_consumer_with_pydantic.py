@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import Literal, Union
+from typing import Annotated, Literal, Union
 
 import pytest
 from pydantic import BaseModel, Field
@@ -94,10 +94,9 @@ def test_kafka_consumer_with_json_value_and_union_tag(kafka_event_with_json_data
         name: Literal["Not using"]
         email: str
 
-    class Model(BaseModel):
-        name: Union[UserValueModel, UserValueModel2] = Field(discriminator="name")
+    UnionModel = Annotated[Union[UserValueModel, UserValueModel2], Field(discriminator="name")]
 
-    schema_config = SchemaConfig(value_schema_type="JSON", value_output_serializer=UserValueModel)
+    schema_config = SchemaConfig(value_schema_type="JSON", value_output_serializer=UnionModel)
 
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
