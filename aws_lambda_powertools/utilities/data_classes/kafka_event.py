@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-class ConsumerRecordSchemaMetadata(DictWrapper):
+class KafkaEventRecordSchemaMetadata(DictWrapper):
     @property
     def data_format(self) -> str | None:
         """The data format of the Kafka record."""
@@ -49,19 +49,19 @@ class KafkaEventRecordBase(DictWrapper):
         return self["timestampType"]
 
     @property
-    def key_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
+    def key_schema_metadata(self) -> KafkaEventRecordSchemaMetadata | None:
         """The metadata of the Key Kafka record."""
         return (
-            None if self.get("keySchemaMetadata") is None else ConsumerRecordSchemaMetadata(self["keySchemaMetadata"])
+            None if self.get("keySchemaMetadata") is None else KafkaEventRecordSchemaMetadata(self["keySchemaMetadata"])
         )
 
     @property
-    def value_schema_metadata(self) -> ConsumerRecordSchemaMetadata | None:
+    def value_schema_metadata(self) -> KafkaEventRecordSchemaMetadata | None:
         """The metadata of the Value Kafka record."""
         return (
             None
             if self.get("valueSchemaMetadata") is None
-            else ConsumerRecordSchemaMetadata(self["valueSchemaMetadata"])
+            else KafkaEventRecordSchemaMetadata(self["valueSchemaMetadata"])
         )
 
 
