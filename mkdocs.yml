@@ -27,7 +27,6 @@ nav:
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
-          - utilities/kafka_consumer.md
           - utilities/batch.md
           - utilities/typing.md
           - utilities/validation.md
