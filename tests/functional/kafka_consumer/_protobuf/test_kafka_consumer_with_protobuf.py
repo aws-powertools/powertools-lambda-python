@@ -68,12 +68,9 @@ class UserKeyClass:
     user_id: str
 
 
-def test_kafka_consumer_with_proto(kafka_event_with_proto_data, lambda_context):
-    """Test Kafka consumer with Protobuf deserialization without output serialization."""
-
-    # Create dict to capture results
-    result_data = {}
-
+def test_kafka_consumer_with_protobuf(kafka_event_with_proto_data, lambda_context):
+    # GIVEN A Kafka consumer configured to deserialize Protobuf data
+    # using the User protobuf message type as the schema
     schema_config = SchemaConfig(
         value_schema_type="PROTOBUF",
         value_schema=User,
@@ -81,32 +78,24 @@ def test_kafka_consumer_with_proto(kafka_event_with_proto_data, lambda_context):
 
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
-        # Capture the results to verify
-        record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value["name"]
-        result_data["age"] = record.value["age"]
-        return {"processed": True}
+        # Return the deserialized record value for verification
+        return event.record.value
 
-    # Call the handler
+    # WHEN The handler processes a Kafka event containing Protobuf-encoded data
     result = handler(kafka_event_with_proto_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "dict"
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The Protobuf data should be correctly deserialized into a dictionary
+    # with the expected field values from the User message
+    assert result["name"] == "John Doe"
+    assert result["age"] == 30
 
 
 def test_kafka_consumer_with_proto_and_dataclass(
     kafka_event_with_proto_data,
     lambda_context,
 ):
-    """Test Kafka consumer with Protobuf deserialization and dataclass output serialization."""
-
-    # Create dict to capture results
-    result_data = {}
-
+    # GIVEN A Kafka consumer configured to deserialize Protobuf data
+    # using the User message type as the schema and convert the result to a UserValueDataClass instance
     schema_config = SchemaConfig(
         value_schema_type="PROTOBUF",
         value_schema=User,
@@ -115,26 +104,25 @@ def test_kafka_consumer_with_proto_and_dataclass(
 
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
-        # Capture the results to verify
-        record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value.name
-        result_data["age"] = record.value.age
-        return {"processed": True}
+        # Extract the deserialized and serialized value
+        # which should be a UserValueDataClass instance
+        value: UserValueDataClass = event.record.value
+        return value
 
-    # Call the handler
+    # WHEN The handler processes a Kafka event containing Protobuf-encoded data
+    # which is deserialized and then serialized to a dataclass
     result = handler(kafka_event_with_proto_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "UserValueDataClass"
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The result should be a UserValueDataClass instance
+    # with the correct property values from the original Protobuf message
+    assert isinstance(result, UserValueDataClass)
+    assert result.name == "John Doe"
+    assert result.age == 30
 
 
 def test_kafka_consumer_with_invalid_proto_data(kafka_event_with_proto_data, lambda_context):
     """Test error handling when Protobuf data is invalid."""
-    # Create invalid protobuf data
+    # GIVEN A Kafka event with deliberately corrupted Protobuf data
     invalid_data = base64.b64encode(b"invalid protobuf data").decode("utf-8")
     kafka_event_with_proto_data_temp = deepcopy(kafka_event_with_proto_data)
     kafka_event_with_proto_data_temp["records"]["my-topic-1"][0]["value"] = invalid_data
@@ -148,14 +136,16 @@ def test_kafka_consumer_with_invalid_proto_data(kafka_event_with_proto_data, lam
     def lambda_handler(event: ConsumerRecords, context):
         # This should never be reached if deserializer fails
         record = next(event.records)
-        assert record.value
-        return {"processed": True}
+        return record.value
 
-    # This should raise a deserialization error
+    # WHEN/THEN
+    # The handler should fail to process the invalid Avro data
+    # and raise a specific deserialization error
     with pytest.raises(KafkaConsumerDeserializationError) as excinfo:
         lambda_handler(kafka_event_with_proto_data_temp, lambda_context)
 
-    # The error message should indicate a deserialization problem
+    # The exact error message may vary depending on the Protobuf library's internals,
+    # but should indicate a deserialization problem
     assert "Error trying to deserialize protobuf data" in str(excinfo.value)
 
 
@@ -163,12 +153,8 @@ def test_kafka_consumer_with_key_deserialization(
     kafka_event_with_proto_data,
     lambda_context,
 ):
-    """Test deserializing both key and value with different schemas and serializers."""
-
-    # Create dict to capture results
-    key_value_result = {}
-
-    # Create schema config with both key and value
+    # GIVEN A Kafka consumer configured to deserialize only the key using Protobuf
+    # and serialize it to a UserKeyClass instance
     schema_config = SchemaConfig(
         key_schema_type="PROTOBUF",
         key_schema=Key,
@@ -177,26 +163,26 @@ def test_kafka_consumer_with_key_deserialization(
 
     @kafka_consumer(schema_config=schema_config)
     def lambda_handler(event: ConsumerRecords, context):
-        record = next(event.records)
-        key_value_result["key_type"] = type(record.key).__name__
-        key_value_result["key_id"] = record.key.user_id
-        return {"processed": True}
+        key: UserKeyClass = event.record.key
+        return key
 
-    # Call the handler
+    # WHEN The handler processes a Kafka event, deserializing only the key portion
+    # while leaving the value in its original format
     result = lambda_handler(kafka_event_with_proto_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert key_value_result["key_type"] == "UserKeyClass"
-    assert key_value_result["key_id"] == "user-123"
+    # THEN The key should be properly deserialized from Protobuf and serialized to a UserKeyClass
+    # with the expected user_id value
+    assert result.user_id == "user-123"
+    assert isinstance(result, UserKeyClass)
 
 
 def test_kafka_consumer_with_wrong_proto_message_class(kafka_event_with_proto_data, lambda_context):
-    """Test error handling when wrong proto message class is provided."""
-
+    # GIVEN
+    # A Kafka consumer configured with the wrong Protobuf message class (Key instead of User)
+    # for deserializing the value payload
     schema_config = SchemaConfig(
         value_schema_type="PROTOBUF",
-        value_schema=Key,
+        value_schema=Key,  # Incorrect schema for the value data
     )
 
     @kafka_consumer(schema_config=schema_config)
@@ -204,25 +190,25 @@ def test_kafka_consumer_with_wrong_proto_message_class(kafka_event_with_proto_da
         record = next(event.records)
         return record.value
 
-    # This should raise a deserialization error
+    # WHEN The handler processes a Kafka event with Protobuf data that doesn't match the schema
     response = lambda_handler(kafka_event_with_proto_data, lambda_context)
 
+    # THEN The deserialization should return an empty result
     assert not response
 
 
-def test_kafka_consumer_with_custom_object(
+def test_kafka_consumer_with_custom_function(
     kafka_event_with_proto_data,
     lambda_context,
 ):
-    """Test Kafka consumer with Protobuf deserialization and custom object serialization."""
-
-    # Define a custom output object class
+    # GIVEN A custom serialization function that removes the age field from the dictionary
     def dict_output(data: dict) -> dict:
+        # removing age key
+        del data["age"]
         return data
 
-    # Create dict to capture results
-    result_data = {}
-
+    # A Kafka consumer configured with Protobuf schema deserialization
+    # and a custom function for output transformation
     schema_config = SchemaConfig(
         value_schema_type="PROTOBUF",
         value_schema=User,
@@ -232,30 +218,30 @@ def test_kafka_consumer_with_custom_object(
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
         # Capture the results to verify
-        record = next(event.records)
-        result_data["name"] = record.value.get("name")
-        result_data["age"] = record.value.get("age")
-        return {"processed": True}
+        return event.record.value
 
-    # Call the handler
+    # WHEN The handler processes the Kafka event containing Protobuf-encoded data
+    # and applies the custom transformation function to the output
     result = handler(kafka_event_with_proto_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The Avro data should be correctly deserialized and transformed
+    # with the name field intact but the age field removed
+    assert result["name"] == "John Doe"
+    assert "age" not in result
 
 
 def test_kafka_consumer_with_multiple_records(lambda_context):
     """Test Kafka consumer with multiple records."""
 
-    # Create first user
+    # GIVEN
+    # Two distinct Protobuf User messages to create multiple records
+    # First user: John Doe, age 30
     user1 = User()
     user1.name = "John Doe"
     user1.age = 30
     value1 = base64.b64encode(user1.SerializeToString()).decode("utf-8")
 
-    # Create second user
+    # Second user: Jane Smith, age 25
     user2 = User()
     user2.name = "Jane Smith"
     user2.age = 25
@@ -300,27 +286,52 @@ def test_kafka_consumer_with_multiple_records(lambda_context):
             processed_records.append({"name": record.value["name"], "age": record.value["age"]})
         return {"processed": len(processed_records)}
 
-    # Call the handler
+    # WHEN
+    # The handler processes the Kafka event containing multiple records
     result = handler(event, lambda_context)
 
-    # Verify the results
+    # THEN
+    # The handler should successfully process both records
+    # and return the correct count
     assert result == {"processed": 2}
+
+    # All records should be correctly deserialized with proper values
     assert len(processed_records) == 2
+
+    # First record should contain John Doe's details
     assert processed_records[0]["name"] == "John Doe"
     assert processed_records[0]["age"] == 30
+
+    # Second record should contain Jane Smith's details
     assert processed_records[1]["name"] == "Jane Smith"
     assert processed_records[1]["age"] == 25
 
 
 def test_kafka_consumer_without_protobuf_value_schema():
-    """Test error handling when Avro data is invalid."""
+    # GIVEN
+    # A scenario where PROTOBUF schema type is specified for the value
+    # but no actual schema class is provided
 
-    with pytest.raises(KafkaConsumerMissingSchemaError):
+    # WHEN/THEN
+    # SchemaConfig initialization should fail with an appropriate error
+    with pytest.raises(KafkaConsumerMissingSchemaError) as excinfo:
         SchemaConfig(value_schema_type="PROTOBUF", value_schema=None)
+
+    # Verify the error message mentions the missing value schema
+    assert "value_schema" in str(excinfo.value)
+    assert "PROTOBUF" in str(excinfo.value)
 
 
 def test_kafka_consumer_without_protobuf_key_schema():
-    """Test error handling when Avro data is invalid."""
+    # GIVEN
+    # A scenario where PROTOBUF schema type is specified for the key
+    # but no actual schema class is provided
 
-    with pytest.raises(KafkaConsumerMissingSchemaError):
+    # WHEN/THEN
+    # SchemaConfig initialization should fail with an appropriate error
+    with pytest.raises(KafkaConsumerMissingSchemaError) as excinfo:
         SchemaConfig(key_schema_type="PROTOBUF", key_schema=None)
+
+    # Verify the error message mentions the missing key schema
+    assert "key_schema" in str(excinfo.value)
+    assert "PROTOBUF" in str(excinfo.value)

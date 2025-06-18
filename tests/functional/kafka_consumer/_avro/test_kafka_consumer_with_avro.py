@@ -100,30 +100,19 @@ class UserKeyClass:
 
 
 def test_kafka_consumer_with_avro(kafka_event_with_avro_data, avro_value_schema, lambda_context):
-    """Test Kafka consumer with Avro deserialization without output serialization."""
-
-    # Create dict to capture results
-    result_data = {}
-
+    # GIVEN A Kafka consumer configured with Avro schema deserialization
     schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_value_schema)
 
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
-        # Capture the results to verify
-        record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value["name"]
-        result_data["age"] = record.value["age"]
-        return {"processed": True}
+        return event.record.value
 
-    # Call the handler
+    # WHEN The handler processes the Kafka event containing Avro-encoded data
     result = handler(kafka_event_with_avro_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "dict"
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The Avro data should be correctly deserialized into a Python dictionary
+    assert result["name"] == "John Doe"
+    assert result["age"] == 30
 
 
 def test_kafka_consumer_with_avro_and_dataclass(
@@ -131,11 +120,8 @@ def test_kafka_consumer_with_avro_and_dataclass(
     avro_value_schema,
     lambda_context,
 ):
-    """Test Kafka consumer with Avro deserialization and dataclass output serialization."""
-
-    # Create dict to capture results
-    result_data = {}
-
+    # GIVEN A Kafka consumer configured with Avro schema deserialization
+    # and a dataclass for output serialization
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
@@ -145,35 +131,33 @@ def test_kafka_consumer_with_avro_and_dataclass(
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
         # Capture the results to verify
-        record = next(event.records)
-        result_data["value_type"] = type(record.value).__name__
-        result_data["name"] = record.value.name
-        result_data["age"] = record.value.age
-        return {"processed": True}
+        value: UserValueDataClass = event.record.value
+        return value
 
-    # Call the handler
+    # WHEN The handler processes the Kafka event containing Avro-encoded data
+    # and serializes the output as a UserValueDataClass instance
     result = handler(kafka_event_with_avro_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["value_type"] == "UserValueDataClass"
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The Avro data should be correctly deserialized and converted to a dataclass instance
+    # with the expected property values
+    assert result.name == "John Doe"
+    assert result.age == 30
+    assert isinstance(result, UserValueDataClass)
 
 
-def test_kafka_consumer_with_avro_and_custom_object(
+def test_kafka_consumer_with_avro_and_custom_function(
     kafka_event_with_avro_data,
     avro_value_schema,
     lambda_context,
 ):
-    """Test Kafka consumer with Avro deserialization and custom object serialization."""
-
+    # GIVEN A custom serialization function that removes the age field from the dictionary
     def dict_output(data: dict) -> dict:
+        # removing age key
+        del data["age"]
         return data
 
-    # Create dict to capture results
-    result_data = {}
-
+    # A Kafka consumer configured with Avro schema deserialization
+    # and a custom function for output transformation
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
@@ -183,23 +167,20 @@ def test_kafka_consumer_with_avro_and_custom_object(
     @kafka_consumer(schema_config=schema_config)
     def handler(event: ConsumerRecords, context):
         # Capture the results to verify
-        record = next(event.records)
-        result_data["name"] = record.value.get("name")
-        result_data["age"] = record.value.get("age")
-        return {"processed": True}
+        return event.record.value
 
-    # Call the handler
+    # WHEN The handler processes the Kafka event containing Avro-encoded data
+    # and applies the custom transformation function to the output
     result = handler(kafka_event_with_avro_data, lambda_context)
 
-    # Verify the results
-    assert result == {"processed": True}
-    assert result_data["name"] == "John Doe"
-    assert result_data["age"] == 30
+    # THEN The Avro data should be correctly deserialized and transformed
+    # with the name field intact but the age field removed
+    assert result["name"] == "John Doe"
+    assert "age" not in result
 
 
 def test_kafka_consumer_with_invalid_avro_data(kafka_event_with_avro_data, lambda_context, avro_value_schema):
-    """Test error handling when Avro data is invalid."""
-    # Create invalid avro data
+    # GIVEN A Kafka event with deliberately corrupted Avro data
     invalid_data = base64.b64encode(b"invalid avro data").decode("utf-8")
     kafka_event_with_avro_data_temp = deepcopy(kafka_event_with_avro_data)
     kafka_event_with_avro_data_temp["records"]["my-topic-1"][0]["value"] = invalid_data
@@ -209,11 +190,11 @@ def test_kafka_consumer_with_invalid_avro_data(kafka_event_with_avro_data, lambd
     @kafka_consumer(schema_config=schema_config)
     def lambda_handler(event: ConsumerRecords, context):
         # This should never be reached if deserializer fails
-        record = next(event.records)
-        assert record.value
-        return {"processed": True}
+        return event.record.value
 
-    # This should raise a deserialization error
+    # WHEN/THEN
+    # The handler should fail to process the invalid Avro data
+    # and raise a specific deserialization error
     with pytest.raises(KafkaConsumerDeserializationError) as excinfo:
         lambda_handler(kafka_event_with_avro_data_temp, lambda_context)
 
@@ -223,8 +204,8 @@ def test_kafka_consumer_with_invalid_avro_data(kafka_event_with_avro_data, lambd
 
 
 def test_kafka_consumer_with_invalid_avro_schema(kafka_event_with_avro_data, lambda_context):
-    """Test error handling when Avro data is invalid."""
-
+    # GIVEN
+    # An intentionally malformed Avro schema with syntax errors
     avro_schema = """
     {
         "type": "record",
@@ -234,16 +215,17 @@ def test_kafka_consumer_with_invalid_avro_schema(kafka_event_with_avro_data, lam
     }
     """
 
+    # A Kafka consumer configured with the invalid schema
     schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_schema)
 
     @kafka_consumer(schema_config=schema_config)
     def lambda_handler(event: ConsumerRecords, context):
         # This should never be reached if deserializer fails
-        record = next(event.records)
-        assert record.value
-        return {"processed": True}
+        return event.record.value
 
-    # This should raise a deserialization error
+    # WHEN/THEN
+    # The handler should fail during initialization when it tries to parse the schema
+    # and raise a specific schema parser error
     with pytest.raises(KafkaConsumerAvroSchemaParserError) as excinfo:
         lambda_handler(kafka_event_with_avro_data, lambda_context)
 
@@ -260,10 +242,10 @@ def test_kafka_consumer_with_key_deserialization(
 ):
     """Test deserializing both key and value with different schemas and serializers."""
 
-    # Create dict to capture results
     key_value_result = {}
 
-    # Create schema config with both key and value
+    # GIVEN A Kafka consumer configured with Avro schemas for both key and value
+    # with different output serializers for each
     schema_config = SchemaConfig(
         value_schema_type="AVRO",
         value_schema=avro_value_schema,
@@ -283,27 +265,47 @@ def test_kafka_consumer_with_key_deserialization(
         key_value_result["value_age"] = record.value.age
         return {"processed": True}
 
-    # Call the handler
+    # WHEN
+    # The handler processes the Kafka event, deserializing both key and value
     result = lambda_handler(kafka_event_with_avro_data, lambda_context)
 
-    # Verify the results
+    # THEN
+    # The handler should return success and the captured properties should match expectations
     assert result == {"processed": True}
+
+    # Key should be correctly deserialized into a UserKeyClass instance
     assert key_value_result["key_type"] == "UserKeyClass"
     assert key_value_result["key_id"] == "user-123"
+
+    # Value should be correctly deserialized into a UserValueDataClass instance
     assert key_value_result["value_type"] == "UserValueDataClass"
     assert key_value_result["value_name"] == "John Doe"
     assert key_value_result["value_age"] == 30
 
 
 def test_kafka_consumer_without_avro_value_schema():
-    """Test error handling when Avro data is invalid."""
+    # GIVEN
+    # A scenario where AVRO schema type is specified for value
+    # but no actual schema is provided
 
-    with pytest.raises(KafkaConsumerMissingSchemaError):
+    # WHEN/THEN
+    # SchemaConfig initialization should fail with an appropriate error
+    with pytest.raises(KafkaConsumerMissingSchemaError) as excinfo:
         SchemaConfig(value_schema_type="AVRO", value_schema=None)
+
+    # Verify the error message mentions 'value_schema'
+    assert "value_schema" in str(excinfo.value)
 
 
 def test_kafka_consumer_without_avro_key_schema():
-    """Test error handling when Avro data is invalid."""
+    # GIVEN
+    # A scenario where AVRO schema type is specified for key
+    # but no actual schema is provided
 
-    with pytest.raises(KafkaConsumerMissingSchemaError):
+    # WHEN/THEN
+    # SchemaConfig initialization should fail with an appropriate error
+    with pytest.raises(KafkaConsumerMissingSchemaError) as excinfo:
         SchemaConfig(key_schema_type="AVRO", key_schema=None)
+
+    # Verify the error message mentions 'key_schema'
+    assert "key_schema" in str(excinfo.value)
