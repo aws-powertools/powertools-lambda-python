@@ -407,7 +407,7 @@ class Route:
 
         # OpenAPI spec only understands paths with { }. So we'll have to convert Powertools' < >.
         # https://swagger.io/specification/#path-templating
-        self.openapi_path = re.sub(r"<(.*?)>", lambda m: f"{{{''.join(m.group(1))}}}", self.path)
+        self.openapi_path = re.sub(r"<(.*?)>", lambda m: f"{{{''.join(m.group(1))}}}", self.path)  # type: ignore[arg-type]
 
         self.rule = rule
         self.func = func

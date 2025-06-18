@@ -67,6 +67,7 @@ def test_with_only_required_packages(session: nox.Session):
             f"{PREFIX_TESTS_UNIT}/data_classes/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/batch/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/kafka_consumer/required_dependencies/",
         ],
     )
 
@@ -155,11 +156,13 @@ def test_with_pydantic_required_package(session: nox.Session):
     # Event Handler OpenAPI
     # Parser
     # Batch Processor with pydantic integration
+    # Kafka Consumer with Output to Pydantic
     build_and_run_test(
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
             f"{PREFIX_TESTS_FUNCTIONAL}/batch/_pydantic/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/kafka_consumer/_pydantic/",
             f"{PREFIX_TESTS_UNIT}/parser/_pydantic/",
             f"{PREFIX_TESTS_UNIT}/event_handler/_pydantic/",
         ],
@@ -195,4 +198,30 @@ def test_with_redis_and_boto3_sdk_as_required_package(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_redis/",
         ],
         extras="redis,aws-sdk",
+    )
+
+
+@nox.session()
+def test_with_avro_required_package(session: nox.Session):
+    """Tests that only depends the Avro dependency"""
+    # Kafka Consumer with AVRO
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/kafka_consumer/_avro/",
+        ],
+        extras="kafka-consumer-avro",
+    )
+
+
+@nox.session()
+def test_with_protobuf_required_package(session: nox.Session):
+    """Tests that only depends the Protobuf dependency"""
+    # Kafka Consumer with PROTOBUF
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/kafka_consumer/_protobuf/",
+        ],
+        extras="kafka-consumer-protobuf",
     )
