@@ -290,4 +290,4 @@ def test_kafka_consumer_metadata_fields(kafka_event_with_json_data, lambda_conte
     assert result.original_value == kafka_event_with_json_data["records"]["my-topic-1"][0]["value"]
     assert result.original_key == kafka_event_with_json_data["records"]["my-topic-1"][0]["key"]
     assert result.original_headers == kafka_event_with_json_data["records"]["my-topic-1"][0]["headers"]
-    assert result.headers
+    assert result.headers == {"headerKey": b"headerValue"}

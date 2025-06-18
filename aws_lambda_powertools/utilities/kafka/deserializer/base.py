@@ -49,9 +49,4 @@ class DeserializerBase(ABC):
         raise NotImplementedError("Subclasses must implement the deserialize method")
 
     def _decode_input(self, data: bytes | str) -> bytes:
-        try:
-            return base64.b64decode(data)
-        except Exception as e:
-            raise TypeError(
-                f"Expected bytes or base64-encoded string, got {type(data).__name__}. Error: {str(e)}",
-            ) from e
+        return base64.b64decode(data)
