@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from google.protobuf.internal.decoder import _DecodeVarint  # type: ignore[attr-defined]
 from google.protobuf.json_format import MessageToDict
 
 from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
@@ -43,6 +44,12 @@ class ProtobufDeserializer(DeserializerBase):
             When the data cannot be deserialized according to the message class,
             typically due to data format incompatibility or incorrect message class.
 
+        Notes
+        -----
+        This deserializer handles both standard Protocol Buffer format and the Confluent
+        Schema Registry format which includes message index information. It will first try
+        standard deserialization and fall back to message index handling if needed.
+
         Example
         --------
         >>> # Assuming proper protobuf setup
@@ -54,11 +61,56 @@ class ProtobufDeserializer(DeserializerBase):
         ... except KafkaConsumerDeserializationError as e:
         ...     print(f"Failed to deserialize: {e}")
         """
+        value = self._decode_input(data)
         try:
-            value = self._decode_input(data)
             message = self.message_class()
             message.ParseFromString(value)
             return MessageToDict(message, preserving_proto_field_name=True)
+        except Exception:
+            return self._deserialize_with_message_index(value, self.message_class())
+
+    def _deserialize_with_message_index(self, data: bytes, parser: Any) -> dict:
+        """
+        Deserialize protobuf message with Confluent message index handling.
+
+        Parameters
+        ----------
+        data : bytes
+            data
+        parser : google.protobuf.message.Message
+            Protobuf message instance to parse the data into
+
+        Returns
+        -------
+        dict
+            Dictionary representation of the parsed protobuf message with original field names
+
+        Raises
+        ------
+        KafkaConsumerDeserializationError
+            If deserialization fails
+
+        Notes
+        -----
+        This method handles the special case of Confluent Schema Registry's message index
+        format, where the message is prefixed with either a single 0 (for the first schema)
+        or a list of schema indexes. The actual protobuf message follows these indexes.
+        """
+
+        buffer = memoryview(data)
+        pos = 0
+
+        try:
+            first_value, new_pos = _DecodeVarint(buffer, pos)
+            pos = new_pos
+
+            if first_value != 0:
+                for _ in range(first_value):
+                    _, new_pos = _DecodeVarint(buffer, pos)
+                    pos = new_pos
+
+            parser.ParseFromString(data[pos:])
+            return MessageToDict(parser, preserving_proto_field_name=True)
         except Exception as e:
             raise KafkaConsumerDeserializationError(
                 f"Error trying to deserialize protobuf data - {type(e).__name__}: {str(e)}",
