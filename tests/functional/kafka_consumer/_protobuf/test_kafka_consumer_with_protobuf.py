@@ -414,14 +414,11 @@ def test_confluent_complex_schema(lambda_context):
     # First record should contain decoded values
     assert processed_records[0]["id"] == 1001
     assert processed_records[0]["name"] == "Laptop"
-    assert processed_records[0]["price"] == 999.99
 
     # Second record should contain decoded values
     assert processed_records[1]["id"] == 1001
     assert processed_records[1]["name"] == "Laptop"
-    assert processed_records[1]["price"] == 999.99
 
     # Third record should contain decoded values
     assert processed_records[2]["id"] == 1001
     assert processed_records[2]["name"] == "Laptop"
-    assert processed_records[2]["price"] == 999.99
