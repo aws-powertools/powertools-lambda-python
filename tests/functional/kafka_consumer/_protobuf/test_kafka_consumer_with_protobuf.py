@@ -12,6 +12,9 @@ from aws_lambda_powertools.utilities.kafka.exceptions import (
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
 from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
 
+# Import confluent complex schema
+from .confluent_protobuf_pb2 import ProtobufProduct
+
 # Import the generated protobuf classes
 from .user_pb2 import Key, User
 
@@ -335,3 +338,90 @@ def test_kafka_consumer_without_protobuf_key_schema():
     # Verify the error message mentions the missing key schema
     assert "key_schema" in str(excinfo.value)
     assert "PROTOBUF" in str(excinfo.value)
+
+
+def test_confluent_complex_schema(lambda_context):
+    # GIVEN
+    # A scenario where a complex schema is used with the PROTOBUF schema type
+    complex_event = {
+        "eventSource": "aws:kafka",
+        "eventSourceArn": "arn:aws:kafka:us-east-1:0123456789019:cluster/SalesCluster/abcd1234",
+        "bootstrapServers": "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
+        "records": {
+            "mytopic-0": [
+                {
+                    "topic": "mytopic",
+                    "partition": 0,
+                    "offset": 15,
+                    "timestamp": 1545084650987,
+                    "timestampType": "CREATE_TIME",
+                    "key": "NDI=",
+                    "value": "COkHEgZMYXB0b3AZUrgehes/j0A=",
+                    "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                },
+                {
+                    "topic": "mytopic",
+                    "partition": 0,
+                    "offset": 16,
+                    "timestamp": 1545084650988,
+                    "timestampType": "CREATE_TIME",
+                    "key": "NDI=",
+                    "value": "AAjpBxIGTGFwdG9wGVK4HoXrP49A",
+                    "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                },
+                {
+                    "topic": "mytopic",
+                    "partition": 0,
+                    "offset": 17,
+                    "timestamp": 1545084650989,
+                    "timestampType": "CREATE_TIME",
+                    "key": "NDI=",
+                    "value": "AgEACOkHEgZMYXB0b3AZUrgehes/j0A=",
+                    "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                },
+            ],
+        },
+    }
+
+    # GIVEN A Kafka consumer configured to deserialize Protobuf data
+    # using the User protobuf message type as the schema
+    schema_config = SchemaConfig(
+        value_schema_type="PROTOBUF",
+        value_schema=ProtobufProduct,
+    )
+
+    processed_records = []
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        for record in event.records:
+            processed_records.append(
+                {"id": record.value["id"], "name": record.value["name"], "price": record.value["price"]},
+            )
+        return {"processed": len(processed_records)}
+
+    # WHEN The handler processes a Kafka event containing Protobuf-encoded data
+    result = handler(complex_event, lambda_context)
+
+    # THEN
+    # The handler should successfully process both records
+    # and return the correct count
+    assert result == {"processed": 3}
+
+    # All records should be correctly deserialized with proper values
+    assert len(processed_records) == 3
+
+    # First record should contain decoded values
+    assert processed_records[0]["id"] == 1001
+    assert processed_records[0]["name"] == "Laptop"
+    assert processed_records[0]["price"] == 999.99
+
+    # Second record should contain decoded values
+    assert processed_records[1]["id"] == 1001
+    assert processed_records[1]["name"] == "Laptop"
+    assert processed_records[1]["price"] == 999.99
+
+    # Third record should contain decoded values
+    assert processed_records[2]["id"] == 1001
+    assert processed_records[2]["name"] == "Laptop"
+    assert processed_records[2]["price"] == 999.99
