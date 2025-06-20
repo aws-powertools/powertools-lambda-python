@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
+from typing import Any
 
 from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
-from aws_lambda_powertools.utilities.kafka.exceptions import KafkaConsumerDeserializationError
+from aws_lambda_powertools.utilities.kafka.exceptions import (
+    KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class JsonDeserializer(DeserializerBase):
@@ -14,6 +21,9 @@ class JsonDeserializer(DeserializerBase):
     This class provides functionality to deserialize JSON data from bytes or string
     into Python dictionaries.
     """
+
+    def __init__(self, field_metadata: dict[str, Any] | None = None):
+        self.field_metatada = field_metadata
 
     def deserialize(self, data: bytes | str) -> dict:
         """
@@ -45,6 +55,14 @@ class JsonDeserializer(DeserializerBase):
         ... except KafkaConsumerDeserializationError as e:
         ...     print(f"Failed to deserialize: {e}")
         """
+
+        data_format = self.field_metatada.get("dataFormat") if self.field_metatada else None
+
+        if data_format and data_format != "JSON":
+            raise KafkaConsumerDeserializationFormatMismatch(f"Expected data is JSON but you sent {data_format}")
+
+        logger.debug("Deserializing data with JSON format")
+
         try:
             return json.loads(base64.b64decode(data).decode("utf-8"))
         except Exception as e:
