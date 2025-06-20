@@ -8,6 +8,7 @@ import pytest
 from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
 )
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
 from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
@@ -293,6 +294,34 @@ def test_kafka_consumer_default_deserializer_key_is_none(kafka_event_with_json_d
     # THEN
     # The key should be preserved as None without any attempt at deserialization
     assert result is None
+
+
+def test_kafka_consumer_json_with_wrong_avro_schema(kafka_event_with_json_data, lambda_context):
+    # GIVEN
+    # A Kafka event with a null key in the record
+    kafka_event_wrong_metadata = deepcopy(kafka_event_with_json_data)
+    kafka_event_wrong_metadata["records"]["my-topic-1"][0]["valueSchemaMetadata"] = {
+        "dataFormat": "AVRO",
+        "schemaId": "1234532323",
+    }
+
+    schema_config = SchemaConfig(value_schema_type="JSON")
+
+    # A Kafka consumer with no schema configuration specified
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        # Get the first record's key which should be None
+        record = next(event.records)
+        return record.value
+
+    # WHEN
+    # The handler processes the Kafka event with a null key
+    with pytest.raises(KafkaConsumerDeserializationFormatMismatch) as excinfo:
+        handler(kafka_event_wrong_metadata, lambda_context)
+
+    # THEN
+    # Ensure the error contains useful diagnostic information
+    assert "Expected data is JSON but you sent " in str(excinfo.value)
 
 
 def test_kafka_consumer_metadata_fields(kafka_event_with_json_data, lambda_context):

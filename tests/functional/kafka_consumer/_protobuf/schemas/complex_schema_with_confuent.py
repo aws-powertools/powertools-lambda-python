@@ -1,0 +1,53 @@
+# ruff: noqa: E501
+complex_event = {
+    "eventSource": "aws:kafka",
+    "eventSourceArn": "arn:aws:kafka:us-east-1:0123456789019:cluster/SalesCluster/abcd1234-abcd-cafe-abab-9876543210ab-4",
+    "bootstrapServers": ",b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
+    "records": {
+        "mytopic-0": [
+            {
+                "topic": "mytopic",
+                "partition": 0,
+                "offset": 15,
+                "timestamp": 1545084650987,
+                "timestampType": "CREATE_TIME",
+                "key": "NDI=",
+                "value": "CgMxMjMSBFRlc3QaDHRlc3RAZ214LmNvbSAKMgoyMDI1LTA2LTIwOgR0YWcxOgR0YWcyQQAAAAAAAChASg4KBXRoZW1lEgVsaWdodFIaCgpNeXRoZW5xdWFpEgZadXJpY2gaBDgwMDI=",
+                "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+            },
+            {
+                "topic": "mytopic",
+                "partition": 0,
+                "offset": 16,
+                "timestamp": 1545084650988,
+                "timestampType": "CREATE_TIME",
+                "key": "NDI=",
+                "value": "AAoDMTIzEgRUZXN0Ggx0ZXN0QGdteC5jb20gCjIKMjAyNS0wNi0yMDoEdGFnMToEdGFnMkEAAAAAAAAoQEoOCgV0aGVtZRIFbGlnaHRSGgoKTXl0aGVucXVhaRIGWnVyaWNoGgQ4MDAy",
+                "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                "valueSchemaMetadata": {"schemaId": "123", "dataFormat": "PROTOBUF"},
+            },
+            {
+                "topic": "mytopic",
+                "partition": 0,
+                "offset": 17,
+                "timestamp": 1545084650989,
+                "timestampType": "CREATE_TIME",
+                "key": None,
+                "value": "BAIACgMxMjMSBFRlc3QaDHRlc3RAZ214LmNvbSAKMgoyMDI1LTA2LTIwOgR0YWcxOgR0YWcyQQAAAAAAAChASg4KBXRoZW1lEgVsaWdodFIaCgpNeXRoZW5xdWFpEgZadXJpY2gaBDgwMDI=",
+                "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                "valueSchemaMetadata": {"schemaId": "456", "dataFormat": "PROTOBUF"},
+            },
+            {
+                "topic": "mytopic",
+                "partition": 0,
+                "offset": 18,
+                "timestamp": 1545084650990,
+                "timestampType": "CREATE_TIME",
+                "key": "NDI=",
+                "value": "AQoDMTIzEgRUZXN0Ggx0ZXN0QGdteC5jb20gCjIKMjAyNS0wNi0yMDoEdGFnMToEdGFnMkEAAAAAAAAoQEoOCgV0aGVtZRIFbGlnaHRSGgoKTXl0aGVucXVhaRIGWnVyaWNoGgQ4MDAy",
+                "headers": [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
+                "valueSchemaMetadata": {"schemaId": "12345678-1234-1234-1234-123456789012", "dataFormat": "PROTOBUF"},
+            },
+        ],
+    },
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
@@ -12,6 +13,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
+
+logger = logging.getLogger(__name__)
 
 
 class ConsumerRecordRecords(KafkaEventRecordBase):
@@ -31,18 +34,24 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
         if not key:
             return None
 
+        logger.debug("Deserializing key field")
+
         # Determine schema type and schema string
         schema_type = None
-        schema_str = None
+        schema_value = None
         output_serializer = None
 
         if self.schema_config and self.schema_config.key_schema_type:
             schema_type = self.schema_config.key_schema_type
-            schema_str = self.schema_config.key_schema
+            schema_value = self.schema_config.key_schema
             output_serializer = self.schema_config.key_output_serializer
 
         # Always use get_deserializer if None it will default to DEFAULT
-        deserializer = get_deserializer(schema_type, schema_str)
+        deserializer = get_deserializer(
+            schema_type=schema_type,
+            schema_value=schema_value,
+            field_metadata=self.key_schema_metadata,
+        )
         deserialized_value = deserializer.deserialize(key)
 
         # Apply output serializer if specified
@@ -57,16 +66,22 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
 
         # Determine schema type and schema string
         schema_type = None
-        schema_str = None
+        schema_value = None
         output_serializer = None
+
+        logger.debug("Deserializing value field")
 
         if self.schema_config and self.schema_config.value_schema_type:
             schema_type = self.schema_config.value_schema_type
-            schema_str = self.schema_config.value_schema
+            schema_value = self.schema_config.value_schema
             output_serializer = self.schema_config.value_output_serializer
 
         # Always use get_deserializer if None it will default to DEFAULT
-        deserializer = get_deserializer(schema_type, schema_str)
+        deserializer = get_deserializer(
+            schema_type=schema_type,
+            schema_value=schema_value,
+            field_metadata=self.value_schema_metadata,
+        )
         deserialized_value = deserializer.deserialize(value)
 
         # Apply output serializer if specified
