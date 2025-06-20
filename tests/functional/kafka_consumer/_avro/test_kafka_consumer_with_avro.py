@@ -11,6 +11,7 @@ from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecor
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
     KafkaConsumerMissingSchemaError,
 )
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
@@ -309,3 +310,36 @@ def test_kafka_consumer_without_avro_key_schema():
 
     # Verify the error message mentions 'key_schema'
     assert "key_schema" in str(excinfo.value)
+
+
+def test_kafka_consumer_avro_with_wrong_json_schema(
+    kafka_event_with_avro_data,
+    lambda_context,
+    avro_value_schema,
+    avro_key_schema,
+):
+    # GIVEN
+    # A Kafka event with a null key in the record
+    kafka_event_wrong_metadata = deepcopy(kafka_event_with_avro_data)
+    kafka_event_wrong_metadata["records"]["my-topic-1"][0]["valueSchemaMetadata"] = {
+        "dataFormat": "JSON",
+        "schemaId": "123",
+    }
+
+    schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_value_schema)
+
+    # A Kafka consumer with no schema configuration specified
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        # Get the first record's key which should be None
+        record = next(event.records)
+        return record.value
+
+    # WHEN
+    # The handler processes the Kafka event with a null key
+    with pytest.raises(KafkaConsumerDeserializationFormatMismatch) as excinfo:
+        handler(kafka_event_wrong_metadata, lambda_context)
+
+    # THEN
+    # Ensure the error contains useful diagnostic information
+    assert "Expected data is AVRO but you sent " in str(excinfo.value)

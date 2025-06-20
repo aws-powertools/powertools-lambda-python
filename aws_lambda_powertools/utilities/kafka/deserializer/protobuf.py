@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
-from google.protobuf.internal.decoder import _DecodeVarint  # type: ignore[attr-defined]
+from google.protobuf.internal.decoder import _DecodeSignedVarint  # type: ignore[attr-defined]
 from google.protobuf.json_format import MessageToDict
 
 from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ProtobufDeserializer(DeserializerBase):
@@ -19,8 +23,9 @@ class ProtobufDeserializer(DeserializerBase):
     into Python dictionaries using the provided Protocol Buffer message class.
     """
 
-    def __init__(self, message_class: Any):
+    def __init__(self, message_class: Any, field_metadata: dict[str, Any] | None = None):
         self.message_class = message_class
+        self.field_metatada = field_metadata
 
     def deserialize(self, data: bytes | str) -> dict:
         """
@@ -61,57 +66,56 @@ class ProtobufDeserializer(DeserializerBase):
         ... except KafkaConsumerDeserializationError as e:
         ...     print(f"Failed to deserialize: {e}")
         """
-        value = self._decode_input(data)
+
+        data_format = self.field_metatada.get("dataFormat") if self.field_metatada else None
+        schema_id = self.field_metatada.get("schemaId") if self.field_metatada else None
+
+        if data_format and data_format != "PROTOBUF":
+            raise KafkaConsumerDeserializationFormatMismatch(f"Expected data is PROTOBUF but you sent {data_format}")
+
+        logger.debug("Deserializing data with PROTOBUF format")
+
         try:
+            value = self._decode_input(data)
             message = self.message_class()
-            message.ParseFromString(value)
+            if schema_id is None:
+                logger.debug("Plain PROTOBUF data: using default deserializer")
+                # Plain protobuf - direct parser
+                message.ParseFromString(value)
+            elif len(schema_id) > 20:
+                logger.debug("PROTOBUF data integrated with Glue SchemaRegistry: using Glue deserializer")
+                # Glue schema registry integration - remove the first byte
+                message.ParseFromString(value[1:])
+            else:
+                logger.debug("PROTOBUF data integrated with Confluent SchemaRegistry: using Confluent deserializer")
+                # Confluent schema registry integration - remove message index list
+                message.ParseFromString(self._remove_message_index(value))
+
             return MessageToDict(message, preserving_proto_field_name=True)
-        except Exception:
-            return self._deserialize_with_message_index(value, self.message_class())
-
-    def _deserialize_with_message_index(self, data: bytes, parser: Any) -> dict:
-        """
-        Deserialize protobuf message with Confluent message index handling.
-
-        Parameters
-        ----------
-        data : bytes
-            data
-        parser : google.protobuf.message.Message
-            Protobuf message instance to parse the data into
-
-        Returns
-        -------
-        dict
-            Dictionary representation of the parsed protobuf message with original field names
-
-        Raises
-        ------
-        KafkaConsumerDeserializationError
-            If deserialization fails
-
-        Notes
-        -----
-        This method handles the special case of Confluent Schema Registry's message index
-        format, where the message is prefixed with either a single 0 (for the first schema)
-        or a list of schema indexes. The actual protobuf message follows these indexes.
-        """
-
-        buffer = memoryview(data)
-        pos = 0
-
-        try:
-            first_value, new_pos = _DecodeVarint(buffer, pos)
-            pos = new_pos
-
-            if first_value != 0:
-                for _ in range(first_value):
-                    _, new_pos = _DecodeVarint(buffer, pos)
-                    pos = new_pos
-
-            parser.ParseFromString(data[pos:])
-            return MessageToDict(parser, preserving_proto_field_name=True)
         except Exception as e:
             raise KafkaConsumerDeserializationError(
                 f"Error trying to deserialize protobuf data - {type(e).__name__}: {str(e)}",
             ) from e
+
+    def _remove_message_index(self, data):
+        """
+        Identifies and removes Confluent Schema Registry MessageIndex from bytes.
+        Returns pure protobuf bytes.
+        """
+        buffer = memoryview(data)
+        pos = 0
+
+        logger.debug("Removing message list bytes")
+
+        # Read first varint (index count or 0)
+        first_value, new_pos = _DecodeSignedVarint(buffer, pos)
+        pos = new_pos
+
+        # Skip index values if present
+        if first_value != 0:
+            for _ in range(first_value):
+                _, new_pos = _DecodeSignedVarint(buffer, pos)
+                pos = new_pos
+
+        # Return remaining bytes (pure protobuf)
+        return data[pos:]
