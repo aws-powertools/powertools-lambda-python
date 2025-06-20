@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import io
+import logging
+from typing import Any
 
 from avro.io import BinaryDecoder, DatumReader
 from avro.schema import parse as parse_schema
@@ -9,7 +11,10 @@ from aws_lambda_powertools.utilities.kafka.deserializer.base import Deserializer
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AvroDeserializer(DeserializerBase):
@@ -20,10 +25,11 @@ class AvroDeserializer(DeserializerBase):
     a provided Avro schema definition.
     """
 
-    def __init__(self, schema_str: str):
+    def __init__(self, schema_str: str, field_metadata: dict[str, Any] | None = None):
         try:
             self.parsed_schema = parse_schema(schema_str)
             self.reader = DatumReader(self.parsed_schema)
+            self.field_metatada = field_metadata
         except Exception as e:
             raise KafkaConsumerAvroSchemaParserError(
                 f"Invalid Avro schema. Please ensure the provided avro schema is valid: {type(e).__name__}: {str(e)}",
@@ -60,6 +66,13 @@ class AvroDeserializer(DeserializerBase):
         ... except KafkaConsumerDeserializationError as e:
         ...     print(f"Failed to deserialize: {e}")
         """
+        data_format = self.field_metatada.get("dataFormat") if self.field_metatada else None
+
+        if data_format and data_format != "AVRO":
+            raise KafkaConsumerDeserializationFormatMismatch(f"Expected data is AVRO but you sent {data_format}")
+
+        logger.debug("Deserializing data with AVRO format")
+
         try:
             value = self._decode_input(data)
             bytes_reader = io.BytesIO(value)

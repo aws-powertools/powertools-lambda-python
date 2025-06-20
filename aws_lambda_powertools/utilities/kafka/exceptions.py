@@ -4,6 +4,12 @@ class KafkaConsumerAvroSchemaParserError(Exception):
     """
 
 
+class KafkaConsumerDeserializationFormatMismatch(Exception):
+    """
+    Error raised when deserialization format is incompatible
+    """
+
+
 class KafkaConsumerDeserializationError(Exception):
     """
     Error raised when message deserialization fails.

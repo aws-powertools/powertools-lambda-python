@@ -13,21 +13,27 @@ if TYPE_CHECKING:
 _deserializer_cache: dict[str, DeserializerBase] = {}
 
 
-def _get_cache_key(schema_type: str | object, schema_value: Any) -> str:
+def _get_cache_key(schema_type: str | object, schema_value: Any, field_metadata: dict[str, Any]) -> str:
+    schema_metadata = None
+
+    if field_metadata:
+        schema_metadata = field_metadata.get("schemaId")
+
     if schema_value is None:
-        return str(schema_type)
+        schema_hash = f"{str(schema_type)}_{schema_metadata}"
 
     if isinstance(schema_value, str):
+        hashable_value = f"{schema_value}_{schema_metadata}"
         # For string schemas like Avro, hash the content
-        schema_hash = hashlib.md5(schema_value.encode("utf-8"), usedforsecurity=False).hexdigest()
+        schema_hash = hashlib.md5(hashable_value.encode("utf-8"), usedforsecurity=False).hexdigest()
     else:
         # For objects like Protobuf, use the object id
-        schema_hash = str(id(schema_value))
+        schema_hash = f"{str(id(schema_value))}_{schema_metadata}"
 
     return f"{schema_type}_{schema_hash}"
 
 
-def get_deserializer(schema_type: str | object, schema_value: Any) -> DeserializerBase:
+def get_deserializer(schema_type: str | object, schema_value: Any, field_metadata: Any) -> DeserializerBase:
     """
     Factory function to get the appropriate deserializer based on schema type.
 
@@ -75,7 +81,7 @@ def get_deserializer(schema_type: str | object, schema_value: Any) -> Deserializ
     """
 
     # Generate a cache key based on schema type and value
-    cache_key = _get_cache_key(schema_type, schema_value)
+    cache_key = _get_cache_key(schema_type, schema_value, field_metadata)
 
     # Check if we already have this deserializer in cache
     if cache_key in _deserializer_cache:
@@ -87,14 +93,14 @@ def get_deserializer(schema_type: str | object, schema_value: Any) -> Deserializ
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka.deserializer.avro import AvroDeserializer
 
-        deserializer = AvroDeserializer(schema_value)
+        deserializer = AvroDeserializer(schema_str=schema_value, field_metadata=field_metadata)
     elif schema_type == "PROTOBUF":
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka.deserializer.protobuf import ProtobufDeserializer
 
-        deserializer = ProtobufDeserializer(schema_value)
+        deserializer = ProtobufDeserializer(message_class=schema_value, field_metadata=field_metadata)
     elif schema_type == "JSON":
-        deserializer = JsonDeserializer()
+        deserializer = JsonDeserializer(field_metadata=field_metadata)
 
     else:
         # Default to no-op deserializer
