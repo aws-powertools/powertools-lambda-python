@@ -374,6 +374,7 @@ class Logger:
         if not self._is_deduplication_disabled:
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
+                # skip suppressing pytest's handler, allowing caplog fixture usage
                 if type(handler).__name__ == "LogCaptureHandler" and type(handler).__module__ == "_pytest.logging":
                     continue
                 # It'll add a filter to suppress any child logger from self.service
