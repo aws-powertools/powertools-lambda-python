@@ -34,6 +34,10 @@ def test_kafka_msk_event():
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.decoded_headers["HeaderKey"] == b"headerValue"
+    assert record.key_schema_metadata.data_format == raw_record["keySchemaMetadata"]["dataFormat"]
+    assert record.key_schema_metadata.schema_id == raw_record["keySchemaMetadata"]["schemaId"]
+    assert record.value_schema_metadata.data_format == raw_record["valueSchemaMetadata"]["dataFormat"]
+    assert record.value_schema_metadata.schema_id == raw_record["valueSchemaMetadata"]["schemaId"]
 
     assert parsed_event.record == records[0]
     for i in range(1, 3):
@@ -68,6 +72,8 @@ def test_kafka_self_managed_event():
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.decoded_headers["HeaderKey"] == b"headerValue"
+    assert record.key_schema_metadata is None
+    assert record.value_schema_metadata is None
 
     assert parsed_event.record == records[0]
 

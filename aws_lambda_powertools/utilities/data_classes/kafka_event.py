@@ -10,7 +10,19 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-class KafkaEventRecord(DictWrapper):
+class KafkaEventRecordSchemaMetadata(DictWrapper):
+    @property
+    def data_format(self) -> str | None:
+        """The data format of the Kafka record."""
+        return self.get("dataFormat", None)
+
+    @property
+    def schema_id(self) -> str | None:
+        """The schema id of the Kafka record."""
+        return self.get("schemaId", None)
+
+
+class KafkaEventRecordBase(DictWrapper):
     @property
     def topic(self) -> str:
         """The Kafka topic."""
@@ -36,6 +48,24 @@ class KafkaEventRecord(DictWrapper):
         """The Kafka record timestamp type."""
         return self["timestampType"]
 
+    @property
+    def key_schema_metadata(self) -> KafkaEventRecordSchemaMetadata | None:
+        """The metadata of the Key Kafka record."""
+        return (
+            None if self.get("keySchemaMetadata") is None else KafkaEventRecordSchemaMetadata(self["keySchemaMetadata"])
+        )
+
+    @property
+    def value_schema_metadata(self) -> KafkaEventRecordSchemaMetadata | None:
+        """The metadata of the Value Kafka record."""
+        return (
+            None
+            if self.get("valueSchemaMetadata") is None
+            else KafkaEventRecordSchemaMetadata(self["valueSchemaMetadata"])
+        )
+
+
+class KafkaEventRecord(KafkaEventRecordBase):
     @property
     def key(self) -> str | None:
         """
@@ -83,18 +113,7 @@ class KafkaEventRecord(DictWrapper):
         return CaseInsensitiveDict((k, bytes(v)) for chunk in self.headers for k, v in chunk.items())
 
 
-class KafkaEvent(DictWrapper):
-    """Self-managed or MSK Apache Kafka event trigger
-    Documentation:
-    --------------
-    - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
-    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
-    """
-
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
-        self._records: Iterator[KafkaEventRecord] | None = None
-
+class KafkaEventBase(DictWrapper):
     @property
     def event_source(self) -> str:
         """The AWS service from which the Kafka event record originated."""
@@ -114,6 +133,19 @@ class KafkaEvent(DictWrapper):
     def decoded_bootstrap_servers(self) -> list[str]:
         """The decoded Kafka bootstrap URL."""
         return self.bootstrap_servers.split(",")
+
+
+class KafkaEvent(KafkaEventBase):
+    """Self-managed or MSK Apache Kafka event trigger
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
+    - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
+    """
+
+    def __init__(self, data: dict[str, Any]):
+        super().__init__(data)
+        self._records: Iterator[KafkaEventRecord] | None = None
 
     @property
     def records(self) -> Iterator[KafkaEventRecord]:
