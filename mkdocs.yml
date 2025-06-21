@@ -28,6 +28,7 @@ nav:
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
           - utilities/batch.md
+          - utilities/kafka.md
           - utilities/typing.md
           - utilities/validation.md
           - utilities/data_classes.md
@@ -220,6 +221,7 @@ plugins:
           - utilities/parameters.md
           - utilities/batch.md
           - utilities/typing.md
+          - utilities/kafka.md
           - utilities/validation.md
           - utilities/data_classes.md
           - utilities/parser.md

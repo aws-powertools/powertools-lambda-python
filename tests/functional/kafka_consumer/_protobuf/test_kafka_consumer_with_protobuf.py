@@ -7,6 +7,7 @@ import pytest
 from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerDeserializationError,
+    KafkaConsumerDeserializationFormatMismatch,
     KafkaConsumerMissingSchemaError,
 )
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
@@ -14,6 +15,7 @@ from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
 
 # Import the generated protobuf classes
 from .user_pb2 import Key, User
+from .user_prof_pb2 import UserProfile
 
 
 @pytest.fixture
@@ -335,3 +337,95 @@ def test_kafka_consumer_without_protobuf_key_schema():
     # Verify the error message mentions the missing key schema
     assert "key_schema" in str(excinfo.value)
     assert "PROTOBUF" in str(excinfo.value)
+
+
+def test_confluent_schema_registry_complex_schema(lambda_context):
+    # GIVEN
+    # A scenario where a complex schema is used with the PROTOBUF schema type
+    from tests.functional.kafka_consumer._protobuf.schemas.complex_schema_with_confuent import complex_event
+
+    # GIVEN A Kafka consumer configured to deserialize Protobuf data
+    # using the User protobuf message type as the schema
+    schema_config = SchemaConfig(
+        value_schema_type="PROTOBUF",
+        value_schema=UserProfile,
+    )
+
+    processed_records = []
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        for record in event.records:
+            processed_records.append(
+                {"email": record.value["email"], "age": record.value["age"]},
+            )
+        return {"processed": len(processed_records)}
+
+    # WHEN The handler processes a Kafka event containing Protobuf-encoded data
+    result = handler(complex_event, lambda_context)
+
+    # THEN
+    # The handler should successfully process both records
+    # and return the correct count
+    assert result == {"processed": 4}
+    assert len(processed_records) == 4
+
+
+def test_glue_schema_registry_complex_schema(lambda_context):
+    # GIVEN
+    # A scenario where a complex schema is used with the PROTOBUF schema type
+    from tests.functional.kafka_consumer._protobuf.schemas.complex_schema_with_glue import complex_event
+
+    # GIVEN A Kafka consumer configured to deserialize Protobuf data
+    # using the User protobuf message type as the schema
+    schema_config = SchemaConfig(
+        value_schema_type="PROTOBUF",
+        value_schema=UserProfile,
+    )
+
+    processed_records = []
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        for record in event.records:
+            processed_records.append(
+                {"email": record.value["email"], "age": record.value["age"]},
+            )
+        return {"processed": len(processed_records)}
+
+    # WHEN The handler processes a Kafka event containing Protobuf-encoded data
+    result = handler(complex_event, lambda_context)
+
+    # THEN
+    # The handler should successfully process both records
+    # and return the correct count
+    assert result == {"processed": 4}
+    assert len(processed_records) == 4
+
+
+def test_kafka_consumer_protobuf_with_wrong_avro_schema(kafka_event_with_proto_data, lambda_context):
+    # GIVEN
+    # A Kafka event with a null key in the record
+    kafka_event_wrong_metadata = deepcopy(kafka_event_with_proto_data)
+    kafka_event_wrong_metadata["records"]["my-topic-1"][0]["valueSchemaMetadata"] = {
+        "dataFormat": "AVRO",
+        "schemaId": "1234",
+    }
+
+    schema_config = SchemaConfig(value_schema_type="PROTOBUF", value_schema=UserProfile)
+
+    # A Kafka consumer with no schema configuration specified
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        # Get the first record's key which should be None
+        record = next(event.records)
+        return record.value
+
+    # WHEN
+    # The handler processes the Kafka event with a null key
+    with pytest.raises(KafkaConsumerDeserializationFormatMismatch) as excinfo:
+        handler(kafka_event_wrong_metadata, lambda_context)
+
+    # THEN
+    # Ensure the error contains useful diagnostic information
+    assert "Expected data is PROTOBUF but you sent " in str(excinfo.value)
