@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import base64
+import logging
 
 from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
+
+logger = logging.getLogger(__name__)
 
 
 class DefaultDeserializer(DeserializerBase):
@@ -43,4 +46,5 @@ class DefaultDeserializer(DeserializerBase):
         >>> result = deserializer.deserialize(bytes_data)
         >>> print(result == bytes_data)  # Output: True
         """
+        logger.debug("Deserializing data with primitives types")
         return base64.b64decode(data).decode("utf-8")
