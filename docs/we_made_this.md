@@ -31,7 +31,7 @@ GitHub: [https://github.com/serverless-dna/powertools-mcp](https://github.com/se
 
 ### AWS Lambda Cookbook — Following best practices with Powertools for AWS Lambda
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
 A collection of articles explaining in detail how Powertools for AWS Lambda helps with a Serverless adoption strategy and its challenges.
 
@@ -94,7 +94,7 @@ This article walks through a sample AWS EventBridge cookiecutter template presen
 
 ### Implementing Feature Flags with AWS AppConfig and Powertools for AWS Lambda
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
 This article walks through how CyberArk uses Powertools to implement Feature Flags with AWS AppConfig
 
@@ -152,7 +152,7 @@ Learn to implement data masking in AWS Lambda with Powertools, protecting sensit
 
 #### Building a resilient input handling with Parser
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
 When building applications with AWS Lambda it is critical to verify the data structure and validate the input due to the multiple different sources that can trigger them. In this session Ran Isenberg (CyberArk) will present one of the interesting features of Powertools for AWS Lambda for python: the parser.
 
@@ -170,7 +170,7 @@ A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank"
 
 #### Level Up Your CI/CD With Smart AWS Feature Flags
 
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
 Feature flags can improve your CI/CD process by enabling capabilities otherwise not possible, thus making them an enabler of DevOps and a crucial part of continuous integration. Partial rollouts, A/B testing, and the ability to quickly change a configuration without redeploying code are advantages you gain by using features flags.
 
@@ -226,7 +226,7 @@ This repository provides a working, deployable, open source-based, serverless MC
 
 ### Serferless Python Demo
 
-> **Author: [Ran Isenberg & Heitor Lessa](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+> **Author: [Ran Isenberg & Heitor Lessa](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
 This project covers an opinionated approach to Python project setup, testing, profiling, deployments, and operations. Learn about many open source tools, including Powertools for AWS Lambda—a toolkit that can help you implement serverless best practices and increase developer velocity.
 
