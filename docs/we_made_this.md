@@ -224,7 +224,7 @@ This repository provides a working, deployable, open source-based, serverless MC
 
 :material-github: [https://github.com/ran-isenberg/aws-lambda-mcp-cookbook](https://github.com/ran-isenberg/aws-lambda-mcp-cookbook){:target="_blank"}
 
-### Serferless Python Demo
+### Serverless Python Demo
 
 > **Author: [Ran Isenberg & Heitor Lessa](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
 
