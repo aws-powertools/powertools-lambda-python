@@ -6,7 +6,13 @@
 
 ## Maintenance
 
+* **deps:** bump docker/setup-buildx-action from 3.10.0 to 3.11.1 ([#6823](https://github.com/aws-powertools/powertools-lambda-python/issues/6823))
+* **deps:** bump pydantic from 2.11.5 to 2.11.7 ([#6844](https://github.com/aws-powertools/powertools-lambda-python/issues/6844))
 * **deps:** bump redis from 5.3.0 to 6.2.0 ([#6827](https://github.com/aws-powertools/powertools-lambda-python/issues/6827))
+* **deps-dev:** bump boto3-stubs from 1.38.34 to 1.38.41 ([#6845](https://github.com/aws-powertools/powertools-lambda-python/issues/6845))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.200.1a0 to 2.202.0a0 ([#6846](https://github.com/aws-powertools/powertools-lambda-python/issues/6846))
+* **deps-dev:** bump aws-cdk from 2.1018.1 to 2.1019.1 ([#6837](https://github.com/aws-powertools/powertools-lambda-python/issues/6837))
+* **deps-dev:** bump mypy from 1.16.0 to 1.16.1 ([#6828](https://github.com/aws-powertools/powertools-lambda-python/issues/6828))
 
 
 <a name="v3.15.1"></a>
