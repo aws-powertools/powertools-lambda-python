@@ -10,7 +10,7 @@ key_schema = """
     "type": "record",
     "name": "ProductKey",
     "fields": [
-        {"name": "product_id", "type": "string"}
+        {"name": "region_name", "type": "string"}
     ]
 }
 """
@@ -18,11 +18,11 @@ key_schema = """
 value_schema = """
 {
     "type": "record",
-    "name": "ProductInfo",
+    "name": "User",
+    "namespace": "com.example",
     "fields": [
         {"name": "name", "type": "string"},
-        {"name": "price", "type": "double"},
-        {"name": "in_stock", "type": "boolean"}
+        {"name": "age", "type": "int"}
     ]
 }
 """
@@ -43,7 +43,7 @@ def lambda_handler(event: ConsumerRecords, context: LambdaContext):
         key = record.key
         value = record.value
 
-        logger.info(f"Processing key: {key['product_id']}")
+        logger.info(f"Processing key: {key['region_name']}")
         logger.info(f"Processing value: {value['name']}")
 
     return {"statusCode": 200}

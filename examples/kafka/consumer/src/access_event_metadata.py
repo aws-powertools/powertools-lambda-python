@@ -4,8 +4,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
-# Define schemas for value
-value_schema = """
+# Define Avro schema
+avro_schema = """
 {
     "type": "record",
     "name": "User",
@@ -17,19 +17,28 @@ value_schema = """
 }
 """
 
-# Configure value schema
 schema_config = SchemaConfig(
     value_schema_type="AVRO",
-    value_schema=value_schema,
+    value_schema=avro_schema,
 )
 
 
 @kafka_consumer(schema_config=schema_config)
 def lambda_handler(event: ConsumerRecords, context: LambdaContext):
     for record in event.records:
-        # Access deserialized value
-        value = record.value
+        # Log record coordinates for tracing
+        logger.info(f"Processing message from topic '{record.topic}'")
+        logger.info(f"Partition: {record.partition}, Offset: {record.offset}")
+        logger.info(f"Produced at: {record.timestamp}")
 
-        logger.info(f"Processing value: {value['name']}")
+        # Process message headers
+        logger.info(f"Headers: {record.headers}")
+
+        # Access the Avro deserialized message content
+        value = record.value
+        logger.info(f"Deserialized value: {value['name']}")
+
+        # For debugging, you can access the original raw data
+        logger.info(f"Raw message: {record.original_value}")
 
     return {"statusCode": 200}
