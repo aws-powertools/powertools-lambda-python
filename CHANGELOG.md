@@ -4,8 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **logger:** fix exception on flush without buffer ([#6794](https://github.com/aws-powertools/powertools-lambda-python/issues/6794))
+
 ## Maintenance
 
+* **ci:** new pre-release 3.15.2a0 ([#6852](https://github.com/aws-powertools/powertools-lambda-python/issues/6852))
 * **deps:** bump docker/setup-buildx-action from 3.10.0 to 3.11.1 ([#6823](https://github.com/aws-powertools/powertools-lambda-python/issues/6823))
 * **deps:** bump pydantic from 2.11.5 to 2.11.7 ([#6844](https://github.com/aws-powertools/powertools-lambda-python/issues/6844))
 * **deps:** bump redis from 5.3.0 to 6.2.0 ([#6827](https://github.com/aws-powertools/powertools-lambda-python/issues/6827))
