@@ -69,8 +69,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                                     |
     | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-    | x86_64       | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard: |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard:  |
+    | x86_64       | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard: |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard:  |
 
     === "AWS Console"
 
@@ -220,15 +220,15 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard: |
 
     **AWS GovCloud (us-gov-west-1)**
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:7__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:7__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard: |
 
 === "Serverless Application Repository (SAR)"
 
