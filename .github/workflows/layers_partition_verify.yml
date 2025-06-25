@@ -1,0 +1,156 @@
+# Parition Layer Verification
+# ---
+# This workflow queries the Parition layer info in production only
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: choice
+        options:
+          - Gamma
+          - Prod
+        required: true
+      version:
+        description: Layer version to verify
+        type: string
+        required: true
+      partition_version:
+        description: Layer version to verify, this is mostly used in Gamma where a version mismatch might exist
+        type: string
+        required: false
+      partition:
+        description: Partition to deploy to
+        type: choice
+        options:
+          - China
+          - GovCloud
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: string
+        required: true
+      version:
+        description: Layer version to verify
+        type: string
+        required: true
+      partition_version:
+        description: Partition Layer version to verify, this is mostly used in Gamma where a version mismatch might exist
+        type: string
+        required: false
+
+name: Layer Verification (Partition)
+run-name: Layer Verification (${{ inputs.partition }}) - ${{ inputs.environment }} / Version - ${{ inputs.version }}
+
+permissions: {}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      regions: ${{ format('{0}{1}', steps.regions_china.outputs.regions, steps.regions_govcloud.outputs.regions) }}
+      parition: ${{ format('{0}{1}', steps.regions_china.outputs.partition, steps.regions_govcloud.outputs.parition) }}
+      aud: ${{ format('{0}{1}', steps.regions_china.outputs.aud, steps.regions_govcloud.outputs.aud) }}
+    steps:
+      - id: regions_china
+        name: Parition (China)
+        if: ${{ inputs.partition == 'China' }}
+        run: |
+          echo regions='["cn-north-1"]'>> "$GITHUB_OUTPUT"
+          echo partition='aws-cn'>> "$GITHUB_OUTPUT"
+          echo aud='sts.amazonaws.com.cn'>> "$GITHUB_OUTPUT"
+      - id: regions_govcloud
+        name: Partition (GovCloud)
+        if: ${{ inputs.partition == 'GovCloud' }}
+        run: |
+          echo regions='["us-gov-east-1", "us-gov-west-1"]'>> "$GITHUB_OUTPUT"
+          echo partition='aws-us-gov'>> "$GITHUB_OUTPUT"
+          echo aud='sts.amazonaws.com'>> "$GITHUB_OUTPUT"
+  commercial:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: Prod (Readonly)
+    strategy:
+      matrix:
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+          - AWSLambdaPowertoolsPythonV3-python313
+        arch:
+          - arm64
+          - x86_64
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+      - name: Output ${{ matrix.layer }}-${{ matrix.arch }}
+        # fetch the specific layer version information from the us-east-1 commercial region
+        run: |
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
+      - name: Store Metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.layer }}-${{ matrix.arch }}.json
+          path: ${{ matrix.layer }}-${{ matrix.arch }}.json
+          retention-days: 1
+          if-no-files-found: error
+
+  verify:
+    name: Verify
+    needs: 
+      - setup
+      - commercial
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    # Environment should interperlate as "GovCloud Prod" or "China Beta"
+    environment: ${{ inputs.partition }} ${{ inputs.environment }}
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.setup.outputs.regions) }}
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+          - AWSLambdaPowertoolsPythonV3-python313
+        arch:
+          - arm64
+          - x86_64
+    steps:
+      - name: Download Metadata
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ matrix.layer }}-${{ matrix.arch }}.json
+      - id: transform
+        run: |
+          echo 'CONVERTED_REGION=${{ matrix.region }}' | tr 'a-z\-' 'A-Z_' >> "$GITHUB_OUTPUT"
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          role-to-assume: ${{ secrets[format('IAM_ROLE_{0}', steps.transform.outputs.CONVERTED_REGION)] }}
+          aws-region: ${{ matrix.region}}
+          mask-aws-account-id: true
+          audience: ${{ needs.setup.outputs.aud }}
+      - id: partition_version
+        name: Partition Layer Version
+        run: |
+          echo 'partition_version=$([[ -n "${{ inputs.partition_version}}" ]] && echo ${{ inputs.partition_version}} || echo ${{ inputs.version }} )' >> "$GITHUB_OUTPUT"
+      - name: Verify Layer
+        run: |
+          export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
+          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn "arn:${{ needs.setup.outputs.parition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ steps.partition_version.outputs.partition_version }}" > $layer_output
+          REMOTE_SHA=$(jq -r '.Content.CodeSha256' $layer_output)
+          LOCAL_SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}-${{ matrix.arch }}.json)
+          test "$REMOTE_SHA" == "$LOCAL_SHA" && echo "SHA OK: ${LOCAL_SHA}" || exit 1
+          jq -s -r '["Layer Arn", "Runtimes", "Version", "Description", "SHA256"], ([.[0], .[1]] | .[] | [.LayerArn, (.CompatibleRuntimes | join("/")), .Version, .Description, .Content.CodeSha256]) |@tsv' ${{ matrix.layer }}-${{ matrix.arch }}.json $layer_output | column -t -s $'\t'

@@ -1,0 +1,193 @@
+# Partitioned Layer Publish
+# ---
+# This workflow publishes a specific layer version in an AWS account based on the environment input.
+#
+# We pull each the version of the layer and store them as artifacts, the we upload them to each of the Partitioned AWS accounts.
+#
+# A number of safety checks are performed to ensure safety.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: choice
+        options:
+          - Gamma
+          - Prod
+        required: true
+      version:
+        description: Layer version to duplicate
+        type: string
+        required: true
+      partition:
+        description: Partition to deploy to
+        type: choice
+        options:
+          - China
+          - GovCloud
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: string
+        required: true
+      version:
+        description: Layer version to duplicate
+        type: string
+        required: true
+
+name: Layer Deployment (Partitions)
+run-name: Layer Deployment (${{ inputs.partition }}) - ${{ inputs.environment }} / Version - ${{ inputs.version }}
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      regions: ${{ format('{0}{1}', steps.regions_china.outputs.regions, steps.regions_govcloud.outputs.regions) }}
+      partition: ${{ format('{0}{1}', steps.regions_china.outputs.partition, steps.regions_govcloud.outputs.partition) }}
+      aud: ${{ format('{0}{1}', steps.regions_china.outputs.aud, steps.regions_govcloud.outputs.aud) }}
+    steps:
+      - id: regions_china
+        name: Partition (China)
+        if: ${{ inputs.partition == 'China' }}
+        run: |
+          echo regions='["cn-north-1"]'>> "$GITHUB_OUTPUT"
+          echo partition='aws-cn'>> "$GITHUB_OUTPUT"
+          echo aud='sts.amazonaws.com.cn'>> "$GITHUB_OUTPUT"
+      - id: regions_govcloud
+        name: Partition (GovCloud)
+        if: ${{ inputs.partition == 'GovCloud' }}
+        run: |
+          echo regions='["us-gov-east-1", "us-gov-west-1"]'>> "$GITHUB_OUTPUT"
+          echo partition='aws-us-gov'>> "$GITHUB_OUTPUT"
+          echo aud='sts.amazonaws.com'>> "$GITHUB_OUTPUT"
+  download:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: Prod (Readonly)
+    strategy:
+      matrix:
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+          - AWSLambdaPowertoolsPythonV3-python313
+        arch:
+          - arm64
+          - x86_64
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+      - name: Grab Zip
+        run: |
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_${{ matrix.arch }}.zip
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}_${{ matrix.arch }}.json
+      - name: Store Zip
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+          path: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+          retention-days: 1
+          if-no-files-found: error
+      - name: Store Metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.json
+          path: ${{ matrix.layer }}_${{ matrix.arch }}.json
+          retention-days: 1
+          if-no-files-found: error
+
+  copy:
+    name: Copy
+    needs: 
+      - setup
+      - download
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    # Environment should interperlate as "GovCloud Prod" or "China Beta"
+    environment: ${{ inputs.partition }} ${{ inputs.environment }}
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.setup.outputs.regions) }}
+        layer:
+          - AWSLambdaPowertoolsPythonV3-python39
+          - AWSLambdaPowertoolsPythonV3-python310
+          - AWSLambdaPowertoolsPythonV3-python311
+          - AWSLambdaPowertoolsPythonV3-python312
+          - AWSLambdaPowertoolsPythonV3-python313
+        arch:
+          - arm64
+          - x86_64
+    steps:
+      - name: Download Zip
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
+      - name: Download Metadata
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ matrix.layer }}_${{ matrix.arch }}.json
+      - name: Verify Layer Signature
+        run: |
+          SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
+          test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
+      - id: transform
+        run: |
+          echo 'CONVERTED_REGION=${{ matrix.region }}' | tr 'a-z\-' 'A-Z_' >> "$GITHUB_OUTPUT"
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          role-to-assume: ${{ secrets[format('IAM_ROLE_{0}', steps.transform.outputs.CONVERTED_REGION)] }}
+          aws-region: ${{ matrix.region}}
+          mask-aws-account-id: true
+          audience: ${{ needs.setup.outputs.aud }}
+      - name: Create Layer
+        id: create-layer
+        run: |
+          cat '${{ matrix.layer }}-${{ matrix.arch }}.json' | jq '{"LayerName": "${{ matrix.layer }}-${{ matrix.arch }}", "Description": .Description, "CompatibleRuntimes": .CompatibleRuntimes, "CompatibleArchitectures": .CompatibleArchitectures, "LicenseInfo": .LicenseInfo}' > input.json
+        
+          LAYER_VERSION=$(aws --region ${{ matrix.region}} lambda publish-layer-version \
+            --zip-file 'fileb://./${{ matrix.layer }}-${{ matrix.arch }}.zip' \
+            --cli-input-json file://./input.json \
+            --query 'Version' \
+            --output text)
+
+          echo "LAYER_VERSION=$LAYER_VERSION" >> "$GITHUB_OUTPUT"
+
+          aws --region ${{ matrix.region}} lambda add-layer-version-permission \
+            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
+            --statement-id 'PublicLayer' \
+            --action lambda:GetLayerVersion \
+            --principal '*' \
+            --version-number "$LAYER_VERSION"
+      - name: Verify Layer
+        env:
+          LAYER_VERSION: ${{ steps.create-layer.outputs.LAYER_VERSION }}
+        run: |
+          export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
+          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn 'arn:${{ needs.setup.outputs.partition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' > $layer_output
+          REMOTE_SHA=$(jq -r '.Content.CodeSha256' $layer_output)
+          LOCAL_SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}-${{ matrix.arch }}.json')
+          test "$REMOTE_SHA" == "$LOCAL_SHA" && echo "SHA OK: ${LOCAL_SHA}" || exit 1
+          jq -s -r '["Layer Arn", "Runtimes", "Version", "Description", "SHA256"], ([.[0], .[1]] | .[] | [.LayerArn, (.CompatibleRuntimes | join("/")), .Version, .Description, .Content.CodeSha256]) |@tsv' '${{ matrix.layer }}-${{ matrix.arch }}.json' $layer_output | column -t -s $'\t'
+
+      - name: Store Metadata - ${{ matrix.region }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.layer }}-${{ matrix.arch }}-${{ matrix.region }}.json
+          path: ${{ matrix.layer }}-${{ matrix.arch }}-${{ matrix.region }}.json
+          retention-days: 1
+          if-no-files-found: error
