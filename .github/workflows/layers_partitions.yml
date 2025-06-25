@@ -41,7 +41,7 @@ name: Layer Deployment (Partitions)
 run-name: Layer Deployment (${{ inputs.partition }}) - ${{ inputs.environment }} / Version - ${{ inputs.version }}
 
 permissions:
-  contents: read
+  contents: read1
 
 jobs:
   setup:
