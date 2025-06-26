@@ -19,11 +19,12 @@ version = "4.9.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "anyio-4.9.0-py3-none-any.whl", hash = "sha256:9f76d541cad6e36af7beb62e978876f3b41e3e04f2c1fbf0884604c0a9c4d93c"},
     {file = "anyio-4.9.0.tar.gz", hash = "sha256:673c0c244e15788651a4ff38710fea9675823028a6f08a5eda409e0c9840a028"},
 ]
+markers = {main = "extra == \"valkey\""}
 
 [package.dependencies]
 exceptiongroup = {version = ">=1.0.2", markers = "python_version < \"3.11\""}
@@ -62,7 +63,7 @@ files = [
     {file = "async_timeout-5.0.1-py3-none-any.whl", hash = "sha256:39e3809566ff85354557ec2398b55e096c8364bacac9405a7a1fa429e77fe76c"},
     {file = "async_timeout-5.0.1.tar.gz", hash = "sha256:d9321a7a3d5a6a5e187e824d2fa0793ce379a202935782d555d6e9d2735677d3"},
 ]
-markers = {main = "extra == \"redis\" and python_full_version < \"3.11.3\" or python_version <= \"3.10\" and (extra == \"redis\" or extra == \"valkey\")", dev = "python_full_version < \"3.11.3\""}
+markers = {main = "extra == \"redis\" and python_full_version < \"3.11.3\"", dev = "python_full_version < \"3.11.3\""}
 
 [[package]]
 name = "attrs"
@@ -449,14 +450,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.38.43"
-description = "Type annotations for boto3 1.38.43 generated with mypy-boto3-builder 8.11.0"
+version = "1.38.44"
+description = "Type annotations for boto3 1.38.44 generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.38.43-py3-none-any.whl", hash = "sha256:2dc863a0bae3a9f31de6cdaff083be0f5f8850d4a846a017ef6079b620294f12"},
-    {file = "boto3_stubs-1.38.43.tar.gz", hash = "sha256:6fe495830b63ffe3bbc8082e96890eee1e9a93ec5c3c1bd9b9b531ec4d90c1a7"},
+    {file = "boto3_stubs-1.38.44-py3-none-any.whl", hash = "sha256:42ef001a43964ee73c151455dba5494d21bd6bcc88b79b58f74c280895460e04"},
+    {file = "boto3_stubs-1.38.44.tar.gz", hash = "sha256:f2bbb7bfbbda7f7b695e8381d828834c4cd547c38b08d5f4491a4764f252cbb4"},
 ]
 
 [package.dependencies]
@@ -524,7 +525,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.38.0,<1.39.0)"]
 billing = ["mypy-boto3-billing (>=1.38.0,<1.39.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.38.0,<1.39.0)"]
-boto3 = ["boto3 (==1.38.43)"]
+boto3 = ["boto3 (==1.38.44)"]
 braket = ["mypy-boto3-braket (>=1.38.0,<1.39.0)"]
 budgets = ["mypy-boto3-budgets (>=1.38.0,<1.39.0)"]
 ce = ["mypy-boto3-ce (>=1.38.0,<1.39.0)"]
@@ -1731,12 +1732,12 @@ version = "1.3.0"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
-markers = "python_version <= \"3.10\""
+groups = ["main", "dev"]
 files = [
     {file = "exceptiongroup-1.3.0-py3-none-any.whl", hash = "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10"},
     {file = "exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"},
 ]
+markers = {main = "extra == \"valkey\" and python_version <= \"3.10\"", dev = "python_version <= \"3.10\""}
 
 [package.dependencies]
 typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
@@ -3421,14 +3422,14 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "8.4.0"
+version = "8.4.1"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pytest-8.4.0-py3-none-any.whl", hash = "sha256:f40f825768ad76c0977cbacdf1fd37c6f7a468e460ea6a0636078f8972d4517e"},
-    {file = "pytest-8.4.0.tar.gz", hash = "sha256:14d920b48472ea0dbf68e45b96cd1ffda4705f33307dcc86c676c1b5104838a6"},
+    {file = "pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7"},
+    {file = "pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c"},
 ]
 
 [package.dependencies]
@@ -4208,11 +4209,12 @@ version = "1.3.1"
 description = "Sniff out which async library your code is running under"
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
     {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
 ]
+markers = {main = "extra == \"valkey\""}
 
 [[package]]
 name = "soupsieve"
@@ -4642,50 +4644,50 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "valkey-glide"
-version = "1.3.5"
+version = "2.0.1"
 description = "An open source Valkey client library that supports Valkey and Redis open source 6.2, 7.0, 7.2 and 8.0."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"valkey\""
 files = [
-    {file = "valkey_glide-1.3.5-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:5335e1c3799b80d61e88369b9d56ea1f9af7f366dad1e0e50678312c09f9230f"},
-    {file = "valkey_glide-1.3.5-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:90a7752309213244df0a9c97484f29dc1133628ba07efbf5581d3709a66d98ba"},
-    {file = "valkey_glide-1.3.5-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bf01955e0035a5fb0c07e08a1090129b883f3c7820d85151d8549ad4ddc62064"},
-    {file = "valkey_glide-1.3.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ebf9014a26a94a15b765b9f9d76252aedb2cf811ca9cbaad822e7ccec7e1269d"},
-    {file = "valkey_glide-1.3.5-cp311-cp311-macosx_10_7_x86_64.whl", hash = "sha256:df2c5be1782a6cac667983af87734dd9fb89f089820e51beb9a2c593d546ecfe"},
-    {file = "valkey_glide-1.3.5-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:0cd7a2066c5785b599798ff59ac6c8cdbc3a25262ca789853e7ecb0c75ff20d9"},
-    {file = "valkey_glide-1.3.5-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7d0c019f1605329dabb5f33925b3d9c600feff568b413cdab7304331588455e7"},
-    {file = "valkey_glide-1.3.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b55c2cbed655ae249e05f7ae9d048d30a69a0017ec57dfcc0282aaacdfe894f6"},
-    {file = "valkey_glide-1.3.5-cp312-cp312-macosx_10_7_x86_64.whl", hash = "sha256:6046204c9c527d6f07fd8af1babec5661cfc66fa01bec8672f87e283847c9fd8"},
-    {file = "valkey_glide-1.3.5-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6e6c28da4423d0800dfd5ff44f5432ecd1652ac6fa29d91e50eade4c2fe11d09"},
-    {file = "valkey_glide-1.3.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4d321c8e27e894fb0eab96f2d1d8c37b4f31ea1a55d67ae087f9127357bd3291"},
-    {file = "valkey_glide-1.3.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cd69d89cd6c486e2a0c559787e64007f17522e7728d41d063371584c850524e7"},
-    {file = "valkey_glide-1.3.5-cp313-cp313-macosx_10_7_x86_64.whl", hash = "sha256:6eaca572835fad1af1e2b480346540f541443ff841c50eaaadf33dfeb5a6fe1d"},
-    {file = "valkey_glide-1.3.5-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:58d2115f10eb7ae385be82bf470613978bc60f9b85c48f887061834774d3efa3"},
-    {file = "valkey_glide-1.3.5-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:44e1bff6cf0fefc099a3b49dd7da6924a96324333f05409c80b792c9137427e8"},
-    {file = "valkey_glide-1.3.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:74c2f5aea2ca9aefefc00045b53ce9153ca3a03a6584cc8c2c075c97ac863a0f"},
-    {file = "valkey_glide-1.3.5-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:f9aaf1bac93c0ee24f995fd4d90bd17685909be686f6a92eb20e0b7be1de7155"},
-    {file = "valkey_glide-1.3.5-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:d5913caf32ebea4682910e07ea1cc6382d1fe594c764cbd4b7112095f8bfe5c4"},
-    {file = "valkey_glide-1.3.5-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bd1a5e92c2d5b6c804edaaef48493f75d1cef94bb4309b2f7f7ee308b70f836a"},
-    {file = "valkey_glide-1.3.5-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ca3618dd6ba1a27e1a479b95fa5f70f4e50383431c8a1ebd01673a2444446c42"},
-    {file = "valkey_glide-1.3.5-pp310-pypy310_pp73-macosx_10_7_x86_64.whl", hash = "sha256:8aac8a48c34ab8c1885150ad25e4f4b296ae1ba4e405914c6b64ac6034ae6df7"},
-    {file = "valkey_glide-1.3.5-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:a2d6f41163e19ef3277bf4861a754514e440b93930c0a5b63fe20f563543b4ce"},
-    {file = "valkey_glide-1.3.5-pp310-pypy310_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0b613271b2a9ee60c534b2f8bc9eeeffef94600417f10d45ee0400b9f5ebfebd"},
-    {file = "valkey_glide-1.3.5-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:703adff16c1ac6ffd1ae9da492502a412179786b779e45da4f0f5e5665de0fb9"},
-    {file = "valkey_glide-1.3.5-pp311-pypy311_pp73-macosx_10_7_x86_64.whl", hash = "sha256:56b4abb66b43974e3fac1a070d9bb24dea6fc2ed24b412093920bfd502af2a8a"},
-    {file = "valkey_glide-1.3.5-pp311-pypy311_pp73-macosx_11_0_arm64.whl", hash = "sha256:02ade5c2c1a4b8841011fb220ec126ee884569701934dd2be59d342bfea6cd6d"},
-    {file = "valkey_glide-1.3.5-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c540d627da49f1be714deb0774f0114293d425f90ce58faa52895c7036e67a9a"},
-    {file = "valkey_glide-1.3.5-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:45a40c2e6d0fba5656f1e3c42251e983ab89e9362455697bf5dd663b9513207f"},
-    {file = "valkey_glide-1.3.5-pp39-pypy39_pp73-macosx_10_7_x86_64.whl", hash = "sha256:71ae003951b00b2d2000050b989eb2c585c89b5b884b4652e0cc7831d09f9373"},
-    {file = "valkey_glide-1.3.5-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:183ae871bf30de26ca2e4f46b4823e32cd3051656c4c3330921c7c48171bd979"},
-    {file = "valkey_glide-1.3.5-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8cd894bc91ea6081f30acf4d609b3e6a00e120d32db3de70997c77a1feb3872d"},
-    {file = "valkey_glide-1.3.5-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b6ee8e7b787ec6362256bce0ebb004fb93d3be24314c7b3f15d2e6552fca79fc"},
-    {file = "valkey_glide-1.3.5.tar.gz", hash = "sha256:4751e6975f24a4f2e788102578ecf7bc4f4ff2f997efc400f547b983b9ec18ac"},
+    {file = "valkey_glide-2.0.1-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:b3307934b76557b18ac559f327592cc09fc895fc653ba46010dd6d70fb6239dc"},
+    {file = "valkey_glide-2.0.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:6b83d34e2e723e97c41682479b0dce5882069066e808316292b363855992b449"},
+    {file = "valkey_glide-2.0.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1baaf14d09d464ae645be5bdb5dc6b8a38b7eacf22f9dcb2907200c74fbdcdd3"},
+    {file = "valkey_glide-2.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4427e7b4d54c9de289a35032c19d5956f94376f5d4335206c5ac4524cbd1c64a"},
+    {file = "valkey_glide-2.0.1-cp311-cp311-macosx_10_7_x86_64.whl", hash = "sha256:6379582d6fbd817697fb119274e37d397db450103cd15d4bd71e555e6d88fb6b"},
+    {file = "valkey_glide-2.0.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:0f1c0fe003026d8ae172369e0eb2337cbff16f41d4c085332487d6ca2e5282e6"},
+    {file = "valkey_glide-2.0.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:82c5f33598e50bcfec6fc924864931f3c6e30cd327a9c9562e1c7ac4e17e79fd"},
+    {file = "valkey_glide-2.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:79039a9dc23bb074680f171c12b36b3322357a0af85125534993e81a619dce21"},
+    {file = "valkey_glide-2.0.1-cp312-cp312-macosx_10_7_x86_64.whl", hash = "sha256:f55ec8968b0fde364a5b3399be34b89dcb9068994b5cd384e20db0773ad12723"},
+    {file = "valkey_glide-2.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:21598f49313912ad27dc700d7b13a3b4bfed7ed9dffad207235cac7d218f4966"},
+    {file = "valkey_glide-2.0.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f662285146529328e2b5a0a7047f699339b4e0d250eb1f252b15c9befa0dea05"},
+    {file = "valkey_glide-2.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3939aaa8411fcbba00cb1ff7c7ba73f388bb1deca919972f65cba7eda1d5fa95"},
+    {file = "valkey_glide-2.0.1-cp313-cp313-macosx_10_7_x86_64.whl", hash = "sha256:c49b53011a05b5820d0c660ee5c76574183b413a54faa33cf5c01ce77164d9c8"},
+    {file = "valkey_glide-2.0.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:3a23572b83877537916ba36ad0a6b2fd96581534f0bc67ef8f8498bf4dbb2b40"},
+    {file = "valkey_glide-2.0.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:943a2c4a5c38b8a6b53281201d5a4997ec454a6fdda72d27050eeb6aaef12afb"},
+    {file = "valkey_glide-2.0.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d770ec581acc59d5597e7ccaac37aee7e3b5e716a77a7fa44e2967db3a715f53"},
+    {file = "valkey_glide-2.0.1-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:e71d2c4337fc1cac8ace180deae7806c49f818c059fd3f7032c15f3bf6e46ddc"},
+    {file = "valkey_glide-2.0.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:ac5ddac6369f73e810f3aff0b730e5b62de54894bef8bbfa33ed517bb3040b43"},
+    {file = "valkey_glide-2.0.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4d6d23bfcc09234509de498c358045dade5470edc5489b60603abaf3d24ab2d4"},
+    {file = "valkey_glide-2.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:81b04b4eac4ba033d7a3932a3fc0f421c2c792ee8d8e64653963ad8c2901d2e7"},
+    {file = "valkey_glide-2.0.1-pp310-pypy310_pp73-macosx_10_7_x86_64.whl", hash = "sha256:d4a9ccfe2b190c90622849dab62f9468acf76a282719a1245d272b649e7c12d1"},
+    {file = "valkey_glide-2.0.1-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:9aa004077b82f64b23ea0d38d948b5116c23f7228dae3a5b4fcfa1799f8ff7de"},
+    {file = "valkey_glide-2.0.1-pp310-pypy310_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:631a7a0e2045f7e5e3706e1903beeddf381a6529e318c27230798f4382579e4f"},
+    {file = "valkey_glide-2.0.1-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3c5ed905fb62368c9bc6aef9df8d66269ef51f968dc527da4d7c956927382c1d"},
+    {file = "valkey_glide-2.0.1-pp311-pypy311_pp73-macosx_10_7_x86_64.whl", hash = "sha256:53da3cc47c8d946ac76ecc4b468a469d3486778833a59162ea69aa7ce70cbb27"},
+    {file = "valkey_glide-2.0.1-pp311-pypy311_pp73-macosx_11_0_arm64.whl", hash = "sha256:e526a7d718cdd299d6b03091c12dcc15cd02ff22fe420f253341a4891c50824d"},
+    {file = "valkey_glide-2.0.1-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8d3345ea2adf6f745733fa5157d8709bcf5ffbb2674391aeebd8f166a37cbc96"},
+    {file = "valkey_glide-2.0.1-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d1c5fff0f12d2aa4277ddc335035b2c8e12bb11243c1a0f3c35071f4a8b11064"},
+    {file = "valkey_glide-2.0.1-pp39-pypy39_pp73-macosx_10_7_x86_64.whl", hash = "sha256:2c0cf348c315f90240297e7ae0826618bef82b640c04295c7a2da6e92f771858"},
+    {file = "valkey_glide-2.0.1-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:f2c9ca5282f89e139d5a5d5731c72c0eb7219945981444e841e85a6e299ab15e"},
+    {file = "valkey_glide-2.0.1-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e8822187e1b7bb230bb92cf77f5a59c5ce0c9d74b2c08f04f2e8a616a228e807"},
+    {file = "valkey_glide-2.0.1-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:813d87cd86ebc8af89d15e491ca6ad0894dbc61be00f88d8edc0d10a53c54739"},
+    {file = "valkey_glide-2.0.1.tar.gz", hash = "sha256:4f9c62a88aedffd725cced7d28a9488b27e3f675d1a5294b4962624e97d346c4"},
 ]
 
 [package.dependencies]
-async-timeout = {version = ">=4.0.2", markers = "python_version < \"3.11\""}
+anyio = ">=4.9.0"
 protobuf = ">=3.20"
 typing-extensions = {version = ">=4.8.0", markers = "python_version < \"3.11\""}
 
@@ -4922,4 +4924,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "a16ee890ac42f45c15cb9308d25c17a3ad465749e530d636c7813f7dbb0e304e"
+content-hash = "6ecae96ccc198a3be6fb21a5bd61bdb1d2d30c6813b8aa0dc8a760c4060be8d9"
