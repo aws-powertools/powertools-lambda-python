@@ -17,7 +17,7 @@ def test_kafka_msk_event_with_envelope():
     )
     for i in range(3):
         assert parsed_event[i].key == "value"
-    assert len(parsed_event) == 3
+    assert len(parsed_event) == 4
 
 
 def test_kafka_self_managed_event_with_envelope():
@@ -70,7 +70,7 @@ def test_kafka_msk_event():
     assert parsed_event.eventSourceArn == raw_event["eventSourceArn"]
 
     records = list(parsed_event.records["mytopic-0"])
-    assert len(records) == 3
+    assert len(records) == 4
     record: KafkaRecordModel = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -88,6 +88,6 @@ def test_kafka_msk_event():
     assert record.keySchemaMetadata.schemaId == "1234"
     assert record.valueSchemaMetadata.dataFormat == "AVRO"
     assert record.valueSchemaMetadata.schemaId == "1234"
-    for i in range(1, 3):
+    for i in range(1, 4):
         record: KafkaRecordModel = records[i]
         assert record.key is None

@@ -104,6 +104,28 @@
               "dataFormat": "AVRO",
               "schemaId": "1234"
            }
+        },
+        {
+           "topic":"mymessage-with-unsigned",
+           "partition":0,
+           "offset":15,
+           "timestamp":1545084650987,
+           "timestampType":"CREATE_TIME",
+           "key": null,
+           "value":"eyJrZXkiOiJ2YWx1ZSJ9",
+           "headers":[
+              {
+                 "headerKey":[104, 101, 108, 108, 111, 45, 119, 111, 114, 108, 100, 45, -61, -85]
+              }
+           ],
+           "valueSchemaMetadata": {
+              "dataFormat": "AVRO",
+              "schemaId": "1234"
+           },
+           "keySchemaMetadata": {
+              "dataFormat": "AVRO",
+              "schemaId": "1234"
+           }
         }
      ]
   }
