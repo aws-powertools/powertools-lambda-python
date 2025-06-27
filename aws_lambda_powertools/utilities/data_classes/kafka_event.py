@@ -4,6 +4,7 @@ import base64
 from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.shared.functions import decode_header_bytes
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 if TYPE_CHECKING:
@@ -110,7 +111,7 @@ class KafkaEventRecord(KafkaEventRecordBase):
     @cached_property
     def decoded_headers(self) -> dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
-        return CaseInsensitiveDict((k, bytes(v)) for chunk in self.headers for k, v in chunk.items())
+        return CaseInsensitiveDict((k, decode_header_bytes(v)) for chunk in self.headers for k, v in chunk.items())
 
 
 class KafkaEventBase(DictWrapper):
