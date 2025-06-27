@@ -21,7 +21,7 @@ def test_kafka_msk_event():
     assert parsed_event.decoded_bootstrap_servers == bootstrap_servers_list
 
     records = list(parsed_event.records)
-    assert len(records) == 3
+    assert len(records) == 4
     record = records[0]
     raw_record = raw_event["records"]["mytopic-0"][0]
     assert record.topic == raw_record["topic"]
@@ -40,9 +40,10 @@ def test_kafka_msk_event():
     assert record.value_schema_metadata.schema_id == raw_record["valueSchemaMetadata"]["schemaId"]
 
     assert parsed_event.record == records[0]
-    for i in range(1, 3):
+    for i in range(1, 4):
         record = records[i]
         assert record.key is None
+        assert record.decoded_headers is not None
 
 
 def test_kafka_self_managed_event():
@@ -90,5 +91,5 @@ def test_kafka_record_property_with_stopiteration_error():
     # WHEN calling record property thrice
     # THEN raise StopIteration
     with pytest.raises(StopIteration):
-        for _ in range(4):
+        for _ in range(5):
             assert parsed_event.record.topic is not None
