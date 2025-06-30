@@ -25,7 +25,7 @@ on:
         description: "Branch or commit ID to checkout from"
         required: false
         type: string
-        default: ci/fix-mkdocs-deps
+        default: develop
 
 permissions:
   contents: read
