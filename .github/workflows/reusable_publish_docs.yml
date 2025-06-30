@@ -52,6 +52,7 @@ jobs:
           python-version: "3.12"
       - name: Install doc generation dependencies
         run: |
+          ls -la docs/requirements.txt
           pip install --require-hashes -r docs/requirements.txt
       - name: Git client setup
         run: |
