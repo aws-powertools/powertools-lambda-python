@@ -15,7 +15,7 @@ schema_config = SchemaConfig(value_schema_type="JSON")
 
 def process_order(order):
     # Simulate processing logic
-    return "OK"
+    return order
 
 
 def send_to_dlq(record):

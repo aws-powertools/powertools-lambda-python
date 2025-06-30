@@ -14,7 +14,7 @@ def process_standard_message(message):
 
 def process_catalog_from_s3(bucket, key):
     # Simulate processing logic
-    return {"product_count": 1000}
+    return {"bucket": bucket, "key": key}
 
 
 @kafka_consumer(schema_config=schema_config)
