@@ -53,8 +53,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: "poetry"
-      - name: Install dependencies
-        run: make dev
+      - name: Install doc generation dependencies
+        run: |
+          pip install --require-hashes -r docs/requirements.txt
       - name: Git client setup
         run: |
           git config --global user.name Docs deploy
