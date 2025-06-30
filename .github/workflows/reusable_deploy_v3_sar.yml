@@ -151,7 +151,7 @@ jobs:
             -e "s|<LAYER_CONTENT_PATH>|./cdk.out/$asset|g" \
             -e "s|<PYTHON_RUNTIME>|${{ matrix.python-version }}|g" \
             -e "s|<ARCHITECTURE>|${{ matrix.architecture }}|g" \
-            layer/sar/template.txt > template.yml
+            layer_v3/sar/template.txt > template.yml
 
           # SAR needs a README and a LICENSE, so just copy the ones from the repo
           cp README.md LICENSE "./cdk.out/$asset/"
