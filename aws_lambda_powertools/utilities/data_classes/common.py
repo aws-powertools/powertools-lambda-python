@@ -71,6 +71,12 @@ class CaseInsensitiveDict(dict):
     def __setitem__(self, k, v):
         super().__setitem__(k.lower(), v)
 
+    def __hash__(self):
+        # Convert the dictionary to a frozenset of tuples (key, value)
+        # where all keys are lowercase
+        items = frozenset((k.lower(), v) for k, v in self.items())
+        return hash(items)
+
 
 class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
@@ -153,6 +159,9 @@ class DictWrapper(Mapping):
     def raw_event(self) -> dict[str, Any]:
         """The original raw event dict"""
         return self._data
+
+    def __hash__(self):
+        return hash(self._data)
 
 
 class BaseProxyEvent(DictWrapper):
