@@ -149,7 +149,7 @@ jobs:
       - name: Verify Layer
         run: |
           export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
-          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn "arn:${{ needs.setup.outputs.parition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ steps.partition_version.outputs.partition_version }}" > $layer_output
+          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn "arn:${{ needs.setup.outputs.partition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ steps.partition_version.outputs.partition_version }}" > $layer_output
           REMOTE_SHA=$(jq -r '.Content.CodeSha256' $layer_output)
           LOCAL_SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}-${{ matrix.arch }}.json)
           test "$REMOTE_SHA" == "$LOCAL_SHA" && echo "SHA OK: ${LOCAL_SHA}" || exit 1
