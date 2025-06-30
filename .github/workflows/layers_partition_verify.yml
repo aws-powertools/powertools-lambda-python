@@ -1,6 +1,6 @@
-# Parition Layer Verification
+# Partition Layer Verification
 # ---
-# This workflow queries the Parition layer info in production only
+# This workflow queries the Partition layer info in production only
 
 on:
   workflow_dispatch:
@@ -51,11 +51,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       regions: ${{ format('{0}{1}', steps.regions_china.outputs.regions, steps.regions_govcloud.outputs.regions) }}
-      parition: ${{ format('{0}{1}', steps.regions_china.outputs.partition, steps.regions_govcloud.outputs.parition) }}
+      partition: ${{ format('{0}{1}', steps.regions_china.outputs.partition, steps.regions_govcloud.outputs.partition) }}
       aud: ${{ format('{0}{1}', steps.regions_china.outputs.aud, steps.regions_govcloud.outputs.aud) }}
     steps:
       - id: regions_china
-        name: Parition (China)
+        name: Partition (China)
         if: ${{ inputs.partition == 'China' }}
         run: |
           echo regions='["cn-north-1"]'>> "$GITHUB_OUTPUT"
@@ -95,7 +95,7 @@ jobs:
       - name: Output ${{ matrix.layer }}-${{ matrix.arch }}
         # fetch the specific layer version information from the us-east-1 commercial region
         run: |
-          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' > '${{ matrix.layer }}-${{ matrix.arch }}.json'
       - name: Store Metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -149,7 +149,7 @@ jobs:
       - name: Verify Layer
         run: |
           export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
-          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn "arn:${{ needs.setup.outputs.parition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ steps.partition_version.outputs.partition_version }}" > $layer_output
+          aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn "arn:${{ needs.setup.outputs.partition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ steps.partition_version.outputs.partition_version }}" > $layer_output
           REMOTE_SHA=$(jq -r '.Content.CodeSha256' $layer_output)
           LOCAL_SHA=$(jq -r '.Content.CodeSha256' ${{ matrix.layer }}-${{ matrix.arch }}.json)
           test "$REMOTE_SHA" == "$LOCAL_SHA" && echo "SHA OK: ${LOCAL_SHA}" || exit 1
