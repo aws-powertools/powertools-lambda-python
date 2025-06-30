@@ -74,6 +74,13 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
           mask-aws-account-id: true
+      - name: Build docs
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          rm -rf site
+          mkdocs build
       - name: Deploy Docs (Version)
         env:
           VERSION: ${{ inputs.version }}
