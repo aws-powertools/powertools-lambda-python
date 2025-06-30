@@ -53,8 +53,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: "poetry"
-      - name: Install dependencies
-        run: make dev
+      - name: Install doc generation dependencies
+        run: |
+          pip install --require-hashes -r docs/requirements.txt
       - name: Git client setup
         run: |
           git config --global user.name Docs deploy
@@ -74,6 +75,13 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
           mask-aws-account-id: true
+      - name: Build docs
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          rm -rf site
+          mkdocs build
       - name: Deploy Docs (Version)
         env:
           VERSION: ${{ inputs.version }}
