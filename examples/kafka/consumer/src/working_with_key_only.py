@@ -4,32 +4,30 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
-# Define schemas for value
-value_schema = """
+# Define schemas for key
+key_schema = """
 {
     "type": "record",
-    "name": "User",
-    "namespace": "com.example",
+    "name": "ProductKey",
     "fields": [
-        {"name": "name", "type": "string"},
-        {"name": "age", "type": "int"}
+        {"name": "region_name", "type": "string"}
     ]
 }
 """
 
-# Configure value schema
+# Configure key schema
 schema_config = SchemaConfig(
-    value_schema_type="AVRO",
-    value_schema=value_schema,
+    key_schema_type="AVRO",
+    key_schema=key_schema,
 )
 
 
 @kafka_consumer(schema_config=schema_config)
 def lambda_handler(event: ConsumerRecords, context: LambdaContext):
     for record in event.records:
-        # Access deserialized value
-        value = record.value
+        # Access deserialized key
+        key = record.key
 
-        logger.info(f"Processing value: {value['name']}")
+        logger.info(f"Processing key: {key}")
 
     return {"statusCode": 200}
