@@ -63,12 +63,6 @@ pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
 build: pr
 	poetry build
 
-release-docs:
-	@echo "Rebuilding docs"
-	rm -rf site api
-	@echo "Updating website docs"
-	poetry run mike deploy --push --update-aliases ${VERSION} ${ALIAS}
-
 docs-local:
 	poetry run mkdocs serve
 
