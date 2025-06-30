@@ -95,7 +95,7 @@ jobs:
       - name: Output ${{ matrix.layer }}-${{ matrix.arch }}
         # fetch the specific layer version information from the us-east-1 commercial region
         run: |
-          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' | jq -r '{"Layer Version Arn": .LayerVersionArn, "Version": .Version, "Description": .Description, "Compatible Runtimes": .CompatibleRuntimes[0], "Compatible Architectures": .CompatibleArchitectures[0], "SHA": .Content.CodeSha256} | keys[] as $k | [$k, .[$k]] | @tsv' | column -t -s $'\t'
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' > '${{ matrix.layer }}-${{ matrix.arch }}.json'
       - name: Store Metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
