@@ -40,9 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: "Docs"
     permissions:
-      contents: write  # push to gh-pages
       id-token: write  # trade JWT token for AWS credentials in AWS Docs account
-      pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
@@ -70,14 +68,6 @@ jobs:
           git pull origin "$BRANCH"
         env:
           BRANCH: ${{ inputs.git_ref }}
-      - name: Build docs website and API reference
-        env:
-          VERSION: ${{ inputs.version }}
-          ALIAS: ${{ inputs.alias }}
-        run: |
-          make release-docs VERSION="$VERSION" ALIAS="$ALIAS"
-          poetry run mike set-default --push latest
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
