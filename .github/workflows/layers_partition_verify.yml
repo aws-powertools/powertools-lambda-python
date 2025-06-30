@@ -1,6 +1,6 @@
-# Parition Layer Verification
+# Partition Layer Verification
 # ---
-# This workflow queries the Parition layer info in production only
+# This workflow queries the Partition layer info in production only
 
 on:
   workflow_dispatch:
@@ -55,7 +55,7 @@ jobs:
       aud: ${{ format('{0}{1}', steps.regions_china.outputs.aud, steps.regions_govcloud.outputs.aud) }}
     steps:
       - id: regions_china
-        name: Parition (China)
+        name: Partition (China)
         if: ${{ inputs.partition == 'China' }}
         run: |
           echo regions='["cn-north-1"]'>> "$GITHUB_OUTPUT"
