@@ -3,7 +3,7 @@ from typing import Dict, List, Literal, Optional, Type, Union
 
 from pydantic import BaseModel, field_validator
 
-from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_string
+from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_string, decode_header_bytes
 
 SERVERS_DELIMITER = ","
 
@@ -28,9 +28,7 @@ class KafkaRecordModel(BaseModel):
     # key is optional; only decode if not None
     @field_validator("key", mode="before")
     def decode_key(cls, value):
-        if value is not None:
-            return base64_decode(value)
-        return value
+        return base64_decode(value) if value is not None else value
 
     @field_validator("value", mode="before")
     def data_base64_decode(cls, value):
@@ -41,7 +39,7 @@ class KafkaRecordModel(BaseModel):
     def decode_headers_list(cls, value):
         for header in value:
             for key, values in header.items():
-                header[key] = bytes(values)
+                header[key] = decode_header_bytes(values)
         return value
 
 
@@ -51,7 +49,7 @@ class KafkaBaseEventModel(BaseModel):
 
     @field_validator("bootstrapServers", mode="before")
     def split_servers(cls, value):
-        return None if not value else value.split(SERVERS_DELIMITER)
+        return value.split(SERVERS_DELIMITER) if value else None
 
 
 class KafkaSelfManagedEventModel(KafkaBaseEventModel):
