@@ -43,7 +43,7 @@ on:
   workflow_call:
     inputs:
       environment:
-        description: Environment to deploy to
+        description: Environment to deploy to, one of `Prod` or `Beta`
         type: string
         required: true
 
