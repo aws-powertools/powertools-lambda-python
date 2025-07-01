@@ -104,14 +104,14 @@ zstandard = ["zstandard"]
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.240"
+version = "2.2.242"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_asset_awscli_v1-2.2.240-py3-none-any.whl", hash = "sha256:bcfa7124d40b9180697489d6875ed1c34a5dbb4db6eaad68148664c0d56b5af1"},
-    {file = "aws_cdk_asset_awscli_v1-2.2.240.tar.gz", hash = "sha256:73a0787fedcc7e2010779593aa0c66398a4bc8e2291c918b07edc11ffd092612"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.242-py3-none-any.whl", hash = "sha256:d1001bf56a12f7d1162d4211003d1e8f72a213159465e2d0e1c598cc0ea44aad"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.242.tar.gz", hash = "sha256:a957d679a118f4375307ed90b9aed7127c5c1402989438060eae4ab29ab0d13f"},
 ]
 
 [package.dependencies]
@@ -252,20 +252,20 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.202.0"
+version = "2.203.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.202.0-py3-none-any.whl", hash = "sha256:38183380494cef1fca47660536d704b9a2af461399580220939306f0c27f9db1"},
-    {file = "aws_cdk_lib-2.202.0.tar.gz", hash = "sha256:cd01bff16595b8f0740b302c16ff9bcf64bf43fe035332052a0b4b89c5338710"},
+    {file = "aws_cdk_lib-2.203.0-py3-none-any.whl", hash = "sha256:5fcc6d01840d45bafff4062f1008d840d89de3eec356aceada195f6b8a9fee61"},
+    {file = "aws_cdk_lib-2.203.0.tar.gz", hash = "sha256:9057675de8d7853835876d83c0a391598af4550fcc79c27cdb7ab57c8c08bce7"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = "2.2.240"
+"aws-cdk.asset-awscli-v1" = "2.2.242"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=44.2.0,<45.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=44.8.0,<45.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.112.0,<2.0.0"
 publication = ">=0.0.3"
