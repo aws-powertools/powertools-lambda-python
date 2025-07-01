@@ -63,7 +63,7 @@ on:
         type: string
         required: true
 
-run-name: SSM Parameters - Python - Layer version ${{ inputs.layer_version }} - V${{ inputs.package_version }}
+run-name: SSM Parameters - Python - Layer version ${{ inputs.layer_version }} - v${{ inputs.package_version }}
 
 permissions:
   contents: read
