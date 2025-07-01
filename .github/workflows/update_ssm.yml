@@ -1,5 +1,4 @@
 name: SSM Parameters
-run-name: SSM Parameters - Python
 
 # SSM Parameters update
 #
@@ -40,6 +39,31 @@ on:
         description: Layer version
         type: string
         required: true
+
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment to deploy to, one of `Prod` or `Beta`
+        type: string
+        required: true
+
+      write_latest:
+        description: Write to the latest path
+        type: boolean
+        required: false
+        default: true
+
+      package_version:
+        description: Semantic Version of published layer
+        type: string
+        required: true
+
+      layer_version:
+        description: Layer version
+        type: string
+        required: true
+
+run-name: SSM Parameters - Python - Layer version ${{ inputs.layer_version }} - v${{ inputs.package_version }}
 
 permissions:
   contents: read
