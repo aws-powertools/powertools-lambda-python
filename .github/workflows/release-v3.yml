@@ -383,3 +383,15 @@ jobs:
           script: |
             const post_release = require('.github/scripts/post_release.js')
             await post_release({github, context, core})
+
+  update_ssm:
+    needs: [seal, release, publish_layer]
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/update_ssm.yml
+    with:
+      environment: "Prod"
+      write_latest: true
+      package_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+      layer_version: ${{ inputs.layer_documentation_version }}
