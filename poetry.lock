@@ -273,15 +273,15 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "4.0.1"
+version = "4.0.2"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"datamasking\""
 files = [
-    {file = "aws-encryption-sdk-4.0.1.tar.gz", hash = "sha256:7320dc4cf8d8d5a9b4c88a343be93835da18756e05308d3536554be0ca2889a5"},
-    {file = "aws_encryption_sdk-4.0.1-py2.py3-none-any.whl", hash = "sha256:5c2ca9a207e1732542a1370ac7efd630ab6e04d05f98e68badf20927eb95ed1d"},
+    {file = "aws_encryption_sdk-4.0.2-py2.py3-none-any.whl", hash = "sha256:73d9aadc3b10927148f3e057e51e0c15f0e68431df6d3ef45d8af83fefe7156f"},
+    {file = "aws_encryption_sdk-4.0.2.tar.gz", hash = "sha256:911a900980732e509b86e0443fe3bdcee480760a460e0f702f360565a20f3888"},
 ]
 
 [package.dependencies]
@@ -291,7 +291,7 @@ cryptography = ">=3.4.6"
 wrapt = ">=1.10.11"
 
 [package.extras]
-mpl = ["aws-cryptographic-material-providers (>=1.7.4,<=1.10.0)"]
+mpl = ["aws-cryptographic-material-providers (>=1.7.4,<=1.11.0)"]
 
 [[package]]
 name = "aws-requests-auth"
