@@ -4,6 +4,7 @@ import logging
 from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.shared.functions import decode_header_bytes
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
 from aws_lambda_powertools.utilities.data_classes.kafka_event import KafkaEventBase, KafkaEventRecordBase
 from aws_lambda_powertools.utilities.kafka.deserializer.deserializer import get_deserializer
@@ -115,7 +116,9 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
     @cached_property
     def headers(self) -> dict[str, bytes]:
         """Decodes the headers as a single dictionary."""
-        return CaseInsensitiveDict((k, bytes(v)) for chunk in self.original_headers for k, v in chunk.items())
+        return CaseInsensitiveDict(
+            (k, decode_header_bytes(v)) for chunk in self.original_headers for k, v in chunk.items()
+        )
 
 
 class ConsumerRecords(KafkaEventBase):

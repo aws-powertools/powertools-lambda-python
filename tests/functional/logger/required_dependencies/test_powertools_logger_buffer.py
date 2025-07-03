@@ -391,6 +391,30 @@ def test_logger_buffer_not_flush_on_uncaught_exception(stdout, service_name, mon
     assert len(log) == 0
 
 
+def test_flush_buffer_log_output_without_buffer_config(stdout, service_name, lambda_context, monkeypatch):
+    # Set initial trace ID for first Lambda invocation
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger without buffer configuration
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout)
+
+    @logger.inject_lambda_context(flush_buffer_on_uncaught_error=True)
+    def handler(event, context):
+        # Log messages are not buffered and should be output immediately
+        logger.debug("debug message - 1")
+        logger.debug("debug message - 2")
+        raise ValueError("Test error")
+
+    # WHEN Invoking the handler and expecting a ValueError
+    # AND flush_buffer_on_uncaught_error is True but there is no logger buffer configuration
+    with pytest.raises(ValueError):
+        handler({}, lambda_context)
+
+    # THEN Verify that log messages are flushed without any exception
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2, "Expected two log messages"
+
+
 def test_buffer_configuration_and_buffer_propagation_across_logger_instances(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 

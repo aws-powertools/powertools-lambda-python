@@ -1,0 +1,21 @@
+{
+   "eventSource":"aws:kafka",
+   "eventSourceArn":"arn:aws:kafka:eu-west-3:123456789012:cluster/powertools-kafka-esm/f138df86-9253-4d2a-b682-19e132396d4f-s3",
+   "bootstrapServers":"boot-z3majaui.c3.kafka-serverless.eu-west-3.amazonaws.com:9098",
+   "records":{
+      "python-with-avro-doc-5":[
+         {
+            "topic":"python-with-avro-doc",
+            "partition":5,
+            "offset":0,
+            "timestamp":1750547462087,
+            "timestampType":"CREATE_TIME",
+            "key":"MTIz",
+            "value":"eyJuYW1lIjogIlBvd2VydG9vbHMiLCAiYWdlIjogNX0=",
+            "headers":[
+
+            ]
+         }
+      ]
+   }
+}
