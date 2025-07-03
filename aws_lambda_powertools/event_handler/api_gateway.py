@@ -916,8 +916,14 @@ class ResponseBuilder(Generic[ResponseEventT]):
         bool
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
-        encoding = event.headers.get("accept-encoding", "")
-        if "gzip" in encoding:
+        encoding = event.resolved_headers_field.get("accept-encoding", "")
+        gzip_accepted = False
+        if isinstance(encoding, str):
+            gzip_accepted = "gzip" in encoding
+        elif isinstance(encoding, list):
+            gzip_accepted = "gzip" in ",".join(encoding)
+
+        if gzip_accepted:
             if response_compression is not None:
                 return response_compression  # e.g., Response(compress=False/True))
             if route_compression:
