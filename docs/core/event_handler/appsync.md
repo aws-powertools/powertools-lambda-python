@@ -3,7 +3,7 @@ title: GraphQL API
 description: Core utility
 ---
 
-Event Handler for AWS AppSync and Amplify GraphQL Transformer.
+Event Handler for AWS AppSync GraphQL APIs simplifies routing and processing of events in AWS Lambda functions. It allows you to define resolvers for GraphQL types and fields, making it easier to handle GraphQL requests without the need for complex VTL or JavaScript templates.
 
 ```mermaid
 stateDiagram-v2
@@ -46,7 +46,7 @@ stateDiagram-v2
 
 **[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
 
-**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language _(SDL)_, _e.g., `@function`_. Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+**[Batching resolvers](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}**. A technique that allows you to batch multiple GraphQL requests into a single Lambda function invocation, reducing the number of calls and improving performance.
 
 ## Getting started
 
@@ -169,55 +169,6 @@ For Lambda Python3.8+ runtime, this utility supports async functions when you us
 ```python hl_lines="7 14 24 25 34 36" title="Resolving GraphQL resolvers async"
 --8<-- "examples/event_handler_graphql/src/async_resolvers.py"
 ```
-
-### Amplify GraphQL Transformer
-
-Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/install){target="_blank"}, create a new API using `amplify add api` and use the following GraphQL Schema.
-
-<!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
-
-```typescript hl_lines="7 15 20 22" title="Example GraphQL Schema"
---8<-- "examples/event_handler_graphql/src/amplify_graphql_transformer_schema.graphql"
-```
-
-[Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
-
-???+ note
-    Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
-
-Within your function's folder, add Powertools for AWS Lambda (Python) as a dependency with `pipenv install aws-lambda-powertools`.
-
-Use the following code for `merchantInfo` and `searchMerchant` functions respectively.
-
-=== "graphql_transformer_merchant_info.py"
-
-    ```python hl_lines="4 6 23 24 29 30 36"
-    --8<-- "examples/event_handler_graphql/src/graphql_transformer_merchant_info.py"
-    ```
-
-=== "graphql_transformer_search_merchant.py"
-
-    ```python hl_lines="4 6 21 22 36 42"
-    --8<-- "examples/event_handler_graphql/src/graphql_transformer_search_merchant.py"
-    ```
-
-=== "graphql_transformer_list_locations.json"
-
-    ```json hl_lines="2-7"
-    --8<-- "examples/event_handler_graphql/src/graphql_transformer_list_locations.json"
-    ```
-
-=== "graphql_transformer_common_field.json"
-
-    ```json hl_lines="2 3"
-    --8<-- "examples/event_handler_graphql/src/graphql_transformer_common_field.json"
-    ```
-
-=== "graphql_transformer_find_merchant.json"
-
-    ```json hl_lines="2-6"
-    --8<-- "examples/event_handler_graphql/src/graphql_transformer_find_merchant.json"
-    ```
 
 ### Custom data models
 
