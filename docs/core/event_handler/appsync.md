@@ -3,7 +3,7 @@ title: GraphQL API
 description: Core utility
 ---
 
-Event Handler for AWS AppSync GraphQL APIs simplifies routing and processing of events in AWS Lambda functions. It allows you to define resolvers for GraphQL types and fields, making it easier to handle GraphQL requests without the need for complex VTL or JavaScript templates.
+Event Handler for AWS AppSync GraphQL APIs simplifies routing and processing of events in AWS Lambda functions by allowing you to define resolvers for specific GraphQL types and fields.
 
 ```mermaid
 stateDiagram-v2
