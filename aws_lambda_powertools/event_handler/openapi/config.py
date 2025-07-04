@@ -12,11 +12,11 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.models import (
         Contact,
+        ExternalDocumentation,
         License,
         SecurityScheme,
         Server,
         Tag,
-        ExternalDocumentation,
     )
 
 

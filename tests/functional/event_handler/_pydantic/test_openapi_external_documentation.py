@@ -25,4 +25,4 @@ def test_openapi_schema_external_documentation():
 
     assert schema.externalDocs
     assert schema.externalDocs.description == "Find out more about this API"
-    assert schema.externalDocs.url == "https://example.org/docs"
+    assert str(schema.externalDocs.url) == "https://example.org/docs"
