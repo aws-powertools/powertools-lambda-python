@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.models import ExternalDocumentation, Server
+from aws_lambda_powertools.event_handler.openapi.models import ExternalDocumentation
 
 
 def test_openapi_schema_no_external_documentation():
