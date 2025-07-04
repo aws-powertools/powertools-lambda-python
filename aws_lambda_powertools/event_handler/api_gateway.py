@@ -85,12 +85,12 @@ if TYPE_CHECKING:
     )
     from aws_lambda_powertools.event_handler.openapi.models import (
         Contact,
+        ExternalDocumentation,
         License,
         OpenAPI,
         SecurityScheme,
         Server,
         Tag,
-        ExternalDocumentation,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import (
@@ -1816,9 +1816,11 @@ class ApiGatewayResolver(BaseRouter):
             "info": info,
             "servers": self._get_openapi_servers(servers),
             "security": self._get_openapi_security(security, security_schemes),
-            "external_docs": external_documentation,
             **openapi_extensions,
         }
+
+        if external_documentation:
+            output["external_docs"] = external_documentation
 
         components: dict[str, dict[str, Any]] = {}
         paths: dict[str, dict[str, Any]] = {}
