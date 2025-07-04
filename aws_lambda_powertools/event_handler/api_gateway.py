@@ -1820,7 +1820,7 @@ class ApiGatewayResolver(BaseRouter):
         }
 
         if external_documentation:
-            output["external_docs"] = external_documentation
+            output["externalDocs"] = external_documentation
 
         components: dict[str, dict[str, Any]] = {}
         paths: dict[str, dict[str, Any]] = {}
