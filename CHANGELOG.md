@@ -4,14 +4,28 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* enable response compression when using multi-value headers ([#6936](https://github.com/aws-powertools/powertools-lambda-python/issues/6936))
+
+## Documentation
+
+* **event-handler:** remove Amplify transformers section ([#6937](https://github.com/aws-powertools/powertools-lambda-python/issues/6937))
+
 ## Maintenance
 
-* **deps:** bump aws-encryption-sdk from 4.0.1 to 4.0.2 ([#6932](https://github.com/aws-powertools/powertools-lambda-python/issues/6932))
+* **ci:** new pre-release 3.16.1a0 ([#6933](https://github.com/aws-powertools/powertools-lambda-python/issues/6933))
 * **deps:** bump mkdocs-material from 9.6.14 to 9.6.15 ([#6931](https://github.com/aws-powertools/powertools-lambda-python/issues/6931))
+* **deps:** bump aws-encryption-sdk from 4.0.1 to 4.0.2 ([#6932](https://github.com/aws-powertools/powertools-lambda-python/issues/6932))
+* **deps-dev:** bump types-protobuf from 6.30.2.20250516 to 6.30.2.20250703 ([#6939](https://github.com/aws-powertools/powertools-lambda-python/issues/6939))
+* **deps-dev:** bump ruff from 0.12.1 to 0.12.2 ([#6938](https://github.com/aws-powertools/powertools-lambda-python/issues/6938))
+* **deps-dev:** bump aws-cdk from 2.1020.1 to 2.1020.2 ([#6942](https://github.com/aws-powertools/powertools-lambda-python/issues/6942))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.203.0a0 to 2.203.1a0 ([#6929](https://github.com/aws-powertools/powertools-lambda-python/issues/6929))
 * **deps-dev:** bump aws-cdk-lib from 2.203.0 to 2.203.1 ([#6928](https://github.com/aws-powertools/powertools-lambda-python/issues/6928))
 * **deps-dev:** bump boto3-stubs from 1.39.1 to 1.39.2 ([#6930](https://github.com/aws-powertools/powertools-lambda-python/issues/6930))
 * **deps-dev:** bump aws-cdk from 2.1020.0 to 2.1020.1 ([#6927](https://github.com/aws-powertools/powertools-lambda-python/issues/6927))
+* **deps-dev:** bump coverage from 7.9.1 to 7.9.2 ([#6941](https://github.com/aws-powertools/powertools-lambda-python/issues/6941))
+* **deps-dev:** bump boto3-stubs from 1.39.2 to 1.39.3 ([#6940](https://github.com/aws-powertools/powertools-lambda-python/issues/6940))
 
 
 <a name="v3.16.0"></a>
