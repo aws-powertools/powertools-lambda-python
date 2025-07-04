@@ -85,6 +85,7 @@ if TYPE_CHECKING:
     )
     from aws_lambda_powertools.event_handler.openapi.models import (
         Contact,
+        ExternalDocumentation,
         License,
         OpenAPI,
         SecurityScheme,
@@ -1714,6 +1715,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: License | None = None,
         security_schemes: dict[str, SecurityScheme] | None = None,
         security: list[dict[str, list[str]]] | None = None,
+        external_documentation: ExternalDocumentation | None = None,
         openapi_extensions: dict[str, Any] | None = None,
     ) -> OpenAPI:
         """
@@ -1745,6 +1747,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: list[dict[str, list[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        external_documentation: ExternalDocumentation, optional
+            Additional external documentation for the API.
         openapi_extensions: Dict[str, Any], optional
             Additional OpenAPI extensions as a dictionary.
 
@@ -1775,6 +1779,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info = license_info or self.openapi_config.license_info
         security_schemes = security_schemes or self.openapi_config.security_schemes
         security = security or self.openapi_config.security
+        external_documentation = external_documentation or self.openapi_config.external_documentation
         openapi_extensions = openapi_extensions or self.openapi_config.openapi_extensions
 
         from pydantic.json_schema import GenerateJsonSchema
@@ -1813,6 +1818,9 @@ class ApiGatewayResolver(BaseRouter):
             "security": self._get_openapi_security(security, security_schemes),
             **openapi_extensions,
         }
+
+        if external_documentation:
+            output["externalDocs"] = external_documentation
 
         components: dict[str, dict[str, Any]] = {}
         paths: dict[str, dict[str, Any]] = {}
@@ -1921,6 +1929,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: License | None = None,
         security_schemes: dict[str, SecurityScheme] | None = None,
         security: list[dict[str, list[str]]] | None = None,
+        external_documentation: ExternalDocumentation | None = None,
         openapi_extensions: dict[str, Any] | None = None,
     ) -> str:
         """
@@ -1952,6 +1961,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: list[dict[str, list[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        external_documentation: ExternalDocumentation, optional
+            Additional external documentation for the API.
         openapi_extensions: Dict[str, Any], optional
             Additional OpenAPI extensions as a dictionary.
 
@@ -1977,6 +1988,7 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
                 security_schemes=security_schemes,
                 security=security,
+                external_documentation=external_documentation,
                 openapi_extensions=openapi_extensions,
             ),
             by_alias=True,
@@ -1998,6 +2010,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: License | None = None,
         security_schemes: dict[str, SecurityScheme] | None = None,
         security: list[dict[str, list[str]]] | None = None,
+        external_documentation: ExternalDocumentation | None = None,
         openapi_extensions: dict[str, Any] | None = None,
     ):
         """Configure OpenAPI specification settings for the API.
@@ -2031,6 +2044,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of the security schemes available to be used in the specification.
         security: list[dict[str, list[str]]], optional
             A declaration of which security mechanisms are applied globally across the API.
+        external_documentation: ExternalDocumentation, optional
+            A link to external documentation for the API.
         openapi_extensions: Dict[str, Any], optional
             Additional OpenAPI extensions as a dictionary.
 
@@ -2064,6 +2079,7 @@ class ApiGatewayResolver(BaseRouter):
             license_info=license_info,
             security_schemes=security_schemes,
             security=security,
+            external_documentation=external_documentation,
             openapi_extensions=openapi_extensions,
         )
 
@@ -2088,6 +2104,7 @@ class ApiGatewayResolver(BaseRouter):
         security: list[dict[str, list[str]]] | None = None,
         oauth2_config: OAuth2Config | None = None,
         persist_authorization: bool = False,
+        external_documentation: ExternalDocumentation | None = None,
         openapi_extensions: dict[str, Any] | None = None,
     ):
         """
@@ -2131,6 +2148,8 @@ class ApiGatewayResolver(BaseRouter):
             The OAuth2 configuration for the Swagger UI.
         persist_authorization: bool, optional
             Whether to persist authorization data on browser close/refresh.
+        external_documentation: ExternalDocumentation, optional
+            A link to external documentation for the API.
         openapi_extensions: dict[str, Any], optional
             Additional OpenAPI extensions as a dictionary.
         """
@@ -2183,6 +2202,7 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
                 security_schemes=security_schemes,
                 security=security,
+                external_documentation=external_documentation,
                 openapi_extensions=openapi_extensions,
             )
 
