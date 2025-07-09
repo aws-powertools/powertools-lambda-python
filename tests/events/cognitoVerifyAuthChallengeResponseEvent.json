@@ -24,5 +24,7 @@
     "challengeAnswer": "challengeAnswer",
     "userNotFound": true
   },
-  "response": {}
+  "response": {
+    "answerCorrect": true
+  }
 }

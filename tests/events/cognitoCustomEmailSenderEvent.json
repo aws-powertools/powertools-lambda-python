@@ -5,7 +5,7 @@
   "userPoolId": "userPoolId",
   "userName": "userName",
   "callerContext": {
-    "awsSdk": "awsSdkVersion",
+    "awsSdkVersion": "awsSdkVersion",
     "clientId": "clientId"
   },
   "request": {

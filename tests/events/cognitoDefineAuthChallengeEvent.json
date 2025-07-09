@@ -21,7 +21,7 @@
         "challengeResult": true
       },
       {
-        "challengeName": "CUSTOM_CHALLENGE",
+        "challengeName": "PASSWORD_VERIFIER",
         "challengeResult": true,
         "challengeMetadata": "CAPTCHA_CHALLENGE"
       }
