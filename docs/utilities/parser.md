@@ -122,7 +122,8 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **CognitoPostConfirmationTriggerModel**     | Lambda User Pool Post Confirmation trigger event                                              |
 | **CognitoPreAuthenticationTriggerModel**    | Lambda User Pool Pre Authentication trigger event                                             |
 | **CognitoPostAuthenticationTriggerModel**   | Lambda User Pool Post Authentication trigger event                                            |
-| **CognitoPreTokenGenerationTriggerModel**   | Lambda User Pool Pre Token Generation trigger event                                           |
+| **CognitoPreTokenGenerationTriggerModelV1** | Lambda User Pool Pre Token Generation V1 trigger event                                        |
+| **CognitoPreTokenGenerationTriggerModelV2AndV3** | Lambda User Pool Pre Token Generation V2 and V3 trigger event                            |
 | **CognitoMigrateUserTriggerModel**          | Lambda User Pool Migrate User trigger event                                                   |
 | **CognitoCustomMessageTriggerModel**        | Lambda User Pool Custom Message trigger event                                                 |
 | **CognitoCustomEmailSenderTriggerModel**    | Lambda User Pool Custom Email Sender trigger event                                            |
