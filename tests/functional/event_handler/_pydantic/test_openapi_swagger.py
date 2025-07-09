@@ -26,7 +26,7 @@ def test_openapi_swagger():
 def test_openapi_swagger_compressed():
     app = APIGatewayRestResolver(enable_validation=True)
     app.enable_swagger(compress=True)
-    LOAD_GW_EVENT["headers"] = {"Accept-Encoding": "gzip, deflate, br"}
+    LOAD_GW_EVENT["multiValueHeaders"] = {"Accept-Encoding": ["gzip, deflate, br"]}
     LOAD_GW_EVENT["path"] = "/swagger"
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200

@@ -43,9 +43,19 @@ jobs:
       id-token: write
     environment: layer-${{ inputs.environment }}
     steps:
+      - name: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Setup dependencies
+        uses: aws-powertools/actions/.github/actions/cached-node-modules@29979bc5339bf54f76a11ac36ff67701986bb0f0
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df
         with:
           aws-region: ${{ inputs.region }}
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
@@ -54,11 +64,6 @@ jobs:
         name: Create Workdir
         run: |
           mkdir -p build/project
-      - id: cdk-install
-        name: Install CDK
-        working-directory: build
-        run: |
-          npm i aws-cdk
       - id: cdk-project
         name: CDK Project
         working-directory: build/project
@@ -97,12 +102,14 @@ jobs:
       - id: go-setup
         name: Setup Go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: '>=1.23.0'
       - id: go-env
         name: Go Env
         run: go env
       - id: go-install-pkg
         name: Install
-        run: go install github.com/aws-powertools/actions/layer-balancer/cmd/balance@latest
+        run: go install github.com/aws-powertools/actions/layer-balancer/cmd/balance@29979bc5339bf54f76a11ac36ff67701986bb0f0
       - id: run-balance
         name: Run Balance
         run: balance -read-region us-east-1 -write-region ${{ inputs.region }} -write-role ${{ secrets.BALANCE_ROLE_ARN }} -layer-name ${{ matrix.layer }} -dry-run=false

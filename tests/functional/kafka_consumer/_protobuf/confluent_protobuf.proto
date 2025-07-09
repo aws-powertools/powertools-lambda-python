@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package org.demo.kafka.protobuf;
+
+option java_package = "org.demo.kafka.protobuf";
+option java_outer_classname = "ProtobufProductOuterClass";
+option java_multiple_files = true;
+
+message ProtobufProduct {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+}

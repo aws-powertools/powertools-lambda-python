@@ -12,6 +12,7 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.models import (
         Contact,
+        ExternalDocumentation,
         License,
         SecurityScheme,
         Server,
@@ -51,6 +52,8 @@ class OpenAPIConfig:
         A declaration of the security schemes available to be used in the specification.
     security: list[dict[str, list[str]]], optional
         A declaration of which security mechanisms are applied globally across the API.
+    external_documentation: ExternalDocumentation, optional
+        A link to external documentation for the API.
     openapi_extensions: Dict[str, Any], optional
         Additional OpenAPI extensions as a dictionary.
 
@@ -77,4 +80,5 @@ class OpenAPIConfig:
     license_info: License | None = None
     security_schemes: dict[str, SecurityScheme] | None = None
     security: list[dict[str, list[str]]] | None = None
+    external_documentation: ExternalDocumentation | None = None
     openapi_extensions: dict[str, Any] | None = None

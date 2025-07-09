@@ -374,6 +374,9 @@ class Logger:
         if not self._is_deduplication_disabled:
             logger.debug("Adding filter in root logger to suppress child logger records to bubble up")
             for handler in logging.root.handlers:
+                # skip suppressing pytest's handler, allowing caplog fixture usage
+                if type(handler).__name__ == "LogCaptureHandler" and type(handler).__module__ == "_pytest.logging":
+                    continue
                 # It'll add a filter to suppress any child logger from self.service
                 # Example: `Logger(service="order")`, where service is Order
                 # It'll reject all loggers starting with `order` e.g. order.checkout, order.shared
@@ -1197,6 +1200,10 @@ class Logger:
 
         tracer_id = get_tracer_id()
 
+        # no buffer config? return
+        if not self._buffer_config:
+            return
+
         # Flushing log without a tracer id? Return
         if not tracer_id:
             return
@@ -1204,9 +1211,6 @@ class Logger:
         # is buffer empty? return
         buffer = self._buffer_cache.get(tracer_id)
         if not buffer:
-            return
-
-        if not self._buffer_config:
             return
 
         # Check ALC level against buffer level

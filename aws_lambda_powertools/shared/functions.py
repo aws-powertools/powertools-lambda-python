@@ -291,3 +291,19 @@ def sanitize_xray_segment_name(name: str) -> str:
 def get_tracer_id() -> str | None:
     xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
     return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
+
+
+def decode_header_bytes(byte_list):
+    """
+    Decode a list of byte values that might be signed.
+    If any negative values exist, handle them as signed bytes.
+    Otherwise use the normal bytes construction.
+    """
+    has_negative = any(b < 0 for b in byte_list)
+
+    if not has_negative:
+        # Use normal bytes construction if all values are positive
+        return bytes(byte_list)
+    # Convert signed bytes to unsigned (0-255 range)
+    unsigned_bytes = [(b & 0xFF) for b in byte_list]
+    return bytes(unsigned_bytes)

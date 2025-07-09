@@ -8,7 +8,6 @@ import os
 import random
 import re
 import string
-import sys
 import time
 from collections import namedtuple
 from threading import Thread
@@ -418,7 +417,6 @@ def test_logger_logs_stack_trace_with_formatter_non_default_value(service_name, 
     assert "stack_trace" not in log
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled")
 def test_thread_safe_keys_encapsulation(service_name, stdout):
     logger = Logger(
         service=service_name,
@@ -434,9 +432,16 @@ def test_thread_safe_keys_encapsulation(service_name, stdout):
     logger.info("global key added")
 
     thread1_keys = {"exampleThread1Key": "thread1"}
-    Thread(target=send_thread_message_with_key, args=("thread1", thread1_keys)).start()
+    thread1 = Thread(target=send_thread_message_with_key, args=("thread1", thread1_keys))
+
+    thread1.start()
+    thread1.join()
+
     thread2_keys = {"exampleThread2Key": "thread2"}
-    Thread(target=send_thread_message_with_key, args=("thread2", thread2_keys)).start()
+    thread2 = Thread(target=send_thread_message_with_key, args=("thread2", thread2_keys))
+
+    thread2.start()
+    thread2.join()
 
     logger.info("final log, all thread keys gone")
 
@@ -457,7 +462,6 @@ def test_thread_safe_keys_encapsulation(service_name, stdout):
     assert logs[3].get("exampleThread2Key") is None
 
 
-@pytest.mark.skipif(sys.version_info >= (3, 13), reason="Test temporarily disabled for Python 3.13+")
 def test_thread_safe_remove_key(service_name, stdout):
     logger = Logger(
         service=service_name,
@@ -471,10 +475,12 @@ def test_thread_safe_remove_key(service_name, stdout):
         logger.info(message)
 
     thread1_keys = {"exampleThread1Key": "thread1"}
-    Thread(target=send_message_with_key_and_without, args=("msg", thread1_keys)).start()
+    thread1 = Thread(target=send_message_with_key_and_without, args=("msg", thread1_keys))
+
+    thread1.start()
+    thread1.join()
 
     logs = capture_logging_output(stdout)
-    print(logs)
 
     assert logs[0].get("exampleThread1Key") == "thread1"
     assert logs[1].get("exampleThread1Key") is None
@@ -493,10 +499,12 @@ def test_thread_safe_clear_key(service_name, stdout):
         logger.info(message)
 
     thread1_keys = {"exampleThread1Key": "thread1"}
-    Thread(target=send_message_with_key_and_clear, args=("msg", thread1_keys)).start()
+    thread1 = Thread(target=send_message_with_key_and_clear, args=("msg", thread1_keys))
+
+    thread1.start()
+    thread1.join()
 
     logs = capture_logging_output(stdout)
-    print(logs)
 
     assert logs[0].get("exampleThread1Key") == "thread1"
     assert logs[1].get("exampleThread1Key") is None
@@ -513,10 +521,12 @@ def test_thread_safe_getkey(service_name, stdout):
         logger.info(logger.thread_safe_get_current_keys())
 
     thread1_keys = {"exampleThread1Key": "thread1"}
-    Thread(target=send_message_with_key_and_get, args=("msg", thread1_keys)).start()
+    thread1 = Thread(target=send_message_with_key_and_get, args=("msg", thread1_keys))
+
+    thread1.start()
+    thread1.join()
 
     logs = capture_logging_output(stdout)
-    print(logs)
 
     assert logs[0].get("exampleThread1Key") == "thread1"
     assert logs[0].get("message") == thread1_keys
