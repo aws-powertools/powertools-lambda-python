@@ -1,20 +1,22 @@
 import pytest
-from aws_lambda_powertools.utilities.parser import parse, ValidationError
+
+from aws_lambda_powertools.utilities.parser import ValidationError, parse
 from aws_lambda_powertools.utilities.parser.models import (
-    CognitoPreSignupTriggerModel,
-    CognitoPostConfirmationTriggerModel,
-    CognitoPreAuthenticationTriggerModel,
-    CognitoPostAuthenticationTriggerModel,
-    CognitoPreTokenGenerationTriggerModel,
-    CognitoMigrateUserTriggerModel,
-    CognitoCustomMessageTriggerModel,
+    CognitoCreateAuthChallengeTriggerModel,
     CognitoCustomEmailSenderTriggerModel,
+    CognitoCustomMessageTriggerModel,
     CognitoCustomSMSSenderTriggerModel,
     CognitoDefineAuthChallengeTriggerModel,
-    CognitoCreateAuthChallengeTriggerModel,
+    CognitoMigrateUserTriggerModel,
+    CognitoPostAuthenticationTriggerModel,
+    CognitoPostConfirmationTriggerModel,
+    CognitoPreAuthenticationTriggerModel,
+    CognitoPreSignupTriggerModel,
+    CognitoPreTokenGenerationTriggerModel,
     CognitoVerifyAuthChallengeTriggerModel,
 )
 from tests.functional.utils import load_event
+
 
 @pytest.mark.parametrize(
     "filename,model",
