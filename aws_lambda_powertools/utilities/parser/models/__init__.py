@@ -157,7 +157,6 @@ __all__ = [
     "CognitoPostConfirmationTriggerModel",
     "CognitoPreAuthenticationTriggerModel",
     "CognitoPostAuthenticationTriggerModel",
-    "CognitoPreTokenGenerationTriggerModel",
     "CognitoMigrateUserTriggerModel",
     "CognitoCustomMessageTriggerModel",
     "CognitoCustomEmailSenderTriggerModel",
