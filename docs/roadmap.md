@@ -17,7 +17,10 @@ You can help us prioritize by [upvoting existing feature requests](https://githu
 
 We will create new features and utilities to solve practical problems developers face when building serverless applications.
 
-- [ ] [Ability to buffer logs](https://github.com/aws-powertools/powertools-lambda-typescript/discussions/3410){target="_blank"}
+- [x] [Ability to buffer logs](https://github.com/aws-powertools/powertools-lambda-python/releases/tag/v3.8.0){target="_blank"}
+- [x] [Implement resolver for Amazon Bedrock Agents Functions](https://github.com/aws-powertools/powertools-lambda-python/releases/tag/v3.14.0){target="_blank"}
+- [x] [Implement resolver for AWS AppSync Events API](https://github.com/aws-powertools/powertools-lambda-python/releases/tag/v3.11.0){target="_blank"}
+- [ ] Add support for OpenTelemetry in our tracer utility
 - [ ] Async event handlers to streamline complex event-driven workflows across SQS, EventBridge
 
 #### Powertools toolchain (p1)
@@ -33,6 +36,12 @@ Python's serverless ecosystem is increasingly adopting asynchronous programming 
 
 - [ ] Add support for aioboto3 or other tool, enabling efficient, non-blocking AWS service interactions in Lambda functions.
 - [ ] Write a PoC with Event Handler support for async.
+
+#### Governance & Advanced Use Cases (p3)
+
+To streghten our offering for more advanced customers as well as enterprises, we will be working on a set of activities that will help us better support their needs and practices. These include:
+
+- [x] [Publish Lambda layers to China regions](https://github.com/aws-powertools/powertools-lambda-python/releases/tag/v3.16.0){target="_blank"}
 
 ## Roadmap status definition
 

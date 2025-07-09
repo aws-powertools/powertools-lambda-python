@@ -464,12 +464,20 @@ def test_override_route_compress_parameter():
     assert result["multiValueHeaders"].get("Content-Encoding") is None
 
 
-def test_response_with_compress_enabled():
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"headers": {"Accept-Encoding": "deflate, gzip"}},
+        {"multiValueHeaders": {"Accept-Encoding": ["deflate, gzip"]}},
+        {"multiValueHeaders": {"Accept-Encoding": ["deflate", "gzip"]}},
+    ],
+)
+def test_response_with_compress_enabled(headers: dict):
     # GIVEN a function
     # AND an event with a "Accept-Encoding" that include gzip
     # AND the Response object with compress=True
     app = ApiGatewayResolver()
-    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    mock_event = {"path": "/my/request", "httpMethod": "GET", **headers}
     expected_value = '{"test": "value"}'
 
     @app.get("/my/request")
