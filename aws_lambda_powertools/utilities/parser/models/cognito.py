@@ -1,133 +1,118 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel
 
 
+# Common context model for Cognito triggers
 class CognitoCallerContextModel(BaseModel):
     awsSdkVersion: str
     clientId: str
 
 
-class CognitoChallengeResultModel(BaseModel):
-    challengeName: str
-    challengeResult: bool
-    challengeMetadata: Optional[str]
-
-
-class CognitoPreSignupRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    validationData: Optional[Dict[str, str]] = None
-    clientMetadata: Optional[Dict[str, str]] = None
-
-
-class CognitoPreSignupResponseModel(BaseModel):
-    autoConfirmUser: Optional[bool] = None
-    autoVerifyPhone: Optional[bool] = None
-    autoVerifyEmail: Optional[bool] = None
-
-
-class CognitoPreSignupTriggerModel(BaseModel):
+# Base model for all Cognito triggers
+class CognitoTriggerBaseSchema(BaseModel):
     version: str
     region: str
     userPoolId: str
-    userName: str
+    userName: Optional[str] = None
     callerContext: CognitoCallerContextModel
-    triggerSource: str
+
+
+# Models for Pre-Signup flow
+class CognitoPreSignupRequestModel(BaseModel):
+    userAttributes: Dict[str, Any]
+    validationData: Optional[Dict[str, Any]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
+    userNotFound: Optional[bool] = None
+
+
+class CognitoPreSignupResponseModel(BaseModel):
+    autoConfirmUser: Optional[bool] = False
+    autoVerifyPhone: Optional[bool] = False
+    autoVerifyEmail: Optional[bool] = False
+
+
+class CognitoPreSignupTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["PreSignUp_SignUp"]
     request: CognitoPreSignupRequestModel
     response: CognitoPreSignupResponseModel
 
 
+# Models for Post-Confirmation flow
 class CognitoPostConfirmationRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    clientMetadata: Optional[Dict[str, str]] = None
+    userAttributes: Dict[str, Any]
+    clientMetadata: Optional[Dict[str, Any]] = None
 
 
-class CognitoPostConfirmationTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
+class CognitoPostConfirmationTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["PostConfirmation_ConfirmSignUp"]
     request: CognitoPostConfirmationRequestModel
     response: Dict[str, Any] = {}
 
 
+# Models for Pre-Authentication flow
 class CognitoPreAuthenticationRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    validationData: Optional[Dict[str, str]] = None
+    userAttributes: Dict[str, Any]
+    validationData: Optional[Dict[str, Any]] = None
     userNotFound: Optional[bool] = None
 
 
-class CognitoPreAuthenticationTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
+class CognitoPreAuthenticationTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["PreAuthentication_Authentication"]
     request: CognitoPreAuthenticationRequestModel
     response: Dict[str, Any] = {}
 
 
+# Models for Post-Authentication flow
 class CognitoPostAuthenticationRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    newDeviceUsed: bool
-    clientMetadata: Optional[Dict[str, str]] = None
+    userAttributes: Dict[str, Any]
+    newDeviceUsed: Optional[bool] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
 
 
-class CognitoPostAuthenticationTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
+class CognitoPostAuthenticationTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["PostAuthentication_Authentication"]
     request: CognitoPostAuthenticationRequestModel
     response: Dict[str, Any] = {}
 
 
+# Models for Pre-Token Generation flow
 class CognitoGroupConfigurationModel(BaseModel):
     groupsToOverride: List[str]
     iamRolesToOverride: List[str]
     preferredRole: Optional[str] = None
 
 
-class CognitoPreTokenGenRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
+class CognitoPreTokenGenerationRequestModel(BaseModel):
+    userAttributes: Dict[str, Any]
     groupConfiguration: CognitoGroupConfigurationModel
-    clientMetadata: Optional[Dict[str, str]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
 
 
-class CognitoClaimsOverrideDetailsModel(BaseModel):
-    claimsToAddOrOverride: Optional[Dict[str, str]] = None
-    claimsToSuppress: Optional[List[str]] = None
-    groupOverrideDetails: Optional[CognitoGroupConfigurationModel] = None
-
-
-class CognitoPreTokenGenResponseModel(BaseModel):
-    claimsOverrideDetails: Optional[CognitoClaimsOverrideDetailsModel] = None
-
-
-class CognitoPreTokenGenerationTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
+class CognitoPreTokenGenerationTriggerModelV1(CognitoTriggerBaseSchema):
     triggerSource: str
-    request: CognitoPreTokenGenRequestModel
-    response: CognitoPreTokenGenResponseModel
+    request: CognitoPreTokenGenerationRequestModel
+    response: Dict[str, Any] = {}
 
 
+class CognitoPreTokenGenerationRequestModelV2AndV3(CognitoPreTokenGenerationRequestModel):
+    scopes: Optional[Dict[str, Any]] = None
+
+
+class CognitoPreTokenGenerationTriggerModelV2AndV3(CognitoTriggerBaseSchema):
+    request: CognitoPreTokenGenerationRequestModelV2AndV3
+    response: Dict[str, Any] = {}
+
+
+# Models for User Migration flow
 class CognitoMigrateUserRequestModel(BaseModel):
     password: str
-    validationData: Optional[Dict[str, str]] = None
-    clientMetadata: Optional[Dict[str, str]] = None
+    validationData: Optional[Dict[str, Any]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
 
 
 class CognitoMigrateUserResponseModel(BaseModel):
-    userAttributes: Dict[str, str]
+    userAttributes: Optional[Dict[str, Any]] = None
     finalUserStatus: Optional[str] = None
     messageAction: Optional[str] = None
     desiredDeliveryMediums: Optional[List[str]] = None
@@ -135,22 +120,20 @@ class CognitoMigrateUserResponseModel(BaseModel):
     enableSMSMFA: Optional[bool] = None
 
 
-class CognitoMigrateUserTriggerModel(BaseModel):
+class CognitoMigrateUserTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: str
     userName: str
-    version: Optional[str] = None
-    region: Optional[str] = None
-    userPoolId: Optional[str] = None
-    callerContext: Optional[CognitoCallerContextModel] = None
-    triggerSource: Optional[str] = None
     request: CognitoMigrateUserRequestModel
     response: CognitoMigrateUserResponseModel
 
 
+# Models for Custom Message flow
 class CognitoCustomMessageRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    codeParameter: Optional[str] = None
+    userAttributes: Dict[str, Any]
+    codeParameter: str
+    linkParameter: Optional[str] = None
     usernameParameter: Optional[str] = None
-    clientMetadata: Optional[Dict[str, str]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
 
 
 class CognitoCustomMessageResponseModel(BaseModel):
@@ -159,105 +142,82 @@ class CognitoCustomMessageResponseModel(BaseModel):
     emailSubject: Optional[str] = None
 
 
-class CognitoCustomMessageTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
+class CognitoCustomMessageTriggerModel(CognitoTriggerBaseSchema):
     triggerSource: str
     request: CognitoCustomMessageRequestModel
     response: CognitoCustomMessageResponseModel
 
 
-class CognitoCustomEmailSenderRequestModel(BaseModel):
+# Models for Custom Email/SMS Sender flow
+class CognitoCustomEmailSMSSenderRequestModel(BaseModel):
     type: str
     code: str
-    clientMetadata: Optional[Dict[str, str]] = None
-    userAttributes: Dict[str, str]
+    clientMetadata: Optional[Dict[str, Any]] = None
+    userAttributes: Dict[str, Any]
 
 
-class CognitoCustomEmailSenderTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
-    request: CognitoCustomEmailSenderRequestModel
+class CognitoCustomEmailSenderTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["CustomEmailSender_SignUp"]
+    request: CognitoCustomEmailSMSSenderRequestModel
 
 
-class CognitoCustomSMSSenderRequestModel(BaseModel):
-    type: str
-    code: str
-    clientMetadata: Optional[Dict[str, str]] = None
-    userAttributes: Dict[str, str]
+class CognitoCustomSMSSenderTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["CustomSMSSender_SignUp"]
+    request: CognitoCustomEmailSMSSenderRequestModel
 
 
-class CognitoCustomSMSSenderTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
-    request: CognitoCustomSMSSenderRequestModel
+# Models for Challenge Authentication flows
+class CognitoChallengeResultModel(BaseModel):
+    challengeName: Literal[
+        "SRP_A",
+        "PASSWORD_VERIFIER",
+        "SMS_MFA",
+        "EMAIL_OTP",
+        "SOFTWARE_TOKEN_MFA",
+        "DEVICE_SRP_AUTH",
+        "DEVICE_PASSWORD_VERIFIER",
+        "ADMIN_NO_SRP_AUTH",
+    ]
+    challengeResult: bool
+    challengeMetadata: Optional[str] = None
 
 
-class CognitoDefineAuthChallengeRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
+class CognitoAuthChallengeRequestModel(BaseModel):
+    userAttributes: Dict[str, Any]
     session: List[CognitoChallengeResultModel]
-    clientMetadata: Optional[Dict[str, str]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
     userNotFound: Optional[bool] = None
 
 
 class CognitoDefineAuthChallengeResponseModel(BaseModel):
-    challengeName: str
-    issueTokens: bool
-    failAuthentication: bool
+    challengeName: Optional[str] = None
+    issueTokens: Optional[bool] = None
+    failAuthentication: Optional[bool] = None
 
 
-class CognitoDefineAuthChallengeTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
-    request: CognitoDefineAuthChallengeRequestModel
+class CognitoDefineAuthChallengeTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["DefineAuthChallenge_Authentication"]
+    request: CognitoAuthChallengeRequestModel
     response: CognitoDefineAuthChallengeResponseModel
 
 
-class CognitoCreateAuthChallengeRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    challengeName: str
-    session: List[CognitoChallengeResultModel]
-    clientMetadata: Optional[Dict[str, str]] = None
-    userNotFound: Optional[bool] = None
-
-
 class CognitoCreateAuthChallengeResponseModel(BaseModel):
-    publicChallengeParameters: Dict[str, str]
-    privateChallengeParameters: Dict[str, str]
+    publicChallengeParameters: Optional[Dict[str, Any]] = None
+    privateChallengeParameters: Optional[Dict[str, Any]] = None
     challengeMetadata: Optional[str] = None
 
 
-class CognitoCreateAuthChallengeTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
-    request: CognitoCreateAuthChallengeRequestModel
+class CognitoCreateAuthChallengeTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["CreateAuthChallenge_Authentication"]
+    request: CognitoAuthChallengeRequestModel
     response: CognitoCreateAuthChallengeResponseModel
 
 
 class CognitoVerifyAuthChallengeRequestModel(BaseModel):
-    userAttributes: Dict[str, str]
-    privateChallengeParameters: Dict[str, str]
+    userAttributes: Dict[str, Any]
+    privateChallengeParameters: Dict[str, Any]
     challengeAnswer: str
-    clientMetadata: Optional[Dict[str, str]] = None
+    clientMetadata: Optional[Dict[str, Any]] = None
     userNotFound: Optional[bool] = None
 
 
@@ -265,12 +225,7 @@ class CognitoVerifyAuthChallengeResponseModel(BaseModel):
     answerCorrect: bool
 
 
-class CognitoVerifyAuthChallengeTriggerModel(BaseModel):
-    version: str
-    region: str
-    userPoolId: str
-    userName: str
-    callerContext: CognitoCallerContextModel
-    triggerSource: str
+class CognitoVerifyAuthChallengeTriggerModel(CognitoTriggerBaseSchema):
+    triggerSource: Literal["VerifyAuthChallengeResponse_Authentication"]
     request: CognitoVerifyAuthChallengeRequestModel
     response: CognitoVerifyAuthChallengeResponseModel

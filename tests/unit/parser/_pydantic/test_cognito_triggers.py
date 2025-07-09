@@ -12,7 +12,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     CognitoPostConfirmationTriggerModel,
     CognitoPreAuthenticationTriggerModel,
     CognitoPreSignupTriggerModel,
-    CognitoPreTokenGenerationTriggerModel,
+    CognitoPreTokenGenerationTriggerModelV1,
     CognitoVerifyAuthChallengeTriggerModel,
 )
 from tests.functional.utils import load_event
@@ -26,7 +26,7 @@ from tests.functional.utils import load_event
         ("cognitoPostConfirmationEvent.json", CognitoPostConfirmationTriggerModel),
         ("cognitoPreAuthenticationEvent.json", CognitoPreAuthenticationTriggerModel),
         ("cognitoPostAuthenticationEvent.json", CognitoPostAuthenticationTriggerModel),
-        ("cognitoPreTokenGenerationEvent.json", CognitoPreTokenGenerationTriggerModel),
+        ("cognitoPreTokenGenerationEvent.json", CognitoPreTokenGenerationTriggerModelV1),
         ("cognitoUserMigrationEvent.json", CognitoMigrateUserTriggerModel),
         ("cognitoCustomMessageEvent.json", CognitoCustomMessageTriggerModel),
         ("cognitoCustomEmailSenderEvent.json", CognitoCustomEmailSenderTriggerModel),
