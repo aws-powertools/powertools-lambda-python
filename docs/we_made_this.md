@@ -59,6 +59,14 @@ A collection of articles explaining in detail how Powertools for AWS Lambda help
 
 * [Build Serverless WebSockets with AWS AppSync Events and Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/aws-appsync-events-and-powertools-for-aws-lambda){target="_blank" rel="nofollow"}
 
+#### Lambda MCP Server Cookbook
+
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
+
+This repository provides a working, deployable, open source-based, serverless MCP server blueprint with an AWS Lambda function and AWS CDK Python code with all the best practices and a complete CI/CD pipeline.
+
+:material-github: [https://github.com/ran-isenberg/aws-lambda-mcp-cookbook](https://github.com/ran-isenberg/aws-lambda-mcp-cookbook){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
@@ -215,14 +223,6 @@ This repository provides a working, deployable, open source based, AWS Lambda ha
 This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the Powertools for AWS Lambda utilities for Python.
 
 :material-github: [github.com/ran-isenberg/aws-lambda-handler-cookbook](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
-
-### Lambda MCP Server Cookbook
-
-> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/RanBuilder){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranbuilder/){target="_blank" rel="nofollow"}**
-
-This repository provides a working, deployable, open source-based, serverless MCP server blueprint with an AWS Lambda function and AWS CDK Python code with all the best practices and a complete CI/CD pipeline.
-
-:material-github: [https://github.com/ran-isenberg/aws-lambda-mcp-cookbook](https://github.com/ran-isenberg/aws-lambda-mcp-cookbook){:target="_blank"}
 
 ### Serverless Python Demo
 
