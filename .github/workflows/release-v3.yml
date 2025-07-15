@@ -386,6 +386,7 @@ jobs:
 
   update_ssm:
     needs: [seal, release, publish_layer]
+    secrets: inherit
     permissions:
       id-token: write
       contents: read
