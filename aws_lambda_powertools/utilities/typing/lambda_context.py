@@ -34,6 +34,7 @@ class LambdaContext:
     _aws_request_id: str
     _log_group_name: str
     _log_stream_name: str
+    _tenant_id: str | None = None
     _identity: LambdaCognitoIdentity
     _client_context: LambdaClientContext
 
@@ -75,13 +76,18 @@ class LambdaContext:
 
     @property
     def identity(self) -> LambdaCognitoIdentity:
-        """(mobile apps) Information about the Amazon Cognito identity that authorized the request."""
+        """Information about the Amazon Cognito identity that authorized the request."""
         return self._identity
 
     @property
     def client_context(self) -> LambdaClientContext:
-        """(mobile apps) Client context that's provided to Lambda by the client application."""
+        """Client context that's provided to Lambda by the client application."""
         return self._client_context
+
+    @property
+    def tenant_id(self) -> str | None:
+        """The tenant_id"""
+        return self._tenant_id
 
     @staticmethod
     def get_remaining_time_in_millis() -> int:
