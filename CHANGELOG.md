@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.17.1a0 ([#6989](https://github.com/aws-powertools/powertools-lambda-python/issues/6989))
+* **deps-dev:** bump sentry-sdk from 2.32.0 to 2.33.0 ([#6988](https://github.com/aws-powertools/powertools-lambda-python/issues/6988))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.204.0a0 to 2.205.0a0 ([#6986](https://github.com/aws-powertools/powertools-lambda-python/issues/6986))
 
 
 <a name="v3.17.0"></a>
