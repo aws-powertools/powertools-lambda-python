@@ -76,12 +76,12 @@ class LambdaContext:
 
     @property
     def identity(self) -> LambdaCognitoIdentity:
-        """(mobile apps) Information about the Amazon Cognito identity that authorized the request."""
+        """Information about the Amazon Cognito identity that authorized the request."""
         return self._identity
 
     @property
     def client_context(self) -> LambdaClientContext:
-        """(mobile apps) Client context that's provided to Lambda by the client application."""
+        """Client context that's provided to Lambda by the client application."""
         return self._client_context
 
     @property
