@@ -19,6 +19,7 @@ def test_typing():
     context._aws_request_id = "_aws_request_id"
     context._log_group_name = "_log_group_name"
     context._log_stream_name = "_log_stream_name"
+    context._tenant_id = "_tenant_id"
     identity = LambdaCognitoIdentity()
     identity._cognito_identity_id = "_cognito_identity_id"
     identity._cognito_identity_pool_id = "_cognito_identity_pool_id"
@@ -42,6 +43,7 @@ def test_typing():
     assert context.aws_request_id == context._aws_request_id
     assert context.log_group_name == context._log_group_name
     assert context.log_stream_name == context._log_stream_name
+    assert context.tenant_id == context._tenant_id
     assert context.identity == context._identity
     assert context.identity.cognito_identity_id == identity._cognito_identity_id
     assert context.identity.cognito_identity_pool_id == identity._cognito_identity_pool_id
