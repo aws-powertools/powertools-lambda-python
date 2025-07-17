@@ -11,7 +11,8 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
-* Support for OpenAPI and data validation for requests/responses
+* Support for OpenAPI schema generation
+* Support data validation for requests/responses
 
 ## Getting started
 
@@ -430,7 +431,7 @@ This value will override the value of the failed response validation http code s
 
 #### Validating query strings
 
-!!! info "We will automatically validate and inject incoming query strings via type annotation."
+!!! info "You must set `enable_validation=True` to have access to the incoming query strings parameters via type annotation."
 
 We use the `Annotated` type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
@@ -490,9 +491,9 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 #### Validating headers
 
-We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated.
+!!! info "You must set `enable_validation=True` to have access to the incoming headers parameters via type annotation."
 
-!!! info "We adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive."
+We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated. Also, we adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive.
 
 In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
