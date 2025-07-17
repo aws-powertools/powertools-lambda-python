@@ -28,7 +28,7 @@ from .apigwv2 import (
     RequestContextV2Http,
 )
 from .appsync import AppSyncResolverEventModel
-from .appsync_events import AppSyncResolverEventsModel
+from .appsync_events import AppSyncEventsModel
 from .bedrock_agent import (
     BedrockAgentEventModel,
     BedrockAgentFunctionEventModel,
@@ -169,7 +169,7 @@ __all__ = [
     "AlbRequestContext",
     "AlbRequestContextData",
     "AppSyncResolverEventModel",
-    "AppSyncResolverEventsModel",
+    "AppSyncEventsModel",
     "DynamoDBStreamModel",
     "EventBridgeModel",
     "DynamoDBStreamChangedRecordModel",

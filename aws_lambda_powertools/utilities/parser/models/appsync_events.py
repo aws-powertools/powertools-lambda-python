@@ -25,7 +25,7 @@ class AppSyncEventsEventModel(BaseModel):
     payload: Dict[str, Any]
 
 
-class AppSyncResolverEventsModel(BaseModel):
+class AppSyncEventsModel(BaseModel):
     identity: Optional[AppSyncIdentity] = None
     request: AppSyncRequestModel
     info: AppSyncEventsInfoModel
