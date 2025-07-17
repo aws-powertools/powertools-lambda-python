@@ -42,5 +42,18 @@ Using `LambdaContext` typing makes it possible to access information and hints o
     --8<-- "examples/typing/src/working_with_context_function.py"
 	```
 
-![Utilities Typing All](../media/utilities_typing_2.png)
-![Utilities Typing Specific](../media/utilities_typing_3.png)
+### Available properties and methods
+
+| Name                           | Type     | Description                                                               |
+| ------------------------------ | -------- | ------------------------------------------------------------------------- |
+| `function_name`                | property | The name of the Lambda function                                           |
+| `function_version`             | property | The version of the function                                               |
+| `invoked_function_arn`         | property | The Amazon Resource Name (ARN) that's used to invoke the function         |
+| `memory_limit_in_mb`           | property | The amount of memory that's allocated for the function                    |
+| `aws_request_id`               | property | The identifier of the invocation request                                  |
+| `log_group_name`               | property | The log group for the function                                            |
+| `log_stream_name`              | property | The log stream for the function instance                                  |
+| `identity`                     | property | Information about the Amazon Cognito identity that authorized the request |
+| `client_context`               | property | Client context that's provided to Lambda by the client application        |
+| `tenant_id`                    | property | The tenant_id used to invoke the function                                 |
+| `get_remaining_time_in_millis` | method   | Returns the number of milliseconds left before the execution times out    |

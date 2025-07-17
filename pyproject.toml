@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "3.17.0"
+version = "3.17.1a1"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -86,7 +86,7 @@ boto3 = "^1.26.164"
 isort = ">=5.13.2,<7.0.0"
 pytest-cov = ">=5,<7"
 pytest-mock = "^3.14.0"
-pytest-asyncio = ">=0.24,<0.27"
+pytest-asyncio = ">=0.24,<1.2"
 bandit = "^1.7.10"
 radon = "^6.0.1"
 xenon = "^0.9.3"
