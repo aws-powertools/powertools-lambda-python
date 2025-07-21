@@ -401,7 +401,7 @@ For example, if you have three parameters, */param/a*, */param/b* and */param/c*
 
 If you use `transform` with `get_multiple()`, you might want to retrieve and transform parameters encoded in different formats.
 
-You can do this with a single request by using `transform="auto"`. This will instruct any Parameter to to infer its type based on the suffix and transform it accordingly.
+You can do this with a single request by using `transform="auto"`. This will instruct any Parameter to infer its type based on the suffix and transform it accordingly.
 
 ???+ info
     `transform="auto"` feature is available across all providers, including the high level functions.
