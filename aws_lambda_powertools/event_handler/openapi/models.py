@@ -480,14 +480,7 @@ class OpenAPI(OpenAPIExtensions):
 
     model_config = MODEL_CONFIG_ALLOW
 
-# Helper schema for file upload
-class FileSchema(BaseModel):
-    """OpenAPI 3.0 schema for binary file uploads (multipart/form-data)."""
 
-    type: Literal["string"] = Field("string", const=True)
-    format: Literal["binary"] = Field("binary", const=True)
-
-    model_config = MODEL_CONFIG_ALLOW
 
 
 model_rebuild(Schema)

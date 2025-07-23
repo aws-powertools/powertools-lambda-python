@@ -848,6 +848,13 @@ class _File(_Form):
         json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
+        # For file uploads, ensure the OpenAPI schema has the correct format
+        file_schema_extra = {"format": "binary"}
+        if json_schema_extra:
+            json_schema_extra.update(file_schema_extra)
+        else:
+            json_schema_extra = file_schema_extra
+            
         super().__init__(
             default=default,
             default_factory=default_factory,
@@ -1122,3 +1129,8 @@ def _create_model_field(
         required=field_info.default in (Required, Undefined),
         field_info=field_info,
     )
+
+
+# Public type aliases for form and file parameters
+File = _File
+Form = _Form
