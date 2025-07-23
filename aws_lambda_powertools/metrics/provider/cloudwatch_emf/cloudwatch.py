@@ -20,7 +20,13 @@ from aws_lambda_powertools.metrics.functions import (
     validate_emf_timestamp,
 )
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
+    MAX_DIMENSIONS,
+    MAX_METRIC_NAME_LENGTH,
+    MAX_METRICS,
+    MIN_METRIC_NAME_LENGTH,
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
@@ -137,6 +143,11 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             When metric resolution is not supported by CloudWatch
         """
 
+        name = name.strip()
+        if len(name) < MIN_METRIC_NAME_LENGTH or len(name) > MAX_METRIC_NAME_LENGTH:
+            raise MetricNameError(
+                f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
+            )
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
