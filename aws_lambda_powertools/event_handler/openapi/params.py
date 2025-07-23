@@ -1132,5 +1132,6 @@ def _create_model_field(
 
 
 # Public type aliases for form and file parameters
-File = _File
-Form = _Form
+# Use Annotated types to work properly with Pydantic
+File = Annotated[bytes, _File()]
+Form = Annotated[str, _Form()]
