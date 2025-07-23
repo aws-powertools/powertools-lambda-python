@@ -1,3 +1,9 @@
+class MetricNameError(Exception):
+    """When metric name does not fall under Cloudwatch constraints"""
+
+    pass
+
+
 class MetricUnitError(Exception):
     """When metric unit is not supported by CloudWatch"""
 

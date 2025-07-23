@@ -24,7 +24,10 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
+    MAX_METRIC_NAME_LENGTH,
+    MIN_METRIC_NAME_LENGTH,
 )
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
@@ -441,6 +444,38 @@ def test_schema_validation_no_namespace(metric, dimension):
     with pytest.raises(SchemaValidationError, match="Must contain a metric namespace."):
         with single_metric(**metric) as my_metric:
             my_metric.add_dimension(**dimension)
+
+
+def test_schema_validation_empty_metric_name(metric, dimension, namespace):
+    # GIVEN we pass an empty metric name
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
+    metric["name"] = ""
+
+    # WHEN we attempt to add a metric
+    # THEN it should fail validation and raise MetricNameError
+    with pytest.raises(
+        MetricNameError,
+        match=f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
+    ):
+        my_metrics.add_metric(**metric)
+
+
+def test_schema_validation_long_metric_name(metric, dimension, namespace):
+    # GIVEN we pass a metric name outside the maximum length constraint
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
+    metric[
+        "name"
+    ] = """Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.
+        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis,
+        ultricies nec, pellentesque eu, pretium quis,."""
+
+    # WHEN we attempt to serialize a valid EMF object
+    # THEN it should fail validation and raise SchemaValidationError
+    with pytest.raises(
+        MetricNameError,
+        match=f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
+    ):
+        my_metrics.add_metric(**metric)
 
 
 def test_schema_validation_incorrect_metric_value(metric, dimension, namespace):
