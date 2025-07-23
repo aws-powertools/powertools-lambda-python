@@ -448,6 +448,7 @@ def test_schema_validation_no_namespace(metric, dimension):
 
 def test_schema_validation_empty_metric_name(metric, dimension, namespace):
     # GIVEN we pass an empty metric name
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     metric["name"] = ""
 
     # WHEN we attempt to add a metric
@@ -456,12 +457,12 @@ def test_schema_validation_empty_metric_name(metric, dimension, namespace):
         MetricNameError,
         match=f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
     ):
-        with single_metric(**metric):
-            pass
+        my_metrics.add_metric(**metric)
 
 
 def test_schema_validation_long_metric_name(metric, dimension, namespace):
     # GIVEN we pass a metric name outside the maximum length constraint
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     metric[
         "name"
     ] = """Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.
@@ -474,8 +475,7 @@ def test_schema_validation_long_metric_name(metric, dimension, namespace):
         MetricNameError,
         match=f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
     ):
-        with single_metric(**metric):
-            pass
+        my_metrics.add_metric(**metric)
 
 
 def test_schema_validation_incorrect_metric_value(metric, dimension, namespace):
