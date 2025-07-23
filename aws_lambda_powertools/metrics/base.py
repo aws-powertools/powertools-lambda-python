@@ -25,7 +25,13 @@ from aws_lambda_powertools.metrics.exceptions import (
 )
 from aws_lambda_powertools.metrics.functions import convert_timestamp_to_emf_format, validate_emf_timestamp
 from aws_lambda_powertools.metrics.provider import cold_start
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
+    MAX_DIMENSIONS,
+    MAX_METRIC_NAME_LENGTH,
+    MAX_METRICS,
+    MIN_METRIC_NAME_LENGTH,
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.provider.cold_start import (
     reset_cold_start_flag,  # noqa: F401  # backwards compatibility
@@ -129,11 +135,18 @@ class MetricManager:
 
         Raises
         ------
+        MetricNameError
+            When metric name does not fall under Cloudwatch constraints
         MetricUnitError
             When metric unit is not supported by CloudWatch
         MetricResolutionError
             When metric resolution is not supported by CloudWatch
         """
+        name = name.strip()
+        if len(name) < MIN_METRIC_NAME_LENGTH or len(name) > MAX_METRIC_NAME_LENGTH:
+            raise MetricNameError(
+                f"The metric name should be between {MIN_METRIC_NAME_LENGTH} and {MAX_METRIC_NAME_LENGTH} characters",
+            )
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
