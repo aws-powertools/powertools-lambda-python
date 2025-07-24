@@ -31,6 +31,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Constants
+CONTENT_DISPOSITION_NAME_PARAM = "name="
+
 
 class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     """
@@ -401,7 +404,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
     def _extract_field_name(self, content_disposition: str) -> str | None:
         """Extract field name from Content-Disposition header."""
-        if "name=" not in content_disposition:
+        if CONTENT_DISPOSITION_NAME_PARAM not in content_disposition:
             return None
 
         # Handle both quoted and unquoted names
@@ -409,8 +412,8 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             name_start = content_disposition.find('name="') + 6
             name_end = content_disposition.find('"', name_start)
             return content_disposition[name_start:name_end]
-        elif "name=" in content_disposition:
-            name_start = content_disposition.find("name=") + 5
+        elif CONTENT_DISPOSITION_NAME_PARAM in content_disposition:
+            name_start = content_disposition.find(CONTENT_DISPOSITION_NAME_PARAM) + len(CONTENT_DISPOSITION_NAME_PARAM)
             name_end = content_disposition.find(";", name_start)
             if name_end == -1:
                 name_end = len(content_disposition)
