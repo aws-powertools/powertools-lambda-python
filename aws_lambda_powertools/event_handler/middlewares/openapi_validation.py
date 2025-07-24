@@ -255,8 +255,32 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
         content_type = app.current_event.headers.get("content-type", "").strip()
 
-        # Handle JSON content (default)
-        if not content_type or content_type.startswith("application/json"):
+        # If no content-type is provided, try to infer from route parameters
+        if not content_type:
+            route = app.context.get("_route")
+            if route and route.dependant.body_params:
+                # Check if any body params are File or Form types
+                from aws_lambda_powertools.event_handler.openapi.params import File, Form
+
+                has_file_params = any(
+                    isinstance(getattr(param.field_info, "__class__", None), type)
+                    and issubclass(param.field_info.__class__, (File, Form))
+                    for param in route.dependant.body_params
+                    if hasattr(param, "field_info")
+                )
+
+                if has_file_params:
+                    # Default to multipart for File/Form parameters
+                    content_type = "multipart/form-data"
+                else:
+                    # Default to JSON for other body parameters
+                    content_type = "application/json"
+            else:
+                # Default to JSON when no body params
+                content_type = "application/json"
+
+        # Handle JSON content
+        if content_type.startswith("application/json"):
             try:
                 return app.current_event.json_body
             except json.JSONDecodeError as e:
@@ -301,7 +325,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             parsed = parse_qs(body, keep_blank_values=True)
 
             # Convert list values to single values where appropriate
-            result = {}
+            result: dict[str, Any] = {}
             for key, values in parsed.items():
                 if len(values) == 1:
                     result[key] = values[0]
