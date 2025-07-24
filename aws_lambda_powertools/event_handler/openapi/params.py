@@ -737,9 +737,9 @@ class Body(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class _Form(Body):
+class Form(Body):
     """
-    A class used internally to represent a form parameter in a path operation.
+    A class used to represent a form parameter in a path operation.
     """
 
     def __init__(
@@ -809,9 +809,9 @@ class _Form(Body):
         )
 
 
-class _File(_Form):
+class File(Form):
     """
-    A class used internally to represent a file parameter in a path operation.
+    A class used to represent a file parameter in a path operation.
     """
 
     def __init__(
@@ -1129,9 +1129,3 @@ def _create_model_field(
         required=field_info.default in (Required, Undefined),
         field_info=field_info,
     )
-
-
-# Public type aliases for form and file parameters
-# Use Annotated types to work properly with Pydantic
-File = Annotated[bytes, _File()]
-Form = Annotated[str, _Form()]

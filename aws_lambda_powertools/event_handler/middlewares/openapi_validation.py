@@ -5,6 +5,7 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
+from urllib.parse import parse_qs
 
 from pydantic import BaseModel
 
@@ -246,11 +247,13 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
     def _get_body(self, app: EventHandlerInstance) -> dict[str, Any]:
         """
-        Get the request body from the event, and parse it as JSON.
+        Get the request body from the event, and parse it according to content type.
         """
 
-        content_type = app.current_event.headers.get("content-type")
-        if not content_type or content_type.strip().startswith("application/json"):
+        content_type = app.current_event.headers.get("content-type", "").strip()
+
+        # Handle JSON content (default)
+        if not content_type or content_type.startswith("application/json"):
             try:
                 return app.current_event.json_body
             except json.JSONDecodeError as e:
@@ -266,8 +269,154 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     ],
                     body=e.doc,
                 ) from e
+
+        # Handle URL-encoded form data
+        elif content_type.startswith("application/x-www-form-urlencoded"):
+            return self._parse_form_data(app)
+
+        # Handle multipart form data (for file uploads)
+        elif content_type.startswith("multipart/form-data"):
+            return self._parse_multipart_data(app)
+
         else:
-            raise NotImplementedError("Only JSON body is supported")
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "content_type_invalid",
+                        "loc": ("body",),
+                        "msg": f"Unsupported content type: {content_type}",
+                        "input": {},
+                    },
+                ],
+            )
+
+    def _parse_form_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse URL-encoded form data from the request body."""
+        try:
+            body = app.current_event.decoded_body or ""
+            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
+            parsed = parse_qs(body, keep_blank_values=True)
+
+            # Convert list values to single values where appropriate
+            result = {}
+            for key, values in parsed.items():
+                if len(values) == 1:
+                    result[key] = values[0]
+                else:
+                    result[key] = values  # Keep as list for multiple values
+
+            return result
+
+        except Exception as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "form_invalid",
+                        "loc": ("body",),
+                        "msg": "Form data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
+
+    def _parse_multipart_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse multipart form data from the request body."""
+        try:
+            content_type = app.current_event.headers.get("content-type", "")
+            body = app.current_event.decoded_body or ""
+
+            # Extract boundary from content-type header
+            boundary = self._extract_boundary(content_type)
+            if not boundary:
+                msg = "No boundary found in multipart content-type"
+                raise ValueError(msg)
+
+            # Split the body by boundary and parse each part
+            parts = body.split(f"--{boundary}")
+            result = {}
+
+            for raw_part in parts:
+                part = raw_part.strip()
+                if not part or part == "--":
+                    continue
+
+                field_name, content = self._parse_multipart_part(part)
+                if field_name:
+                    result[field_name] = content
+
+            return result
+
+        except Exception as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "multipart_invalid",
+                        "loc": ("body",),
+                        "msg": "Multipart data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
+
+    def _extract_boundary(self, content_type: str) -> str | None:
+        """Extract boundary from multipart content-type header."""
+        if "boundary=" in content_type:
+            return content_type.split("boundary=")[1].split(";")[0].strip()
+        return None
+
+    def _parse_multipart_part(self, part: str) -> tuple[str | None, Any]:
+        """Parse a single multipart section and return field name and content."""
+        # Split headers from content
+        if "\r\n\r\n" in part:
+            headers_section, content = part.split("\r\n\r\n", 1)
+        elif "\n\n" in part:
+            headers_section, content = part.split("\n\n", 1)
+        else:
+            return None, None
+
+        # Parse headers to find field name
+        headers = {}
+        for header_line in headers_section.split("\n"):
+            if ":" in header_line:
+                key, value = header_line.split(":", 1)
+                headers[key.strip().lower()] = value.strip()
+
+        # Extract field name from Content-Disposition header
+        content_disposition = headers.get("content-disposition", "")
+        field_name = self._extract_field_name(content_disposition)
+
+        if not field_name:
+            return None, None
+
+        # Handle file vs text field
+        if "filename=" in content_disposition:
+            # This is a file upload - convert to bytes
+            content = content.rstrip("\r\n")
+            return field_name, content.encode() if isinstance(content, str) else content
+        else:
+            # This is a text field - keep as string
+            return field_name, content.rstrip("\r\n")
+
+    def _extract_field_name(self, content_disposition: str) -> str | None:
+        """Extract field name from Content-Disposition header."""
+        if "name=" not in content_disposition:
+            return None
+
+        # Handle both quoted and unquoted names
+        if 'name="' in content_disposition:
+            name_start = content_disposition.find('name="') + 6
+            name_end = content_disposition.find('"', name_start)
+            return content_disposition[name_start:name_end]
+        elif "name=" in content_disposition:
+            name_start = content_disposition.find("name=") + 5
+            name_end = content_disposition.find(";", name_start)
+            if name_end == -1:
+                name_end = len(content_disposition)
+            return content_disposition[name_start:name_end].strip()
+
+        return None
 
 
 def _request_params_to_args(

@@ -14,12 +14,12 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    File,
+    Form,
     Header,
     Param,
     ParamTypes,
     Query,
-    _File,
-    _Form,
     analyze_param,
     create_response_field,
     get_flat_dependant,
@@ -367,10 +367,10 @@ def get_body_field_info(
     if not required:
         body_field_info_kwargs["default"] = None
 
-    if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
+    if any(isinstance(f.field_info, File) for f in flat_dependant.body_params):
         body_field_info = Body
         body_field_info_kwargs["media_type"] = "multipart/form-data"
-    elif any(isinstance(f.field_info, _Form) for f in flat_dependant.body_params):
+    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
         body_field_info = Body
         body_field_info_kwargs["media_type"] = "application/x-www-form-urlencoded"
     else:

@@ -653,14 +653,14 @@ def test_openapi_with_openapi_example():
 
 def test_openapi_file_upload_parameters():
     """Test File parameter generates correct OpenAPI schema for file uploads."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File, _Form
+    from aws_lambda_powertools.event_handler.openapi.params import File, Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/upload")
     def upload_file(
-        file: Annotated[bytes, _File(description="File to upload")],
-        filename: Annotated[str, _Form(description="Name of the file")],
+        file: Annotated[bytes, File(description="File to upload")],
+        filename: Annotated[str, Form(description="Name of the file")],
     ):
         return {"message": f"Uploaded {filename}", "size": len(file)}
 
@@ -718,14 +718,14 @@ def test_openapi_file_upload_parameters():
 
 def test_openapi_form_only_parameters():
     """Test Form parameters generate application/x-www-form-urlencoded content type."""
-    from aws_lambda_powertools.event_handler.openapi.params import _Form
+    from aws_lambda_powertools.event_handler.openapi.params import Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form-data")
     def create_form_data(
-        name: Annotated[str, _Form(description="User name")],
-        email: Annotated[str, _Form(description="User email")] = "test@example.com",
+        name: Annotated[str, Form(description="User name")],
+        email: Annotated[str, Form(description="User email")] = "test@example.com",
     ):
         return {"name": name, "email": email}
 
@@ -778,15 +778,15 @@ def test_openapi_form_only_parameters():
 
 def test_openapi_mixed_file_and_form_parameters():
     """Test mixed File and Form parameters use multipart/form-data."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File, _Form
+    from aws_lambda_powertools.event_handler.openapi.params import File, Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/mixed")
     def upload_with_metadata(
-        file: Annotated[bytes, _File(description="Document to upload")],
-        title: Annotated[str, _Form(description="Document title")],
-        category: Annotated[str, _Form(description="Document category")] = "general",
+        file: Annotated[bytes, File(description="Document to upload")],
+        title: Annotated[str, Form(description="Document title")],
+        category: Annotated[str, Form(description="Document category")] = "general",
     ):
         return {"title": title, "category": category, "file_size": len(file)}
 
@@ -826,14 +826,14 @@ def test_openapi_mixed_file_and_form_parameters():
 
 def test_openapi_multiple_file_uploads():
     """Test multiple file uploads with List[bytes] type."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File, _Form
+    from aws_lambda_powertools.event_handler.openapi.params import File, Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/upload-multiple")
     def upload_multiple_files(
-        files: Annotated[List[bytes], _File(description="Files to upload")],
-        description: Annotated[str, _Form(description="Upload description")],
+        files: Annotated[List[bytes], File(description="Files to upload")],
+        description: Annotated[str, Form(description="Upload description")],
     ):
         return {
             "message": f"Uploaded {len(files)} files",
@@ -883,8 +883,8 @@ def test_openapi_public_file_form_exports():
 
     @app.post("/public-api")
     def upload_with_public_types(
-        file: File,  # Using the public export
-        name: Form,  # Using the public export
+        file: Annotated[bytes, File()],  # Using the public export as annotation
+        name: Annotated[str, Form()],  # Using the public export as annotation
     ):
         return {"status": "uploaded"}
 
@@ -917,7 +917,7 @@ def test_openapi_public_file_form_exports():
 
 def test_openapi_file_parameter_with_custom_schema_extra():
     """Test File parameter with custom json_schema_extra that gets merged with format: binary."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File
+    from aws_lambda_powertools.event_handler.openapi.params import File
 
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -925,8 +925,9 @@ def test_openapi_file_parameter_with_custom_schema_extra():
     def upload_with_custom_schema(
         file: Annotated[
             bytes,
-            _File(
-                description="Custom file upload", json_schema_extra={"example": "file_content", "title": "Custom File"}
+            File(
+                description="Custom file upload",
+                json_schema_extra={"example": "file_content", "title": "Custom File"},
             ),
         ],
     ):
@@ -960,14 +961,13 @@ def test_openapi_file_parameter_with_custom_schema_extra():
 
 def test_openapi_body_param_with_conflicting_field_info():
     """Test error condition when both FieldInfo annotation and value are provided."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File
-    import pytest
+    from aws_lambda_powertools.event_handler.openapi.params import File
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     # This should work fine - using FieldInfo as annotation
     @app.post("/upload-normal")
-    def upload_normal(file: Annotated[bytes, _File(description="File to upload")]):
+    def upload_normal(file: Annotated[bytes, File(description="File to upload")]):
         return {"status": "uploaded"}
 
     # Test that the normal case works
@@ -977,8 +977,9 @@ def test_openapi_body_param_with_conflicting_field_info():
 
 def test_openapi_mixed_body_media_types():
     """Test mixed Body parameters with different media types."""
-    from aws_lambda_powertools.event_handler.openapi.params import Body
     from pydantic import BaseModel
+
+    from aws_lambda_powertools.event_handler.openapi.params import Body
 
     class UserData(BaseModel):
         name: str
@@ -1004,16 +1005,17 @@ def test_openapi_mixed_body_media_types():
 
 def test_openapi_form_parameter_edge_cases():
     """Test Form parameters with various edge cases."""
-    from aws_lambda_powertools.event_handler.openapi.params import _Form
     from typing import Optional
+
+    from aws_lambda_powertools.event_handler.openapi.params import Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form-edge-cases")
     def form_edge_cases(
-        required_field: Annotated[str, _Form(description="Required field")],
-        optional_field: Annotated[Optional[str], _Form(description="Optional field")] = None,
-        field_with_default: Annotated[str, _Form(description="Field with default")] = "default_value",
+        required_field: Annotated[str, Form(description="Required field")],
+        optional_field: Annotated[Optional[str], Form(description="Optional field")] = None,
+        field_with_default: Annotated[str, Form(description="Field with default")] = "default_value",
     ):
         return {"required": required_field, "optional": optional_field, "default": field_with_default}
 
@@ -1049,15 +1051,16 @@ def test_openapi_form_parameter_edge_cases():
 
 def test_openapi_file_with_list_type_edge_case():
     """Test File parameter with nested List types for edge case coverage."""
-    from aws_lambda_powertools.event_handler.openapi.params import _File, _Form
     from typing import List, Optional
+
+    from aws_lambda_powertools.event_handler.openapi.params import File, Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/upload-complex")
     def upload_complex_types(
-        files: Annotated[List[bytes], _File(description="Multiple files")],
-        metadata: Annotated[Optional[str], _Form(description="Optional metadata")] = None,
+        files: Annotated[List[bytes], File(description="Multiple files")],
+        metadata: Annotated[Optional[str], Form(description="Optional metadata")] = None,
     ):
         total_size = sum(len(file) for file in files) if files else 0
         return {"file_count": len(files) if files else 0, "total_size": total_size, "metadata": metadata}
