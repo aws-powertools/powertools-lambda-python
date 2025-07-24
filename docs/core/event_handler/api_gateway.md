@@ -538,26 +538,7 @@ In the following example, we use `File` and `Form` OpenAPI types to handle file 
 === "handling_file_uploads.py"
 
     ```python hl_lines="5 9-10 18-19"
-    from typing import Annotated
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload")
-    def upload_file(
-        file: Annotated[bytes, File(description="File to upload")],
-        filename: Annotated[str, Form(description="Name of the file")]
-    ):
-        # file contains the binary data of the uploaded file
-        # filename contains the form field value
-        return {
-            "message": f"Uploaded {filename}",
-            "size": len(file)
-        }
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    --8<-- "examples/event_handler_rest/src/handling_file_uploads.py"
     ```
 
     1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
@@ -569,22 +550,7 @@ In the following example, we use `File` and `Form` OpenAPI types to handle file 
     You can handle multiple file uploads by declaring parameters as lists:
 
     ```python hl_lines="9-10"
-    from typing import Annotated, List
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload-multiple")
-    def upload_multiple_files(
-        files: Annotated[List[bytes], File(description="Files to upload")],
-        description: Annotated[str, Form(description="Upload description")]
-    ):
-        return {
-            "message": f"Uploaded {len(files)} files",
-            "description": description,
-            "total_size": sum(len(file) for file in files)
-        }
+    --8<-- "examples/event_handler_rest/src/handling_multiple_file_uploads.py"
     ```
 
     1. `files` will be a list containing the binary data of each uploaded file
