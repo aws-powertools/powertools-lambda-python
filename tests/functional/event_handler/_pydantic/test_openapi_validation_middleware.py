@@ -1525,36 +1525,36 @@ def test_custom_route_response_validation_error_bad_http_code(response_validatio
 def test_infer_content_type_with_file_params(gw_event):
     """Test _infer_content_type method when route has File/Form params"""
     from aws_lambda_powertools.event_handler.openapi.params import File, Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(
         file: Annotated[bytes, File(description="File to upload")],
-        form_field: Annotated[str, Form(description="Form field")]
+        form_field: Annotated[str, Form(description="Form field")],
     ):
         return {"status": "uploaded"}
-    
+
     # Create event with no content-type header
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
     gw_event["headers"].pop("content-type", None)
     gw_event["body"] = "test content"
-    
+
     # Mock multipart form data
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
+        "--test123\r\n"
         'Content-Disposition: form-data; name="file"; filename="test.txt"\r\n'
-        'Content-Type: text/plain\r\n\r\n'
-        'file content\r\n'
-        '--test123\r\n'
+        "Content-Type: text/plain\r\n\r\n"
+        "file content\r\n"
+        "--test123\r\n"
         'Content-Disposition: form-data; name="form_field"\r\n\r\n'
-        'form value\r\n'
-        '--test123--'
+        "form value\r\n"
+        "--test123--"
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1562,20 +1562,20 @@ def test_infer_content_type_with_file_params(gw_event):
 def test_infer_content_type_without_file_params(gw_event):
     """Test _infer_content_type method when route has no File/Form params"""
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     class RequestModel(BaseModel):
         name: str
-        
+
     @app.post("/data")
     def post_data(data: RequestModel):
         return {"received": data.name}
-    
+
     # Remove content-type header to trigger inference
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/data"
     gw_event["headers"].pop("content-type", None)
     gw_event["body"] = json.dumps({"name": "test"})
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1583,16 +1583,16 @@ def test_infer_content_type_without_file_params(gw_event):
 def test_infer_content_type_no_body_params(gw_event):
     """Test _infer_content_type method when route has no body params"""
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/no-body")
     def post_no_body():
         return {"status": "ok"}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/no-body"
     gw_event["headers"].pop("content-type", None)
     gw_event["body"] = ""
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1600,19 +1600,19 @@ def test_infer_content_type_no_body_params(gw_event):
 def test_parse_json_data_invalid_json(gw_event):
     """Test _parse_json_data method with invalid JSON"""
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     class RequestModel(BaseModel):
         name: str
-        
+
     @app.post("/data")
     def post_data(data: RequestModel):
         return {"received": data.name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/data"
     gw_event["headers"]["content-type"] = "application/json"
     gw_event["body"] = "invalid json {"  # Invalid JSON
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422
     assert "json_invalid" in result["body"]
@@ -1621,21 +1621,18 @@ def test_parse_json_data_invalid_json(gw_event):
 def test_parse_form_data_url_encoded(gw_event):
     """Test _parse_form_data method with URL-encoded form data"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
-    def post_form(
-        name: Annotated[str, Form()], 
-        tags: Annotated[list[str], Form()]
-    ):
+    def post_form(name: Annotated[str, Form()], tags: Annotated[list[str], Form()]):
         return {"name": name, "tags": tags}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
     gw_event["body"] = "name=test&tags=tag1&tags=tag2"
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1643,18 +1640,18 @@ def test_parse_form_data_url_encoded(gw_event):
 def test_parse_form_data_empty_body(gw_event):
     """Test _parse_form_data method with empty body"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()] = "default"):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
     gw_event["body"] = ""
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1662,18 +1659,18 @@ def test_parse_form_data_empty_body(gw_event):
 def test_parse_multipart_data_no_boundary(gw_event):
     """Test _parse_multipart_data method with no boundary in content-type"""
     from aws_lambda_powertools.event_handler.openapi.params import File
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[bytes, File()]):
         return {"status": "uploaded"}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
     gw_event["headers"]["content-type"] = "multipart/form-data"  # No boundary
     gw_event["body"] = "test content"
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422
     assert "multipart_invalid" in result["body"]
@@ -1682,18 +1679,18 @@ def test_parse_multipart_data_no_boundary(gw_event):
 def test_parse_multipart_data_invalid_format(gw_event):
     """Test _parse_multipart_data method with invalid multipart format"""
     from aws_lambda_powertools.event_handler.openapi.params import File
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[bytes, File()]):
         return {"status": "uploaded"}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     gw_event["body"] = "invalid multipart content"
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422  # Should return validation error for missing required field
 
@@ -1701,25 +1698,25 @@ def test_parse_multipart_data_invalid_format(gw_event):
 def test_parse_multipart_part_with_filename(gw_event):
     """Test _parse_multipart_part method with file upload (filename present)"""
     from aws_lambda_powertools.event_handler.openapi.params import File
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[bytes, File()]):
         return {"status": "uploaded", "file_size": len(file) if file else 0}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
+        "--test123\r\n"
         'Content-Disposition: form-data; name="file"; filename="test.txt"\r\n'
-        'Content-Type: text/plain\r\n\r\n'
-        'file content here\r\n'
-        '--test123--'
+        "Content-Type: text/plain\r\n\r\n"
+        "file content here\r\n"
+        "--test123--"
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1727,24 +1724,19 @@ def test_parse_multipart_part_with_filename(gw_event):
 def test_parse_multipart_part_text_field(gw_event):
     """Test _parse_multipart_part method with text field (no filename)"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
-    boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data; name="name"\r\n\r\n'
-        'test value\r\n'
-        '--test123--'
-    )
+    boundary_body = '--test123\r\nContent-Disposition: form-data; name="name"\r\n\r\ntest value\r\n--test123--'
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1752,24 +1744,19 @@ def test_parse_multipart_part_text_field(gw_event):
 def test_extract_field_name_quoted(gw_event):
     """Test _extract_field_name method with quoted field name"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(field: Annotated[str, Form()]):
         return {"field": field}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
-    boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data; name="field"\r\n\r\n'
-        'value\r\n'
-        '--test123--'
-    )
+    boundary_body = '--test123\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--test123--'
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1777,24 +1764,19 @@ def test_extract_field_name_quoted(gw_event):
 def test_extract_field_name_unquoted(gw_event):
     """Test _extract_field_name method with unquoted field name"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(field: Annotated[str, Form()]):
         return {"field": field}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
-    boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data; name=field\r\n\r\n'
-        'value\r\n'
-        '--test123--'
-    )
+    boundary_body = "--test123\r\nContent-Disposition: form-data; name=field\r\n\r\nvalue\r\n--test123--"
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1802,19 +1784,19 @@ def test_extract_field_name_unquoted(gw_event):
 def test_unsupported_content_type(gw_event):
     """Test _get_body method with unsupported content type"""
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     class RequestModel(BaseModel):
         name: str
-        
+
     @app.post("/data")
     def post_data(data: RequestModel):
         return {"received": data.name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/data"
     gw_event["headers"]["content-type"] = "application/xml"  # Unsupported
     gw_event["body"] = "<xml>test</xml>"
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422
     assert "content_type_invalid" in result["body"]
@@ -1823,25 +1805,20 @@ def test_unsupported_content_type(gw_event):
 def test_multipart_with_different_separators(gw_event):
     """Test multipart parsing with different line separators"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     # Using \n\n instead of \r\n\r\n
-    boundary_body = (
-        '--test123\n'
-        'Content-Disposition: form-data; name="name"\n\n'
-        'test value\n'
-        '--test123--'
-    )
+    boundary_body = '--test123\nContent-Disposition: form-data; name="name"\n\ntest value\n--test123--'
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1849,19 +1826,19 @@ def test_multipart_with_different_separators(gw_event):
 def test_form_data_parsing_exception(gw_event):
     """Test _parse_form_data method exception handling"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
     # Set body to None to trigger exception handling
     gw_event["body"] = None
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422
     # With None body, it becomes empty string and missing field validation triggers
@@ -1871,24 +1848,24 @@ def test_form_data_parsing_exception(gw_event):
 def test_multipart_part_no_content_disposition(gw_event):
     """Test _parse_multipart_part method with missing content-disposition"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
-        'Some-Other-Header: value\r\n\r\n'  # No Content-Disposition header
-        'test value\r\n'
-        '--test123--'
+        "--test123\r\n"
+        "Some-Other-Header: value\r\n\r\n"  # No Content-Disposition header
+        "test value\r\n"
+        "--test123--"
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422  # Should fail validation due to missing field
 
@@ -1896,24 +1873,24 @@ def test_multipart_part_no_content_disposition(gw_event):
 def test_multipart_part_invalid_content_disposition(gw_event):
     """Test _parse_multipart_part method with invalid content-disposition format"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data\r\n\r\n'  # Missing name parameter
-        'test value\r\n'
-        '--test123--'
+        "--test123\r\n"
+        "Content-Disposition: form-data\r\n\r\n"  # Missing name parameter
+        "test value\r\n"
+        "--test123--"
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 422  # Should fail validation due to missing field
 
@@ -1921,25 +1898,25 @@ def test_multipart_part_invalid_content_disposition(gw_event):
 def test_multipart_part_malformed_headers(gw_event):
     """Test _parse_multipart_part method with malformed headers"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(name: Annotated[str, Form()]):
         return {"name": name}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
-        'Malformed header without colon\r\n'
+        "--test123\r\n"
+        "Malformed header without colon\r\n"
         'Content-Disposition: form-data; name="name"\r\n\r\n'
-        'test value\r\n'
-        '--test123--'
+        "test value\r\n"
+        "--test123--"
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200  # Should work despite malformed header
 
@@ -1947,26 +1924,23 @@ def test_multipart_part_malformed_headers(gw_event):
 def test_extract_boundary_edge_cases(gw_event):
     """Test _extract_boundary method with edge cases"""
     from aws_lambda_powertools.event_handler.openapi.params import File
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[bytes, File()]):
         return {"status": "uploaded"}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
-    
+
     # Test boundary with additional parameters
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123; charset=utf-8"
     boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data; name="file"; filename="test.txt"\r\n\r\n'
-        'content\r\n'
-        '--test123--'
+        '--test123\r\nContent-Disposition: form-data; name="file"; filename="test.txt"\r\n\r\ncontent\r\n--test123--'
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1974,24 +1948,19 @@ def test_extract_boundary_edge_cases(gw_event):
 def test_extract_field_name_with_semicolon(gw_event):
     """Test _extract_field_name method with semicolon in unquoted name"""
     from aws_lambda_powertools.event_handler.openapi.params import Form
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/form")
     def post_form(field: Annotated[str, Form()]):
         return {"field": field}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
-    boundary_body = (
-        '--test123\r\n'
-        'Content-Disposition: form-data; name=field; charset=utf-8\r\n\r\n'
-        'value\r\n'
-        '--test123--'
-    )
+    boundary_body = "--test123\r\nContent-Disposition: form-data; name=field; charset=utf-8\r\n\r\nvalue\r\n--test123--"
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -1999,16 +1968,16 @@ def test_extract_field_name_with_semicolon(gw_event):
 def test_route_without_body_params_inference(gw_event):
     """Test content type inference when route has no body params but has a route context"""
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/no-body")
     def post_no_body():
         return {"status": "ok"}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/no-body"
     gw_event["headers"].pop("content-type", None)
     gw_event["body"] = ""
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
 
@@ -2016,21 +1985,21 @@ def test_route_without_body_params_inference(gw_event):
 def test_multipart_optional_file_param(gw_event):
     """Test multipart parsing with optional file parameter"""
     from aws_lambda_powertools.event_handler.openapi.params import File
-    
+
     app = APIGatewayRestResolver(enable_validation=True)
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[bytes | None, File()] = None):
         return {"status": "uploaded", "has_file": file is not None}
-    
+
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/upload"
     gw_event["headers"]["content-type"] = "multipart/form-data; boundary=test123"
     boundary_body = (
-        '--test123\r\n'
-        '--test123--'  # Empty multipart
+        "--test123\r\n"
+        "--test123--"  # Empty multipart
     )
     gw_event["body"] = boundary_body
-    
+
     result = app(gw_event, {})
     assert result["statusCode"] == 200
