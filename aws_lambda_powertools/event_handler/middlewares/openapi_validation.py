@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 CONTENT_DISPOSITION_NAME_PARAM = "name="
+APPLICATION_JSON_CONTENT_TYPE = "application/json"
 
 
 class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
@@ -252,50 +253,15 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
         Get the request body from the event, and parse it according to content type.
         """
-
         content_type = app.current_event.headers.get("content-type", "").strip()
 
         # If no content-type is provided, try to infer from route parameters
         if not content_type:
-            route = app.context.get("_route")
-            if route and route.dependant.body_params:
-                # Check if any body params are File or Form types
-                from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-                has_file_params = any(
-                    isinstance(getattr(param.field_info, "__class__", None), type)
-                    and issubclass(param.field_info.__class__, (File, Form))
-                    for param in route.dependant.body_params
-                    if hasattr(param, "field_info")
-                )
-
-                if has_file_params:
-                    # Default to multipart for File/Form parameters
-                    content_type = "multipart/form-data"
-                else:
-                    # Default to JSON for other body parameters
-                    content_type = "application/json"
-            else:
-                # Default to JSON when no body params
-                content_type = "application/json"
+            content_type = self._infer_content_type(app)
 
         # Handle JSON content
-        if content_type.startswith("application/json"):
-            try:
-                return app.current_event.json_body
-            except json.JSONDecodeError as e:
-                raise RequestValidationError(
-                    [
-                        {
-                            "type": "json_invalid",
-                            "loc": ("body", e.pos),
-                            "msg": "JSON decode error",
-                            "input": {},
-                            "ctx": {"error": e.msg},
-                        },
-                    ],
-                    body=e.doc,
-                ) from e
+        if content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
+            return self._parse_json_data(app)
 
         # Handle URL-encoded form data
         elif content_type.startswith("application/x-www-form-urlencoded"):
@@ -316,6 +282,43 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     },
                 ],
             )
+
+    def _infer_content_type(self, app: EventHandlerInstance) -> str:
+        """Infer content type from route parameters when not explicitly provided."""
+        route = app.context.get("_route")
+        if route and route.dependant.body_params:
+            # Check if any body params are File or Form types
+            from aws_lambda_powertools.event_handler.openapi.params import File, Form
+
+            has_file_params = any(
+                isinstance(getattr(param.field_info, "__class__", None), type)
+                and issubclass(param.field_info.__class__, (File, Form))
+                for param in route.dependant.body_params
+                if hasattr(param, "field_info")
+            )
+
+            return "multipart/form-data" if has_file_params else APPLICATION_JSON_CONTENT_TYPE
+
+        # Default to JSON when no body params
+        return APPLICATION_JSON_CONTENT_TYPE
+
+    def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse JSON data from the request body."""
+        try:
+            return app.current_event.json_body
+        except json.JSONDecodeError as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "json_invalid",
+                        "loc": ("body", e.pos),
+                        "msg": "JSON decode error",
+                        "input": {},
+                        "ctx": {"error": e.msg},
+                    },
+                ],
+                body=e.doc,
+            ) from e
 
     def _parse_form_data(self, app: EventHandlerInstance) -> dict[str, Any]:
         """Parse URL-encoded form data from the request body."""
