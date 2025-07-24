@@ -9,12 +9,12 @@ app = APIGatewayRestResolver(enable_validation=True)
 @app.post("/upload-multiple")
 def upload_multiple_files(
     files: Annotated[List[bytes], File(description="Files to upload")],
-    description: Annotated[str, Form(description="Upload description")]
+    description: Annotated[str, Form(description="Upload description")],
 ):
     return {
         "message": f"Uploaded {len(files)} files",
         "description": description,
-        "total_size": sum(len(file) for file in files)
+        "total_size": sum(len(file) for file in files),
     }
 
 
