@@ -348,7 +348,7 @@ def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
         alias="body",
         field_info=body_field_info(**body_field_info_kwargs),
     )
-    
+
     return final_field
 
 

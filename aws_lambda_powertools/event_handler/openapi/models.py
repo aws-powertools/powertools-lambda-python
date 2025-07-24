@@ -481,8 +481,6 @@ class OpenAPI(OpenAPIExtensions):
     model_config = MODEL_CONFIG_ALLOW
 
 
-
-
 model_rebuild(Schema)
 model_rebuild(Operation)
 model_rebuild(Encoding)
