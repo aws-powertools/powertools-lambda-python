@@ -14,12 +14,12 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    Form,
     Header,
     Param,
     ParamTypes,
     Query,
     _File,
-    _Form,
     analyze_param,
     create_response_field,
     get_flat_dependant,
@@ -348,6 +348,7 @@ def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
         alias="body",
         field_info=body_field_info(**body_field_info_kwargs),
     )
+
     return final_field
 
 
@@ -369,9 +370,9 @@ def get_body_field_info(
     if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
         # MAINTENANCE: body_field_info: type[Body] = _File
         raise NotImplementedError("_File fields are not supported in request bodies")
-    elif any(isinstance(f.field_info, _Form) for f in flat_dependant.body_params):
-        # MAINTENANCE: body_field_info: type[Body] = _Form
-        raise NotImplementedError("_Form fields are not supported in request bodies")
+    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
+        body_field_info = Body
+        body_field_info_kwargs["media_type"] = "application/x-www-form-urlencoded"
     else:
         body_field_info = Body
 

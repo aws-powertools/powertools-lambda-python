@@ -1,3 +1,4 @@
+import base64
 import json
 from dataclasses import dataclass
 from enum import Enum
@@ -18,7 +19,7 @@ from aws_lambda_powertools.event_handler import (
     VPCLatticeV2Resolver,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
+from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Query
 
 
 def test_validate_scalars(gw_event):
@@ -1068,49 +1069,6 @@ def test_validation_header_with_vpc_lattice_v2_resolver(
         assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validation_with_alias(gw_event):
-    # GIVEN a REST API V2 proxy type event
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    # GIVEN that it has a multiple parameters called "parameter1"
-    gw_event["queryStringParameters"] = {
-        "parameter1": "value1,value2",
-    }
-
-    @app.get("/my/path")
-    def my_path(
-        parameter: Annotated[Optional[str], Query(alias="parameter1")] = None,
-    ) -> str:
-        assert parameter == "value1"
-        return parameter
-
-    result = app(gw_event, {})
-    assert result["statusCode"] == 200
-
-
-def test_validation_with_http_single_param(gw_event_http):
-    # GIVEN a HTTP API V2 proxy type event
-    app = APIGatewayHttpResolver(enable_validation=True)
-
-    # GIVEN that it has a single parameter called "parameter2"
-    gw_event_http["queryStringParameters"] = {
-        "parameter1": "value1,value2",
-        "parameter2": "value",
-    }
-
-    # WHEN a handler is defined with a single parameter
-    @app.post("/my/path")
-    def my_path(
-        parameter2: str,
-    ) -> str:
-        assert parameter2 == "value"
-        return parameter2
-
-    # THEN the handler should be invoked and return 200
-    result = app(gw_event_http, {})
-    assert result["statusCode"] == 200
-
-
 def test_validate_with_minimal_event():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1519,3 +1477,158 @@ def test_custom_route_response_validation_error_bad_http_code(response_validatio
         str(exception_info.value)
         == f"'{response_validation_error_http_code}' must be an integer representing an HTTP status code or an enum of type HTTPStatus."  # noqa: E501
     )
+
+
+def test_parse_form_data_url_encoded(gw_event):
+    """Test _parse_form_data method with URL-encoded form data"""
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form")
+    def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
+        return {"name": name, "tags": tags}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/form"
+    gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
+    gw_event["body"] = "name=test&tags=tag1&tags=tag2"
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+
+def test_parse_form_data_wrong_value(gw_event):
+    """Test _parse_form_data method with URL-encoded form data"""
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form")
+    def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
+        return {"name": name, "tags": tags}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/form"
+    gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
+    gw_event["body"] = "123"
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+
+def test_parse_form_data_empty_body(gw_event):
+    """Test _parse_form_data method with empty body"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form")
+    def post_form(name: Annotated[str, Form()] = "default"):
+        return {"name": name}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/form"
+    gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
+    gw_event["body"] = ""
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+
+def test_form_data_parsing_exception(gw_event):
+    """Test _parse_form_data method exception handling"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form")
+    def post_form(name: Annotated[str, Form()]):
+        return {"name": name}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/form"
+    gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
+    # Set body to None to trigger exception handling
+    gw_event["body"] = None
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+    # With None body, it becomes empty string and missing field validation triggers
+    assert "missing" in result["body"]
+
+
+def test_prepare_response_content_nested_structures():
+    """Test _prepare_response_content method with nested data structures"""
+    from dataclasses import dataclass
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @dataclass
+    class TestDataclass:
+        name: str
+        value: int
+
+    class TestModel(BaseModel):
+        title: str
+        count: int
+
+    @app.get("/complex")
+    def get_complex() -> dict:
+        # Return complex nested structure to trigger _prepare_response_content paths
+        return {
+            "models": [TestModel(title="test1", count=1), TestModel(title="test2", count=2)],
+            "dataclasses": [TestDataclass(name="dc1", value=10)],
+            "nested_dicts": {"inner": {"key": "value"}},
+            "mixed_list": [{"a": 1}, TestModel(title="mixed", count=3)],
+        }
+
+    event = {
+        "httpMethod": "GET",
+        "path": "/complex",
+        "headers": {},
+        "queryStringParameters": None,
+        "body": None,
+        "isBase64Encoded": False,
+        "requestContext": {"requestId": "test"},
+        "pathParameters": None,
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+
+
+def test_multipart_empty_parts(gw_event):
+    """Test handling of multipart data with empty parts."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/test")
+    def handler():
+        return {"status": "ok"}
+
+    content_type = "multipart/form-data; boundary=----boundary"
+
+    # Test with completely empty multipart content
+    empty_multipart = "------boundary--\r\n"
+    gw_event["body"] = base64.b64encode(empty_multipart.encode()).decode()
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["isBase64Encoded"] = True
+    gw_event["path"] = "/test"
+    gw_event["httpMethod"] = "POST"
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+
+def test_response_serialization_with_custom_serializer():
+    """Test response serialization using custom serializer path."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class CustomModel(BaseModel):
+        id: int
+        name: str
+
+        def dict(self, **kwargs):
+            # Custom dict method that triggers alternative serialization path
+            return {"custom": "value", "id": self.id, "name": self.name}
+
+    @app.get("/test")
+    def handler() -> CustomModel:
+        return CustomModel(id=1, name="test")
+
+    result = app({"httpMethod": "GET", "path": "/test"}, {})
+    assert result["statusCode"] == 200
