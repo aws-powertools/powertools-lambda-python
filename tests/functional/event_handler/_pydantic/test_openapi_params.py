@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
+    Form,
     Header,
     Param,
     ParamTypes,
@@ -649,3 +650,129 @@ def test_openapi_with_openapi_example():
     assert parameter.schema_.type == "integer"
     assert parameter.schema_.default == 1
     assert parameter.schema_.title == "Count"
+
+
+def test_openapi_form_only_parameters():
+    """Test Form parameters generate application/x-www-form-urlencoded content type."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form-data")
+    def create_form_data(
+        name: Annotated[str, Form(description="User name")],
+        email: Annotated[str, Form(description="User email")] = "test@example.com",
+    ):
+        return {"name": name, "email": email}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the endpoint is present
+    assert "/form-data" in schema.paths
+
+    post_op = schema.paths["/form-data"].post
+    assert post_op is not None
+
+    # Check request body
+    request_body = post_op.requestBody
+    assert request_body is not None
+
+    # Check content type is application/x-www-form-urlencoded
+    assert "application/x-www-form-urlencoded" in request_body.content
+
+    # Get the schema reference
+    form_content = request_body.content["application/x-www-form-urlencoded"]
+    assert form_content.schema_ is not None
+
+    # Check that it references a component schema
+    schema_ref = form_content.schema_.ref
+    assert schema_ref is not None
+    assert schema_ref.startswith("#/components/schemas/")
+
+    # Get the component schema
+    component_name = schema_ref.split("/")[-1]
+    assert component_name in schema.components.schemas
+
+    component_schema = schema.components.schemas[component_name]
+    properties = component_schema.properties
+
+    # Check form parameters
+    assert "name" in properties
+    name_prop = properties["name"]
+    assert name_prop.type == "string"
+    assert name_prop.description == "User name"
+
+    assert "email" in properties
+    email_prop = properties["email"]
+    assert email_prop.type == "string"
+    assert email_prop.description == "User email"
+    assert email_prop.default == "test@example.com"
+
+    # Check required fields (only name should be required since email has default)
+    assert component_schema.required == ["name"]
+
+
+def test_openapi_mixed_body_media_types():
+    """Test mixed Body parameters with different media types."""
+
+    class UserData(BaseModel):
+        name: str
+        email: str
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/mixed-body")
+    def mixed_body_endpoint(user_data: Annotated[UserData, Body(media_type="application/json")]):
+        return {"status": "created"}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the endpoint uses the specified media type
+    assert "/mixed-body" in schema.paths
+
+    post_op = schema.paths["/mixed-body"].post
+    request_body = post_op.requestBody
+
+    # Should use the specified media type
+    assert "application/json" in request_body.content
+
+
+def test_openapi_form_parameter_edge_cases():
+    """Test Form parameters with various edge cases."""
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/form-edge-cases")
+    def form_edge_cases(
+        required_field: Annotated[str, Form(description="Required field")],
+        optional_field: Annotated[Optional[str], Form(description="Optional field")] = None,
+        field_with_default: Annotated[str, Form(description="Field with default")] = "default_value",
+    ):
+        return {"required": required_field, "optional": optional_field, "default": field_with_default}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the endpoint is present
+    assert "/form-edge-cases" in schema.paths
+
+    post_op = schema.paths["/form-edge-cases"].post
+    request_body = post_op.requestBody
+
+    # Should use application/x-www-form-urlencoded for form-only parameters
+    assert "application/x-www-form-urlencoded" in request_body.content
+
+    # Get the component schema
+    form_content = request_body.content["application/x-www-form-urlencoded"]
+    schema_ref = form_content.schema_.ref
+    component_name = schema_ref.split("/")[-1]
+    component_schema = schema.components.schemas[component_name]
+
+    properties = component_schema.properties
+
+    # Check all fields are present
+    assert "required_field" in properties
+    assert "optional_field" in properties
+    assert "field_with_default" in properties
+
+    # Check required vs optional handling
+    assert "required_field" in component_schema.required
+    assert "optional_field" not in component_schema.required  # Optional
+    assert "field_with_default" not in component_schema.required  # Has default

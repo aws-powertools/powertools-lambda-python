@@ -523,6 +523,18 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
+#### Handling form data
+
+!!! info "You must set `enable_validation=True` to handle file uploads and form data via type annotation."
+
+You can use the `Form` type to tell the Event Handler that a parameter expects file upload or form data. This automatically sets the correct OpenAPI schema for `application/x-www-form-urlencoded` requests.
+
+=== "working_with_form_data.py"
+
+    ```python hl_lines="4 11 12"
+    --8<-- "examples/event_handler_rest/src/working_with_form_data.py"
+    ```
+
 #### Supported types for response serialization
 
 With data validation enabled, we natively support serializing the following data types to JSON:

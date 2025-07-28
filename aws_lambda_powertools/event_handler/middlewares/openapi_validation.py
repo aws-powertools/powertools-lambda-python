@@ -5,6 +5,7 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
+from urllib.parse import parse_qs
 
 from pydantic import BaseModel
 
@@ -29,6 +30,11 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
 logger = logging.getLogger(__name__)
+
+# Constants
+CONTENT_DISPOSITION_NAME_PARAM = "name="
+APPLICATION_JSON_CONTENT_TYPE = "application/json"
+APPLICATION_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded"
 
 
 class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
@@ -246,28 +252,61 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
     def _get_body(self, app: EventHandlerInstance) -> dict[str, Any]:
         """
-        Get the request body from the event, and parse it as JSON.
+        Get the request body from the event, and parse it according to content type.
         """
+        content_type = app.current_event.headers.get("content-type", "").strip()
 
-        content_type = app.current_event.headers.get("content-type")
-        if not content_type or content_type.strip().startswith("application/json"):
-            try:
-                return app.current_event.json_body
-            except json.JSONDecodeError as e:
-                raise RequestValidationError(
-                    [
-                        {
-                            "type": "json_invalid",
-                            "loc": ("body", e.pos),
-                            "msg": "JSON decode error",
-                            "input": {},
-                            "ctx": {"error": e.msg},
-                        },
-                    ],
-                    body=e.doc,
-                ) from e
+        # Handle JSON content
+        if not content_type or content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
+            return self._parse_json_data(app)
+
+        # Handle URL-encoded form data
+        elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
+            return self._parse_form_data(app)
+
         else:
-            raise NotImplementedError("Only JSON body is supported")
+            raise NotImplementedError("Only JSON body or Form() are supported")
+
+    def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse JSON data from the request body."""
+        try:
+            return app.current_event.json_body
+        except json.JSONDecodeError as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "json_invalid",
+                        "loc": ("body", e.pos),
+                        "msg": "JSON decode error",
+                        "input": {},
+                        "ctx": {"error": e.msg},
+                    },
+                ],
+                body=e.doc,
+            ) from e
+
+    def _parse_form_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse URL-encoded form data from the request body."""
+        try:
+            body = app.current_event.decoded_body or ""
+            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
+            parsed = parse_qs(body, keep_blank_values=True)
+
+            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
+            return result
+
+        except Exception as e:  # pragma: no cover
+            raise RequestValidationError(  # pragma: no cover
+                [
+                    {
+                        "type": "form_invalid",
+                        "loc": ("body",),
+                        "msg": "Form data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
 
 
 def _request_params_to_args(
