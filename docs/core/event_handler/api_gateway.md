@@ -559,8 +559,6 @@ With data validation enabled, we natively support serializing the following data
 !!! warning "Important: Pydantic models are serialized using aliases by default"
     When `enable_validation=True` is set, **all Pydantic models in responses are automatically serialized using `by_alias=True`**. This differs from Pydantic's default behavior (`by_alias=False`).
 
-    This design choice ensures compatibility with HTTP standards where field names may contain characters like hyphens (`-`) that are not valid Python identifiers.
-
 When you return Pydantic models from your handlers, Event Handler will serialize them using field aliases defined in your model configuration:
 
 === "pydantic_alias_serialization.py"
