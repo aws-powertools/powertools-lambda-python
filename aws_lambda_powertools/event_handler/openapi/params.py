@@ -809,7 +809,7 @@ class Form(Body):
         )
 
 
-class File(Form):
+class _File(Form):
     """
     A class used to represent a file parameter in a path operation.
     """

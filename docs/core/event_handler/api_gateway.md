@@ -523,46 +523,17 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
-#### Handling file uploads and form data
+#### Handling form data
 
 !!! info "You must set `enable_validation=True` to handle file uploads and form data via type annotation."
 
-We use the `Annotated` type to tell the Event Handler that a parameter expects file upload or form data. This automatically sets the correct OpenAPI schema for `multipart/form-data` requests.
+You can use the `Form` type to tell the Event Handler that a parameter expects file upload or form data. This automatically sets the correct OpenAPI schema for `application/x-www-form-urlencoded` requests.
 
-In the following example, we use `File` and `Form` OpenAPI types to handle file uploads and form fields:
+=== "working_with_form_data.py"
 
-* `File` parameters expect binary file data and generate OpenAPI schema with `format: binary`
-* `Form` parameters expect form field values from multipart form data
-* The OpenAPI spec will automatically set `requestBody` content type to `multipart/form-data`
-
-=== "handling_file_uploads.py"
-
-    ```python hl_lines="5 9-10 18-19"
-    --8<-- "examples/event_handler_rest/src/handling_file_uploads.py"
+    ```python hl_lines="4 11 12"
+    --8<-- "examples/event_handler_rest/src/working_with_form_data.py"
     ```
-
-    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
-    2. `File` is a special OpenAPI type for binary file uploads that sets `format: binary` in the schema
-    3. `Form` is a special OpenAPI type for form field values in multipart requests
-
-=== "Multiple files"
-
-    You can handle multiple file uploads by declaring parameters as lists:
-
-    ```python hl_lines="9-10"
-    --8<-- "examples/event_handler_rest/src/handling_multiple_file_uploads.py"
-    ```
-
-    1. `files` will be a list containing the binary data of each uploaded file
-
-???+ note "OpenAPI Schema Generation"
-    When you use `File` or `Form` parameters, the generated OpenAPI specification will automatically include:
-    
-    * `requestBody` with content type `multipart/form-data`
-    * Proper schema definitions with `format: binary` for file parameters
-    * Form field descriptions and constraints
-    
-    This ensures API documentation tools like SwaggerUI correctly display file upload interfaces.
 
 #### Supported types for response serialization
 

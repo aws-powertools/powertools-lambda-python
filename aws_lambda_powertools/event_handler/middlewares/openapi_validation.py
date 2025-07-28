@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # Constants
 CONTENT_DISPOSITION_NAME_PARAM = "name="
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
+APPLICATION_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded"
 
 
 class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
@@ -255,52 +256,16 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
         content_type = app.current_event.headers.get("content-type", "").strip()
 
-        # If no content-type is provided, try to infer from route parameters
-        if not content_type:
-            content_type = self._infer_content_type(app)
-
         # Handle JSON content
-        if content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
+        if not content_type or content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
             return self._parse_json_data(app)
 
         # Handle URL-encoded form data
-        elif content_type.startswith("application/x-www-form-urlencoded"):
+        elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
             return self._parse_form_data(app)
 
-        # Handle multipart form data (for file uploads)
-        elif content_type.startswith("multipart/form-data"):
-            return self._parse_multipart_data(app)
-
         else:
-            raise RequestValidationError(
-                [
-                    {
-                        "type": "content_type_invalid",
-                        "loc": ("body",),
-                        "msg": f"Unsupported content type: {content_type}",
-                        "input": {},
-                    },
-                ],
-            )
-
-    def _infer_content_type(self, app: EventHandlerInstance) -> str:
-        """Infer content type from route parameters when not explicitly provided."""
-        route = app.context.get("_route")
-        if route and route.dependant.body_params:
-            # Check if any body params are File or Form types
-            from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-            has_file_params = any(
-                isinstance(getattr(param.field_info, "__class__", None), type)
-                and issubclass(param.field_info.__class__, (File, Form))
-                for param in route.dependant.body_params
-                if hasattr(param, "field_info")
-            )
-
-            return "multipart/form-data" if has_file_params else APPLICATION_JSON_CONTENT_TYPE
-
-        # Default to JSON when no body params
-        return APPLICATION_JSON_CONTENT_TYPE
+            raise NotImplementedError("Only JSON body or Form() are supported")
 
     def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
         """Parse JSON data from the request body."""
@@ -327,18 +292,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
             parsed = parse_qs(body, keep_blank_values=True)
 
-            # Convert list values to single values where appropriate
-            result: dict[str, Any] = {}
-            for key, values in parsed.items():
-                if len(values) == 1:
-                    result[key] = values[0]
-                else:
-                    result[key] = values  # Keep as list for multiple values
-
+            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
             return result
 
-        except Exception as e:
-            raise RequestValidationError(
+        except Exception as e:  # pragma: no cover
+            raise RequestValidationError(  # pragma: no cover
                 [
                     {
                         "type": "form_invalid",
@@ -349,104 +307,6 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     },
                 ],
             ) from e
-
-    def _parse_multipart_data(self, app: EventHandlerInstance) -> dict[str, Any]:
-        """Parse multipart form data from the request body."""
-        try:
-            content_type = app.current_event.headers.get("content-type", "")
-            body = app.current_event.decoded_body or ""
-
-            # Extract boundary from content-type header
-            boundary = self._extract_boundary(content_type)
-            if not boundary:
-                msg = "No boundary found in multipart content-type"
-                raise ValueError(msg)
-
-            # Split the body by boundary and parse each part
-            parts = body.split(f"--{boundary}")
-            result = {}
-
-            for raw_part in parts:
-                part = raw_part.strip()
-                if not part or part == "--":
-                    continue
-
-                field_name, content = self._parse_multipart_part(part)
-                if field_name:
-                    result[field_name] = content
-
-            return result
-
-        except Exception as e:
-            raise RequestValidationError(
-                [
-                    {
-                        "type": "multipart_invalid",
-                        "loc": ("body",),
-                        "msg": "Multipart data parsing error",
-                        "input": {},
-                        "ctx": {"error": str(e)},
-                    },
-                ],
-            ) from e
-
-    def _extract_boundary(self, content_type: str) -> str | None:
-        """Extract boundary from multipart content-type header."""
-        if "boundary=" in content_type:
-            return content_type.split("boundary=")[1].split(";")[0].strip()
-        return None
-
-    def _parse_multipart_part(self, part: str) -> tuple[str | None, Any]:
-        """Parse a single multipart section and return field name and content."""
-        # Split headers from content
-        if "\r\n\r\n" in part:
-            headers_section, content = part.split("\r\n\r\n", 1)
-        elif "\n\n" in part:
-            headers_section, content = part.split("\n\n", 1)
-        else:
-            return None, None
-
-        # Parse headers to find field name
-        headers = {}
-        for header_line in headers_section.split("\n"):
-            if ":" in header_line:
-                key, value = header_line.split(":", 1)
-                headers[key.strip().lower()] = value.strip()
-
-        # Extract field name from Content-Disposition header
-        content_disposition = headers.get("content-disposition", "")
-        field_name = self._extract_field_name(content_disposition)
-
-        if not field_name:
-            return None, None
-
-        # Handle file vs text field
-        if "filename=" in content_disposition:
-            # This is a file upload - convert to bytes
-            content = content.rstrip("\r\n")
-            return field_name, content.encode() if isinstance(content, str) else content
-        else:
-            # This is a text field - keep as string
-            return field_name, content.rstrip("\r\n")
-
-    def _extract_field_name(self, content_disposition: str) -> str | None:
-        """Extract field name from Content-Disposition header."""
-        if CONTENT_DISPOSITION_NAME_PARAM not in content_disposition:
-            return None
-
-        # Handle both quoted and unquoted names
-        if 'name="' in content_disposition:
-            name_start = content_disposition.find('name="') + 6
-            name_end = content_disposition.find('"', name_start)
-            return content_disposition[name_start:name_end]
-        elif CONTENT_DISPOSITION_NAME_PARAM in content_disposition:
-            name_start = content_disposition.find(CONTENT_DISPOSITION_NAME_PARAM) + len(CONTENT_DISPOSITION_NAME_PARAM)
-            name_end = content_disposition.find(";", name_start)
-            if name_end == -1:
-                name_end = len(content_disposition)
-            return content_disposition[name_start:name_end].strip()
-
-        return None
 
 
 def _request_params_to_args(

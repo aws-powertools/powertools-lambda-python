@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
+    Form,
     Header,
     Param,
     ParamTypes,
@@ -651,75 +652,8 @@ def test_openapi_with_openapi_example():
     assert parameter.schema_.title == "Count"
 
 
-def test_openapi_file_upload_parameters():
-    """Test File parameter generates correct OpenAPI schema for file uploads."""
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload")
-    def upload_file(
-        file: Annotated[bytes, File(description="File to upload")],
-        filename: Annotated[str, Form(description="Name of the file")],
-    ):
-        return {"message": f"Uploaded {filename}", "size": len(file)}
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint is present
-    assert "/upload" in schema.paths
-
-    post_op = schema.paths["/upload"].post
-    assert post_op is not None
-
-    # Check request body
-    request_body = post_op.requestBody
-    assert request_body is not None
-    assert request_body.required is True
-
-    # Check content type is multipart/form-data
-    assert "multipart/form-data" in request_body.content
-
-    # Get the schema reference
-    multipart_content = request_body.content["multipart/form-data"]
-    assert multipart_content.schema_ is not None
-
-    # Check that it references a component schema
-    schema_ref = multipart_content.schema_.ref
-    assert schema_ref is not None
-    assert schema_ref.startswith("#/components/schemas/")
-
-    # Get the component schema name
-    component_name = schema_ref.split("/")[-1]
-    assert component_name in schema.components.schemas
-
-    # Check the component schema properties
-    component_schema = schema.components.schemas[component_name]
-    properties = component_schema.properties
-
-    # Check file parameter
-    assert "file" in properties
-    file_prop = properties["file"]
-    assert file_prop.type == "string"
-    assert file_prop.format == "binary"  # This is the key assertion
-    assert file_prop.title == "File"
-    assert file_prop.description == "File to upload"
-
-    # Check form parameter
-    assert "filename" in properties
-    filename_prop = properties["filename"]
-    assert filename_prop.type == "string"
-    assert filename_prop.title == "Filename"
-    assert filename_prop.description == "Name of the file"
-
-    # Check required fields
-    assert component_schema.required == ["file", "filename"]
-
-
 def test_openapi_form_only_parameters():
     """Test Form parameters generate application/x-www-form-urlencoded content type."""
-    from aws_lambda_powertools.event_handler.openapi.params import Form
-
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form-data")
@@ -776,210 +710,8 @@ def test_openapi_form_only_parameters():
     assert component_schema.required == ["name"]
 
 
-def test_openapi_mixed_file_and_form_parameters():
-    """Test mixed File and Form parameters use multipart/form-data."""
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/mixed")
-    def upload_with_metadata(
-        file: Annotated[bytes, File(description="Document to upload")],
-        title: Annotated[str, Form(description="Document title")],
-        category: Annotated[str, Form(description="Document category")] = "general",
-    ):
-        return {"title": title, "category": category, "file_size": len(file)}
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint is present
-    assert "/mixed" in schema.paths
-
-    post_op = schema.paths["/mixed"].post
-    request_body = post_op.requestBody
-
-    # When both File and Form parameters are present, should use multipart/form-data
-    assert "multipart/form-data" in request_body.content
-
-    # Get the component schema
-    multipart_content = request_body.content["multipart/form-data"]
-    schema_ref = multipart_content.schema_.ref
-    component_name = schema_ref.split("/")[-1]
-    component_schema = schema.components.schemas[component_name]
-
-    properties = component_schema.properties
-
-    # Check file parameter has binary format
-    assert "file" in properties
-    file_prop = properties["file"]
-    assert file_prop.format == "binary"
-
-    # Check form parameters are present
-    assert "title" in properties
-    assert "category" in properties
-
-    # Check required fields
-    assert "file" in component_schema.required
-    assert "title" in component_schema.required
-    assert "category" not in component_schema.required  # has default value
-
-
-def test_openapi_multiple_file_uploads():
-    """Test multiple file uploads with List[bytes] type."""
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload-multiple")
-    def upload_multiple_files(
-        files: Annotated[List[bytes], File(description="Files to upload")],
-        description: Annotated[str, Form(description="Upload description")],
-    ):
-        return {
-            "message": f"Uploaded {len(files)} files",
-            "description": description,
-            "total_size": sum(len(file) for file in files),
-        }
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint is present
-    assert "/upload-multiple" in schema.paths
-
-    post_op = schema.paths["/upload-multiple"].post
-    request_body = post_op.requestBody
-
-    # Should use multipart/form-data for file uploads
-    assert "multipart/form-data" in request_body.content
-
-    # Get the component schema
-    multipart_content = request_body.content["multipart/form-data"]
-    schema_ref = multipart_content.schema_.ref
-    component_name = schema_ref.split("/")[-1]
-    component_schema = schema.components.schemas[component_name]
-
-    properties = component_schema.properties
-
-    # Check files parameter
-    assert "files" in properties
-    files_prop = properties["files"]
-
-    # For List[bytes] with File annotation, should be array of strings with binary format
-    assert files_prop.type == "array"
-    assert files_prop.items.type == "string"
-    assert files_prop.items.format == "binary"
-
-    # Check form parameter
-    assert "description" in properties
-    description_prop = properties["description"]
-    assert description_prop.type == "string"
-
-
-def test_openapi_public_file_form_exports():
-    """Test that File and Form are properly exported for public use."""
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/public-api")
-    def upload_with_public_types(
-        file: Annotated[bytes, File()],  # Using the public export as annotation
-        name: Annotated[str, Form()],  # Using the public export as annotation
-    ):
-        return {"status": "uploaded"}
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint works with public exports
-    assert "/public-api" in schema.paths
-
-    post_op = schema.paths["/public-api"].post
-    request_body = post_op.requestBody
-
-    # Should generate multipart/form-data
-    assert "multipart/form-data" in request_body.content
-
-    # Get the component schema
-    multipart_content = request_body.content["multipart/form-data"]
-    schema_ref = multipart_content.schema_.ref
-    component_name = schema_ref.split("/")[-1]
-    component_schema = schema.components.schemas[component_name]
-
-    properties = component_schema.properties
-
-    # Check that both parameters are present and correctly typed
-    assert "file" in properties
-    assert properties["file"].format == "binary"
-
-    assert "name" in properties
-    assert properties["name"].type == "string"
-
-
-def test_openapi_file_parameter_with_custom_schema_extra():
-    """Test File parameter with custom json_schema_extra that gets merged with format: binary."""
-    from aws_lambda_powertools.event_handler.openapi.params import File
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload-custom")
-    def upload_with_custom_schema(
-        file: Annotated[
-            bytes,
-            File(
-                description="Custom file upload",
-                json_schema_extra={"example": "file_content", "title": "Custom File"},
-            ),
-        ],
-    ):
-        return {"status": "uploaded"}
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint is present
-    assert "/upload-custom" in schema.paths
-
-    post_op = schema.paths["/upload-custom"].post
-    request_body = post_op.requestBody
-
-    # Should use multipart/form-data for file uploads
-    assert "multipart/form-data" in request_body.content
-
-    # Get the component schema
-    multipart_content = request_body.content["multipart/form-data"]
-    schema_ref = multipart_content.schema_.ref
-    component_name = schema_ref.split("/")[-1]
-    component_schema = schema.components.schemas[component_name]
-
-    properties = component_schema.properties
-
-    # Check file parameter has both binary format and custom schema extras
-    assert "file" in properties
-    file_prop = properties["file"]
-    assert file_prop.format == "binary"  # This should be preserved
-    assert file_prop.description == "Custom file upload"
-
-
-def test_openapi_body_param_with_conflicting_field_info():
-    """Test error condition when both FieldInfo annotation and value are provided."""
-    from aws_lambda_powertools.event_handler.openapi.params import File
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    # This should work fine - using FieldInfo as annotation
-    @app.post("/upload-normal")
-    def upload_normal(file: Annotated[bytes, File(description="File to upload")]):
-        return {"status": "uploaded"}
-
-    # Test that the normal case works
-    schema = app.get_openapi_schema()
-    assert "/upload-normal" in schema.paths
-
-
 def test_openapi_mixed_body_media_types():
     """Test mixed Body parameters with different media types."""
-    from pydantic import BaseModel
-
-    from aws_lambda_powertools.event_handler.openapi.params import Body
 
     class UserData(BaseModel):
         name: str
@@ -1005,9 +737,6 @@ def test_openapi_mixed_body_media_types():
 
 def test_openapi_form_parameter_edge_cases():
     """Test Form parameters with various edge cases."""
-    from typing import Optional
-
-    from aws_lambda_powertools.event_handler.openapi.params import Form
 
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -1047,51 +776,3 @@ def test_openapi_form_parameter_edge_cases():
     assert "required_field" in component_schema.required
     assert "optional_field" not in component_schema.required  # Optional
     assert "field_with_default" not in component_schema.required  # Has default
-
-
-def test_openapi_file_with_list_type_edge_case():
-    """Test File parameter with nested List types for edge case coverage."""
-    from typing import List, Optional
-
-    from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload-complex")
-    def upload_complex_types(
-        files: Annotated[List[bytes], File(description="Multiple files")],
-        metadata: Annotated[Optional[str], Form(description="Optional metadata")] = None,
-    ):
-        total_size = sum(len(file) for file in files) if files else 0
-        return {"file_count": len(files) if files else 0, "total_size": total_size, "metadata": metadata}
-
-    schema = app.get_openapi_schema()
-
-    # Check that the endpoint is present
-    assert "/upload-complex" in schema.paths
-
-    post_op = schema.paths["/upload-complex"].post
-    request_body = post_op.requestBody
-
-    # Should use multipart/form-data when files are present
-    assert "multipart/form-data" in request_body.content
-
-    # Get the component schema
-    multipart_content = request_body.content["multipart/form-data"]
-    schema_ref = multipart_content.schema_.ref
-    component_name = schema_ref.split("/")[-1]
-    component_schema = schema.components.schemas[component_name]
-
-    properties = component_schema.properties
-
-    # Check files parameter is array with binary format items
-    assert "files" in properties
-    files_prop = properties["files"]
-    assert files_prop.type == "array"
-    assert files_prop.items.type == "string"
-    assert files_prop.items.format == "binary"
-
-    # Check metadata is optional
-    assert "metadata" in properties
-    assert "files" in component_schema.required
-    assert "metadata" not in component_schema.required
