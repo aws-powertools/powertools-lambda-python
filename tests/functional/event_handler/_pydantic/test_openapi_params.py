@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
+    Cookie,
     Form,
     Header,
     Param,
@@ -98,6 +99,26 @@ def test_openapi_with_scalar_params():
     assert parameter.schema_.default is False
     assert parameter.schema_.type == "boolean"
     assert parameter.schema_.title == "Include Extra"
+
+
+def test_openapi_with_cookie_params():
+    app = APIGatewayRestResolver()
+
+    @app.get("/menu", summary="Get food items", operation_id="GetMenu", description="Get food items")
+    def handler(country: Annotated[str, Cookie(examples=[Example(summary="Country", value="🇧🇷")])]):
+        print(country)
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+    get = schema.paths["/menu"].get
+
+    param = get.parameters[0]
+    assert param.name == "country"
+    assert param.in_ == ParameterInType.cookie
+
+    example = Example(**param.schema_.examples[0])
+    assert example.summary == "Country"
+    assert example.value == "🇧🇷"
 
 
 def test_openapi_with_custom_params():
