@@ -928,6 +928,20 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 !!! note "Class-based **vs** function-based middlewares"
     When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
 
+#### Middleware and data validation
+
+When you enable data validation with `enable_validation=True`, we split validation into two separate middlewares:
+
+1. **Request validation** runs first to validate incoming data
+2. **Your middlewares** run in the middle and can return early responses
+3. **Response validation** runs last, only for route handler responses
+
+This ensures your middlewares can return early responses (401, 403, 429, etc.) without triggering validation errors, while still validating actual route handler responses for data integrity.
+
+```python hl_lines="5 11 23 36" title="Middleware early returns work seamlessly with validation"
+--8<-- "examples/event_handler_rest/src/middleware_and_data_validation.py"
+```
+
 #### Native middlewares
 
 These are native middlewares that may become native features depending on customer demand.

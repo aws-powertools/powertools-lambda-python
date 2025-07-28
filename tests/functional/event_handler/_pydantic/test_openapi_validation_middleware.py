@@ -1632,3 +1632,354 @@ def test_response_serialization_with_custom_serializer():
 
     result = app({"httpMethod": "GET", "path": "/test"}, {})
     assert result["statusCode"] == 200
+
+
+def test_middleware_early_return_without_validation_error(gw_event):
+    """Test that middleware can return early response without triggering validation error (Issue #5228)"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def auth_middleware(app, next_middleware):
+        execution_log.append("auth_middleware")
+        # Return 401 without calling next_middleware - should not trigger validation
+        return Response(status_code=401, content_type="application/json", body="{}")
+
+    def logging_middleware(app, next_middleware):
+        execution_log.append("logging_middleware")  # Should not be called
+        return next_middleware(app)
+
+    app.use(middlewares=[auth_middleware, logging_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/protected")
+    def protected_route() -> UserModel:
+        execution_log.append("route_handler")  # Should not be called
+        return UserModel(name="John", age=30, email="john@example.com")
+
+    # WHEN calling the protected route
+    gw_event["path"] = "/protected"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 401 without validation error
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 401
+    assert result["body"] == "{}"
+
+    # Check execution order - only auth_middleware should have run
+    assert execution_log == ["auth_middleware"]
+
+
+def test_middleware_allows_validation_to_proceed(gw_event):
+    """Test that when middleware calls next_middleware, validation still works"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def logging_middleware(app, next_middleware):
+        execution_log.append("logging_middleware")
+        # Log and continue to next middleware
+        result = next_middleware(app)
+        execution_log.append("logging_middleware_after")
+        return result
+
+    app.use(middlewares=[logging_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/user")
+    def get_user() -> UserModel:
+        execution_log.append("route_handler")
+        return UserModel(name="Jane", age=25, email="jane@example.com")
+
+    # WHEN calling the user route
+    gw_event["path"] = "/user"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 200 with validated response
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["name"] == "Jane"
+    assert response_body["age"] == 25
+    assert response_body["email"] == "jane@example.com"
+
+    # Check execution order
+    expected_log = ["logging_middleware", "route_handler", "logging_middleware_after"]
+    assert execution_log == expected_log
+
+
+def test_request_validation_fails_before_user_middlewares(gw_event):
+    """Test that request validation fails before user middlewares are executed"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def passthrough_middleware(app, next_middleware):
+        execution_log.append("passthrough_middleware")
+        return next_middleware(app)
+
+    app.use(middlewares=[passthrough_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.post("/user")
+    def create_user(user: UserModel) -> UserModel:
+        execution_log.append("route_handler")  # Should not be called due to validation error
+        return user
+
+    # WHEN sending invalid request body (missing required fields)
+    gw_event["path"] = "/user"
+    gw_event["httpMethod"] = "POST"
+    gw_event["body"] = '{"name": "John"}'  # Missing age and email
+    gw_event["headers"]["Content-Type"] = "application/json"
+
+    # THEN it should return 422 for validation error
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 422
+    response_body = json.loads(result["body"])
+    assert "detail" in response_body
+
+    # Request validation happens BEFORE user middlewares, so neither should run
+    assert "passthrough_middleware" not in execution_log
+    assert "route_handler" not in execution_log
+
+
+def test_request_validation_passes_then_middlewares_execute(gw_event):
+    """Test that when request validation passes, user middlewares execute normally"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def passthrough_middleware(app, next_middleware):
+        execution_log.append("passthrough_middleware")
+        return next_middleware(app)
+
+    app.use(middlewares=[passthrough_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.post("/user")
+    def create_user(user: UserModel) -> UserModel:
+        execution_log.append("route_handler")
+        return user
+
+    # WHEN sending valid request body
+    gw_event["path"] = "/user"
+    gw_event["httpMethod"] = "POST"
+    gw_event["body"] = '{"name": "John", "age": 30, "email": "john@example.com"}'
+    gw_event["headers"]["Content-Type"] = "application/json"
+
+    # THEN it should return 200 and middlewares should execute
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+
+    # Both middleware and route handler should have executed
+    assert "passthrough_middleware" in execution_log
+    assert "route_handler" in execution_log
+
+
+def test_multiple_middlewares_with_early_return(gw_event):
+    """Test multiple middlewares where one returns early (Issue #4656)"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def first_middleware(app, next_middleware):
+        execution_log.append("first_middleware")
+        return next_middleware(app)
+
+    def auth_middleware(app, next_middleware):
+        execution_log.append("auth_middleware")
+        # Return early - should not trigger validation
+        return Response(status_code=403, content_type="application/json", body="{}")
+
+    def third_middleware(app, next_middleware):
+        execution_log.append("third_middleware")  # Should not be called
+        return next_middleware(app)
+
+    app.use(middlewares=[first_middleware, auth_middleware, third_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/protected")
+    def protected_route() -> UserModel:
+        execution_log.append("route_handler")  # Should not be called
+        return UserModel(name="Secret", age=42, email="secret@example.com")
+
+    # WHEN calling the protected route
+    gw_event["path"] = "/protected"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 403 without validation error
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 403
+    assert result["body"] == "{}"
+
+    # Check execution order - should stop at auth_middleware
+    expected_log = ["first_middleware", "auth_middleware"]
+    assert execution_log == expected_log
+
+
+def test_middleware_execution_order_with_validation(gw_event):
+    """Test that middleware execution order is correct with validation enabled"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+    execution_log = []
+
+    def first_middleware(app, next_middleware):
+        execution_log.append("first_middleware")
+        return next_middleware(app)
+
+    def second_middleware(app, next_middleware):
+        execution_log.append("second_middleware")
+        return next_middleware(app)
+
+    app.use(middlewares=[first_middleware, second_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/test")
+    def test_route() -> UserModel:
+        execution_log.append("route_handler")
+        return UserModel(name="Test", age=30, email="test@example.com")
+
+    # WHEN calling the test route
+    gw_event["path"] = "/test"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 200 with correct execution order
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+
+    # Expected order: first -> second -> route
+    expected_order = ["first_middleware", "second_middleware", "route_handler"]
+    assert execution_log == expected_order
+
+
+def test_rate_limiting_middleware_response_not_validated(gw_event):
+    """Test rate limiting middleware response (429) is not validated"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    def rate_limit_middleware(app, next_middleware):
+        # Return 429 with simple body - should not be validated
+        return Response(status_code=429, content_type="application/json", body="{}")
+
+    app.use(middlewares=[rate_limit_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/api/data")
+    def get_data() -> UserModel:
+        return UserModel(name="Data", age=1, email="data@example.com")
+
+    # WHEN calling the rate limited route
+    gw_event["path"] = "/api/data"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 429 without validation error
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 429
+    assert result["body"] == "{}"
+
+
+def test_middleware_with_complex_auth_response_gets_validated(gw_event):
+    """Test middleware with complex auth response that should be validated"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    def auth_middleware(app, next_middleware):
+        # Return complex 401 response - should trigger validation
+        return Response(
+            status_code=401,
+            content_type="application/json",
+            body='{"error": "Unauthorized", "message": "Token expired", "code": 1001}',
+        )
+
+    app.use(middlewares=[auth_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/protected")
+    def protected_route() -> UserModel:
+        return UserModel(name="Secret", age=42, email="secret@example.com")
+
+    # WHEN calling the protected route
+    gw_event["path"] = "/protected"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 401 with complex body (validation should occur)
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 401
+    response_body = json.loads(result["body"])
+    assert response_body["error"] == "Unauthorized"
+    assert response_body["message"] == "Token expired"
+    assert response_body["code"] == 1001
+
+
+def test_normal_route_response_validation_still_works(gw_event):
+    """Test that normal route responses are still validated"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    def logging_middleware(app, next_middleware):
+        result = next_middleware(app)
+        return result
+
+    app.use(middlewares=[logging_middleware])
+
+    class UserModel(BaseModel):
+        name: str
+        age: int
+        email: str
+
+    @app.get("/user/<user_id>")
+    def get_user(user_id: int) -> UserModel:
+        return UserModel(name=f"User{user_id}", age=user_id + 20, email=f"user{user_id}@example.com")
+
+    # WHEN calling the user route
+    gw_event["path"] = "/user/123"
+    gw_event["httpMethod"] = "GET"
+
+    # THEN it should return 200 with validated response
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["name"] == "User123"
+    assert response_body["age"] == 143
+    assert response_body["email"] == "user123@example.com"
