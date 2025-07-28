@@ -554,6 +554,38 @@ With data validation enabled, we natively support serializing the following data
 ???+ info "See [custom serializer section](#custom-serializer) for bringing your own."
     Otherwise, we will raise `SerializationError` for any unsupported types _e.g., SQLAlchemy models_.
 
+#### Pydantic serialization behavior
+
+!!! warning "Important: Pydantic models are serialized using aliases by default"
+    When `enable_validation=True` is set, **all Pydantic models in responses are automatically serialized using `by_alias=True`**. This differs from Pydantic's default behavior (`by_alias=False`).
+
+When you return Pydantic models from your handlers, Event Handler will serialize them using field aliases defined in your model configuration:
+
+=== "pydantic_alias_serialization.py"
+
+    ```python hl_lines="1 2 11 20"
+    --8<-- "examples/event_handler_rest/src/pydantic_alias_serialization.py"
+    ```
+
+    1. The `alias_generator=to_snake` converts camelCase field names to snake_case aliases
+    2. `firstName` becomes `first_name` and lastName` becomes `last_name` in the JSON response
+
+=== "pydantic_alias_serialization_output.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/event_handler_rest/src/pydantic_alias_serialization_output.json"
+    ```
+
+##### Serializing using field name
+
+If you need to serialize using field names instead of aliases, you can dump the model:
+
+=== "pydantic_field_name_serialization.py"
+
+    ```python hl_lines="11 19 20"
+    --8<-- "examples/event_handler_rest/src/pydantic_field_name_serialization.py"
+    ```
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
