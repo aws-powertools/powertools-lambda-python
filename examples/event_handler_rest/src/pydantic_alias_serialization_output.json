@@ -1,0 +1,9 @@
+{
+    "statusCode": 200,
+    "body": "{\"first_name\":\"John\",\"last_name\":\"Doe\"}",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "multiValueHeaders": {},
+    "isBase64Encoded": false
+}
