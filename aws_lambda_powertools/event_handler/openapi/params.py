@@ -737,9 +737,9 @@ class Body(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class _Form(Body):
+class Form(Body):
     """
-    A class used internally to represent a form parameter in a path operation.
+    A class used to represent a form parameter in a path operation.
     """
 
     def __init__(
@@ -809,9 +809,9 @@ class _Form(Body):
         )
 
 
-class _File(_Form):
+class _File(Form):
     """
-    A class used internally to represent a file parameter in a path operation.
+    A class used to represent a file parameter in a path operation.
     """
 
     def __init__(
@@ -848,6 +848,14 @@ class _File(_Form):
         json_schema_extra: dict[str, Any] | None = None,
         **extra: Any,
     ):
+        # For file uploads, ensure the OpenAPI schema has the correct format
+        # Also we can't test it
+        file_schema_extra = {"format": "binary"}  # pragma: no cover
+        if json_schema_extra:  # pragma: no cover
+            json_schema_extra.update(file_schema_extra)  # pragma: no cover
+        else:  # pragma: no cover
+            json_schema_extra = file_schema_extra  # pragma: no cover
+
         super().__init__(
             default=default,
             default_factory=default_factory,
