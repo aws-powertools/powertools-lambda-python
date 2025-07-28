@@ -2685,7 +2685,7 @@ class ApiGatewayResolver(BaseRouter):
                 route=route,
             )
 
-        # OpenAPIValidationMiddleware will only raise ResponseValidationError when
+        # OpenAPIResponseValidationMiddleware will only raise ResponseValidationError when
         # 'self._response_validation_error_http_code' is not None or
         # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
