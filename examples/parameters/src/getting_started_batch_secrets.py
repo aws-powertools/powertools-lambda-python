@@ -27,4 +27,5 @@ def lambda_handler(event, context: LambdaContext):
 
 
 def do_stuff_with_secrets(db_password, api_key, jwt_secret):
+    """Do your business logic"""
     pass
