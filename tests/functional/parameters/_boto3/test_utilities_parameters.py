@@ -3282,6 +3282,42 @@ def test_secrets_provider_get_multiple_empty_names(config):
         provider.get_multiple([])
 
 
+def test_secrets_provider_non_existing_key(config):
+    """
+    Test SecretsProvider.get_multiple() with additional filters
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN calling get_multiple with additional filters that doesnt
+    secret_names = ["filtered-secret"]
+    additional_filters = [{"Key": "error-region", "Values": ["us-east-1"]}]
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "SecretValues": [
+            {
+                "ARN": "arn:aws:secretsmanager:us-east-1:132456789012:secret/filtered-secret",
+                "Name": "filtered-secret",
+                "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+                "SecretString": "filtered-value",
+                "CreatedDate": datetime(2015, 1, 1),
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params = {
+        "Filters": [{"Key": "primary-region", "Values": ["us-east-1"]}, {"Key": "name", "Values": secret_names}],
+    }
+    stubber.add_response("batch_get_secret_value", response, expected_params)
+    stubber.activate()
+
+    # THEN it should raise an exception
+    with pytest.raises(GetSecretError, match="Failed to retrieve secrets*"):
+        provider.get_multiple(secret_names, Filters=additional_filters)
+
+
 def test_secrets_provider_get_multiple_caching(config):
     """
     Test SecretsProvider.get_multiple() caching behavior
@@ -3382,3 +3418,42 @@ def test_secrets_provider_get_multiple_no_secrets_found(config):
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_secrets_provider_get_multiple_with_json_transform_error(config):
+    """
+    Test SecretsProvider.get_multiple() with JSON transformation
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN calling get_multiple with JSON transform
+    secret_names = ["json-secret", "plain-secret"]
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "SecretValues": [
+            {
+                "ARN": "arn:aws:secretsmanager:us-east-1:132456789012:secret/json-secret",
+                "Name": "json-secret",
+                "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+                "SecretString": '{"key": "value", "number": 42}',
+                "CreatedDate": datetime(2015, 1, 1),
+            },
+            {
+                "ARN": "arn:aws:secretsmanager:us-east-1:132456789012:secret/plain-secret",
+                "Name": "plain-secret",
+                "VersionId": "8b9266c9-3ed0-577f-c5g7-6cd57627d95e",
+                "SecretString": "plain-text",
+                "CreatedDate": datetime(2015, 1, 1),
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params = {"Filters": [{"Key": "name", "Values": secret_names}]}
+    stubber.add_response("batch_get_secret_value", response, expected_params)
+    stubber.activate()
+
+    with pytest.raises(parameters.TransformParameterError):
+        provider.get_multiple(secret_names, transform="binary", raise_on_transform_error=True)

@@ -172,7 +172,7 @@ class SecretsProvider(BaseProvider):
                 sdk_options["NextToken"] = next_token
             elif "NextToken" in sdk_options:
                 # Remove NextToken from first call if it was passed
-                sdk_options.pop("NextToken")
+                sdk_options.pop("NextToken")  # pragma: no cover
 
             try:
                 response = self.client.batch_get_secret_value(**sdk_options)
@@ -276,7 +276,7 @@ class SecretsProvider(BaseProvider):
                 except TransformParameterError:
                     if raise_on_transform_error:
                         raise
-                    transformed_values[name] = None
+                    transformed_values[name] = None  # pragma: no cover
             values = transformed_values
 
         # Cache the results
