@@ -36,6 +36,7 @@ This utility requires additional permissions to work as expected.
 | SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                                         |
 | Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                             |
 | Secrets   | **`set_secret`**, **`SecretsProvider.set`**                            | **`secretsmanager:PutSecretValue`** and **`secretsmanager:CreateSecret`** (if creating secrets) |
+| Secrets   | **`get_secrets_by_name`**, **`SecretsProvider.get_multiple`**          | **`secretsmanager:BatchGetSecretValue`**, **`secretsmanager:GetSecretValue`**  and **`secretsmanager:ListSecrets`** |
 | DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                                          |
 | DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                            |
 | AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`**            |
@@ -109,6 +110,30 @@ You can fetch secrets stored in Secrets Manager using `get_secret`.
 === "getting_started_secret.py"
     ```python hl_lines="5 15"
     --8<-- "examples/parameters/src/getting_started_secret.py"
+    ```
+
+### Fetching multiple secrets
+
+You can fetch multiple secrets from Secrets Manager in a single API call using `get_secrets_by_name`. This reduces the number of API calls and improves performance when you need to retrieve several secrets at once.
+
+???+ info "Batch retrieval benefits"
+    - **Performance**: Retrieve up to 20 secrets in one API call
+    - **Cost optimization**: Fewer API calls reduce AWS costs
+    - **Error resilience**: Partial failures don't break the entire operation
+    - **Advanced filtering**: Use additional filters beyond secret names
+
+=== "getting_started_batch_secrets.py"
+    ```python hl_lines="1 7"
+    --8<-- "examples/parameters/src/getting_started_batch_secrets.py"
+    ```
+
+#### Advanced filtering
+
+You can combine secret name filtering with additional AWS Secrets Manager filters for more precise results:
+
+=== "batch_secrets_with_filters.py"
+    ```python hl_lines="2 10-16"
+    --8<-- "examples/parameters/src/batch_secrets_with_filters.py"
     ```
 
 ### Setting secrets
@@ -249,6 +274,11 @@ You can create `SecureString` parameters, which are parameters that have a plain
 === "builtin_provider_secret.py"
     ```python hl_lines="4 6 9"
     --8<-- "examples/parameters/src/builtin_provider_secret.py"
+    ```
+
+=== "batch_secrets_provider.py"
+    ```python hl_lines="2-12"
+    --8<-- "examples/parameters/src/batch_secrets_provider.py"
     ```
 
 #### DynamoDBProvider
@@ -445,7 +475,9 @@ Here is the mapping between this utility's functions and methods and the underly
 | SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter){target="_blank"}                                                                                                                                                                                                                                              |
 | SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path){target="_blank"}                                                                                                                                                                                                                            |
 | Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
+| Secrets Manager     | `get_secrets_by_name`           | `secretsmanager` | [batch_get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.batch_get_secret_value){target="_blank"}                                                                                                                                                                                                      |
 | Secrets Manager     | `SecretsProvider.get`           | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
+| Secrets Manager     | `SecretsProvider.get_multiple`  | `secretsmanager` | [batch_get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.batch_get_secret_value){target="_blank"}                                                                                                                                                                                                      |
 | DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})    |
 | DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})    |
 | App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session){target="_blank"} and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration){target="_blank"} |
