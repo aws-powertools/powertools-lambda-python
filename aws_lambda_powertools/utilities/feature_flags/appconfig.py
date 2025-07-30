@@ -87,6 +87,17 @@ class AppConfigStore(StoreProvider):
             boto3_session=boto3_session,
         )
 
+        # Override the user agent to use "feature_flags" instead of "parameters"
+        self._register_feature_flags_user_agent()
+
+    def _register_feature_flags_user_agent(self):
+        """Register feature_flags user agent to the AppConfig client"""
+        from aws_lambda_powertools.shared import user_agent
+
+        # Register feature_flags to the client used by the AppConfigProvider
+        if hasattr(self._conf_store, "client") and self._conf_store.client is not None:
+            user_agent.register_feature_to_client(client=self._conf_store.client, feature="feature_flags")
+
     @property
     def get_raw_configuration(self) -> dict[str, Any]:
         """Fetch feature schema configuration from AWS AppConfig"""
