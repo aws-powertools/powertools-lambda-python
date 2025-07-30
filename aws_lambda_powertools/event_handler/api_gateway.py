@@ -815,7 +815,7 @@ class Route:
         from aws_lambda_powertools.event_handler.openapi.compat import (
             get_schema_from_model_field,
         )
-        from aws_lambda_powertools.event_handler.openapi.params import Param
+        from aws_lambda_powertools.event_handler.openapi.params import Form, Header, Param, Query
 
         parameters = []
         parameter: dict[str, Any] = {}
@@ -826,31 +826,73 @@ class Route:
             if not field_info.include_in_schema:
                 continue
 
-            param_schema = get_schema_from_model_field(
-                field=param,
-                model_name_map=model_name_map,
-                field_mapping=field_mapping,
-            )
+            # Check if this is a Pydantic model that should be expanded
+            from pydantic import BaseModel
 
-            parameter = {
-                "name": param.alias,
-                "in": field_info.in_.value,
-                "required": param.required,
-                "schema": param_schema,
-            }
+            from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
 
-            if field_info.description:
-                parameter["description"] = field_info.description
+            if isinstance(field_info, (Query, Header, Form)) and lenient_issubclass(field_info.annotation, BaseModel):
+                # Expand Pydantic model into individual parameters
+                model_class = field_info.annotation
 
-            if field_info.openapi_examples:
-                parameter["examples"] = field_info.openapi_examples
+                for field_name, field_def in model_class.model_fields.items():
+                    # Create individual parameter for each model field
+                    individual_param = {
+                        "name": field_def.alias or field_name,
+                        "in": field_info.in_.value,
+                        "required": field_def.is_required()
+                        if hasattr(field_def, "is_required")
+                        else field_def.default is ...,
+                        "schema": Route._get_basic_type_schema(field_def.annotation),
+                    }
 
-            if field_info.deprecated:
-                parameter["deprecated"] = field_info.deprecated
+                    if field_def.description:
+                        individual_param["description"] = field_def.description
 
-            parameters.append(parameter)
+                    parameters.append(individual_param)
+            else:
+                # Regular parameter processing
+                param_schema = get_schema_from_model_field(
+                    field=param,
+                    model_name_map=model_name_map,
+                    field_mapping=field_mapping,
+                )
+
+                parameter = {
+                    "name": param.alias,
+                    "in": field_info.in_.value,
+                    "required": param.required,
+                    "schema": param_schema,
+                }
+
+                if field_info.description:
+                    parameter["description"] = field_info.description
+
+                if field_info.openapi_examples:
+                    parameter["examples"] = field_info.openapi_examples
+
+                if field_info.deprecated:
+                    parameter["deprecated"] = field_info.deprecated
+
+                parameters.append(parameter)
 
         return parameters
+
+    @staticmethod
+    def _get_basic_type_schema(param_type: type) -> dict[str, str]:
+        """
+        Get basic OpenAPI schema for simple types
+        """
+        if isinstance(int, param_type):
+            return {"type": "integer"}
+        elif isinstance(float, param_type):
+            return {"type": "number"}
+        elif isinstance(bool, param_type):
+            return {"type": "boolean"}
+        elif isinstance(str, param_type):
+            return {"type": "string"}
+        else:
+            return {"type": "string"}  # Default fallback
 
     @staticmethod
     def _openapi_operation_return(
