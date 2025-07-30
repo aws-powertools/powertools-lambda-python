@@ -6,7 +6,7 @@ from pathlib import PurePath
 from typing import List, Optional, Tuple
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -45,6 +45,185 @@ def test_validate_scalars(gw_event):
     result = app(gw_event, {})
     assert result["statusCode"] == 422
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
+
+
+def test_validate_pydantic_query_params(gw_event):
+    """Test that Pydantic models in Query parameters are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class QueryParams(BaseModel):
+        limit: int = Field(default=10, ge=1, le=100, description="Number of items")
+        search: Optional[str] = Field(default=None, description="Search term")
+
+    @app.get("/search")
+    def search_handler(params: Annotated[QueryParams, Query()]):
+        return {
+            "limit": params.limit,
+            "search": params.search,
+        }
+
+    # Test valid request
+    gw_event["path"] = "/search"
+    gw_event["queryStringParameters"] = {"limit": "25", "search": "python"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["limit"] == 25
+    assert body["search"] == "python"
+
+    # Test with default values
+    gw_event["queryStringParameters"] = {}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["limit"] == 10  # Default value
+    assert body["search"] is None  # Default value
+
+    # Test validation error (limit too high)
+    gw_event["queryStringParameters"] = {"limit": "150"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("limit" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_header_params(gw_event):
+    """Test that Pydantic models in Header parameters are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class HeaderParams(BaseModel):
+        authorization: str = Field(description="Authorization token")
+        user_agent: str = Field(default="PowerTools/1.0", description="User agent")
+
+    @app.get("/protected")
+    def protected_handler(headers: Annotated[HeaderParams, Header()]):
+        return {
+            "authorization": headers.authorization,
+            "user_agent": headers.user_agent,
+        }
+
+    # Test valid request
+    gw_event["path"] = "/protected"
+    gw_event["headers"] = {"authorization": "Bearer token123", "user-agent": "TestClient/1.0"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["authorization"] == "Bearer token123"
+    assert body["user_agent"] == "TestClient/1.0"
+
+    # Test with default value
+    gw_event["headers"] = {"authorization": "Bearer token123"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["authorization"] == "Bearer token123"
+    assert body["user_agent"] == "PowerTools/1.0"  # Default value
+
+    # Test missing required header
+    gw_event["headers"] = {}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("authorization" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_mixed_params(gw_event):
+    """Test that mixed Pydantic models (Query + Header) are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class QueryParams(BaseModel):
+        q: str = Field(description="Search query")
+        limit: int = Field(default=10, description="Number of results")
+
+    class HeaderParams(BaseModel):
+        authorization: str = Field(description="Bearer token")
+
+    @app.get("/mixed")
+    def mixed_handler(query: Annotated[QueryParams, Query()], headers: Annotated[HeaderParams, Header()]):
+        return {
+            "query": {"q": query.q, "limit": query.limit},
+            "headers": {"authorization": headers.authorization},
+        }
+
+    # Test valid request
+    gw_event["path"] = "/mixed"
+    gw_event["queryStringParameters"] = {"q": "python", "limit": "25"}
+    gw_event["headers"] = {"authorization": "Bearer token123"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["query"]["q"] == "python"
+    assert body["query"]["limit"] == 25
+    assert body["headers"]["authorization"] == "Bearer token123"
+
+    # Test missing required query parameter
+    gw_event["queryStringParameters"] = {"limit": "25"}  # Missing 'q'
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("q" in str(error) for error in body["detail"])
+
+    # Test missing required header
+    gw_event["queryStringParameters"] = {"q": "python"}
+    gw_event["headers"] = {}  # Missing 'authorization'
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("authorization" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_with_alias(gw_event):
+    """Test that Pydantic models with field aliases work correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class HeaderParams(BaseModel):
+        accept_language: str = Field(alias="accept-language", description="Language preference")
+
+    @app.get("/alias")
+    def alias_handler(headers: Annotated[HeaderParams, Header()]):
+        return {"accept_language": headers.accept_language}
+
+    # Test with alias in request
+    gw_event["path"] = "/alias"
+    gw_event["headers"] = {"accept-language": "en-US"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["accept_language"] == "en-US"
+
+    # Test missing aliased field
+    gw_event["headers"] = {}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("accept-language" in str(error) for error in body["detail"])
 
 
 def test_validate_scalars_with_default(gw_event):

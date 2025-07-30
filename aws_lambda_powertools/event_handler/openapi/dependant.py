@@ -277,6 +277,9 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     elif isinstance(param_field.field_info, (Query, Header)) and is_scalar_sequence_field(param_field):
         return False
+    elif isinstance(param_field.field_info, (Query, Header)):
+        # Allow Pydantic models in Query, Header, and Form parameters when explicitly annotated
+        return False
     else:
         if not isinstance(param_field.field_info, Body):
             raise AssertionError(f"Param: {param_field.name} can only be a request body, use Body()")
@@ -305,6 +308,97 @@ def get_flat_params(dependant: Dependant) -> list[ModelField]:
         + flat_dependant.header_params
         + flat_dependant.cookie_params
     )
+
+
+def expand_pydantic_model_for_openapi(param_field: ModelField) -> list[ModelField]:
+    """
+    Expands a Pydantic model parameter into individual fields for OpenAPI schema generation.
+
+    Parameters
+    ----------
+    param_field: ModelField
+        The field containing a Pydantic model
+
+    Returns
+    -------
+    list[ModelField]
+        List of individual ModelField objects for each field in the Pydantic model
+    """
+    from pydantic import BaseModel
+
+    from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
+
+    # Check if this is a Pydantic model in Query, Header, or Form
+    if not (
+        isinstance(param_field.field_info, (Query, Header, Form))
+        and lenient_issubclass(param_field.field_info.annotation, BaseModel)
+    ):
+        return [param_field]
+
+    # Get the Pydantic model class
+    model_class = param_field.field_info.annotation
+    field_info_template = param_field.field_info
+
+    expanded_fields = []
+
+    # Create individual fields for each field in the Pydantic model
+    for field_name, field_def in model_class.model_fields.items():
+        # Create a new field_info for each model field
+        individual_field_info = type(field_info_template)(
+            default=field_def.default if field_def.default is not ... else None,
+            annotation=field_def.annotation,
+            alias=field_def.alias or field_name,
+            title=field_def.title,
+            description=field_def.description,
+        )
+
+        # Create the ModelField using the internal function
+        from aws_lambda_powertools.event_handler.openapi.params import _create_model_field
+
+        individual_field = _create_model_field(
+            field_info=individual_field_info,
+            type_annotation=field_def.annotation,
+            param_name=field_name,
+            is_path_param=False,
+        )
+
+        if individual_field:
+            expanded_fields.append(individual_field)
+
+    return expanded_fields
+
+
+def get_flat_params_with_pydantic_expansion(dependant: Dependant) -> list[ModelField]:
+    """
+    Get a list of all parameters from a Dependant object, expanding Pydantic models into individual fields.
+    This is used specifically for OpenAPI schema generation.
+
+    Parameters
+    ----------
+    dependant : Dependant
+        The Dependant object containing the parameters.
+
+    Returns
+    -------
+    list[ModelField]
+        A list of ModelField objects with Pydantic models expanded into individual fields.
+    """
+    flat_dependant = get_flat_dependant(dependant)
+    all_params = (
+        flat_dependant.path_params
+        + flat_dependant.query_params
+        + flat_dependant.header_params
+        + flat_dependant.cookie_params
+    )
+
+    expanded_params = []
+
+    for param in all_params:
+        # Expand Pydantic models into individual fields
+        expanded_fields = expand_pydantic_model_for_openapi(param)
+        expanded_params.extend(expanded_fields)
+
+    return expanded_params
 
 
 def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
