@@ -187,7 +187,9 @@ class BaseProvider(ABC):
             raise GetParameterError(str(exc))
 
         if transform:
-            values.update(transform_value(values, transform, raise_on_transform_error))
+            values.update(
+                transform_value(value=values, transform=transform, raise_on_transform_error=raise_on_transform_error),
+            )
 
         self.add_to_cache(key=key, value=values, max_age=max_age)
 
