@@ -7,6 +7,10 @@ class GetParameterError(Exception):
     """When a provider raises an exception on parameter retrieval"""
 
 
+class GetSecretError(Exception):
+    """When a provider raises an exception on secret retrieval"""
+
+
 class TransformParameterError(Exception):
     """When a provider fails to transform a parameter value"""
 

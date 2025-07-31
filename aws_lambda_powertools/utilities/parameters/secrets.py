@@ -8,16 +8,20 @@ import json
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import boto3
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider, transform_value
 from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
-from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
+from aws_lambda_powertools.utilities.parameters.exceptions import (
+    GetSecretError,
+    SetSecretError,
+    TransformParameterError,
+)
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -126,11 +130,159 @@ class SecretsProvider(BaseProvider):
 
         return secret_value["SecretBinary"]
 
-    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
+    def _get_multiple(self, names: list[str], **sdk_options) -> dict[str, Any]:  # type: ignore[override]
         """
-        Retrieving multiple parameter values is not supported with AWS Secrets Manager
+        Retrieve multiple secrets using AWS Secrets Manager batch_get_secret_value API
+
+        Parameters
+        ----------
+        names: list[str]
+            List of secret names to retrieve
+        sdk_options: dict, optional
+            Additional options passed to batch_get_secret_value API call
+
+        Returns
+        -------
+        dict[str, str]
+            Dictionary mapping secret names to their values
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve secrets
         """
-        raise NotImplementedError()
+
+        # Merge filters: combine names with any additional filters from sdk_options
+        filters = sdk_options.get("Filters", [])
+        name_filter = {"Key": "name", "Values": names}
+
+        # Add name filter to existing filters
+        filters.append(name_filter)
+        sdk_options["Filters"] = filters
+
+        # Remove SecretIdList if present to avoid conflicts
+        sdk_options.pop("SecretIdList", None)
+
+        secrets: dict[str, Any] = {}
+        next_token = None
+
+        # Handle pagination automatically
+        while True:
+            if next_token:
+                sdk_options["NextToken"] = next_token
+            elif "NextToken" in sdk_options:
+                # Remove NextToken from first call if it was passed
+                sdk_options.pop("NextToken")  # pragma: no cover
+
+            try:
+                response = self.client.batch_get_secret_value(**sdk_options)
+            except Exception as exc:
+                raise GetSecretError(f"Failed to retrieve secrets: {str(exc)}") from exc
+
+            # Process successful secrets
+            for secret in response.get("SecretValues", []):
+                secret_name = secret["Name"]
+
+                # Extract secret value (SecretString or SecretBinary)
+                if "SecretString" in secret:
+                    secrets[secret_name] = secret["SecretString"]
+                elif "SecretBinary" in secret:
+                    secrets[secret_name] = secret["SecretBinary"]
+
+            # Check if there are more results
+            next_token = response.get("NextToken")
+            if not next_token:
+                break
+
+        # If no secrets were found, raise an error
+        if not secrets:
+            raise GetSecretError(f"No secrets found matching the provided names: {names}")
+
+        return secrets
+
+    def get_multiple(  # type: ignore[override]
+        self,
+        names: list[str],
+        max_age: int | None = None,
+        transform: TransformOptions = None,
+        raise_on_transform_error: bool = False,
+        force_fetch: bool = False,
+        **sdk_options,
+    ) -> dict[str, Any]:
+        """
+        Retrieve multiple secrets by name from AWS Secrets Manager
+
+        Parameters
+        ----------
+        names: list[str]
+            List of secret names to retrieve
+        max_age: int, optional
+            Maximum age of the cached value
+        transform: str, optional
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings and "binary" for base 64 encoded values.
+        raise_on_transform_error: bool, optional
+            Raises an exception if any transform fails, otherwise this will
+            return a None value for each transform that failed
+        force_fetch: bool, optional
+            Force update even before a cached item has expired, defaults to False
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
+
+        Returns
+        -------
+        dict[str, str | bytes | dict]
+            Dictionary mapping secret names to their values
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve secrets
+        TransformParameterError
+            When the parameter provider fails to transform a secret value
+        """
+        if not names:
+            raise GetSecretError("You must provide at least one secret name")
+
+        # Create a unique cache key for this batch of secrets
+        # Use sorted names to ensure consistent caching regardless of order
+        cache_key_name = "|".join(sorted(names))
+        key = self._build_cache_key(name=cache_key_name, transform=transform, is_nested=True)
+
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
+        if not force_fetch and self.has_not_expired_in_cache(key):
+            cached_values = self.fetch_from_cache(key)
+            # Return only the requested secrets from cache (in case cache has more)
+            return {name: cached_values[name] for name in names if name in cached_values}
+
+        try:
+            values = self._get_multiple(names, **sdk_options)
+        except Exception as exc:
+            raise GetSecretError(str(exc)) from exc
+
+        if transform:
+            # Transform each secret value
+            transformed_values = {}
+            for name, value in values.items():
+                try:
+                    transformed_values[name] = transform_value(
+                        key=name,
+                        value=value,
+                        transform=transform,
+                        raise_on_transform_error=raise_on_transform_error,
+                    )
+                except TransformParameterError:
+                    if raise_on_transform_error:
+                        raise
+                    transformed_values[name] = None  # pragma: no cover
+            values = transformed_values
+
+        # Cache the results
+        self.add_to_cache(key=key, value=values, max_age=max_age)
+
+        return values
 
     def _create_secret(self, name: str, **sdk_options) -> CreateSecretResponseTypeDef:
         """
@@ -362,6 +514,85 @@ def get_secret(
 
     return DEFAULT_PROVIDERS["secrets"].get(
         name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
+    )
+
+
+def get_secrets_by_name(
+    names: list[str],
+    transform: TransformOptions = None,
+    force_fetch: bool = False,
+    max_age: int | None = None,
+    **sdk_options,
+) -> dict[str, str | bytes | dict]:
+    """
+    Retrieve multiple secrets by name from AWS Secrets Manager
+
+    Parameters
+    ----------
+    names: list[str]
+        List of secret names to retrieve
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    force_fetch: bool, optional
+        Force update even before a cached item has expired, defaults to False
+    max_age: int, optional
+        Maximum age of the cached value
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the batch_get_secret_value call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve secrets
+    TransformParameterError
+        When the parameter provider fails to transform a secret value
+
+    Returns
+    -------
+    dict[str, str | bytes | dict]
+        Dictionary mapping secret names to their values
+
+    Example
+    -------
+    **Retrieves multiple secrets**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secrets_by_name
+        >>>
+        >>> secrets = get_secrets_by_name(["db-password", "api-key", "jwt-secret"])
+        >>> print(secrets["db-password"])
+
+    **Retrieves multiple secrets with JSON transformation**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secrets_by_name
+        >>>
+        >>> secrets = get_secrets_by_name(["config", "settings"], transform="json")
+        >>> print(secrets["config"]["database_url"])
+
+    **Retrieves multiple secrets with additional filters**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secrets_by_name
+        >>>
+        >>> secrets = get_secrets_by_name(
+        ...     names=["app-secret"],
+        ...     Filters=[{"Key": "primary-region", "Values": ["us-east-1"]}]
+        ... )
+    """
+    if not names:
+        raise GetSecretError("You must provide at least one secret name")
+
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
+    # Only create the provider if this function is called at least once
+    if "secrets" not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
+
+    return DEFAULT_PROVIDERS["secrets"].get_multiple(
+        names=names,
         max_age=max_age,
         transform=transform,
         force_fetch=force_fetch,
