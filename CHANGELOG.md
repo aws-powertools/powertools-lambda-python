@@ -4,15 +4,25 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **event_handler:** split OpenAPI validation to respect middleware returns ([#7050](https://github.com/aws-powertools/powertools-lambda-python/issues/7050))
+
 ## Maintenance
 
+* **ci:** new pre-release 3.18.1a0 ([#7068](https://github.com/aws-powertools/powertools-lambda-python/issues/7068))
+* **ci:** new pre-release 3.18.1a1 ([#7077](https://github.com/aws-powertools/powertools-lambda-python/issues/7077))
+* **deps:** bump mkdocs-material from 9.6.15 to 9.6.16 in /docs ([#7060](https://github.com/aws-powertools/powertools-lambda-python/issues/7060))
+* **deps:** bump aws-powertools/actions from 1.1.0 to 1.3.0 ([#7061](https://github.com/aws-powertools/powertools-lambda-python/issues/7061))
 * **deps:** bump mkdocs-material from 9.6.15 to 9.6.16 ([#7065](https://github.com/aws-powertools/powertools-lambda-python/issues/7065))
 * **deps:** bump squidfunk/mkdocs-material from `0bfdba4` to `bb7b015` in /docs ([#7059](https://github.com/aws-powertools/powertools-lambda-python/issues/7059))
-* **deps:** bump aws-powertools/actions from 1.1.0 to 1.3.0 ([#7061](https://github.com/aws-powertools/powertools-lambda-python/issues/7061))
-* **deps:** bump mkdocs-material from 9.6.15 to 9.6.16 in /docs ([#7060](https://github.com/aws-powertools/powertools-lambda-python/issues/7060))
+* **deps-dev:** bump aws-cdk from 2.1022.0 to 2.1023.0 ([#7067](https://github.com/aws-powertools/powertools-lambda-python/issues/7067))
+* **deps-dev:** bump boto3-stubs from 1.39.16 to 1.39.17 ([#7072](https://github.com/aws-powertools/powertools-lambda-python/issues/7072))
 * **deps-dev:** bump boto3-stubs from 1.39.14 to 1.39.16 ([#7066](https://github.com/aws-powertools/powertools-lambda-python/issues/7066))
 * **deps-dev:** bump coverage from 7.10.0 to 7.10.1 ([#7063](https://github.com/aws-powertools/powertools-lambda-python/issues/7063))
+* **deps-dev:** bump ruff from 0.12.5 to 0.12.7 ([#7073](https://github.com/aws-powertools/powertools-lambda-python/issues/7073))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.207.0a0 to 2.208.0a0 ([#7062](https://github.com/aws-powertools/powertools-lambda-python/issues/7062))
+* **deps-dev:** bump sentry-sdk from 2.34.0 to 2.34.1 ([#7075](https://github.com/aws-powertools/powertools-lambda-python/issues/7075))
 * **deps-dev:** bump sentry-sdk from 2.33.2 to 2.34.0 ([#7064](https://github.com/aws-powertools/powertools-lambda-python/issues/7064))
 
 
