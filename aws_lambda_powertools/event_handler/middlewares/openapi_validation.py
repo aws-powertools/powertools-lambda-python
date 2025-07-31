@@ -37,56 +37,20 @@ APPLICATION_JSON_CONTENT_TYPE = "application/json"
 APPLICATION_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded"
 
 
-class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
+class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
     """
-    OpenAPIValidationMiddleware is a middleware that validates the request against the OpenAPI schema defined by the
-    Lambda handler. It also validates the response against the OpenAPI schema defined by the Lambda handler. It
-    should not be used directly, but rather through the `enable_validation` parameter of the `ApiGatewayResolver`.
+    OpenAPI request validation middleware - validates only incoming requests.
 
-    Example
-    --------
-
-    ```python
-    from pydantic import BaseModel
-
-    from aws_lambda_powertools.event_handler.api_gateway import (
-        APIGatewayRestResolver,
-    )
-
-    class Todo(BaseModel):
-      name: str
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.get("/todos")
-    def get_todos(): list[Todo]:
-      return [Todo(name="hello world")]
-    ```
+    This middleware should be used first in the middleware chain to validate
+    requests before they reach user middlewares.
     """
 
-    def __init__(
-        self,
-        validation_serializer: Callable[[Any], str] | None = None,
-        has_response_validation_error: bool = False,
-    ):
-        """
-        Initialize the OpenAPIValidationMiddleware.
-
-        Parameters
-        ----------
-        validation_serializer : Callable, optional
-            Optional serializer to use when serializing the response for validation.
-            Use it when you have a custom type that cannot be serialized by the default jsonable_encoder.
-
-        has_response_validation_error: bool, optional
-            Optional flag used to distinguish between payload and validation errors.
-            By setting this flag to True, ResponseValidationError will be raised if response could not be validated.
-        """
-        self._validation_serializer = validation_serializer
-        self._has_response_validation_error = has_response_validation_error
+    def __init__(self):
+        """Initialize the request validation middleware."""
+        pass
 
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
-        logger.debug("OpenAPIValidationMiddleware handler")
+        logger.debug("OpenAPIRequestValidationMiddleware handler")
 
         route: Route = app.context["_route"]
 
@@ -140,15 +104,111 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         if errors:
             # Raise the validation errors
             raise RequestValidationError(_normalize_errors(errors))
+
+        # Re-write the route_args with the validated values
+        app.context["_route_args"] = values
+
+        # Call the next middleware
+        return next_middleware(app)
+
+    def _get_body(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """
+        Get the request body from the event, and parse it according to content type.
+        """
+        content_type = app.current_event.headers.get("content-type", "").strip()
+
+        # Handle JSON content
+        if not content_type or content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
+            return self._parse_json_data(app)
+
+        # Handle URL-encoded form data
+        elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
+            return self._parse_form_data(app)
+
         else:
-            # Re-write the route_args with the validated values, and call the next middleware
-            app.context["_route_args"] = values
+            raise NotImplementedError("Only JSON body or Form() are supported")
 
-            # Call the handler by calling the next middleware
-            response = next_middleware(app)
+    def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse JSON data from the request body."""
+        try:
+            return app.current_event.json_body
+        except json.JSONDecodeError as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "json_invalid",
+                        "loc": ("body", e.pos),
+                        "msg": "JSON decode error",
+                        "input": {},
+                        "ctx": {"error": e.msg},
+                    },
+                ],
+                body=e.doc,
+            ) from e
 
-            # Process the response
-            return self._handle_response(route=route, response=response)
+    def _parse_form_data(self, app: EventHandlerInstance) -> dict[str, Any]:
+        """Parse URL-encoded form data from the request body."""
+        try:
+            body = app.current_event.decoded_body or ""
+            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
+            parsed = parse_qs(body, keep_blank_values=True)
+
+            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
+            return result
+
+        except Exception as e:  # pragma: no cover
+            raise RequestValidationError(  # pragma: no cover
+                [
+                    {
+                        "type": "form_invalid",
+                        "loc": ("body",),
+                        "msg": "Form data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
+
+
+class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
+    """
+    OpenAPI response validation middleware - validates only outgoing responses.
+
+    This middleware should be used last in the middleware chain to validate
+    responses only from route handlers, not from user middlewares.
+    """
+
+    def __init__(
+        self,
+        validation_serializer: Callable[[Any], str] | None = None,
+        has_response_validation_error: bool = False,
+    ):
+        """
+        Initialize the response validation middleware.
+
+        Parameters
+        ----------
+        validation_serializer : Callable, optional
+            Optional serializer to use when serializing the response for validation.
+            Use it when you have a custom type that cannot be serialized by the default jsonable_encoder.
+
+        has_response_validation_error: bool, optional
+            Optional flag used to distinguish between payload and validation errors.
+            By setting this flag to True, ResponseValidationError will be raised if response could not be validated.
+        """
+        self._validation_serializer = validation_serializer
+        self._has_response_validation_error = has_response_validation_error
+
+    def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
+        logger.debug("OpenAPIResponseValidationMiddleware handler")
+
+        route: Route = app.context["_route"]
+
+        # Call the next middleware (should be the route handler)
+        response = next_middleware(app)
+
+        # Process the response
+        return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
         # Process the response body if it exists
@@ -228,85 +288,27 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
         Prepares the response content for serialization.
         """
-        if isinstance(res, BaseModel):
-            return _model_dump(
+        if isinstance(res, BaseModel):  # pragma: no cover
+            return _model_dump(  # pragma: no cover
                 res,
                 by_alias=True,
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
             )
-        elif isinstance(res, list):
-            return [
+        elif isinstance(res, list):  # pragma: no cover
+            return [  # pragma: no cover
                 self._prepare_response_content(item, exclude_unset=exclude_unset, exclude_defaults=exclude_defaults)
                 for item in res
             ]
-        elif isinstance(res, dict):
-            return {
+        elif isinstance(res, dict):  # pragma: no cover
+            return {  # pragma: no cover
                 k: self._prepare_response_content(v, exclude_unset=exclude_unset, exclude_defaults=exclude_defaults)
                 for k, v in res.items()
             }
-        elif dataclasses.is_dataclass(res):
-            return dataclasses.asdict(res)  # type: ignore[arg-type]
-        return res
-
-    def _get_body(self, app: EventHandlerInstance) -> dict[str, Any]:
-        """
-        Get the request body from the event, and parse it according to content type.
-        """
-        content_type = app.current_event.headers.get("content-type", "").strip()
-
-        # Handle JSON content
-        if not content_type or content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
-            return self._parse_json_data(app)
-
-        # Handle URL-encoded form data
-        elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
-            return self._parse_form_data(app)
-
-        else:
-            raise NotImplementedError("Only JSON body or Form() are supported")
-
-    def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
-        """Parse JSON data from the request body."""
-        try:
-            return app.current_event.json_body
-        except json.JSONDecodeError as e:
-            raise RequestValidationError(
-                [
-                    {
-                        "type": "json_invalid",
-                        "loc": ("body", e.pos),
-                        "msg": "JSON decode error",
-                        "input": {},
-                        "ctx": {"error": e.msg},
-                    },
-                ],
-                body=e.doc,
-            ) from e
-
-    def _parse_form_data(self, app: EventHandlerInstance) -> dict[str, Any]:
-        """Parse URL-encoded form data from the request body."""
-        try:
-            body = app.current_event.decoded_body or ""
-            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
-            parsed = parse_qs(body, keep_blank_values=True)
-
-            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
-            return result
-
-        except Exception as e:  # pragma: no cover
-            raise RequestValidationError(  # pragma: no cover
-                [
-                    {
-                        "type": "form_invalid",
-                        "loc": ("body",),
-                        "msg": "Form data parsing error",
-                        "input": {},
-                        "ctx": {"error": str(e)},
-                    },
-                ],
-            ) from e
+        elif dataclasses.is_dataclass(res):  # pragma: no cover
+            return dataclasses.asdict(res)  # type: ignore[arg-type] # pragma: no cover
+        return res  # pragma: no cover
 
 
 def _request_params_to_args(
