@@ -214,17 +214,145 @@ Each dynamic route you set must be part of your function signature. This allows 
 ???+ tip
     You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
+#### Routing Rules Syntax
+
+The routing system uses a specific syntax to define dynamic URL patterns. Understanding this syntax is crucial for creating flexible and robust API routes.
+
+##### Dynamic Path Parameters
+
+Dynamic path parameters are defined using angle brackets `<parameter_name>` syntax. These parameters are automatically converted to regex patterns for efficient route matching.
+
+**Syntax**: `/path/<parameter_name>`
+
+* **Parameter names** must contain only word characters (letters, numbers, underscore)
+* **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`
+
+=== "routing_syntax_basic.py"
+
+    ```python
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+
+    app = APIGatewayRestResolver()
+
+    @app.get("/users/<user_id>")
+    def get_user(user_id: str):
+        # user_id can be: "123", "user-456", "john.doe", "user_with_underscores"
+        return {"user_id": user_id}
+
+    @app.get("/orders/<order_id>/items/<item_id>")
+    def get_order_item(order_id: str, item_id: str):
+        # Multiple parameters: /orders/ORD-123/items/ITEM_456
+        return {"order_id": order_id, "item_id": item_id}
+    ```
+
+##### Regex Pattern Conversion
+
+Behind the scenes, dynamic routes are converted to regex patterns for efficient matching:
+
+| Route Pattern | Generated Regex | Matches | Doesn't Match |
+|---------------|-----------------|---------|---------------|
+| `/users/<user_id>` | `^/users/(?P<user_id>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)$` | `/users/123`, `/users/user-456` | `/users/123/profile` |
+| `/api/<version>/users` | `^/api/(?P<version>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)/users$` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
+| `/files/<path>` | `^/files/(?P<path>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)$` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
+
+???+ warning "Route Matching Behavior"
+    * Routes are matched **exactly** - no partial matches
+    * Dynamic parameters match **non-slash characters only** by default
+    * For paths with slashes, use [catch-all routes](#catch-all-routes) instead
+
+##### Advanced Examples
+
+**Complex Parameter Names**
+
+```python
+@app.get("/api/<api_version>/resources/<resource_type>/<resource_id>")
+def get_resource(api_version: str, resource_type: str, resource_id: str):
+    # Matches: /api/v1/resources/users/123
+    # api_version = "v1", resource_type = "users", resource_id = "123"
+    return {
+        "version": api_version,
+        "type": resource_type, 
+        "id": resource_id
+    }
+```
+
+**Mixed Static and Dynamic Paths**
+
+```python
+@app.get("/organizations/<org_id>/teams/<team_id>/members")
+def list_team_members(org_id: str, team_id: str):
+    # Matches: /organizations/acme-corp/teams/engineering/members
+    return {"org": org_id, "team": team_id, "action": "list_members"}
+```
+
+**Handling Special Characters**
+
+```python
+@app.get("/files/<filename>")
+def get_file(filename: str):
+    # These all work:
+    # /files/document.pdf → filename = "document.pdf"
+    # /files/my-file_v2.txt → filename = "my-file_v2.txt"
+    # /files/file%20with%20spaces → filename = "file%20with%20spaces"
+    return {"filename": filename}
+```
+
+???+ tip "Function Parameter Names Must Match"
+    The parameter names in your route (`<user_id>`) must exactly match the parameter names in your function signature (`user_id: str`). This is how the framework knows which captured values to pass to which parameters.
+
 #### Catch-all routes
 
 ???+ note
     We recommend having explicit routes whenever possible; use catch-all routes sparingly.
 
-You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} string to handle an arbitrary number of paths within a request, for example `.+`.
+For scenarios where you need to handle arbitrary or deeply nested paths, you can use regex patterns directly in your route definitions. These are particularly useful for proxy routes or when dealing with file paths.
 
-You can also combine nested paths with greedy regex to catch in between routes.
+##### Using Regex Patterns
 
-???+ warning
-    We choose the most explicit registered route that matches an incoming event.
+You can use standard [Python regex patterns](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} in your route definitions:
+
+| Pattern | Description | Examples |
+|---------|-------------|----------|
+| `.+` | Matches one or more characters (greedy) | `/proxy/.+` matches `/proxy/any/deep/path` |
+| `.*` | Matches zero or more characters (greedy) | `/files/.*` matches `/files/` and `/files/deep/path` |
+| `[^/]+` | Matches one or more non-slash characters | `/api/[^/]+` matches `/api/v1` but not `/api/v1/users` |
+| `\w+` | Matches one or more word characters | `/users/\w+` matches `/users/john123` |
+
+**Common Regex Route Examples:**
+
+```python
+# File path proxy - captures everything after /files/
+@app.get("/files/.+")
+def serve_file():
+    file_path = app.current_event.path.replace("/files/", "")
+    return {"file_path": file_path}
+
+# API versioning with any format
+@app.get("/api/v\d+/.*")  # Matches /api/v1/users, /api/v2/posts/123
+def handle_versioned_api():
+    return {"api_version": "handled"}
+
+# Catch-all for unmatched routes
+@app.route(".*", method=["GET", "POST"])  # Must be last route
+def catch_all():
+    return {"message": "Route not found", "path": app.current_event.path}
+```
+
+##### Combining Dynamic Parameters with Regex
+
+```python
+# Mixed: dynamic parameter + regex catch-all
+@app.get("/users/<user_id>/files/.+")
+def get_user_files(user_id: str):
+    file_path = app.current_event.path.split(f"/users/{user_id}/files/")[1]
+    return {"user_id": user_id, "file_path": file_path}
+```
+
+???+ warning "Route Matching Priority"
+    * Routes are matched in **order of specificity**, not registration order
+    * More specific routes (exact matches) take precedence over regex patterns
+    * Among regex routes, the first registered matching route wins
+    * Always place catch-all routes (`.*`) last
 
 === "dynamic_routes_catch_all.py"
 
