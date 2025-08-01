@@ -240,17 +240,28 @@ section Docs
     Create PR (Layer ARN)       : active, after layer_prod, 8s
     Release versioned docs      : active, 2.2m
 
-Documentation release : milestone, m4, 10:28,1m
+Documentation release : milestone, m5, 10:28,1m
 
 section SSM Parameters
     Update SSM Parameters       : active, 8s
 
-SSM Parameters : milestone, m5, 10:28,1m
+SSM Parameters : milestone, m6, 10:28,1m
 
 section Post-release
     Close pending issues        : active, 8s
 
-Release complete : milestone, m6, 10:31,2m
+section GovCloud
+    Publish GovCloud layers (Gamma)    : active, 8s
+    Publish GovCloud layers (Prod)    : active, 8s
+    GovCloud layers published : milestone, m7
+
+
+section China
+    Publish China layers (Gamma)    : active, 8s
+    Publish China layers (Prod)    : active, 8s
+    China layers published : milestone, m8
+
+Release complete : milestone, m9, 10:31,2m
 ```
 
 #### Drafting release notes
