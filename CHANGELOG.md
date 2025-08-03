@@ -8,15 +8,20 @@
 
 * **event_handler:** split OpenAPI validation to respect middleware returns ([#7050](https://github.com/aws-powertools/powertools-lambda-python/issues/7050))
 
+## Code Refactoring
+
+* **parser:** Improve Kinesis models with examples and descriptions ([#7092](https://github.com/aws-powertools/powertools-lambda-python/issues/7092))
+* **parser:** Improve EventBridge models with examples and descriptions ([#7090](https://github.com/aws-powertools/powertools-lambda-python/issues/7090))
+
 ## Features
 
 * **parameters:** add support for retrieving batch of secrets ([#7058](https://github.com/aws-powertools/powertools-lambda-python/issues/7058))
 
 ## Maintenance
 
+* **ci:** new pre-release 3.18.1a2 ([#7085](https://github.com/aws-powertools/powertools-lambda-python/issues/7085))
 * **ci:** new pre-release 3.18.1a0 ([#7068](https://github.com/aws-powertools/powertools-lambda-python/issues/7068))
 * **ci:** new pre-release 3.18.1a1 ([#7077](https://github.com/aws-powertools/powertools-lambda-python/issues/7077))
-* **ci:** new pre-release 3.18.1a2 ([#7085](https://github.com/aws-powertools/powertools-lambda-python/issues/7085))
 * **deps:** bump mkdocs-material from 9.6.15 to 9.6.16 ([#7065](https://github.com/aws-powertools/powertools-lambda-python/issues/7065))
 * **deps:** bump mkdocs-material from 9.6.15 to 9.6.16 in /docs ([#7060](https://github.com/aws-powertools/powertools-lambda-python/issues/7060))
 * **deps:** bump aws-powertools/actions from 1.1.0 to 1.3.0 ([#7061](https://github.com/aws-powertools/powertools-lambda-python/issues/7061))
