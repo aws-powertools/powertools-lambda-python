@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
 from urllib.parse import parse_qs
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -338,6 +338,11 @@ def _request_params_to_args_with_pydantic_support(
             # Extract individual fields from the request
             for model_field_name, model_field_def in model_class.model_fields.items():
                 field_alias = model_field_def.alias or model_field_name
+
+                # Convert snake_case to kebab-case for headers (HTTP convention)
+                if isinstance(field_info, Header):
+                    field_alias = field_alias.replace("_", "-")
+
                 field_value = received_params.get(field_alias)
 
                 if field_value is not None:
@@ -358,8 +363,21 @@ def _request_params_to_args_with_pydantic_support(
                 try:
                     model_instance = model_class(**model_data)
                     values[field.name] = model_instance
+                except ValidationError as e:
+                    # Extract detailed validation errors from Pydantic
+                    for error in e.errors():
+                        # Update the location to include the parameter source (query/header) and field path
+                        error_loc = [field_info.in_.value] + list(error["loc"])
+                        errors.append(
+                            {
+                                "type": error["type"],
+                                "loc": error_loc,
+                                "msg": error["msg"],
+                                "input": error.get("input"),
+                            },
+                        )
                 except Exception as e:
-                    # Validation error
+                    # Fallback for non-Pydantic validation errors
                     loc = (field_info.in_.value, field.alias)
                     errors.append(
                         {
@@ -593,6 +611,10 @@ def _normalize_multi_header_values_with_param(headers: MutableMapping[str, Any],
                     # Normalize individual fields of the Pydantic model
                     for field_name, field_def in model_class.model_fields.items():
                         field_alias = field_def.alias or field_name
+
+                        # Convert snake_case to kebab-case for headers (HTTP convention)
+                        field_alias = field_alias.replace("_", "-")
+
                         try:
                             if len(headers[field_alias]) == 1:
                                 headers[field_alias] = headers[field_alias][0]

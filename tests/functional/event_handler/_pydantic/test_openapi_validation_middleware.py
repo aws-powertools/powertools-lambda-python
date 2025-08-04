@@ -94,6 +94,47 @@ def test_validate_pydantic_query_params(gw_event):
     assert any("limit" in str(error) for error in body["detail"])
 
 
+def test_validate_pydantic_query_params_detailed_errors(gw_event):
+    """Test that Pydantic validation errors include detailed field-level information"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class QueryParams(BaseModel):
+        full_name: str = Field(..., min_length=5, description="Full name with minimum 5 characters")
+        age: int = Field(..., ge=18, le=100, description="Age between 18 and 100")
+
+    @app.get("/query-model")
+    def query_model(params: Annotated[QueryParams, Query()]):
+        return {"full_name": params.full_name, "age": params.age}
+
+    # Test validation error with detailed field information
+    gw_event["path"] = "/query-model"
+    gw_event["queryStringParameters"] = {"full_name": "Jo", "age": "15"}  # Both invalid
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+
+    # Check that we get detailed field-level errors
+    errors = body["detail"]
+
+    # Should have errors for both fields
+    full_name_error = next((e for e in errors if "full_name" in e["loc"]), None)
+    age_error = next((e for e in errors if "age" in e["loc"]), None)
+
+    assert full_name_error is not None, "Should have error for full_name field"
+    assert age_error is not None, "Should have error for age field"
+
+    # Check error details for full_name
+    assert full_name_error["loc"] == ["query", "full_name"]
+    assert full_name_error["type"] == "string_too_short"
+
+    # Check error details for age
+    assert age_error["loc"] == ["query", "age"]
+    assert age_error["type"] == "greater_than_equal"
+
+
 def test_validate_pydantic_header_params(gw_event):
     """Test that Pydantic models in Header parameters are validated correctly"""
     app = APIGatewayRestResolver(enable_validation=True)
@@ -139,6 +180,49 @@ def test_validate_pydantic_header_params(gw_event):
     body = json.loads(result["body"])
     assert "detail" in body
     assert any("authorization" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
+    """Test that snake_case header fields are converted to kebab-case in OpenAPI schema and validation"""
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger()
+
+    class HeaderParams(BaseModel):
+        correlation_id: str = Field(description="Correlation ID header")
+        user_agent: str = Field(default="PowerTools/1.0", description="User agent header")
+
+    @app.get("/kebab-headers")
+    def kebab_handler(headers: Annotated[HeaderParams, Header()]):
+        return {
+            "correlation_id": headers.correlation_id,
+            "user_agent": headers.user_agent,
+        }
+
+    # Test that OpenAPI schema uses kebab-case for headers
+    openapi_schema = app.get_openapi_schema()
+    operation = openapi_schema["paths"]["/kebab-headers"]["get"]
+    parameters = operation["parameters"]
+
+    # Find the correlation_id parameter
+    correlation_param = next((p for p in parameters if p["name"] == "correlation-id"), None)
+    assert correlation_param is not None, "Should have correlation-id parameter in kebab-case"
+    assert correlation_param["in"] == "header"
+
+    # Find the user_agent parameter
+    user_agent_param = next((p for p in parameters if p["name"] == "user-agent"), None)
+    assert user_agent_param is not None, "Should have user-agent parameter in kebab-case"
+    assert user_agent_param["in"] == "header"
+
+    # Test validation with kebab-case headers
+    gw_event["path"] = "/kebab-headers"
+    gw_event["headers"] = {"correlation-id": "test-123", "user-agent": "TestClient/1.0"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["correlation_id"] == "test-123"
+    assert body["user_agent"] == "TestClient/1.0"
 
 
 def test_validate_pydantic_mixed_params(gw_event):

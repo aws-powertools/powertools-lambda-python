@@ -837,8 +837,14 @@ class Route:
 
                 for field_name, field_def in model_class.model_fields.items():
                     # Create individual parameter for each model field
+                    param_name = field_def.alias or field_name
+
+                    # Convert snake_case to kebab-case for headers (HTTP convention)
+                    if isinstance(field_info, Header):
+                        param_name = param_name.replace("_", "-")
+
                     individual_param = {
-                        "name": field_def.alias or field_name,
+                        "name": param_name,
                         "in": field_info.in_.value,
                         "required": field_def.is_required()
                         if hasattr(field_def, "is_required")
