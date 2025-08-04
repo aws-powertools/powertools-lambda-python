@@ -214,40 +214,14 @@ Each dynamic route you set must be part of your function signature. This allows 
 ???+ tip
     You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
-#### Routing Rules Syntax
+#### Dynamic Path Parameters
 
-The routing system uses a specific syntax to define dynamic URL patterns. Understanding this syntax is crucial for creating flexible and robust API routes.
-
-##### Dynamic Path Parameters
-
-Dynamic path parameters are defined using angle brackets `<parameter_name>` syntax. These parameters are automatically converted to regex patterns for efficient route matching.
+Dynamic path parameters are defined using angle brackets `<parameter_name>` syntax. These parameters are automatically converted to regex patterns for efficient route matching and performance gains.
 
 **Syntax**: `/path/<parameter_name>`
 
 * **Parameter names** must contain only word characters (letters, numbers, underscore)
 * **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`
-
-=== "routing_syntax_basic.py"
-
-    ```python
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/users/<user_id>")
-    def get_user(user_id: str):
-        # user_id can be: "123", "user-456", "john.doe", "user_with_underscores"
-        return {"user_id": user_id}
-
-    @app.get("/orders/<order_id>/items/<item_id>")
-    def get_order_item(order_id: str, item_id: str):
-        # Multiple parameters: /orders/ORD-123/items/ITEM_456
-        return {"order_id": order_id, "item_id": item_id}
-    ```
-
-##### Regex Pattern Conversion
-
-Behind the scenes, dynamic routes are converted to regex patterns for efficient matching:
 
 | Route Pattern | Generated Regex | Matches | Doesn't Match |
 |---------------|-----------------|---------|---------------|
@@ -255,49 +229,23 @@ Behind the scenes, dynamic routes are converted to regex patterns for efficient 
 | `/api/<version>/users` | `^/api/(?P<version>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)/users$` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
 | `/files/<path>` | `^/files/(?P<path>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)$` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
 
-???+ warning "Route Matching Behavior"
-    * Routes are matched **exactly** - no partial matches
-    * Dynamic parameters match **non-slash characters only** by default
-    * For paths with slashes, use [catch-all routes](#catch-all-routes) instead
+=== "routing_syntax_basic.py"
 
-##### Advanced Examples
+    ```python hl_lines="11 18"
+    --8<-- "examples/event_handler_rest/src/routing_syntax_basic.py"
+    ```
 
-**Complex Parameter Names**
 
-```python
-@app.get("/api/<api_version>/resources/<resource_type>/<resource_id>")
-def get_resource(api_version: str, resource_type: str, resource_id: str):
-    # Matches: /api/v1/resources/users/123
-    # api_version = "v1", resource_type = "users", resource_id = "123"
-    return {
-        "version": api_version,
-        "type": resource_type, 
-        "id": resource_id
-    }
-```
 
-**Mixed Static and Dynamic Paths**
+#### Advanced Examples
 
-```python
-@app.get("/organizations/<org_id>/teams/<team_id>/members")
-def list_team_members(org_id: str, team_id: str):
-    # Matches: /organizations/acme-corp/teams/engineering/members
-    return {"org": org_id, "team": team_id, "action": "list_members"}
-```
+=== "routing_advanced_examples.py"
 
-**Handling Special Characters**
+    ```python hl_lines="12 25 33"
+    --8<-- "examples/event_handler_rest/src/routing_advanced_examples.py"
+    ```
 
-```python
-@app.get("/files/<filename>")
-def get_file(filename: str):
-    # These all work:
-    # /files/document.pdf → filename = "document.pdf"
-    # /files/my-file_v2.txt → filename = "my-file_v2.txt"
-    # /files/file%20with%20spaces → filename = "file%20with%20spaces"
-    return {"filename": filename}
-```
-
-???+ tip "Function Parameter Names Must Match"
+???+ tip "Function parameter names must match"
     The parameter names in your route (`<user_id>`) must exactly match the parameter names in your function signature (`user_id: str`). This is how the framework knows which captured values to pass to which parameters.
 
 #### Catch-all routes
