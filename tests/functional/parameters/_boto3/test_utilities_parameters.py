@@ -1114,6 +1114,34 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, 
         stubber.deactivate()
 
 
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_transform(mock_name, mock_value, config):
+    success = f"/dev/{mock_name}"
+    fail = f"/prod/{mock_name}"
+    params = {success: {}, fail: {}}
+    param_names = list(params.keys())
+    expected_value = {"value": mock_value}
+    stub_params = {success: json.dumps(expected_value)}
+
+    expected_stub_response = build_get_parameters_stub(params=stub_params, invalid_parameters=[fail])
+    expected_stub_params = {"Names": param_names}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    try:
+        ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
+
+        stubber.assert_no_pending_responses()
+        assert ret[success] == expected_value
+        assert ret["_errors"]
+        assert len(ret["_errors"]) == 1
+        assert fail not in ret
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decrypt(mock_name, config):
     # GIVEN one parameter requires decryption and an arbitrary SDK error occurs
     param = f"/{mock_name}"
