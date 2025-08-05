@@ -196,8 +196,8 @@ You can use `/todos/<todo_id>` to configure dynamic URL paths, where `<todo_id>`
 
 Each dynamic route you set must be part of your function signature. This allows us to call your function using keyword arguments when matching your dynamic route.
 
-???+ note
-    For brevity, we will only include the necessary keys for each sample request for the example to work.
+???+ tip
+    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
 === "dynamic_routes.py"
 
@@ -211,23 +211,21 @@ Each dynamic route you set must be part of your function signature. This allows 
     --8<-- "examples/event_handler_rest/src/dynamic_routes.json"
     ```
 
-???+ tip
-    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
-
-#### Dynamic Path Parameters
+#### Dynamic path mechanism
 
 Dynamic path parameters are defined using angle brackets `<parameter_name>` syntax. These parameters are automatically converted to regex patterns for efficient route matching and performance gains.
 
 **Syntax**: `/path/<parameter_name>`
 
 * **Parameter names** must contain only word characters (letters, numbers, underscore)
-* **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`
+* **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`. Reserved characters must be percent-encoded in URLs to prevent errors.
 
-| Route Pattern | Generated Regex | Matches | Doesn't Match |
-|---------------|-----------------|---------|---------------|
-| `/users/<user_id>` | `^/users/(?P<user_id>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)$` | `/users/123`, `/users/user-456` | `/users/123/profile` |
-| `/api/<version>/users` | `^/api/(?P<version>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)/users$` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
-| `/files/<path>` | `^/files/(?P<path>[-._~()'!*:@,;=+&$%<> \[\]{}|^\w]+)$` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
+| Route Pattern | Matches | Doesn't Match |
+|---------------|---------|---------------|
+| `/users/<user_id>` | `/users/123`, `/users/user-456` | `/users/123/profile` |
+| `/api/<version>/users` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
+| `/files/<path>` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
+| `/files/<folder>/<name>` | `/files/src/document.pdf`, `/files/src/test.txt` | `/files/sub/folder/file.txt` |
 
 === "routing_syntax_basic.py"
 
@@ -235,13 +233,9 @@ Dynamic path parameters are defined using angle brackets `<parameter_name>` synt
     --8<-- "examples/event_handler_rest/src/routing_syntax_basic.py"
     ```
 
-
-
-#### Advanced Examples
-
 === "routing_advanced_examples.py"
 
-    ```python hl_lines="12 25 33"
+    ```python hl_lines="11 22"
     --8<-- "examples/event_handler_rest/src/routing_advanced_examples.py"
     ```
 
@@ -250,14 +244,13 @@ Dynamic path parameters are defined using angle brackets `<parameter_name>` synt
 
 #### Catch-all routes
 
-???+ note
-    We recommend having explicit routes whenever possible; use catch-all routes sparingly.
-
 For scenarios where you need to handle arbitrary or deeply nested paths, you can use regex patterns directly in your route definitions. These are particularly useful for proxy routes or when dealing with file paths.
+
+**We recommend** having explicit routes whenever possible; use catch-all routes sparingly.
 
 ##### Using Regex Patterns
 
-You can use standard [Python regex patterns](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} in your route definitions:
+You can use standard [Python regex patterns](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} in your route definitions, for example:
 
 | Pattern | Description | Examples |
 |---------|-------------|----------|
@@ -266,53 +259,17 @@ You can use standard [Python regex patterns](https://docs.python.org/3/library/r
 | `[^/]+` | Matches one or more non-slash characters | `/api/[^/]+` matches `/api/v1` but not `/api/v1/users` |
 | `\w+` | Matches one or more word characters | `/users/\w+` matches `/users/john123` |
 
-**Common Regex Route Examples:**
-
-```python
-# File path proxy - captures everything after /files/
-@app.get("/files/.+")
-def serve_file():
-    file_path = app.current_event.path.replace("/files/", "")
-    return {"file_path": file_path}
-
-# API versioning with any format
-@app.get("/api/v\d+/.*")  # Matches /api/v1/users, /api/v2/posts/123
-def handle_versioned_api():
-    return {"api_version": "handled"}
-
-# Catch-all for unmatched routes
-@app.route(".*", method=["GET", "POST"])  # Must be last route
-def catch_all():
-    return {"message": "Route not found", "path": app.current_event.path}
-```
-
-##### Combining Dynamic Parameters with Regex
-
-```python
-# Mixed: dynamic parameter + regex catch-all
-@app.get("/users/<user_id>/files/.+")
-def get_user_files(user_id: str):
-    file_path = app.current_event.path.split(f"/users/{user_id}/files/")[1]
-    return {"user_id": user_id, "file_path": file_path}
-```
-
-???+ warning "Route Matching Priority"
-    * Routes are matched in **order of specificity**, not registration order
-    * More specific routes (exact matches) take precedence over regex patterns
-    * Among regex routes, the first registered matching route wins
-    * Always place catch-all routes (`.*`) last
-
 === "dynamic_routes_catch_all.py"
 
-    ```python hl_lines="11"
+    ```python hl_lines="11 17 18 24 25 30 31 36 37"
     --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.py"
     ```
 
-=== "dynamic_routes_catch_all.json"
-
-    ```json
-    --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.json"
-    ```
+???+ warning "Route Matching Priority"
+    - Routes are matched in **order of specificity**, not registration order
+    - More specific routes (exact matches) take precedence over regex patterns
+    - Among regex routes, the first registered matching route wins
+    - Always place catch-all routes (`.*`) last
 
 ### HTTP Methods
 
