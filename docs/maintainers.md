@@ -160,7 +160,7 @@ Releasing a new version is a multi-step process that takes up to 2 hours to comp
 <!-- markdownlint-disable MD013 -->
 **Release Steps**:
 
-1. **Run [end-to-end tests](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/.github/workflows/run-e2e-tests.yml)** and ensure they pass
+1. **Run [end-to-end tests](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml)** and ensure they pass
 2. **Trigger Release v3 workflow** - Run the [`Release v3`](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-v3.yml) workflow with two inputs: the new Powertools version (check [latest version](https://pypi.org/project/aws-lambda-powertools/)) and the new Lambda Layer version number. To find the new Lambda Layer version number, go to this [page](https://docs.powertools.aws.dev/lambda/python/latest/#python-313) and increase the version by one (N + 1).
 3. **Monitor the release workflow** - it runs tests, publishes to PyPI, deploys Lambda layers to Beta and Prod environments across all commercial regions, runs canary tests, and updates documentation. If it fails, see the [Re-run partial failed Release workflow](#re-run-partial-failed-release-workflow) section
 4. **Review and merge documentation/version PRs** - two PRs will be created to update documentation and bump version files. Review, approve and merge both (order doesn't matter)
