@@ -57,8 +57,7 @@ def test_form_parameter_validation():
 
     @app.post("/contact")
     def contact_form(
-        name: Annotated[str, Form(description="Contact name")], 
-        email: Annotated[str, Form(description="Contact email")]
+        name: Annotated[str, Form(description="Contact name")], email: Annotated[str, Form(description="Contact email")]
     ):
         return {"message": f"Hello {name}, we'll contact you at {email}"}
 
@@ -66,10 +65,7 @@ def test_form_parameter_validation():
     body = "name=John+Doe&email=john%40example.com"
 
     event = make_request_event(
-        method="POST", 
-        path="/contact", 
-        body=body, 
-        headers={"content-type": "application/x-www-form-urlencoded"}
+        method="POST", path="/contact", body=body, headers={"content-type": "application/x-www-form-urlencoded"}
     )
 
     response = app.resolve(event, {})
