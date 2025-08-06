@@ -177,74 +177,10 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
 
     def _parse_multipart_data(self, app: EventHandlerInstance, content_type: str) -> dict[str, Any]:
         """Parse multipart/form-data."""
-        import base64
-
         try:
-            # Get the raw body - it might be base64 encoded
-            body = app.current_event.body or ""
-
-            # Handle base64 encoded body (common in Lambda)
-            if app.current_event.is_base64_encoded:
-                try:
-                    decoded_bytes = base64.b64decode(body)
-                except Exception:
-                    # If decoding fails, use body as-is
-                    decoded_bytes = body.encode("utf-8") if isinstance(body, str) else body
-            else:
-                decoded_bytes = body.encode("utf-8") if isinstance(body, str) else body
-
-            # Extract boundary from content type - handle both standard and WebKit boundaries
-            boundary_match = re.search(r"boundary=([^;,\s]+)", content_type)
-            if not boundary_match:
-                # Handle WebKit browsers that may use different boundary formats
-                webkit_match = re.search(r"WebKitFormBoundary([a-zA-Z0-9]+)", content_type)
-                if webkit_match:
-                    boundary = "WebKitFormBoundary" + webkit_match.group(1)
-                else:
-                    raise ValueError("No boundary found in multipart content-type")
-            else:
-                boundary = boundary_match.group(1).strip('"')
-            boundary_bytes = ("--" + boundary).encode("utf-8")
-
-            # Parse multipart sections
-            parsed_data: dict[str, Any] = {}
-            if decoded_bytes:
-                sections = decoded_bytes.split(boundary_bytes)
-
-                for section in sections[1:-1]:  # Skip first empty and last closing parts
-                    if not section.strip():
-                        continue
-
-                    # Split headers and content
-                    header_end = section.find(b"\r\n\r\n")
-                    if header_end == -1:
-                        header_end = section.find(b"\n\n")
-                        if header_end == -1:
-                            continue
-                        content = section[header_end + 2 :].strip()
-                    else:
-                        content = section[header_end + 4 :].strip()
-
-                    headers_part = section[:header_end].decode("utf-8", errors="ignore")
-
-                    # Extract field name from Content-Disposition header
-                    name_match = re.search(r'name="([^"]+)"', headers_part)
-                    if name_match:
-                        field_name = name_match.group(1)
-
-                        # Check if it's a file field
-                        if "filename=" in headers_part:
-                            # It's a file - store as bytes
-                            parsed_data[field_name] = content
-                        else:
-                            # It's a regular form field - decode as string
-                            try:
-                                parsed_data[field_name] = content.decode("utf-8")
-                            except UnicodeDecodeError:
-                                # If can't decode as text, keep as bytes
-                                parsed_data[field_name] = content
-
-            return parsed_data
+            decoded_bytes = self._decode_request_body(app)
+            boundary_bytes = self._extract_boundary_bytes(content_type)
+            return self._parse_multipart_sections(decoded_bytes, boundary_bytes)
 
         except Exception as e:
             raise RequestValidationError(
@@ -258,6 +194,100 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                     },
                 ]
             ) from e
+
+    def _decode_request_body(self, app: EventHandlerInstance) -> bytes:
+        """Decode the request body, handling base64 encoding if necessary."""
+        import base64
+
+        body = app.current_event.body or ""
+
+        if app.current_event.is_base64_encoded:
+            try:
+                return base64.b64decode(body)
+            except Exception:
+                # If decoding fails, use body as-is
+                return body.encode("utf-8") if isinstance(body, str) else body
+        else:
+            return body.encode("utf-8") if isinstance(body, str) else body
+
+    def _extract_boundary_bytes(self, content_type: str) -> bytes:
+        """Extract and return the boundary bytes from the content type header."""
+        boundary_match = re.search(r"boundary=([^;,\s]+)", content_type)
+        
+        if not boundary_match:
+            # Handle WebKit browsers that may use different boundary formats
+            webkit_match = re.search(r"WebKitFormBoundary([a-zA-Z0-9]+)", content_type)
+            if webkit_match:
+                boundary = "WebKitFormBoundary" + webkit_match.group(1)
+            else:
+                raise ValueError("No boundary found in multipart content-type")
+        else:
+            boundary = boundary_match.group(1).strip('"')
+        
+        return ("--" + boundary).encode("utf-8")
+
+    def _parse_multipart_sections(self, decoded_bytes: bytes, boundary_bytes: bytes) -> dict[str, Any]:
+        """Parse individual multipart sections from the decoded body."""
+        parsed_data: dict[str, Any] = {}
+        
+        if not decoded_bytes:
+            return parsed_data
+
+        sections = decoded_bytes.split(boundary_bytes)
+
+        for section in sections[1:-1]:  # Skip first empty and last closing parts
+            if not section.strip():
+                continue
+
+            field_name, content = self._parse_multipart_section(section)
+            if field_name:
+                parsed_data[field_name] = content
+
+        return parsed_data
+
+    def _parse_multipart_section(self, section: bytes) -> tuple[str | None, bytes | str]:
+        """Parse a single multipart section to extract field name and content."""
+        headers_part, content = self._split_section_headers_and_content(section)
+        
+        if headers_part is None:
+            return None, b""
+
+        # Extract field name from Content-Disposition header
+        name_match = re.search(r'name="([^"]+)"', headers_part)
+        if not name_match:
+            return None, b""
+
+        field_name = name_match.group(1)
+        
+        # Check if it's a file field and process accordingly
+        if "filename=" in headers_part:
+            # It's a file - store as bytes
+            return field_name, content
+        else:
+            # It's a regular form field - decode as string
+            return field_name, self._decode_form_field_content(content)
+
+    def _split_section_headers_and_content(self, section: bytes) -> tuple[str | None, bytes]:
+        """Split a multipart section into headers and content parts."""
+        header_end = section.find(b"\r\n\r\n")
+        if header_end == -1:
+            header_end = section.find(b"\n\n")
+            if header_end == -1:
+                return None, b""
+            content = section[header_end + 2:].strip()
+        else:
+            content = section[header_end + 4:].strip()
+
+        headers_part = section[:header_end].decode("utf-8", errors="ignore")
+        return headers_part, content
+
+    def _decode_form_field_content(self, content: bytes) -> str | bytes:
+        """Decode form field content as string, falling back to bytes if decoding fails."""
+        try:
+            return content.decode("utf-8")
+        except UnicodeDecodeError:
+            # If can't decode as text, keep as bytes
+            return content
 
 
 class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
