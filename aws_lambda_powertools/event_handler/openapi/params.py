@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
 """
 
+__all__ = ["Path", "Query", "Header", "Body", "Form", "File"]
+
 
 class ParamTypes(Enum):
     query = "query"
@@ -886,6 +888,29 @@ class _File(Form):
             json_schema_extra=json_schema_extra,
             **extra,
         )
+
+
+class File(_File):
+    """
+    Defines a file parameter that should be extracted from multipart form data.
+    
+    This parameter type is used for file uploads in multipart/form-data requests
+    and integrates with OpenAPI schema generation.
+    
+    Example:
+    -------
+    ```python
+    from typing import Annotated
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload_file(file: Annotated[bytes, File(description="File to upload")]):
+        return {"file_size": len(file)}
+    ```
+    """
 
 
 def get_flat_dependant(

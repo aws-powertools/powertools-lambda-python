@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    File,
     Form,
     Header,
     Param,
@@ -367,13 +368,23 @@ def get_body_field_info(
     if not required:
         body_field_info_kwargs["default"] = None
 
-    if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
-        # MAINTENANCE: body_field_info: type[Body] = _File
-        raise NotImplementedError("_File fields are not supported in request bodies")
-    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
+    # Check for File parameters
+    has_file_params = any(isinstance(f.field_info, File) for f in flat_dependant.body_params)
+    # Check for Form parameters
+    has_form_params = any(isinstance(f.field_info, Form) for f in flat_dependant.body_params)
+
+    if has_file_params:
+        # File parameters use multipart/form-data
+        body_field_info = Body
+        body_field_info_kwargs["media_type"] = "multipart/form-data"
+        body_field_info_kwargs["embed"] = True
+    elif has_form_params:
+        # Form parameters use application/x-www-form-urlencoded
         body_field_info = Body
         body_field_info_kwargs["media_type"] = "application/x-www-form-urlencoded"
+        body_field_info_kwargs["embed"] = True
     else:
+        # Regular JSON body parameters
         body_field_info = Body
 
         body_param_media_types = [
