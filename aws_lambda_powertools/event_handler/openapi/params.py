@@ -893,10 +893,10 @@ class _File(Form):
 class File(_File):
     """
     Defines a file parameter that should be extracted from multipart form data.
-    
+
     This parameter type is used for file uploads in multipart/form-data requests
     and integrates with OpenAPI schema generation.
-    
+
     Example:
     -------
     ```python
