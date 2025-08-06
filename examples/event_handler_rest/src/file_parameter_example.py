@@ -1,15 +1,13 @@
 """
-Example demonstrating File parameter usage in AWS Lambda Powertools Python Event Handler.
-
-This example shows how to use the File parameter for handling multipart/form-data file uploads
-with OpenAPI validation and automatic schema generation.
+Example demonstrating File parameter usage for handling file uploads.
 """
+
+from __future__ import annotations
 
 from typing import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form
-
 
 # Initialize resolver with OpenAPI validation enabled
 app = APIGatewayRestResolver(enable_validation=True)

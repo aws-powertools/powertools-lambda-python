@@ -2,11 +2,11 @@
 Comprehensive tests for File parameter multipart parsing and validation.
 """
 
+from __future__ import annotations
+
 import base64
 import json
 from typing import Annotated
-
-import pytest
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form
@@ -23,7 +23,7 @@ def make_multipart_event(boundary="----WebKitFormBoundary7MA4YWxkTrZu0gW", body_
         body_lines.append(f"--{boundary}")
         body_lines.append(
             f'Content-Disposition: form-data; name="{part["name"]}"'
-            + (f'; filename="{part["filename"]}"' if part.get("filename") else "")
+            + (f'; filename="{part["filename"]}"' if part.get("filename") else ""),
         )
         if part.get("content_type"):
             body_lines.append(f"Content-Type: {part['content_type']}")
@@ -75,7 +75,7 @@ def test_file_upload_basic_parsing():
 
     # Create a simple file upload
     event = make_multipart_event(
-        body_parts=[{"name": "file", "filename": "test.txt", "content_type": "text/plain", "content": "Hello, world!"}]
+        body_parts=[{"name": "file", "filename": "test.txt", "content_type": "text/plain", "content": "Hello, world!"}],
     )
 
     response = app.resolve(event, {})
@@ -109,7 +109,7 @@ def test_file_upload_with_form_data():
             },
             {"name": "title", "content": "Important Document"},
             {"name": "description", "content": "This is a test document upload"},
-        ]
+        ],
     )
 
     response = app.resolve(event, {})
@@ -134,7 +134,7 @@ def test_webkit_boundary_parsing():
     event = make_multipart_event(
         boundary=webkit_boundary,
         body_parts=[
-            {"name": "file", "filename": "test.jpg", "content_type": "image/jpeg", "content": "fake image data"}
+            {"name": "file", "filename": "test.jpg", "content_type": "image/jpeg", "content": "fake image data"},
         ],
     )
 
@@ -180,7 +180,7 @@ def test_multiple_files():
         body_parts=[
             {"name": "file1", "filename": "first.txt", "content": "First file content"},
             {"name": "file2", "filename": "second.txt", "content": "Second file content is longer"},
-        ]
+        ],
     )
 
     response = app.resolve(event, {})
@@ -263,8 +263,12 @@ def test_file_with_constraints():
     # Test file that's too large
     event = make_multipart_event(
         body_parts=[
-            {"name": "file", "filename": "large.txt", "content": "This file content is way too long for the constraint"}
-        ]
+            {
+                "name": "file",
+                "filename": "large.txt",
+                "content": "This file content is way too long for the constraint",
+            },
+        ],
     )
 
     response = app.resolve(event, {})
@@ -312,8 +316,8 @@ def test_empty_file_upload():
                 "name": "file",
                 "filename": "empty.txt",
                 "content": "",  # Empty file
-            }
-        ]
+            },
+        ],
     )
 
     response = app.resolve(event, {})

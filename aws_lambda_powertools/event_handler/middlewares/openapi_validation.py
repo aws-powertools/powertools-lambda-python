@@ -192,7 +192,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                         "input": {},
                         "ctx": {"error": str(e)},
                     },
-                ]
+                ],
             ) from e
 
     def _decode_request_body(self, app: EventHandlerInstance) -> bytes:
