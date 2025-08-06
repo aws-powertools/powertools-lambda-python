@@ -151,15 +151,37 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 ### Releasing a new version
 
-Firstly, make sure the commit history in the `develop` branch **(1)** it's up to date, **(2)** commit messages are semantic, and **(3)** commit messages have their respective area, for example `feat(logger): <change>`, `chore(ci): ...`).
+!!! note "Only maintainers with write access to this repository can release a new version"
 
-**Looks good, what's next?**
+Releasing a new version is a multi-step process that takes up to 2 hours to complete. Most steps are automated - you provide inputs to trigger the release and monitor progress.
 
-Kickoff the [`Release` workflow](https://github.com/aws-powertools/powertools-lambda-python/blob/6db9079d21698b72f5d36d72c993c1aad7276db6/.github/workflows/release.yml#L3) with the intended version - this might take around 25m-30m to complete.
+**Prerequisites**: Ensure the commit history in the `develop` branch is up to date, commit messages are semantic, and include their respective area (e.g., `feat(logger): <change>`, `chore(ci): ...`).
 
-Once complete, you can start drafting the release notes to let customers know **what changed and what's in it for them (a.k.a why they should care)**. We have guidelines in the [release notes section](#drafting-release-notes) so you know what good looks like.
+<!-- markdownlint-disable MD013 -->
+**Release Steps**:
 
-> **NOTE**: Documentation might take a few minutes to reflect the latest version due to caching and CDN invalidations.
+1. **Run [end-to-end tests](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml)** and ensure they pass
+2. **Trigger Release v3 workflow** - Run the [`Release v3`](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-v3.yml) workflow with two inputs: the new Powertools version (check [latest version](https://pypi.org/project/aws-lambda-powertools/)) and the new Lambda Layer version number. To find the new Lambda Layer version number, go to this [page](https://docs.powertools.aws.dev/lambda/python/latest/#python-313) and increase the version by one (N + 1).
+3. **Monitor the release workflow** - it runs tests, publishes to PyPI, deploys Lambda layers to Beta and Prod environments across all commercial regions, runs canary tests, and updates documentation. If it fails, see the [Re-run partial failed Release workflow](#re-run-partial-failed-release-workflow) section
+4. **Review and merge documentation/version PRs** - two PRs will be created to update documentation and bump version files. Review, approve and merge both (order doesn't matter)
+5. **Deploy GovCloud layers** - Run the [`Layer Deployment (GovCloud)`](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/layer_govcloud.yml) workflow with `develop` branch, `Prod` environment, and the Layer version number from step 2.
+6. **Deploy China layers** - Run the [`Layer Deployment (Partitions)`](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/layers_partitions.yml) workflow with `develop` branch, `Prod` environment, and the Layer version number from step 2.
+7. **Update documentation** - Run the [`Rebuild latest docs`](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/rebuild_latest_docs.yml) workflow with `develop` branch and the PyPI package version
+
+Once complete, you can start drafting the release notes to let customers know **what changed and what's in it for them (a.k.a why they should care)**. We have guidelines in the [release notes](#drafting-release-notes) section so you know what good looks like.
+
+#### Re-run partial failed Release workflow
+
+While workflows are designed to be stable, failures can occur during the release process. If the release workflow fails, you have two recovery options:
+
+**Option 1: Re-run failed jobs** The Release v3 pipeline contains several steps, and one of them is `publish_layer`. This step is responsible for building and deploying public Lambda layers. If this step fails due to CloudFormation errors (we deploy approximately 600 layers per release and cannot control CloudFormation quotas), you can re-run only the failed jobs. This will retry the deployment and typically resolves quota-related issues.
+<!-- markdownlint-enable MD013 -->
+
+**Option 2: Re-trigger the entire workflow**
+If the release fails due to workflow modifications or permission issues that prevent re-running failed jobs, trigger the Release v3 workflow again.
+
+!!! important "Avoid PyPI errors"
+    Make sure to select `Skip publishing to PyPI` as it can't publish more than once. This is useful for semi-failed releases when rerunning the entire workflow to avoid duplicate publishes
 
 #### Release process visualized
 
@@ -222,12 +244,28 @@ section Docs
     Create PR (Layer ARN)       : active, after layer_prod, 8s
     Release versioned docs      : active, 2.2m
 
-Documentation release : milestone, m4, 10:28,1m
+Documentation release : milestone, m5, 10:28,1m
+
+section SSM Parameters
+    Update SSM Parameters       : active, 8s
+
+SSM Parameters : milestone, m6, 10:28,1m
 
 section Post-release
     Close pending issues        : active, 8s
 
-Release complete : milestone, m6, 10:31,2m
+section GovCloud
+    Publish GovCloud layers (Gamma)    : active, 8s
+    Publish GovCloud layers (Prod)    : active, 8s
+    GovCloud layers published : milestone, m7
+
+
+section China
+    Publish China layers (Gamma)    : active, 8s
+    Publish China layers (Prod)    : active, 8s
+    China layers published : milestone, m8
+
+Release complete : milestone, m9, 10:31,2m
 ```
 
 #### Drafting release notes
