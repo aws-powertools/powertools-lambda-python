@@ -20,7 +20,6 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Param,
     ParamTypes,
     Query,
-    _File,
     analyze_param,
     create_response_field,
     get_flat_dependant,

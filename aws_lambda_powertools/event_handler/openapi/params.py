@@ -811,7 +811,7 @@ class Form(Body):
         )
 
 
-class _File(Form):
+class File(Form):
     """
     A class used to represent a file parameter in a path operation.
     """
@@ -851,12 +851,11 @@ class _File(Form):
         **extra: Any,
     ):
         # For file uploads, ensure the OpenAPI schema has the correct format
-        # Also we can't test it
-        file_schema_extra = {"format": "binary"}  # pragma: no cover
-        if json_schema_extra:  # pragma: no cover
-            json_schema_extra.update(file_schema_extra)  # pragma: no cover
-        else:  # pragma: no cover
-            json_schema_extra = file_schema_extra  # pragma: no cover
+        file_schema_extra = {"format": "binary"}
+        if json_schema_extra:
+            json_schema_extra.update(file_schema_extra)
+        else:
+            json_schema_extra = file_schema_extra
 
         super().__init__(
             default=default,
@@ -888,29 +887,6 @@ class _File(Form):
             json_schema_extra=json_schema_extra,
             **extra,
         )
-
-
-class File(_File):
-    """
-    Defines a file parameter that should be extracted from multipart form data.
-
-    This parameter type is used for file uploads in multipart/form-data requests
-    and integrates with OpenAPI schema generation.
-
-    Example:
-    -------
-    ```python
-    from typing import Annotated
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.event_handler.openapi.params import File
-
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    @app.post("/upload")
-    def upload_file(file: Annotated[bytes, File(description="File to upload")]):
-        return {"file_size": len(file)}
-    ```
-    """
 
 
 def get_flat_dependant(

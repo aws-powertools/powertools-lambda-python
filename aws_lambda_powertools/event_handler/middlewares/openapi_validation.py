@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
+import re
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
 from urllib.parse import parse_qs
@@ -177,7 +178,6 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
     def _parse_multipart_data(self, app: EventHandlerInstance, content_type: str) -> dict[str, Any]:
         """Parse multipart/form-data."""
         import base64
-        import re
 
         try:
             # Get the raw body - it might be base64 encoded
