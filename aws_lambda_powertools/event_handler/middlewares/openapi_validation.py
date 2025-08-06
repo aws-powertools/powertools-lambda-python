@@ -213,7 +213,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
     def _extract_boundary_bytes(self, content_type: str) -> bytes:
         """Extract and return the boundary bytes from the content type header."""
         boundary_match = re.search(r"boundary=([^;,\s]+)", content_type)
-        
+
         if not boundary_match:
             # Handle WebKit browsers that may use different boundary formats
             webkit_match = re.search(r"WebKitFormBoundary([a-zA-Z0-9]+)", content_type)
@@ -223,13 +223,13 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                 raise ValueError("No boundary found in multipart content-type")
         else:
             boundary = boundary_match.group(1).strip('"')
-        
+
         return ("--" + boundary).encode("utf-8")
 
     def _parse_multipart_sections(self, decoded_bytes: bytes, boundary_bytes: bytes) -> dict[str, Any]:
         """Parse individual multipart sections from the decoded body."""
         parsed_data: dict[str, Any] = {}
-        
+
         if not decoded_bytes:
             return parsed_data
 
@@ -248,7 +248,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
     def _parse_multipart_section(self, section: bytes) -> tuple[str | None, bytes | str]:
         """Parse a single multipart section to extract field name and content."""
         headers_part, content = self._split_section_headers_and_content(section)
-        
+
         if headers_part is None:
             return None, b""
 
@@ -258,7 +258,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             return None, b""
 
         field_name = name_match.group(1)
-        
+
         # Check if it's a file field and process accordingly
         if "filename=" in headers_part:
             # It's a file - store as bytes
@@ -274,9 +274,9 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             header_end = section.find(b"\n\n")
             if header_end == -1:
                 return None, b""
-            content = section[header_end + 2:].strip()
+            content = section[header_end + 2 :].strip()
         else:
-            content = section[header_end + 4:].strip()
+            content = section[header_end + 4 :].strip()
 
         headers_part = section[:header_end].decode("utf-8", errors="ignore")
         return headers_part, content
