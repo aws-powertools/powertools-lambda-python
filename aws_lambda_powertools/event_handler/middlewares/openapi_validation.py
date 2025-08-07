@@ -488,6 +488,47 @@ def _request_params_to_args(
     return values, errors
 
 
+def _get_field_location(field: ModelField, field_alias_omitted: bool) -> tuple[str, ...]:
+    """Get the location tuple for a field based on whether alias is omitted."""
+    if field_alias_omitted:
+        return ("body",)
+    return ("body", field.alias)
+
+
+def _get_field_value(received_body: dict[str, Any] | None, field: ModelField) -> Any | None:
+    """Extract field value from received body, returning None if not found or on error."""
+    if received_body is None:
+        return None
+
+    try:
+        return received_body.get(field.alias)
+    except AttributeError:
+        return None
+
+
+def _resolve_field_type(field_type: type) -> type:
+    """Resolve the actual field type, handling Union types by returning the first non-None type."""
+    from typing import get_args, get_origin
+
+    if get_origin(field_type) is Union:
+        union_args = get_args(field_type)
+        non_none_types = [arg for arg in union_args if arg is not type(None)]
+        if non_none_types:
+            return non_none_types[0]
+    return field_type
+
+
+def _convert_value_type(value: Any, field_type: type) -> Any:
+    """Convert value between UploadFile and bytes for type compatibility."""
+    if isinstance(value, UploadFile) and field_type is bytes:
+        # Convert UploadFile to bytes for backward compatibility
+        return value.file
+    elif isinstance(value, bytes) and field_type == UploadFile:
+        # Convert bytes to UploadFile if that's what's expected
+        return UploadFile(file=value)
+    return value
+
+
 def _request_body_to_args(
     required_params: list[ModelField],
     received_body: dict[str, Any] | None,
@@ -505,24 +546,19 @@ def _request_body_to_args(
     )
 
     for field in required_params:
-        # This sets the location to:
-        # { "user": { object } } if field.alias == user
-        # { { object } if field_alias is omitted
-        loc: tuple[str, ...] = ("body", field.alias)
-        if field_alias_omitted:
-            loc = ("body",)
+        loc = _get_field_location(field, field_alias_omitted)
+        value = _get_field_value(received_body, field)
 
-        value: Any | None = None
-
-        # Now that we know what to look for, try to get the value from the received body
-        if received_body is not None:
+        # Handle AttributeError from _get_field_value
+        if received_body is not None and value is None:
             try:
-                value = received_body.get(field.alias)
+                # Double-check with direct access to distinguish None value from AttributeError
+                received_body.get(field.alias)
             except AttributeError:
                 errors.append(get_missing_field_error(loc))
                 continue
 
-        # Determine if the field is required
+        # Handle missing values
         if value is None:
             if field.required:
                 errors.append(get_missing_field_error(loc))
@@ -530,28 +566,9 @@ def _request_body_to_args(
                 values[field.name] = deepcopy(field.default)
             continue
 
-        # MAINTENANCE: Handle byte and file fields
-        # Check if we have an UploadFile but the field expects bytes
-        from typing import get_args, get_origin
-
-        field_type = field.type_
-
-        # Handle Union types (e.g., Union[bytes, None] for optional parameters)
-        if get_origin(field_type) is Union:
-            # Get the non-None types from the Union
-            union_args = get_args(field_type)
-            non_none_types = [arg for arg in union_args if arg is not type(None)]
-            if non_none_types:
-                field_type = non_none_types[0]  # Use the first non-None type
-
-        if isinstance(value, UploadFile) and field_type is bytes:
-            # Convert UploadFile to bytes for backward compatibility
-            value = value.file
-        elif isinstance(value, bytes) and field_type == UploadFile:
-            # Convert bytes to UploadFile if that's what's expected
-            # This shouldn't normally happen in our current implementation,
-            # but provides a fallback path
-            value = UploadFile(file=value)
+        # Handle type conversions for UploadFile/bytes compatibility
+        field_type = _resolve_field_type(field.type_)
+        value = _convert_value_type(value, field_type)
 
         # Finally, validate the value
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
