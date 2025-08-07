@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import base64
 import json
-from typing import Annotated
+from typing import Annotated, Union
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form
@@ -286,7 +286,7 @@ def test_optional_file_parameter():
     @app.post("/upload")
     def upload_file(
         message: Annotated[str, Form(description="Required message")],
-        file: Annotated[bytes | None, File(description="Optional file")] = None,
+        file: Annotated[Union[bytes, None], File(description="Optional file")] = None,  # noqa: UP007
     ):
         return {"has_file": file is not None, "file_size": len(file) if file else 0, "message": message}
 

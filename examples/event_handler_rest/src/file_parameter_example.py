@@ -4,7 +4,7 @@ Example demonstrating File parameter usage for handling file uploads.
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Union
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form
@@ -23,7 +23,7 @@ def upload_single_file(file: Annotated[bytes, File(description="File to upload")
 def upload_file_with_metadata(
     file: Annotated[bytes, File(description="File to upload")],
     description: Annotated[str, Form(description="File description")],
-    tags: Annotated[str | None, Form(description="Optional tags")] = None,
+    tags: Annotated[Union[str, None], Form(description="Optional tags")] = None,  # noqa: UP007
 ):
     """Upload a file with additional form metadata."""
     return {
@@ -63,7 +63,7 @@ def upload_small_file(file: Annotated[bytes, File(description="Small file only",
 @app.post("/upload-optional")
 def upload_optional_file(
     message: Annotated[str, Form(description="Required message")],
-    file: Annotated[bytes | None, File(description="Optional file")] = None,
+    file: Annotated[Union[bytes, None], File(description="Optional file")] = None,  # noqa: UP007
 ):
     """Upload with an optional file parameter."""
     return {
