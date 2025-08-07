@@ -29,7 +29,105 @@ if TYPE_CHECKING:
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
 """
 
-__all__ = ["Path", "Query", "Header", "Body", "Form", "File"]
+__all__ = ["Path", "Query", "Header", "Body", "Form", "File", "UploadFile"]
+
+
+class UploadFile:
+    """
+    A file uploaded as part of a multipart/form-data request.
+
+    Similar to FastAPI's UploadFile, this class provides access to both file content
+    and metadata such as filename, content type, and headers.
+
+    Example:
+        ```python
+        @app.post("/upload")
+        def upload_file(file: Annotated[UploadFile, File()]):
+            return {
+                "filename": file.filename,
+                "content_type": file.content_type,
+                "size": file.size,
+                "content": file.file.decode() if file.size < 1000 else "File too large to display"
+            }
+        ```
+    """
+
+    def __init__(
+        self,
+        file: bytes,
+        filename: str | None = None,
+        content_type: str | None = None,
+        headers: dict[str, str] | None = None,
+    ):
+        """
+        Initialize an UploadFile instance.
+
+        Parameters
+        ----------
+        file : bytes
+            The file content as bytes
+        filename : str | None
+            The original filename from the Content-Disposition header
+        content_type : str | None
+            The content type from the Content-Type header
+        headers : dict[str, str] | None
+            All headers from the multipart section
+        """
+        self.file = file
+        self.filename = filename
+        self.content_type = content_type
+        self.headers = headers or {}
+
+    @property
+    def size(self) -> int:
+        """Return the size of the file in bytes."""
+        return len(self.file)
+
+    def read(self, size: int = -1) -> bytes:
+        """
+        Read and return up to size bytes from the file.
+
+        Parameters
+        ----------
+        size : int
+            Number of bytes to read. If -1 (default), read the entire file.
+
+        Returns
+        -------
+        bytes
+            The file content
+        """
+        if size == -1:
+            return self.file
+        return self.file[:size]
+
+    def __repr__(self) -> str:
+        """Return a string representation of the UploadFile."""
+        return f"UploadFile(filename={self.filename!r}, size={self.size}, content_type={self.content_type!r})"
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        _source_type: Any,
+        _handler: Any,
+    ) -> Any:
+        """Return Pydantic core schema for UploadFile."""
+        from pydantic_core import core_schema
+
+        # Define the schema for UploadFile validation
+        return core_schema.no_info_plain_validator_function(
+            cls._validate,
+            serialization=core_schema.to_string_ser_schema(),
+        )
+
+    @classmethod
+    def _validate(cls, value: Any) -> UploadFile:
+        """Validate and convert value to UploadFile."""
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, bytes):
+            return cls(file=value)
+        raise ValueError(f"Expected UploadFile or bytes, got {type(value)}")
 
 
 class ParamTypes(Enum):

@@ -15,7 +15,7 @@ import json
 from typing import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.params import File, Form
+from aws_lambda_powertools.event_handler.openapi.params import File, Form, UploadFile
 
 
 class TestFileParameterBasics:
@@ -1900,3 +1900,403 @@ class TestAdditionalCoverageTargets:
 
         result = app(event, {})
         assert result["statusCode"] == 200
+
+
+class TestUploadFileFeature:
+    """Test the new UploadFile class functionality and metadata access."""
+
+    def test_upload_file_with_metadata(self):
+        """Test UploadFile provides access to filename, content_type, and metadata."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def upload_file(file: Annotated[UploadFile, File()]):
+            return {
+                "filename": file.filename,
+                "content_type": file.content_type,
+                "size": file.size,
+                "content_preview": file.read(50).decode("utf-8", errors="ignore"),
+                "has_headers": len(file.headers) > 0,
+            }
+
+        # Create multipart form data with detailed headers
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="test.txt"',
+            "Content-Type: text/plain; charset=utf-8",
+            "X-Custom-Header: custom-value",
+            "",
+            "Hello, World! This is a test file with metadata.",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["filename"] == "test.txt"
+        assert response_body["content_type"] == "text/plain; charset=utf-8"
+        assert response_body["size"] == 48  # Length of the test content
+        assert response_body["content_preview"] == "Hello, World! This is a test file with metadata."
+        assert response_body["has_headers"] is True
+
+    def test_upload_file_backward_compatibility_with_bytes(self):
+        """Test that existing code using bytes still works when using UploadFile."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def upload_file(file: Annotated[bytes, File()]):
+            # Should receive bytes even when UploadFile is created internally
+            return {"message": "File uploaded", "size": len(file), "type": type(file).__name__}
+
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="test.txt"',
+            "Content-Type: text/plain",
+            "",
+            "Backward compatibility test",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["message"] == "File uploaded"
+        assert response_body["size"] == 27  # "Backward compatibility test"
+        assert response_body["type"] == "bytes"  # Should receive bytes, not UploadFile
+
+    def test_upload_file_mixed_with_form_data(self):
+        """Test UploadFile works with regular form fields."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def upload_with_metadata(
+            file: Annotated[UploadFile, File()],
+            description: Annotated[str, Form()],
+            category: Annotated[str, Form()],
+        ):
+            return {
+                "filename": file.filename,
+                "file_size": file.size,
+                "description": description,
+                "category": category,
+                "content_type": file.content_type,
+            }
+
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="description"',
+            "",
+            "Test document",
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="document.pdf"',
+            "Content-Type: application/pdf",
+            "",
+            "PDF content here",
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="category"',
+            "",
+            "documents",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["filename"] == "document.pdf"
+        assert response_body["file_size"] == 16  # "PDF content here"
+        assert response_body["description"] == "Test document"
+        assert response_body["category"] == "documents"
+        assert response_body["content_type"] == "application/pdf"
+
+    def test_upload_file_headers_access(self):
+        """Test UploadFile provides access to all multipart headers."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def upload_file(file: Annotated[UploadFile, File()]):
+            return {
+                "filename": file.filename,
+                "content_type": file.content_type,
+                "size": file.size,
+                "custom_header": file.headers.get("X-Upload-ID"),
+                "file_hash": file.headers.get("X-File-Hash"),
+                "all_headers": file.headers,
+            }
+
+        # Create multipart form data with custom headers
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="important-document.pdf"',
+            "Content-Type: application/pdf",
+            "X-Upload-ID: 12345",
+            "X-File-Hash: abc123def456",
+            "X-File-Version: 1.0",
+            "",
+            "PDF file content with metadata for reconstruction...",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["filename"] == "important-document.pdf"
+        assert response_body["content_type"] == "application/pdf"
+        assert response_body["size"] == 52  # Length of the content
+        assert response_body["custom_header"] == "12345"
+        assert response_body["file_hash"] == "abc123def456"
+        assert "X-File-Version" in response_body["all_headers"]
+        assert response_body["all_headers"]["X-File-Version"] == "1.0"
+
+    def test_upload_file_read_method_functionality(self):
+        """Test UploadFile read method for flexible content access."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def upload_file(file: Annotated[UploadFile, File()]):
+            # Test different read patterns
+            full_content = file.read()
+            partial_content = file.read(20)
+            return {
+                "filename": file.filename,
+                "full_size": len(full_content),
+                "partial_size": len(partial_content),
+                "partial_content": partial_content.decode("utf-8", errors="ignore"),
+                "full_matches_file_property": full_content == file.file,
+                "can_reconstruct": True,
+            }
+
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="read_test.txt"',
+            "Content-Type: text/plain",
+            "",
+            "This is a longer test content for read method testing and file reconstruction.",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["filename"] == "read_test.txt"
+        assert response_body["full_size"] == 78  # Full content length
+        assert response_body["partial_size"] == 20  # Partial read
+        assert response_body["partial_content"] == "This is a longer tes"
+        assert response_body["full_matches_file_property"] is True
+        assert response_body["can_reconstruct"] is True
+
+    def test_upload_file_reconstruction_scenario(self):
+        """Test real-world file reconstruction scenario with UploadFile."""
+        app = APIGatewayRestResolver(enable_validation=True)
+
+        @app.post("/upload")
+        def process_upload(file: Annotated[UploadFile, File()]):
+            # Simulate file reconstruction for storage/processing
+            reconstructed_file = {
+                "original_filename": file.filename,
+                "mime_type": file.content_type,
+                "file_size_bytes": file.size,
+                "file_content": file.file,  # Raw bytes for storage
+                "metadata": file.headers,
+                "can_save_to_s3": True,
+                "can_process": file.content_type in ["text/plain", "application/pdf", "image/jpeg"],
+            }
+
+            return {
+                "upload_id": "12345",
+                "filename": reconstructed_file["original_filename"],
+                "content_type": reconstructed_file["mime_type"],
+                "size": reconstructed_file["file_size_bytes"],
+                "processable": reconstructed_file["can_process"],
+                "has_metadata": len(reconstructed_file["metadata"]) > 0,
+                "ready_for_storage": reconstructed_file["can_save_to_s3"],
+            }
+
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_lines = [
+            f"--{boundary}",
+            'Content-Disposition: form-data; name="file"; filename="user-document.pdf"',
+            "Content-Type: application/pdf",
+            "X-Original-Size: 1024",
+            "X-Upload-Source: web-app",
+            "",
+            "Binary PDF content that would be stored in S3...",
+            f"--{boundary}--",
+        ]
+        body = "\r\n".join(body_lines)
+
+        event = {
+            "resource": "/upload",
+            "path": "/upload",
+            "httpMethod": "POST",
+            "headers": {"content-type": f"multipart/form-data; boundary={boundary}"},
+            "multiValueHeaders": {},
+            "queryStringParameters": None,
+            "multiValueQueryStringParameters": {},
+            "pathParameters": None,
+            "stageVariables": None,
+            "requestContext": {
+                "path": "/stage/upload",
+                "accountId": "123456789012",
+                "resourceId": "abcdef",
+                "stage": "test",
+                "requestId": "test-request-id",
+                "identity": {"sourceIp": "127.0.0.1"},
+                "resourcePath": "/upload",
+                "httpMethod": "POST",
+                "apiId": "abcdefghij",
+            },
+            "body": body,
+            "isBase64Encoded": False,
+        }
+
+        response = app.resolve(event, {})
+        assert response["statusCode"] == 200
+
+        response_body = json.loads(response["body"])
+        assert response_body["upload_id"] == "12345"
+        assert response_body["filename"] == "user-document.pdf"
+        assert response_body["content_type"] == "application/pdf"
+        assert response_body["size"] == 48  # Length of binary content
+        assert response_body["processable"] is True  # PDF is processable
+        assert response_body["has_metadata"] is True
+        assert response_body["ready_for_storage"] is True

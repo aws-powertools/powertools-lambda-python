@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Param
+from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler import Response
@@ -245,7 +245,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
 
         return parsed_data
 
-    def _parse_multipart_section(self, section: bytes) -> tuple[str | None, bytes | str]:
+    def _parse_multipart_section(self, section: bytes) -> tuple[str | None, bytes | str | UploadFile]:
         """Parse a single multipart section to extract field name and content."""
         headers_part, content = self._split_section_headers_and_content(section)
 
@@ -261,8 +261,30 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
 
         # Check if it's a file field and process accordingly
         if "filename=" in headers_part:
-            # It's a file - store as bytes
-            return field_name, content
+            # It's a file - extract metadata and create UploadFile
+            filename_match = re.search(r'filename="([^"]*)"', headers_part)
+            filename = filename_match.group(1) if filename_match else None
+
+            # Extract Content-Type if present
+            content_type_match = re.search(r"Content-Type:\s*([^\r\n]+)", headers_part, re.IGNORECASE)
+            content_type = content_type_match.group(1).strip() if content_type_match else None
+
+            # Parse all headers from the section
+            headers = {}
+            for line_raw in headers_part.split("\n"):
+                line = line_raw.strip()
+                if ":" in line and not line.startswith("Content-Disposition"):
+                    key, value = line.split(":", 1)
+                    headers[key.strip()] = value.strip()
+
+            # Create UploadFile instance with metadata
+            upload_file = UploadFile(
+                file=content,
+                filename=filename,
+                content_type=content_type,
+                headers=headers,
+            )
+            return field_name, upload_file
         else:
             # It's a regular form field - decode as string
             return field_name, self._decode_form_field_content(content)
@@ -509,6 +531,27 @@ def _request_body_to_args(
             continue
 
         # MAINTENANCE: Handle byte and file fields
+        # Check if we have an UploadFile but the field expects bytes
+        from typing import get_args, get_origin
+
+        field_type = field.type_
+
+        # Handle Union types (e.g., Union[bytes, None] for optional parameters)
+        if get_origin(field_type) is Union:
+            # Get the non-None types from the Union
+            union_args = get_args(field_type)
+            non_none_types = [arg for arg in union_args if arg is not type(None)]
+            if non_none_types:
+                field_type = non_none_types[0]  # Use the first non-None type
+
+        if isinstance(value, UploadFile) and field_type is bytes:
+            # Convert UploadFile to bytes for backward compatibility
+            value = value.file
+        elif isinstance(value, bytes) and field_type == UploadFile:
+            # Convert bytes to UploadFile if that's what's expected
+            # This shouldn't normally happen in our current implementation,
+            # but provides a fallback path
+            value = UploadFile(file=value)
 
         # Finally, validate the value
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
