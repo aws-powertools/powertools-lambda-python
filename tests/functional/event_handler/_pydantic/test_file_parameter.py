@@ -9,6 +9,7 @@ This module tests all aspects of File parameter handling including:
 - Validation constraints
 - Mixed file and form data scenarios
 """
+
 import base64
 import json
 from typing import Annotated
@@ -342,7 +343,7 @@ class TestValidationAndConstraints:
                 "httpMethod": "POST",
                 "apiId": "abcdefghij",
             },
-            "body": "--test\r\nContent-Disposition: form-data; name=\"other\"\r\n\r\nvalue\r\n--test--",
+            "body": '--test\r\nContent-Disposition: form-data; name="other"\r\n\r\nvalue\r\n--test--',
             "isBase64Encoded": False,
         }
 
@@ -383,7 +384,7 @@ class TestValidationAndConstraints:
                 "httpMethod": "POST",
                 "apiId": "abcdefghij",
             },
-            "body": "--test\r\nContent-Disposition: form-data; name=\"other\"\r\n\r\nvalue\r\n--test--",
+            "body": '--test\r\nContent-Disposition: form-data; name="other"\r\n\r\nvalue\r\n--test--',
             "isBase64Encoded": False,
         }
 
@@ -616,21 +617,21 @@ class TestErrorHandling:
         # Create multipart data with invalid UTF-8 in form field
         boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
         invalid_utf8_bytes = b"\xff\xfe\xfd"
-        
+
         body_parts = []
         body_parts.append(f"--{boundary}")
         body_parts.append('Content-Disposition: form-data; name="file"; filename="test.txt"')
         body_parts.append("Content-Type: text/plain")
         body_parts.append("")
         body_parts.append("File content")
-        
+
         body_parts.append(f"--{boundary}")
         body_parts.append('Content-Disposition: form-data; name="metadata"')
         body_parts.append("")
-        
+
         body_start = "\r\n".join(body_parts) + "\r\n"
         body_end = f"\r\n--{boundary}--"
-        
+
         # Combine with the invalid UTF-8 bytes
         full_body = body_start.encode("utf-8") + invalid_utf8_bytes + body_end.encode("utf-8")
 
@@ -676,7 +677,7 @@ class TestBoundaryExtraction:
             return {"status": "uploaded"}
 
         webkit_boundary = "WebKitFormBoundary7MA4YWxkTrZu0gW123"
-        
+
         body_lines = [
             f"--{webkit_boundary}",
             'Content-Disposition: form-data; name="file"; filename="test.txt"',
@@ -724,7 +725,7 @@ class TestBoundaryExtraction:
             return {"status": "uploaded"}
 
         boundary = "test-boundary-123"
-        
+
         body_lines = [
             f"--{boundary}",
             'Content-Disposition: form-data; name="file"; filename="test.txt"',
