@@ -2602,14 +2602,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-llmstxt"
-version = "0.3.0"
+version = "0.3.1"
 description = "MkDocs plugin to generate an /llms.txt file."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_llmstxt-0.3.0-py3-none-any.whl", hash = "sha256:87f0df4a8051f3dfe15574cff1e1464f9fd09318e3dbbb35d08a7457ee3a5ce8"},
-    {file = "mkdocs_llmstxt-0.3.0.tar.gz", hash = "sha256:97b4558ec658ee2927c1ff9eeb5c9a06ca9d9f0fc0697b530794e6acda45b970"},
+    {file = "mkdocs_llmstxt-0.3.1-py3-none-any.whl", hash = "sha256:31f5b6aaae6123c09a2b1c32912c3eb21ccb356b5db7abb867f105e8cc392653"},
+    {file = "mkdocs_llmstxt-0.3.1.tar.gz", hash = "sha256:123119d9b984c1d1224ed5af250bfbc49879ad83decdaff59d8b0ebb459ddc54"},
 ]
 
 [package.dependencies]
