@@ -216,18 +216,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.208.0a0"
+version = "2.210.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.208.0a0-py3-none-any.whl", hash = "sha256:39f33590b2e45388551260540f38a60ef8b10052a45a43835d0dd27382bf9997"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.208.0a0.tar.gz", hash = "sha256:172c2738bc8ec88f716879e78934acc17b5fa9d79e7d0c10bb4cf7678de2b7c1"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.210.0a0-py3-none-any.whl", hash = "sha256:2cf8c67cc4966547b7ae4783d31aa1ac5c5fc88eaed288936e3e540bf118403f"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.210.0a0.tar.gz", hash = "sha256:bcb86c94666e515c227ce6f567481adf75cfd1fca1c0e34f8c52f4e46aa5e71c"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.208.0,<3.0.0"
+aws-cdk-lib = ">=2.210.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.112.0,<2.0.0"
 publication = ">=0.0.3"
@@ -235,14 +235,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "45.2.0"
+version = "48.2.0"
 description = "Schema for the protocol between CDK framework and CDK CLI"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_cloud_assembly_schema-45.2.0-py3-none-any.whl", hash = "sha256:aeb88c5e3c36eecae341ddca568907b5d70b9b67de51572ef51564dd486dbb48"},
-    {file = "aws_cdk_cloud_assembly_schema-45.2.0.tar.gz", hash = "sha256:7affdd151be58028d31fcbbbd084c07ea2e9d433979d0653ed43e15a307015cd"},
+    {file = "aws_cdk_cloud_assembly_schema-48.2.0-py3-none-any.whl", hash = "sha256:11b50edc74b0643c43c6218141265d33c0a115926a48ac9b0374c60cc49c3213"},
+    {file = "aws_cdk_cloud_assembly_schema-48.2.0.tar.gz", hash = "sha256:d10a1daccce28495f88c740526bc9ebacc43f00f624e4d48644e06853381d0e9"},
 ]
 
 [package.dependencies]
@@ -252,20 +252,20 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.208.0"
+version = "2.210.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.208.0-py3-none-any.whl", hash = "sha256:554e77362958676b7c452eb1a2910e2bd64c3dcd489d90f347dd064d47fa2f2d"},
-    {file = "aws_cdk_lib-2.208.0.tar.gz", hash = "sha256:b638806aa8203c26dc965a67eb30b4a83fbb8c618b82cdbf2bcc7f2e65296312"},
+    {file = "aws_cdk_lib-2.210.0-py3-none-any.whl", hash = "sha256:0b3c30acb1142252b649303e63fa914832bed4357452c2b2bfff5455e448253c"},
+    {file = "aws_cdk_lib-2.210.0.tar.gz", hash = "sha256:a6695b0b0ec691b1007865ab0c9e4d246f33dca23ad205d980f2e5724d8cbb01"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = "2.2.242"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=45.2.0,<46.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=48.2.0,<49.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.112.0,<2.0.0"
 publication = ">=0.0.3"
@@ -464,14 +464,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.40.3"
-description = "Type annotations for boto3 1.40.3 generated with mypy-boto3-builder 8.11.0"
+version = "1.40.4"
+description = "Type annotations for boto3 1.40.4 generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.40.3-py3-none-any.whl", hash = "sha256:e11a701169e859a1c3e937981820eaf9a6df14c37e7a36a23662131cb4476c66"},
-    {file = "boto3_stubs-1.40.3.tar.gz", hash = "sha256:d08c8549d39a9be7edf4f46cea3d887733d623d09ec541f0a1c6e23a06572ee1"},
+    {file = "boto3_stubs-1.40.4-py3-none-any.whl", hash = "sha256:cb6304edc75f7090b048d6acb22942bc9d41e41100e0fd424edbd5b8573e072a"},
+    {file = "boto3_stubs-1.40.4.tar.gz", hash = "sha256:d7b6a5c20b2f16b47b442844afca68e0aeedf6ddda667bc56cb506b04b545dd0"},
 ]
 
 [package.dependencies]
@@ -542,7 +542,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.40.0,<1.41.0)"]
 billing = ["mypy-boto3-billing (>=1.40.0,<1.41.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.40.0,<1.41.0)"]
-boto3 = ["boto3 (==1.40.3)"]
+boto3 = ["boto3 (==1.40.4)"]
 braket = ["mypy-boto3-braket (>=1.40.0,<1.41.0)"]
 budgets = ["mypy-boto3-budgets (>=1.40.0,<1.41.0)"]
 ce = ["mypy-boto3-ce (>=1.40.0,<1.41.0)"]
@@ -2602,14 +2602,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-llmstxt"
-version = "0.3.0"
+version = "0.3.1"
 description = "MkDocs plugin to generate an /llms.txt file."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_llmstxt-0.3.0-py3-none-any.whl", hash = "sha256:87f0df4a8051f3dfe15574cff1e1464f9fd09318e3dbbb35d08a7457ee3a5ce8"},
-    {file = "mkdocs_llmstxt-0.3.0.tar.gz", hash = "sha256:97b4558ec658ee2927c1ff9eeb5c9a06ca9d9f0fc0697b530794e6acda45b970"},
+    {file = "mkdocs_llmstxt-0.3.1-py3-none-any.whl", hash = "sha256:31f5b6aaae6123c09a2b1c32912c3eb21ccb356b5db7abb867f105e8cc392653"},
+    {file = "mkdocs_llmstxt-0.3.1.tar.gz", hash = "sha256:123119d9b984c1d1224ed5af250bfbc49879ad83decdaff59d8b0ebb459ddc54"},
 ]
 
 [package.dependencies]
