@@ -14,8 +14,6 @@ import base64
 import json
 from typing import Annotated
 
-import pytest
-
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form
 
