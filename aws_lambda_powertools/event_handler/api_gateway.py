@@ -895,10 +895,8 @@ class Route:
             return {"type": "number"}
         elif isinstance(bool, param_type):
             return {"type": "boolean"}
-        elif isinstance(str, param_type):
-            return {"type": "string"}
         else:
-            return {"type": "string"}  # Default fallback
+            return {"type": "string"}
 
     @staticmethod
     def _openapi_operation_return(

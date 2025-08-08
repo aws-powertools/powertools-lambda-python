@@ -343,8 +343,6 @@ def _request_params_to_args_with_pydantic_support(
                     values[field.name] = deepcopy(field.default)
                 continue
 
-            # Use _validate_field like _request_body_to_args does
-            values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
         else:
             # Regular parameter processing (existing logic)
             if not isinstance(field_info, Param):
@@ -360,8 +358,8 @@ def _request_params_to_args_with_pydantic_support(
                     values[field.name] = deepcopy(field.default)
                 continue
 
-            values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
-
+        # Use _validate_field like _request_body_to_args does
+        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
     return values, errors
 
 
