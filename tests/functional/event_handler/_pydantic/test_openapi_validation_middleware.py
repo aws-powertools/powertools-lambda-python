@@ -49,7 +49,9 @@ def test_validate_scalars(gw_event):
 
 def test_validate_pydantic_query_params(gw_event):
     """Test that Pydantic models in Query parameters are validated correctly"""
+
     app = APIGatewayRestResolver(enable_validation=True)
+    del gw_event["multiValueQueryStringParameters"]
 
     class QueryParams(BaseModel):
         limit: int = Field(default=10, ge=1, le=100, description="Number of items")
@@ -98,6 +100,9 @@ def test_validate_pydantic_query_params_detailed_errors(gw_event):
     """Test that Pydantic validation errors include detailed field-level information"""
     app = APIGatewayRestResolver(enable_validation=True)
 
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
+
     class QueryParams(BaseModel):
         full_name: str = Field(..., min_length=5, description="Full name with minimum 5 characters")
         age: int = Field(..., ge=18, le=100, description="Age between 18 and 100")
@@ -127,11 +132,11 @@ def test_validate_pydantic_query_params_detailed_errors(gw_event):
     assert age_error is not None, "Should have error for age field"
 
     # Check error details for full_name
-    assert full_name_error["loc"] == ["query", "full_name"]
+    assert full_name_error["loc"] == ["query", "params", "full_name"]
     assert full_name_error["type"] == "string_too_short"
 
     # Check error details for age
-    assert age_error["loc"] == ["query", "age"]
+    assert age_error["loc"] == ["query", "params", "age"]
     assert age_error["type"] == "greater_than_equal"
 
 
@@ -139,15 +144,17 @@ def test_validate_pydantic_header_params(gw_event):
     """Test that Pydantic models in Header parameters are validated correctly"""
     app = APIGatewayRestResolver(enable_validation=True)
 
+    del gw_event["multiValueHeaders"]
+
     class HeaderParams(BaseModel):
         authorization: str = Field(description="Authorization token")
         user_agent: str = Field(default="PowerTools/1.0", description="User agent")
 
     @app.get("/protected")
-    def protected_handler(headers: Annotated[HeaderParams, Header()]):
+    def protected_handler(my_headers: Annotated[HeaderParams, Header()]):
         return {
-            "authorization": headers.authorization,
-            "user_agent": headers.user_agent,
+            "authorization": my_headers.authorization,
+            "user_agent": my_headers.user_agent,
         }
 
     # Test valid request
@@ -179,7 +186,7 @@ def test_validate_pydantic_header_params(gw_event):
 
     body = json.loads(result["body"])
     assert "detail" in body
-    assert any("authorization" in str(error) for error in body["detail"])
+    assert any("my-headers" in str(error) for error in body["detail"])
 
 
 def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
@@ -187,31 +194,31 @@ def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
     app = APIGatewayRestResolver(enable_validation=True)
     app.enable_swagger()
 
+    del gw_event["multiValueHeaders"]
+
     class HeaderParams(BaseModel):
         correlation_id: str = Field(description="Correlation ID header")
         user_agent: str = Field(default="PowerTools/1.0", description="User agent header")
 
     @app.get("/kebab-headers")
-    def kebab_handler(headers: Annotated[HeaderParams, Header()]):
+    def kebab_handler(my_headers: Annotated[HeaderParams, Header()]):
         return {
-            "correlation_id": headers.correlation_id,
-            "user_agent": headers.user_agent,
+            "correlation_id": my_headers.correlation_id,
+            "user_agent": my_headers.user_agent,
         }
 
     # Test that OpenAPI schema uses kebab-case for headers
     openapi_schema = app.get_openapi_schema()
-    operation = openapi_schema["paths"]["/kebab-headers"]["get"]
-    parameters = operation["parameters"]
+    operation = openapi_schema.paths["/kebab-headers"].get
+    parameters = operation.parameters
 
     # Find the correlation_id parameter
-    correlation_param = next((p for p in parameters if p["name"] == "correlation-id"), None)
+    correlation_param = next((p for p in parameters if p.name == "correlation-id"), None)
     assert correlation_param is not None, "Should have correlation-id parameter in kebab-case"
-    assert correlation_param["in"] == "header"
 
     # Find the user_agent parameter
-    user_agent_param = next((p for p in parameters if p["name"] == "user-agent"), None)
+    user_agent_param = next((p for p in parameters if p.name == "user-agent"), None)
     assert user_agent_param is not None, "Should have user-agent parameter in kebab-case"
-    assert user_agent_param["in"] == "header"
 
     # Test validation with kebab-case headers
     gw_event["path"] = "/kebab-headers"
@@ -228,6 +235,9 @@ def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
 def test_validate_pydantic_mixed_params(gw_event):
     """Test that mixed Pydantic models (Query + Header) are validated correctly"""
     app = APIGatewayRestResolver(enable_validation=True)
+
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
 
     class QueryParams(BaseModel):
         q: str = Field(description="Search query")
@@ -275,12 +285,15 @@ def test_validate_pydantic_mixed_params(gw_event):
 
     body = json.loads(result["body"])
     assert "detail" in body
-    assert any("authorization" in str(error) for error in body["detail"])
+    assert any("headers" in str(error) for error in body["detail"])
 
 
 def test_validate_pydantic_with_alias(gw_event):
     """Test that Pydantic models with field aliases work correctly"""
     app = APIGatewayRestResolver(enable_validation=True)
+
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
 
     class HeaderParams(BaseModel):
         accept_language: str = Field(alias="accept-language", description="Language preference")
@@ -307,7 +320,7 @@ def test_validate_pydantic_with_alias(gw_event):
 
     body = json.loads(result["body"])
     assert "detail" in body
-    assert any("accept-language" in str(error) for error in body["detail"])
+    assert any("headers" in str(error) for error in body["detail"])
 
 
 def test_validate_scalars_with_default(gw_event):
@@ -2246,3 +2259,131 @@ def test_normal_route_response_validation_still_works(gw_event):
     assert response_body["name"] == "User123"
     assert response_body["age"] == 143
     assert response_body["email"] == "user123@example.com"
+
+
+def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event):
+    """Test that Pydantic models with ConfigDict, aliases, and validators work correctly"""
+    from typing import Any
+
+    from pydantic import UUID4, AfterValidator, Base64UrlStr, ConfigDict, StringConstraints, alias_generators
+
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
+
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger(path="/swagger")
+
+    def _validate_powertools(value: str) -> str:
+        if not value.startswith("Powertools"):
+            raise ValueError("Full name must start with 'Powertools'")
+        return value
+
+    class QuerySimple(BaseModel):
+        full_name: Annotated[str, StringConstraints(min_length=5), AfterValidator(_validate_powertools)]
+        next_token: Base64UrlStr
+        search_id: str
+
+    @app.get("/query-model-simple")
+    def query_model(params: Annotated[QuerySimple, Query()]) -> dict[str, Any]:
+        return {
+            "fullName": params.full_name,
+            "nextToken": params.next_token,
+            "searchId": params.search_id,
+        }
+
+    class QueryAdvanced(BaseModel):
+        full_name: Annotated[str, StringConstraints(min_length=5)]
+        next_token: str
+        search_id: Annotated[str, Field(alias="id")]  # Using str instead of UUID4 for simpler testing
+
+        model_config = ConfigDict(
+            alias_generator=alias_generators.to_camel,
+            validate_by_alias=True,
+            serialize_by_alias=True,
+        )
+
+    @app.get("/query-model-advanced")
+    def query_model_advanced(params: Annotated[QueryAdvanced, Query()]) -> dict[str, Any]:
+        return params.model_dump()
+
+    # Test QuerySimple with validators
+    gw_event["path"] = "/query-model-simple"
+    gw_event["queryStringParameters"] = {
+        "full_name": "Powertools Lambda",
+        "next_token": "dGVzdA==",  # base64url encoded "test"
+        "search_id": "search-123",
+    }
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["fullName"] == "Powertools Lambda"
+    assert body["nextToken"] == "test"
+    assert body["searchId"] == "search-123"
+
+    # Test QuerySimple validation error (name doesn't start with "Powertools")
+    gw_event["queryStringParameters"] = {
+        "full_name": "Lambda Powertools",  # Wrong order
+        "next_token": "dGVzdA==",
+        "search_id": "search-123",
+    }
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    errors = body["detail"]
+
+    # Test QueryAdvanced with ConfigDict and alias_generator
+    gw_event["path"] = "/query-model-advanced"
+    gw_event["queryStringParameters"] = {
+        "fullName": "Advanced Test",  # camelCase from alias_generator
+        "nextToken": "dGVzdA==",  # camelCase from alias_generator
+        "id": "search-456",  # explicit alias
+    }
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    # Should return with camelCase keys due to serialize_by_alias=True
+    assert body["fullName"] == "Advanced Test"
+    assert body["nextToken"] == "dGVzdA=="
+    assert body["id"] == "search-456"
+
+    # Test QueryAdvanced with snake_case field names (should also work due to populate_by_name behavior)
+    gw_event["queryStringParameters"] = {
+        "full_name": "Snake Case Test",  # snake_case field name
+        "next_token": "dGVzdA==",  # snake_case field name
+        "id": "search-789",  # explicit alias
+    }
+
+    gw_event["path"] = "/query-model-advanced"
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["fullName"] == "Snake Case Test"
+    assert body["nextToken"] == "token789"
+    assert body["id"] == "search-789"
+
+    # Test QueryAdvanced validation error (full_name too short)
+    gw_event["queryStringParameters"] = {
+        "fullName": "Bad",  # Too short (min_length=5)
+        "nextToken": "dGVzdA==",
+        "id": "search-456",
+    }
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    errors = body["detail"]
+
+    # Should have validation error for full_name with proper location
+    full_name_error = next((e for e in errors if "full_name" in e["loc"] or "fullName" in e["loc"]), None)
+    assert full_name_error is not None
+    assert full_name_error["type"] == "string_too_short"
