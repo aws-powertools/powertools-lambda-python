@@ -15,7 +15,7 @@ python_requirement(
 
 python_requirement(
     name="requests",
-    requirements=["requests==2.32.3"],
+    requirements=["requests>=2.32.4"],
 )
 
 pex_binary(

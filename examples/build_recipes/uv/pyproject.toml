@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Lambda function with Powertools using uv"
 requires-python = ">=3.9"
 dependencies = [
-    "aws-lambda-powertools[all]>=3.4.0",
+    "aws-lambda-powertools[all]>=3.18.0",
     "pydantic>=2.10.0",
     "requests>=2.32.0",
 ]
