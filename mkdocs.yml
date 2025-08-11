@@ -14,6 +14,7 @@ nav:
       - We Made This (Community): we_made_this.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
       - Roadmap: roadmap.md
+      - Tutorial: tutorial/index.md
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -43,7 +44,7 @@ nav:
       - Resources:
           - "llms.txt": ./llms.txt
           - "llms.txt (full version)": ./llms-full.txt
-  - Tutorial: tutorial/index.md
+  - Build recipes: build_recipes.md
   - Processes:
       - Security: security.md
       - Automation: automation.md
@@ -233,6 +234,8 @@ plugins:
           - utilities/jmespath_functions.md
         Tutorial:
           - tutorial/index.md
+        Build recipes:
+          - build_recipes.md
 
   - mkdocstrings:
       default_handler: python

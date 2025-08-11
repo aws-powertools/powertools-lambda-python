@@ -1,0 +1,23 @@
+#Public Lambda image
+FROM public.ecr.aws/lambda/python:3.13-x86_64
+#FROM public.ecr.aws/lambda/python:3.13-arm64 for ARM64 builds
+
+# Set workdir file
+WORKDIR /tmp/app
+
+# Install poetry
+RUN pip install poetry
+
+# Copy poetry files
+COPY pyproject.toml poetry.lock ./
+
+# Configure poetry
+RUN poetry config virtualenvs.create false
+
+# Install dependencies
+RUN poetry install --only=main --no-root
+
+# Copy application code
+COPY app_poetry.py ./
+
+CMD ["app_poetry.lambda_handler"]

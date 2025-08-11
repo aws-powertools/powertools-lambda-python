@@ -1,0 +1,79 @@
+name: Multi-Environment Lambda Deployment
+
+on:
+  push:
+    branches: [main, develop, staging]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - branch: develop
+            environment: dev
+            function-suffix: -dev
+            memory: 256
+            timeout: 30
+            log-level: DEBUG
+          - branch: staging
+            environment: staging
+            function-suffix: -staging
+            memory: 512
+            timeout: 45
+            log-level: INFO
+          - branch: main
+            environment: prod
+            function-suffix: -prod
+            memory: 1024
+            timeout: 60
+            log-level: INFO
+
+    steps:
+    - uses: actions/checkout@v4
+      if: github.ref == format('refs/heads/{0}', matrix.branch)
+
+    - name: Set up Python
+      if: github.ref == format('refs/heads/{0}', matrix.branch)
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Prepare deployment with uv (fast)
+      if: github.ref == format('refs/heads/{0}', matrix.branch)
+      run: |
+        # Install uv for fast dependency management
+        pip install uv
+
+        # Create deployment directory
+        mkdir -p deploy-${{ matrix.environment }}/
+
+        # Install dependencies with uv (much faster than pip)
+        uv pip install \
+          --target deploy-${{ matrix.environment }}/ \
+          --python-version 3.13 \
+          aws-lambda-powertools[all] pydantic requests
+
+        # Copy application code
+        cp -r src/* deploy-${{ matrix.environment }}/
+
+    - name: Configure AWS credentials
+      if: github.ref == format('refs/heads/{0}', matrix.branch)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: us-east-1
+
+    - name: Deploy to Lambda
+      if: github.ref == format('refs/heads/{0}', matrix.branch)
+      uses: aws-actions/aws-lambda-deploy@v1
+      with:
+        function-name: powertools-app${{ matrix.function-suffix }}
+        code-artifacts-dir: deploy-${{ matrix.environment }}/
+        handler: app.lambda_handler
+        runtime: python3.13
+        environment: '{"ENVIRONMENT":"${{ matrix.environment }}","POWERTOOLS_SERVICE_NAME":"powertools-app-${{ matrix.environment }}","POWERTOOLS_METRICS_NAMESPACE":"MyApp/${{ matrix.environment }}","POWERTOOLS_LOG_LEVEL":"${{ matrix.log-level }}"}'
+        timeout: ${{ matrix.timeout }}
+        memory-size: ${{ matrix.memory }}
+        role: ${{ secrets.LAMBDA_EXECUTION_ROLE_ARN }}
+        tags: '{"Environment":"${{ matrix.environment }}","Project":"powertools-demo","ManagedBy":"github-actions"}'

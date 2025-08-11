@@ -1,0 +1,35 @@
+name: Build Lambda Package
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Always use Linux for Lambda builds
+    #runs-on: ubuntu-24.04-arm # For ARM64
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt -t build/
+
+    - name: Copy application code
+      run: cp -r src/* build/
+
+    - name: Create deployment package
+      run: |
+        cd build && zip -r ../lambda-deployment.zip . && cd ..
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-package
+        path: lambda-deployment.zip

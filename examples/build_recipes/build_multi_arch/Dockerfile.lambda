@@ -1,0 +1,17 @@
+#Public Lambda image
+FROM public.ecr.aws/lambda/python:3.13-86_64
+#FROM public.ecr.aws/lambda/python:3.13-arm64 for ARM64 builds
+
+# Set workdir file
+WORKDIR /tmp/app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install dependencies in Lambda-compatible environment
+RUN pip install -r requirements.txt
+
+# Copy application code
+COPY . .
+
+CMD ["app.lambda_handler"]
