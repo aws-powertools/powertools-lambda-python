@@ -358,10 +358,10 @@ Optimized approach using Lambda Layers to separate dependencies from application
     --8<-- "examples/build_recipes/sam/with-layers/layers/dependencies/requirements.txt"
     ```
 
-=== "src/api/app_sam_layer.py"
+=== "src/app/app_sam_layer.py"
 
     ```python
-    --8<-- "examples/build_recipes/sam/with-layers/src/api/app_sam_layer.py"
+    --8<-- "examples/build_recipes/sam/with-layers/src/app/app_sam_layer.py"
     ```
 
 === "src/worker/worker_sam_layer.py"
@@ -463,10 +463,10 @@ Multi-environment CDK setup with separate stacks, DynamoDB integration, and SQS 
     --8<-- "examples/build_recipes/cdk/multi-stack/app_multi_stack.py"
     ```
 
-=== "src/api/api.py"
+=== "src/app/api.py"
 
     ```python
-    --8<-- "examples/build_recipes/cdk/multi-stack/src/api/api.py"
+    --8<-- "examples/build_recipes/cdk/multi-stack/src/app/api.py"
     ```
 
 === "src/worker/worker.py"
@@ -521,10 +521,10 @@ Pants excels at managing complex projects with multiple Lambda functions that sh
     --8<-- "examples/build_recipes/pants/multi-target/BUILD"
     ```
 
-=== "api/handler.py"
+=== "app/handler.py"
 
     ```python
-    --8<-- "examples/build_recipes/pants/multi-target/api/handler.py"
+    --8<-- "examples/build_recipes/pants/multi-target/app/handler.py"
     ```
 
 === "worker/workder_pants.py"
