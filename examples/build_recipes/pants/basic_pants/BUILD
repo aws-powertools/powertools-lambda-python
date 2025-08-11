@@ -5,7 +5,7 @@ python_sources(
 
 python_requirement(
     name="aws-lambda-powertools",
-    requirements=["aws-lambda-powertools[all]==3.4.0"],
+    requirements=["aws-lambda-powertools[all]==3.18.0"],
 )
 
 python_requirement(
