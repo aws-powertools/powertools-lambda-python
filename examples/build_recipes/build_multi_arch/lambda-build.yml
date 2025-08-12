@@ -6,8 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Always use Linux for Lambda builds
-    #runs-on: ubuntu-24.04-arm # For ARM64
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -17,9 +16,12 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Install dependencies
+    - name: Install dependencies with Lambda-compatible wheels
       run: |
-        pip install -r requirements.txt -t build/
+        # Force Linux x86_64 wheels compatible with Lambda GLIBC 2.34
+        pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+          --python-version 3.13 --target build/ \
+          -r requirements.txt
 
     - name: Copy application code
       run: cp -r src/* build/
@@ -33,3 +35,34 @@ jobs:
       with:
         name: lambda-package
         path: lambda-deployment.zip
+
+  build-arm64:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies for ARM64 Lambda
+      run: |
+        # Force Linux ARM64 wheels compatible with Lambda
+        pip install --platform manylinux2014_aarch64 --only-binary=:all: \
+          --python-version 3.13 --target build/ \
+          -r requirements.txt
+
+    - name: Copy application code
+      run: cp -r src/* build/
+
+    - name: Create deployment package
+      run: |
+        cd build && zip -r ../lambda-deployment-arm64.zip . && cd ..
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-package-arm64
+        path: lambda-deployment-arm64.zip

@@ -1,16 +1,15 @@
 #!/bin/bash
 
-# Install dependencies
-poetry install --only=main --no-root
-
 # Export requirements for Lambda
 poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 # Create build directory
 mkdir -p build/
 
-# Install dependencies to build directory
-pip install -r requirements.txt -t build/
+# Install dependencies with Lambda-compatible wheels
+pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+    --python-version 3.13 --target build/ \
+    -r requirements.txt
 
 # Copy application code
 cp app_poetry.py build/

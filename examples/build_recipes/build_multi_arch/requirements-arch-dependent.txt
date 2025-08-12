@@ -1,0 +1,8 @@
+# These extras include compiled dependencies
+aws-lambda-powertools[parser]==3.18.0           # pydantic (Rust)
+aws-lambda-powertools[validation]==3.18.0       # fastjsonschema (C)
+aws-lambda-powertools[datamasking]==3.18.0      # aws-encryption-sdk (C)
+aws-lambda-powertools[redis]==3.18.0            # redis with hiredis (C)
+aws-lambda-powertools[valkey]==3.18.0           # valkey-glide (Rust)
+aws-lambda-powertools[kafka-consumer-avro]==3.18.0      # avro (C)
+aws-lambda-powertools[kafka-consumer-protobuf]==3.18.0  # protobuf (C++)

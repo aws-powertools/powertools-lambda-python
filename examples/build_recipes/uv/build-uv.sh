@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# Create virtual environment and install dependencies
-uv venv
-uv pip install -e .
-
 # Create build directory
 mkdir -p build/
 
-# Copy installed packages
-cp -r .venv/lib/python*/site-packages/* build/
+# Install dependencies with Lambda-compatible wheels
+uv pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+    --python-version 3.13 --target build/ \
+    -e .
 
 # Copy application code
 cp app_uv.py build/

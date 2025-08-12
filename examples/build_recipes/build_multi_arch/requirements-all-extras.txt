@@ -1,0 +1,6 @@
+# The 'all' extra includes both safe and architecture-dependent packages
+aws-lambda-powertools[all]==3.18.0
+
+# This is equivalent to:
+# pydantic, pydantic-settings, aws-xray-sdk, fastjsonschema,
+# aws-encryption-sdk, jsonpath-ng

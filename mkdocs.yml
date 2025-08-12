@@ -9,12 +9,22 @@ nav:
   - Homepage:
       - index.md
       - Changelog: changelog.md
-      - API reference: api/" target="_blank
-      - Upgrade guide: upgrade.md
-      - We Made This (Community): we_made_this.md
-      - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
-      - Roadmap: roadmap.md
       - Tutorial: tutorial/index.md
+      - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
+      - Build recipes:
+          - build_recipes/index.md
+          - Getting started: build_recipes/getting-started.md
+          - Cross-platform builds: build_recipes/cross-platform.md
+          - Build with pip: build_recipes/build-with-pip.md
+          - Build with poetry: build_recipes/build-with-poetry.md
+          - Build with uv: build_recipes/build-with-uv.md
+          - Build with SAM: build_recipes/build-with-sam.md
+          - Build with CDK: build_recipes/build-with-cdk.md
+          - Build with Pants: build_recipes/build-with-pants.md
+          - Performance optimization: build_recipes/performance-optimization.md
+          - CI/CD integration: build_recipes/cicd-integration.md
+          - Troubleshooting: build_recipes/troubleshooting.md
+      - API reference: api/" target="_blank
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -41,10 +51,13 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Upgrade guide: upgrade.md
+      - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
       - Resources:
           - "llms.txt": ./llms.txt
           - "llms.txt (full version)": ./llms-full.txt
-  - Build recipes: build_recipes.md
+
   - Processes:
       - Security: security.md
       - Automation: automation.md
@@ -235,7 +248,18 @@ plugins:
         Tutorial:
           - tutorial/index.md
         Build recipes:
-          - build_recipes.md
+          - build_recipes/index.md
+          - build_recipes/getting-started.md
+          - build_recipes/cross-platform.md
+          - build_recipes/build-with-pip.md
+          - build_recipes/build-with-poetry.md
+          - build_recipes/build-with-uv.md
+          - build_recipes/build-with-sam.md
+          - build_recipes/build-with-cdk.md
+          - build_recipes/build-with-pants.md
+          - build_recipes/performance-optimization.md
+          - build_recipes/cicd-integration.md
+          - build_recipes/troubleshooting.md
 
   - mkdocstrings:
       default_handler: python

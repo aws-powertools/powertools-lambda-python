@@ -3,17 +3,16 @@
 # Generate lock file for reproducible builds
 uv lock
 
-# Install exact versions from lock file
-uv sync --frozen
-
 # Export to requirements.txt for Lambda
 uv export --format requirements-txt --no-hashes > requirements.txt
 
 # Create build directory
 mkdir -p build/
 
-# Install to build directory
-uv pip install -r requirements.txt --target build/
+# Install to build directory with Lambda-compatible wheels
+uv pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+    --python-version 3.13 --target build/ \
+    -r requirements.txt
 
 # Copy application code
 cp app_uv.py build/
