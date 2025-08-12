@@ -5,17 +5,13 @@ FROM public.ecr.aws/lambda/python:3.13-x86_64
 # Set workdir file
 WORKDIR /tmp/app
 
-# Install poetry
-RUN pip install poetry
-
 # Copy poetry files
 COPY pyproject.toml poetry.lock ./
 
-# Configure poetry
-RUN poetry config virtualenvs.create false
-
-# Install dependencies
-RUN poetry install --only=main --no-root
+# Configure poetry and install dependencies
+RUN poetry config virtualenvs.create false \
+    pip install poetry \
+    poetry install --only=main --no-root
 
 # Copy application code
 COPY app_poetry.py ./
