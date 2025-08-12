@@ -527,7 +527,7 @@ Pants excels at managing complex projects with multiple Lambda functions that sh
     --8<-- "examples/build_recipes/pants/multi-target/app/handler.py"
     ```
 
-=== "worker/workder_pants.py"
+=== "worker/worker_pants.py"
 
     ```python
     --8<-- "examples/build_recipes/pants/multi-target/worker/worker_pants.py"
