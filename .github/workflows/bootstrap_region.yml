@@ -44,7 +44,7 @@ jobs:
     environment: layer-${{ inputs.environment }}
     steps:
       - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
         with:
           ref: ${{ github.sha }}
       - name: Setup Node.js
@@ -52,10 +52,10 @@ jobs:
         with:
           node-version: "22"
       - name: Setup dependencies
-        uses: aws-powertools/actions/.github/actions/cached-node-modules@5ae7c190d6b51491bb14f593c3509c1bcbf7a3c1
+        uses: aws-powertools/actions/.github/actions/cached-node-modules@743fa57a003787b157991ea5c6e3cf0d40468676
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c
         with:
           aws-region: ${{ inputs.region }}
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
@@ -94,7 +94,7 @@ jobs:
     steps:
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}

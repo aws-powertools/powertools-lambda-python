@@ -59,7 +59,7 @@ jobs:
     environment: Prod (Readonly)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -104,11 +104,11 @@ jobs:
     environment: GovCloud ${{ inputs.environment }} (East)
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Verify Layer Signature
@@ -116,7 +116,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-east-1
@@ -173,11 +173,11 @@ jobs:
       name: GovCloud ${{ inputs.environment }} (West)
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Verify Layer Signature
@@ -185,7 +185,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-west-1

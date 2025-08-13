@@ -469,7 +469,7 @@ class Route:
 
         # Save CPU cycles by building middleware stack once
         if not self._middleware_stack_built:
-            self._build_middleware_stack(router_middlewares=router_middlewares)
+            self._build_middleware_stack(router_middlewares=router_middlewares, app=app)
 
         # If debug is turned on then output the middleware stack to the console
         if app._debug:
@@ -487,7 +487,7 @@ class Route:
         # Call the Middleware Wrapped _call_stack function handler with the app
         return self._middleware_stack(app)
 
-    def _build_middleware_stack(self, router_middlewares: list[Callable[..., Any]]) -> None:
+    def _build_middleware_stack(self, router_middlewares: list[Callable[..., Any]], app) -> None:
         """
         Builds the middleware stack for the handler by wrapping each
         handler in an instance of MiddlewareWrapper which is used to contain the state
@@ -505,7 +505,25 @@ class Route:
         The Route Middleware stack is processed in reverse order. This is so the stack of
         middleware handlers is applied in the order of being added to the handler.
         """
-        all_middlewares = router_middlewares + self.middlewares
+        # Build middleware stack in the correct order for validation:
+        # 1. Request validation middleware (first)
+        # 2. Router middlewares + user middlewares (middle)
+        # 3. Response validation middleware (before route handler)
+        # 4. Route handler adapter (last)
+
+        all_middlewares = []
+
+        # Add request validation middleware first if validation is enabled
+        if hasattr(app, "_request_validation_middleware"):
+            all_middlewares.append(app._request_validation_middleware)
+
+        # Add user middlewares in the middle
+        all_middlewares.extend(router_middlewares + self.middlewares)
+
+        # Add response validation middleware before the route handler if validation is enabled
+        if hasattr(app, "_response_validation_middleware"):
+            all_middlewares.append(app._response_validation_middleware)
+
         logger.debug(f"Building middleware stack: {all_middlewares}")
 
         # IMPORTANT:
@@ -1639,17 +1657,16 @@ class ApiGatewayResolver(BaseRouter):
         self._json_body_deserializer = json_body_deserializer
 
         if self._enable_validation:
-            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
+            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import (
+                OpenAPIRequestValidationMiddleware,
+                OpenAPIResponseValidationMiddleware,
+            )
 
-            # Note the serializer argument: only use custom serializer if provided by the caller
-            # Otherwise, fully rely on the internal Pydantic based mechanism to serialize responses for validation.
-            self.use(
-                [
-                    OpenAPIValidationMiddleware(
-                        validation_serializer=serializer,
-                        has_response_validation_error=self._has_response_validation_error,
-                    ),
-                ],
+            # Store validation middlewares to be added in the correct order later
+            self._request_validation_middleware = OpenAPIRequestValidationMiddleware()
+            self._response_validation_middleware = OpenAPIResponseValidationMiddleware(
+                validation_serializer=serializer,
+                has_response_validation_error=self._has_response_validation_error,
             )
 
     def _validate_response_validation_error_http_code(
@@ -2668,7 +2685,7 @@ class ApiGatewayResolver(BaseRouter):
                 route=route,
             )
 
-        # OpenAPIValidationMiddleware will only raise ResponseValidationError when
+        # OpenAPIResponseValidationMiddleware will only raise ResponseValidationError when
         # 'self._response_validation_error_http_code' is not None or
         # when route has custom_response_validation_http_code
         if isinstance(exp, ResponseValidationError):
