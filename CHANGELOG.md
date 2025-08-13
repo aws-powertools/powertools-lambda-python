@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.19.1a0 ([#7161](https://github.com/aws-powertools/powertools-lambda-python/issues/7161))
+* **deps:** bump aws-actions/configure-aws-credentials from aa1f74b81b53cb3adb28afcdb21d7b9f3fceea98 to 209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c ([#7160](https://github.com/aws-powertools/powertools-lambda-python/issues/7160))
+* **deps-dev:** bump boto3-stubs from 1.40.7 to 1.40.8 ([#7159](https://github.com/aws-powertools/powertools-lambda-python/issues/7159))
 
 
 <a name="v3.19.0"></a>
