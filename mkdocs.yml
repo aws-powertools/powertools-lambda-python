@@ -11,9 +11,6 @@ nav:
       - Changelog: changelog.md
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
-      - Build recipes:
-          - build_recipes/index.md
-          - Getting started: build_recipes/getting-started.md
       - API reference: api/" target="_blank
       - Features:
           - core/tracer.md
@@ -41,6 +38,9 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Build recipes:
+          - build_recipes/index.md
+          - Getting started: build_recipes/getting-started.md
       - Upgrade guide: upgrade.md
       - We Made This (Community): we_made_this.md
       - Roadmap: roadmap.md
