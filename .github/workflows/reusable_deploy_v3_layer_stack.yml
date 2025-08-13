@@ -161,7 +161,7 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@aa1f74b81b53cb3adb28afcdb21d7b9f3fceea98 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
