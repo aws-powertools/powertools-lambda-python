@@ -240,16 +240,6 @@ plugins:
         Build recipes:
           - build_recipes/index.md
           - build_recipes/getting-started.md
-          - build_recipes/cross-platform.md
-          - build_recipes/build-with-pip.md
-          - build_recipes/build-with-poetry.md
-          - build_recipes/build-with-uv.md
-          - build_recipes/build-with-sam.md
-          - build_recipes/build-with-cdk.md
-          - build_recipes/build-with-pants.md
-          - build_recipes/performance-optimization.md
-          - build_recipes/cicd-integration.md
-          - build_recipes/troubleshooting.md
 
   - mkdocstrings:
       default_handler: python
