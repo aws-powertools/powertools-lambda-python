@@ -1,3 +1,0 @@
-# These extras have minimal or no compiled dependencies
-aws-lambda-powertools[tracer]==3.18.0      # aws-xray-sdk (mostly pure Python)
-aws-lambda-powertools[aws-sdk]==3.18.0    # boto3 (pure Python)
