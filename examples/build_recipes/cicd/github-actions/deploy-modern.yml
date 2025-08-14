@@ -1,0 +1,84 @@
+name: Deploy Lambda with AWS Lambda Deploy Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  PYTHON_VERSION: '3.13'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+
+    - name: Set up Python
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        pip install aws-lambda-powertools[all] pytest pytest-cov
+
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=src/ --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+
+    - name: Set up Python
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Prepare deployment directory
+      run: |
+        # Create deployment directory with dependencies
+        mkdir -p deploy/
+
+        # Install dependencies with Linux-compatible wheels
+        pip install \
+          --platform manylinux2014_x86_64 \
+          --target deploy/ \
+          --implementation cp \
+          --python-version ${{ env.PYTHON_VERSION }} \
+          --only-binary=:all: \
+          --upgrade \
+          aws-lambda-powertools[all] pydantic requests
+
+        # Copy application code
+        cp -r src/* deploy/
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Deploy to Lambda
+      uses: aws-actions/aws-lambda-deploy@246115fccc1ad110c97f729696574d09eb5c690d
+      with:
+        function-name: powertools-lambda-function
+        code-artifacts-dir: deploy/
+        handler: app.lambda_handler
+        runtime: python3.13
+        environment: '{"POWERTOOLS_SERVICE_NAME":"powertools-app","POWERTOOLS_METRICS_NAMESPACE":"MyApp","POWERTOOLS_LOG_LEVEL":"INFO"}'
+        timeout: 30
+        memory-size: 512
+        role: ${{ secrets.LAMBDA_EXECUTION_ROLE_ARN }}
