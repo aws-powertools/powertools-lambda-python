@@ -9,11 +9,9 @@ nav:
   - Homepage:
       - index.md
       - Changelog: changelog.md
-      - API reference: api/" target="_blank
-      - Upgrade guide: upgrade.md
-      - We Made This (Community): we_made_this.md
+      - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
-      - Roadmap: roadmap.md
+      - API reference: api/" target="_blank
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -40,10 +38,16 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Build recipes:
+          - build_recipes/index.md
+          - Getting started: build_recipes/getting-started.md
+      - Upgrade guide: upgrade.md
+      - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
       - Resources:
           - "llms.txt": ./llms.txt
           - "llms.txt (full version)": ./llms-full.txt
-  - Tutorial: tutorial/index.md
+
   - Processes:
       - Security: security.md
       - Automation: automation.md
@@ -233,6 +237,9 @@ plugins:
           - utilities/jmespath_functions.md
         Tutorial:
           - tutorial/index.md
+        Build recipes:
+          - build_recipes/index.md
+          - build_recipes/getting-started.md
 
   - mkdocstrings:
       default_handler: python
