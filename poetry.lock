@@ -216,20 +216,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.210.0a0"
+version = "2.211.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.210.0a0-py3-none-any.whl", hash = "sha256:2cf8c67cc4966547b7ae4783d31aa1ac5c5fc88eaed288936e3e540bf118403f"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.210.0a0.tar.gz", hash = "sha256:bcb86c94666e515c227ce6f567481adf75cfd1fca1c0e34f8c52f4e46aa5e71c"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.211.0a0-py3-none-any.whl", hash = "sha256:65cc88da7720221371d41c7050dd89a650190b9b7ce4e153787fea24be9b1b51"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.211.0a0.tar.gz", hash = "sha256:6b2eda370287a94b2b981d7a332b39656acc25b660b6bfcbe95768cb3d50e6d1"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.210.0,<3.0.0"
+aws-cdk-lib = ">=2.211.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.112.0,<2.0.0"
+jsii = ">=1.113.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -252,14 +252,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.210.0"
+version = "2.211.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.210.0-py3-none-any.whl", hash = "sha256:0b3c30acb1142252b649303e63fa914832bed4357452c2b2bfff5455e448253c"},
-    {file = "aws_cdk_lib-2.210.0.tar.gz", hash = "sha256:a6695b0b0ec691b1007865ab0c9e4d246f33dca23ad205d980f2e5724d8cbb01"},
+    {file = "aws_cdk_lib-2.211.0-py3-none-any.whl", hash = "sha256:62dc0315ad556207a067c87c476a7567dae3f3741d53d9017510a1455e87ce2e"},
+    {file = "aws_cdk_lib-2.211.0.tar.gz", hash = "sha256:7e9eb756e3d9d4a0c1326d45b8df179bf287ee6a3de740faf1b975c94c782911"},
 ]
 
 [package.dependencies]
@@ -267,7 +267,7 @@ files = [
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
 "aws-cdk.cloud-assembly-schema" = ">=48.2.0,<49.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.112.0,<2.0.0"
+jsii = ">=1.113.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -2195,19 +2195,19 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.112.0"
+version = "1.113.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "jsii-1.112.0-py3-none-any.whl", hash = "sha256:6510c223074d9b206fd0570849a791e4d9ecfff7ffe68428de73870cea9f55a1"},
-    {file = "jsii-1.112.0.tar.gz", hash = "sha256:6b7d19f361c2565b76828ecbe8cbed8b8d6028a82aa98a46b206a4ee5083157e"},
+    {file = "jsii-1.113.0-py3-none-any.whl", hash = "sha256:62377c651554234ea945693f7c03cb96a969ba425a686950c88d43b0d4d76b07"},
+    {file = "jsii-1.113.0.tar.gz", hash = "sha256:2dedea9d6006af53467a7a67f1d35a56ab3f75a3d6ed4b4536fffc3e1d1fe476"},
 ]
 
 [package.dependencies]
 attrs = ">=21.2,<26.0"
-cattrs = ">=1.8,<24.2"
+cattrs = ">=1.8,<25.2"
 importlib_resources = ">=5.2.0"
 publication = ">=0.0.3"
 python-dateutil = "*"
