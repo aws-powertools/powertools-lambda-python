@@ -4,11 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **build_recipes:** add initial build recipes structure  ([#7163](https://github.com/aws-powertools/powertools-lambda-python/issues/7163))
+
 ## Maintenance
 
+* **automation:** update PR template to include closes command ([#7173](https://github.com/aws-powertools/powertools-lambda-python/issues/7173))
+* **ci:** new pre-release 3.19.1a1 ([#7172](https://github.com/aws-powertools/powertools-lambda-python/issues/7172))
 * **ci:** new pre-release 3.19.1a0 ([#7161](https://github.com/aws-powertools/powertools-lambda-python/issues/7161))
 * **deps:** bump aws-actions/configure-aws-credentials from aa1f74b81b53cb3adb28afcdb21d7b9f3fceea98 to 209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c ([#7160](https://github.com/aws-powertools/powertools-lambda-python/issues/7160))
+* **deps-dev:** bump boto3-stubs from 1.40.8 to 1.40.9 ([#7170](https://github.com/aws-powertools/powertools-lambda-python/issues/7170))
 * **deps-dev:** bump boto3-stubs from 1.40.7 to 1.40.8 ([#7159](https://github.com/aws-powertools/powertools-lambda-python/issues/7159))
+* **deps-dev:** bump aws-cdk from 2.1024.0 to 2.1025.0 ([#7167](https://github.com/aws-powertools/powertools-lambda-python/issues/7167))
+* **deps-dev:** bump cfn-lint from 1.38.2 to 1.38.3 ([#7169](https://github.com/aws-powertools/powertools-lambda-python/issues/7169))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.210.0a0 to 2.211.0a0 ([#7168](https://github.com/aws-powertools/powertools-lambda-python/issues/7168))
 
 
 <a name="v3.19.0"></a>
