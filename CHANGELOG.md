@@ -6,6 +6,7 @@
 
 ## Documentation
 
+* **build_recipes:** add cicd page ([#7176](https://github.com/aws-powertools/powertools-lambda-python/issues/7176))
 * **build_recipes:** add initial build recipes structure  ([#7163](https://github.com/aws-powertools/powertools-lambda-python/issues/7163))
 
 ## Maintenance
@@ -19,6 +20,7 @@
 * **deps-dev:** bump aws-cdk from 2.1024.0 to 2.1025.0 ([#7167](https://github.com/aws-powertools/powertools-lambda-python/issues/7167))
 * **deps-dev:** bump cfn-lint from 1.38.2 to 1.38.3 ([#7169](https://github.com/aws-powertools/powertools-lambda-python/issues/7169))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.210.0a0 to 2.211.0a0 ([#7168](https://github.com/aws-powertools/powertools-lambda-python/issues/7168))
+* **deps-dev:** bump ruff from 0.12.8 to 0.12.9 ([#7182](https://github.com/aws-powertools/powertools-lambda-python/issues/7182))
 
 
 <a name="v3.19.0"></a>
