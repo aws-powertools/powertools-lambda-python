@@ -42,7 +42,7 @@ permissions:
 
 jobs:
   quality_check:
-    runs-on: ubuntu-latest
+    runs-on: codebuild--${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       max-parallel: 5
       matrix:
