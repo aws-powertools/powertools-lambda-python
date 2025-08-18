@@ -41,7 +41,7 @@ This guide covers different build tools and dependency managers for packaging La
 
 ### Advanced pip with Lambda Layers
 
-Optimize your deployment by using Lambda Layers for Powertools for AWS:
+Optimize your deployment by using Lambda layers for Powertools for AWS:
 
 === "requirements-layer.txt"
 
@@ -83,7 +83,7 @@ Build packages for different Lambda architectures using platform-specific wheels
 | Platform Flag | Lambda Architecture | Use Case |
 |---------------|-------------------|----------|
 | `manylinux2014_x86_64` | x86_64 | Standard Lambda functions |
-| `manylinux2014_aarch64` | arm64 | Graviton2-based functions (lower cost) |
+| `manylinux2014_aarch64` | arm64 | Graviton-based functions (lower cost) |
 
 ???+ tip "Architecture selection"
     - **x86_64**: Broader package compatibility, more mature ecosystem
