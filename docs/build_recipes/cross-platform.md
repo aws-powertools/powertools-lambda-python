@@ -116,17 +116,19 @@ pydantic-2.5.0-cp311-cp311-linux_x86_64.whl
 
 ## Lambda runtime environments
 
-Lambda runtimes use specific Amazon Linux versions with fixed GLIBC versions. Packages built on development machines with newer GLIBC versions will fail at runtime with import errors. Each Python runtime version corresponds to a specific Amazon Linux base system that determines compatible system library versions.
+<!-- markdownlint-disable MD013 -->
+Lambda managed runtimes use [specific Amazon Linux versions](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtimes-supported) versions with fixed GLIBC versions. Packages built on development machines with newer GLIBC versions will fail at runtime with import errors. Each Python runtime version corresponds to a specific Amazon Linux base system that determines compatible system library versions.
+<!-- markdownlint-enable MD013 -->
 
 ### Amazon Linux versions and GLIBC compatibility
 
-| Python Runtime | Base System | GLIBC Version | Architecture Support | Status |
-|----------------|-------------|---------------|---------------------|---------|
-| **python3.9** | Amazon Linux 2 | 2.26 | x86_64, arm64 | Supported |
-| **python3.10** | Amazon Linux 2 | 2.26 | x86_64, arm64 | Supported |
-| **python3.11** | Amazon Linux 2 | 2.26 | x86_64, arm64 | Supported |
-| **python3.12** | Amazon Linux 2023 | 2.34 | x86_64, arm64 | Supported |
-| **python3.13** | Amazon Linux 2023 | 2.34 | x86_64, arm64 | Supported |
+| Python Runtime | Base System       | GLIBC Version | Architecture Support |
+|----------------|-------------------|---------------|----------------------|
+| **python3.9**  | Amazon Linux 2    | 2.26          | x86_64, arm64        |
+| **python3.10** | Amazon Linux 2    | 2.26          | x86_64, arm64        |
+| **python3.11** | Amazon Linux 2    | 2.26          | x86_64, arm64        |
+| **python3.12** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
+| **python3.13** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
 
 ???+ warning "GLIBC Version Mismatch"
     Compiled libraries built on systems with newer GLIBC versions will fail on Lambda runtimes with older GLIBC versions. Ubuntu 24.04 (GLIBC 2.39) and Ubuntu 22.04 (GLIBC 2.35) are incompatible with Lambda python3.11 and earlier (GLIBC 2.26). Always use `--platform` flags or Docker with Lambda base images.
