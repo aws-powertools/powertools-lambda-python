@@ -42,6 +42,7 @@ nav:
           - build_recipes/index.md
           - Getting started: build_recipes/getting-started.md
           - CI/CD integration: build_recipes/cicd-integration.md
+          - Troubleshooting: build_recipes/troubleshooting.md
       - Upgrade guide: upgrade.md
       - We Made This (Community): we_made_this.md
       - Roadmap: roadmap.md
@@ -242,6 +243,7 @@ plugins:
           - build_recipes/index.md
           - build_recipes/getting-started.md
           - build_recipes/cicd-integration.md
+          - build_recipes/troubleshooting.md
 
   - mkdocstrings:
       default_handler: python
