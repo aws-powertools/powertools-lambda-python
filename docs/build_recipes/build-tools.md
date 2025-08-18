@@ -7,6 +7,9 @@ description: Package Lambda functions using different build tools and dependency
 
 This guide covers different build tools and dependency managers for packaging Lambda functions with Powertools for AWS Lambda (Python). Each tool has its strengths and is optimized for different use cases.
 
+???+ info "Requirements file security"
+    For simplicity, examples in this guide use `requirements.txt` with pinned versions. In production environments, you should use hash-checking for enhanced security by including `--hash` flags. Learn more about [secure package installation](https://pip.pypa.io/en/stable/topics/secure-installs/){target="_blank"} in the pip documentation.
+
 ## pip
 
 **pip** is Python's standard package installer - simple, reliable, and available everywhere. Perfect for straightforward Lambda functions where you need basic dependency management without complex workflows.
@@ -19,7 +22,9 @@ This guide covers different build tools and dependency managers for packaging La
 === "requirements.txt"
 
     ```bash
-    --8<-- "examples/build_recipes/pip/requirements.txt"
+    aws-lambda-powertools[all]==3.18.0
+    pydantic==2.10.4
+    requests>=2.32.4
     ```
 
 === "app_pip.py"
@@ -41,13 +46,14 @@ Optimize your deployment by using Lambda Layers for Powertools for AWS:
 === "requirements-layer.txt"
 
     ```bash
-    --8<-- "examples/build_recipes/pip/requirements-layer.txt"
+    aws-lambda-powertools[all]==3.18.0
     ```
 
 === "requirements-app.txt"
 
     ```bash
-    --8<-- "examples/build_recipes/pip/requirements-app.txt"
+    pydantic==2.10.4
+    requests>=2.32.4
     ```
 
 === "app_pip.py"
@@ -248,7 +254,9 @@ Simple approach where all dependencies are packaged with the function code:
 === "requirements.txt"
 
     ```txt
-    --8<-- "examples/build_recipes/sam/no-layers/requirements.txt"
+    aws-lambda-powertools[all]==3.18.0
+    pydantic==2.10.4
+    requests>=2.32.4
     ```
 
 === "src/app_sam_no_layer.py"
@@ -279,7 +287,8 @@ Optimized approach using Lambda Layers to separate dependencies from application
 === "layers/dependencies/requirements.txt"
 
     ```txt
-    --8<-- "examples/build_recipes/sam/with-layers/layers/dependencies/requirements.txt"
+    pydantic==2.10.4
+    requests>=2.32.4
     ```
 
 === "src/app/app_sam_layer.py"
@@ -384,7 +393,8 @@ Before starting, ensure you have:
 === "requirements.txt"
 
     ```txt
-    --8<-- "examples/build_recipes/cdk/basic/requirements.txt"
+    aws-cdk-lib>=2.100.0
+    constructs>=10.0.0
     ```
 
 === "src/lambda_function.py"
