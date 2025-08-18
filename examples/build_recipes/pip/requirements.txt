@@ -1,0 +1,3 @@
+aws-lambda-powertools[all]==3.18.0
+pydantic==2.10.4
+requests>=2.32.4

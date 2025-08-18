@@ -39,16 +39,16 @@ This guide is organized into focused sections to help you find exactly what you 
 ### 📚 Fundamentals
 
 * **[Getting started](getting-started.md)** - Prerequisites, tool selection, and basic setup
-* **[Cross-platform builds](cross-platform.md)** - Handle architecture differences and compiled dependencies
+* **[Cross-platform builds](cross-integration.md)** - Handle architecture differences and compiled dependencies
 
 ### 🔧 Build tools
 
-* **[Build with pip](build-with-pip.md)** - Simple, universal package management
-* **[Build with Poetry](build-with-poetry.md)** - Modern dependency management with lock files
-* **[Build with uv](build-with-uv.md)** - Extremely fast Rust-based package manager
-* **[Build with SAM](build-with-sam.md)** - AWS Serverless Application Model integration
-* **[Build with CDK](build-with-cdk.md)** - Infrastructure as code with type safety
-* **[Build with Pants](build-with-pants.md)** - Advanced build system for monorepos
+* **[Build with pip](build-tools.md#pip)** - Simple, universal package management
+* **[Build with uv](build-tools.md#uv)** - Extremely fast Rust-based package manager
+* **[Build with Poetry](build-tools.md#poetry)** - Modern dependency management with lock files
+* **[Build with SAM](build-tools.md#sam)** - AWS Serverless Application Model integration
+* **[Build with CDK](build-tools.md#cdk)** - Infrastructure as code with type safety
+* **[Build with Pants](build-tools.md#pants)** - Advanced build system for monorepos
 
 ### ⚡ Advanced topics
 
