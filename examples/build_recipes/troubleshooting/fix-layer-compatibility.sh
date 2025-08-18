@@ -5,7 +5,8 @@
 # 2. Verify layer compatibility
 aws lambda get-layer-version \
     --layer-name AWSLambdaPowertoolsPythonV3-python313-x86_64 \
-    --version-number 22
+    --version-number 22 \
+    --region-name {REGION}
 
 # 3. Avoid version conflicts
 # Don't include Powertools for AWS in deployment package if using layer
