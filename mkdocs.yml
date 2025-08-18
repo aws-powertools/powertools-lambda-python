@@ -41,6 +41,7 @@ nav:
       - Build recipes:
           - build_recipes/index.md
           - Getting started: build_recipes/getting-started.md
+          - Build tools: build_recipes/build-tools.md
           - Cross-platform builds: build_recipes/cross-platform.md
           - Performance optimization: build_recipes/performance-optimization.md
           - CI/CD integration: build_recipes/cicd-integration.md
@@ -244,6 +245,7 @@ plugins:
         Build recipes:
           - build_recipes/index.md
           - build_recipes/getting-started.md
+          - build_recipes/build-tools.md
           - build_recipes/cross-platform.md
           - build_recipes/performance-optimization.md
           - build_recipes/cicd-integration.md

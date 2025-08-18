@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "lambda-powertools-app"
+version = "0.1.0"
+description = "Lambda function with Powertools"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aws-lambda-powertools = {extras = ["all"], version = "^3.18.0"}
+pydantic = "^2.10.0"
+requests = "^2.32.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.0.0"
+mypy = "^1.8.0"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

@@ -19,12 +19,12 @@ Each build tool has its strengths and is optimized for different use cases. Cons
 
 | Tool                  | Best for                          | Considerations                              |
 | --------------------- | --------------------------------- | ------------------------------------------- |
-| **[pip](build-with-pip.md)**       | Simple projects, CI/CD            | Lightweight, universal                      |
-| **[poetry](build-with-poetry.md)** | Modern Python projects            | Excellent dependency management, lock files |
-| **[uv](build-with-uv.md)**         | Fast builds, performance-critical | Extremely fast, Rust-based                  |
-| **[pants](build-with-pants.md)**   | Monorepos, complex projects       | Advanced build system, incremental builds   |
-| **[SAM](build-with-sam.md)**       | AWS-native deployments            | Integrated with AWS, local testing          |
-| **[CDK](build-with-cdk.md)**       | Infrastructure as code            | Programmatic infrastructure, type safety    |
+| **[pip](build-tools.md#pip)**       | Simple projects, CI/CD            | Lightweight, universal                      |
+| **[uv](build-tools.md#uv)**         | Fast builds, performance-critical | Extremely fast, Rust-based                  |
+| **[poetry](bbuild-tools.md#poetry)** | Modern Python projects            | Excellent dependency management, lock files |
+| **[SAM](build-tools.md#sam)**       | AWS-native deployments            | Integrated with AWS, local testing          |
+| **[CDK](build-tools.md#cdk)**       | Infrastructure as code            | Programmatic infrastructure, type safety    |
+| **[pants](build-tools.md#pants)**   | Monorepos, complex projects       | Advanced build system, incremental builds   |
 
 ???+ tip
     All examples in this guide are available in the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples/build_recipes){target="_blank"}.
