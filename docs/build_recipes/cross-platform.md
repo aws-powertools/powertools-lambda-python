@@ -1,6 +1,6 @@
 ---
 title: Cross-Platform Build Considerations
-description: Handle architecture differences when building Lambda packages
+description: Handle architecture differences when building AWS Lambda packages
 ---
 
 <!-- markdownlint-disable MD043 -->
@@ -8,7 +8,7 @@ description: Handle architecture differences when building Lambda packages
 Many modern Python packages include compiled extensions written in Rust or C/C++ for performance reasons. These compiled components are platform-specific and can cause deployment issues when building on different architectures.
 
 ???+ warning "Architecture Mismatch Issues"
-    Building Lambda packages on macOS (ARM64/Intel) for deployment on AWS Lambda (Linux x86_64 or ARM64) will result in incompatible binary dependencies that cause import errors at runtime.
+    Building AWS Lambda packages on macOS (ARM64/Intel) for deployment on AWS Lambda (Linux x86_64 or ARM64) will result in incompatible binary dependencies that cause import errors at runtime.
 
 ## Common compiled libraries
 
