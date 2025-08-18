@@ -8,7 +8,7 @@ description: Package Lambda functions using different build tools and dependency
 This guide covers different build tools and dependency managers for packaging Lambda functions with Powertools for AWS Lambda (Python). Each tool has its strengths and is optimized for different use cases.
 
 ???+ info "Requirements file security"
-    For simplicity, examples in this guide use `requirements.txt` with pinned versions. In production environments, you should use hash-checking for enhanced security by including `--hash` flags. Learn more about [secure package installation](https://pip.pypa.io/en/stable/topics/secure-installs/){target="_blank"} in the pip documentation.
+    For simplicity, examples in this guide use `requirements.txt` files with pinned versions. In production environments, you should use hash-checking for enhanced security by including `--hash` flags. Learn more about [secure package installation](https://pip.pypa.io/en/stable/topics/secure-installs/){target="_blank"} in the pip documentation.
 
 ## pip
 
