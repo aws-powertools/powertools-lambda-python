@@ -29,7 +29,8 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     SequenceNumber: str = Field(description="A unique identifier for the stream record.", examples=["222"])
     SizeBytes: int = Field(description="The size of the stream record, in bytes.", examples=[26])
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"] = Field(
-        description="The type of data included in the stream record.", examples=["NEW_AND_OLD_IMAGES"]
+        description="The type of data included in the stream record.",
+        examples=["NEW_AND_OLD_IMAGES"],
     )
 
     @field_validator("Keys", "NewImage", "OldImage", mode="before")
@@ -39,7 +40,6 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
 
 class UserIdentity(BaseModel):
     type: Literal["Service"] = Field(
-        default="Service",
         description="The type of identity that made the request, which is always 'Service' for DynamoDB streams.",
         examples=["Service"],
     )
@@ -52,11 +52,11 @@ class UserIdentity(BaseModel):
 class DynamoDBStreamRecordModel(BaseModel):
     eventID: str = Field(description="A unique identifier for the event.", examples=["1"])
     eventName: Literal["INSERT", "MODIFY", "REMOVE"] = Field(
-        description="The type of operation that was performed on the item.", examples=["INSERT"]
+        description="The type of operation that was performed on the item.",
+        examples=["INSERT"],
     )
-    eventVersion: float = Field(default="1.0", description="The version of the stream record format.", examples=["1.0"])
+    eventVersion: float = Field(description="The version of the stream record format.", examples=["1.0"])
     eventSource: Literal["aws:dynamodb"] = Field(
-        default="aws:dynamodb",
         description="The source of the event, which is always 'aws:dynamodb' for DynamoDB streams.",
         examples=["aws:dynamodb"],
     )
@@ -76,7 +76,7 @@ class DynamoDBStreamRecordModel(BaseModel):
                 "SequenceNumber": "222",
                 "SizeBytes": 26,
                 "StreamViewType": "NEW_AND_OLD_IMAGES",
-            }
+            },
         ],
     )
     userIdentity: Optional[UserIdentity] = Field(
@@ -96,7 +96,7 @@ class DynamoDBStreamModel(BaseModel):
                 "eventVersion": "1.0",
                 "eventSource": "aws:dynamodb",
                 "awsRegion": "us-west-2",
-                "eventSourceARN": "arn:aws:dynamodb:us-west-2:123456789012:table/ExampleTable/stream/2021-01-01T00:00:00.000",
+                "eventSourceARN": "arn:aws:dynamodb:us-west-2:123456789012:table/ExampleTable/stream/2021-01-01T00:00:00.000",  # noqa E501
                 "dynamodb": {
                     "ApproximateCreationDateTime": 1693997155.0,
                     "Keys": {"Id": {"N": "101"}},
@@ -107,6 +107,6 @@ class DynamoDBStreamModel(BaseModel):
                     "StreamViewType": "NEW_AND_OLD_IMAGES",
                 },
                 "userIdentity": {"type": "Service", "principalId": "dynamodb.amazonaws.com"},
-            }
+            },
         ],
     )
