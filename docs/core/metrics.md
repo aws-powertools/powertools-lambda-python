@@ -395,7 +395,7 @@ Current providers:
 
 | Provider                              | Notes                                                    |
 | ------------------------------------- | -------------------------------------------------------- |
-| [Datadog](./datadog){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
+| [Datadog](./datadog.md){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
 
 ## Testing your code
 

@@ -54,7 +54,7 @@ classDiagram
 
 ## Getting started
 
-We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-database).
+We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#cache-database).
 
 ### IAM Permissions
 
@@ -69,7 +69,7 @@ When using Amazon DynamoDB as the persistence layer, you will need the following
 
 **First time setting it up?**
 
-We provide Infrastrucure as Code examples with [AWS Serverless Application Model (SAM)](#aws-serverless-application-model-sam-example), [AWS Cloud Development Kit (CDK)](#aws-cloud-development-kit-cdk), and [Terraform](#terraform) with the required permissions.
+We provide Infrastrucure as Code examples with [AWS Serverless Application Model (SAM)](#dynamodb-iac-examples), [AWS Cloud Development Kit (CDK)](#aws-cloud-development-kit-cdk), and [Terraform](#terraform) with the required permissions.
 
 ### Required resources
 

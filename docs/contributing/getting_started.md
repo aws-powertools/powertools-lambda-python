@@ -17,7 +17,7 @@ graph LR
 
 ## Types of contributions
 
-We consider any contribution that help this project improve everyone's experience to be valid, as long as you agree with our [tenets](../index.md#tenets){target="_blank"}, [licensing](../../LICENSE){target="_blank"}, and [Code of Conduct](#code-of-conduct).
+We consider any contribution that help this project improve everyone's experience to be valid, as long as you agree with our [tenets](../index.md#tenets){target="_blank"}, [licensing](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/LICENSE){target="_blank"}, and [Code of Conduct](#code-of-conduct).
 
 Whether you're new contributor or a pro, we compiled a list of the common contributions to help you choose your first:
 
