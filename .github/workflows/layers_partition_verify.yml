@@ -87,7 +87,7 @@ jobs:
           - x86_64
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@aa1f74b81b53cb3adb28afcdb21d7b9f3fceea98 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -136,7 +136,7 @@ jobs:
         run: |
           echo 'CONVERTED_REGION=${{ matrix.region }}' | tr 'a-z\-' 'A-Z_' >> "$GITHUB_OUTPUT"
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@aa1f74b81b53cb3adb28afcdb21d7b9f3fceea98 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets[format('IAM_ROLE_{0}', steps.transform.outputs.CONVERTED_REGION)] }}
           aws-region: ${{ matrix.region}}
