@@ -72,7 +72,7 @@ jobs:
       - name: Install dependencies
         run: make dev-quality-code
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
