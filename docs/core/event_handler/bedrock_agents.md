@@ -173,7 +173,7 @@ You'll need to regenerate the OpenAPI schema and update your Agent everytime you
     ```
 
 	1. This ensures that it's only executed when running the file directly, and not when running on the Lambda runtime.
-    2. You can use [additional options](#customizing-openapi-metadata) to customize the OpenAPI schema.
+    2. You can use [additional options](#customizing-api-operations) to customize the OpenAPI schema.
 
 === "OpenAPI schema"
 

@@ -105,7 +105,7 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     --8<-- "examples/data_masking/src/getting_started_erase_data.py"
     ```
 
-    1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
+    1. See [choosing parts of your data](#choosing-parts-of-your-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
 
 === "generic_data_input.json"
     ```json hl_lines="7 9 14"
