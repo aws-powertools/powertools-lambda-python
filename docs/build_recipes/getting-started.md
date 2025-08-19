@@ -21,7 +21,7 @@ Each build tool has its strengths and is optimized for different use cases. Cons
 | --------------------- | --------------------------------- | ------------------------------------------- |
 | **[pip](build-tools.md#pip)**       | Simple projects, CI/CD            | Lightweight, universal                      |
 | **[uv](build-tools.md#uv)**         | Fast builds, performance-critical | Extremely fast, Rust-based                  |
-| **[poetry](bbuild-tools.md#poetry)** | Modern Python projects            | Excellent dependency management, lock files |
+| **[poetry](build-tools.md#poetry)** | Modern Python projects            | Excellent dependency management, lock files |
 | **[SAM](build-tools.md#sam)**       | AWS-native deployments            | Integrated with AWS, local testing          |
 | **[CDK](build-tools.md#cdk)**       | Infrastructure as code            | Programmatic infrastructure, type safety    |
 | **[pants](build-tools.md#pants)**   | Monorepos, complex projects       | Advanced build system, incremental builds   |

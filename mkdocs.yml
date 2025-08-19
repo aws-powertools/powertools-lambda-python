@@ -11,7 +11,6 @@ nav:
       - Changelog: changelog.md
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
-      - API reference: api/" target="_blank
       - Features:
           - core/tracer.md
           - core/logger.md
