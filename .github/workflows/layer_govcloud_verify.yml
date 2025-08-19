@@ -39,7 +39,7 @@ jobs:
     environment: Prod (Readonly)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -69,7 +69,7 @@ jobs:
     environment: GovCloud Prod (East)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-east-1
@@ -100,7 +100,7 @@ jobs:
     environment: GovCloud Prod (West)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@209f2a4450bb4b277e1dedaff40ad2fd8d4d0a4c # v4.3.0
+        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-east-1
