@@ -68,7 +68,7 @@ jobs:
         env:
           BRANCH: ${{ inputs.git_ref }}
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@3821430d177f66b128b701e38ba67c5319b1b0bd # v4.3.0
+        uses: aws-actions/configure-aws-credentials@09a74e37ceda446282c61f1496cdca8d8dca0e57 # v4.3.0
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
