@@ -1046,17 +1046,47 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     type_annotation = annotated_args[0]
     powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
 
-    if len(powertools_annotations) > 1:
-        raise AssertionError("Only one FieldInfo can be used per parameter")
+    # Special case: handle Field(discriminator) + Body() combination
+    # This happens when using Annotated[Union[A, B], Field(discriminator='...')] with Body()
+    has_discriminator_with_body = False
+    powertools_annotation: FieldInfo | None = None
+    
+    if len(powertools_annotations) == 2:
+        field_obj = None
+        body_obj = None
+        for ann in powertools_annotations:
+            if isinstance(ann, Body):
+                body_obj = ann
+            elif isinstance(ann, FieldInfo) and hasattr(ann, "discriminator") and ann.discriminator is not None:
+                field_obj = ann
 
-    powertools_annotation = next(iter(powertools_annotations), None)
+        if field_obj and body_obj:
+            # Use Body as the primary annotation
+            powertools_annotation = body_obj
+            # Preserve the full annotation including discriminator for proper validation
+            # This ensures the discriminator is available when creating the TypeAdapter
+            type_annotation = annotation
+            has_discriminator_with_body = True
+        else:
+            raise AssertionError("Only one FieldInfo can be used per parameter")
+    elif len(powertools_annotations) > 1:
+        raise AssertionError("Only one FieldInfo can be used per parameter")
+    else:
+        powertools_annotation = next(iter(powertools_annotations), None)
 
     if isinstance(powertools_annotation, FieldInfo):
-        # Copy `field_info` because we mutate `field_info.default` later
-        field_info = copy_field_info(
-            field_info=powertools_annotation,
-            annotation=annotation,
-        )
+        if has_discriminator_with_body:
+            # For discriminator + Body case, create a new Body instance directly
+            # This avoids issues with copy_field_info trying to process the Field
+            field_info = Body()
+            field_info.annotation = type_annotation
+        else:
+            # Copy `field_info` because we mutate `field_info.default` later
+            # Use the possibly modified type_annotation for copy_field_info
+            field_info = copy_field_info(
+                field_info=powertools_annotation,
+                annotation=type_annotation,
+            )
         if field_info.default not in [Undefined, Required]:
             raise AssertionError("FieldInfo needs to have a default value of Undefined or Required")
 
@@ -1066,6 +1096,12 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
             field_info.default = value
         else:
             field_info.default = Required
+
+        # Preserve the full annotated type if it contains discriminator metadata
+        # This is crucial for tagged unions to work properly
+        if hasattr(powertools_annotation, "discriminator") and powertools_annotation.discriminator is not None:
+            # Store the full annotated type for discriminated unions
+            type_annotation = annotation
 
     return field_info, type_annotation
 

@@ -3,10 +3,10 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -1983,3 +1983,95 @@ def test_normal_route_response_validation_still_works(gw_event):
     assert response_body["name"] == "User123"
     assert response_body["age"] == 143
     assert response_body["email"] == "user123@example.com"
+
+
+def test_field_discriminator_validation(gw_event):
+    """Test that Pydantic Field discriminator works with event_handler validation"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class FooAction(BaseModel):
+        action: Literal["foo"]
+        foo_data: str
+
+    class BarAction(BaseModel):
+        action: Literal["bar"]
+        bar_data: int
+
+    # This should work with Field discriminator (issue #5953)
+    Action = Annotated[FooAction | BarAction, Field(discriminator="action")]
+
+    @app.post("/actions")
+    def create_action(action: Annotated[Action, Body()]):
+        return {"received_action": action.action, "data": action.model_dump()}
+
+    # WHEN sending a valid foo action
+    gw_event["path"] = "/actions"
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"]["content-type"] = "application/json"
+    gw_event["body"] = '{"action": "foo", "foo_data": "test"}'
+
+    # THEN the handler should be invoked and return 200
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    response_body = json.loads(result["body"])
+    assert response_body["received_action"] == "foo"
+    assert response_body["data"]["action"] == "foo"
+    assert response_body["data"]["foo_data"] == "test"
+
+    # WHEN sending a valid bar action
+    gw_event["body"] = '{"action": "bar", "bar_data": 123}'
+
+    # THEN the handler should be invoked and return 200
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    response_body = json.loads(result["body"])
+    assert response_body["received_action"] == "bar"
+    assert response_body["data"]["action"] == "bar"
+    assert response_body["data"]["bar_data"] == 123
+
+    # WHEN sending an invalid discriminator
+    gw_event["body"] = '{"action": "invalid", "some_data": "test"}'
+
+    # THEN the handler should return 422 (validation error)
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+
+def test_field_other_features_still_work(gw_event):
+    """Test that other Field features still work after discriminator fix"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class UserInput(BaseModel):
+        name: Annotated[str, Field(min_length=2, max_length=50, description="User name")]
+        age: Annotated[int, Field(ge=18, le=120, description="User age")]
+        email: Annotated[str, Field(pattern=r".+@.+\..+", description="User email")]
+
+    @app.post("/users")
+    def create_user(user: UserInput):
+        return {"created": user.model_dump()}
+
+    # WHEN sending valid data
+    gw_event["path"] = "/users"
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"]["content-type"] = "application/json"
+    gw_event["body"] = '{"name": "John", "age": 25, "email": "john@example.com"}'
+
+    # THEN the handler should return 200
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    response_body = json.loads(result["body"])
+    assert response_body["created"]["name"] == "John"
+    assert response_body["created"]["age"] == 25
+    assert response_body["created"]["email"] == "john@example.com"
+
+    # WHEN sending data with validation error (age too low)
+    gw_event["body"] = '{"name": "John", "age": 16, "email": "john@example.com"}'
+
+    # THEN the handler should return 422 (validation error)
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422

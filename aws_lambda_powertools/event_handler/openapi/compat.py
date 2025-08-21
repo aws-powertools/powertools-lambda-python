@@ -80,9 +80,20 @@ class ModelField:
         return self.field_info.annotation
 
     def __post_init__(self) -> None:
-        self._type_adapter: TypeAdapter[Any] = TypeAdapter(
-            Annotated[self.field_info.annotation, self.field_info],
-        )
+
+        # If the field_info.annotation is already an Annotated type with discriminator metadata,
+        # use it directly instead of wrapping it again
+        annotation = self.field_info.annotation
+        if (
+            get_origin(annotation) is Annotated
+            and hasattr(self.field_info, "discriminator")
+            and self.field_info.discriminator is not None
+        ):
+            self._type_adapter: TypeAdapter[Any] = TypeAdapter(annotation)
+        else:
+            self._type_adapter: TypeAdapter[Any] = TypeAdapter(
+                Annotated[annotation, self.field_info],
+            )
 
     def get_default(self) -> Any:
         if self.field_info.is_required():
