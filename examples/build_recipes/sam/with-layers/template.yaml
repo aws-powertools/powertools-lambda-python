@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: !Ref AWS::StackName
+        POWERTOOLS_METRICS_NAMESPACE: MyApp
+        POWERTOOLS_LOG_LEVEL: INFO
+
+Resources:
+  # Dependencies Layer (pydantic, requests, etc.)
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "${AWS::StackName}-dependencies"
+      Description: Application dependencies
+      ContentUri: layers/dependencies/
+      CompatibleRuntimes:
+        - python3.13
+      RetentionPolicy: Delete
+
+  # API Lambda Function (lightweight - only app code)
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/app/
+      Handler: app_sam_layer.lambda_handler
+      Layers:
+        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:21
+        - !Ref DependenciesLayer
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: api-service
+
+  # Background Worker Function
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/worker/
+      Handler: worker_sam_layer.lambda_handler
+      Layers:
+        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:21
+        - !Ref DependenciesLayer
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt WorkerQueue.Arn
+            BatchSize: 10
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: worker-service
+
+  # SQS Queue for worker
+  WorkerQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-worker-queue"
+      VisibilityTimeout: 180
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  WorkerQueueUrl:
+    Description: SQS Queue URL for worker
+    Value: !Ref WorkerQueue

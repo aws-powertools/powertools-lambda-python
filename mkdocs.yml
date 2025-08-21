@@ -9,11 +9,8 @@ nav:
   - Homepage:
       - index.md
       - Changelog: changelog.md
-      - API reference: api/" target="_blank
-      - Upgrade guide: upgrade.md
-      - We Made This (Community): we_made_this.md
+      - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
-      - Roadmap: roadmap.md
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -40,10 +37,21 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Build recipes:
+          - build_recipes/index.md
+          - Getting started: build_recipes/getting-started.md
+          - Build tools: build_recipes/build-tools.md
+          - Cross-platform builds: build_recipes/cross-platform.md
+          - Performance optimization: build_recipes/performance-optimization.md
+          - CI/CD integration: build_recipes/cicd-integration.md
+          - Troubleshooting: build_recipes/troubleshooting.md
+      - Upgrade guide: upgrade.md
+      - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
       - Resources:
           - "llms.txt": ./llms.txt
           - "llms.txt (full version)": ./llms-full.txt
-  - Tutorial: tutorial/index.md
+
   - Processes:
       - Security: security.md
       - Automation: automation.md
@@ -233,6 +241,14 @@ plugins:
           - utilities/jmespath_functions.md
         Tutorial:
           - tutorial/index.md
+        Build recipes:
+          - build_recipes/index.md
+          - build_recipes/getting-started.md
+          - build_recipes/build-tools.md
+          - build_recipes/cross-platform.md
+          - build_recipes/performance-optimization.md
+          - build_recipes/cicd-integration.md
+          - build_recipes/troubleshooting.md
 
   - mkdocstrings:
       default_handler: python

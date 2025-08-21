@@ -146,7 +146,7 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -161,7 +161,7 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@09a74e37ceda446282c61f1496cdca8d8dca0e57 # v4.3.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -189,7 +189,7 @@ jobs:
       - name: install deps
         run: poetry install
       - name: Download artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
           path: layer_v3

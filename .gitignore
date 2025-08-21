@@ -318,3 +318,9 @@ cdk.context.json
 
 # vim
 *.swp
+
+# LLMs
+.claude
+.amazonq
+.kiro
+.github/instructions

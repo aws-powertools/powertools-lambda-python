@@ -196,8 +196,8 @@ You can use `/todos/<todo_id>` to configure dynamic URL paths, where `<todo_id>`
 
 Each dynamic route you set must be part of your function signature. This allows us to call your function using keyword arguments when matching your dynamic route.
 
-???+ note
-    For brevity, we will only include the necessary keys for each sample request for the example to work.
+???+ tip
+    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
 === "dynamic_routes.py"
 
@@ -211,32 +211,65 @@ Each dynamic route you set must be part of your function signature. This allows 
     --8<-- "examples/event_handler_rest/src/dynamic_routes.json"
     ```
 
-???+ tip
-    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
+#### Dynamic path mechanism
+
+Dynamic path parameters are defined using angle brackets `<parameter_name>` syntax. These parameters are automatically converted to regex patterns for efficient route matching and performance gains.
+
+**Syntax**: `/path/<parameter_name>`
+
+* **Parameter names** must contain only word characters (letters, numbers, underscore)
+* **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`. Reserved characters must be percent-encoded in URLs to prevent errors.
+
+| Route Pattern | Matches | Doesn't Match |
+|---------------|---------|---------------|
+| `/users/<user_id>` | `/users/123`, `/users/user-456` | `/users/123/profile` |
+| `/api/<version>/users` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
+| `/files/<path>` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
+| `/files/<folder>/<name>` | `/files/src/document.pdf`, `/files/src/test.txt` | `/files/sub/folder/file.txt` |
+
+=== "routing_syntax_basic.py"
+
+    ```python hl_lines="11 18"
+    --8<-- "examples/event_handler_rest/src/routing_syntax_basic.py"
+    ```
+
+=== "routing_advanced_examples.py"
+
+    ```python hl_lines="11 22"
+    --8<-- "examples/event_handler_rest/src/routing_advanced_examples.py"
+    ```
+
+???+ tip "Function parameter names must match"
+    The parameter names in your route (`<user_id>`) must exactly match the parameter names in your function signature (`user_id: str`). This is how the framework knows which captured values to pass to which parameters.
 
 #### Catch-all routes
 
-???+ note
-    We recommend having explicit routes whenever possible; use catch-all routes sparingly.
+For scenarios where you need to handle arbitrary or deeply nested paths, you can use regex patterns directly in your route definitions. These are particularly useful for proxy routes or when dealing with file paths.
 
-You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} string to handle an arbitrary number of paths within a request, for example `.+`.
+**We recommend** having explicit routes whenever possible; use catch-all routes sparingly.
 
-You can also combine nested paths with greedy regex to catch in between routes.
+##### Using Regex Patterns
 
-???+ warning
-    We choose the most explicit registered route that matches an incoming event.
+You can use standard [Python regex patterns](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} in your route definitions, for example:
+
+| Pattern | Description | Examples |
+|---------|-------------|----------|
+| `.+` | Matches one or more characters (greedy) | `/proxy/.+` matches `/proxy/any/deep/path` |
+| `.*` | Matches zero or more characters (greedy) | `/files/.*` matches `/files/` and `/files/deep/path` |
+| `[^/]+` | Matches one or more non-slash characters | `/api/[^/]+` matches `/api/v1` but not `/api/v1/users` |
+| `\w+` | Matches one or more word characters | `/users/\w+` matches `/users/john123` |
 
 === "dynamic_routes_catch_all.py"
 
-    ```python hl_lines="11"
+    ```python hl_lines="11 17 18 24 25 30 31 36 37"
     --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.py"
     ```
 
-=== "dynamic_routes_catch_all.json"
-
-    ```json
-    --8<-- "examples/event_handler_rest/src/dynamic_routes_catch_all.json"
-    ```
+???+ warning "Route Matching Priority"
+    - Routes are matched in **order of specificity**, not registration order
+    - More specific routes (exact matches) take precedence over regex patterns
+    - Among regex routes, the first registered matching route wins
+    - Always place catch-all routes (`.*`) last
 
 ### HTTP Methods
 
@@ -980,7 +1013,7 @@ These are native middlewares that may become native features depending on custom
 
 | Middleware                                                                                                                | Purpose                                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
+| SchemaValidationMiddleware | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
 

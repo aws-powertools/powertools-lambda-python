@@ -84,7 +84,7 @@ jobs:
           - x86_64
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@09a74e37ceda446282c61f1496cdca8d8dca0e57 # v4.3.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -133,11 +133,11 @@ jobs:
           - x86_64
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.json
       - name: Verify Layer Signature
@@ -148,7 +148,7 @@ jobs:
         run: |
           echo 'CONVERTED_REGION=${{ matrix.region }}' | tr 'a-z\-' 'A-Z_' >> "$GITHUB_OUTPUT"
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@09a74e37ceda446282c61f1496cdca8d8dca0e57 # v4.3.0
         with:
           role-to-assume: ${{ secrets[format('IAM_ROLE_{0}', steps.transform.outputs.CONVERTED_REGION)] }}
           aws-region: ${{ matrix.region}}
