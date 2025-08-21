@@ -558,6 +558,9 @@ Knowing which companies are using this library is important to help prioritize t
 [**Pushpay**](https://pushpay.com/){target="_blank" rel="nofollow"}
 { .card }
 
+[**QuasiScience Limited**](https://quasiscience.com/){target="_blank" rel="nofollow"}
+{ .card }
+
 [**Recast**](https://getrecast.com/){target="_blank" rel="nofollow"}
 { .card }
 
