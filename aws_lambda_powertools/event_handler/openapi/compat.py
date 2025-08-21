@@ -80,7 +80,6 @@ class ModelField:
         return self.field_info.annotation
 
     def __post_init__(self) -> None:
-
         # If the field_info.annotation is already an Annotated type with discriminator metadata,
         # use it directly instead of wrapping it again
         annotation = self.field_info.annotation

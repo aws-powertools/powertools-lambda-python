@@ -1050,7 +1050,7 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     # This happens when using Annotated[Union[A, B], Field(discriminator='...')] with Body()
     has_discriminator_with_body = False
     powertools_annotation: FieldInfo | None = None
-    
+
     if len(powertools_annotations) == 2:
         field_obj = None
         body_obj = None
