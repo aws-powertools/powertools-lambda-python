@@ -117,7 +117,7 @@ class VpcLatticeV2Model(BaseModel):
         description="The request headers as key-value pairs.",
         examples=[
             {"host": "test-lambda-service.vpc-lattice-svcs.us-east-2.on.aws", "user-agent": "curl/7.64.1"},
-            {"content-type": "application/json", "x-forwarded-for": "10.213.229.10"},
+            {"content-type": "application/json"},
         ],
     )
     query_string_parameters: Optional[Dict[str, str]] = Field(
