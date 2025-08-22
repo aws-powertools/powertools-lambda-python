@@ -9,8 +9,8 @@ from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
 class TestUploadFileOpenAPISchema:
     """Test UploadFile OpenAPI schema generation."""
 
-    def test_upload_file_openapi_schema(self):
-        """Test OpenAPI schema generation with UploadFile."""
+    def _create_test_app(self):
+        """Create test application with upload endpoints."""
         app = APIGatewayRestResolver()
 
         @app.post("/upload-single")
@@ -33,41 +33,55 @@ class TestUploadFileOpenAPISchema:
                 "total_size": primary_file.size + len(secondary_file),
             }
 
-        # Generate OpenAPI schema
-        schema = app.get_openapi_schema()
+        return app
 
-        # Print schema for debugging
-        schema_dict = schema.model_dump()
+    def _print_multipart_schemas(self, schema_dict):
+        """Print multipart form data schemas from paths."""
         print("SCHEMA PATHS:")
         for path, path_item in schema_dict["paths"].items():
             print(f"Path: {path}")
-            if "post" in path_item:
-                if "requestBody" in path_item["post"]:
-                    if "content" in path_item["post"]["requestBody"]:
-                        if "multipart/form-data" in path_item["post"]["requestBody"]["content"]:
-                            print("  Found multipart/form-data")
-                            content = path_item["post"]["requestBody"]["content"]["multipart/form-data"]
-                            print(f"  Schema: {json.dumps(content, indent=2)}")
 
+            # Merged nested if statements
+            if (
+                "post" in path_item
+                and "requestBody" in path_item["post"]
+                and "content" in path_item["post"]["requestBody"]
+                and "multipart/form-data" in path_item["post"]["requestBody"]["content"]
+            ):
+                print("  Found multipart/form-data")
+                content = path_item["post"]["requestBody"]["content"]["multipart/form-data"]
+                print(f"  Schema: {json.dumps(content, indent=2)}")
+
+    def _print_file_components(self, schema_dict):
+        """Print file-related components from schema."""
         print("\nSCHEMA COMPONENTS:")
-        if "components" in schema_dict and "schemas" in schema_dict["components"]:
-            for name, comp_schema in schema_dict["components"]["schemas"].items():
-                if "file" in name.lower() or "upload" in name.lower():
-                    print(f"Component: {name}")
-                    print(f"  {json.dumps(comp_schema, indent=2)}")
+        components = schema_dict.get("components", {})
+        schemas = components.get("schemas", {})
+
+        for name, comp_schema in schemas.items():
+            if "file" in name.lower() or "upload" in name.lower():
+                print(f"Component: {name}")
+                print(f"  {json.dumps(comp_schema, indent=2)}")
+
+    def test_upload_file_openapi_schema(self):
+        """Test OpenAPI schema generation with UploadFile."""
+        # Setup test app with file upload endpoints
+        app = self._create_test_app()
+
+        # Generate OpenAPI schema
+        schema = app.get_openapi_schema()
+        schema_dict = schema.model_dump()
+
+        # Print debug information (optional)
+        self._print_multipart_schemas(schema_dict)
+        self._print_file_components(schema_dict)
 
         # Basic verification
         paths = schema.paths
         assert "/upload-single" in paths
         assert "/upload-multiple" in paths
-
-        # Verify upload-single endpoint exists
-        upload_single = paths["/upload-single"]
-        assert upload_single.post is not None
-
-        # Verify upload-multiple endpoint exists
-        upload_multiple = paths["/upload-multiple"]
-        assert upload_multiple.post is not None
+        assert paths["/upload-single"].post is not None
+        assert paths["/upload-multiple"].post is not None
 
         # Print success
         print("\n✅ Basic OpenAPI schema generation tests passed")
