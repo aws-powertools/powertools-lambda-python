@@ -49,38 +49,69 @@ class OpenAPISchemaFixResolver(APIGatewayRestResolver):
         schema_dict = schema.model_dump(by_alias=True)
 
         # Find all multipart/form-data references that might be missing
-        missing_refs = []
-        paths = schema_dict.get("paths", {})
-        for path_item in paths.values():
-            for _method, operation in path_item.items():
-                if not isinstance(operation, dict):
-                    continue
-
-                if "requestBody" not in operation:
-                    continue
-
-                req_body = operation.get("requestBody", {})
-                content = req_body.get("content", {})
-                multipart = content.get("multipart/form-data", {})
-                schema_ref = multipart.get("schema", {})
-
-                if "$ref" in schema_ref:
-                    ref = schema_ref["$ref"]
-                    if ref.startswith("#/components/schemas/"):
-                        component_name = ref[len("#/components/schemas/") :]
-
-                        # Check if the component exists
-                        components = schema_dict.get("components", {})
-                        schemas = components.get("schemas", {})
-
-                        if component_name not in schemas:
-                            missing_refs.append((component_name, ref))
+        missing_refs = self._find_missing_component_references(schema_dict)
 
         # If no missing references, return the original schema
         if not missing_refs:
             return schema
 
         # Add missing components to the schema
+        self._add_missing_components(schema_dict, missing_refs)
+
+        # Rebuild the schema with the added components
+        return schema.__class__(**schema_dict)
+
+    def _find_missing_component_references(self, schema_dict: dict) -> list[tuple[str, str]]:
+        """Find all missing component references in multipart/form-data schemas."""
+        missing_refs = []
+        paths = schema_dict.get("paths", {})
+        
+        for path_item in paths.values():
+            self._check_path_item_for_missing_refs(path_item, schema_dict, missing_refs)
+        
+        return missing_refs
+
+    def _check_path_item_for_missing_refs(
+        self, 
+        path_item: dict, 
+        schema_dict: dict, 
+        missing_refs: list[tuple[str, str]]
+    ) -> None:
+        """Check a single path item for missing component references."""
+        for _method, operation in path_item.items():
+            if not isinstance(operation, dict) or "requestBody" not in operation:
+                continue
+            
+            self._check_operation_for_missing_refs(operation, schema_dict, missing_refs)
+
+    def _check_operation_for_missing_refs(
+        self, 
+        operation: dict, 
+        schema_dict: dict, 
+        missing_refs: list[tuple[str, str]]
+    ) -> None:
+        """Check a single operation for missing component references."""
+        req_body = operation.get("requestBody", {})
+        content = req_body.get("content", {})
+        multipart = content.get("multipart/form-data", {})
+        schema_ref = multipart.get("schema", {})
+
+        if "$ref" in schema_ref:
+            ref = schema_ref["$ref"]
+            if ref.startswith("#/components/schemas/"):
+                component_name = ref[len("#/components/schemas/") :]
+                
+                if self._is_component_missing(schema_dict, component_name):
+                    missing_refs.append((component_name, ref))
+
+    def _is_component_missing(self, schema_dict: dict, component_name: str) -> bool:
+        """Check if a component is missing from the schema."""
+        components = schema_dict.get("components", {})
+        schemas = components.get("schemas", {})
+        return component_name not in schemas
+
+    def _add_missing_components(self, schema_dict: dict, missing_refs: list[tuple[str, str]]) -> None:
+        """Add missing components to the schema."""
         components = schema_dict.setdefault("components", {})
         schemas = components.setdefault("schemas", {})
 
@@ -97,9 +128,6 @@ class OpenAPISchemaFixResolver(APIGatewayRestResolver):
                 },
                 "required": ["file"],
             }
-
-        # Rebuild the schema with the added components
-        return schema.__class__(**schema_dict)
 
 
 def create_test_app():

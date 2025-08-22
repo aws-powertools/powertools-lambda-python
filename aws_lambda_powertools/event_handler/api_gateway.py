@@ -1812,22 +1812,36 @@ class ApiGatewayResolver(BaseRouter):
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6122
         resolved = {}
         
-        # Handle title with fallback
+        # Handle fields with specific default value checks
+        self._resolve_title_config(resolved, kwargs)
+        self._resolve_version_config(resolved, kwargs)
+        self._resolve_openapi_version_config(resolved, kwargs)
+
+        # Resolve other fields with simple fallbacks
+        self._resolve_remaining_config_fields(resolved, kwargs)
+
+        return resolved
+
+    def _resolve_title_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
+        """Resolve title configuration with fallback to openapi_config."""
         resolved["title"] = kwargs["title"]
         if kwargs["title"] == DEFAULT_OPENAPI_TITLE and self.openapi_config.title:
             resolved["title"] = self.openapi_config.title
 
-        # Handle version with fallback
+    def _resolve_version_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
+        """Resolve version configuration with fallback to openapi_config."""
         resolved["version"] = kwargs["version"]
         if kwargs["version"] == DEFAULT_API_VERSION and self.openapi_config.version:
             resolved["version"] = self.openapi_config.version
 
-        # Handle openapi_version with fallback
+    def _resolve_openapi_version_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
+        """Resolve openapi_version configuration with fallback to openapi_config."""
         resolved["openapi_version"] = kwargs["openapi_version"]
         if kwargs["openapi_version"] == DEFAULT_OPENAPI_VERSION and self.openapi_config.openapi_version:
             resolved["openapi_version"] = self.openapi_config.openapi_version
 
-        # Resolve other fields with fallbacks
+    def _resolve_remaining_config_fields(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
+        """Resolve remaining configuration fields with simple fallbacks."""
         resolved.update({
             "summary": kwargs["summary"] or self.openapi_config.summary,
             "description": kwargs["description"] or self.openapi_config.description,
@@ -1841,8 +1855,6 @@ class ApiGatewayResolver(BaseRouter):
             "external_documentation": kwargs["external_documentation"] or self.openapi_config.external_documentation,
             "openapi_extensions": kwargs["openapi_extensions"] or self.openapi_config.openapi_extensions,
         })
-
-        return resolved
 
     def _build_base_openapi_structure(self, config: dict[str, Any]) -> dict[str, Any]:
         """Build the base OpenAPI structure with info, servers, and security."""
