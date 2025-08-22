@@ -39,7 +39,7 @@ This guide is organized into focused sections to help you find exactly what you 
 ### 📚 Fundamentals
 
 * **[Getting started](getting-started.md)** - Prerequisites, tool selection, and basic setup
-* **[Cross-platform builds](cross-integration.md)** - Handle architecture differences and compiled dependencies
+* **[Cross-platform builds](cross-platform.md)** - Handle architecture differences and compiled dependencies
 
 ### 🔧 Build tools
 

@@ -72,6 +72,7 @@ The following companies, among others, use Powertools:
 * [LocalStack](https://www.localstack.cloud/)
 * [Propellor.ai](https://www.propellor.ai/)
 * [Pushpay](https://pushpay.com/)
+* [QuasiScience Limited](https://quasiscience.com/)
 * [Recast](https://getrecast.com/)
 * [TopSport](https://www.topsport.com.au/)
 * [Transformity](https://transformity.tech/)

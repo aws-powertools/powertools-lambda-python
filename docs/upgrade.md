@@ -13,7 +13,7 @@ Given our commitment to all of our customers using Powertools for AWS Lambda (Py
 
 ## Migrate to v3 from v2
 
-!!! info "We strongly encourage you to migrate to v3. However, if you still need to upgrade from v1 to v2, you can find the [upgrade guide](/lambda/python/2.43.1/upgrade/)."
+!!! info "We strongly encourage you to migrate to v3. However, if you still need to upgrade from v1 to v2, you can find the [upgrade guide](https://docs.powertools.aws.dev/lambda/python/2.43.1/)."
 
 We've made minimal breaking changes to make your transition to v3 as smooth as possible.
 

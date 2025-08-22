@@ -549,11 +549,6 @@ class SingleMetric(MetricManager):
         metric.add_dimension(name="function_version", value=47)
 
         print(json.dumps(metric.serialize_metric_set(), indent=4))
-
-    Parameters
-    ----------
-    MetricManager : MetricManager
-        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
     """
 
     def add_metric(
