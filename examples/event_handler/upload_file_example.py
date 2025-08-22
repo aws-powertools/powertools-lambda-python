@@ -5,7 +5,7 @@ This example demonstrates how to use the UploadFile class with FastAPI-like
 file handling and proper OpenAPI schema generation.
 """
 
-from typing_extensions import Annotated, List
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import File, Form, UploadFile
@@ -17,7 +17,7 @@ app = APIGatewayRestResolver()
 def upload_file(file: Annotated[UploadFile, File()]):
     """
     Upload a single file.
-    
+
     Returns file metadata and a preview of the content.
     """
     return {
@@ -36,7 +36,7 @@ def upload_multiple_files(
 ):
     """
     Upload multiple files with form data.
-    
+
     Shows how to mix UploadFile, bytes files, and form data in the same endpoint.
     """
     return {
@@ -54,7 +54,7 @@ def upload_multiple_files(
 def upload_with_headers(file: Annotated[UploadFile, File()]):
     """
     Upload a file and access its headers.
-    
+
     Demonstrates how to access all headers from the multipart section.
     """
     return {
@@ -73,7 +73,3 @@ if __name__ == "__main__":
     # Print the OpenAPI schema for testing
     schema = app.get_openapi_schema(title="File Upload API", version="1.0.0")
     print("\n✅ OpenAPI schema generated successfully!")
-    
-    # You can access the schema as JSON with:
-    # import json
-    # print(json.dumps(schema.model_dump(), indent=2))

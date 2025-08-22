@@ -1,5 +1,5 @@
-import pytest
 import json
+
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -35,7 +35,7 @@ class TestUploadFileOpenAPISchema:
 
         # Generate OpenAPI schema
         schema = app.get_openapi_schema()
-        
+
         # Print schema for debugging
         schema_dict = schema.model_dump()
         print("SCHEMA PATHS:")
@@ -46,27 +46,28 @@ class TestUploadFileOpenAPISchema:
                     if "content" in path_item["post"]["requestBody"]:
                         if "multipart/form-data" in path_item["post"]["requestBody"]["content"]:
                             print("  Found multipart/form-data")
-                            print(f"  Schema: {json.dumps(path_item['post']['requestBody']['content']['multipart/form-data'], indent=2)}")
-        
+                            content = path_item["post"]["requestBody"]["content"]["multipart/form-data"]
+                            print(f"  Schema: {json.dumps(content, indent=2)}")
+
         print("\nSCHEMA COMPONENTS:")
         if "components" in schema_dict and "schemas" in schema_dict["components"]:
             for name, comp_schema in schema_dict["components"]["schemas"].items():
                 if "file" in name.lower() or "upload" in name.lower():
                     print(f"Component: {name}")
                     print(f"  {json.dumps(comp_schema, indent=2)}")
-        
+
         # Basic verification
         paths = schema.paths
         assert "/upload-single" in paths
         assert "/upload-multiple" in paths
-        
+
         # Verify upload-single endpoint exists
         upload_single = paths["/upload-single"]
         assert upload_single.post is not None
-        
+
         # Verify upload-multiple endpoint exists
         upload_multiple = paths["/upload-multiple"]
         assert upload_multiple.post is not None
-        
+
         # Print success
         print("\n✅ Basic OpenAPI schema generation tests passed")
