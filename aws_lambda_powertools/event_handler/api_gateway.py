@@ -1894,7 +1894,21 @@ class ApiGatewayResolver(BaseRouter):
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
-        return OpenAPI(**output)
+        # Apply patches to fix any issues with the OpenAPI schema
+        # Import here to avoid circular imports
+        from aws_lambda_powertools.event_handler.openapi.upload_file_fix import fix_upload_file_schema
+
+        # First create the OpenAPI model
+        result = OpenAPI(**output)
+
+        # Convert the model to a dict and apply the fix
+        result_dict = result.model_dump(by_alias=True)
+        fixed_dict = fix_upload_file_schema(result_dict)
+
+        # Reconstruct the model with the fixed dict
+        result = OpenAPI(**fixed_dict)
+
+        return result
 
     @staticmethod
     def _get_openapi_servers(servers: list[Server] | None) -> list[Server]:
