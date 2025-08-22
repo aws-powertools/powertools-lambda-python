@@ -115,10 +115,19 @@ class UploadFile:
         from pydantic_core import core_schema
 
         # Define the schema for UploadFile validation
-        return core_schema.no_info_plain_validator_function(
+        schema = core_schema.no_info_plain_validator_function(
             cls._validate,
             serialization=core_schema.to_string_ser_schema(),
         )
+        
+        # Add OpenAPI schema info
+        schema["json_schema_extra"] = {
+            "type": "string",
+            "format": "binary",
+            "description": "A file uploaded as part of a multipart/form-data request",
+        }
+        
+        return schema
 
     @classmethod
     def _validate(cls, value: Any) -> UploadFile:
@@ -128,6 +137,28 @@ class UploadFile:
         if isinstance(value, bytes):
             return cls(file=value)
         raise ValueError(f"Expected UploadFile or bytes, got {type(value)}")
+        
+    @classmethod
+    def __get_validators__(cls):
+        """Return validators for Pydantic v1 compatibility."""
+        yield cls._validate
+        
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, _core_schema: Any, field_schema: Any
+    ) -> dict[str, Any]:
+        """Modify the JSON schema for OpenAPI compatibility."""
+        # Handle both Pydantic v1 and v2 schemas
+        json_schema = field_schema(_core_schema) if callable(field_schema) else {}
+        
+        # Add binary file format for OpenAPI
+        json_schema.update(
+            type="string",
+            format="binary",
+            description="A file uploaded as part of a multipart/form-data request",
+        )
+        
+        return json_schema
 
 
 class ParamTypes(Enum):
