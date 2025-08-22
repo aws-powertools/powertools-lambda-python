@@ -47,7 +47,6 @@ class TestUploadFileOpenAPIValidator:
         # Create a temporary file for manual inspection if needed
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as tmp:
             json.dump(schema_dict, tmp, cls=EnumEncoder, indent=2)
-            tmp_path = tmp.name
 
         # Access the schema paths
         paths = schema_dict.get("paths", {})

@@ -1,3 +1,16 @@
+"""
+OpenAPI Schema Fix Example
+
+This example demonstrates how the automatic OpenAPI schema fix works for UploadFile parameters.
+The fix resolves missing component references that would otherwise cause validation errors
+in tools like Swagger Editor.
+
+Example shows:
+- Custom resolver that demonstrates the fix (though it's now built-in)
+- UploadFile usage with File parameters
+- OpenAPI schema generation with proper component references
+"""
+
 from __future__ import annotations
 
 import json
@@ -5,7 +18,7 @@ import json
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+from aws_lambda_powertools.event_handler.openapi.params import File, Form, UploadFile
 
 
 class EnumEncoder(json.JSONEncoder):
@@ -18,12 +31,15 @@ class EnumEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-class OpenAPIUploadFileFixResolver(APIGatewayRestResolver):
+class OpenAPISchemaFixResolver(APIGatewayRestResolver):
     """
-    A custom resolver that fixes the OpenAPI schema generation for UploadFile parameters.
+    A custom resolver that demonstrates the OpenAPI schema fix for UploadFile parameters.
 
-    The issue is that when using UploadFile with File parameters, the OpenAPI schema references
-    a component that doesn't exist in the components/schemas section.
+    NOTE: This fix is now built into the main APIGatewayRestResolver, so this example
+    is primarily for educational purposes to show how the fix works.
+
+    The issue that was fixed: when using UploadFile with File parameters, the OpenAPI schema
+    would reference components that didn't exist in the components/schemas section.
     """
 
     def get_openapi_schema(self, **kwargs):
@@ -88,13 +104,13 @@ class OpenAPIUploadFileFixResolver(APIGatewayRestResolver):
 
 def create_test_app():
     """Create a test app with the fixed resolver."""
-    app = OpenAPIUploadFileFixResolver()
+    app = OpenAPISchemaFixResolver()
 
     @app.post("/upload-with-metadata")
     def upload_file_with_metadata(
         file: Annotated[UploadFile, File(description="File to upload")],
-        description: str = "No description provided",
-        tags: str | None = None,
+        description: Annotated[str, Form()] = "No description provided",
+        tags: Annotated[str | None, Form()] = None,
     ):
         """Upload a file with additional metadata."""
         return {

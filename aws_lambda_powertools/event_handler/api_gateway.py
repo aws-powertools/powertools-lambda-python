@@ -1774,72 +1774,114 @@ class ApiGatewayResolver(BaseRouter):
         OpenAPI: pydantic model
             The OpenAPI schema as a pydantic model.
         """
+        # Resolve configuration with fallbacks to openapi_config
+        config = self._resolve_openapi_config(
+            title=title,
+            version=version,
+            openapi_version=openapi_version,
+            summary=summary,
+            description=description,
+            tags=tags,
+            servers=servers,
+            terms_of_service=terms_of_service,
+            contact=contact,
+            license_info=license_info,
+            security_schemes=security_schemes,
+            security=security,
+            external_documentation=external_documentation,
+            openapi_extensions=openapi_extensions,
+        )
 
+        # Build base OpenAPI structure
+        output = self._build_base_openapi_structure(config)
+
+        # Process routes and build paths/components
+        paths, definitions = self._process_routes_for_openapi(config["security_schemes"])
+
+        # Build final components and paths
+        components = self._build_openapi_components(definitions, config["security_schemes"])
+        output.update(self._finalize_openapi_output(components, config["tags"], paths, config["external_documentation"]))
+
+        # Apply schema fixes and return result
+        return self._apply_schema_fixes(output)
+
+    def _resolve_openapi_config(self, **kwargs) -> dict[str, Any]:
+        """Resolve OpenAPI configuration with fallbacks to openapi_config."""
         # DEPRECATION: Will be removed in v4.0.0. Use configure_api() instead.
         # Maintained for backwards compatibility.
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6122
-        if title == DEFAULT_OPENAPI_TITLE and self.openapi_config.title:
-            title = self.openapi_config.title
+        resolved = {}
+        
+        # Handle title with fallback
+        resolved["title"] = kwargs["title"]
+        if kwargs["title"] == DEFAULT_OPENAPI_TITLE and self.openapi_config.title:
+            resolved["title"] = self.openapi_config.title
 
-        if version == DEFAULT_API_VERSION and self.openapi_config.version:
-            version = self.openapi_config.version
+        # Handle version with fallback
+        resolved["version"] = kwargs["version"]
+        if kwargs["version"] == DEFAULT_API_VERSION and self.openapi_config.version:
+            resolved["version"] = self.openapi_config.version
 
-        if openapi_version == DEFAULT_OPENAPI_VERSION and self.openapi_config.openapi_version:
-            openapi_version = self.openapi_config.openapi_version
+        # Handle openapi_version with fallback
+        resolved["openapi_version"] = kwargs["openapi_version"]
+        if kwargs["openapi_version"] == DEFAULT_OPENAPI_VERSION and self.openapi_config.openapi_version:
+            resolved["openapi_version"] = self.openapi_config.openapi_version
 
-        summary = summary or self.openapi_config.summary
-        description = description or self.openapi_config.description
-        tags = tags or self.openapi_config.tags
-        servers = servers or self.openapi_config.servers
-        terms_of_service = terms_of_service or self.openapi_config.terms_of_service
-        contact = contact or self.openapi_config.contact
-        license_info = license_info or self.openapi_config.license_info
-        security_schemes = security_schemes or self.openapi_config.security_schemes
-        security = security or self.openapi_config.security
-        external_documentation = external_documentation or self.openapi_config.external_documentation
-        openapi_extensions = openapi_extensions or self.openapi_config.openapi_extensions
+        # Resolve other fields with fallbacks
+        resolved.update({
+            "summary": kwargs["summary"] or self.openapi_config.summary,
+            "description": kwargs["description"] or self.openapi_config.description,
+            "tags": kwargs["tags"] or self.openapi_config.tags,
+            "servers": kwargs["servers"] or self.openapi_config.servers,
+            "terms_of_service": kwargs["terms_of_service"] or self.openapi_config.terms_of_service,
+            "contact": kwargs["contact"] or self.openapi_config.contact,
+            "license_info": kwargs["license_info"] or self.openapi_config.license_info,
+            "security_schemes": kwargs["security_schemes"] or self.openapi_config.security_schemes,
+            "security": kwargs["security"] or self.openapi_config.security,
+            "external_documentation": kwargs["external_documentation"] or self.openapi_config.external_documentation,
+            "openapi_extensions": kwargs["openapi_extensions"] or self.openapi_config.openapi_extensions,
+        })
 
-        from pydantic.json_schema import GenerateJsonSchema
+        return resolved
 
-        from aws_lambda_powertools.event_handler.openapi.compat import (
-            get_compat_model_name_map,
-            get_definitions,
-        )
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
-        from aws_lambda_powertools.event_handler.openapi.types import (
-            COMPONENT_REF_TEMPLATE,
-        )
-
-        openapi_version = self._determine_openapi_version(openapi_version)
+    def _build_base_openapi_structure(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Build the base OpenAPI structure with info, servers, and security."""
+        openapi_version = self._determine_openapi_version(config["openapi_version"])
 
         # Start with the bare minimum required for a valid OpenAPI schema
-        info: dict[str, Any] = {"title": title, "version": version}
+        info: dict[str, Any] = {"title": config["title"], "version": config["version"]}
 
         optional_fields = {
-            "summary": summary,
-            "description": description,
-            "termsOfService": terms_of_service,
-            "contact": contact,
-            "license": license_info,
+            "summary": config["summary"],
+            "description": config["description"],
+            "termsOfService": config["terms_of_service"],
+            "contact": config["contact"],
+            "license": config["license_info"],
         }
 
         info.update({field: value for field, value in optional_fields.items() if value})
 
+        openapi_extensions = config["openapi_extensions"]
         if not isinstance(openapi_extensions, dict):
             openapi_extensions = {}
 
-        output: dict[str, Any] = {
+        return {
             "openapi": openapi_version,
             "info": info,
-            "servers": self._get_openapi_servers(servers),
-            "security": self._get_openapi_security(security, security_schemes),
+            "servers": self._get_openapi_servers(config["servers"]),
+            "security": self._get_openapi_security(config["security"], config["security_schemes"]),
             **openapi_extensions,
         }
 
-        if external_documentation:
-            output["externalDocs"] = external_documentation
+    def _process_routes_for_openapi(self, security_schemes: dict[str, SecurityScheme] | None) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        """Process all routes and build paths and definitions."""
+        from pydantic.json_schema import GenerateJsonSchema
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            get_compat_model_name_map,
+            get_definitions,
+        )
+        from aws_lambda_powertools.event_handler.openapi.types import COMPONENT_REF_TEMPLATE
 
-        components: dict[str, dict[str, Any]] = {}
         paths: dict[str, dict[str, Any]] = {}
         operation_ids: set[str] = set()
 
@@ -1857,15 +1899,8 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
-            if route.security and not _validate_openapi_security_parameters(
-                security=route.security,
-                security_schemes=security_schemes,
-            ):
-                raise SchemaValidationError(
-                    "Security configuration was not found in security_schemas or security_schema was not defined. "
-                    "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
-                )
-
+            self._validate_route_security(route, security_schemes)
+            
             if not route.include_in_schema:
                 continue
 
@@ -1883,19 +1918,50 @@ class ApiGatewayResolver(BaseRouter):
                 if path_definitions:
                     definitions.update(path_definitions)
 
+        return paths, definitions
+
+    def _validate_route_security(self, route, security_schemes: dict[str, SecurityScheme] | None) -> None:
+        """Validate route security configuration."""
+        if route.security and not _validate_openapi_security_parameters(
+            security=route.security,
+            security_schemes=security_schemes,
+        ):
+            raise SchemaValidationError(
+                "Security configuration was not found in security_schemas or security_schema was not defined. "
+                "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
+            )
+
+    def _build_openapi_components(self, definitions: dict[str, dict[str, Any]], security_schemes: dict[str, SecurityScheme] | None) -> dict[str, dict[str, Any]]:
+        """Build the components section of the OpenAPI schema."""
+        components: dict[str, dict[str, Any]] = {}
+        
         if definitions:
             components["schemas"] = self._generate_schemas(definitions)
         if security_schemes:
             components["securitySchemes"] = security_schemes
+            
+        return components
+
+    def _finalize_openapi_output(self, components: dict[str, dict[str, Any]], tags, paths: dict[str, dict[str, Any]], external_documentation) -> dict[str, Any]:
+        """Finalize the OpenAPI output with components, tags, and paths."""
+        from aws_lambda_powertools.event_handler.openapi.models import PathItem, Tag
+
+        output = {}
+        
         if components:
             output["components"] = components
         if tags:
             output["tags"] = [Tag(name=tag) if isinstance(tag, str) else tag for tag in tags]
+        if external_documentation:
+            output["externalDocs"] = external_documentation
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
+        
+        return output
 
-        # Apply patches to fix any issues with the OpenAPI schema
-        # Import here to avoid circular imports
+    def _apply_schema_fixes(self, output: dict[str, Any]) -> OpenAPI:
+        """Apply schema fixes and return the final OpenAPI model."""
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
         from aws_lambda_powertools.event_handler.openapi.upload_file_fix import fix_upload_file_schema
 
         # First create the OpenAPI model
@@ -1906,9 +1972,7 @@ class ApiGatewayResolver(BaseRouter):
         fixed_dict = fix_upload_file_schema(result_dict)
 
         # Reconstruct the model with the fixed dict
-        result = OpenAPI(**fixed_dict)
-
-        return result
+        return OpenAPI(**fixed_dict)
 
     @staticmethod
     def _get_openapi_servers(servers: list[Server] | None) -> list[Server]:

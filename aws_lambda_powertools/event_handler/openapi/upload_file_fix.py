@@ -62,43 +62,86 @@ def find_missing_component_references(schema_dict: dict[str, Any]) -> list[tuple
         A list of tuples containing (reference_name, path_url)
     """
     paths = schema_dict.get("paths", {})
+    existing_schemas = _get_existing_schemas(schema_dict)
     missing_components: list[tuple[str, str]] = []
 
-    # Find all referenced component names that don't exist in the schema
     for path_url, path_item in paths.items():
         if not isinstance(path_item, dict):
             continue
-
-        for _method, operation in path_item.items():
-            if not isinstance(operation, dict):
-                continue
-
-            if "requestBody" not in operation or not operation["requestBody"]:
-                continue
-
-            request_body = operation["requestBody"]
-            if "content" not in request_body or not request_body["content"]:
-                continue
-
-            content = request_body["content"]
-            if "multipart/form-data" not in content:
-                continue
-
-            multipart = content["multipart/form-data"]
-
-            # Get schema reference - could be in schema or schema_ (Pydantic v1/v2 difference)
-            schema_ref = get_schema_ref(multipart)
-
-            if schema_ref and isinstance(schema_ref, str) and schema_ref.startswith("#/components/schemas/"):
-                ref_name = schema_ref[len("#/components/schemas/") :]
-                # Check if this component exists
-                components = schema_dict.get("components", {})
-                schemas = components.get("schemas", {})
-
-                if ref_name not in schemas:
-                    missing_components.append((ref_name, path_url))
+        _check_path_for_missing_components(path_item, path_url, existing_schemas, missing_components)
 
     return missing_components
+
+
+def _get_existing_schemas(schema_dict: dict[str, Any]) -> set[str]:
+    """Get the set of existing schema component names."""
+    components = schema_dict.get("components")
+    if components is None:
+        return set()
+    
+    schemas = components.get("schemas")
+    if schemas is None:
+        return set()
+        
+    return set(schemas.keys())
+
+
+def _check_path_for_missing_components(
+    path_item: dict[str, Any], 
+    path_url: str, 
+    existing_schemas: set[str], 
+    missing_components: list[tuple[str, str]]
+) -> None:
+    """Check a single path item for missing component references."""
+    for _method, operation in path_item.items():
+        if not isinstance(operation, dict):
+            continue
+        _check_operation_for_missing_components(operation, path_url, existing_schemas, missing_components)
+
+
+def _check_operation_for_missing_components(
+    operation: dict[str, Any], 
+    path_url: str, 
+    existing_schemas: set[str], 
+    missing_components: list[tuple[str, str]]
+) -> None:
+    """Check a single operation for missing component references."""
+    multipart_schema = _extract_multipart_schema(operation)
+    if not multipart_schema:
+        return
+        
+    schema_ref = get_schema_ref(multipart_schema)
+    ref_name = _extract_component_name(schema_ref)
+    
+    if ref_name and ref_name not in existing_schemas:
+        missing_components.append((ref_name, path_url))
+
+
+def _extract_multipart_schema(operation: dict[str, Any]) -> dict[str, Any] | None:
+    """Extract multipart/form-data schema from operation, if it exists."""
+    if "requestBody" not in operation or not operation["requestBody"]:
+        return None
+        
+    request_body = operation["requestBody"]
+    if "content" not in request_body or not request_body["content"]:
+        return None
+        
+    content = request_body["content"]
+    if "multipart/form-data" not in content:
+        return None
+        
+    return content["multipart/form-data"]
+
+
+def _extract_component_name(schema_ref: str | None) -> str | None:
+    """Extract component name from schema reference."""
+    if not schema_ref or not isinstance(schema_ref, str):
+        return None
+        
+    if not schema_ref.startswith("#/components/schemas/"):
+        return None
+        
+    return schema_ref[len("#/components/schemas/"):]
 
 
 def get_schema_ref(multipart: dict[str, Any]) -> str | None:
