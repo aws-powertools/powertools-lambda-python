@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 from pydantic import BaseModel, Field
@@ -2265,7 +2265,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
     """Test that Pydantic models with ConfigDict, aliases, and validators work correctly"""
     from typing import Any
 
-    from pydantic import UUID4, AfterValidator, Base64UrlStr, ConfigDict, StringConstraints, alias_generators
+    from pydantic import AfterValidator, Base64UrlStr, ConfigDict, StringConstraints, alias_generators
 
     del gw_event["multiValueHeaders"]
     del gw_event["multiValueQueryStringParameters"]
@@ -2284,7 +2284,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
         search_id: str
 
     @app.get("/query-model-simple")
-    def query_model(params: Annotated[QuerySimple, Query()]) -> dict[str, Any]:
+    def query_model(params: Annotated[QuerySimple, Query()]) -> Dict[str, Any]:
         return {
             "fullName": params.full_name,
             "nextToken": params.next_token,
@@ -2299,11 +2299,12 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
         model_config = ConfigDict(
             alias_generator=alias_generators.to_camel,
             validate_by_alias=True,
+            validate_by_name=True,
             serialize_by_alias=True,
         )
 
     @app.get("/query-model-advanced")
-    def query_model_advanced(params: Annotated[QueryAdvanced, Query()]) -> dict[str, Any]:
+    def query_model_advanced(params: Annotated[QueryAdvanced, Query()]) -> Dict[str, Any]:
         return params.model_dump()
 
     # Test QuerySimple with validators
@@ -2353,11 +2354,11 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
     assert body["nextToken"] == "dGVzdA=="
     assert body["id"] == "search-456"
 
-    # Test QueryAdvanced with snake_case field names (should also work due to populate_by_name behavior)
+    # Test QueryAdvanced with snake_case field names due to validate_by_name=True
     gw_event["queryStringParameters"] = {
         "full_name": "Snake Case Test",  # snake_case field name
         "next_token": "dGVzdA==",  # snake_case field name
-        "id": "search-789",  # explicit alias
+        "search_id": "search-789",  # snake_case field name
     }
 
     gw_event["path"] = "/query-model-advanced"
@@ -2366,7 +2367,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
 
     body = json.loads(result["body"])
     assert body["fullName"] == "Snake Case Test"
-    assert body["nextToken"] == "token789"
+    assert body["nextToken"] == "dGVzdA=="
     assert body["id"] == "search-789"
 
     # Test QueryAdvanced validation error (full_name too short)

@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
 from urllib.parse import parse_qs
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -69,8 +69,8 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             route.dependant.query_params,
         )
 
-        # Process query values (with Pydantic model support)
-        query_values, query_errors = _request_params_to_args_with_pydantic_support(
+        # Process query values
+        query_values, query_errors = _request_params_to_args(
             route.dependant.query_params,
             query_string,
         )
@@ -81,8 +81,8 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             route.dependant.header_params,
         )
 
-        # Process header values (with Pydantic model support)
-        header_values, header_errors = _request_params_to_args_with_pydantic_support(
+        # Process header values
+        header_values, header_errors = _request_params_to_args(
             route.dependant.header_params,
             headers,
         )
@@ -311,7 +311,7 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         return res  # pragma: no cover
 
 
-def _request_params_to_args_with_pydantic_support(
+def _request_params_to_args(
     required_params: Sequence[ModelField],
     received_params: Mapping[str, Any],
 ) -> tuple[dict[str, Any], list[Any]]:
@@ -330,61 +330,15 @@ def _request_params_to_args_with_pydantic_support(
         from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
 
         if isinstance(field_info, (Query, Header)) and lenient_issubclass(field_info.annotation, BaseModel):
-            # Handle Pydantic model - use the same approach as _request_body_to_args
-            loc = (field_info.in_.value, field.alias)
-
-            # Get the raw data for the Pydantic model
-            value = received_params.get(field.alias)
-
-            if value is None:
-                if field.required:
-                    errors.append(get_missing_field_error(loc))
-                else:
-                    values[field.name] = deepcopy(field.default)
-                continue
-
+            pass
+        elif isinstance(field_info, Param):
+            pass
         else:
-            # Regular parameter processing (existing logic)
-            if not isinstance(field_info, Param):
-                raise AssertionError(f"Expected Param field_info, got {field_info}")
-
-            value = received_params.get(field.alias)
-            loc = (field_info.in_.value, field.alias)
-
-            if value is None:
-                if field.required:
-                    errors.append(get_missing_field_error(loc=loc))
-                else:
-                    values[field.name] = deepcopy(field.default)
-                continue
-
-        # Use _validate_field like _request_body_to_args does
-        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
-    return values, errors
-
-
-def _request_params_to_args(
-    required_params: Sequence[ModelField],
-    received_params: Mapping[str, Any],
-) -> tuple[dict[str, Any], list[Any]]:
-    """
-    Convert the request params to a dictionary of values using validation, and returns a list of errors.
-    """
-    values = {}
-    errors = []
-
-    for field in required_params:
-        field_info = field.field_info
-
-        # To ensure early failure, we check if it's not an instance of Param.
-        if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
         value = received_params.get(field.alias)
-
         loc = (field_info.in_.value, field.alias)
 
-        # If we don't have a value, see if it's required or has a default
         if value is None:
             if field.required:
                 errors.append(get_missing_field_error(loc=loc))
@@ -392,9 +346,8 @@ def _request_params_to_args(
                 values[field.name] = deepcopy(field.default)
             continue
 
-        # Finally, validate the value
+        # Use _validate_field like _request_body_to_args does
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
-
     return values, errors
 
 
@@ -529,7 +482,13 @@ def _normalize_multi_query_string_with_param(
                     try:
                         model_data[field_alias] = query_string[field_alias][0]
                     except KeyError:
-                        pass
+                        if model_class.model_config.get("validate_by_name") or model_class.model_config.get(
+                            "populate_by_name",
+                        ):
+                            try:
+                                model_data[field_alias] = query_string[field_name][0]
+                            except KeyError:
+                                pass
 
                 # Store the collected data under the param alias
                 resolved_query_string[param.alias] = model_data

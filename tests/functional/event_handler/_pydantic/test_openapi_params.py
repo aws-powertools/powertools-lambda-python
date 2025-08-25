@@ -80,7 +80,7 @@ def test_openapi_pydantic_header_params():
     class HeaderParams(BaseModel):
         authorization: str = Field(description="Authorization token")
         user_agent: str = Field(default="PowerTools/1.0", description="User agent")
-        accept_language: Optional[str] = Field(default=None, alias="accept-language", description="Language preference")
+        language: Optional[str] = Field(default=None, alias="accept-language", description="Language preference")
 
     @app.get("/protected")
     def protected_handler(headers: Annotated[HeaderParams, Header()]):
@@ -101,7 +101,7 @@ def test_openapi_pydantic_header_params():
     # Check individual parameters
     param_names = [param.name for param in get_operation.parameters]
     assert "authorization" in param_names
-    assert "user_agent" in param_names
+    assert "user-agent" in param_names  # headers are always spinal-case
     assert "accept-language" in param_names  # Should use alias
 
     # Check parameter details

@@ -889,13 +889,18 @@ class Route:
         """
         Get basic OpenAPI schema for simple types
         """
-        if isinstance(int, param_type):
-            return {"type": "integer"}
-        elif isinstance(float, param_type):
-            return {"type": "number"}
-        elif isinstance(bool, param_type):
-            return {"type": "boolean"}
-        else:
+        try:
+            # Check bool before int, since bool is a subclass of int in Python
+            if issubclass(param_type, bool):
+                return {"type": "boolean"}
+            elif issubclass(param_type, int):
+                return {"type": "integer"}
+            elif issubclass(param_type, float):
+                return {"type": "number"}
+            else:
+                return {"type": "string"}
+        except TypeError:
+            # param_type may not be a type (e.g., typing.Optional[int]), fallback to string
             return {"type": "string"}
 
     @staticmethod
