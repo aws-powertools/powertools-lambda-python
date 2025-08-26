@@ -144,7 +144,6 @@ def slice_dictionary(data: dict, chunk_size: int) -> Generator[dict, None, None]
         yield {key: data[key] for key in itertools.islice(data, i, i + chunk_size)}
 
 
-
 def extract_event_from_common_models(data: Any) -> dict | Any:
     """Extract raw event from common types used in Powertools
 

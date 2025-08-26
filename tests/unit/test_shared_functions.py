@@ -205,11 +205,14 @@ def test_sanitize_xray_segment_name_with_no_special_characters():
     assert sanitized_name == expected_name
 
 
-@pytest.mark.parametrize("chunk_size, expected", [
-    (1, [{"k0": 0}, {"k1": 1}, {"k2": 2}, {"k3": 3}]),
-    (2, [{"k0": 0, "k1": 1}, {"k2": 2, "k3": 3}]),
-    (3, [{"k0": 0, "k1": 1, "k2": 2}, {"k3": 3}]),
-])
+@pytest.mark.parametrize(
+    "chunk_size, expected",
+    [
+        (1, [{"k0": 0}, {"k1": 1}, {"k2": 2}, {"k3": 3}]),
+        (2, [{"k0": 0, "k1": 1}, {"k2": 2, "k3": 3}]),
+        (3, [{"k0": 0, "k1": 1, "k2": 2}, {"k3": 3}]),
+    ],
+)
 def test_slice_dictionary(chunk_size, expected):
     data = {f"k{i}": i for i in range(4)}
     chunks = list(slice_dictionary(data, chunk_size=chunk_size))
