@@ -839,10 +839,6 @@ class Route:
                     # Create individual parameter for each model field
                     param_name = field_def.alias or field_name
 
-                    # Convert snake_case to kebab-case for headers (HTTP convention)
-                    if isinstance(field_info, Header):
-                        param_name = param_name.replace("_", "-")
-
                     individual_param = {
                         "name": param_name,
                         "in": field_info.in_.value,

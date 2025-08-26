@@ -96,6 +96,67 @@ def test_validate_pydantic_query_params(gw_event):
     assert any("limit" in str(error) for error in body["detail"])
 
 
+def test_validate_multi_value_query_params(gw_event):
+    """Test that multi-value query parameters are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/users")
+    def users_handler(ids: Annotated[List[int], Query()]):
+        return {"ids": ids}
+
+    # Test valid request
+    gw_event["path"] = "/users"
+    gw_event["multiValueQueryStringParameters"] = {"ids": ["1", "2", "3"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["ids"] == [1, 2, 3]
+
+    # Test with invalid value
+    gw_event["multiValueQueryStringParameters"] = {"ids": ["1", "abc", "3"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("ids" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_multi_value_query_params(gw_event):
+    """Test that Pydantic models in Multi-Value Query parameters are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class QueryParams(BaseModel):
+        ids: List[int] = Field(..., description="List of user IDs")
+
+    @app.get("/users")
+    def users_handler(params: Annotated[QueryParams, Query()]):
+        return {"ids": params.ids}
+
+    # Test valid request
+    gw_event["path"] = "/users"
+    gw_event["multiValueQueryStringParameters"] = {"ids": ["1", "2", "3"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["ids"] == [1, 2, 3]
+
+    # Test with invalid value
+    gw_event["multiValueQueryStringParameters"] = {"ids": ["1", "abc", "3"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("ids" in str(error) for error in body["detail"])
+
+
 def test_validate_pydantic_query_params_detailed_errors(gw_event):
     """Test that Pydantic validation errors include detailed field-level information"""
     app = APIGatewayRestResolver(enable_validation=True)
@@ -189,12 +250,75 @@ def test_validate_pydantic_header_params(gw_event):
     assert any("my-headers" in str(error) for error in body["detail"])
 
 
+def test_validate_multi_value_header_params(gw_event):
+    """Test that multi-value headers are validated correctly without Pydantic"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    del gw_event["multiValueHeaders"]
+
+    @app.get("/multi-value-headers")
+    def multi_value_handler(my_headers: Annotated[List[str], Header()]):
+        return {"items": my_headers}
+
+    # Test valid request
+    gw_event["path"] = "/multi-value-headers"
+    gw_event["multiValueHeaders"] = {"my-headers": ["item1", "item2"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["items"] == ["item1", "item2"]
+
+    # Test invalid request
+    gw_event["multiValueHeaders"] = {"items": "invalid"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("my-headers" in str(error) for error in body["detail"])
+
+
+def test_validate_pydantic_multi_value_header_params(gw_event):
+    """Test that multi-value headers are validated correctly"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    del gw_event["multiValueHeaders"]
+
+    class MultiValueHeaderParams(BaseModel):
+        list_items: List[str] = Field(description="List of items")
+
+    @app.get("/multi-value-headers")
+    def multi_value_handler(my_headers: Annotated[MultiValueHeaderParams, Header()]):
+        return {"items": my_headers.list_items}
+
+    # Test valid request
+    gw_event["path"] = "/multi-value-headers"
+    gw_event["multiValueHeaders"] = {"list-items": ["item1", "item2"]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    body = json.loads(result["body"])
+    assert body["items"] == ["item1", "item2"]
+
+    # Test invalid request
+    gw_event["multiValueHeaders"] = {"items": "invalid"}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+    body = json.loads(result["body"])
+    assert "detail" in body
+    assert any("my-headers" in str(error) for error in body["detail"])
+
+
 def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
     """Test that snake_case header fields are converted to kebab-case in OpenAPI schema and validation"""
     app = APIGatewayRestResolver(enable_validation=True)
     app.enable_swagger()
-
-    del gw_event["multiValueHeaders"]
 
     class HeaderParams(BaseModel):
         correlation_id: str = Field(description="Correlation ID header")
@@ -222,7 +346,7 @@ def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
 
     # Test validation with kebab-case headers
     gw_event["path"] = "/kebab-headers"
-    gw_event["headers"] = {"correlation-id": "test-123", "user-agent": "TestClient/1.0"}
+    gw_event["multiValueHeaders"] = {"correlation-id": "test-123", "user-agent": "TestClient/1.0"}
 
     result = app(gw_event, {})
     assert result["statusCode"] == 200

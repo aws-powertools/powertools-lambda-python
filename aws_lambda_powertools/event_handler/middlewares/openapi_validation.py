@@ -4,7 +4,7 @@ import dataclasses
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, get_origin
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -15,11 +15,12 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     _normalize_errors,
     _regenerate_error_with_loc,
     get_missing_field_error,
+    lenient_issubclass,
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Header, Param, Query
+from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler import Response
@@ -64,7 +65,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         )
 
         # Normalize query values before validate this
-        query_string = _normalize_multi_query_string_with_param(
+        query_string = _normalize_multi_params(
             app.current_event.resolved_query_string_parameters,
             route.dependant.query_params,
         )
@@ -76,7 +77,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         )
 
         # Normalize header values before validate this
-        headers = _normalize_multi_header_values_with_param(
+        headers = _normalize_multi_params(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
         )
@@ -316,7 +317,7 @@ def _request_params_to_args(
     received_params: Mapping[str, Any],
 ) -> tuple[dict[str, Any], list[Any]]:
     """
-    Convert request params to a dictionary of values with Pydantic model support.
+    Convert the request params to a dictionary of values using validation, and returns a list of errors.
     """
     values = {}
     errors = []
@@ -324,21 +325,15 @@ def _request_params_to_args(
     for field in required_params:
         field_info = field.field_info
 
-        # Check if this is a Pydantic model in Query/Header
-        from pydantic import BaseModel
-
-        from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
-
-        if isinstance(field_info, (Query, Header)) and lenient_issubclass(field_info.annotation, BaseModel):
-            pass
-        elif isinstance(field_info, Param):
-            pass
-        else:
+        # To ensure early failure, we check if it's not an instance of Param.
+        if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
         value = received_params.get(field.alias)
+
         loc = (field_info.in_.value, field.alias)
 
+        # If we don't have a value, see if it's required or has a default
         if value is None:
             if field.required:
                 errors.append(get_missing_field_error(loc=loc))
@@ -346,8 +341,9 @@ def _request_params_to_args(
                 values[field.name] = deepcopy(field.default)
             continue
 
-        # Use _validate_field like _request_body_to_args does
+        # Finally, validate the value
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
+
     return values, errors
 
 
@@ -439,116 +435,53 @@ def _get_embed_body(
     return received_body, field_alias_omitted
 
 
-def _normalize_multi_query_string_with_param(
-    query_string: dict[str, list[str]],
+def _normalize_multi_params(
+    input_dict: MutableMapping[str, Any],
     params: Sequence[ModelField],
-) -> dict[str, Any]:
+) -> MutableMapping[str, Any]:
     """
-    Extract and normalize resolved_query_string_parameters with Pydantic model support
+    Extract and normalize query string or header parameters with Pydantic model support.
 
     Parameters
     ----------
-    query_string: dict
-        A dictionary containing the initial query string parameters.
+    input_dict: MutableMapping[str, Any]
+        A dictionary containing the initial query string or header parameters.
     params: Sequence[ModelField]
         A sequence of ModelField objects representing parameters.
 
     Returns
     -------
-    A dictionary containing the processed multi_query_string_parameters.
+    MutableMapping[str, Any]
+        A dictionary containing the processed parameters with normalized values.
     """
-    resolved_query_string: dict[str, Any] = query_string
-
     for param in params:
-        # Handle scalar fields (existing logic)
         if is_scalar_field(param):
             try:
-                resolved_query_string[param.alias] = query_string[param.alias][0]
+                val = input_dict[param.alias]
+                if isinstance(val, list) and len(val) == 1:
+                    input_dict[param.alias] = val[0]
+                elif isinstance(val, list):
+                    pass  # leave as list for multi-value
+                # If it's a string, leave as is
             except KeyError:
                 pass
-        # Handle Pydantic models
-        elif isinstance(param.field_info, Query) and hasattr(param.field_info, "annotation"):
-            from pydantic import BaseModel
+        elif lenient_issubclass(param.field_info.annotation, BaseModel):
+            model_class = param.field_info.annotation
+            model_data = {}
 
-            from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
-
-            if lenient_issubclass(param.field_info.annotation, BaseModel):
-                model_class = param.field_info.annotation
-                model_data = {}
-
-                # Collect all fields for the Pydantic model
-                for field_name, field_def in model_class.model_fields.items():
-                    field_alias = field_def.alias or field_name
-                    try:
-                        model_data[field_alias] = query_string[field_alias][0]
-                    except KeyError:
-                        if model_class.model_config.get("validate_by_name") or model_class.model_config.get(
-                            "populate_by_name",
-                        ):
-                            try:
-                                model_data[field_alias] = query_string[field_name][0]
-                            except KeyError:
-                                pass
-
-                # Store the collected data under the param alias
-                resolved_query_string[param.alias] = model_data
-
-    return resolved_query_string
-
-
-def _normalize_multi_header_values_with_param(headers: MutableMapping[str, Any], params: Sequence[ModelField]):
-    """
-    Extract and normalize resolved_headers_field with Pydantic model support
-
-    Parameters
-    ----------
-    headers: MutableMapping[str, Any]
-        A dictionary containing the initial header parameters.
-    params: Sequence[ModelField]
-        A sequence of ModelField objects representing parameters.
-
-    Returns
-    -------
-    A dictionary containing the processed headers.
-    """
-    if headers:
-        for param in params:
-            # Handle scalar fields (existing logic)
-            if is_scalar_field(param):
-                try:
-                    if len(headers[param.alias]) == 1:
-                        headers[param.alias] = headers[param.alias][0]
-                except KeyError:
-                    pass
-            # Handle Pydantic models
-            elif isinstance(param.field_info, Header) and hasattr(param.field_info, "annotation"):
-                from pydantic import BaseModel
-
-                from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
-
-                if lenient_issubclass(param.field_info.annotation, BaseModel):
-                    model_class = param.field_info.annotation
-                    model_data = {}
-
-                    # Collect all fields for the Pydantic model
-                    for field_name, field_def in model_class.model_fields.items():
-                        field_alias = field_def.alias or field_name
-
-                        # Convert snake_case to kebab-case for headers (HTTP convention)
-                        header_key = field_alias.replace("_", "-")
-
-                        try:
-                            header_value = headers[header_key]
-                            if isinstance(header_value, list):
-                                if len(header_value) == 1:
-                                    model_data[field_alias] = header_value[0]
-                                else:
-                                    model_data[field_alias] = header_value
-                            else:
-                                model_data[field_alias] = header_value
-                        except KeyError:
-                            pass
-
-                    # Store the collected data under the param alias
-                    headers[param.alias] = model_data
-    return headers
+            for field_name, field_def in model_class.model_fields.items():
+                field_alias = field_def.alias or field_name
+                value = input_dict.get(field_alias)
+                if value is None and (
+                    model_class.model_config.get("validate_by_name") or model_class.model_config.get("populate_by_name")
+                ):
+                    value = input_dict.get(field_name)
+                if value is not None:
+                    if get_origin(field_def.annotation) is list:
+                        model_data[field_alias] = value
+                    elif isinstance(value, list):
+                        model_data[field_alias] = value[0]
+                    else:
+                        model_data[field_alias] = value
+            input_dict[param.alias] = model_data
+    return input_dict
