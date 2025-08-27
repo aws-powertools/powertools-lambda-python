@@ -145,9 +145,9 @@ gitpython==3.1.44 \
     --hash=sha256:9e0e10cda9bed1ee64bc9a6de50e7e38a9c9943241cd7f585f6df3ed28011110 \
     --hash=sha256:c87e30b26253bf5418b01b0660f818967f3c503193838337fe5e573331249269
     # via mkdocs-git-revision-date-plugin
-griffe==1.12.1 \
-    --hash=sha256:29f5a6114c0aeda7d9c86a570f736883f8a2c5b38b57323d56b3d1c000565567 \
-    --hash=sha256:2d7c12334de00089c31905424a00abcfd931b45b8b516967f224133903d302cc
+griffe==1.13.0 \
+    --hash=sha256:246ea436a5e78f7fbf5f24ca8a727bb4d2a4b442a2959052eea3d0bfe9a076e0 \
+    --hash=sha256:470fde5b735625ac0a36296cd194617f039e9e83e301fcbd493e2b58382d0559
     # via mkdocstrings-python
 idna==3.10 \
     --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
@@ -302,9 +302,9 @@ mkdocstrings==0.30.0 \
     --hash=sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444 \
     --hash=sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2
     # via mkdocstrings-python
-mkdocstrings-python==1.17.0 \
-    --hash=sha256:49903fa355dfecc5ad0b891e78ff5d25d30ffd00846952801bbe8331e123d4b0 \
-    --hash=sha256:c6295962b60542a9c7468a3b515ce8524616ca9f8c1a38c790db4286340ba501
+mkdocstrings-python==1.18.0 \
+    --hash=sha256:0b9924b4034fe9ae43604d78fe8e5107ea2c2391620124fc833043a62e83c744 \
+    --hash=sha256:f5056d8afe9a9683ad0c59001df1ecd9668b51c19b9a6b4dc0ff02cc9b76265a
     # via -r requirements.in
 packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
