@@ -364,39 +364,6 @@ def expand_pydantic_model_for_openapi(param_field: ModelField) -> list[ModelFiel
     return expanded_fields
 
 
-def get_flat_params_with_pydantic_expansion(dependant: Dependant) -> list[ModelField]:
-    """
-    Get a list of all parameters from a Dependant object, expanding Pydantic models into individual fields.
-    This is used specifically for OpenAPI schema generation.
-
-    Parameters
-    ----------
-    dependant : Dependant
-        The Dependant object containing the parameters.
-
-    Returns
-    -------
-    list[ModelField]
-        A list of ModelField objects with Pydantic models expanded into individual fields.
-    """
-    flat_dependant = get_flat_dependant(dependant)
-    all_params = (
-        flat_dependant.path_params
-        + flat_dependant.query_params
-        + flat_dependant.header_params
-        + flat_dependant.cookie_params
-    )
-
-    expanded_params = []
-
-    for param in all_params:
-        # Expand Pydantic models into individual fields
-        expanded_fields = expand_pydantic_model_for_openapi(param)
-        expanded_params.extend(expanded_fields)
-
-    return expanded_params
-
-
 def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
     """
     Get the Body field for a given Dependant object.
