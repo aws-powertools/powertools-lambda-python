@@ -4,7 +4,7 @@ import dataclasses
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, get_origin
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast, get_origin
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -456,32 +456,59 @@ def _normalize_multi_params(
     """
     for param in params:
         if is_scalar_field(param):
-            try:
-                val = input_dict[param.alias]
-                if isinstance(val, list) and len(val) == 1:
-                    input_dict[param.alias] = val[0]
-                elif isinstance(val, list):
-                    pass  # leave as list for multi-value
-                # If it's a string, leave as is
-            except KeyError:
-                pass
+            _process_scalar_param(input_dict, param)
         elif lenient_issubclass(param.field_info.annotation, BaseModel):
-            model_class = param.field_info.annotation
-            model_data = {}
-
-            for field_name, field_def in model_class.model_fields.items():
-                field_alias = field_def.alias or field_name
-                value = input_dict.get(field_alias)
-                if value is None and (
-                    model_class.model_config.get("validate_by_name") or model_class.model_config.get("populate_by_name")
-                ):
-                    value = input_dict.get(field_name)
-                if value is not None:
-                    if get_origin(field_def.annotation) is list:
-                        model_data[field_alias] = value
-                    elif isinstance(value, list):
-                        model_data[field_alias] = value[0]
-                    else:
-                        model_data[field_alias] = value
-            input_dict[param.alias] = model_data
+            _process_model_param(input_dict, param)
     return input_dict
+
+
+def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+    """Process a scalar parameter by normalizing single-item lists."""
+    try:
+        val = input_dict[param.alias]
+        if isinstance(val, list) and len(val) == 1:
+            input_dict[param.alias] = val[0]
+    except KeyError:
+        pass
+
+
+def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+    """Process a Pydantic model parameter by extracting model fields."""
+    model_class = cast(type[BaseModel], param.field_info.annotation)
+
+    model_data = {}
+    for field_name, field_def in model_class.model_fields.items():
+        field_alias = field_def.alias or field_name
+        value = _get_param_value(input_dict, field_alias, field_name, model_class)
+
+        if value is not None:
+            model_data[field_alias] = _normalize_field_value(value, field_def)
+
+    input_dict[param.alias] = model_data
+
+
+def _get_param_value(
+    input_dict: MutableMapping[str, Any],
+    field_alias: str,
+    field_name: str,
+    model_class: type[BaseModel],
+) -> Any:
+    """Get parameter value, checking both alias and field name if needed."""
+    value = input_dict.get(field_alias)
+    if value is not None:
+        return value
+
+    if model_class.model_config.get("validate_by_name") or model_class.model_config.get("populate_by_name"):
+        value = input_dict.get(field_name)
+
+    return value
+
+
+def _normalize_field_value(value: Any, field_def: Any) -> Any:
+    """Normalize field value based on its type annotation."""
+    if get_origin(field_def.annotation) is list:
+        return value
+    elif isinstance(value, list) and value:
+        return value[0]
+    else:
+        return value

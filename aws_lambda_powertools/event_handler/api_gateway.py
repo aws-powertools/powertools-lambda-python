@@ -812,10 +812,8 @@ class Route:
         """
         Returns the OpenAPI operation parameters.
         """
-        from aws_lambda_powertools.event_handler.openapi.compat import (
-            get_schema_from_model_field,
-        )
-        from aws_lambda_powertools.event_handler.openapi.params import Form, Header, Param, Query
+        from aws_lambda_powertools.event_handler.openapi.compat import get_schema_from_model_field
+        from aws_lambda_powertools.event_handler.openapi.params import Param
 
         parameters = []
         parameter: dict[str, Any] = {}
@@ -831,11 +829,13 @@ class Route:
 
             from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
 
-            if isinstance(field_info, (Query, Header, Form)) and lenient_issubclass(field_info.annotation, BaseModel):
+            if lenient_issubclass(field_info.annotation, BaseModel):
                 # Expand Pydantic model into individual parameters
-                model_class = field_info.annotation
+                model_class = cast(type[BaseModel], field_info.annotation)
 
                 for field_name, field_def in model_class.model_fields.items():
+                    if not field_def.annotation:
+                        continue
                     # Create individual parameter for each model field
                     param_name = field_def.alias or field_name
 
