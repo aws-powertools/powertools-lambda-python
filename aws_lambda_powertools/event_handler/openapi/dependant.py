@@ -306,64 +306,6 @@ def get_flat_params(dependant: Dependant) -> list[ModelField]:
     )
 
 
-def expand_pydantic_model_for_openapi(param_field: ModelField) -> list[ModelField]:
-    """
-    Expands a Pydantic model parameter into individual fields for OpenAPI schema generation.
-
-    Parameters
-    ----------
-    param_field: ModelField
-        The field containing a Pydantic model
-
-    Returns
-    -------
-    list[ModelField]
-        List of individual ModelField objects for each field in the Pydantic model
-    """
-    from pydantic import BaseModel
-
-    from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
-
-    # Check if this is a Pydantic model in Query, Header, or Form
-    if not (
-        isinstance(param_field.field_info, (Query, Header, Form))
-        and lenient_issubclass(param_field.field_info.annotation, BaseModel)
-    ):
-        return [param_field]
-
-    # Get the Pydantic model class
-    model_class = param_field.field_info.annotation
-    field_info_template = param_field.field_info
-
-    expanded_fields = []
-
-    # Create individual fields for each field in the Pydantic model
-    for field_name, field_def in model_class.model_fields.items():
-        # Create a new field_info for each model field
-        individual_field_info = type(field_info_template)(
-            default=field_def.default if field_def.default is not ... else None,
-            annotation=field_def.annotation,
-            alias=field_def.alias or field_name,
-            title=field_def.title,
-            description=field_def.description,
-        )
-
-        # Create the ModelField using the internal function
-        from aws_lambda_powertools.event_handler.openapi.params import _create_model_field
-
-        individual_field = _create_model_field(
-            field_info=individual_field_info,
-            type_annotation=field_def.annotation,
-            param_name=field_name,
-            is_path_param=False,
-        )
-
-        if individual_field:
-            expanded_fields.append(individual_field)
-
-    return expanded_fields
-
-
 def get_body_field(*, dependant: Dependant, name: str) -> ModelField | None:
     """
     Get the Body field for a given Dependant object.
