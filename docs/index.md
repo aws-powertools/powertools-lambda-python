@@ -47,6 +47,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
     * **pip**: **`pip install "aws-lambda-powertools"`**{: .copyMe}
     * **poetry**: **`poetry add "aws-lambda-powertools"`**{: .copyMe}
     * **pdm**: **`pdm add "aws-lambda-powertools"`**{: .copyMe}
+    * **uv**: **`uv add "aws-lambda-powertools"`**{: .copyMe}
 
     ### Extra dependencies
 
@@ -299,6 +300,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
     - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}
     - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}
     - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}
+    - __uv__: [**`uv add --prerelease allow "aws-lambda-powertools"`**](#){: .copyMe}
 
 ### Local development
 
@@ -309,6 +311,7 @@ Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda 
 - __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
 - __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}
 - __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
+- __uv__: [**`uv add "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
 
 __A word about dependency resolution__
 
