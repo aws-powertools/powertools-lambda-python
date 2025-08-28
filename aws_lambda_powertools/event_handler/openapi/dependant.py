@@ -14,10 +14,8 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
     Form,
-    Header,
     Param,
     ParamTypes,
-    Query,
     _File,
     analyze_param,
     create_response_field,
@@ -274,7 +272,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     elif is_scalar_field(field=param_field):
         return False
-    elif isinstance(param_field.field_info, (Query, Header)):
+    elif isinstance(param_field.field_info, Param):
         return False
     else:
         if not isinstance(param_field.field_info, Body):
