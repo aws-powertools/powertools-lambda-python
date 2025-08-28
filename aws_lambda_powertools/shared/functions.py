@@ -140,8 +140,8 @@ def powertools_debug_is_set() -> bool:
 
 
 def slice_dictionary(data: dict, chunk_size: int) -> Generator[dict, None, None]:
-    for _ in range(0, len(data), chunk_size):
-        yield {dict_key: data[dict_key] for dict_key in itertools.islice(data, chunk_size)}
+    for i in range(0, len(data), chunk_size):
+        yield {key: data[key] for key in itertools.islice(data, i, i + chunk_size)}
 
 
 def extract_event_from_common_models(data: Any) -> dict | Any:

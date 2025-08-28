@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     abs_lambda_path,
+    slice_dictionary,
     extract_event_from_common_models,
     powertools_debug_is_set,
     powertools_dev_is_set,
@@ -202,3 +203,17 @@ def test_sanitize_xray_segment_name_with_no_special_characters():
     # THEN the sanitized name remains the same as the original name
     expected_name = valid_name
     assert sanitized_name == expected_name
+
+
+@pytest.mark.parametrize(
+    "chunk_size, expected",
+    [
+        (1, [{"k0": 0}, {"k1": 1}, {"k2": 2}, {"k3": 3}]),
+        (2, [{"k0": 0, "k1": 1}, {"k2": 2, "k3": 3}]),
+        (3, [{"k0": 0, "k1": 1, "k2": 2}, {"k3": 3}]),
+    ],
+)
+def test_slice_dictionary(chunk_size, expected):
+    data = {f"k{i}": i for i in range(4)}
+    chunks = list(slice_dictionary(data, chunk_size=chunk_size))
+    assert chunks == expected
