@@ -2449,7 +2449,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
 
     # Test QuerySimple validation error (name doesn't start with "Powertools")
     gw_event["queryStringParameters"] = {
-        "full_name": "Lambda Powertools",  # Wrong order
+        "full_name": "Lambda Powertools",
         "next_token": "dGVzdA==",
         "search_id": "search-123",
     }
@@ -2460,6 +2460,15 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
     body = json.loads(result["body"])
     assert "detail" in body
     errors = body["detail"]
+
+    # Should have validation error for full_name with proper location
+    full_name_error = next((e for e in errors if "full_name" in e["loc"]), None)
+
+    assert full_name_error is not None, "Should have error for full_name field"
+
+    # Check error details for full_name
+    assert full_name_error["loc"] == ["query", "params", "full_name"]
+    assert full_name_error["type"] == "value_error"
 
     # Test QueryAdvanced with ConfigDict and alias_generator
     gw_event["path"] = "/query-model-advanced"
