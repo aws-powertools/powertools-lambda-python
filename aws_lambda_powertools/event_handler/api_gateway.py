@@ -830,15 +830,12 @@ class Route:
         return parameters
 
     @staticmethod
-    def _is_pydantic_model_param(field_info: ModelField | Param) -> bool:
+    def _is_pydantic_model_param(field_info: Param) -> bool:
         """Check if the field info represents a Pydantic model parameter."""
         from pydantic import BaseModel
 
         from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
-        from aws_lambda_powertools.event_handler.openapi.params import Param
 
-        if not isinstance(field_info, Param):
-            return False
         return lenient_issubclass(field_info.annotation, BaseModel)
 
     @staticmethod
@@ -850,9 +847,6 @@ class Route:
         parameters: list[dict[str, Any]] = []
 
         for field_name, field_def in model_class.model_fields.items():
-            if not field_def.annotation:
-                continue
-
             param_name = field_def.alias or field_name
             individual_param = Route._create_pydantic_field_parameter(
                 param_name=param_name,

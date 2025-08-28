@@ -323,6 +323,7 @@ def test_validate_pydantic_header_snake_case_to_kebab_case_schema(gw_event):
     class HeaderParams(BaseModel):
         correlation_id: str = Field(description="Correlation ID header")
         user_agent: str = Field(default="PowerTools/1.0", description="User agent header")
+        accept: str = Field(default="application/json")  # omit description to test optional description
 
     @app.get("/kebab-headers")
     def kebab_handler(my_headers: Annotated[HeaderParams, Header()]):
@@ -1124,8 +1125,8 @@ def test_validation_header_with_api_rest_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
@@ -1190,8 +1191,8 @@ def test_validation_header_with_http_rest_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
@@ -1253,8 +1254,8 @@ def test_validation_header_with_alb_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
@@ -1318,8 +1319,8 @@ def test_validation_header_with_lambda_url_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
@@ -1382,8 +1383,8 @@ def test_validation_header_with_vpc_lattice_v1_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
@@ -1446,8 +1447,8 @@ def test_validation_header_with_vpc_lattice_v2_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(name="Header2")],
-            header1: Annotated[str, Header(name="Header1")],
+            header2: Annotated[List[str], Header(alias="Header2")],
+            header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
 
