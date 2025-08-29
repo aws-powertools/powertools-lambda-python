@@ -2684,14 +2684,14 @@ python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
 
 [[package]]
 name = "mkdocstrings-python"
-version = "1.18.0"
+version = "1.18.2"
 description = "A Python handler for mkdocstrings."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "mkdocstrings_python-1.18.0-py3-none-any.whl", hash = "sha256:f5056d8afe9a9683ad0c59001df1ecd9668b51c19b9a6b4dc0ff02cc9b76265a"},
-    {file = "mkdocstrings_python-1.18.0.tar.gz", hash = "sha256:0b9924b4034fe9ae43604d78fe8e5107ea2c2391620124fc833043a62e83c744"},
+    {file = "mkdocstrings_python-1.18.2-py3-none-any.whl", hash = "sha256:944fe6deb8f08f33fa936d538233c4036e9f53e840994f6146e8e94eb71b600d"},
+    {file = "mkdocstrings_python-1.18.2.tar.gz", hash = "sha256:4ad536920a07b6336f50d4c6d5603316fafb1172c5c882370cbbc954770ad323"},
 ]
 
 [package.dependencies]
