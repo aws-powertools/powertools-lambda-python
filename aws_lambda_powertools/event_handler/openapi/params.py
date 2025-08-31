@@ -114,14 +114,23 @@ class UploadFile:
         """Return Pydantic core schema for UploadFile."""
         from pydantic_core import core_schema
 
-        # Define the schema for UploadFile validation
-        schema = core_schema.no_info_plain_validator_function(
-            cls._validate,
+        # Use a string schema with custom JSON schema for OpenAPI
+        return core_schema.with_info_plain_validator_function(
+            cls._validate_with_info,
             serialization=core_schema.to_string_ser_schema(),
         )
 
-        # For OpenAPI schema info, we'll use __modify_schema__ method instead
-        return schema
+    @classmethod
+    def _validate_with_info(cls, value: Any, info) -> UploadFile:
+        """Validate and convert value to UploadFile with validation info."""
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, bytes):
+            return cls(file=value)
+        # For OpenAPI schema generation, return a placeholder
+        if info and getattr(info, "context", {}).get("openapi_generation", False):
+            return cls(file=b"", filename="placeholder.txt")
+        raise ValueError(f"Expected UploadFile or bytes, got {type(value)}")
 
     @classmethod
     def __modify_schema__(cls, field_schema: dict[str, Any]) -> None:
@@ -151,17 +160,11 @@ class UploadFile:
     @classmethod
     def __get_pydantic_json_schema__(cls, _core_schema: Any, field_schema: Any) -> dict[str, Any]:
         """Modify the JSON schema for OpenAPI compatibility."""
-        # Handle both Pydantic v1 and v2 schemas
-        json_schema = field_schema(_core_schema) if callable(field_schema) else {}
-
-        # Add binary file format for OpenAPI
-        json_schema.update(
-            type="string",
-            format="binary",
-            description="A file uploaded as part of a multipart/form-data request",
-        )
-
-        return json_schema
+        return {
+            "type": "string",
+            "format": "binary",
+            "description": "A file uploaded as part of a multipart/form-data request",
+        }
 
 
 class ParamTypes(Enum):
