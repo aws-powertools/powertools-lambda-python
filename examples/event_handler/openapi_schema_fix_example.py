@@ -5,10 +5,16 @@ This example demonstrates how the automatic OpenAPI schema fix works for UploadF
 The fix resolves missing component references that would otherwise cause validation errors
 in tools like Swagger Editor.
 
+IMPORTANT: As of this version, the fix is automatically applied by APIGatewayRestResolver.
+This example shows how the fix works internally and is provided for educational purposes.
+
 Example shows:
-- Custom resolver that demonstrates the fix (though it's now built-in)
+- Custom resolver that replicates the built-in fix functionality
 - UploadFile usage with File parameters
 - OpenAPI schema generation with proper component references
+- How missing component references are detected and resolved
+
+For production use, simply use APIGatewayRestResolver directly - the fix is automatically applied.
 """
 
 from __future__ import annotations
@@ -63,32 +69,32 @@ class OpenAPISchemaFixResolver(APIGatewayRestResolver):
 
     def _find_missing_component_references(self, schema_dict: dict) -> list[tuple[str, str]]:
         """Find all missing component references in multipart/form-data schemas."""
-        missing_refs = []
+        missing_refs: list[tuple[str, str]] = []
         paths = schema_dict.get("paths", {})
-        
+
         for path_item in paths.values():
             self._check_path_item_for_missing_refs(path_item, schema_dict, missing_refs)
-        
+
         return missing_refs
 
     def _check_path_item_for_missing_refs(
-        self, 
-        path_item: dict, 
-        schema_dict: dict, 
-        missing_refs: list[tuple[str, str]]
+        self,
+        path_item: dict,
+        schema_dict: dict,
+        missing_refs: list[tuple[str, str]],
     ) -> None:
         """Check a single path item for missing component references."""
         for _method, operation in path_item.items():
             if not isinstance(operation, dict) or "requestBody" not in operation:
                 continue
-            
+
             self._check_operation_for_missing_refs(operation, schema_dict, missing_refs)
 
     def _check_operation_for_missing_refs(
-        self, 
-        operation: dict, 
-        schema_dict: dict, 
-        missing_refs: list[tuple[str, str]]
+        self,
+        operation: dict,
+        schema_dict: dict,
+        missing_refs: list[tuple[str, str]],
     ) -> None:
         """Check a single operation for missing component references."""
         req_body = operation.get("requestBody", {})
@@ -100,7 +106,7 @@ class OpenAPISchemaFixResolver(APIGatewayRestResolver):
             ref = schema_ref["$ref"]
             if ref.startswith("#/components/schemas/"):
                 component_name = ref[len("#/components/schemas/") :]
-                
+
                 if self._is_component_missing(schema_dict, component_name):
                     missing_refs.append((component_name, ref))
 

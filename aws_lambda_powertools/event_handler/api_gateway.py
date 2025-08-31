@@ -1800,7 +1800,9 @@ class ApiGatewayResolver(BaseRouter):
 
         # Build final components and paths
         components = self._build_openapi_components(definitions, config["security_schemes"])
-        output.update(self._finalize_openapi_output(components, config["tags"], paths, config["external_documentation"]))
+        output.update(
+            self._finalize_openapi_output(components, config["tags"], paths, config["external_documentation"]),
+        )
 
         # Apply schema fixes and return result
         return self._apply_schema_fixes(output)
@@ -1810,8 +1812,8 @@ class ApiGatewayResolver(BaseRouter):
         # DEPRECATION: Will be removed in v4.0.0. Use configure_api() instead.
         # Maintained for backwards compatibility.
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/6122
-        resolved = {}
-        
+        resolved: dict[str, Any] = {}
+
         # Handle fields with specific default value checks
         self._resolve_title_config(resolved, kwargs)
         self._resolve_version_config(resolved, kwargs)
@@ -1823,41 +1825,112 @@ class ApiGatewayResolver(BaseRouter):
         return resolved
 
     def _resolve_title_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
-        """Resolve title configuration with fallback to openapi_config."""
+        """
+        Resolve title configuration with fallback to openapi_config.
+
+        Checks if the provided title is the default value, and if so, uses the
+        title from openapi_config if available. This allows users to configure
+        a default title through the OpenAPI configuration object.
+
+        Parameters
+        ----------
+        resolved : dict[str, Any]
+            Dictionary to store the resolved configuration (modified in place)
+        kwargs : dict[str, Any]
+            Keyword arguments passed to get_openapi_schema
+        """
         resolved["title"] = kwargs["title"]
         if kwargs["title"] == DEFAULT_OPENAPI_TITLE and self.openapi_config.title:
             resolved["title"] = self.openapi_config.title
 
     def _resolve_version_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
-        """Resolve version configuration with fallback to openapi_config."""
+        """
+        Resolve version configuration with fallback to openapi_config.
+
+        Checks if the provided version is the default value, and if so, uses the
+        version from openapi_config if available. This allows users to configure
+        a default API version through the OpenAPI configuration object.
+
+        Parameters
+        ----------
+        resolved : dict[str, Any]
+            Dictionary to store the resolved configuration (modified in place)
+        kwargs : dict[str, Any]
+            Keyword arguments passed to get_openapi_schema
+        """
         resolved["version"] = kwargs["version"]
         if kwargs["version"] == DEFAULT_API_VERSION and self.openapi_config.version:
             resolved["version"] = self.openapi_config.version
 
     def _resolve_openapi_version_config(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
-        """Resolve openapi_version configuration with fallback to openapi_config."""
+        """
+        Resolve openapi_version configuration with fallback to openapi_config.
+
+        Checks if the provided OpenAPI version is the default value, and if so, uses
+        the version from openapi_config if available. This allows users to configure
+        a specific OpenAPI version through the OpenAPI configuration object.
+
+        Parameters
+        ----------
+        resolved : dict[str, Any]
+            Dictionary to store the resolved configuration (modified in place)
+        kwargs : dict[str, Any]
+            Keyword arguments passed to get_openapi_schema
+        """
         resolved["openapi_version"] = kwargs["openapi_version"]
         if kwargs["openapi_version"] == DEFAULT_OPENAPI_VERSION and self.openapi_config.openapi_version:
             resolved["openapi_version"] = self.openapi_config.openapi_version
 
     def _resolve_remaining_config_fields(self, resolved: dict[str, Any], kwargs: dict[str, Any]) -> None:
-        """Resolve remaining configuration fields with simple fallbacks."""
-        resolved.update({
-            "summary": kwargs["summary"] or self.openapi_config.summary,
-            "description": kwargs["description"] or self.openapi_config.description,
-            "tags": kwargs["tags"] or self.openapi_config.tags,
-            "servers": kwargs["servers"] or self.openapi_config.servers,
-            "terms_of_service": kwargs["terms_of_service"] or self.openapi_config.terms_of_service,
-            "contact": kwargs["contact"] or self.openapi_config.contact,
-            "license_info": kwargs["license_info"] or self.openapi_config.license_info,
-            "security_schemes": kwargs["security_schemes"] or self.openapi_config.security_schemes,
-            "security": kwargs["security"] or self.openapi_config.security,
-            "external_documentation": kwargs["external_documentation"] or self.openapi_config.external_documentation,
-            "openapi_extensions": kwargs["openapi_extensions"] or self.openapi_config.openapi_extensions,
-        })
+        """
+        Resolve remaining configuration fields with simple fallbacks.
+
+        For fields that use simple OR logic, use the provided value from kwargs
+        or fall back to the value from openapi_config. This includes fields like
+        summary, description, tags, servers, etc.
+
+        Parameters
+        ----------
+        resolved : dict[str, Any]
+            Dictionary to store the resolved configuration (modified in place)
+        kwargs : dict[str, Any]
+            Keyword arguments passed to get_openapi_schema
+        """
+        resolved.update(
+            {
+                "summary": kwargs["summary"] or self.openapi_config.summary,
+                "description": kwargs["description"] or self.openapi_config.description,
+                "tags": kwargs["tags"] or self.openapi_config.tags,
+                "servers": kwargs["servers"] or self.openapi_config.servers,
+                "terms_of_service": kwargs["terms_of_service"] or self.openapi_config.terms_of_service,
+                "contact": kwargs["contact"] or self.openapi_config.contact,
+                "license_info": kwargs["license_info"] or self.openapi_config.license_info,
+                "security_schemes": kwargs["security_schemes"] or self.openapi_config.security_schemes,
+                "security": kwargs["security"] or self.openapi_config.security,
+                "external_documentation": kwargs["external_documentation"]
+                or self.openapi_config.external_documentation,
+                "openapi_extensions": kwargs["openapi_extensions"] or self.openapi_config.openapi_extensions,
+            },
+        )
 
     def _build_base_openapi_structure(self, config: dict[str, Any]) -> dict[str, Any]:
-        """Build the base OpenAPI structure with info, servers, and security."""
+        """
+        Build the base OpenAPI structure with info, servers, and security.
+
+        Creates the foundation of an OpenAPI schema including the required fields
+        (openapi version, info) and optional fields (servers, security) based on
+        the resolved configuration.
+
+        Parameters
+        ----------
+        config : dict[str, Any]
+            Resolved OpenAPI configuration dictionary containing title, version, etc.
+
+        Returns
+        -------
+        dict[str, Any]
+            Base OpenAPI structure dictionary ready for paths and components
+        """
         openapi_version = self._determine_openapi_version(config["openapi_version"])
 
         # Start with the bare minimum required for a valid OpenAPI schema
@@ -1885,9 +1958,13 @@ class ApiGatewayResolver(BaseRouter):
             **openapi_extensions,
         }
 
-    def _process_routes_for_openapi(self, security_schemes: dict[str, SecurityScheme] | None) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    def _process_routes_for_openapi(
+        self,
+        security_schemes: dict[str, SecurityScheme] | None,
+    ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
         """Process all routes and build paths and definitions."""
         from pydantic.json_schema import GenerateJsonSchema
+
         from aws_lambda_powertools.event_handler.openapi.compat import (
             get_compat_model_name_map,
             get_definitions,
@@ -1912,7 +1989,7 @@ class ApiGatewayResolver(BaseRouter):
         # Add routes to the OpenAPI schema
         for route in all_routes:
             self._validate_route_security(route, security_schemes)
-            
+
             if not route.include_in_schema:
                 continue
 
@@ -1943,23 +2020,33 @@ class ApiGatewayResolver(BaseRouter):
                 "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
             )
 
-    def _build_openapi_components(self, definitions: dict[str, dict[str, Any]], security_schemes: dict[str, SecurityScheme] | None) -> dict[str, dict[str, Any]]:
+    def _build_openapi_components(
+        self,
+        definitions: dict[str, dict[str, Any]],
+        security_schemes: dict[str, SecurityScheme] | None,
+    ) -> dict[str, dict[str, Any]]:
         """Build the components section of the OpenAPI schema."""
         components: dict[str, dict[str, Any]] = {}
-        
+
         if definitions:
             components["schemas"] = self._generate_schemas(definitions)
         if security_schemes:
             components["securitySchemes"] = security_schemes
-            
+
         return components
 
-    def _finalize_openapi_output(self, components: dict[str, dict[str, Any]], tags, paths: dict[str, dict[str, Any]], external_documentation) -> dict[str, Any]:
+    def _finalize_openapi_output(
+        self,
+        components: dict[str, dict[str, Any]],
+        tags,
+        paths: dict[str, dict[str, Any]],
+        external_documentation,
+    ) -> dict[str, Any]:
         """Finalize the OpenAPI output with components, tags, and paths."""
         from aws_lambda_powertools.event_handler.openapi.models import PathItem, Tag
 
-        output = {}
-        
+        output: dict[str, Any] = {}
+
         if components:
             output["components"] = components
         if tags:
@@ -1967,21 +2054,37 @@ class ApiGatewayResolver(BaseRouter):
         if external_documentation:
             output["externalDocs"] = external_documentation
 
-        output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
-        
+        output["paths"] = {k: PathItem(**v) if not isinstance(v, PathItem) else v for k, v in paths.items()}
+
         return output
 
     def _apply_schema_fixes(self, output: dict[str, Any]) -> OpenAPI:
-        """Apply schema fixes and return the final OpenAPI model."""
+        """
+        Apply schema fixes and return the final OpenAPI model.
+
+        This method handles various schema fixes, including resolving missing
+        component references for UploadFile parameters that can cause validation
+        errors in OpenAPI tools like Swagger Editor.
+
+        Parameters
+        ----------
+        output : dict[str, Any]
+            The OpenAPI schema dictionary to process
+
+        Returns
+        -------
+        OpenAPI
+            The final OpenAPI model with all fixes applied
+        """
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
-        from aws_lambda_powertools.event_handler.openapi.upload_file_fix import fix_upload_file_schema
+        from aws_lambda_powertools.event_handler.openapi.params import fix_upload_file_schema_references
 
         # First create the OpenAPI model
         result = OpenAPI(**output)
 
-        # Convert the model to a dict and apply the fix
+        # Convert the model to a dict and apply the upload file schema fix
         result_dict = result.model_dump(by_alias=True)
-        fixed_dict = fix_upload_file_schema(result_dict)
+        fixed_dict = fix_upload_file_schema_references(result_dict)
 
         # Reconstruct the model with the fixed dict
         return OpenAPI(**fixed_dict)

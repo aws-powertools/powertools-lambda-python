@@ -120,14 +120,19 @@ class UploadFile:
             serialization=core_schema.to_string_ser_schema(),
         )
 
-        # Add OpenAPI schema info
-        schema["json_schema_extra"] = {
-            "type": "string",
-            "format": "binary",
-            "description": "A file uploaded as part of a multipart/form-data request",
-        }
-
+        # For OpenAPI schema info, we'll use __modify_schema__ method instead
         return schema
+
+    @classmethod
+    def __modify_schema__(cls, field_schema: dict[str, Any]) -> None:
+        """Modify the JSON schema for OpenAPI documentation."""
+        field_schema.update(
+            {
+                "type": "string",
+                "format": "binary",
+                "description": "A file uploaded as part of a multipart/form-data request",
+            },
+        )
 
     @classmethod
     def _validate(cls, value: Any) -> UploadFile:
@@ -1258,3 +1263,247 @@ def _create_model_field(
         required=field_info.default in (Required, Undefined),
         field_info=field_info,
     )
+
+
+def fix_upload_file_schema_references(schema_dict: dict[str, Any]) -> dict[str, Any]:
+    """
+    Fix missing component references for UploadFile in OpenAPI schemas.
+
+    When using UploadFile parameters, the OpenAPI schema generation sometimes creates
+    references to component schemas that aren't included in the final schema. This
+    causes validation errors in tools like Swagger Editor.
+
+    This function identifies missing component references and adds the required
+    schemas to the components section of the OpenAPI schema.
+
+    Parameters
+    ----------
+    schema_dict : dict[str, Any]
+        The OpenAPI schema dictionary to fix
+
+    Returns
+    -------
+    dict[str, Any]
+        The updated OpenAPI schema dictionary with missing component references resolved
+
+    Example
+    -------
+    >>> schema = {"paths": {...}, "components": {...}}
+    >>> fixed_schema = fix_upload_file_schema_references(schema)
+    >>> # Now all $ref references in multipart/form-data schemas have matching components
+    """
+    # Handle pydantic models that might be passed in
+    if hasattr(schema_dict, "model_dump"):
+        schema_dict = schema_dict.model_dump(by_alias=True)
+
+    missing_components = _find_missing_upload_file_components(schema_dict)
+
+    if missing_components:
+        _add_missing_upload_file_components(schema_dict, missing_components)
+
+    return schema_dict
+
+
+def _find_missing_upload_file_components(schema_dict: dict[str, Any]) -> list[tuple[str, str]]:
+    """
+    Find all missing component references in multipart/form-data schemas.
+
+    This helper function scans the OpenAPI schema paths to identify any $ref
+    references in multipart/form-data request bodies that don't have corresponding
+    component definitions.
+
+    Parameters
+    ----------
+    schema_dict : dict[str, Any]
+        The OpenAPI schema dictionary to scan
+
+    Returns
+    -------
+    list[tuple[str, str]]
+        List of tuples containing (component_name, ref_path) for missing components
+    """
+    missing_refs: list[tuple[str, str]] = []
+    paths = schema_dict.get("paths", {})
+    existing_schemas = _get_existing_component_schemas(schema_dict)
+
+    for path_item in paths.values():
+        _check_path_for_missing_upload_components(path_item, existing_schemas, missing_refs)
+
+    return missing_refs
+
+
+def _get_existing_component_schemas(schema_dict: dict[str, Any]) -> dict[str, Any]:
+    """
+    Get the existing component schemas from the OpenAPI schema.
+
+    Parameters
+    ----------
+    schema_dict : dict[str, Any]
+        The OpenAPI schema dictionary
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary of existing component schemas, empty if none exist
+    """
+    components = schema_dict.get("components")
+    if components is None:
+        return {}
+    return components.get("schemas", {})
+
+
+def _check_path_for_missing_upload_components(
+    path_item: dict[str, Any],
+    existing_schemas: dict[str, Any],
+    missing_refs: list[tuple[str, str]],
+) -> None:
+    """
+    Check a single path item for missing upload file component references.
+
+    Parameters
+    ----------
+    path_item : dict[str, Any]
+        The OpenAPI path item to check
+    existing_schemas : dict[str, Any]
+        Dictionary of existing component schemas
+    missing_refs : list[tuple[str, str]]
+        List to append missing references to (modified in place)
+    """
+    for _method, operation in path_item.items():
+        if not isinstance(operation, dict):
+            continue
+
+        _check_operation_for_missing_upload_components(operation, existing_schemas, missing_refs)
+
+
+def _check_operation_for_missing_upload_components(
+    operation: dict[str, Any],
+    existing_schemas: dict[str, Any],
+    missing_refs: list[tuple[str, str]],
+) -> None:
+    """
+    Check a single operation for missing upload file component references.
+
+    Parameters
+    ----------
+    operation : dict[str, Any]
+        The OpenAPI operation to check
+    existing_schemas : dict[str, Any]
+        Dictionary of existing component schemas
+    missing_refs : list[tuple[str, str]]
+        List to append missing references to (modified in place)
+    """
+    if "requestBody" not in operation:
+        return
+
+    req_body = operation.get("requestBody")
+    if req_body is None:
+        return
+
+    content = req_body.get("content", {})
+    multipart = content.get("multipart/form-data", {})
+    schema_ref = multipart.get("schema", {})
+
+    if "$ref" in schema_ref:
+        ref = schema_ref["$ref"]
+        if ref.startswith("#/components/schemas/"):
+            component_name = ref[len("#/components/schemas/") :]
+            if component_name not in existing_schemas:
+                missing_refs.append((component_name, ref))
+
+
+def _add_missing_upload_file_components(schema_dict: dict[str, Any], missing_components: list[tuple[str, str]]) -> None:
+    """
+    Add missing component schemas for upload file references.
+
+    Creates proper component schemas for missing UploadFile references with
+    appropriate file upload properties including binary format for file fields.
+
+    Parameters
+    ----------
+    schema_dict : dict[str, Any]
+        The OpenAPI schema dictionary to modify (modified in place)
+    missing_components : list[tuple[str, str]]
+        List of tuples containing (component_name, ref_path) for missing components
+    """
+    components = schema_dict.setdefault("components", {})
+    schemas = components.setdefault("schemas", {})
+
+    for component_name, _ref in missing_components:
+        # Extract endpoint information from component name for better description
+        endpoint_info = _extract_endpoint_info_from_component_name(component_name)
+
+        schemas[component_name] = {
+            "type": "object",
+            "properties": {
+                "file": {"type": "string", "format": "binary", "description": "File to upload"},
+                "description": {
+                    "type": "string",
+                    "default": "No description provided",
+                    "description": "Optional description of the file",
+                },
+                "tags": {"type": "string", "description": "Optional tags for the file"},
+            },
+            "required": ["file"],
+            "title": _generate_component_title(component_name),
+            "description": f"File upload schema for {endpoint_info}",
+        }
+
+
+def _extract_endpoint_info_from_component_name(component_name: str) -> str:
+    """
+    Extract endpoint information from the auto-generated component name.
+
+    Parameters
+    ----------
+    component_name : str
+        The auto-generated component name
+
+    Returns
+    -------
+    str
+        Human-readable endpoint information
+    """
+    # Try to extract meaningful endpoint info from the component name
+    # Format is usually: aws_lambda_powertools__event_handler__openapi__compat__Body_<endpoint>_<method>-Input__1
+    if "_Body_" in component_name:
+        parts = component_name.split("_Body_")[1]
+        if "_" in parts:
+            endpoint_part = parts.split("_")[0]
+            return f"/{endpoint_part.replace('_', '-')}"
+    return "upload endpoint"
+
+
+def _generate_component_title(component_name: str) -> str:
+    """
+    Generate a clean title for the component schema.
+
+    Parameters
+    ----------
+    component_name : str
+        The auto-generated component name
+
+    Returns
+    -------
+    str
+        A clean, readable title for the component
+    """
+    # Remove common prefixes and suffixes to create a cleaner title
+    title = component_name
+
+    # Remove the long AWS prefix
+    if title.startswith("aws_lambda_powertools__event_handler__openapi__compat__"):
+        title = title[len("aws_lambda_powertools__event_handler__openapi__compat__") :]
+
+    # Remove Body_ prefix
+    if title.startswith("Body_"):
+        title = title[len("Body_") :]
+
+    # Remove -Input__1 suffix
+    if title.endswith("-Input__1"):
+        title = title[: -len("-Input__1")]
+
+    # Replace underscores with spaces and capitalize
+    title = title.replace("_", " ").title()
+
+    return title

@@ -1,4 +1,6 @@
-# Expose the fix_upload_file_schema function
-from aws_lambda_powertools.event_handler.openapi.upload_file_fix import fix_upload_file_schema
+from __future__ import annotations
 
-__all__ = ["fix_upload_file_schema"]
+# OpenAPI module for event handler
+# The fix_upload_file_schema_references function is available in params module
+
+__all__: list[str] = []

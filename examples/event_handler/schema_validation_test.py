@@ -36,12 +36,12 @@ class EnumEncoder(json.JSONEncoder):
 def create_test_app():
     """Create a test app with UploadFile endpoints."""
     app = APIGatewayRestResolver()
-    
+
     @app.post("/upload")
     def upload_file(file: Annotated[UploadFile, File()]):
         """Upload a file endpoint."""
         return {"filename": file.filename}
-    
+
     @app.post("/upload-with-metadata")
     def upload_file_with_metadata(
         file: Annotated[UploadFile, File(description="File to upload")],
@@ -56,7 +56,7 @@ def create_test_app():
             "description": description,
             "tags": tags or [],
         }
-    
+
     return app
 
 
@@ -64,11 +64,11 @@ def main():
     """Generate and save OpenAPI schema for validation."""
     # Create a sample app with upload endpoints
     app = create_test_app()
-    
+
     # Generate the OpenAPI schema (now includes automatic fix)
     schema = app.get_openapi_schema()
     schema_dict = schema.model_dump(by_alias=True)
-    
+
     # Create a file for external validation (e.g., Swagger Editor)
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as tmp:
         json.dump(schema_dict, tmp, cls=EnumEncoder, indent=2)
