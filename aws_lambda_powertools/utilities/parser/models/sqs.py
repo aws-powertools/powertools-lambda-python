@@ -101,7 +101,7 @@ class SqsMsgAttributeModel(BaseModel):
 
 class SqsRecordModel(BaseModel):
     messageId: str = Field(
-        description="A unique identifier for the message. A MessageId is considered unique across all AWS accounts for an extended period of time.",
+        description="A unique identifier for the message. A MessageId is considered unique across all AWS accounts.",
         examples=[
             "059f36b4-87a3-44ab-83d2-661975830a7d",
             "2e1424d4-f796-459a-8184-9c92662be6da",
@@ -142,7 +142,7 @@ class SqsRecordModel(BaseModel):
     )
     md5OfMessageAttributes: Optional[str] = Field(
         default=None,
-        description="An MD5 digest of the non-URL-encoded message attribute string. You can use this attribute to verify that Amazon SQS received the message correctly.",
+        description="An MD5 digest of the non-URL-encoded message attribute string.",
         examples=[
             "00484c68...59e48fb7",
             "b25f48e8...f4e4f0bb",
