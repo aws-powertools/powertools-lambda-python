@@ -10,7 +10,12 @@ from .event_bridge import EventBridgeModel
 
 
 class S3EventRecordGlacierRestoreEventData(BaseModel):
-    lifecycleRestorationExpiryTime: datetime
+    lifecycleRestorationExpiryTime: datetime = Field(
+        description="The time, in ISO-8601 format, of Restore Expiry.",
+        examples=[
+            "1970-01-01T00:00:00.000Z",
+        ],
+    )
     lifecycleRestoreStorageClass: str = Field(
         description="Source storage class for restore.",
         examples=[
@@ -22,12 +27,22 @@ class S3EventRecordGlacierRestoreEventData(BaseModel):
 
 
 class S3EventRecordGlacierEventData(BaseModel):
-    restoreEventData: S3EventRecordGlacierRestoreEventData
+    restoreEventData: S3EventRecordGlacierRestoreEventData = Field(
+        description="Event data produced only for 's3:ObjectRestore:Completed' events.",
+        examples=[
+            {
+                "restoreEventData": {
+                    "lifecycleRestorationExpiryTime": "1970-01-01T00:00:00.000Z",
+                    "lifecycleRestoreStorageClass": "glacier",
+                },
+            },
+        ],
+    )
 
 
 class S3Identity(BaseModel):
     principalId: str = Field(
-        description="Amazon customer ID of the user who caused the event.",
+        description="Amazon identifier of the user, role, account or services who caused the event.",
         examples=[
             "AIDAJDPLRKLG7UEXAMPLE",
             "A1YQ72UWCM96UF",
@@ -37,7 +52,13 @@ class S3Identity(BaseModel):
 
 
 class S3RequestParameters(BaseModel):
-    sourceIPAddress: Union[IPvAnyNetwork, Literal["s3.amazonaws.com"]]
+    sourceIPAddress: Union[IPvAnyNetwork, Literal["s3.amazonaws.com"]] = Field(
+        description="Source IP address of the request.",
+        examples=[
+            "255.255.255.255",
+            "s3.amazonaws.com",
+        ],
+    )
 
 
 class S3ResponseElements(BaseModel):
@@ -81,7 +102,10 @@ class S3Bucket(BaseModel):
             "sourcebucket",
         ],
     )
-    ownerIdentity: S3OwnerIdentify
+    ownerIdentity: S3OwnerIdentify = Field(
+        description="Amazon customer ID of the bucket owner.",
+        examples=[{"principalId": "A3NL1KOZZKExample"}, {"principalId": "A1YQ72UWCM96UF"}],
+    )
     arn: str = Field(
         description="The ARN of the Amazon S3 bucket.",
         examples=[
@@ -146,8 +170,29 @@ class S3Message(BaseModel):
             "b1d3a482-96eb-4d3a-abd7-763662a6ba94",
         ],
     )
-    bucket: S3Bucket
-    object: S3Object  # noqa: A003
+    bucket: S3Bucket = Field(
+        description="The S3 bucket object.",
+        examples=[
+            {
+                "bucket": {
+                    "name": "lambda-artifacts-deafc19498e3f2df",
+                    "ownerIdentity": {"principalId": "A3I5XTEXAMAI3E"},
+                    "arn": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
+                },
+            },
+        ],
+    )
+    object: S3Object = Field(
+        description="The S3 object object.",
+        examples=[
+            {
+                "key": "b21b84d653bb07b05b1e6b33684dc11b",
+                "size": 1305107,
+                "eTag": "b21b84d653bb07b05b1e6b33684dc11b",
+                "sequencer": "0C0F6F405D6ED209E1",
+            },
+        ],
+    )  # noqa: A003
 
 
 class S3EventNotificationObjectModel(BaseModel):
@@ -209,8 +254,21 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
             "0",
         ],
     )
-    bucket: S3EventNotificationEventBridgeBucketModel
-    object: S3EventNotificationObjectModel  # noqa: A003
+    bucket: S3EventNotificationEventBridgeBucketModel = Field(
+        description="Bucket object of the event sent from S3 to EventBridge.",
+        examples=[{"name": "example-bucket"}],
+    )
+    object: S3EventNotificationObjectModel = Field(
+        description="The S3 object object.",
+        examples=[
+            {
+                "key": "b21b84d653bb07b05b1e6b33684dc11b",
+                "size": 1305107,
+                "eTag": "b21b84d653bb07b05b1e6b33684dc11b",
+                "sequencer": "0C0F6F405D6ED209E1",
+            },
+        ],
+    )  # noqa: A003
     request_id: str = Field(
         ...,
         alias="request-id",
@@ -233,7 +291,6 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
         alias="source-ip-address",
         description="Source IP address of S3 request. Only present for events triggered by an S3 request.",
         examples=[
-            "0.0.0.0",
             "255.255.255.255",
         ],
     )
@@ -289,7 +346,25 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
 
 
 class S3EventNotificationEventBridgeModel(EventBridgeModel):  # type: ignore[override]
-    detail: S3EventNotificationEventBridgeDetailModel
+    detail: S3EventNotificationEventBridgeDetailModel = Field(
+        description="Object representing the details of the S3 Event Notification sent to EventBridge.",
+        examples=[
+            {
+                "version": "0",
+                "bucket": {"name": "example-bucket"},
+                "object": {
+                    "key": "IMG_m7fzo3.jpg",
+                    "size": 184662,
+                    "etag": "4e68adba0abe2dc8653dc3354e14c01d",
+                    "sequencer": "006408CAD69598B05E",
+                },
+                "request-id": "57H08PA84AB1JZW0",
+                "requester": "123456789012",
+                "source-ip-address": "255.255.255.255",
+                "reason": "PutObject",
+            },
+        ],
+    )
 
 
 class S3RecordModel(BaseModel):
@@ -300,7 +375,11 @@ class S3RecordModel(BaseModel):
             "1.9",
         ],
     )
-    eventSource: Literal["aws:s3"]
+    eventSource: Literal["aws:s3"] = Field(
+        default="aws:s3",
+        description="Source of the event.",
+        examples=["aws:s3"],
+    )
     awsRegion: str = Field(
         description="The AWS region where the event occurred.",
         examples=[
@@ -324,11 +403,56 @@ class S3RecordModel(BaseModel):
             "LifecycleExpiration:Delete",
         ],
     )
-    userIdentity: S3Identity
-    requestParameters: S3RequestParameters
-    responseElements: S3ResponseElements
-    s3: S3Message
-    glacierEventData: Optional[S3EventRecordGlacierEventData] = None
+    userIdentity: S3Identity = Field(
+        description="Amazon identifier of the user, role, account or services who caused the event.",
+        examples=[{"principalId": "AWS:AIDAINPONIXQXHT3IKHL2"}],
+    )
+    requestParameters: S3RequestParameters = Field(
+        description="Source IP address of the request.",
+        examples=[{"sourceIPAddress": "255.255.255.255"}],
+    )
+    responseElements: S3ResponseElements = Field(
+        description="Response elements from an Amazon S3 response object. Useful if you want to trace a request by "
+        "following up with AWS Support.",
+        examples=[
+            {
+                "x-amz-request-id": "D82B88E5F771F645",
+                "x-amz-id-2": "vlR7PnpV2Ce81l0PRw6jlUpck7Jo5ZsQjryTjKlc5aLWGVHPZLj5NeC6qMa0emYBDXOo6QBU0Wo=",
+            },
+        ],
+    )
+    s3: S3Message = Field(
+        description="The Amazon S3 message object.",
+        examples=[
+            {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "828aa6fc-f7b5-4305-8584-487c791949c1",
+                "bucket": {
+                    "name": "lambda-artifacts-deafc19498e3f2df",
+                    "ownerIdentity": {"principalId": "A3I5XTEXAMAI3E"},
+                    "arn": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
+                },
+                "object": {
+                    "key": "b21b84d653bb07b05b1e6b33684dc11b",
+                    "size": 1305107,
+                    "eTag": "b21b84d653bb07b05b1e6b33684dc11b",
+                    "sequencer": "0C0F6F405D6ED209E1",
+                },
+            },
+        ],
+    )
+    glacierEventData: Optional[S3EventRecordGlacierEventData] = Field(
+        default=None,
+        description="The Glacier event data object.",
+        examples=[
+            {
+                "restoreEventData": {
+                    "lifecycleRestorationExpiryTime": "1970-01-01T00:01:00.000Z",
+                    "lifecycleRestoreStorageClass": "standard",
+                },
+            },
+        ],
+    )
 
     @model_validator(mode="before")
     def validate_s3_object(cls, values):
@@ -342,4 +466,36 @@ class S3RecordModel(BaseModel):
 
 
 class S3Model(BaseModel):
-    Records: List[S3RecordModel]
+    Records: List[S3RecordModel] = Field(
+        description="List of S3 records included in this event.",
+        examples=[
+            {
+                "eventVersion": "2.1",
+                "eventSource": "aws:s3",
+                "awsRegion": "us-east-2",
+                "eventTime": "2019-09-03T19:37:27.192Z",
+                "eventName": "ObjectCreated:Put",
+                "userIdentity": {"principalId": "AWS:AIDAINPONIXQXHT3IKHL2"},
+                "requestParameters": {"sourceIPAddress": "255.255.255.255"},
+                "responseElements": {
+                    "x-amz-request-id": "D82B88E5F771F645",
+                    "x-amz-id-2": "vlR7PnpV2Ce81l0PRw6jlUpck7Jo5ZsQjryTjKlc5aLWGVHPZLj5NeC6qMa0emYBDXOo6QBU0Wo=",
+                },
+                "s3": {
+                    "s3SchemaVersion": "1.0",
+                    "configurationId": "828aa6fc-f7b5-4305-8584-487c791949c1",
+                    "bucket": {
+                        "name": "lambda-artifacts-deafc19498e3f2df",
+                        "ownerIdentity": {"principalId": "A3I5XTEXAMAI3E"},
+                        "arn": "arn:aws:s3:::lambda-artifacts-deafc19498e3f2df",
+                    },
+                    "object": {
+                        "key": "b21b84d653bb07b05b1e6b33684dc11b",
+                        "size": 1305107,
+                        "eTag": "b21b84d653bb07b05b1e6b33684dc11b",
+                        "sequencer": "0C0F6F405D6ED209E1",
+                    },
+                },
+            },
+        ],
+    )
