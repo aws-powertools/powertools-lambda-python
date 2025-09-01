@@ -34,8 +34,14 @@ class SnsNotificationModel(BaseModel):
     UnsubscribeUrl: HttpUrl = Field(
         description="A URL that you can use to unsubscribe the endpoint from this topic.",
         examples=[
-            "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-2:123456789012:test-lambda:21be56ed-a058-49f5-8c98-aedd2564c486",
-            "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:123456789012:notification-topic:abcd1234-5678-90ef-ghij-klmnopqrstuv",
+            (
+                "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn="
+                "arn:aws:sns:us-east-2:123456789012:test-lambda:21be56ed-a058-49f5-8c98-aedd2564c486"
+            ),
+            (
+                "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn="
+                "arn:aws:sns:eu-west-1:123456789012:notification-topic:abcd1234-5678-90ef-ghij-klmnopqrstuv"
+            ),
         ],
     )
     Type: Literal["Notification"] = Field(
@@ -69,7 +75,10 @@ class SnsNotificationModel(BaseModel):
     )
     SigningCertUrl: Optional[HttpUrl] = Field(
         default=None,
-        description="The URL to the certificate that was used to sign the message. Not present for FIFO topics with content-based deduplication.",
+        description=(
+            "The URL to the certificate that was used to sign the message. "
+            "Not present for FIFO topics with content-based deduplication."
+        ),
         examples=[
             "https://sns.us-east-2.amazonaws.com/SimpleNotificationService-1234567890.pem",
             "https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-0987654321.pem",
@@ -78,7 +87,10 @@ class SnsNotificationModel(BaseModel):
     )  # NOTE: FIFO opt-in removes attribute
     Signature: Optional[str] = Field(
         default=None,
-        description="Base64-encoded SHA1withRSA signature of the message. Not present for FIFO topics with content-based deduplication.",
+        description=(
+            "Base64-encoded SHA1withRSA signature of the message. "
+            "Not present for FIFO topics with content-based deduplication."
+        ),
         examples=[
             "tcc6faL2yUC6dgZdmrwh1Y4cGa/ebXEkAi6RibDsvpi+tE/1+82j...65r==",
             "EXAMPLEw6JRNwm1LFQL4ICB0bnXrdB8ClRMTQFPGBfHs...EXAMPLEw==",
@@ -95,7 +107,10 @@ class SnsNotificationModel(BaseModel):
     )
     SignatureVersion: Optional[str] = Field(
         default=None,
-        description="Version of the Amazon SNS signature used. Not present for FIFO topics with content-based deduplication.",
+        description=(
+            "Version of the Amazon SNS signature used. "
+            "Not present for FIFO topics with content-based deduplication."
+        ),
         examples=["1", "2", None],
     )  # NOTE: FIFO opt-in removes attribute
 
