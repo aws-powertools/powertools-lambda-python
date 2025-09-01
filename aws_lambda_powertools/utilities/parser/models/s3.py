@@ -43,11 +43,7 @@ class S3EventRecordGlacierEventData(BaseModel):
 class S3Identity(BaseModel):
     principalId: str = Field(
         description="Amazon identifier of the user, role, account or services who caused the event.",
-        examples=[
-            "AIDAJDPLRKLG7UEXAMPLE",
-            "A1YQ72UWCM96UF",
-            "AWS:AIDAINPONIXQXHT3IKHL2",
-        ],
+        examples=["AIDAJEXAMPLE1234"],
     )
 
 
@@ -88,7 +84,7 @@ class S3OwnerIdentify(BaseModel):
         examples=[
             "A3I5XTEXAMAI3E",
             "A1YQ72UWCM96UF",
-            "AWS:AIDAINPONIXQXHT3IKHL2",
+            "AWS:AIDAJEXAMPLE1234",
         ],
     )
 
@@ -405,7 +401,7 @@ class S3RecordModel(BaseModel):
     )
     userIdentity: S3Identity = Field(
         description="Amazon identifier of the user, role, account or services who caused the event.",
-        examples=[{"principalId": "AWS:AIDAINPONIXQXHT3IKHL2"}],
+        examples=[{"principalId": "AWS:AIDAJEXAMPLE1234"}],
     )
     requestParameters: S3RequestParameters = Field(
         description="Source IP address of the request.",
@@ -475,7 +471,7 @@ class S3Model(BaseModel):
                 "awsRegion": "us-east-2",
                 "eventTime": "2019-09-03T19:37:27.192Z",
                 "eventName": "ObjectCreated:Put",
-                "userIdentity": {"principalId": "AWS:AIDAINPONIXQXHT3IKHL2"},
+                "userIdentity": {"principalId": "AWS:AIDAJEXAMPLE1234"},
                 "requestParameters": {"sourceIPAddress": "255.255.255.255"},
                 "responseElements": {
                     "x-amz-request-id": "D82B88E5F771F645",

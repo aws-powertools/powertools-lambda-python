@@ -1,10 +1,3 @@
 examples/batch_processing/src/context_manager_access_output_pydantic.txt:aws-access-token:10
 examples/batch_processing/src/context_manager_access_output_pydantic.txt:aws-access-token:15
 examples/batch_processing/src/context_manager_access_output.txt:aws-access-token:10
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:32
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:34
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:70
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:345
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:393
-aws_lambda_powertools/utilities/parser/models/s3.py:aws-access-token:463
-aws_lambda_powertools/utilities/parser/models/s3.py:generic-api-key:345
