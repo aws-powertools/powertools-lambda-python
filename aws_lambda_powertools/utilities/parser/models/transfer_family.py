@@ -12,7 +12,7 @@ class TransferFamilyAuthorizer(BaseModel):
     password: Optional[str] = Field(
         default=None,
         description="The password for authentication.",
-        examples=["mysecretpassword", "Password1234", "secure-pass", None],
+        examples=["<password>", "<user-password>", None],
     )
     protocol: Literal["SFTP", "FTP", "FTPS"] = Field(
         description="The protocol used for the connection.",
