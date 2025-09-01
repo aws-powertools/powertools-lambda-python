@@ -28,5 +28,4 @@ class TransferFamilyAuthorizer(BaseModel):
         ...,
         alias="sourceIp",
         description="The IP address of the client connecting to the Transfer Family server.",
-        examples=["192.168.0.100", "10.0.0.50", "127.0.0.1", "203.0.113.12"],
     )
