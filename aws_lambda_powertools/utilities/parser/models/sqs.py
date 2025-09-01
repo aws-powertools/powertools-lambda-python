@@ -113,7 +113,6 @@ class SqsRecordModel(BaseModel):
         examples=[
             "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
             "AQEBzWwaftRI0KuVm4tP+/7q1rGgNqicHq...",
-            "AQEBl1pqxv+ZHkarVAWZUyWgj2mmqJGLBTo6YFOi/bw1QpBTpJBGJPLOTZrjKztKIbAB8EXkG7zHlbkn+Ze/AHMKKuhST9azHu8LyF4Ffu9uPkZc5xzggXlfFBWH3TUKyV+F5Obaj3esyX8YfM/zfgjbRuu5nc2tfPhvaSYEaTZsdMpzIB5tyKvHxAltLxK7upRHeoT768M9UrFYswarFTBn8piDbnsPsUhi8Q9G4Q4xSI0fLQANmryBsRJIzGQTVxenDad+MJ7XEL+hD3p2DmW+ycvv6WD7bdedqQuroQG8+ca1Dz7s3CBbXw9ZZnUziPa7LH1j1Lky5bAxpNF+BlurRS9pFBnomhwpylrGxtGfaEmUW1G7jnrG97sZNOLOFUykbQgroZPXmjzMBdvtgq9ZmQfCch3LOXN267+PKc56VR4=",
         ],
     )
     body: Union[str, Type[BaseModel], BaseModel] = Field(
@@ -170,7 +169,5 @@ class SqsRecordModel(BaseModel):
 class SqsModel(BaseModel):
     Records: Sequence[SqsRecordModel] = Field(
         description="A list of SQS message records included in the event.",
-        examples=[
-            [{"messageId": "059f36b4-87a3-44ab-83d2-661975830a7d", "body": "Test message."}]
-        ],
+        examples=[[{"messageId": "059f36b4-87a3-44ab-83d2-661975830a7d", "body": "Test message."}]],
     )
