@@ -135,7 +135,5 @@ class SnsRecordModel(BaseModel):
 class SnsModel(BaseModel):
     Records: List[SnsRecordModel] = Field(
         description="A list of SNS message records included in the event.",
-        examples=[
-            [{"EventSource": "aws:sns", "Sns": {"MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e"}}]
-        ],
+        examples=[[{"EventSource": "aws:sns", "Sns": {"MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e"}}]],
     )
