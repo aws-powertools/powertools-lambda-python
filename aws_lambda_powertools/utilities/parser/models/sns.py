@@ -108,8 +108,7 @@ class SnsNotificationModel(BaseModel):
     SignatureVersion: Optional[str] = Field(
         default=None,
         description=(
-            "Version of the Amazon SNS signature used. "
-            "Not present for FIFO topics with content-based deduplication."
+            "Version of the Amazon SNS signature used. Not present for FIFO topics with content-based deduplication."
         ),
         examples=["1", "2", None],
     )  # NOTE: FIFO opt-in removes attribute
