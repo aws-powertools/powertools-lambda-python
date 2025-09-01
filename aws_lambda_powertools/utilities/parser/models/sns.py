@@ -35,12 +35,12 @@ class SnsNotificationModel(BaseModel):
         description="A URL that you can use to unsubscribe the endpoint from this topic.",
         examples=[
             (
-                "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn="
-                "arn:aws:sns:us-east-2:123456789012:test-lambda:21be56ed-a058-49f5-8c98-aedd2564c486"
+                "https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn= \
+                arn:aws:sns:us-east-2:123456789012:test-lambda:21be56ed-a058-49f5-8c98-aedd2564c486"
             ),
             (
-                "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn="
-                "arn:aws:sns:eu-west-1:123456789012:notification-topic:abcd1234-5678-90ef-ghij-klmnopqrstuv"
+                "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn= \
+                arn:aws:sns:eu-west-1:123456789012:notification-topic:abcd1234-5678-90ef-ghij-klmnopqrstuv"
             ),
         ],
     )
