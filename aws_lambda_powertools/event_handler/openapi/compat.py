@@ -186,7 +186,13 @@ def model_rebuild(model: type[BaseModel]) -> None:
 
 
 def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
-    return type(field_info).from_annotation(annotation)
+    # Create a shallow copy of the field_info to preserve its type and all attributes
+    import copy
+
+    new_field = copy.copy(field_info)
+    # Update only the annotation to the new one
+    new_field.annotation = annotation
+    return new_field
 
 
 def get_missing_field_error(loc: tuple[str, ...]) -> dict[str, Any]:
