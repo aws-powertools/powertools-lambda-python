@@ -4,7 +4,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pydantic import IPvAnyNetwork, TypeAdapter, ValidationError
+from pydantic import IPvAnyNetwork, TypeAdapter
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 
@@ -99,7 +99,7 @@ def _validate_source_ip(value):
         # The value is always an instance of str before Pydantic validation occurs.
         # So the first thing to do is try to convert it.
         IPvAnyNetwork(value)
-    except (ValidationError, ValueError):
+    except ValueError:
         try:
             ip_part = value.split(":")[0]
             IPvAnyNetwork(ip_part)
