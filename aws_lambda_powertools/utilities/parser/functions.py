@@ -103,7 +103,7 @@ def _validate_source_ip(value):
         try:
             ip_part = value.split(":")[0]
             IPvAnyNetwork(ip_part)
-        except (ValidationError, ValueError, IndexError) as e:
+        except (ValueError, IndexError) as e:
             raise ValueError(f"Invalid IP address in sourceIp: {ip_part}") from e
 
     return value
