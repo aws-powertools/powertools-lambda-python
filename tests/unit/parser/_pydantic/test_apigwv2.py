@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
     ApiGatewayAuthorizerRequestV2,
@@ -69,6 +72,21 @@ def test_apigw_v2_event_empty_jwt_scopes():
     raw_event["requestContext"]["authorizer"]["jwt"]["scopes"] = None
 
     APIGatewayProxyEventV2Model(**raw_event)
+
+
+def test_apigw_v2_event_and_source_ip_with_port():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["http"]["sourceIp"] = "10.10.10.10:1235"
+
+    APIGatewayProxyEventV2Model(**raw_event)
+
+
+def test_apigw_v2_event_and_source_ip_with_random_string():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["http"]["sourceIp"] = "NON_IP_WITH_OR_WITHOUT_PORT_STRING"
+
+    with pytest.raises(ValidationError):
+        APIGatewayProxyEventV2Model(**raw_event)
 
 
 def test_api_gateway_proxy_v2_event_lambda_authorizer():

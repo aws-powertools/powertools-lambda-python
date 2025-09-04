@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Type, Union
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 from pydantic.networks import IPvAnyNetwork
+
+from aws_lambda_powertools.utilities.parser.functions import _validate_source_ip
 
 
 class ApiGatewayUserCertValidity(BaseModel):
@@ -31,11 +33,16 @@ class APIGatewayEventIdentity(BaseModel):
     principalOrgId: Optional[str] = None
     # see #1562, temp workaround until API Gateway fixes it the Test button payload
     # removing it will not be considered a regression in the future
-    sourceIp: Union[IPvAnyNetwork, Literal["test-invoke-source-ip"]]
+    sourceIp: Union[IPvAnyNetwork, str]
     user: Optional[str] = None
     userAgent: Optional[str] = None
     userArn: Optional[str] = None
     clientCert: Optional[ApiGatewayUserCert] = None
+
+    @field_validator("sourceIp", mode="before")
+    @classmethod
+    def _validate_source_ip(cls, value):
+        return _validate_source_ip(value=value)
 
 
 class APIGatewayEventAuthorizer(BaseModel):

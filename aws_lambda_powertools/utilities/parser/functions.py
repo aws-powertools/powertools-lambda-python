@@ -4,7 +4,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pydantic import TypeAdapter
+from pydantic import IPvAnyNetwork, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 
@@ -82,3 +82,28 @@ def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter):
             data = json.loads(data)
 
     return adapter.validate_python(data)
+
+
+def _validate_source_ip(value):
+    """
+    Handle sourceIp that may come with port (e.g., "10.1.15.242:39870")
+    in certain network configurations like Cloudflare + CloudFront + API Gateway.
+    Validates the IP part while preserving the original format.
+    See: https://github.com/aws-powertools/powertools-lambda-python/issues/7288
+    """
+
+    if value == "test-invoke-source-ip":
+        return value
+
+    try:
+        # The value is always an instance of str before Pydantic validation occurs.
+        # So the first thing to do is try to convert it.
+        IPvAnyNetwork(value)
+    except (ValidationError, ValueError):
+        try:
+            ip_part = value.split(":")[0]
+            IPvAnyNetwork(ip_part)
+        except (ValidationError, ValueError, IndexError) as e:
+            raise ValueError(f"Invalid IP address in sourceIp: {ip_part}") from e
+
+    return value
