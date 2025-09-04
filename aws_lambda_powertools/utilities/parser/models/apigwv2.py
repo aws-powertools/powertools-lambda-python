@@ -38,7 +38,7 @@ class RequestContextV2Http(BaseModel):
     method: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     path: str
     protocol: str
-    sourceIp: IPvAnyNetwork | str
+    sourceIp: Union[IPvAnyNetwork, str]
     userAgent: str
 
     @field_validator("sourceIp", mode="before")
