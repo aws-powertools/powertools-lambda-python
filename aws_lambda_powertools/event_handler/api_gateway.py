@@ -682,7 +682,6 @@ class Route:
 
                             # Preserve existing fields like examples, encoding, etc.
                             new_payload: OpenAPIResponseContentSchema = {}
-                            # Copy all fields except 'model'
                             for key, value in payload.items():
                                 if key != "model":
                                     new_payload[key] = value  # type: ignore[literal-required]
