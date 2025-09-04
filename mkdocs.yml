@@ -200,7 +200,14 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 
-copyright: Copyright &copy; 2023 Amazon Web Services
+copyright: |
+  <div id="awsdocs-legal-zone-copyright">
+      <a href="https://aws.amazon.com/privacy" target="_blank" rel="nofollow">Privacy</a> |
+      <a href="https://aws.amazon.com/terms/" target="_blank" rel="nofollow">Site terms</a> |
+      <span class="copyright">
+        © 2025, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+      </span>
+  </div>
 
 plugins:
   - privacy
