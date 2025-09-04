@@ -675,11 +675,16 @@ class Route:
                             if not return_field:
                                 raise AssertionError("Model declared in custom responses was not found")
 
-                            new_payload = self._openapi_operation_return(
+                            model_payload = self._openapi_operation_return(
                                 param=return_field,
                                 model_name_map=model_name_map,
                                 field_mapping=field_mapping,
                             )
+                            
+                            # Preserve existing fields like examples, encoding, etc.
+                            new_payload = {**payload}  # Copy all existing fields
+                            new_payload.update(model_payload)  # Add/override with model schema
+                            new_payload.pop("model", None)  # Remove the model field itself
 
                         # Case 2.2: the 'content' has a schema
                         else:
