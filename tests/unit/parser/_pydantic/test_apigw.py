@@ -105,6 +105,21 @@ def test_apigw_event():
     assert identity.apiKeyId is None
 
 
+def test_apigw_event_and_source_ip_with_port():
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["requestContext"]["identity"]["sourceIp"] = "10.10.10.10:1235"
+
+    APIGatewayProxyEventModel(**raw_event)
+
+
+def test_apigw_event_and_source_ip_with_random_string():
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["requestContext"]["identity"]["sourceIp"] = "NON_IP_WITH_OR_WITHOUT_PORT_STRING"
+
+    with pytest.raises(ValidationError):
+        APIGatewayProxyEventModel(**raw_event)
+
+
 def test_apigw_event_with_invalid_websocket_request():
     # GIVEN an event with an eventType != MESSAGE and has  a messageId
     event = {
