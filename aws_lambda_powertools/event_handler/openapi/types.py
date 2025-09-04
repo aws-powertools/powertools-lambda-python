@@ -65,6 +65,7 @@ response_validation_error_response_definition = {
 
 class OpenAPIResponseHeader(TypedDict, total=False):
     """OpenAPI Response Header Object"""
+
     description: NotRequired[str]
     schema: NotRequired[dict[str, Any]]
     examples: NotRequired[dict[str, Any]]

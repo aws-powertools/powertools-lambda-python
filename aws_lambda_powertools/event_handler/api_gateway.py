@@ -680,7 +680,7 @@ class Route:
                                 model_name_map=model_name_map,
                                 field_mapping=field_mapping,
                             )
-                            
+
                             # Preserve existing fields like examples, encoding, etc.
                             new_payload = {**payload}  # Copy all existing fields
                             new_payload.update(model_payload)  # Add/override with model schema
