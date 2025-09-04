@@ -1037,70 +1037,97 @@ def get_field_info_response_type(annotation, value) -> tuple[FieldInfo | None, A
     return get_field_info_and_type_annotation(inner_type, value, False, True)
 
 
+def _has_discriminator(field_info: FieldInfo) -> bool:
+    """Check if a FieldInfo has a discriminator."""
+    return hasattr(field_info, "discriminator") and field_info.discriminator is not None
+
+
+def _handle_discriminator_with_body(
+    annotations: list[FieldInfo], annotation: Any,
+) -> tuple[FieldInfo | None, Any, bool]:
+    """
+    Handle the special case of Field(discriminator) + Body() combination.
+
+    Returns:
+        tuple of (powertools_annotation, type_annotation, has_discriminator_with_body)
+    """
+    field_obj = None
+    body_obj = None
+
+    for ann in annotations:
+        if isinstance(ann, Body):
+            body_obj = ann
+        elif _has_discriminator(ann):
+            field_obj = ann
+
+    if field_obj and body_obj:
+        # Use Body as the primary annotation, preserve full annotation for validation
+        return body_obj, annotation, True
+
+    raise AssertionError("Only one FieldInfo can be used per parameter")
+
+
+def _create_field_info(
+    powertools_annotation: FieldInfo,
+    type_annotation: Any,
+    has_discriminator_with_body: bool,
+) -> FieldInfo:
+    """Create or copy FieldInfo based on the annotation type."""
+    if has_discriminator_with_body:
+        # For discriminator + Body case, create a new Body instance directly
+        field_info = Body()
+        field_info.annotation = type_annotation
+    else:
+        # Copy field_info because we mutate field_info.default later
+        field_info = copy_field_info(
+            field_info=powertools_annotation,
+            annotation=type_annotation,
+        )
+    return field_info
+
+
+def _set_field_default(field_info: FieldInfo, value: Any, is_path_param: bool) -> None:
+    """Set the default value for a field."""
+    if field_info.default not in [Undefined, Required]:
+        raise AssertionError("FieldInfo needs to have a default value of Undefined or Required")
+
+    if value is not inspect.Signature.empty:
+        if is_path_param:
+            raise AssertionError("Cannot use a FieldInfo as a path parameter and pass a value")
+        field_info.default = value
+    else:
+        field_info.default = Required
+
+
 def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tuple[FieldInfo | None, Any]:
     """
     Get the FieldInfo and type annotation from an Annotated type.
     """
-    field_info: FieldInfo | None = None
     annotated_args = get_args(annotation)
     type_annotation = annotated_args[0]
     powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
 
-    # Special case: handle Field(discriminator) + Body() combination
-    # This happens when using Annotated[Union[A, B], Field(discriminator='...')] with Body()
-    has_discriminator_with_body = False
+    # Determine which annotation to use
     powertools_annotation: FieldInfo | None = None
+    has_discriminator_with_body = False
 
     if len(powertools_annotations) == 2:
-        field_obj = None
-        body_obj = None
-        for ann in powertools_annotations:
-            if isinstance(ann, Body):
-                body_obj = ann
-            elif isinstance(ann, FieldInfo) and hasattr(ann, "discriminator") and ann.discriminator is not None:
-                field_obj = ann
-
-        if field_obj and body_obj:
-            # Use Body as the primary annotation
-            powertools_annotation = body_obj
-            # Preserve the full annotation including discriminator for proper validation
-            # This ensures the discriminator is available when creating the TypeAdapter
-            type_annotation = annotation
-            has_discriminator_with_body = True
-        else:
-            raise AssertionError("Only one FieldInfo can be used per parameter")
+        powertools_annotation, type_annotation, has_discriminator_with_body = _handle_discriminator_with_body(
+            powertools_annotations, annotation,
+        )
     elif len(powertools_annotations) > 1:
         raise AssertionError("Only one FieldInfo can be used per parameter")
     else:
         powertools_annotation = next(iter(powertools_annotations), None)
 
+    # Process the annotation if it exists
+    field_info: FieldInfo | None = None
     if isinstance(powertools_annotation, FieldInfo):
-        if has_discriminator_with_body:
-            # For discriminator + Body case, create a new Body instance directly
-            # This avoids issues with copy_field_info trying to process the Field
-            field_info = Body()
-            field_info.annotation = type_annotation
-        else:
-            # Copy `field_info` because we mutate `field_info.default` later
-            # Use the possibly modified type_annotation for copy_field_info
-            field_info = copy_field_info(
-                field_info=powertools_annotation,
-                annotation=type_annotation,
-            )
-        if field_info.default not in [Undefined, Required]:
-            raise AssertionError("FieldInfo needs to have a default value of Undefined or Required")
+        field_info = _create_field_info(powertools_annotation, type_annotation, has_discriminator_with_body)
+        _set_field_default(field_info, value, is_path_param)
 
-        if value is not inspect.Signature.empty:
-            if is_path_param:
-                raise AssertionError("Cannot use a FieldInfo as a path parameter and pass a value")
-            field_info.default = value
-        else:
-            field_info.default = Required
-
-        # Preserve the full annotated type if it contains discriminator metadata
-        # This is crucial for tagged unions to work properly
-        if hasattr(powertools_annotation, "discriminator") and powertools_annotation.discriminator is not None:
-            # Store the full annotated type for discriminated unions
+        # Preserve full annotated type for discriminated unions
+        if _has_discriminator(powertools_annotation):
             type_annotation = annotation
 
     return field_info, type_annotation

@@ -1997,10 +1997,10 @@ def test_field_discriminator_validation(gw_event):
         action: Literal["bar"]
         bar_data: int
 
-    Action = Annotated[FooAction | BarAction, Field(discriminator="action")]
+    action_type = Annotated[FooAction | BarAction, Field(discriminator="action")]
 
     @app.post("/actions")
-    def create_action(action: Annotated[Action, Body()]):
+    def create_action(action: Annotated[action_type, Body()]):
         return {"received_action": action.action, "data": action.model_dump()}
 
     gw_event["path"] = "/actions"

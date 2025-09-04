@@ -187,9 +187,9 @@ def model_rebuild(model: type[BaseModel]) -> None:
 
 def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
     # Create a shallow copy of the field_info to preserve its type and all attributes
-    import copy
+    from copy import copy
 
-    new_field = copy.copy(field_info)
+    new_field = copy(field_info)
     # Update only the annotation to the new one
     new_field.annotation = annotation
     return new_field
