@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     abs_lambda_path,
-    slice_dictionary,
     extract_event_from_common_models,
     powertools_debug_is_set,
     powertools_dev_is_set,
@@ -19,6 +18,7 @@ from aws_lambda_powertools.shared.functions import (
     resolve_max_age,
     resolve_truthy_env_var_choice,
     sanitize_xray_segment_name,
+    slice_dictionary,
     strtobool,
 )
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
