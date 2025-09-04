@@ -661,14 +661,13 @@ class Route:
                 else:
                     # Need to iterate to transform any 'model' into a 'schema'
                     for content_type, payload in response["content"].items():
-                        new_payload: OpenAPIResponseContentSchema
-
                         # Case 2.1: the 'content' has a model
                         if "model" in payload:
                             # Find the model in the dependant's extra models
+                            model_payload_typed = cast(OpenAPIResponseContentModel, payload)
                             return_field = next(
                                 filter(
-                                    lambda model: model.type_ is cast(OpenAPIResponseContentModel, payload)["model"],
+                                    lambda model: model.type_ is model_payload_typed["model"],
                                     self.dependant.response_extra_models,
                                 ),
                             )
@@ -682,14 +681,17 @@ class Route:
                             )
 
                             # Preserve existing fields like examples, encoding, etc.
-                            new_payload = {**payload}  # Copy all existing fields
+                            new_payload: OpenAPIResponseContentSchema = {}
+                            # Copy all fields except 'model'
+                            for key, value in payload.items():
+                                if key != "model":
+                                    new_payload[key] = value  # type: ignore[literal-required]
                             new_payload.update(model_payload)  # Add/override with model schema
-                            new_payload.pop("model", None)  # Remove the model field itself
 
                         # Case 2.2: the 'content' has a schema
                         else:
                             # Do nothing! We already have what we need!
-                            new_payload = payload
+                            new_payload = cast(OpenAPIResponseContentSchema, payload)
 
                         response["content"][content_type] = new_payload
 
