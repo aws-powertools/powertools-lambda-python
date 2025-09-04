@@ -243,7 +243,7 @@ For greater flexibility such as configuring the underlying SDK client used by bu
     ```
 
 === "builtin_provider_ssm_recursive_parameter.py"
-    ```python hl_lines="6 19-25"
+    ```python hl_lines="6 26 32"
     --8<-- "examples/parameters/src/builtin_provider_ssm_recursive_parameter.py"
     ```
 
