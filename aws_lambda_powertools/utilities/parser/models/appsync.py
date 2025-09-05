@@ -66,16 +66,7 @@ class AppSyncCognitoIdentity(BaseModel):
     )
     claims: Dict[str, Any] = Field(
         description="The JWT claims that the user has from Cognito User Pool.",
-        examples=[
-            {
-                "sub": "user-uuid-here",
-                "aud": "client-id-here",
-                "event_id": "event-uuid-here",
-                "name": "User Name",
-                "exp": 1615369861,
-                "iat": 1615366261,
-            }
-        ],
+        examples=[{"sub": "user-uuid", "name": "User Name", "exp": 1615369861}],
     )
     sourceIp: List[str] = Field(
         description=(
@@ -97,17 +88,7 @@ class AppSyncCognitoIdentity(BaseModel):
 class AppSyncOidcIdentity(BaseModel):
     claims: Dict[str, Any] = Field(
         description="The JWT claims from the OpenID Connect provider.",
-        examples=[
-            {
-                "sub": "248289761001",
-                "name": "Jane Doe",
-                "given_name": "Jane",
-                "family_name": "Doe",
-                "preferred_username": "j.doe",
-                "email": "janedoe@example.com",
-                "picture": "https://example.com/janedoe/me.jpg",
-            }
-        ],
+        examples=[{"sub": "user-id", "name": "User Name", "email": "user@example.com"}],
     )
     issuer: str = Field(
         description="The token issuer URL from the OpenID Connect provider.",
