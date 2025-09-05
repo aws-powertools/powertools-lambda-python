@@ -51,7 +51,7 @@ class AppSyncIamIdentity(BaseModel):
 class AppSyncCognitoIdentity(BaseModel):
     sub: str = Field(
         description="The UUID of the authenticated user from Cognito User Pool.",
-        examples=["07920713-4526-4642-9c88-2953512de441", "192879fc-a240-4bf1-ab5a-d6a00f3063f9"],
+        examples=["user-uuid-1234-5678-9012-123456789012", "user-uuid-abcd-efgh-ijkl-mnopqrstuvwx"],
     )
     issuer: str = Field(
         description="The token issuer URL from Cognito User Pool.",
@@ -68,12 +68,12 @@ class AppSyncCognitoIdentity(BaseModel):
         description="The JWT claims that the user has from Cognito User Pool.",
         examples=[
             {
-                "sub": "07920713-4526-4642-9c88-2953512de441",
-                "aud": "58rc9bf5kkti90ctmvioppukm9",
-                "event_id": "7f4c9383-abf6-48b7-b821-91643968b755",
+                "sub": "user-uuid-here",
+                "aud": "client-id-here",
+                "event_id": "event-uuid-here",
                 "token_use": "id",
                 "auth_time": 1615366261,
-                "name": "Michael Brewer",
+                "name": "User Name",
                 "exp": 1615369861,
                 "iat": 1615366261,
             }
@@ -157,9 +157,8 @@ class AppSyncRequestModel(BaseModel):
             {
                 "x-forwarded-for": "11.215.2.22, 64.44.173.11",
                 "cloudfront-viewer-country": "US",
-                "host": "SOMETHING.appsync-api.us-east-1.amazonaws.com",
+                "host": "example.appsync-api.us-east-1.amazonaws.com",
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-                "authorization": "AUTH-HEADER",
                 "content-type": "application/json",
             }
         ],
