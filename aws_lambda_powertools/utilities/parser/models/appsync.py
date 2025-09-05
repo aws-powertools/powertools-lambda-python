@@ -19,10 +19,10 @@ class AppSyncIamIdentity(BaseModel):
         description=(
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
-        )
+        ),
     )
     username: str = Field(
-        description="The IAM user principal name.", examples=["AIDAAAAAAAAAAAAAAAAAA", "appsync-user"]
+        description="The IAM user principal name.", examples=["AIDAAAAAAAAAAAAAAAAAA", "appsync-user"],
     )
     userArn: str = Field(
         description="The Amazon Resource Name (ARN) of the IAM user.",
@@ -63,17 +63,15 @@ class AppSyncCognitoIdentity(BaseModel):
         description="The username of the authenticated user (cognito:username attribute).",
         examples=["mike", "jdoe", "user123"],
     )
-    claims: Dict[str, Any] = Field(
-        description="The JWT claims that the user has from Cognito User Pool."
-    )
+    claims: Dict[str, Any] = Field(description="The JWT claims that the user has from Cognito User Pool.")
     sourceIp: List[str] = Field(
         description=(
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
-        )
+        ),
     )
     defaultAuthStrategy: str = Field(
-        description="The default authorization strategy for this caller (ALLOW or DENY).", examples=["ALLOW", "DENY"]
+        description="The default authorization strategy for this caller (ALLOW or DENY).", examples=["ALLOW", "DENY"],
     )
     groups: Optional[List[str]] = Field(
         default=None,
@@ -83,9 +81,7 @@ class AppSyncCognitoIdentity(BaseModel):
 
 
 class AppSyncOidcIdentity(BaseModel):
-    claims: Dict[str, Any] = Field(
-        description="The JWT claims from the OpenID Connect provider."
-    )
+    claims: Dict[str, Any] = Field(description="The JWT claims from the OpenID Connect provider.")
     issuer: str = Field(
         description="The token issuer URL from the OpenID Connect provider.",
         examples=["https://accounts.google.com", "https://login.microsoftonline.com/tenant-id/v2.0"],
@@ -134,7 +130,7 @@ class AppSyncRequestModel(BaseModel):
                 "host": "example.appsync-api.us-east-1.amazonaws.com",
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
                 "content-type": "application/json",
-            }
+            },
         ],
     )
 
@@ -196,7 +192,7 @@ class AppSyncResolverEventModel(BaseModel):
         ],
     )
     identity: Optional[AppSyncIdentity] = Field(
-        default=None, description="Information about the caller identity (authenticated user or API key)."
+        default=None, description="Information about the caller identity (authenticated user or API key).",
     )
     source: Optional[Dict[str, Any]] = Field(
         default=None,
@@ -210,10 +206,10 @@ class AppSyncResolverEventModel(BaseModel):
     )
     request: AppSyncRequestModel = Field(description="Information about the GraphQL request context.")
     info: AppSyncInfoModel = Field(
-        description="Information about the GraphQL request including selection set and field details."
+        description="Information about the GraphQL request including selection set and field details.",
     )
     prev: Optional[AppSyncPrevModel] = Field(
-        default=None, description="Results from the previous resolver in a pipeline resolver."
+        default=None, description="Results from the previous resolver in a pipeline resolver.",
     )
     stash: Dict[str, Any] = Field(
         description=(
