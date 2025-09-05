@@ -20,7 +20,7 @@ class AppSyncIamIdentity(BaseModel):
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
         ),
-        examples=[["192.168.1.1"], ["11.215.2.22", "64.44.173.11"]],
+        examples=[["127.0.0.1"], ["10.0.0.1", "10.0.0.2"]],
     )
     username: str = Field(
         description="The IAM user principal name.", examples=["AIDAAAAAAAAAAAAAAAAAA", "appsync-user"]
@@ -72,7 +72,7 @@ class AppSyncCognitoIdentity(BaseModel):
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
         ),
-        examples=[["11.215.2.22"], ["1.1.1.1"]],
+        examples=[["127.0.0.1"], ["10.0.0.1"]],
     )
     defaultAuthStrategy: str = Field(
         description="The default authorization strategy for this caller (ALLOW or DENY).", examples=["ALLOW", "DENY"]
@@ -132,7 +132,7 @@ class AppSyncRequestModel(BaseModel):
         description="HTTP headers from the GraphQL request, including custom headers.",
         examples=[
             {
-                "x-forwarded-for": "11.215.2.22, 64.44.173.11",
+                "x-forwarded-for": "10.0.0.1, 10.0.0.2",
                 "cloudfront-viewer-country": "US",
                 "host": "example.appsync-api.us-east-1.amazonaws.com",
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
