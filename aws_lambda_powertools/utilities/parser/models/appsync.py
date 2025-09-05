@@ -71,8 +71,6 @@ class AppSyncCognitoIdentity(BaseModel):
                 "sub": "user-uuid-here",
                 "aud": "client-id-here",
                 "event_id": "event-uuid-here",
-                "token_use": "id",
-                "auth_time": 1615366261,
                 "name": "User Name",
                 "exp": 1615369861,
                 "iat": 1615366261,
@@ -117,7 +115,7 @@ class AppSyncOidcIdentity(BaseModel):
     )
     sub: str = Field(
         description="The subject identifier from the OpenID Connect provider.",
-        examples=["248289761001", "google-oauth2|123456789012345678901"],
+        examples=["248289761001", "provider-subject-identifier"],
     )
 
 
