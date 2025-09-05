@@ -1043,7 +1043,8 @@ def _has_discriminator(field_info: FieldInfo) -> bool:
 
 
 def _handle_discriminator_with_body(
-    annotations: list[FieldInfo], annotation: Any,
+    annotations: list[FieldInfo],
+    annotation: Any,
 ) -> tuple[FieldInfo | None, Any, bool]:
     """
     Handle the special case of Field(discriminator) + Body() combination.
@@ -1113,7 +1114,8 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
 
     if len(powertools_annotations) == 2:
         powertools_annotation, type_annotation, has_discriminator_with_body = _handle_discriminator_with_body(
-            powertools_annotations, annotation,
+            powertools_annotations,
+            annotation,
         )
     elif len(powertools_annotations) > 1:
         raise AssertionError("Only one FieldInfo can be used per parameter")
