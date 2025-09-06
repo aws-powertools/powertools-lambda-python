@@ -222,8 +222,9 @@ class TestUploadFileComprehensiveCoverage:
         # Create a File parameter with json_schema_extra
         file_param = File(description="Test file", json_schema_extra={"maxLength": 1000})
 
-        # Verify it doesn't crash and handles the extra parameters
-        assert file_param is not None
+        # Verify the file parameter has the expected attributes
+        assert file_param.description == "Test file"
+        assert hasattr(file_param, "json_schema_extra")
 
     def test_fix_upload_file_schema_references_complex(self):
         """Test schema fix with complex schema structures."""
