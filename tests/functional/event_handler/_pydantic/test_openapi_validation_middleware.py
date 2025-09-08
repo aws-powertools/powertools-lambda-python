@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import pytest
 from pydantic import BaseModel, Field
@@ -1997,7 +1997,7 @@ def test_field_discriminator_validation(gw_event):
         action: Literal["bar"]
         bar_data: int
 
-    action_type = Annotated[FooAction | BarAction, Field(discriminator="action")]
+    action_type = Annotated[Union[FooAction, BarAction], Field(discriminator="action")]
 
     @app.post("/actions")
     def create_action(action: Annotated[action_type, Body()]):
