@@ -426,12 +426,11 @@ class TestUploadFileComprehensiveCoverage:
         loc = ("body", "test_field")
 
         # Test the specific condition that triggers AttributeError handling
-        value = None
-        if mock_body is not None and value is None:
-            try:
-                mock_body.get(mock_field.alias)
-            except AttributeError:
-                errors.append(get_missing_field_error(loc))
+        # Simulate the scenario where _get_field_value returns None and we try to double-check
+        try:
+            mock_body.get(mock_field.alias)
+        except AttributeError:
+            errors.append(get_missing_field_error(loc))
 
         assert len(errors) == 1
         assert "test_field" in str(errors[0])
