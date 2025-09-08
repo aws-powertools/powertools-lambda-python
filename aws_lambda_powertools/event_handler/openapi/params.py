@@ -1074,6 +1074,7 @@ def _create_field_info(
     has_discriminator_with_body: bool,
 ) -> FieldInfo:
     """Create or copy FieldInfo based on the annotation type."""
+    field_info: FieldInfo
     if has_discriminator_with_body:
         # For discriminator + Body case, create a new Body instance directly
         field_info = Body()
