@@ -101,7 +101,15 @@ def _validate_source_ip(value):
         IPvAnyNetwork(value)
     except ValueError:
         try:
-            ip_part = value.split(":")[0]
+            # Handle IPv6 with port: [IPv6]:port
+            if value.startswith("[") and "]:" in value:
+                ip_part = value.split("]:")[0][1:]  # Remove "[" and get IP part
+            elif ":" in value and value.count(":") <= 1:
+                ip_part = value.split(":")[0]
+            else:
+                # If it"s not in IP:port format, validate as-is
+                ip_part = value
+
             IPvAnyNetwork(ip_part)
         except (ValueError, IndexError) as e:
             raise ValueError(f"Invalid IP address in sourceIp: {ip_part}") from e
