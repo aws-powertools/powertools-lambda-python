@@ -4,16 +4,16 @@ from pydantic import BaseModel, Field
 
 
 class AppSyncIamIdentity(BaseModel):
-    accountId: str = Field(description="The AWS account ID of the caller.", examples=["123456789012", "666666666666"])
+    accountId: str = Field(description="The AWS account ID of the caller.", examples=["123456789012"])
     cognitoIdentityPoolId: Optional[str] = Field(
         default=None,
         description="The Amazon Cognito identity pool ID associated with the caller.",
-        examples=["us-east-1:12345678-1234-1234-1234-123456789012", None],
+        examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
     )
     cognitoIdentityId: Optional[str] = Field(
         default=None,
         description="The Amazon Cognito identity ID of the caller.",
-        examples=["us-east-1:12345678-1234-1234-1234-123456789012", None],
+        examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
     )
     sourceIp: List[str] = Field(
         description=(
@@ -22,7 +22,8 @@ class AppSyncIamIdentity(BaseModel):
         ),
     )
     username: str = Field(
-        description="The IAM user principal name.", examples=["AIDAAAAAAAAAAAAAAAAAA", "appsync-user"],
+        description="The IAM user principal name.",
+        examples=["AIDAJEXAMPLE1234", "appsync-user"],
     )
     userArn: str = Field(
         description="The Amazon Resource Name (ARN) of the IAM user.",
@@ -31,7 +32,7 @@ class AppSyncIamIdentity(BaseModel):
     cognitoIdentityAuthType: Optional[str] = Field(
         default=None,
         description="Either authenticated or unauthenticated based on the identity type.",
-        examples=["authenticated", "unauthenticated", None],
+        examples=["authenticated", "unauthenticated"],
     )
     cognitoIdentityAuthProvider: Optional[str] = Field(
         default=None,
@@ -42,7 +43,6 @@ class AppSyncIamIdentity(BaseModel):
         examples=[
             "cognito-idp.us-east-1.amazonaws.com/us-east-1_POOL_ID",
             "graph.facebook.com,cognito-idp.us-east-1.amazonaws.com/us-east-1_POOL_ID",
-            None,
         ],
     )
 
@@ -71,12 +71,13 @@ class AppSyncCognitoIdentity(BaseModel):
         ),
     )
     defaultAuthStrategy: str = Field(
-        description="The default authorization strategy for this caller (ALLOW or DENY).", examples=["ALLOW", "DENY"],
+        description="The default authorization strategy for this caller (ALLOW or DENY).",
+        examples=["ALLOW", "DENY"],
     )
     groups: Optional[List[str]] = Field(
         default=None,
         description="The Cognito User Pool groups that the user belongs to.",
-        examples=[["admin", "users"], ["developers"], None],
+        examples=[["admin", "users"], ["developers"]],
     )
 
 
@@ -120,7 +121,7 @@ class AppSyncRequestModel(BaseModel):
             "The custom domain name used to access the GraphQL endpoint. "
             "Returns null when using the default GraphQL endpoint domain name."
         ),
-        examples=["api.example.com", "graphql.mycompany.com", None],
+        examples=["api.example.com", "graphql.mycompany.com"],
     )
     headers: Dict[str, str] = Field(
         description="HTTP headers from the GraphQL request, including custom headers.",
@@ -176,7 +177,6 @@ class AppSyncPrevModel(BaseModel):
         examples=[
             {"userId": "123", "posts": [{"id": "1", "title": "Hello World"}]},
             {"data": {"field1": "value1", "field2": "value2"}},
-            {},
         ],
     )
 
@@ -188,11 +188,11 @@ class AppSyncResolverEventModel(BaseModel):
             {"id": "123", "limit": 10},
             {"input": {"name": "John", "email": "john@example.com"}},
             {"page": 2, "size": 1, "name": "value"},
-            {},
         ],
     )
     identity: Optional[AppSyncIdentity] = Field(
-        default=None, description="Information about the caller identity (authenticated user or API key).",
+        default=None,
+        description="Information about the caller identity (authenticated user or API key).",
     )
     source: Optional[Dict[str, Any]] = Field(
         default=None,
@@ -209,14 +209,15 @@ class AppSyncResolverEventModel(BaseModel):
         description="Information about the GraphQL request including selection set and field details.",
     )
     prev: Optional[AppSyncPrevModel] = Field(
-        default=None, description="Results from the previous resolver in a pipeline resolver.",
+        default=None,
+        description="Results from the previous resolver in a pipeline resolver.",
     )
     stash: Dict[str, Any] = Field(
         description=(
             "The stash is a map that is made available inside each resolver and function mapping template. "
             "The same stash instance lives through a single resolver execution."
         ),
-        examples=[{}, {"customData": "value", "userId": "123"}],
+        examples=[{"customData": "value", "userId": "123"}],
     )
 
 
