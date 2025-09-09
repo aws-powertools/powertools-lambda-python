@@ -568,6 +568,23 @@ You can use the `Form` type to tell the Event Handler that a parameter expects f
     --8<-- "examples/event_handler_rest/src/working_with_form_data.py"
     ```
 
+#### Discriminated unions
+
+!!! info "You must set `enable_validation=True` to use discriminated unions via type annotation."
+
+You can use Pydantic's `Field(discriminator="...")` with union types to create discriminated unions (also known as tagged unions). This allows the Event Handler to automatically determine which model to use based on a discriminator field in the request body.
+
+In the following example, we define two action types (`FooAction` and `BarAction`) that share a common discriminator field `action`. The Event Handler will automatically parse the request body and instantiate the correct model based on the `action` field value:
+
+```python hl_lines="3 4 8 31 36" title="discriminated_unions.py"
+--8<-- "examples/event_handler_rest/src/discriminated_unions.py"
+```
+
+1. `Field(discriminator="action")` tells Pydantic to use the `action` field to determine which model to instantiate
+2. `Body()` annotation tells the Event Handler to parse the request body using the discriminated union
+
+When you send a request with `{"action": "foo", "foo_data": "example"}`, the Event Handler will automatically create a `FooAction` instance. Similarly, `{"action": "bar", "bar_data": 42}` will create a `BarAction` instance.
+
 #### Supported types for response serialization
 
 With data validation enabled, we natively support serializing the following data types to JSON:
