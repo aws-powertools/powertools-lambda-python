@@ -84,7 +84,7 @@ coverage = { extras = ["toml"], version = "^7.6" }
 pytest = "^8.3.4"
 boto3 = "^1.26.164"
 isort = ">=5.13.2,<7.0.0"
-pytest-cov = ">=5,<7"
+pytest-cov = ">=5,<8"
 pytest-mock = "^3.14.0"
 pytest-asyncio = ">=0.24,<1.2"
 bandit = "^1.7.10"
