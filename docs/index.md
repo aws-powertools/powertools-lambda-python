@@ -206,7 +206,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:22 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:23 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
@@ -335,7 +335,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:22 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:23 --region eu-west-1
 ```
 
 #### SAR
@@ -495,89 +495,6 @@ There are many ways you can help us gain future investments to improve everyone'
     Connect, ask questions, and share what features you use.
 
     [:octicons-arrow-right-24: Discord invite](https://discord.gg/B8zZKbbyET){target="blank"}
-
-</div>
-
-### Becoming a reference customer
-
-Knowing which companies are using this library is important to help prioritize the project internally. The following companies, among others, use Powertools:
-
-<div class="grid" style="text-align:center;" markdown>
-
-[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Banxware**](https://www.banxware.com){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Brsk**](https://www.brsk.co.uk/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**BusPatrol**](https://buspatrol.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Capital One**](https://www.capitalone.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Caylent**](https://caylent.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CHS Inc.**](https://www.chsinc.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CPQi (Exadel Financial Services)**](https://cpqi.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CloudZero**](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CyberArk**](https://www.cyberark.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Flyweight**](https://flyweight.io/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**globaldatanet**](https://globaldatanet.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Guild**](https://guild.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Instil**](https://instil.co/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**IMS**](https://ims.tech/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**LocalStack**](https://www.localstack.cloud/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Propellor.ai**](https://www.propellor.ai/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Pushpay**](https://pushpay.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**QuasiScience Limited**](https://quasiscience.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Recast**](https://getrecast.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**TopSport**](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Transformity**](https://transformity.tech/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Trek10**](https://www.trek10.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Vertex Pharmaceuticals**](https://www.vrtx.com/){target="_blank" rel="nofollow"}
-{ .card }
 
 </div>
 
