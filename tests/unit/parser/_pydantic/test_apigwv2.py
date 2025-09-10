@@ -89,6 +89,20 @@ def test_apigw_v2_event_and_source_ip_with_random_string():
         APIGatewayProxyEventV2Model(**raw_event)
 
 
+def test_apigw_v2_event_and_source_ip_ipv6():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["http"]["sourceIp"] = "fe80::1ff:fe23:4567:890a"
+
+    APIGatewayProxyEventV2Model(**raw_event)
+
+
+def test_apigw_v2_event_and_source_ip_ipv6_with_port():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["http"]["sourceIp"] = "[fe80::1ff:fe23:4567:890a]:12345"
+
+    APIGatewayProxyEventV2Model(**raw_event)
+
+
 def test_api_gateway_proxy_v2_event_lambda_authorizer():
     raw_event = load_event("apiGatewayProxyV2LambdaAuthorizerEvent.json")
     parsed_event: APIGatewayProxyEventV2Model = APIGatewayProxyEventV2Model(**raw_event)
