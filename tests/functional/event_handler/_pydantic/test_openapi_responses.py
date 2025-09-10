@@ -1,5 +1,5 @@
 from secrets import randbelow
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -237,3 +237,136 @@ def test_openapi_enable_validation_disabled():
     assert 200 in responses.keys()
     assert responses[200].description == "Successful Response"
     assert 422 not in responses.keys()
+
+
+def test_openapi_response_with_headers():
+    """Test that response headers are properly included in OpenAPI schema"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get(
+        "/",
+        responses={
+            200: {
+                "description": "Successful Response",
+                "headers": {
+                    "X-Rate-Limit": {
+                        "description": "Rate limit header",
+                        "schema": {"type": "integer"},
+                    },
+                    "X-Custom-Header": {
+                        "description": "Custom header",
+                        "schema": {"type": "string"},
+                        "examples": {"example1": "value1"},
+                    },
+                },
+            },
+        },
+    )
+    def handler():
+        return {"message": "hello"}
+
+    schema = app.get_openapi_schema()
+    response_dict = schema.paths["/"].get.responses[200]
+
+    # Verify headers are present
+    assert "headers" in response_dict
+    headers = response_dict["headers"]
+
+    # Check X-Rate-Limit header
+    assert "X-Rate-Limit" in headers
+    assert headers["X-Rate-Limit"]["description"] == "Rate limit header"
+    assert headers["X-Rate-Limit"]["schema"]["type"] == "integer"
+
+    # Check X-Custom-Header with examples
+    assert "X-Custom-Header" in headers
+    assert headers["X-Custom-Header"]["description"] == "Custom header"
+    assert headers["X-Custom-Header"]["schema"]["type"] == "string"
+    assert headers["X-Custom-Header"]["examples"]["example1"] == "value1"
+
+
+def test_openapi_response_with_links():
+    """Test that response links are properly included in OpenAPI schema"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get(
+        "/users/{user_id}",
+        responses={
+            200: {
+                "description": "User details",
+                "links": {
+                    "GetUserOrders": {
+                        "operationId": "getUserOrders",
+                        "parameters": {"userId": "$response.body#/id"},
+                        "description": "Get orders for this user",
+                    },
+                },
+            },
+        },
+    )
+    def get_user(user_id: str):
+        return {"id": user_id, "name": "John Doe"}
+
+    schema = app.get_openapi_schema()
+    response = schema.paths["/users/{user_id}"].get.responses[200]
+
+    # Verify links are present
+    links = response.links
+
+    assert "GetUserOrders" in links
+    assert links["GetUserOrders"].operationId == "getUserOrders"
+    assert links["GetUserOrders"].parameters["userId"] == "$response.body#/id"
+    assert links["GetUserOrders"].description == "Get orders for this user"
+
+
+def test_openapi_response_examples_preserved_with_model():
+    """Test that examples are preserved when using model in response content"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class UserResponse(BaseModel):
+        id: int
+        name: str
+        email: Optional[str] = None
+
+    @app.get(
+        "/",
+        responses={
+            200: {
+                "description": "User response",
+                "content": {
+                    "application/json": {
+                        "model": UserResponse,
+                        "examples": {
+                            "example1": {
+                                "summary": "Example 1",
+                                "value": {"id": 1, "name": "John", "email": "john@example.com"},
+                            },
+                            "example2": {
+                                "summary": "Example 2",
+                                "value": {"id": 2, "name": "Jane"},
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    )
+    def handler() -> UserResponse:
+        return UserResponse(id=1, name="Test")
+
+    schema = app.get_openapi_schema()
+    content = schema.paths["/"].get.responses[200].content["application/json"]
+
+    # Verify model schema is present
+    assert content.schema_.ref == "#/components/schemas/UserResponse"
+
+    # Verify examples are preserved
+    examples = content.examples
+
+    assert "example1" in examples
+    assert examples["example1"].summary == "Example 1"
+    assert examples["example1"].value["id"] == 1
+    assert examples["example1"].value["name"] == "John"
+
+    assert "example2" in examples
+    assert examples["example2"].summary == "Example 2"
+    assert examples["example2"].value["id"] == 2
