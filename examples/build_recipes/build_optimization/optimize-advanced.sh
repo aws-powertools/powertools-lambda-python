@@ -15,7 +15,6 @@ find build/ -name "*.so.*" -exec strip --strip-debug {} \; 2>/dev/null || true
 rm -rf build/*/site-packages/*/tests/
 rm -rf build/*/site-packages/*/test/
 rm -rf build/*/site-packages/*/.git/
-rm -rf build/*/site-packages/*/docs/
 rm -rf build/*/site-packages/*/examples/
 rm -rf build/*/site-packages/*/*.md
 rm -rf build/*/site-packages/*/*.rst
