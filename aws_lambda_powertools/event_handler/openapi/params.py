@@ -1042,7 +1042,7 @@ def _has_discriminator(field_info: FieldInfo) -> bool:
     return hasattr(field_info, "discriminator") and field_info.discriminator is not None
 
 
-def _handle_discriminator_with_body(
+def _handle_discriminator_with_param(
     annotations: list[FieldInfo],
     annotation: Any,
 ) -> tuple[FieldInfo | None, Any, bool]:
@@ -1111,10 +1111,10 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
 
     # Determine which annotation to use
     powertools_annotation: FieldInfo | None = None
-    has_discriminator_with_body = False
+    has_discriminator_with_param = False
 
     if len(powertools_annotations) == 2:
-        powertools_annotation, type_annotation, has_discriminator_with_body = _handle_discriminator_with_body(
+        powertools_annotation, type_annotation, has_discriminator_with_param = _handle_discriminator_with_param(
             powertools_annotations,
             annotation,
         )
@@ -1126,7 +1126,7 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     # Process the annotation if it exists
     field_info: FieldInfo | None = None
     if isinstance(powertools_annotation, FieldInfo):
-        field_info = _create_field_info(powertools_annotation, type_annotation, has_discriminator_with_body)
+        field_info = _create_field_info(powertools_annotation, type_annotation, has_discriminator_with_param)
         _set_field_default(field_info, value, is_path_param)
 
         # Preserve full annotated type for discriminated unions

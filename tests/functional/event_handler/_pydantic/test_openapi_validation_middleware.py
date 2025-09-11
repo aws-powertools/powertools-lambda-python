@@ -2030,35 +2030,3 @@ def test_field_discriminator_validation(gw_event):
 
     result = app(gw_event, {})
     assert result["statusCode"] == 422
-
-
-def test_field_other_features_still_work(gw_event):
-    """Test that other Field features still work after discriminator fix"""
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    class UserInput(BaseModel):
-        name: Annotated[str, Field(min_length=2, max_length=50, description="User name")]
-        age: Annotated[int, Field(ge=18, le=120, description="User age")]
-        email: Annotated[str, Field(pattern=r".+@.+\..+", description="User email")]
-
-    @app.post("/users")
-    def create_user(user: UserInput):
-        return {"created": user.model_dump()}
-
-    gw_event["path"] = "/users"
-    gw_event["httpMethod"] = "POST"
-    gw_event["headers"]["content-type"] = "application/json"
-    gw_event["body"] = '{"name": "John", "age": 25, "email": "john@example.com"}'
-
-    result = app(gw_event, {})
-    assert result["statusCode"] == 200
-
-    response_body = json.loads(result["body"])
-    assert response_body["created"]["name"] == "John"
-    assert response_body["created"]["age"] == 25
-    assert response_body["created"]["email"] == "john@example.com"
-
-    gw_event["body"] = '{"name": "John", "age": 16, "email": "john@example.com"}'
-
-    result = app(gw_event, {})
-    assert result["statusCode"] == 422

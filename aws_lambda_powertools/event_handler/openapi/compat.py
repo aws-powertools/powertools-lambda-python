@@ -4,9 +4,6 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Mapping, Sequence
 from copy import copy
-
-# MAINTENANCE: remove when deprecating Pydantic v1. Mypy doesn't handle two different code paths that import different
-# versions of a module, so we need to ignore errors here.
 from dataclasses import dataclass, is_dataclass
 from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Set, Tuple, Union
 

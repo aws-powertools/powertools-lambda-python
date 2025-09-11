@@ -59,3 +59,20 @@ def test_get_openapi_validation_and_middleware(apigw_rest_endpoint):
     )
 
     assert response.status_code == 202
+
+
+def test_openapi_with_fields_discriminator(apigw_rest_endpoint):
+    # GIVEN
+    url = f"{apigw_rest_endpoint}data_validation_with_fields"
+
+    # WHEN
+    response = data_fetcher.get_http_response(
+        Request(
+            method="POST",
+            url=url,
+            json={"action": "foo", "foo_data": "foo data working"},
+        ),
+    )
+
+    assert "Powertools e2e API" in response.text
+    assert response.status_code == 200
