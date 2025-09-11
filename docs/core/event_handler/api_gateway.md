@@ -428,6 +428,17 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
     --8<-- "examples/event_handler_rest/src/validating_payload_subset_output.json"
     ```
 
+##### Discriminated unions
+
+You can use Pydantic's `Field(discriminator="...")` with union types to create discriminated unions (also known as tagged unions). This allows the Event Handler to automatically determine which model to use based on a discriminator field in the request body.
+
+```python hl_lines="3 4 8 31 36" title="discriminated_unions.py"
+--8<-- "examples/event_handler_rest/src/discriminated_unions.py"
+```
+
+1. `Field(discriminator="action")` tells Pydantic to use the `action` field to determine which model to instantiate
+2. `Body()` annotation tells the Event Handler to parse the request body using the discriminated union
+
 #### Validating responses
 
 You can use `response_validation_error_http_code` to set a custom HTTP code for failed response validation. When this field is set, we will raise a `ResponseValidationError` instead of a `RequestValidationError`.

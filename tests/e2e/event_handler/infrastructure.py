@@ -24,6 +24,7 @@ class EventHandlerStack(BaseInfrastructure):
                 functions["OpenapiHandler"],
                 functions["OpenapiHandlerWithPep563"],
                 functions["DataValidationAndMiddleware"],
+                functions["DataValidationWithFields"],
             ],
         )
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
@@ -104,6 +105,9 @@ class EventHandlerStack(BaseInfrastructure):
 
         openapi_schema = apigw.root.add_resource("data_validation_middleware")
         openapi_schema.add_method("GET", apigwv1.LambdaIntegration(function[3], proxy=True))
+
+        openapi_schema = apigw.root.add_resource("data_validation_with_fields")
+        openapi_schema.add_method("POST", apigwv1.LambdaIntegration(function[4], proxy=True))
 
         CfnOutput(self.stack, "APIGatewayRestUrl", value=apigw.url)
 
