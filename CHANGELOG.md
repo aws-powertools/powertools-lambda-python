@@ -4,12 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **docs:** correct build optimization script and docs ([#7367](https://github.com/aws-powertools/powertools-lambda-python/issues/7367))
+
 ## Code Refactoring
 
 * **parser:** Improve AppSync models with examples and descriptions ([#7330](https://github.com/aws-powertools/powertools-lambda-python/issues/7330))
 
+## Documentation
+
+* **event_handler:** add info section about types ([#7368](https://github.com/aws-powertools/powertools-lambda-python/issues/7368))
+
 ## Features
 
+* **event_handler:** enhance OpenAPI response with headers, links, examples and encoding ([#7312](https://github.com/aws-powertools/powertools-lambda-python/issues/7312))
 * **parser:** add field metadata and examples for CloudWatch models ([#7343](https://github.com/aws-powertools/powertools-lambda-python/issues/7343))
 
 ## Maintenance
