@@ -1493,6 +1493,9 @@ Each endpoint will be it's own Lambda function that is configured as a [Lambda i
 
 You can test your routes by passing a proxy event request with required params.
 
+???+ info
+    Fields such as headers and query strings are always delivered as strings when events reach Lambda. When testing your Lambda function with local events, we recommend using the sample events available in our [repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/tests/events).
+
 === "API Gateway REST API"
 
     === "assert_rest_api_resolver_response.py"
@@ -1556,14 +1559,3 @@ You can test your routes by passing a proxy event request with required params.
 Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.
 
 That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank" rel="nofollow"} if you're looking for a more opinionated and web framework feature set.
-
-**What happened to `ApiGatewayResolver`?**
-
-It's been superseded by more explicit resolvers like `APIGatewayRestResolver`, `APIGatewayHttpResolver`, and `ALBResolver`.
-
-`ApiGatewayResolver` handled multiple types of event resolvers for convenience via `proxy_type` param. However,
-it made it impossible for static checkers like Mypy and IDEs IntelliSense to know what properties a `current_event` would have due to late bound resolution.
-
-This provided a suboptimal experience for customers not being able to find all properties available besides common ones between API Gateway REST, HTTP, and ALB - while manually annotating `app.current_event` would work it is not the experience we want to provide to customers.
-
-`ApiGatewayResolver` will be deprecated in v2 and have appropriate warnings as soon as we have a v2 draft.
