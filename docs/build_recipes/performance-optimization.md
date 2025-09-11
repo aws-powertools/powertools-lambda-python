@@ -7,7 +7,7 @@ description: Optimize Lambda functions for better performance and reduced costs
 
 Optimize your Lambda functions for better performance, reduced cold start times, and lower costs. These techniques help minimize package size, improve startup speed, and reduce memory usage.
 
-Always validate your function's behavior after applying optimizations to ensure an optimization hasn't introduced any issues with your packages. For example, removal of directories that appear to be unnecessary, such as `docs`, can break some libraries. 
+Always validate your function's behavior after applying optimizations to ensure an optimization hasn't introduced any issues with your packages. For example, removal of directories that appear to be unnecessary, such as `docs`, can break some libraries.
 
 ## Reduce cold start times
 
