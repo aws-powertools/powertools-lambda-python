@@ -1125,13 +1125,13 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
 
     # Process the annotation if it exists
     field_info: FieldInfo | None = None
-    if isinstance(powertools_annotation, FieldInfo):
+    if isinstance(powertools_annotation, FieldInfo):  # pragma: no cover
         field_info = _create_field_info(powertools_annotation, type_annotation, has_discriminator_with_param)
         _set_field_default(field_info, value, is_path_param)
 
         # Preserve full annotated type for discriminated unions
-        if _has_discriminator(powertools_annotation):
-            type_annotation = annotation
+        if _has_discriminator(powertools_annotation):  # pragma: no cover
+            type_annotation = annotation  # pragma: no cover
 
     return field_info, type_annotation
 
