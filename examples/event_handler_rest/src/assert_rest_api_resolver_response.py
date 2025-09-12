@@ -22,6 +22,8 @@ def test_lambda_handler(lambda_context):
         "path": "/todos",
         "httpMethod": "GET",
         "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
+        # Always use strings when using query parameters. API Gateway automatically converts them to strings
+        "queryStringParameters": {"page": "5", "foo": "bar"},
     }
     # Example of API Gateway REST API request event:
     # https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-example-event
