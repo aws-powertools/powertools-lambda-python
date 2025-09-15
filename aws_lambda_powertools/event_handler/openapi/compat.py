@@ -3,9 +3,7 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Mapping, Sequence
-
-# MAINTENANCE: remove when deprecating Pydantic v1. Mypy doesn't handle two different code paths that import different
-# versions of a module, so we need to ignore errors here.
+from copy import copy
 from dataclasses import dataclass, is_dataclass
 from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Set, Tuple, Union
 
@@ -80,9 +78,19 @@ class ModelField:
         return self.field_info.annotation
 
     def __post_init__(self) -> None:
-        self._type_adapter: TypeAdapter[Any] = TypeAdapter(
-            Annotated[self.field_info.annotation, self.field_info],
-        )
+        # If the field_info.annotation is already an Annotated type with discriminator metadata,
+        # use it directly instead of wrapping it again
+        annotation = self.field_info.annotation
+        if (
+            get_origin(annotation) is Annotated
+            and hasattr(self.field_info, "discriminator")
+            and self.field_info.discriminator is not None
+        ):
+            self._type_adapter: TypeAdapter[Any] = TypeAdapter(annotation)
+        else:
+            self._type_adapter: TypeAdapter[Any] = TypeAdapter(
+                Annotated[annotation, self.field_info],
+            )
 
     def get_default(self) -> Any:
         if self.field_info.is_required():
@@ -176,7 +184,11 @@ def model_rebuild(model: type[BaseModel]) -> None:
 
 
 def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
-    return type(field_info).from_annotation(annotation)
+    # Create a shallow copy of the field_info to preserve its type and all attributes
+    new_field = copy(field_info)
+    # Update only the annotation to the new one
+    new_field.annotation = annotation
+    return new_field
 
 
 def get_missing_field_error(loc: tuple[str, ...]) -> dict[str, Any]:
