@@ -15,6 +15,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     _normalize_errors,
     _regenerate_error_with_loc,
     get_missing_field_error,
+    is_sequence_field,
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
@@ -150,11 +151,10 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         """Parse URL-encoded form data from the request body."""
         try:
             body = app.current_event.decoded_body or ""
-            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
+            # NOTE: Keep values as lists; we'll normalize per-field later based on the expected type.
+            # This avoids breaking List[...] fields when only a single value is provided.
             parsed = parse_qs(body, keep_blank_values=True)
-
-            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
-            return result
+            return parsed
 
         except Exception as e:  # pragma: no cover
             raise RequestValidationError(  # pragma: no cover
@@ -387,6 +387,10 @@ def _request_body_to_args(
             else:
                 values[field.name] = deepcopy(field.default)
             continue
+
+        # Normalize lists for non-sequence fields
+        if isinstance(value, list) and not is_sequence_field(field):
+            value = value[0]
 
         # MAINTENANCE: Handle byte and file fields
 

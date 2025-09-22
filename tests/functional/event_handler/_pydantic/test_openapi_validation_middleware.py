@@ -1481,20 +1481,33 @@ def test_custom_route_response_validation_error_bad_http_code(response_validatio
 
 def test_parse_form_data_url_encoded(gw_event):
     """Test _parse_form_data method with URL-encoded form data"""
-
+    # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form")
     def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
         return {"name": name, "tags": tags}
 
+    # WHEN sending a POST request with URL-encoded form data
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
     gw_event["body"] = "name=test&tags=tag1&tags=tag2"
 
     result = app(gw_event, {})
+
+    # THEN it should parse the form data correctly
     assert result["statusCode"] == 200
+    assert result["body"] == '{"name":"test","tags":["tag1","tag2"]}'
+
+    # WHEN sending a POST request with a single value for a list field
+    gw_event["body"] = "name=test&tags=tag1"
+
+    result = app(gw_event, {})
+
+    # THEN it should parse the form data correctly
+    assert result["statusCode"] == 200
+    assert result["body"] == '{"name":"test","tags":["tag1"]}'
 
 
 def test_parse_form_data_wrong_value(gw_event):
