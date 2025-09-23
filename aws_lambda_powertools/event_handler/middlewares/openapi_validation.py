@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence
 from urllib.parse import parse_qs
 
@@ -314,12 +313,12 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
 def _request_params_to_args(
     required_params: Sequence[ModelField],
     received_params: Mapping[str, Any],
-) -> tuple[dict[str, Any], list[Any]]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """
     Convert the request params to a dictionary of values using validation, and returns a list of errors.
     """
-    values = {}
-    errors = []
+    values: dict[str, Any] = {}
+    errors: list[dict[str, Any]] = []
 
     for field in required_params:
         field_info = field.field_info
@@ -328,16 +327,12 @@ def _request_params_to_args(
         if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
-        value = received_params.get(field.alias)
-
         loc = (field_info.in_.value, field.alias)
+        value = received_params.get(field.alias)
 
         # If we don't have a value, see if it's required or has a default
         if value is None:
-            if field.required:
-                errors.append(get_missing_field_error(loc=loc))
-            else:
-                values[field.name] = deepcopy(field.default)
+            _handle_missing_field_value(field, values, errors, loc)
             continue
 
         # Finally, validate the value
@@ -363,41 +358,62 @@ def _request_body_to_args(
     )
 
     for field in required_params:
-        # This sets the location to:
-        # { "user": { object } } if field.alias == user
-        # { { object } if field_alias is omitted
-        loc: tuple[str, ...] = ("body", field.alias)
-        if field_alias_omitted:
-            loc = ("body",)
+        loc = _get_body_field_location(field, field_alias_omitted)
+        value = _extract_field_value_from_body(field, received_body, loc, errors)
 
-        value: Any | None = None
-
-        # Now that we know what to look for, try to get the value from the received body
-        if received_body is not None:
-            try:
-                value = received_body.get(field.alias)
-            except AttributeError:
-                errors.append(get_missing_field_error(loc))
-                continue
-
-        # Determine if the field is required
+        # If we don't have a value, see if it's required or has a default
         if value is None:
-            if field.required:
-                errors.append(get_missing_field_error(loc))
-            else:
-                values[field.name] = deepcopy(field.default)
+            _handle_missing_field_value(field, values, errors, loc)
             continue
 
-        # Normalize lists for non-sequence fields
-        if isinstance(value, list) and not is_sequence_field(field):
-            value = value[0]
-
-        # MAINTENANCE: Handle byte and file fields
-
-        # Finally, validate the value
+        value = _normalize_field_value(field, value)
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
+
+
+def _get_body_field_location(field: ModelField, field_alias_omitted: bool) -> tuple[str, ...]:
+    """Get the location tuple for a body field based on whether the field alias is omitted."""
+    if field_alias_omitted:
+        return ("body",)
+    return ("body", field.alias)
+
+
+def _extract_field_value_from_body(
+    field: ModelField,
+    received_body: dict[str, Any] | None,
+    loc: tuple[str, ...],
+    errors: list[dict[str, Any]],
+) -> Any | None:
+    """Extract field value from the received body, handling potential AttributeError."""
+    if received_body is None:
+        return None
+
+    try:
+        return received_body.get(field.alias)
+    except AttributeError:
+        errors.append(get_missing_field_error(loc))
+        return None
+
+
+def _handle_missing_field_value(
+    field: ModelField,
+    values: dict[str, Any],
+    errors: list[dict[str, Any]],
+    loc: tuple[str, ...],
+) -> None:
+    """Handle the case when a field value is missing."""
+    if field.required:
+        errors.append(get_missing_field_error(loc))
+    else:
+        values[field.name] = field.get_default()
+
+
+def _normalize_field_value(field: ModelField, value: Any) -> Any:
+    """Normalize field value, converting lists to single values for non-sequence fields."""
+    if isinstance(value, list) and not is_sequence_field(field):
+        return value[0]
+    return value
 
 
 def _validate_field(
