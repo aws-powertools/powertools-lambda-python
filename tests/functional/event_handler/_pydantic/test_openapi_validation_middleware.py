@@ -3,10 +3,10 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -2043,3 +2043,50 @@ def test_normal_route_response_validation_still_works(gw_event):
     assert response_body["name"] == "User123"
     assert response_body["age"] == 143
     assert response_body["email"] == "user123@example.com"
+
+
+def test_field_discriminator_validation(gw_event):
+    """Test that Pydantic Field discriminator works with event_handler validation"""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class FooAction(BaseModel):
+        action: Literal["foo"]
+        foo_data: str
+
+    class BarAction(BaseModel):
+        action: Literal["bar"]
+        bar_data: int
+
+    action_type = Annotated[Union[FooAction, BarAction], Field(discriminator="action")]
+
+    @app.post("/actions")
+    def create_action(action: Annotated[action_type, Body()]):
+        return {"received_action": action.action, "data": action.model_dump()}
+
+    gw_event["path"] = "/actions"
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"]["content-type"] = "application/json"
+    gw_event["body"] = '{"action": "foo", "foo_data": "test"}'
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    response_body = json.loads(result["body"])
+    assert response_body["received_action"] == "foo"
+    assert response_body["data"]["action"] == "foo"
+    assert response_body["data"]["foo_data"] == "test"
+
+    gw_event["body"] = '{"action": "bar", "bar_data": 123}'
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+
+    response_body = json.loads(result["body"])
+    assert response_body["received_action"] == "bar"
+    assert response_body["data"]["action"] == "bar"
+    assert response_body["data"]["bar_data"] == 123
+
+    gw_event["body"] = '{"action": "invalid", "some_data": "test"}'
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422

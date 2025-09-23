@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
       # Maintenance: Persist state per PR as an artifact to avoid spam on label add
       - name: "Suggest split large Pull Request"
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
           PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}

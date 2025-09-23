@@ -145,9 +145,9 @@ gitpython==3.1.44 \
     --hash=sha256:9e0e10cda9bed1ee64bc9a6de50e7e38a9c9943241cd7f585f6df3ed28011110 \
     --hash=sha256:c87e30b26253bf5418b01b0660f818967f3c503193838337fe5e573331249269
     # via mkdocs-git-revision-date-plugin
-griffe==1.12.1 \
-    --hash=sha256:29f5a6114c0aeda7d9c86a570f736883f8a2c5b38b57323d56b3d1c000565567 \
-    --hash=sha256:2d7c12334de00089c31905424a00abcfd931b45b8b516967f224133903d302cc
+griffe==1.13.0 \
+    --hash=sha256:246ea436a5e78f7fbf5f24ca8a727bb4d2a4b442a2959052eea3d0bfe9a076e0 \
+    --hash=sha256:470fde5b735625ac0a36296cd194617f039e9e83e301fcbd493e2b58382d0559
     # via mkdocstrings-python
 idna==3.10 \
     --hash=sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9 \
@@ -290,9 +290,9 @@ mkdocs-llmstxt==0.3.1 \
     --hash=sha256:123119d9b984c1d1224ed5af250bfbc49879ad83decdaff59d8b0ebb459ddc54 \
     --hash=sha256:31f5b6aaae6123c09a2b1c32912c3eb21ccb356b5db7abb867f105e8cc392653
     # via -r requirements.in
-mkdocs-material==9.6.18 \
-    --hash=sha256:a2eb253bcc8b66f8c6eaf8379c10ed6e9644090c2e2e9d0971c7722dc7211c05 \
-    --hash=sha256:dbc1e146a0ecce951a4d84f97b816a54936cdc9e1edd1667fc6868878ac06701
+mkdocs-material==9.6.20 \
+    --hash=sha256:b8d8c8b0444c7c06dd984b55ba456ce731f0035c5a1533cc86793618eb1e6c82 \
+    --hash=sha256:e1f84d21ec5fb730673c4259b2e0d39f8d32a3fef613e3a8e7094b012d43e790
     # via -r requirements.in
 mkdocs-material-extensions==1.3.1 \
     --hash=sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443 \
@@ -302,9 +302,9 @@ mkdocstrings==0.30.0 \
     --hash=sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444 \
     --hash=sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2
     # via mkdocstrings-python
-mkdocstrings-python==1.17.0 \
-    --hash=sha256:49903fa355dfecc5ad0b891e78ff5d25d30ffd00846952801bbe8331e123d4b0 \
-    --hash=sha256:c6295962b60542a9c7468a3b515ce8524616ca9f8c1a38c790db4286340ba501
+mkdocstrings-python==1.18.2 \
+    --hash=sha256:4ad536920a07b6336f50d4c6d5603316fafb1172c5c882370cbbc954770ad323 \
+    --hash=sha256:944fe6deb8f08f33fa936d538233c4036e9f53e840994f6146e8e94eb71b600d
     # via -r requirements.in
 packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \

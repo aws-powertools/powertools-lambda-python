@@ -63,14 +63,32 @@ response_validation_error_response_definition = {
 }
 
 
+class OpenAPIResponseHeader(TypedDict, total=False):
+    """OpenAPI Response Header Object"""
+
+    description: NotRequired[str]
+    schema: NotRequired[dict[str, Any]]
+    examples: NotRequired[dict[str, Any]]
+    style: NotRequired[str]
+    explode: NotRequired[bool]
+    allowReserved: NotRequired[bool]
+    deprecated: NotRequired[bool]
+
+
 class OpenAPIResponseContentSchema(TypedDict, total=False):
     schema: dict
+    examples: NotRequired[dict[str, Any]]
+    encoding: NotRequired[dict[str, Any]]
 
 
-class OpenAPIResponseContentModel(TypedDict):
+class OpenAPIResponseContentModel(TypedDict, total=False):
     model: Any
+    examples: NotRequired[dict[str, Any]]
+    encoding: NotRequired[dict[str, Any]]
 
 
-class OpenAPIResponse(TypedDict):
-    description: str
+class OpenAPIResponse(TypedDict, total=False):
+    description: str  # Still required
+    headers: NotRequired[dict[str, OpenAPIResponseHeader]]
     content: NotRequired[dict[str, OpenAPIResponseContentSchema | OpenAPIResponseContentModel]]
+    links: NotRequired[dict[str, Any]]

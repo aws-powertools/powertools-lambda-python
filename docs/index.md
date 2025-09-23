@@ -44,9 +44,10 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     Most features use Python standard library and the AWS SDK _(boto3)_ that are available in the AWS Lambda runtime.
 
-    * **pip**: **`pip install "aws-lambda-powertools"`**{: .copyMe}:clipboard:
-    * **poetry**: **`poetry add "aws-lambda-powertools"`**{: .copyMe}:clipboard:
-    * **pdm**: **`pdm add "aws-lambda-powertools"`**{: .copyMe}:clipboard:
+    * **pip**: **`pip install "aws-lambda-powertools"`**{: .copyMe}
+    * **poetry**: **`poetry add "aws-lambda-powertools"`**{: .copyMe}
+    * **pdm**: **`pdm add "aws-lambda-powertools"`**{: .copyMe}
+    * **uv**: **`uv add "aws-lambda-powertools"`**{: .copyMe}
 
     ### Extra dependencies
 
@@ -54,12 +55,12 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Feature                                                 | Install                                                                                  | Default dependency                                                           |
     | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-    | **[Tracer](./core/tracer.md#install)**                  | **`pip install "aws-lambda-powertools[tracer]"`**{.copyMe}:clipboard:                    | `aws-xray-sdk`                                                               |
-    | **[Validation](./utilities/validation.md#install)**     | **`pip install "aws-lambda-powertools[validation]"`**{.copyMe}:clipboard:                | `fastjsonschema`                                                             |
-    | **[Parser](./utilities/parser.md#install)**             | **`pip install "aws-lambda-powertools[parser]"`**{.copyMe}:clipboard:                    | `pydantic` _(v2)_ |
-    | **[Data Masking](./utilities/data_masking.md#install)** | **`pip install "aws-lambda-powertools[datamasking]"`**{.copyMe}:clipboard:               | `aws-encryption-sdk`, `jsonpath-ng`                                          |
-    | **All extra dependencies at once**                      | **`pip install "aws-lambda-powertools[all]"`**{.copyMe}:clipboard:                       |
-    | **Two or more extra dependencies only, not all**        | **`pip install "aws-lambda-powertools[tracer,parser,datamasking]"`**{.copyMe}:clipboard: |
+    | **[Tracer](./core/tracer.md#install)**                  | **`pip install "aws-lambda-powertools[tracer]"`**{.copyMe}                    | `aws-xray-sdk`                                                               |
+    | **[Validation](./utilities/validation.md#install)**     | **`pip install "aws-lambda-powertools[validation]"`**{.copyMe}                | `fastjsonschema`                                                             |
+    | **[Parser](./utilities/parser.md#install)**             | **`pip install "aws-lambda-powertools[parser]"`**{.copyMe}                    | `pydantic` _(v2)_ |
+    | **[Data Masking](./utilities/data_masking.md#install)** | **`pip install "aws-lambda-powertools[datamasking]"`**{.copyMe}               | `aws-encryption-sdk`, `jsonpath-ng`                                          |
+    | **All extra dependencies at once**                      | **`pip install "aws-lambda-powertools[all]"`**{.copyMe}                       |
+    | **Two or more extra dependencies only, not all**        | **`pip install "aws-lambda-powertools[tracer,parser,datamasking]"`**{.copyMe} |
 
 === "Lambda Layer"
 
@@ -69,8 +70,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                                     |
     | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-    | x86_64       | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard: |
-    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard:  |
+    | x86_64       | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe} |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}  |
 
     === "AWS Console"
 
@@ -205,7 +206,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
         ```bash title="AWS CLI command to download Lambda Layer content"
-        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:22 --region eu-west-1
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:23 --region eu-west-1
         ```
 
         You'll find the pre-signed URL under `Location` key as part of the CLI command output.
@@ -220,8 +221,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}       |
+    | ARM          | __arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe} |
 
 === "Lambda Layer (GovCloud)"
 
@@ -240,8 +241,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     | Architecture | Layer ARN                                                                                                 |
     | ------------ | --------------------------------------------------------------------------------------------------------- |
-    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}:clipboard:       |
-    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe}:clipboard: |
+    | x86_64          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:18__{: .copyMe}       |
+    | ARM          | __arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:18__{: .copyMe} |
 
 === "Serverless Application Repository (SAR)"
 
@@ -296,19 +297,21 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     Here's how you can use them:
 
-    - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
-    - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}:clipboard:
-    - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+    - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}
+    - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}
+    - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}
+    - __uv__: [**`uv add --prerelease allow "aws-lambda-powertools"`**](#){: .copyMe}
 
 ### Local development
 
-!!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
+!!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe} as a development dependency."
 
 Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency to support IDE auto-completion and to run your tests locally:
 
-- __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
-- __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
-- __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+- __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
+- __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}
+- __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
+- __uv__: [**`uv add "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}
 
 __A word about dependency resolution__
 
@@ -332,7 +335,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:22 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:23 --region eu-west-1
 ```
 
 #### SAR
@@ -343,16 +346,16 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
 | App | ARN | Python version | Architecture |
 | --- | --- | -------------- | ------------ |
-| [aws-lambda-powertools-python-layer-v3-python39-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-x86-64](#){: .copyMe}:clipboard: | Python 3.9 | X86_64 |
-| [aws-lambda-powertools-python-layer-v3-python310-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-x86-64](#){: .copyMe}:clipboard: | Python 3.10 | X86_64 |
-| [aws-lambda-powertools-python-layer-v3-python311-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-x86-64](#){: .copyMe}:clipboard: | Python 3.11 | X86_64 |
-| [aws-lambda-powertools-python-layer-v3-python312-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86-64](#){: .copyMe}:clipboard: | Python 3.12 | X86_64 |
-| [aws-lambda-powertools-python-layer-v3-python313-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64](#){: .copyMe}:clipboard: | Python 3.13 | X86_64 |
-| [aws-lambda-powertools-python-layer-v3-python39-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-arm64](#){: .copyMe}:clipboard: | Python 3.9 | ARM64 |
-| [aws-lambda-powertools-python-layer-v3-python310-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-arm64](#){: .copyMe}:clipboard: | Python 3.10 | ARM64 |
-| [aws-lambda-powertools-python-layer-v3-python311-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-arm64](#){: .copyMe}:clipboard: | Python 3.11 | ARM64 |
-| [aws-lambda-powertools-python-layer-v3-python312-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-arm64](#){: .copyMe}:clipboard: | Python 3.12 | ARM64 |
-| [aws-lambda-powertools-python-layer-v3-python313-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-arm64](#){: .copyMe}:clipboard: | Python 3.13 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python39-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-x86-64](#){: .copyMe} | Python 3.9 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python310-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-x86-64](#){: .copyMe} | Python 3.10 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python311-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-x86-64](#){: .copyMe} | Python 3.11 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python312-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86-64](#){: .copyMe} | Python 3.12 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python313-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64](#){: .copyMe} | Python 3.13 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python39-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-arm64](#){: .copyMe} | Python 3.9 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python310-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-arm64](#){: .copyMe} | Python 3.10 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python311-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-arm64](#){: .copyMe} | Python 3.11 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python312-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-arm64](#){: .copyMe} | Python 3.12 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python313-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-arm64](#){: .copyMe} | Python 3.13 | ARM64 |
 
 ??? note "Click to expand and copy SAR code snippets for popular frameworks"
 
@@ -492,89 +495,6 @@ There are many ways you can help us gain future investments to improve everyone'
     Connect, ask questions, and share what features you use.
 
     [:octicons-arrow-right-24: Discord invite](https://discord.gg/B8zZKbbyET){target="blank"}
-
-</div>
-
-### Becoming a reference customer
-
-Knowing which companies are using this library is important to help prioritize the project internally. The following companies, among others, use Powertools:
-
-<div class="grid" style="text-align:center;" markdown>
-
-[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Banxware**](https://www.banxware.com){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Brsk**](https://www.brsk.co.uk/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**BusPatrol**](https://buspatrol.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Capital One**](https://www.capitalone.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Caylent**](https://caylent.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CHS Inc.**](https://www.chsinc.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CPQi (Exadel Financial Services)**](https://cpqi.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CloudZero**](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**CyberArk**](https://www.cyberark.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Flyweight**](https://flyweight.io/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**globaldatanet**](https://globaldatanet.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Guild**](https://guild.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Instil**](https://instil.co/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**IMS**](https://ims.tech/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**LocalStack**](https://www.localstack.cloud/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Propellor.ai**](https://www.propellor.ai/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Pushpay**](https://pushpay.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**QuasiScience Limited**](https://quasiscience.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Recast**](https://getrecast.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**TopSport**](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Transformity**](https://transformity.tech/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Trek10**](https://www.trek10.com/){target="_blank" rel="nofollow"}
-{ .card }
-
-[**Vertex Pharmaceuticals**](https://www.vrtx.com/){target="_blank" rel="nofollow"}
-{ .card }
 
 </div>
 
