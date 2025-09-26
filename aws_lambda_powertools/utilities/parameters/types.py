@@ -1,3 +1,3 @@
 from typing import Literal
 
-TransformOptions = Literal["json", "binary", "auto", None]
+TransformOptions = Literal["json", "binary", "auto"] | None
