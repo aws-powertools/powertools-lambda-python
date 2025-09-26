@@ -375,7 +375,7 @@ If you want to access the numeric value of the current log level, you can use th
     When you want to set a logging policy to drop informational or verbose logs for one or all AWS Lambda functions, regardless of runtime and logger used.
 
 <!-- markdownlint-disable MD013 -->
-With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced){target="_blank"}, you can enforce a minimum log level that Lambda will accept from your application code.
+With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs-log-level.html#monitoring-cloudwatchlogs-log-level-setting){target="_blank"}, you can enforce a minimum log level that Lambda will accept from your application code.
 
 When enabled, you should keep `Logger` and ALC log level in sync to avoid data loss.
 
