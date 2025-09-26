@@ -410,9 +410,9 @@ We prioritise log level settings in this order:
 3. `POWERTOOLS_LOG_LEVEL` environment variable
 
 !!! info "AWS CDK and Advanced Logging Controls"
-    When using AWS CDK's `applicationLogLevelV2` parameter or setting log levels through the Lambda console, AWS automatically sets the `AWS_LAMBDA_LOG_LEVEL` environment variable. This means Lambda's log level takes precedence over Powertools configuration, potentially overriding both `POWERTOOLS_LOG_LEVEL` and sampling settings.
+    When using AWS CDK's `applicationLogLevelV2` parameter or setting log levels through the Lambda console, AWS Lambda automatically sets the `AWS_LAMBDA_LOG_LEVEL` environment variable. This means Lambda's log level takes precedence over Powertools for AWS configuration, potentially overriding both `POWERTOOLS_LOG_LEVEL` and sampling settings.
 
-    **Example**: If you set `applicationLogLevelV2=DEBUG` in CDK while having `POWERTOOLS_LOG_LEVEL=INFO`, the DEBUG level will be used because CDK automatically sets `AWS_LAMBDA_LOG_LEVEL=DEBUG` behind the scenes.
+    **Example**: If you set `applicationLogLevelV2=DEBUG` in CDK while having `POWERTOOLS_LOG_LEVEL=INFO`, the DEBUG level will be used because Lambda automatically sets the environment variable `AWS_LAMBDA_LOG_LEVEL` to the debug level.
 
 If you set `Logger` level lower than ALC, we will emit a warning informing you that your messages will be discarded by Lambda.
 
@@ -830,13 +830,13 @@ Use sampling when you want to dynamically change your log level to **DEBUG** bas
 
 You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sampling_rate` parameter in Logger.
 
+**AWS Lambda Advanced Logging Controls (ALC)** settings can affect Sampling behavior. See [how it works](#aws-lambda-advanced-logging-controls-alc).
+
 ???+ tip "Tip: When is this useful?"
     Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without increasing the overall verbosity of your logs.
 
     Example: Imagine an e-commerce checkout process where you want to understand rare payment gateway errors. With 10% sampling, you'll log detailed information for a small subset of transactions, making troubleshooting easier without generating excessive logs.
 
-!!! warning "Interaction with AWS Lambda Advanced Logging Controls"
-    When using [AWS Lambda Advanced Logging Controls](#aws-lambda-advanced-logging-controls-alc) with log level set to `DEBUG` (e.g., via CDK's `applicationLogLevelV2` or Lambda console), sampling may not work as expected. Lambda's log level setting takes precedence and overrides Powertools configuration, potentially causing all DEBUG logs to appear regardless of your sampling rate. See the [priority order](#aws-lambda-advanced-logging-controls-alc) for more details.
 
 The sampling decision happens automatically with each invocation when using `@logger.inject_lambda_context` decorator.  When not using the decorator, you're in charge of refreshing it via `refresh_sample_rate_calculation` method. Skipping both may lead to unexpected sampling results.
 
