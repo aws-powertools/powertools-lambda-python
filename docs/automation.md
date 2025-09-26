@@ -94,7 +94,7 @@ This is a snapshot of our automated checks at a glance.
 To build and deploy the Lambda Layers, we run a pipeline with the following steps:
 
 * We fetch the latest PyPi release and use it as the source for our layer.
-* We build Python versions ranging from **3.9 to 3.13** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
+* We build Python versions ranging from **3.9 to 3.14** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
 * We provide layer distributions for both the **x86_64** and **arm64** architectures.
 * For each Python version, we create a single CDK package containing both x86_64 and arm64 assets to optimize deployment performance.
 

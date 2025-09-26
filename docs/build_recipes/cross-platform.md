@@ -129,6 +129,7 @@ Lambda managed runtimes use [specific Amazon Linux versions](https://docs.aws.am
 | **python3.11** | Amazon Linux 2    | 2.26          | x86_64, arm64        |
 | **python3.12** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
 | **python3.13** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
+| **python3.14** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
 
 ???+ warning "GLIBC Version Mismatch"
     Compiled libraries built on systems with newer GLIBC versions will fail on Lambda runtimes with older GLIBC versions. Ubuntu 24.04 (GLIBC 2.39) and Ubuntu 22.04 (GLIBC 2.35) are incompatible with Lambda python3.11 and earlier (GLIBC 2.26). Always use `--platform` flags or Docker with Lambda base images.

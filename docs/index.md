@@ -66,7 +66,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/layer_v3/docker/Dockerfile#L34){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
+    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`, and the `{python_version}` without the period (.), e.g., `python314` for `Python 3.14`.
 
     | Architecture | Layer ARN                                                                                                                     |
     | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -89,7 +89,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         Sample Placeholders:
 
         - `{arch}` is either `arm64` (Graviton based functions) or `x86_64`
-        - `{python_version}` is the Python runtime version, e.g., `python3.13` for `Python 3.13`.
+        - `{python_version}` is the Python runtime version, e.g., `python3.14` for `Python 3.14`.
         - `{version}` is the semantic version number (e,g. 3.1.0) for a release or `latest`
 
         ```yaml
@@ -215,7 +215,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/layer_v3/docker/Dockerfile#L34){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
+    For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python314` for `Python 3.14`.
 
     **AWS China Beijing (cn-north-1)**
 
@@ -228,7 +228,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/layer_v3/docker/Dockerfile#L34){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
+    For the latter, make sure to replace `{python_version}` without the period (.), e.g., `python314` for `Python 3.14`.
 
     **AWS GovCloud (us-gov-east-1)**
 
@@ -248,7 +248,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     We provide a SAR App that deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
 
-    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version. Make sure to replace `{python_version}` without the period (.), e.g., `python313` for `Python 3.13`.
+    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version. Make sure to replace `{python_version}` without the period (.), e.g., `python314` for `Python 3.14`.
 
     | App | ARN | Architecture |
     | --- | --- | ------------ |
@@ -351,11 +351,13 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 | [aws-lambda-powertools-python-layer-v3-python311-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-x86-64](#){: .copyMe} | Python 3.11 | X86_64 |
 | [aws-lambda-powertools-python-layer-v3-python312-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-x86-64](#){: .copyMe} | Python 3.12 | X86_64 |
 | [aws-lambda-powertools-python-layer-v3-python313-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-x86-64](#){: .copyMe} | Python 3.13 | X86_64 |
+| [aws-lambda-powertools-python-layer-v3-python314-x86-64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python314-x86-64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python314-x86-64](#){: .copyMe} | Python 3.14 | X86_64 |
 | [aws-lambda-powertools-python-layer-v3-python39-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python39-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python39-arm64](#){: .copyMe} | Python 3.9 | ARM64 |
 | [aws-lambda-powertools-python-layer-v3-python310-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python310-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python310-arm64](#){: .copyMe} | Python 3.10 | ARM64 |
 | [aws-lambda-powertools-python-layer-v3-python311-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python11-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python311-arm64](#){: .copyMe} | Python 3.11 | ARM64 |
 | [aws-lambda-powertools-python-layer-v3-python312-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python12-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python312-arm64](#){: .copyMe} | Python 3.12 | ARM64 |
 | [aws-lambda-powertools-python-layer-v3-python313-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python313-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python313-arm64](#){: .copyMe} | Python 3.13 | ARM64 |
+| [aws-lambda-powertools-python-layer-v3-python314-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-v3-python314-arm64){target="_blank"}  | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-v3-python314-arm64](#){: .copyMe} | Python 3.14 | ARM64 |
 
 ??? note "Click to expand and copy SAR code snippets for popular frameworks"
 

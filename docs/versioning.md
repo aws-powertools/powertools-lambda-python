@@ -37,11 +37,11 @@ Most AWS SDKs have underlying dependencies, such as language runtimes, AWS Lambd
 
 The following terms are used to classify underlying third party dependencies:
 
-* [**AWS Lambda Runtime**](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html): Examples include `nodejs20.x`, `python3.13`, etc.
-* **Language Runtime**: Examples include Python 3.13, NodeJS 20, Java 17, .NET Core, etc.
+* [**AWS Lambda Runtime**](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html): Examples include `nodejs20.x`, `python3.14`, etc.
+* **Language Runtime**: Examples include Python 3.14, NodeJS 20, Java 17, .NET Core, etc.
 * **Third party Library**: Examples include Pydantic, AWS X-Ray SDK, AWS Encryption SDK, Middy.js, etc.
 
-Powertools for AWS Lambda follows the [AWS Lambda Runtime deprecation policy cycle](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy), when it comes to Language Runtime. This means we will stop supporting their respective deprecated Language Runtime _(e.g., `python37`)_ without increasing the major SDK version.
+Powertools for AWS Lambda follows the [AWS Lambda Runtime deprecation policy cycle](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy), when it comes to Language Runtime. This means we will stop supporting their respective deprecated Language Runtime _(e.g., `python39`)_ without increasing the major SDK version.
 
 !!! note "AWS reserves the right to stop support for an underlying dependency without increasing the major SDK version"
 
