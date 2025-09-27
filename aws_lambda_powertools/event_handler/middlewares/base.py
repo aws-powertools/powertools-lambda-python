@@ -19,7 +19,7 @@ class NextMiddleware(Protocol):
         ...
 
 
-class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
+class BaseMiddlewareHandler(ABC, Generic[EventHandlerInstance]):
     """Base implementation for Middlewares to run code before and after in a chain.
 
 
