@@ -60,7 +60,7 @@ class SchemaConfig:
         value_schema_type: Literal["AVRO", "PROTOBUF", "JSON"] | None = None,
         value_schema: str | None = None,
         value_output_serializer: Any | None = None,
-        key_schema_type: Literal["AVRO", "PROTOBUF", "JSON", None] | None = None,
+        key_schema_type: Literal["AVRO", "PROTOBUF", "JSON"] | None = None,
         key_schema: str | None = None,
         key_output_serializer: Any | None = None,
     ):
