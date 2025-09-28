@@ -132,7 +132,16 @@ class BasePartialProcessor(ABC):
         # whether we create an event loop (Lambda) or schedule it as usual (non-Lambda)
         coro = async_process_closure()
         if os.getenv(constants.LAMBDA_TASK_ROOT_ENV):
-            loop = asyncio.get_event_loop()  # NOTE: this might return an error starting in Python 3.12 in a few years
+            # In Python 3.12+, asyncio.get_event_loop() raises a warning when called without a running loop
+            # In Python 3.14+, it will raise an exception if no event loop is running
+            # Use try/except to handle both the current behavior and future Python versions
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                # No running loop, create a new one for Lambda environment
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
             task_instance = loop.create_task(coro)
             return loop.run_until_complete(task_instance)
 
