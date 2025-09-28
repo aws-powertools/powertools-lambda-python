@@ -375,7 +375,7 @@ If you want to access the numeric value of the current log level, you can use th
     When you want to set a logging policy to drop informational or verbose logs for one or all AWS Lambda functions, regardless of runtime and logger used.
 
 <!-- markdownlint-disable MD013 -->
-With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced){target="_blank"}, you can enforce a minimum log level that Lambda will accept from your application code.
+With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs-log-level.html#monitoring-cloudwatchlogs-log-level-setting){target="_blank"}, you can enforce a minimum log level that Lambda will accept from your application code.
 
 When enabled, you should keep `Logger` and ALC log level in sync to avoid data loss.
 
@@ -408,6 +408,11 @@ We prioritise log level settings in this order:
 1. `AWS_LAMBDA_LOG_LEVEL` environment variable
 2. Explicit log level in `Logger` constructor, or by calling the `logger.setLevel()` method
 3. `POWERTOOLS_LOG_LEVEL` environment variable
+
+!!! info "AWS CDK and Advanced Logging Controls"
+    When using AWS CDK's `applicationLogLevelV2` parameter or setting log levels through the Lambda console, AWS Lambda automatically sets the `AWS_LAMBDA_LOG_LEVEL` environment variable. This means Lambda's log level takes precedence over Powertools for AWS configuration, potentially overriding both `POWERTOOLS_LOG_LEVEL` and sampling settings.
+
+    **Example**: If you set `applicationLogLevelV2=DEBUG` in CDK while having `POWERTOOLS_LOG_LEVEL=INFO`, the DEBUG level will be used because Lambda automatically sets the environment variable `AWS_LAMBDA_LOG_LEVEL` to the debug level.
 
 If you set `Logger` level lower than ALC, we will emit a warning informing you that your messages will be discarded by Lambda.
 
@@ -824,6 +829,8 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
 Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of the Lambda function invocations**.
 
 You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOGGER_SAMPLE_RATE` env var, or `sampling_rate` parameter in Logger.
+
+**AWS Lambda Advanced Logging Controls (ALC)** settings can affect Sampling behavior. See [how it works](#aws-lambda-advanced-logging-controls-alc).
 
 ???+ tip "Tip: When is this useful?"
     Log sampling allows you to capture debug information for a fraction of your requests, helping you diagnose rare or intermittent issues without increasing the overall verbosity of your logs.
