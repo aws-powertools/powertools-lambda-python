@@ -767,6 +767,100 @@ def test_validate_embed_body_param(gw_event):
     assert result["statusCode"] == 200
 
 
+def test_validate_body_param_with_missing_body(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with multiple body parameters
+    @app.post("/")
+    def handler(name: str, age: int):
+        return {"name": name, "age": age}
+
+    # WHEN the event has no body
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/"
+    gw_event["body"] = None  # simulate event without body
+    gw_event["headers"]["content-type"] = "application/json"
+
+    result = app(gw_event, {})
+
+    # THEN the handler should be invoked and return 422
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
+
+
+def test_validate_body_param_with_empty_body(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with multiple body parameters
+    @app.post("/")
+    def handler(name: str, age: int):
+        return {"name": name, "age": age}
+
+    # WHEN the event has no body
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/"
+    gw_event["body"] = "[]"  # JSON array -> received_body is a list (no .get)
+    gw_event["headers"]["content-type"] = "application/json"
+
+    result = app(gw_event, {})
+
+    # THEN the handler should be invoked and return 422
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
+
+
+def test_validate_embed_body_param_with_missing_body(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Annotated[Model, Body(embed=True)]) -> Model:
+        return user
+
+    # WHEN the event has no body
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/"
+    gw_event["body"] = None  # simulate event without body
+    gw_event["headers"]["content-type"] = "application/json"
+
+    result = app(gw_event, {})
+
+    # THEN the handler should be invoked and return 422
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
+
+
+def test_validate_embed_body_param_with_empty_body(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Annotated[Model, Body(embed=True)]) -> Model:
+        return user
+
+    # WHEN the event has no body
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/"
+    gw_event["body"] = "[]"  # JSON array -> received_body is a list (no .get)
+    gw_event["headers"]["content-type"] = "application/json"
+
+    result = app(gw_event, {})
+
+    # THEN the handler should be invoked and return 422
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
+
+
 def test_validate_response_return(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1882,20 +1976,33 @@ def test_custom_route_response_validation_error_bad_http_code(response_validatio
 
 def test_parse_form_data_url_encoded(gw_event):
     """Test _parse_form_data method with URL-encoded form data"""
-
+    # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form")
     def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
         return {"name": name, "tags": tags}
 
+    # WHEN sending a POST request with URL-encoded form data
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/form"
     gw_event["headers"]["content-type"] = "application/x-www-form-urlencoded"
     gw_event["body"] = "name=test&tags=tag1&tags=tag2"
 
     result = app(gw_event, {})
+
+    # THEN it should parse the form data correctly
     assert result["statusCode"] == 200
+    assert result["body"] == '{"name":"test","tags":["tag1","tag2"]}'
+
+    # WHEN sending a POST request with a single value for a list field
+    gw_event["body"] = "name=test&tags=tag1"
+
+    result = app(gw_event, {})
+
+    # THEN it should parse the form data correctly
+    assert result["statusCode"] == 200
+    assert result["body"] == '{"name":"test","tags":["tag1"]}'
 
 
 def test_parse_form_data_wrong_value(gw_event):

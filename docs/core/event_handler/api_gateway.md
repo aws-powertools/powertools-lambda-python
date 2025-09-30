@@ -1144,7 +1144,7 @@ You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environmen
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
 ???+ danger
-    This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
+    This might reveal sensitive information in your logs, use it sparingly.
 
     It's best to use for local development only!
 
