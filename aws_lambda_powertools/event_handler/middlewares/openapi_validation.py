@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast, get_origin
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -13,8 +13,8 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     _model_dump,
     _normalize_errors,
     _regenerate_error_with_loc,
+    field_annotation_is_sequence,
     get_missing_field_error,
-    is_sequence_field,
     lenient_issubclass,
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
@@ -369,7 +369,7 @@ def _request_body_to_args(
             _handle_missing_field_value(field, values, errors, loc)
             continue
 
-        value = _normalize_field_value(field, value)
+        value = _normalize_field_value(value=value, field_info=field.field_info)
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
@@ -412,10 +412,13 @@ def _handle_missing_field_value(
         values[field.name] = field.get_default()
 
 
-def _normalize_field_value(field: ModelField, value: Any) -> Any:
+def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
-    if isinstance(value, list) and not is_sequence_field(field):
+    if field_annotation_is_sequence(field_info.annotation):
+        return value
+    elif isinstance(value, list) and value:
         return value[0]
+
     return value
 
 
@@ -504,7 +507,7 @@ def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField
         value = _get_param_value(input_dict, field_alias, field_name, model_class)
 
         if value is not None:
-            model_data[field_alias] = _normalize_field_value_model_param(value, field_info)
+            model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
 
     input_dict[param.alias] = model_data
 
@@ -524,13 +527,3 @@ def _get_param_value(
         value = input_dict.get(field_name)
 
     return value
-
-
-def _normalize_field_value_model_param(value: Any, field_info: FieldInfo) -> Any:
-    """Normalize field value based on its type annotation."""
-    if get_origin(field_info.annotation) is list:
-        return value
-    elif isinstance(value, list) and value:
-        return value[0]
-    else:
-        return value
