@@ -23,6 +23,8 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValida
 from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
+    from pydantic.fields import FieldInfo
+
     from aws_lambda_powertools.event_handler import Response
     from aws_lambda_powertools.event_handler.api_gateway import Route
     from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
@@ -465,9 +467,9 @@ def _normalize_multi_params(
 def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
     """Process a scalar parameter by normalizing single-item lists."""
     try:
-        val = input_dict[param.alias]
-        if isinstance(val, list) and len(val) == 1:
-            input_dict[param.alias] = val[0]
+        value = input_dict[param.alias]
+        if isinstance(value, list) and len(value) == 1:
+            input_dict[param.alias] = value[0]
     except KeyError:
         pass
 
@@ -477,12 +479,12 @@ def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField
     model_class = cast(type[BaseModel], param.field_info.annotation)
 
     model_data = {}
-    for field_name, field_def in model_class.model_fields.items():
-        field_alias = field_def.alias or field_name
+    for field_name, field_info in model_class.model_fields.items():
+        field_alias = field_info.alias or field_name
         value = _get_param_value(input_dict, field_alias, field_name, model_class)
 
         if value is not None:
-            model_data[field_alias] = _normalize_field_value(value, field_def)
+            model_data[field_alias] = _normalize_field_value_model_param(value, field_info)
 
     input_dict[param.alias] = model_data
 
@@ -504,9 +506,9 @@ def _get_param_value(
     return value
 
 
-def _normalize_field_value(value: Any, field_def: Any) -> Any:
+def _normalize_field_value_model_param(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value based on its type annotation."""
-    if get_origin(field_def.annotation) is list:
+    if get_origin(field_info.annotation) is list:
         return value
     elif isinstance(value, list) and value:
         return value[0]
