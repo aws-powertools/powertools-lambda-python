@@ -390,7 +390,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
-        if not raise_on_empty_metrics and not self.metric_set:
+        if not raise_on_empty_metrics:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "
                 "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
