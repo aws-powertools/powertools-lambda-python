@@ -3,7 +3,7 @@ site_description: Powertools for AWS Lambda (Python)
 site_author: Amazon Web Services
 repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
-site_url: https://docs.powertools.aws.dev/lambda/python/latest
+site_url: https://docs.powertools.aws.dev/lambda/python/latest/
 
 nav:
   - Homepage:
@@ -297,6 +297,7 @@ extra_javascript:
   - javascript/aws-amplify.min.js
   - javascript/extra.js
   - https://docs.powertools.aws.dev/shared/mermaid.min.js
+  - https://docs.aws.amazon.com/assets/js/awsdocs-boot.js
 
 extra:
   version:
