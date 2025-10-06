@@ -43,7 +43,7 @@ jobs:
       statuses: read
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v4.3.0
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
