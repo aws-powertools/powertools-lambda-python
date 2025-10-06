@@ -284,9 +284,9 @@ mkdocs-get-deps==0.2.0 \
 mkdocs-git-revision-date-plugin==0.3.2 \
     --hash=sha256:2e67956cb01823dd2418e2833f3623dee8604cdf223bddd005fe36226a56f6ef
     # via -r requirements.in
-mkdocs-llmstxt==0.3.2 \
-    --hash=sha256:dd63acb8257fca3244058fd820acd4700c1626dbe48ad3a1a2cc9c599f8e4b7f \
-    --hash=sha256:fb363205d6f1452411dc5069f62012cb6b29e1788f6db9cc17793bdca7eabea8
+mkdocs-llmstxt==0.4.0 \
+    --hash=sha256:7244bf0ac917c9964030c93e9c3e26c02d2d14a0f66fc113416007125b6da0fc \
+    --hash=sha256:a7e4d20496bc8c55b6773b55c8d69cf552448a9ad38915b6e8c657ae3a46c8b8
     # via -r requirements.in
 mkdocs-material==9.6.21 \
     --hash=sha256:aa6a5ab6fb4f6d381588ac51da8782a4d3757cb3d1b174f81a2ec126e1f22c92 \
