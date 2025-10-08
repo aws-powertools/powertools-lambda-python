@@ -46,7 +46,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: ["3.9","3.10","3.11","3.12","3.13","3.14.0-rc.3"]
+        python-version: ["3.9","3.10","3.11","3.12","3.13","3.14"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
