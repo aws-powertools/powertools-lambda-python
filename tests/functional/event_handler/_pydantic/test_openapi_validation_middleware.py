@@ -3,10 +3,10 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, Base64UrlStr, BaseModel, ConfigDict, Field, StringConstraints, alias_generators
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -2542,15 +2542,11 @@ def test_field_discriminator_validation(gw_event):
 
 def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event):
     """Test that Pydantic models with ConfigDict, aliases, and validators work correctly"""
-    from typing import Any
-
-    from pydantic import AfterValidator, Base64UrlStr, ConfigDict, StringConstraints, alias_generators
 
     del gw_event["multiValueHeaders"]
     del gw_event["multiValueQueryStringParameters"]
 
     app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger(path="/swagger")
 
     def _validate_powertools(value: str) -> str:
         if not value.startswith("Powertools"):
