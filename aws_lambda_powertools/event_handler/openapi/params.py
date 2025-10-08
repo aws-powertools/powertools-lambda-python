@@ -86,7 +86,7 @@ class Dependant:
         self.cache_key: CacheKey = self.call
 
 
-class Param(FieldInfo):
+class Param(FieldInfo):  # type: ignore[misc]
     """
     A class used internally to represent a parameter in a path operation.
     """
@@ -237,7 +237,7 @@ class Param(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class Path(Param):
+class Path(Param):  # type: ignore[misc]
     """
     A class used internally to represent a path parameter in a path operation.
     """
@@ -371,7 +371,7 @@ class Path(Param):
         )
 
 
-class Query(Param):
+class Query(Param):  # type: ignore[misc]
     """
     A class used internally to represent a query parameter in a path operation.
     """
@@ -500,7 +500,7 @@ class Query(Param):
         )
 
 
-class Header(Param):
+class Header(Param):  # type: ignore[misc]
     """
     A class used internally to represent a header parameter in a path operation.
     """
@@ -650,7 +650,7 @@ class Header(Param):
             self._alias = value.lower()
 
 
-class Body(FieldInfo):
+class Body(FieldInfo):  # type: ignore[misc]
     """
     A class used internally to represent a body parameter in a path operation.
     """
@@ -738,7 +738,7 @@ class Body(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class Form(Body):
+class Form(Body):  # type: ignore[misc]
     """
     A class used to represent a form parameter in a path operation.
     """
@@ -810,7 +810,7 @@ class Form(Body):
         )
 
 
-class _File(Form):
+class _File(Form):  # type: ignore[misc]
     """
     A class used to represent a file parameter in a path operation.
     """
