@@ -32,5 +32,5 @@ jobs:
       - name: Block if it doesn't minimum requirements
         if: contains(github.event.pull_request.labels.*.name, 'do-not-merge')
         run: |
-          echo "This PR does not meet minimum requirements (check PR comments)."
+          echo "PR has 'do-not-merge' label. Please resolve the issues mentioned in the PR comments."
           exit 1
