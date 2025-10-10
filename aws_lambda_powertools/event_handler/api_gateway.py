@@ -92,7 +92,7 @@ if TYPE_CHECKING:
         Server,
         Tag,
     )
-    from aws_lambda_powertools.event_handler.openapi.params import Dependant
+    from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param
     from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import (
         OAuth2Config,
     )
@@ -818,45 +818,122 @@ class Route:
         """
         Returns the OpenAPI operation parameters.
         """
-        from aws_lambda_powertools.event_handler.openapi.compat import (
-            get_schema_from_model_field,
-        )
         from aws_lambda_powertools.event_handler.openapi.params import Param
 
-        parameters = []
-        parameter: dict[str, Any] = {}
+        parameters: list[dict[str, Any]] = []
 
         for param in all_route_params:
-            field_info = param.field_info
-            field_info = cast(Param, field_info)
+            field_info = cast(Param, param.field_info)
             if not field_info.include_in_schema:
                 continue
 
-            param_schema = get_schema_from_model_field(
-                field=param,
-                model_name_map=model_name_map,
-                field_mapping=field_mapping,
-            )
-
-            parameter = {
-                "name": param.alias,
-                "in": field_info.in_.value,
-                "required": param.required,
-                "schema": param_schema,
-            }
-
-            if field_info.description:
-                parameter["description"] = field_info.description
-
-            if field_info.openapi_examples:
-                parameter["examples"] = field_info.openapi_examples
-
-            if field_info.deprecated:
-                parameter["deprecated"] = field_info.deprecated
-
-            parameters.append(parameter)
+            # Check if this is a Pydantic model that should be expanded
+            if Route._is_pydantic_model_param(field_info):
+                parameters.extend(Route._expand_pydantic_model_parameters(field_info))
+            else:
+                parameters.append(Route._create_regular_parameter(param, model_name_map, field_mapping))
 
         return parameters
+
+    @staticmethod
+    def _is_pydantic_model_param(field_info: Param) -> bool:
+        """Check if the field info represents a Pydantic model parameter."""
+        from pydantic import BaseModel
+
+        from aws_lambda_powertools.event_handler.openapi.compat import lenient_issubclass
+
+        return lenient_issubclass(field_info.annotation, BaseModel)
+
+    @staticmethod
+    def _expand_pydantic_model_parameters(field_info: Param) -> list[dict[str, Any]]:
+        """Expand a Pydantic model into individual OpenAPI parameters."""
+        from pydantic import BaseModel
+
+        model_class = cast(type[BaseModel], field_info.annotation)
+        parameters: list[dict[str, Any]] = []
+
+        for field_name, field_def in model_class.model_fields.items():
+            param_name = field_def.alias or field_name
+            individual_param = Route._create_pydantic_field_parameter(
+                param_name=param_name,
+                field_def=field_def,
+                param_location=field_info.in_.value,
+            )
+            parameters.append(individual_param)
+
+        return parameters
+
+    @staticmethod
+    def _create_pydantic_field_parameter(
+        param_name: str,
+        field_def: Any,
+        param_location: str,
+    ) -> dict[str, Any]:
+        """Create an OpenAPI parameter from a Pydantic field definition."""
+        individual_param: dict[str, Any] = {
+            "name": param_name,
+            "in": param_location,
+            "required": field_def.is_required() if hasattr(field_def, "is_required") else field_def.default is ...,
+            "schema": Route._get_basic_type_schema(field_def.annotation or type(None)),
+        }
+
+        if field_def.description:
+            individual_param["description"] = field_def.description
+
+        return individual_param
+
+    @staticmethod
+    def _create_regular_parameter(
+        param: ModelField,
+        model_name_map: dict[TypeModelOrEnum, str],
+        field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+    ) -> dict[str, Any]:
+        """Create an OpenAPI parameter from a regular ModelField."""
+        from aws_lambda_powertools.event_handler.openapi.compat import get_schema_from_model_field
+        from aws_lambda_powertools.event_handler.openapi.params import Param
+
+        field_info = cast(Param, param.field_info)
+        param_schema = get_schema_from_model_field(
+            field=param,
+            model_name_map=model_name_map,
+            field_mapping=field_mapping,
+        )
+
+        parameter: dict[str, Any] = {
+            "name": param.alias,
+            "in": field_info.in_.value,
+            "required": param.required,
+            "schema": param_schema,
+        }
+
+        # Add optional attributes if present
+        if field_info.description:
+            parameter["description"] = field_info.description
+        if field_info.openapi_examples:
+            parameter["examples"] = field_info.openapi_examples
+        if field_info.deprecated:
+            parameter["deprecated"] = field_info.deprecated
+
+        return parameter
+
+    @staticmethod
+    def _get_basic_type_schema(param_type: type) -> dict[str, str]:
+        """
+        Get basic OpenAPI schema for simple types
+        """
+        try:
+            # Check bool before int, since bool is a subclass of int in Python
+            if issubclass(param_type, bool):
+                return {"type": "boolean"}
+            elif issubclass(param_type, int):
+                return {"type": "integer"}
+            elif issubclass(param_type, float):
+                return {"type": "number"}
+            else:
+                return {"type": "string"}
+        except TypeError:
+            # param_type may not be a type (e.g., typing.Optional[int]), fallback to string
+            return {"type": "string"}
 
     @staticmethod
     def _openapi_operation_return(
