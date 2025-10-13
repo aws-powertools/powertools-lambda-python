@@ -4,11 +4,20 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Features
+
+* **event_handler:** add support for Pydantic models in Query and Header types ([#7253](https://github.com/aws-powertools/powertools-lambda-python/issues/7253))
+
 ## Maintenance
 
+* **ci:** improve message when do-not-merge label is present ([#7505](https://github.com/aws-powertools/powertools-lambda-python/issues/7505))
+* **ci:** new pre-release 3.21.1a1 ([#7506](https://github.com/aws-powertools/powertools-lambda-python/issues/7506))
 * **ci:** new pre-release 3.21.1a0 ([#7500](https://github.com/aws-powertools/powertools-lambda-python/issues/7500))
 * **deps:** bump valkey-glide from 2.1.0 to 2.1.1 ([#7498](https://github.com/aws-powertools/powertools-lambda-python/issues/7498))
+* **deps-dev:** bump cfn-lint from 1.40.0 to 1.40.1 ([#7502](https://github.com/aws-powertools/powertools-lambda-python/issues/7502))
 * **deps-dev:** bump types-python-dateutil from 2.9.0.20250822 to 2.9.0.20251008 ([#7499](https://github.com/aws-powertools/powertools-lambda-python/issues/7499))
+* **deps-dev:** bump boto3-stubs from 1.40.47 to 1.40.49 ([#7503](https://github.com/aws-powertools/powertools-lambda-python/issues/7503))
+* **deps-dev:** bump sentry-sdk from 2.40.0 to 2.41.0 ([#7504](https://github.com/aws-powertools/powertools-lambda-python/issues/7504))
 
 
 <a name="v3.21.0"></a>
