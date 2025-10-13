@@ -11,6 +11,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
+* Support for Middleware
 * Support for OpenAPI schema generation
 * Support data validation for requests/responses
 
@@ -303,7 +304,7 @@ If you need to accept multiple HTTP methods in a single function, or support a H
 
     For brevity, we'll focus on Pydantic only.
 
-All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`.
+All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`. You can use Pydantic models to validate request bodies, query strings, headers, and form parameters.
 
 With this feature, we can now express how we expect our incoming data and response to look like. This moves data validation responsibilities to Event Handler resolvers, reducing a ton of boilerplate code.
 
@@ -519,6 +520,16 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     1. `example_multi_value_param` is a list containing values from the `ExampleEnum` enumeration.
 
+=== "validating_query_string_with_pydantic.py"
+
+    You can use Pydantic models to define your query string parameters.
+
+    ```python hl_lines="18-22 27"
+    --8<-- "examples/event_handler_rest/src/validating_query_string_with_pydantic.py"
+    ```
+
+    1. `todo` is a Pydantic model.
+
 <!-- markdownlint-enable MD013 -->
 
 #### Validating path parameters
@@ -566,6 +577,16 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
     ```
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
+
+=== "validating_headers_with_pydantic.py"
+
+    You can use Pydantic models to define your headers parameters.
+
+    ```python hl_lines="18-22 27"
+    --8<-- "examples/event_handler_rest/src/validating_headers_with_pydantic.py"
+    ```
+
+    1. `todo` is a Pydantic model.
 
 #### Handling form data
 
