@@ -9,17 +9,14 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     create_body_model,
     evaluate_forwardref,
     is_scalar_field,
-    is_scalar_sequence_field,
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
     File,
     Form,
-    Header,
     Param,
     ParamTypes,
-    Query,
     analyze_param,
     create_response_field,
     get_flat_dependant,
@@ -275,7 +272,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     elif is_scalar_field(field=param_field):
         return False
-    elif isinstance(param_field.field_info, (Query, Header)) and is_scalar_sequence_field(param_field):
+    elif isinstance(param_field.field_info, Param):
         return False
     else:
         if not isinstance(param_field.field_info, Body):

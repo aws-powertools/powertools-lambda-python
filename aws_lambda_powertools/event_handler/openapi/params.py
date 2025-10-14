@@ -4,7 +4,7 @@ import inspect
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Literal
 
-from pydantic import BaseConfig
+from pydantic import BaseConfig, BaseModel, create_model
 from pydantic.fields import FieldInfo
 from typing_extensions import Annotated, get_args, get_origin
 
@@ -17,6 +17,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     copy_field_info,
     field_annotation_is_scalar,
     get_annotation_from_field_info,
+    lenient_issubclass,
 )
 
 if TYPE_CHECKING:
@@ -222,7 +223,7 @@ class Dependant:
         self.cache_key: CacheKey = self.call
 
 
-class Param(FieldInfo):
+class Param(FieldInfo):  # type: ignore[misc]
     """
     A class used internally to represent a parameter in a path operation.
     """
@@ -373,7 +374,7 @@ class Param(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class Path(Param):
+class Path(Param):  # type: ignore[misc]
     """
     A class used internally to represent a path parameter in a path operation.
     """
@@ -507,7 +508,7 @@ class Path(Param):
         )
 
 
-class Query(Param):
+class Query(Param):  # type: ignore[misc]
     """
     A class used internally to represent a query parameter in a path operation.
     """
@@ -636,7 +637,7 @@ class Query(Param):
         )
 
 
-class Header(Param):
+class Header(Param):  # type: ignore[misc]
     """
     A class used internally to represent a header parameter in a path operation.
     """
@@ -786,7 +787,7 @@ class Header(Param):
             self._alias = value.lower()
 
 
-class Body(FieldInfo):
+class Body(FieldInfo):  # type: ignore[misc]
     """
     A class used internally to represent a body parameter in a path operation.
     """
@@ -874,7 +875,7 @@ class Body(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class Form(Body):
+class Form(Body):  # type: ignore[misc]
     """
     A class used to represent a form parameter in a path operation.
     """
@@ -946,7 +947,7 @@ class Form(Body):
         )
 
 
-class File(Form):
+class _File(Form):  # type: ignore[misc]
     """
     A class used to represent a file parameter in a path operation.
     """
@@ -1022,6 +1023,9 @@ class File(Form):
             json_schema_extra=json_schema_extra,
             **extra,
         )
+
+
+File = _File
 
 
 def get_flat_dependant(
@@ -1296,6 +1300,42 @@ def create_response_field(
     return ModelField(**kwargs)  # type: ignore[arg-type]
 
 
+def _apply_header_underscore_conversion(
+    field_info: FieldInfo,
+    type_annotation: Any,
+    param_name: str,
+) -> tuple[FieldInfo, Any]:
+    """
+    Apply underscore-to-dash conversion for Header parameters.
+
+    For BaseModel: Creates new model with underscore-to-dash alias generator.
+    Note: If the BaseModel already has an alias generator, it will be replaced
+    with dash-case conversion since HTTP headers should use dash-case.
+    For all Header fields: Sets the parameter alias if convert_underscores is True
+    """
+    if not isinstance(field_info, Header) or not field_info.convert_underscores:
+        return field_info, type_annotation
+
+    # Always set the parameter alias for Header fields (if not already set)
+    if not field_info.alias:
+        field_info.alias = param_name.replace("_", "-")
+
+    # Handle BaseModel case - create new model with dash-case alias generator
+    if lenient_issubclass(type_annotation, BaseModel):
+        # For HTTP headers, we should use dash-case regardless of existing alias generator
+        # This ensures consistent header naming conventions
+        header_aliased_model = create_model(
+            f"{type_annotation.__name__}WithHeaderAliases",
+            __base__=type_annotation,
+            __config__={"alias_generator": lambda name: name.replace("_", "-")},
+        )
+
+        type_annotation = header_aliased_model
+        field_info.annotation = type_annotation
+
+    return field_info, type_annotation
+
+
 def _create_model_field(
     field_info: FieldInfo | None,
     type_annotation: Any,
@@ -1314,21 +1354,17 @@ def _create_model_field(
     elif isinstance(field_info, Param) and getattr(field_info, "in_", None) is None:
         field_info.in_ = ParamTypes.query
 
+    # Apply header underscore conversion
+    field_info, type_annotation = _apply_header_underscore_conversion(field_info, type_annotation, param_name)
+
     # If the field_info is a Param, we use the `in_` attribute to determine the type annotation
     use_annotation = get_annotation_from_field_info(type_annotation, field_info, param_name)
-
-    # If the field doesn't have a defined alias, we use the param name
-    if not field_info.alias and getattr(field_info, "convert_underscores", None):
-        alias = param_name.replace("_", "-")
-    else:
-        alias = field_info.alias or param_name
-    field_info.alias = alias
 
     return create_response_field(
         name=param_name,
         type_=use_annotation,
         default=field_info.default,
-        alias=alias,
+        alias=field_info.alias,
         required=field_info.default in (Required, Undefined),
         field_info=field_info,
     )

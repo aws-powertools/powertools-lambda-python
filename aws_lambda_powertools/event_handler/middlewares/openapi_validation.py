@@ -4,8 +4,7 @@ import dataclasses
 import json
 import logging
 import re
-from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union, cast
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -15,7 +14,9 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     _model_dump,
     _normalize_errors,
     _regenerate_error_with_loc,
+    field_annotation_is_sequence,
     get_missing_field_error,
+    lenient_issubclass,
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
@@ -23,6 +24,8 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValida
 from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
 
 if TYPE_CHECKING:
+    from pydantic.fields import FieldInfo
+
     from aws_lambda_powertools.event_handler import Response
     from aws_lambda_powertools.event_handler.api_gateway import Route
     from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
@@ -66,7 +69,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         )
 
         # Normalize query values before validate this
-        query_string = _normalize_multi_query_string_with_param(
+        query_string = _normalize_multi_params(
             app.current_event.resolved_query_string_parameters,
             route.dependant.query_params,
         )
@@ -78,7 +81,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         )
 
         # Normalize header values before validate this
-        headers = _normalize_multi_header_values_with_param(
+        headers = _normalize_multi_params(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
         )
@@ -156,11 +159,10 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         """Parse URL-encoded form data from the request body."""
         try:
             body = app.current_event.decoded_body or ""
-            # parse_qs returns dict[str, list[str]], but we want dict[str, str] for single values
+            # NOTE: Keep values as lists; we'll normalize per-field later based on the expected type.
+            # This avoids breaking List[...] fields when only a single value is provided.
             parsed = parse_qs(body, keep_blank_values=True)
-
-            result: dict[str, Any] = {key: values[0] if len(values) == 1 else values for key, values in parsed.items()}
-            return result
+            return parsed
 
         except Exception as e:  # pragma: no cover
             raise RequestValidationError(  # pragma: no cover
@@ -456,12 +458,12 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
 def _request_params_to_args(
     required_params: Sequence[ModelField],
     received_params: Mapping[str, Any],
-) -> tuple[dict[str, Any], list[Any]]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """
     Convert the request params to a dictionary of values using validation, and returns a list of errors.
     """
-    values = {}
-    errors = []
+    values: dict[str, Any] = {}
+    errors: list[dict[str, Any]] = []
 
     for field in required_params:
         field_info = field.field_info
@@ -470,16 +472,12 @@ def _request_params_to_args(
         if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
-        value = received_params.get(field.alias)
-
         loc = (field_info.in_.value, field.alias)
+        value = received_params.get(field.alias)
 
         # If we don't have a value, see if it's required or has a default
         if value is None:
-            if field.required:
-                errors.append(get_missing_field_error(loc=loc))
-            else:
-                values[field.name] = deepcopy(field.default)
+            _handle_missing_field_value(field, values, errors, loc)
             continue
 
         # Finally, validate the value
@@ -546,34 +544,65 @@ def _request_body_to_args(
     )
 
     for field in required_params:
-        loc = _get_field_location(field, field_alias_omitted)
-        value = _get_field_value(received_body, field)
+        loc = _get_body_field_location(field, field_alias_omitted)
+        value = _extract_field_value_from_body(field, received_body, loc, errors)
 
-        # Handle AttributeError from _get_field_value
-        if received_body is not None and value is None:
-            try:
-                # Double-check with direct access to distinguish None value from AttributeError
-                received_body.get(field.alias)
-            except AttributeError:
-                errors.append(get_missing_field_error(loc))
-                continue
-
-        # Handle missing values
+        # If we don't have a value, see if it's required or has a default
         if value is None:
-            if field.required:
-                errors.append(get_missing_field_error(loc))
-            else:
-                values[field.name] = deepcopy(field.default)
+            _handle_missing_field_value(field, values, errors, loc)
             continue
 
-        # Handle type conversions for UploadFile/bytes compatibility
-        field_type = _resolve_field_type(field.type_)
-        value = _convert_value_type(value, field_type)
-
-        # Finally, validate the value
+        value = _normalize_field_value(value=value, field_info=field.field_info)
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
+
+
+def _get_body_field_location(field: ModelField, field_alias_omitted: bool) -> tuple[str, ...]:
+    """Get the location tuple for a body field based on whether the field alias is omitted."""
+    if field_alias_omitted:
+        return ("body",)
+    return ("body", field.alias)
+
+
+def _extract_field_value_from_body(
+    field: ModelField,
+    received_body: dict[str, Any] | None,
+    loc: tuple[str, ...],
+    errors: list[dict[str, Any]],
+) -> Any | None:
+    """Extract field value from the received body, handling potential AttributeError."""
+    if received_body is None:
+        return None
+
+    try:
+        return received_body.get(field.alias)
+    except AttributeError:
+        errors.append(get_missing_field_error(loc))
+        return None
+
+
+def _handle_missing_field_value(
+    field: ModelField,
+    values: dict[str, Any],
+    errors: list[dict[str, Any]],
+    loc: tuple[str, ...],
+) -> None:
+    """Handle the case when a field value is missing."""
+    if field.required:
+        errors.append(get_missing_field_error(loc))
+    else:
+        values[field.name] = field.get_default()
+
+
+def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
+    """Normalize field value, converting lists to single values for non-sequence fields."""
+    if field_annotation_is_sequence(field_info.annotation):
+        return value
+    elif isinstance(value, list) and value:
+        return value[0]
+
+    return value
 
 
 def _validate_field(
@@ -614,57 +643,70 @@ def _get_embed_body(
     return received_body, field_alias_omitted
 
 
-def _normalize_multi_query_string_with_param(
-    query_string: dict[str, list[str]],
+def _normalize_multi_params(
+    input_dict: MutableMapping[str, Any],
     params: Sequence[ModelField],
-) -> dict[str, Any]:
+) -> MutableMapping[str, Any]:
     """
-    Extract and normalize resolved_query_string_parameters
+    Extract and normalize query string or header parameters with Pydantic model support.
 
     Parameters
     ----------
-    query_string: dict
-        A dictionary containing the initial query string parameters.
+    input_dict: MutableMapping[str, Any]
+        A dictionary containing the initial query string or header parameters.
     params: Sequence[ModelField]
         A sequence of ModelField objects representing parameters.
 
     Returns
     -------
-    A dictionary containing the processed multi_query_string_parameters.
+    MutableMapping[str, Any]
+        A dictionary containing the processed parameters with normalized values.
     """
-    resolved_query_string: dict[str, Any] = query_string
-    for param in filter(is_scalar_field, params):
-        try:
-            # if the target parameter is a scalar, we keep the first value of the query string
-            # regardless if there are more in the payload
-            resolved_query_string[param.alias] = query_string[param.alias][0]
-        except KeyError:
-            pass
-    return resolved_query_string
+    for param in params:
+        if is_scalar_field(param):
+            _process_scalar_param(input_dict, param)
+        elif lenient_issubclass(param.field_info.annotation, BaseModel):
+            _process_model_param(input_dict, param)
+    return input_dict
 
 
-def _normalize_multi_header_values_with_param(headers: MutableMapping[str, Any], params: Sequence[ModelField]):
-    """
-    Extract and normalize resolved_headers_field
+def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+    """Process a scalar parameter by normalizing single-item lists."""
+    try:
+        value = input_dict[param.alias]
+        if isinstance(value, list) and len(value) == 1:
+            input_dict[param.alias] = value[0]
+    except KeyError:
+        pass
 
-    Parameters
-    ----------
-    headers: MutableMapping[str, Any]
-        A dictionary containing the initial header parameters.
-    params: Sequence[ModelField]
-        A sequence of ModelField objects representing parameters.
 
-    Returns
-    -------
-    A dictionary containing the processed headers.
-    """
-    if headers:
-        for param in filter(is_scalar_field, params):
-            try:
-                if len(headers[param.alias]) == 1:
-                    # if the target parameter is a scalar and the list contains only 1 element
-                    # we keep the first value of the headers regardless if there are more in the payload
-                    headers[param.alias] = headers[param.alias][0]
-            except KeyError:
-                pass
-    return headers
+def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+    """Process a Pydantic model parameter by extracting model fields."""
+    model_class = cast(type[BaseModel], param.field_info.annotation)
+
+    model_data = {}
+    for field_name, field_info in model_class.model_fields.items():
+        field_alias = field_info.alias or field_name
+        value = _get_param_value(input_dict, field_alias, field_name, model_class)
+
+        if value is not None:
+            model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
+
+    input_dict[param.alias] = model_data
+
+
+def _get_param_value(
+    input_dict: MutableMapping[str, Any],
+    field_alias: str,
+    field_name: str,
+    model_class: type[BaseModel],
+) -> Any:
+    """Get parameter value, checking both alias and field name if needed."""
+    value = input_dict.get(field_alias)
+    if value is not None:
+        return value
+
+    if model_class.model_config.get("validate_by_name") or model_class.model_config.get("populate_by_name"):
+        value = input_dict.get(field_name)
+
+    return value

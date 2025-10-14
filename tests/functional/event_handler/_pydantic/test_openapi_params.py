@@ -25,6 +25,145 @@ from aws_lambda_powertools.event_handler.openapi.params import (
 JSON_CONTENT_TYPE = "application/json"
 
 
+def test_openapi_pydantic_query_params():
+    """Test that Pydantic models in Query parameters are expanded into individual fields in OpenAPI schema"""
+    app = APIGatewayRestResolver()
+
+    class QueryParams(BaseModel):
+        limit: int = Field(default=10, ge=1, le=100, description="Number of items to return")
+        offset: int = Field(default=0, ge=0, description="Number of items to skip")
+        search: Optional[str] = Field(default=None, description="Search term")
+
+    @app.get("/search")
+    def search_handler(params: Annotated[QueryParams, Query()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the path exists
+    assert "/search" in schema.paths
+    path = schema.paths["/search"]
+    assert path.get is not None
+
+    # Check that parameters are expanded
+    get_operation = path.get
+    assert get_operation.parameters is not None
+    assert len(get_operation.parameters) == 3
+
+    # Check individual parameters
+    param_names = [param.name for param in get_operation.parameters]
+    assert "limit" in param_names
+    assert "offset" in param_names
+    assert "search" in param_names
+
+    # Check parameter details
+    for param in get_operation.parameters:
+        assert param.in_ == ParameterInType.query
+        if param.name == "limit":
+            assert param.required is False  # Has default value
+            assert param.description == "Number of items to return"
+            assert param.schema_.type == "integer"
+        elif param.name == "offset":
+            assert param.required is False  # Has default value
+            assert param.description == "Number of items to skip"
+            assert param.schema_.type == "integer"
+        elif param.name == "search":
+            assert param.required is False  # Optional field
+            assert param.description == "Search term"
+            assert param.schema_.type == "string"
+
+
+def test_openapi_pydantic_header_params():
+    """Test that Pydantic models in Header parameters are expanded into individual fields in OpenAPI schema"""
+    app = APIGatewayRestResolver()
+
+    class HeaderParams(BaseModel):
+        authorization: str = Field(description="Authorization token")
+        user_agent: str = Field(default="PowerTools/1.0", description="User agent")
+        language: Optional[str] = Field(default=None, alias="accept-language", description="Language preference")
+
+    @app.get("/protected")
+    def protected_handler(headers: Annotated[HeaderParams, Header()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the path exists
+    assert "/protected" in schema.paths
+    path = schema.paths["/protected"]
+    assert path.get is not None
+
+    # Check that parameters are expanded
+    get_operation = path.get
+    assert get_operation.parameters is not None
+    assert len(get_operation.parameters) == 3
+
+    # Check individual parameters
+    param_names = [param.name for param in get_operation.parameters]
+    assert "authorization" in param_names
+    assert "user-agent" in param_names  # headers are always spinal-case
+    assert "accept-language" in param_names  # Should use alias
+
+    # Check parameter details
+    for param in get_operation.parameters:
+        assert param.in_ == ParameterInType.header
+        if param.name == "authorization":
+            assert param.required is True  # No default value
+            assert param.description == "Authorization token"
+            assert param.schema_.type == "string"
+        elif param.name == "user_agent":
+            assert param.required is False  # Has default value
+            assert param.description == "User agent"
+            assert param.schema_.type == "string"
+        elif param.name == "accept-language":
+            assert param.required is False  # Optional field
+            assert param.description == "Language preference"
+            assert param.schema_.type == "string"
+
+
+def test_openapi_pydantic_mixed_params():
+    """Test that mixed Pydantic models (Query + Header) work together"""
+    app = APIGatewayRestResolver()
+
+    class QueryParams(BaseModel):
+        q: str = Field(description="Search query")
+        limit: int = Field(default=10, description="Number of results")
+
+    class HeaderParams(BaseModel):
+        authorization: str = Field(description="Bearer token")
+
+    @app.get("/mixed")
+    def mixed_handler(query: Annotated[QueryParams, Query()], headers: Annotated[HeaderParams, Header()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+
+    # Check that the path exists
+    assert "/mixed" in schema.paths
+    path = schema.paths["/mixed"]
+    assert path.get is not None
+
+    # Check that all parameters are expanded
+    get_operation = path.get
+    assert get_operation.parameters is not None
+    assert len(get_operation.parameters) == 3  # 2 query + 1 header
+
+    # Check parameter types
+    query_params = [p for p in get_operation.parameters if p.in_ == ParameterInType.query]
+    header_params = [p for p in get_operation.parameters if p.in_ == ParameterInType.header]
+
+    assert len(query_params) == 2
+    assert len(header_params) == 1
+
+    # Check specific parameters
+    query_names = [p.name for p in query_params]
+    assert "q" in query_names
+    assert "limit" in query_names
+
+    header_names = [p.name for p in header_params]
+    assert "authorization" in header_names
+
+
 def test_openapi_no_params():
     app = APIGatewayRestResolver()
 
@@ -776,3 +915,132 @@ def test_openapi_form_parameter_edge_cases():
     assert "required_field" in component_schema.required
     assert "optional_field" not in component_schema.required  # Optional
     assert "field_with_default" not in component_schema.required  # Has default
+
+
+def test_openapi_pydantic_query_with_constraints():
+    """Test that Pydantic field constraints are preserved in OpenAPI schema"""
+    app = APIGatewayRestResolver()
+
+    class QueryParams(BaseModel):
+        limit: int = Field(ge=1, le=100, description="Number of items")
+        name: str = Field(min_length=1, max_length=50, description="Name filter")
+
+    @app.get("/items")
+    def get_items(params: Annotated[QueryParams, Query()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/items"]
+    get_operation = path.get
+
+    # Find the limit parameter
+    limit_param = next(p for p in get_operation.parameters if p.name == "limit")
+    assert limit_param.schema_.type == "integer"
+    assert limit_param.description == "Number of items"
+
+    # Find the name parameter
+    name_param = next(p for p in get_operation.parameters if p.name == "name")
+    assert name_param.schema_.type == "string"
+    assert name_param.description == "Name filter"
+
+
+def test_openapi_pydantic_header_with_alias():
+    """Test that Pydantic field aliases work correctly in Header parameters"""
+    app = APIGatewayRestResolver()
+
+    class HeaderParams(BaseModel):
+        content_type: str = Field(alias="content-type", description="Content type")
+        user_agent: str = Field(alias="user-agent", description="User agent")
+
+    @app.get("/test")
+    def test_handler(headers: Annotated[HeaderParams, Header()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/test"]
+    get_operation = path.get
+
+    # Check that aliases are used as parameter names
+    param_names = [param.name for param in get_operation.parameters]
+    assert "content-type" in param_names
+    assert "user-agent" in param_names
+    assert "content_type" not in param_names  # Original field name should not be used
+    assert "user_agent" not in param_names
+
+
+def test_openapi_pydantic_required_vs_optional():
+    """Test that required vs optional fields are correctly identified"""
+    app = APIGatewayRestResolver()
+
+    class QueryParams(BaseModel):
+        required_field: str = Field(description="Required field")
+        optional_with_default: str = Field(default="default", description="Optional with default")
+        optional_nullable: Optional[str] = Field(default=None, description="Optional nullable")
+
+    @app.get("/test")
+    def test_handler(params: Annotated[QueryParams, Query()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/test"]
+    get_operation = path.get
+
+    for param in get_operation.parameters:
+        if param.name == "required_field":
+            assert param.required is True
+        elif param.name == "optional_with_default":
+            assert param.required is False
+        elif param.name == "optional_nullable":
+            assert param.required is False
+
+
+def test_openapi_pydantic_backward_compatibility():
+    """Test that existing Body parameter behavior is unchanged"""
+    app = APIGatewayRestResolver()
+
+    class BodyModel(BaseModel):
+        name: str = Field(description="Name")
+        age: int = Field(description="Age")
+
+    @app.post("/users")
+    def create_user(user: BodyModel):  # No annotation - should work as Body
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/users"]
+    post_operation = path.post
+
+    # Should have no parameters (body is handled separately)
+    assert post_operation.parameters is None or len(post_operation.parameters) == 0
+
+    # Should have request body
+    assert post_operation.requestBody is not None
+    assert "application/json" in post_operation.requestBody.content
+
+
+def test_openapi_pydantic_complex_types():
+    """Test that complex types are handled correctly"""
+    app = APIGatewayRestResolver()
+
+    class QueryParams(BaseModel):
+        string_field: str = Field(description="String field")
+        int_field: int = Field(description="Integer field")
+        float_field: float = Field(description="Float field")
+        bool_field: bool = Field(description="Boolean field")
+
+    @app.get("/complex")
+    def complex_handler(params: Annotated[QueryParams, Query()]):
+        return {"message": "success"}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/complex"]
+    get_operation = path.get
+
+    type_mapping = {}
+    for param in get_operation.parameters:
+        type_mapping[param.name] = param.schema_.type
+
+    assert type_mapping["string_field"] == "string"
+    assert type_mapping["int_field"] == "integer"
+    assert type_mapping["float_field"] == "number"
+    assert type_mapping["bool_field"] == "boolean"
