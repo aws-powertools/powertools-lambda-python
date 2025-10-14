@@ -947,7 +947,7 @@ class Form(Body):  # type: ignore[misc]
         )
 
 
-class _File(Form):  # type: ignore[misc]
+class File(Form):
     """
     A class used to represent a file parameter in a path operation.
     """
@@ -1023,9 +1023,6 @@ class _File(Form):  # type: ignore[misc]
             json_schema_extra=json_schema_extra,
             **extra,
         )
-
-
-File = _File
 
 
 def get_flat_dependant(
