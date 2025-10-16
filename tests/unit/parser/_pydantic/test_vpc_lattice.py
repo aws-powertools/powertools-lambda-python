@@ -8,15 +8,15 @@ from tests.unit.parser._pydantic.schemas import MyVpcLatticeBusiness
 
 def test_vpc_lattice_event_with_envelope():
     raw_event = load_event("vpcLatticeEvent.json")
-    raw_event["body"] = '{"username": "Leandro", "name": "Damascena"}'
+    raw_event["body"] = '{"username": "Akua", "name": "Mansa"}'
     parsed_event: MyVpcLatticeBusiness = parse(
         event=raw_event,
         model=MyVpcLatticeBusiness,
         envelope=envelopes.VpcLatticeEnvelope,
     )
 
-    assert parsed_event.username == "Leandro"
-    assert parsed_event.name == "Damascena"
+    assert parsed_event.username == "Akua"
+    assert parsed_event.name == "Mansa"
 
 
 def test_vpc_lattice_event():

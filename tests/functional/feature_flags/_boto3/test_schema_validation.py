@@ -1047,7 +1047,7 @@ def test_validate_all_in_value_condition_invalid_value():
     # GIVEN a schema with a ANY_IN_VALUE action with non-list value
     condition = {
         CONDITION_ACTION: RuleAction.ALL_IN_VALUE.value,
-        CONDITION_VALUE: "Leandro",
+        CONDITION_VALUE: "Pat",
     }
 
     rule_name = "non-list value for ALL_IN_VALUE"
