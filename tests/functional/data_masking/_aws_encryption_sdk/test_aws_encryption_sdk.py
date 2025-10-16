@@ -351,25 +351,25 @@ def test_encrypt_with_complex_dict(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
     data = json.dumps(
         {
-            "name": "Leandro",
+            "name": "Pat",
             "operation": "non sensitive",
             "card_number": "1000 4444 333 2222",
             "address": [
                 {
-                    "postcode": 81847,
-                    "street": "38986 Joanne Stravenue",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/La_Paz",
                 },
                 {
-                    "postcode": 94400,
-                    "street": "623 Kraig Mall",
+                    "postcode": 10000,
+                    "street": "100 Main Street",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
                 {
-                    "postcode": 94480,
-                    "street": "123 Kraig Mall",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
@@ -389,25 +389,25 @@ def test_encrypt_with_slice(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
     data = json.dumps(
         {
-            "name": "Leandro",
+            "name": "Pat",
             "operation": "non sensitive",
             "card_number": "1000 4444 333 2222",
             "address": [
                 {
-                    "postcode": 81847,
-                    "street": "38986 Joanne Stravenue",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/La_Paz",
                 },
                 {
-                    "postcode": 94400,
-                    "street": "623 Kraig Mall",
+                    "postcode": 10000,
+                    "street": "100 Main Street",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
                 {
-                    "postcode": 94480,
-                    "street": "123 Kraig Mall",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
@@ -427,25 +427,25 @@ def test_encrypt_with_complex_search(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
     data = json.dumps(
         {
-            "name": "Leandro",
+            "name": "Pat",
             "operation": "non sensitive",
             "card_number": "1000 4444 333 2222",
             "address": [
                 {
-                    "postcode": 81847,
-                    "street": "38986 Joanne Stravenue",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/La_Paz",
                 },
                 {
-                    "postcode": 94400,
-                    "street": "623 Kraig Mall",
+                    "postcode": 10000,
+                    "street": "100 Main Street",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
                 {
-                    "postcode": 94480,
-                    "street": "123 Kraig Mall",
+                    "postcode": 10001,
+                    "street": "123 Any Street, Any Town",
                     "country": "United States",
                     "timezone": "America/Mazatlan",
                 },
