@@ -947,7 +947,7 @@ class Form(Body):  # type: ignore[misc]
         )
 
 
-class File(Form):
+class File(Form):  # type: ignore[misc]
     """
     A class used to represent a file parameter in a path operation.
     """
