@@ -4,34 +4,43 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **idempotency:** removed inexistent css class ([#7539](https://github.com/aws-powertools/powertools-lambda-python/issues/7539))
+
 ## Features
 
 * **event_handler:** add support for Pydantic models in Query and Header types ([#7253](https://github.com/aws-powertools/powertools-lambda-python/issues/7253))
 
 ## Maintenance
 
+* **ci:** new pre-release 3.21.1a3 ([#7519](https://github.com/aws-powertools/powertools-lambda-python/issues/7519))
 * **ci:** new pre-release 3.21.1a0 ([#7500](https://github.com/aws-powertools/powertools-lambda-python/issues/7500))
+* **ci:** new pre-release 3.21.1a5 ([#7538](https://github.com/aws-powertools/powertools-lambda-python/issues/7538))
 * **ci:** new pre-release 3.21.1a1 ([#7506](https://github.com/aws-powertools/powertools-lambda-python/issues/7506))
 * **ci:** improve message when do-not-merge label is present ([#7505](https://github.com/aws-powertools/powertools-lambda-python/issues/7505))
-* **ci:** new pre-release 3.21.1a4 ([#7528](https://github.com/aws-powertools/powertools-lambda-python/issues/7528))
-* **ci:** new pre-release 3.21.1a3 ([#7519](https://github.com/aws-powertools/powertools-lambda-python/issues/7519))
 * **ci:** new pre-release 3.21.1a2 ([#7514](https://github.com/aws-powertools/powertools-lambda-python/issues/7514))
-* **deps:** bump actions/setup-node from 5.0.0 to 6.0.0 ([#7521](https://github.com/aws-powertools/powertools-lambda-python/issues/7521))
-* **deps:** bump valkey-glide from 2.1.0 to 2.1.1 ([#7498](https://github.com/aws-powertools/powertools-lambda-python/issues/7498))
-* **deps:** bump actions/dependency-review-action from 4.8.0 to 4.8.1 ([#7516](https://github.com/aws-powertools/powertools-lambda-python/issues/7516))
+* **ci:** new pre-release 3.21.1a4 ([#7528](https://github.com/aws-powertools/powertools-lambda-python/issues/7528))
 * **deps:** bump pydantic from 2.12.0 to 2.12.2 ([#7522](https://github.com/aws-powertools/powertools-lambda-python/issues/7522))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.309 to 0.1.310 ([#7509](https://github.com/aws-powertools/powertools-lambda-python/issues/7509))
-* **deps-dev:** bump aws-cdk from 2.1029.4 to 2.1030.0 ([#7508](https://github.com/aws-powertools/powertools-lambda-python/issues/7508))
-* **deps-dev:** bump aws-cdk-lib from 2.219.0 to 2.220.0 ([#7524](https://github.com/aws-powertools/powertools-lambda-python/issues/7524))
-* **deps-dev:** bump cfn-lint from 1.40.0 to 1.40.1 ([#7502](https://github.com/aws-powertools/powertools-lambda-python/issues/7502))
-* **deps-dev:** bump ijson from 3.4.0 to 3.4.0.post0 ([#7510](https://github.com/aws-powertools/powertools-lambda-python/issues/7510))
-* **deps-dev:** bump sentry-sdk from 2.40.0 to 2.41.0 ([#7504](https://github.com/aws-powertools/powertools-lambda-python/issues/7504))
-* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.219.0a0 to 2.220.0a0 ([#7526](https://github.com/aws-powertools/powertools-lambda-python/issues/7526))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.310 to 0.1.311 ([#7523](https://github.com/aws-powertools/powertools-lambda-python/issues/7523))
+* **deps:** bump actions/dependency-review-action from 4.8.0 to 4.8.1 ([#7516](https://github.com/aws-powertools/powertools-lambda-python/issues/7516))
+* **deps:** bump actions/setup-node from 5.0.0 to 6.0.0 ([#7521](https://github.com/aws-powertools/powertools-lambda-python/issues/7521))
+* **deps:** bump mkdocs-material from 9.6.21 to 9.6.22 ([#7534](https://github.com/aws-powertools/powertools-lambda-python/issues/7534))
+* **deps:** bump valkey-glide from 2.1.0 to 2.1.1 ([#7498](https://github.com/aws-powertools/powertools-lambda-python/issues/7498))
+* **deps:** bump mkdocs-material from 9.6.21 to 9.6.22 in /docs ([#7531](https://github.com/aws-powertools/powertools-lambda-python/issues/7531))
+* **deps:** bump squidfunk/mkdocs-material from `00f9276` to `f5c556a` in /docs ([#7530](https://github.com/aws-powertools/powertools-lambda-python/issues/7530))
 * **deps-dev:** bump boto3-stubs from 1.40.49 to 1.40.51 ([#7517](https://github.com/aws-powertools/powertools-lambda-python/issues/7517))
-* **deps-dev:** bump types-python-dateutil from 2.9.0.20250822 to 2.9.0.20251008 ([#7499](https://github.com/aws-powertools/powertools-lambda-python/issues/7499))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.309 to 0.1.310 ([#7509](https://github.com/aws-powertools/powertools-lambda-python/issues/7509))
 * **deps-dev:** bump cfn-lint from 1.40.1 to 1.40.2 ([#7525](https://github.com/aws-powertools/powertools-lambda-python/issues/7525))
+* **deps-dev:** bump aws-cdk from 2.1029.4 to 2.1030.0 ([#7508](https://github.com/aws-powertools/powertools-lambda-python/issues/7508))
+* **deps-dev:** bump cfn-lint from 1.40.0 to 1.40.1 ([#7502](https://github.com/aws-powertools/powertools-lambda-python/issues/7502))
 * **deps-dev:** bump boto3-stubs from 1.40.47 to 1.40.49 ([#7503](https://github.com/aws-powertools/powertools-lambda-python/issues/7503))
+* **deps-dev:** bump sentry-sdk from 2.40.0 to 2.41.0 ([#7504](https://github.com/aws-powertools/powertools-lambda-python/issues/7504))
+* **deps-dev:** bump ijson from 3.4.0 to 3.4.0.post0 ([#7510](https://github.com/aws-powertools/powertools-lambda-python/issues/7510))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.310 to 0.1.311 ([#7523](https://github.com/aws-powertools/powertools-lambda-python/issues/7523))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.219.0a0 to 2.220.0a0 ([#7526](https://github.com/aws-powertools/powertools-lambda-python/issues/7526))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20250822 to 2.9.0.20251008 ([#7499](https://github.com/aws-powertools/powertools-lambda-python/issues/7499))
+* **deps-dev:** bump aws-cdk-lib from 2.219.0 to 2.220.0 ([#7524](https://github.com/aws-powertools/powertools-lambda-python/issues/7524))
+* **deps-dev:** bump nox from 2024.10.9 to 2025.10.14 ([#7532](https://github.com/aws-powertools/powertools-lambda-python/issues/7532))
 
 
 <a name="v3.21.0"></a>
