@@ -1335,7 +1335,7 @@ def test_api_gateway_app_with_strip_prefix_and_route_prefix():
     app = ApiGatewayResolver(strip_prefixes=["/v1"])
     router = Router()
 
-    event = {"httpMethod": "GET", "path": "/v1/users/leandro", "resource": "/users"}
+    event = {"httpMethod": "GET", "path": "/v1/users/pat", "resource": "/users"}
 
     @router.get("<user_id>")
     def base(user_id: str):

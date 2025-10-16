@@ -375,7 +375,7 @@ def test_erase_dictionary_with_masking_rules(data_masker):
 
 def test_erase_dictionary_with_masking_rules_with_list(data_masker):
     # GIVEN a dictionary with nested sensitive data
-    data = {"user": {"name": ["leandro", "powertools"]}}
+    data = {"user": {"name": ["Pat", "powertools"]}}
 
     # AND masking rules for specific fields
     masking_rules = {"user.name": {"custom_mask": "NO-NAME"}}
@@ -393,7 +393,7 @@ def test_erase_dictionary_with_masking_rules_with_list(data_masker):
 
 def test_erase_list_with_custom_mask(data_masker):
     # GIVEN a dictionary with nested sensitive data
-    data = {"user": {"name": ["leandro", "powertools"]}}
+    data = {"user": {"name": ["Pat", "powertools"]}}
 
     # WHEN erase is called with masking rules
     result = data_masker.erase(data, fields=["user.name"], dynamic_mask=True)
@@ -401,7 +401,7 @@ def test_erase_list_with_custom_mask(data_masker):
     # THEN only the specified fields should be masked
     assert result == {
         "user": {
-            "name": ["*******", "**********"],
+            "name": ["***", "**********"],
         },
     }
 
