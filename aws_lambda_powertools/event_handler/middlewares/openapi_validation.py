@@ -597,6 +597,21 @@ def _handle_missing_field_value(
 
 def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
+    # Convert UploadFile to bytes if the expected type is bytes
+    if isinstance(value, UploadFile):
+        # Check if the annotation is bytes
+        annotation = field_info.annotation
+        # Handle Annotated types by unwrapping
+        if hasattr(annotation, "__origin__"):
+            from typing import get_args
+
+            args = get_args(annotation)
+            if args:
+                annotation = args[0]
+
+        if annotation is bytes:
+            return value.file
+
     if field_annotation_is_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
