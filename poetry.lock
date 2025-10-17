@@ -88,14 +88,14 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "avro"
-version = "1.12.0"
+version = "1.12.1"
 description = "Avro is a serialization and RPC framework."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "avro-1.12.0-py2.py3-none-any.whl", hash = "sha256:9a255c72e1837341dd4f6ff57b2b6f68c0f0cecdef62dd04962e10fd33bec05b"},
-    {file = "avro-1.12.0.tar.gz", hash = "sha256:cad9c53b23ceed699c7af6bddced42e2c572fd6b408c257a7d4fc4e8cf2e2d6b"},
+    {file = "avro-1.12.1-py2.py3-none-any.whl", hash = "sha256:970475dd6457924533966fe761be607c759d5a48390cc8fbed472f7c9a8868f2"},
+    {file = "avro-1.12.1.tar.gz", hash = "sha256:c5b8dd2dd4c10816f0dc127cc29cfd43b5e405cf7e6840e89460a024bf3d098d"},
 ]
 
 [package.extras]
