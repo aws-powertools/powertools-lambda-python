@@ -464,14 +464,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.40.54"
-description = "Type annotations for boto3 1.40.54 generated with mypy-boto3-builder 8.11.0"
+version = "1.40.55"
+description = "Type annotations for boto3 1.40.55 generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.40.54-py3-none-any.whl", hash = "sha256:548a4786785ba7b43ef4ef1a2a764bebbb0301525f3201091fcf412e4c8ce323"},
-    {file = "boto3_stubs-1.40.54.tar.gz", hash = "sha256:e21a9eda979a451935eb3196de3efbe15b9470e6bf9027406d1f6d0ac08b339e"},
+    {file = "boto3_stubs-1.40.55-py3-none-any.whl", hash = "sha256:4632f909719218c439e1a73c52ae94fb1c7252a5064ebcb0efe04388d8bd48d9"},
+    {file = "boto3_stubs-1.40.55.tar.gz", hash = "sha256:a11adaf8eac77c4ed4c1b7bf7241b0cd9ad023dc1c17c49b45f35adf4c21b7ff"},
 ]
 
 [package.dependencies]
@@ -544,7 +544,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.40.0,<1.41.0)"]
 billing = ["mypy-boto3-billing (>=1.40.0,<1.41.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.40.0,<1.41.0)"]
-boto3 = ["boto3 (==1.40.54)"]
+boto3 = ["boto3 (==1.40.55)"]
 braket = ["mypy-boto3-braket (>=1.40.0,<1.41.0)"]
 budgets = ["mypy-boto3-budgets (>=1.40.0,<1.41.0)"]
 ce = ["mypy-boto3-ce (>=1.40.0,<1.41.0)"]
@@ -3326,14 +3326,14 @@ markers = {main = "(extra == \"all\" or extra == \"datamasking\") and platform_p
 
 [[package]]
 name = "pydantic"
-version = "2.12.2"
+version = "2.12.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "pydantic-2.12.2-py3-none-any.whl", hash = "sha256:25ff718ee909acd82f1ff9b1a4acfd781bb23ab3739adaa7144f19a6a4e231ae"},
-    {file = "pydantic-2.12.2.tar.gz", hash = "sha256:7b8fa15b831a4bbde9d5b84028641ac3080a4ca2cbd4a621a661687e741624fd"},
+    {file = "pydantic-2.12.3-py3-none-any.whl", hash = "sha256:6986454a854bc3bc6e5443e1369e06a3a456af9d339eda45510f517d9ea5c6bf"},
+    {file = "pydantic-2.12.3.tar.gz", hash = "sha256:1da1c82b0fc140bb0103bc1441ffe062154c8d38491189751ee00fd8ca65ce74"},
 ]
 markers = {main = "extra == \"all\" or extra == \"parser\""}
 
