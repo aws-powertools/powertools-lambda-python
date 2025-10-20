@@ -2874,14 +2874,14 @@ typing-extensions = {version = "*", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-appconfigdata"
-version = "1.40.0"
-description = "Type annotations for boto3 AppConfigData 1.40.0 service generated with mypy-boto3-builder 8.11.0"
+version = "1.40.55"
+description = "Type annotations for boto3 AppConfigData 1.40.55 service generated with mypy-boto3-builder 8.11.0"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "mypy_boto3_appconfigdata-1.40.0-py3-none-any.whl", hash = "sha256:60391c08b8b0cb8c9327d01518d17e0d291a2d5cac5efde0b6a94d3ef97852d1"},
-    {file = "mypy_boto3_appconfigdata-1.40.0.tar.gz", hash = "sha256:ffa4bf19d5de01863dc1d6a95a372b0b268399e8a3a7a912cbade6d084d6ddfb"},
+    {file = "mypy_boto3_appconfigdata-1.40.55-py3-none-any.whl", hash = "sha256:83fc13cb6ad7195241c8b9528da76d3f55d25e1b577cbaba0ad989790fc6dc03"},
+    {file = "mypy_boto3_appconfigdata-1.40.55.tar.gz", hash = "sha256:527c5cd351b3bca64688a956de8dd9ac4657b6124f94c635b6ed2f9d48189aae"},
 ]
 
 [package.dependencies]
