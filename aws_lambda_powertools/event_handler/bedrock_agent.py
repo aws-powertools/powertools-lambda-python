@@ -403,11 +403,6 @@ class BedrockAgentResolver(ApiGatewayResolver):
                         if isinstance(item, dict) and item.get("type") == "null":
                             anyOf.pop(i)
                             yaml_dict["nullable"] = True
-                if "examples" in yaml_dict:
-                    examples = yaml_dict["examples"]
-                    del yaml_dict["examples"]
-                    if isinstance(examples, list) and len(examples):
-                        yaml_dict["example"] = examples[0]
                 for value in yaml_dict.values():
                     inner(value)
             elif isinstance(yaml_dict, list):
