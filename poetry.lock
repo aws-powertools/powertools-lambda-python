@@ -24,7 +24,7 @@ files = [
     {file = "anyio-4.11.0-py3-none-any.whl", hash = "sha256:0287e96f4d26d4149305414d4e3bc32f0dcd0862365a4bddea19d7a1ec38c4fc"},
     {file = "anyio-4.11.0.tar.gz", hash = "sha256:82a8d0b81e318cc5ce71a5f1f8b5c4e63619620b63141ef8c995fa0db95a57c4"},
 ]
-markers = {main = "extra == \"valkey\""}
+markers = {main = "extra == \"valkey\" and python_version < \"3.14.0\""}
 
 [package.dependencies]
 exceptiongroup = {version = ">=1.0.2", markers = "python_version < \"3.11\""}
@@ -1987,7 +1987,7 @@ files = [
     {file = "exceptiongroup-1.3.0-py3-none-any.whl", hash = "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10"},
     {file = "exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"},
 ]
-markers = {main = "extra == \"valkey\" and python_version < \"3.11\"", dev = "python_version < \"3.11\""}
+markers = {main = "python_version < \"3.11\" and extra == \"valkey\"", dev = "python_version < \"3.11\""}
 
 [package.dependencies]
 typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
@@ -4728,7 +4728,7 @@ files = [
     {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
     {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
 ]
-markers = {main = "extra == \"valkey\""}
+markers = {main = "extra == \"valkey\" and python_version < \"3.14.0\""}
 
 [[package]]
 name = "soupsieve"
@@ -5274,7 +5274,7 @@ description = "Valkey GLIDE Async client. Supports Valkey and Redis OSS."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"valkey\""
+markers = "python_version < \"3.14.0\" and extra == \"valkey\""
 files = [
     {file = "valkey_glide-2.1.1-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:f242463cd1c43eb7cf918c8eaa7040f30d14a7d4be91f61c0ead67a375fb91ba"},
     {file = "valkey_glide-2.1.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:bfc1139f18f16c62a94b58b021958ce8a084e2862c495004f88e1f743b7eeae3"},
@@ -5540,4 +5540,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "daa27d0958810abeb51f10632cc2c53f64abde24a2a88857b5973ce3089bbaf4"
+content-hash = "a9d5c238ef0125cbeaebce89f4065f39de3b1cd7681a241d8e6223d09dcaa5a1"
