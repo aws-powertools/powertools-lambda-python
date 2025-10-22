@@ -78,13 +78,13 @@ To start, you'll need:
 <!-- markdownlint-disable MD030 -->
 
 <div class="grid cards" markdown>
-*   :octicons-database-16:{ .lg .middle } __Persistent storage__
+*   **Persistent storage**
 
     ---
 
     [Amazon DynamoDB](#dynamodb-table) or [Valkey/Redis OSS/Redis compatible](#cache-database)
 
-*   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
+*   **AWS Lambda function**
 
     ---
 

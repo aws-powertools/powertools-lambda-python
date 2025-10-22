@@ -1459,7 +1459,7 @@ def test_flags_any_in_value_match(mocker, config):
                         {
                             "action": RuleAction.ANY_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1470,7 +1470,7 @@ def test_flags_any_in_value_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Gerald"]},
+        context={"tenant_id": ["Akua"]},
         default=False,
     )
     assert toggle == expected_value
@@ -1488,7 +1488,7 @@ def test_flags_any_in_value_no_match(mocker, config):
                         {
                             "action": RuleAction.ANY_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1499,7 +1499,7 @@ def test_flags_any_in_value_no_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Simon"]},
+        context={"tenant_id": ["Kwesi"]},
         default=False,
     )
     assert toggle == expected_value
@@ -1517,7 +1517,7 @@ def test_flags_all_in_value_match(mocker, config):
                         {
                             "action": RuleAction.ALL_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1528,7 +1528,7 @@ def test_flags_all_in_value_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Gerald"]},
+        context={"tenant_id": ["Akua"]},
         default=False,
     )
 
@@ -1547,7 +1547,7 @@ def test_flags_all_in_value_no_match(mocker, config):
                         {
                             "action": RuleAction.ALL_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1558,7 +1558,7 @@ def test_flags_all_in_value_no_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Gerald", "Simon"]},
+        context={"tenant_id": ["Akua", "Mary"]},
         default=False,
     )
 
@@ -1577,7 +1577,7 @@ def test_flags_none_in_value_match(mocker, config):
                         {
                             "action": RuleAction.NONE_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1588,7 +1588,7 @@ def test_flags_none_in_value_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Rubao"]},
+        context={"tenant_id": ["Mary"]},
         default=False,
     )
 
@@ -1607,7 +1607,7 @@ def test_flags_none_in_value_no_match(mocker, config):
                         {
                             "action": RuleAction.NONE_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1618,7 +1618,7 @@ def test_flags_none_in_value_no_match(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     toggle = feature_flags.evaluate(
         name="my_feature",
-        context={"tenant_id": ["Heitor"]},
+        context={"tenant_id": ["Pat"]},
         default=False,
     )
 
@@ -1646,7 +1646,7 @@ def test_intersection_non_list_value(mocker, config, intersection_action):
                         {
                             "action": intersection_action,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
@@ -1680,7 +1680,7 @@ def test_exception_handler(mocker, config):
                         {
                             "action": RuleAction.ANY_IN_VALUE.value,
                             "key": "tenant_id",
-                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                            "value": ["Akua", "John", "Maria", "Pat"],
                         },
                     ],
                 },
