@@ -2672,3 +2672,32 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
     full_name_error = next((e for e in errors if "full_name" in e["loc"] or "fullName" in e["loc"]), None)
     assert full_name_error is not None
     assert full_name_error["type"] == "string_too_short"
+
+
+def test_parse_form_data_exception(monkeypatch):
+    """Test that _parse_form_data raises RequestValidationError on exception"""
+    import pytest
+    from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIRequestValidationMiddleware
+    class DummyEvent:
+        decoded_body = None
+    class DummyApp:
+        current_event = DummyEvent()
+    # Correct monkeypatch: replace parse_qs with a function that raises Exception
+    monkeypatch.setattr(
+        "aws_lambda_powertools.event_handler.middlewares.openapi_validation.parse_qs",
+        lambda *a, **kw: (_ for _ in ()).throw(Exception("fail"))
+    )
+    middleware = OpenAPIRequestValidationMiddleware()
+    with pytest.raises(Exception) as excinfo:
+        middleware._parse_form_data(DummyApp())
+    assert "Form data parsing error" in str(excinfo.value)
+    assert "fail" in str(excinfo.value)
+
+
+def test_get_body_field_location_alias_omitted():
+    """Test _get_body_field_location with field_alias_omitted True and False"""
+    from aws_lambda_powertools.event_handler.middlewares.openapi_validation import _get_body_field_location
+    class DummyField:
+        alias = "field_alias"
+    assert _get_body_field_location(DummyField(), True) == ("body",)
+    assert _get_body_field_location(DummyField(), False) == ("body", "field_alias")
