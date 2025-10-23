@@ -2678,20 +2678,21 @@ def test_parse_form_data_exception(monkeypatch):
     """Test that _parse_form_data raises RequestValidationError on exception"""
     import pytest
     from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIRequestValidationMiddleware
+    from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
     class DummyEvent:
         decoded_body = None
     class DummyApp:
         current_event = DummyEvent()
     # Correct monkeypatch: replace parse_qs with a function that raises Exception
     def _raise(*a, **kw):
-        raise Exception("fail")
+        raise ValueError("fail")
 
     monkeypatch.setattr(
         "aws_lambda_powertools.event_handler.middlewares.openapi_validation.parse_qs",
         _raise,
     )
     middleware = OpenAPIRequestValidationMiddleware()
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(RequestValidationError) as excinfo:
         middleware._parse_form_data(DummyApp())
     assert "Form data parsing error" in str(excinfo.value)
     assert "fail" in str(excinfo.value)
