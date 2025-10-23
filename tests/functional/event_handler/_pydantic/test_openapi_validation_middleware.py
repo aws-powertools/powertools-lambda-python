@@ -2677,12 +2677,16 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
 def test_parse_form_data_exception(monkeypatch):
     """Test that _parse_form_data raises RequestValidationError on exception"""
     import pytest
+
     from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIRequestValidationMiddleware
     from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+
     class DummyEvent:
         decoded_body = None
+
     class DummyApp:
         current_event = DummyEvent()
+
     # Correct monkeypatch: replace parse_qs with a function that raises Exception
     def _raise(*a, **kw):
         raise ValueError("fail")
@@ -2700,8 +2704,9 @@ def test_parse_form_data_exception(monkeypatch):
 
 def test_get_body_field_location_alias_omitted():
     """Test _get_body_field_location with field_alias_omitted True and False"""
-    from aws_lambda_powertools.event_handler.middlewares.openapi_validation import _get_body_field_location
     from typing import cast
+
+    from aws_lambda_powertools.event_handler.middlewares.openapi_validation import _get_body_field_location
     from aws_lambda_powertools.event_handler.openapi.compat import ModelField
 
     class DummyField:
@@ -2721,7 +2726,11 @@ def test_decode_request_body_fallback_on_invalid_base64():
     current_event = SimpleNamespace(body="not-base64!!", is_base64_encoded=True)
     app = SimpleNamespace(current_event=current_event)
 
-    result = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"]).OpenAPIRequestValidationMiddleware()._decode_request_body(app)
+    result = (
+        __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
+        .OpenAPIRequestValidationMiddleware()
+        ._decode_request_body(app)
+    )
     assert isinstance(result, (bytes, bytearray))
     assert result == b"not-base64!!"
 
@@ -2729,6 +2738,7 @@ def test_decode_request_body_fallback_on_invalid_base64():
 def test_normalize_field_value_uploadfile_with_annotated_bytes():
     """If a field_info.annotation is Annotated[bytes,...], UploadFile should be converted to bytes."""
     from typing import Annotated
+
     from aws_lambda_powertools.event_handler.openapi.params import UploadFile
 
     file_content = b"hello"
@@ -2767,14 +2777,18 @@ def test_get_embed_body_wraps_when_alias_omitted():
     received_body = {"a": 1}
 
     ov = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
-    new_body, alias_omitted = ov._get_embed_body(field=field, required_params=required_params, received_body=received_body)
+    new_body, alias_omitted = ov._get_embed_body(
+        field=field,
+        required_params=required_params,
+        received_body=received_body,
+    )
     assert alias_omitted is True
     assert new_body == {"my_field": received_body}
 
 
 def test_split_section_headers_and_content_handles_crlf_and_lf():
     # CRLF version
-    section_crlf = b"Content-Disposition: form-data; name=\"f\"\r\nContent-Type: text/plain\r\n\r\nhello"
+    section_crlf = b'Content-Disposition: form-data; name="f"\r\nContent-Type: text/plain\r\n\r\nhello'
     ov = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
     middleware = ov.OpenAPIRequestValidationMiddleware()
     headers_part, content = middleware._split_section_headers_and_content(section_crlf)
@@ -2782,7 +2796,7 @@ def test_split_section_headers_and_content_handles_crlf_and_lf():
     assert content == b"hello"
 
     # LF version
-    section_lf = b"Content-Disposition: form-data; name=\"f\"\n\nworld"
+    section_lf = b'Content-Disposition: form-data; name="f"\n\nworld'
     headers_part2, content2 = middleware._split_section_headers_and_content(section_lf)
     assert "Content-Disposition" in headers_part2
     assert content2 == b"world"
@@ -2794,16 +2808,14 @@ def test_parse_multipart_sections_creates_uploadfile_and_field():
     boundary = b"--boundary"
     # Build sections: empty preamble, a file part, a field part, and closing
     file_section = (
-        b"\r\n" + boundary + b"\r\n"
+        b"\r\n"
+        + boundary
+        + b"\r\n"
         + b'Content-Disposition: form-data; name="file"; filename="t.txt"\r\n'
         + b"Content-Type: text/plain\r\n\r\n"
         + b"file-content\r\n"
     )
-    field_section = (
-        boundary + b"\r\n"
-        + b'Content-Disposition: form-data; name="field"\r\n\r\n'
-        + b"value\r\n"
-    )
+    field_section = boundary + b"\r\n" + b'Content-Disposition: form-data; name="field"\r\n\r\n' + b"value\r\n"
     closing = boundary + b"--\r\n"
     decoded = file_section + field_section + closing
 
@@ -2826,6 +2838,7 @@ def test_decode_form_field_content_falls_back_to_bytes_on_decode_error():
 
 def test_extract_field_value_from_body_handles_attribute_error():
     from types import SimpleNamespace
+
     errors = []
     field = SimpleNamespace(alias="x")
     ov = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
@@ -2839,7 +2852,7 @@ def test_resolve_field_type_returns_first_non_none_in_union():
 
     ov = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
     resolved = ov._resolve_field_type(Union[int, None])
-    assert resolved == int
+    assert resolved is int
 
 
 def test_normalize_field_value_list_to_single_when_not_sequence():
