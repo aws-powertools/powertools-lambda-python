@@ -1367,7 +1367,7 @@ def _create_model_field(
     )
 
 
-def fix_upload_file_schema_references(schema_dict: dict[str, Any]) -> dict[str, Any]:
+def ensure_upload_file_schema_references(schema_dict: dict[str, Any]) -> dict[str, Any]:
     """
     Fix missing component references for UploadFile in OpenAPI schemas.
 
@@ -1391,7 +1391,7 @@ def fix_upload_file_schema_references(schema_dict: dict[str, Any]) -> dict[str, 
     Example
     -------
     >>> schema = {"paths": {...}, "components": {...}}
-    >>> fixed_schema = fix_upload_file_schema_references(schema)
+    >>> fixed_schema = ensure_upload_file_schema_references(schema)
     >>> # Now all $ref references in multipart/form-data schemas have matching components
     """
     # Handle pydantic models that might be passed in

@@ -2160,14 +2160,14 @@ class ApiGatewayResolver(BaseRouter):
             The final OpenAPI model with all fixes applied
         """
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
-        from aws_lambda_powertools.event_handler.openapi.params import fix_upload_file_schema_references
+        from aws_lambda_powertools.event_handler.openapi.params import ensure_upload_file_schema_references
 
         # First create the OpenAPI model
         result = OpenAPI(**output)
 
         # Convert the model to a dict and apply the upload file schema fix
         result_dict = result.model_dump(by_alias=True)
-        fixed_dict = fix_upload_file_schema_references(result_dict)
+        fixed_dict = ensure_upload_file_schema_references(result_dict)
 
         # Reconstruct the model with the fixed dict
         return OpenAPI(**fixed_dict)

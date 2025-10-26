@@ -18,7 +18,7 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     _extract_endpoint_info_from_component_name,
     _find_missing_upload_file_components,
     _generate_component_title,
-    fix_upload_file_schema_references,
+    ensure_upload_file_schema_references,
 )
 
 
@@ -52,7 +52,7 @@ class TestUploadFileComprehensiveCoverage:
         schema = app.get_openapi_schema()
         # Convert to dict for processing by fix function
         schema_dict = schema.model_dump()
-        fix_upload_file_schema_references(schema_dict)
+        ensure_upload_file_schema_references(schema_dict)
 
         # Verify components exist and are processed
         assert "components" in schema_dict
@@ -113,12 +113,12 @@ class TestUploadFileComprehensiveCoverage:
         """Test schema fix function edge cases."""
         # Test with empty schema
         empty_schema = {}
-        fix_upload_file_schema_references(empty_schema)
+        ensure_upload_file_schema_references(empty_schema)
         assert empty_schema == {}
 
         # Test with schema missing components
         schema_no_components = {"paths": {}}
-        fix_upload_file_schema_references(schema_no_components)
+        ensure_upload_file_schema_references(schema_no_components)
         # Should not crash and may or may not add components
 
     def test_upload_file_multipart_handling(self):
@@ -131,7 +131,7 @@ class TestUploadFileComprehensiveCoverage:
 
         schema = app.get_openapi_schema()
         schema_dict = schema.model_dump()
-        fix_upload_file_schema_references(schema_dict)
+        ensure_upload_file_schema_references(schema_dict)
 
         # Verify multipart handling works without errors
         assert schema_dict is not None
@@ -226,7 +226,7 @@ class TestUploadFileComprehensiveCoverage:
         assert file_param.description == "Test file"
         assert hasattr(file_param, "json_schema_extra")
 
-    def test_fix_upload_file_schema_references_complex(self):
+    def test_ensure_upload_file_schema_references_complex(self):
         """Test schema fix with complex schema structures."""
         # Test with pydantic model that has model_dump method
         mock_schema = Mock()
@@ -246,7 +246,7 @@ class TestUploadFileComprehensiveCoverage:
         }
 
         # Test fix function with model that has model_dump
-        fix_upload_file_schema_references(mock_schema)
+        ensure_upload_file_schema_references(mock_schema)
         mock_schema.model_dump.assert_called_once_with(by_alias=True)
 
     def test_extract_endpoint_info_from_component_name(self):
@@ -341,7 +341,7 @@ class TestUploadFileComprehensiveCoverage:
         mock_schema.model_dump.return_value = {"paths": {}, "components": {"schemas": {}}}
 
         # This should call model_dump and process the result
-        fix_upload_file_schema_references(mock_schema)
+        ensure_upload_file_schema_references(mock_schema)
         mock_schema.model_dump.assert_called_once_with(by_alias=True)
 
     def test_openapi_validation_webkit_boundary_extraction(self):
