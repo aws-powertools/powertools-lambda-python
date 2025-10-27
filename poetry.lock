@@ -216,20 +216,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.220.0a0"
+version = "2.221.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.220.0a0-py3-none-any.whl", hash = "sha256:694bc21e56e47ed133bfc5fc6f454270789cdad42b8128de9b4ed3a3deb2260b"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.220.0a0.tar.gz", hash = "sha256:7ca48223a49c9c1428c2a1adfe602e591d24b5cb6580930319e76190d8789379"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.221.0a0-py3-none-any.whl", hash = "sha256:8a3cd4215ace3c55d4c8f93b472f974d193cc4ad611fd8bfbd55fab44e8d3cbb"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.221.0a0.tar.gz", hash = "sha256:8cc435f8ec62a7b07d27a4d2b0fd6cfa86ade171d4064d2929f9cd9820c3aa3e"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.220.0,<3.0.0"
+aws-cdk-lib = ">=2.221.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.113.0,<2.0.0"
+jsii = ">=1.116.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -252,14 +252,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.220.0"
+version = "2.221.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.220.0-py3-none-any.whl", hash = "sha256:2f69bae74529142a8decb3d1591cf54c8ed9fc033e503a09bfbdd534509a6785"},
-    {file = "aws_cdk_lib-2.220.0.tar.gz", hash = "sha256:0c5242dd740e5c0f31cf7f65f6f7b4fecada0d5e4054570944c5308230d797ae"},
+    {file = "aws_cdk_lib-2.221.0-py3-none-any.whl", hash = "sha256:419ffa33565ae5e5017d174d7193e9df34c5954012901cb9901ad6b1f5ad2777"},
+    {file = "aws_cdk_lib-2.221.0.tar.gz", hash = "sha256:3982d4a535988454deb6ad1b33cc1661601cb8a24f0c3a3d157b27d2f45709d5"},
 ]
 
 [package.dependencies]
@@ -267,7 +267,7 @@ files = [
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
 "aws-cdk.cloud-assembly-schema" = ">=48.6.0,<49.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.113.0,<2.0.0"
+jsii = ">=1.116.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -2270,19 +2270,19 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.115.0"
+version = "1.117.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "jsii-1.115.0-py3-none-any.whl", hash = "sha256:f7ef91e39954c6c10db859ca90cfe1bb978c457a5fcaf5fba4303cbdefff8619"},
-    {file = "jsii-1.115.0.tar.gz", hash = "sha256:4e32200d6fc3f71ee42fe8b1d817bb3ce8119b157f167a5e014c52171700ca2b"},
+    {file = "jsii-1.117.0-py3-none-any.whl", hash = "sha256:a715084779aa14be06a3ba1a8c9ca0abb1d0f208da7f8dd6e9cf2e68df23b7ce"},
+    {file = "jsii-1.117.0.tar.gz", hash = "sha256:55c6863fc7245b9b885bc4bcb17ca117958f686e34a0f401ddc31c1d90452611"},
 ]
 
 [package.dependencies]
 attrs = ">=21.2,<26.0"
-cattrs = ">=1.8,<25.3"
+cattrs = ">=1.8,<25.4"
 importlib_resources = ">=5.2.0"
 publication = ">=0.0.3"
 python-dateutil = "*"
@@ -3847,14 +3847,14 @@ toml = ["tomli (>=2.0.1)"]
 
 [[package]]
 name = "redis"
-version = "6.4.0"
+version = "7.0.0"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "redis-6.4.0-py3-none-any.whl", hash = "sha256:f0544fa9604264e9464cdf4814e7d4830f74b165d52f2a330a760a88dd248b7f"},
-    {file = "redis-6.4.0.tar.gz", hash = "sha256:b01bc7282b8444e28ec36b261df5375183bb47a07eb9c603f284e89cbc5ef010"},
+    {file = "redis-7.0.0-py3-none-any.whl", hash = "sha256:1e66c8355b3443af78367c4937484cd875fdf9f5f14e1fed14aa95869e64f6d1"},
+    {file = "redis-7.0.0.tar.gz", hash = "sha256:6546ada54354248a53a47342d36abe6172bb156f23d24f018fda2e3c06b9c97a"},
 ]
 markers = {main = "extra == \"redis\""}
 
@@ -3862,6 +3862,7 @@ markers = {main = "extra == \"redis\""}
 async-timeout = {version = ">=4.0.3", markers = "python_full_version < \"3.11.3\""}
 
 [package.extras]
+circuit-breaker = ["pybreaker (>=1.4.0)"]
 hiredis = ["hiredis (>=3.2.0)"]
 jwt = ["pyjwt (>=2.9.0)"]
 ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
@@ -5095,4 +5096,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "f6d1993d3e75a6d623f63f0c8bb5ee6200e28740c87739dc4808058db824e07c"
+content-hash = "be30c1055d06290daebc8e4fe08143d52d5f3786c9d330bafcd1b150409354e8"
