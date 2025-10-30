@@ -70,14 +70,14 @@ jobs:
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}_${{ matrix.arch }}.zip
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Store Zip
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
           path: ${{ matrix.layer }}_${{ matrix.arch }}.zip
           retention-days: 1
           if-no-files-found: error
       - name: Store Metadata
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
           path: ${{ matrix.layer }}_${{ matrix.arch }}.json
@@ -106,11 +106,11 @@ jobs:
     environment: GovCloud ${{ inputs.environment }} (East)
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Verify Layer Signature
@@ -176,11 +176,11 @@ jobs:
       name: GovCloud ${{ inputs.environment }} (West)
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: ${{ matrix.layer }}_${{ matrix.arch }}.json
       - name: Verify Layer Signature
