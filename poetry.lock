@@ -216,18 +216,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.221.0a0"
+version = "2.221.1a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.221.0a0-py3-none-any.whl", hash = "sha256:8a3cd4215ace3c55d4c8f93b472f974d193cc4ad611fd8bfbd55fab44e8d3cbb"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.221.0a0.tar.gz", hash = "sha256:8cc435f8ec62a7b07d27a4d2b0fd6cfa86ade171d4064d2929f9cd9820c3aa3e"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.221.1a0-py3-none-any.whl", hash = "sha256:82ae652615039d839ce26475ddaf184c2c525179afd40e4bf1ade224ab682920"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.221.1a0.tar.gz", hash = "sha256:5f8dd2e0872f610cb6d8b79149780f6c387ce64297bd5e1defeaf7e2d073abf9"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.221.0,<3.0.0"
+aws-cdk-lib = ">=2.221.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.116.0,<2.0.0"
 publication = ">=0.0.3"
@@ -252,14 +252,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.221.0"
+version = "2.221.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.221.0-py3-none-any.whl", hash = "sha256:419ffa33565ae5e5017d174d7193e9df34c5954012901cb9901ad6b1f5ad2777"},
-    {file = "aws_cdk_lib-2.221.0.tar.gz", hash = "sha256:3982d4a535988454deb6ad1b33cc1661601cb8a24f0c3a3d157b27d2f45709d5"},
+    {file = "aws_cdk_lib-2.221.1-py3-none-any.whl", hash = "sha256:adfa5634cd9ab7b1c36ea07338b5cb7ac35d89e1dce09a4d92759e3c377e46a3"},
+    {file = "aws_cdk_lib-2.221.1.tar.gz", hash = "sha256:0ad4c31eb77848b4a8bd1644a3cc4c2f4bad627e2a24bc5f6bace0747379fa46"},
 ]
 
 [package.dependencies]
@@ -4229,14 +4229,14 @@ pathspec = ">=0.10.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.42.1"
+version = "2.43.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["dev"]
 files = [
-    {file = "sentry_sdk-2.42.1-py2.py3-none-any.whl", hash = "sha256:f8716b50c927d3beb41bc88439dc6bcd872237b596df5b14613e2ade104aee02"},
-    {file = "sentry_sdk-2.42.1.tar.gz", hash = "sha256:8598cc6edcfe74cb8074ba6a7c15338cdee93d63d3eb9b9943b4b568354ad5b6"},
+    {file = "sentry_sdk-2.43.0-py2.py3-none-any.whl", hash = "sha256:4aacafcf1756ef066d359ae35030881917160ba7f6fc3ae11e0e58b09edc2d5d"},
+    {file = "sentry_sdk-2.43.0.tar.gz", hash = "sha256:52ed6e251c5d2c084224d73efee56b007ef5c2d408a4a071270e82131d336e20"},
 ]
 
 [package.dependencies]
@@ -4270,11 +4270,13 @@ launchdarkly = ["launchdarkly-server-sdk (>=9.8.0)"]
 litellm = ["litellm (>=1.77.5)"]
 litestar = ["litestar (>=2.0.0)"]
 loguru = ["loguru (>=0.5)"]
+mcp = ["mcp (>=1.15.0)"]
 openai = ["openai (>=1.0.0)", "tiktoken (>=0.3.0)"]
 openfeature = ["openfeature-sdk (>=0.7.1)"]
 opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
 opentelemetry-experimental = ["opentelemetry-distro"]
 pure-eval = ["asttokens", "executing", "pure_eval"]
+pydantic-ai = ["pydantic-ai (>=1.0.0)"]
 pymongo = ["pymongo (>=3.1)"]
 pyspark = ["pyspark (>=2.4.4)"]
 quart = ["blinker (>=1.1)", "quart (>=0.16.1)"]
