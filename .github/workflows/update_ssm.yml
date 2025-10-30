@@ -118,18 +118,18 @@ jobs:
         if: inputs.write_latest == true
         env:
           prefix: ${{ inputs.environment == 'beta' && '/aws/service/powertools/beta' || '/aws/service/powertools' }}
-          layer_version: ${{ inputs.layer_version }}
+          LAYER_VERSION: ${{ inputs.layer_version }}
         run: |
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.9/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.10/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.11/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.12/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.13/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.14/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:${{ env.layer_version }}" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.9/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-arm64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.10/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.11/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.12/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.13/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/arm64/python3.14/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:$LAYER_VERSION" --type String --overwrite
 
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.9/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-x86_64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.10/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.11/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.12/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.13/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:${{ env.layer_version }}" --type String --overwrite
-          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.14/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:${{ env.layer_version }}" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.9/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python39-x86_64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.10/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.11/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.12/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.13/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:$LAYER_VERSION" --type String --overwrite
+          aws ssm put-parameter --name ${{ env.prefix }}/python/x86_64/python3.14/latest --value "arn:aws:lambda:${{ matrix.region }}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:$LAYER_VERSION" --type String --overwrite
