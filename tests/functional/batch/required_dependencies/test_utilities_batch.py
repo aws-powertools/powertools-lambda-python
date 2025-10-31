@@ -767,3 +767,66 @@ async def test_async_process_partial_response_raises_unexpected_batch_type(event
     assert "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams" in str(
         exc_info.value,
     )
+
+
+def test_async_batch_processor_lambda_cold_start_creates_new_loop(sqs_event_factory, monkeypatch):
+    """Test async processing creates new event loop in Lambda cold start (Python 3.14+ compatibility)"""
+    import asyncio
+
+    # GIVEN Lambda environment is set (cold start scenario)
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/var/task")
+
+    # Close any existing event loop to simulate cold start
+    try:
+        loop = asyncio.get_event_loop()
+        if not loop.is_closed():
+            loop.close()
+    except RuntimeError:
+        pass
+
+    # Simple async handler without external dependencies
+    async def simple_async_handler(record: SQSRecord):
+        await asyncio.sleep(0.001)  # Yield control to event loop
+        return {"processed": record.body}
+
+    records = [sqs_event_factory("success"), sqs_event_factory("success")]
+    event = {"Records": records}
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN calling async_process_partial_response synchronously (like Lambda handler does)
+    result = async_process_partial_response(
+        event=event,
+        record_handler=simple_async_handler,
+        processor=processor,
+    )
+
+    # THEN all records are processed successfully with new event loop created
+    assert result == {"batchItemFailures": []}
+
+
+def test_async_batch_processor_non_lambda_uses_asyncio_run(sqs_event_factory, monkeypatch):
+    """Test async processing uses asyncio.run outside Lambda environment"""
+    import asyncio
+
+    # GIVEN Lambda environment is NOT set
+    monkeypatch.delenv("LAMBDA_TASK_ROOT", raising=False)
+
+    # Simple async handler without external dependencies
+    async def simple_async_handler(record: SQSRecord):
+        await asyncio.sleep(0.001)  # Yield control to event loop
+        return {"processed": record.body}
+
+    records = [sqs_event_factory("success")]
+    event = {"Records": records}
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    # WHEN calling async_process_partial_response outside Lambda
+    result = async_process_partial_response(
+        event=event,
+        record_handler=simple_async_handler,
+        processor=processor,
+    )
+
+    # THEN record is processed successfully using asyncio.run()
+    assert result == {"batchItemFailures": []}
+    assert result == {"batchItemFailures": []}
