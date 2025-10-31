@@ -1107,10 +1107,10 @@ def test_annotated_types_interval_constraints_in_body_params_invalid(body_value)
     app = APIGatewayRestResolver(enable_validation=True)
 
     # AND a constrained type using annotated_types.Interval
-    ConstrainedInt = Annotated[int, Interval(ge=0, le=100)]
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
 
     @app.post("/items")
-    def create_item(value: Annotated[ConstrainedInt, Body()]):
+    def create_item(value: Annotated[constrained_int, Body()]):
         return {"value": value}
 
     # WHEN sending a request with an invalid value
@@ -1146,10 +1146,10 @@ def test_annotated_types_interval_constraints_in_query_params(query_value, expec
     app = APIGatewayRestResolver(enable_validation=True)
 
     # AND a constrained type using annotated_types.Interval
-    ConstrainedInt = Annotated[int, Interval(ge=0, le=100)]
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
 
     @app.get("/items")
-    def list_items(limit: Annotated[ConstrainedInt, Query()]):
+    def list_items(limit: Annotated[constrained_int, Query()]):
         return {"limit": limit}
 
     # WHEN sending a request with a valid value
@@ -1186,10 +1186,10 @@ def test_annotated_types_interval_constraints_in_query_params_invalid(query_valu
     app = APIGatewayRestResolver(enable_validation=True)
 
     # AND a constrained type using annotated_types.Interval
-    ConstrainedInt = Annotated[int, Interval(ge=0, le=100)]
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
 
     @app.get("/items")
-    def list_items(limit: Annotated[ConstrainedInt, Query()]):
+    def list_items(limit: Annotated[constrained_int, Query()]):
         return {"limit": limit}
 
     # WHEN sending a request with an invalid value
@@ -1213,10 +1213,10 @@ def test_annotated_types_interval_in_openapi_schema():
     from annotated_types import Interval
 
     app = APIGatewayRestResolver()
-    ConstrainedInt = Annotated[int, Interval(ge=0, le=100)]
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
 
     @app.get("/items")
-    def list_items(limit: Annotated[ConstrainedInt, Query()] = 10):
+    def list_items(limit: Annotated[constrained_int, Query()] = 10):
         return {"limit": limit}
 
     schema = app.get_openapi_schema()
