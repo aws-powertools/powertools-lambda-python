@@ -552,7 +552,12 @@ def _request_body_to_args(
             _handle_missing_field_value(field, values, errors, loc)
             continue
 
+        # Normalize the field value (e.g., convert lists to single values)
         value = _normalize_field_value(value=value, field_info=field.field_info)
+
+        # Convert UploadFile to bytes if needed before validation
+        value = _convert_uploadfile_to_bytes(value=value, field_info=field.field_info)
+
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
@@ -595,23 +600,34 @@ def _handle_missing_field_value(
         values[field.name] = field.get_default()
 
 
+def _convert_uploadfile_to_bytes(value: Any, field_info: FieldInfo) -> Any:
+    """
+    Convert UploadFile instances to bytes when the expected type is bytes.
+
+    This handles the conversion of uploaded files to bytes for validation,
+    supporting both plain bytes annotations and Annotated[bytes, File()] patterns.
+    """
+    if not isinstance(value, UploadFile):
+        return value
+
+    # Check if the annotation is bytes
+    annotation = field_info.annotation
+    # Handle Annotated types by unwrapping
+    if hasattr(annotation, "__origin__"):
+        from typing import get_args
+
+        args = get_args(annotation)
+        if args:
+            annotation = args[0]
+
+    if annotation is bytes:
+        return value.file
+
+    return value
+
+
 def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
-    # Convert UploadFile to bytes if the expected type is bytes
-    if isinstance(value, UploadFile):
-        # Check if the annotation is bytes
-        annotation = field_info.annotation
-        # Handle Annotated types by unwrapping
-        if hasattr(annotation, "__origin__"):
-            from typing import get_args
-
-            args = get_args(annotation)
-            if args:
-                annotation = args[0]
-
-        if annotation is bytes:
-            return value.file
-
     if field_annotation_is_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
@@ -705,7 +721,9 @@ def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField
         value = _get_param_value(input_dict, field_alias, field_name, model_class)
 
         if value is not None:
-            model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
+            value = _normalize_field_value(value=value, field_info=field_info)
+            value = _convert_uploadfile_to_bytes(value=value, field_info=field_info)
+            model_data[field_alias] = value
 
     input_dict[param.alias] = model_data
 

@@ -30,6 +30,8 @@ if TYPE_CHECKING:
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
 """
 
+# Explicitly define public API for this module to support IDE autocomplete,
+# documentation generation, and controlled imports. Update when adding new parameter types.
 __all__ = ["Path", "Query", "Header", "Body", "Form", "File", "UploadFile"]
 
 
