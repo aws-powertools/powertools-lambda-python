@@ -2748,7 +2748,7 @@ def test_normalize_field_value_uploadfile_with_annotated_bytes():
         annotation = Annotated[bytes, "meta"]
 
     ov = __import__("aws_lambda_powertools.event_handler.middlewares.openapi_validation", fromlist=["*"])
-    result = ov._normalize_field_value(upload, DummyFieldInfo())
+    result = ov._convert_uploadfile_to_bytes(upload, DummyFieldInfo())
     assert result == file_content
 
 
