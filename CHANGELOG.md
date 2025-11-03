@@ -12,6 +12,7 @@
 ## Maintenance
 
 * **ci:** new pre-release 3.22.1a4 ([#7597](https://github.com/aws-powertools/powertools-lambda-python/issues/7597))
+* **ci:** new pre-release 3.22.1a6 ([#7615](https://github.com/aws-powertools/powertools-lambda-python/issues/7615))
 * **ci:** new pre-release 3.22.1a0 ([#7567](https://github.com/aws-powertools/powertools-lambda-python/issues/7567))
 * **ci:** new pre-release 3.22.1a1 ([#7583](https://github.com/aws-powertools/powertools-lambda-python/issues/7583))
 * **ci:** new pre-release 3.22.1a2 ([#7588](https://github.com/aws-powertools/powertools-lambda-python/issues/7588))
