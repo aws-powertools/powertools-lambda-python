@@ -14,6 +14,7 @@ from pydantic import BaseModel, TypeAdapter, ValidationError, create_model
 # We use this for forward reference, as it allows us to handle forward references in type annotations.
 from pydantic._internal._typing_extra import eval_type_lenient
 from pydantic._internal._utils import lenient_issubclass
+from pydantic.fields import FieldInfo as PydanticFieldInfo
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 from typing_extensions import Annotated, Literal, get_args, get_origin
 
@@ -200,15 +201,9 @@ def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
         # If base type is also Annotated, recursively extract its metadata
         if get_origin(base_type) is Annotated:
             inner_base, inner_metadata = extract_metadata(base_type)
-            # Combine metadata from both levels, filtering out FieldInfo instances
-            from pydantic.fields import FieldInfo as PydanticFieldInfo
-
             all_metadata = [m for m in inner_metadata + metadata if not isinstance(m, PydanticFieldInfo)]
             return inner_base, all_metadata
         else:
-            # Filter out FieldInfo instances from metadata
-            from pydantic.fields import FieldInfo as PydanticFieldInfo
-
             constraint_metadata = [m for m in metadata if not isinstance(m, PydanticFieldInfo)]
             return base_type, constraint_metadata
 

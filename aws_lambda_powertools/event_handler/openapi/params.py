@@ -1131,8 +1131,6 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     # Reconstruct type_annotation with non-FieldInfo metadata if present
     # This ensures constraints like Interval are preserved
     if other_metadata and not has_discriminator_with_param:
-        from typing_extensions import Annotated
-
         type_annotation = Annotated[(type_annotation, *other_metadata)]
 
     # Process the annotation if it exists
