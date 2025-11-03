@@ -1110,6 +1110,10 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     type_annotation = annotated_args[0]
     powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
 
+    # Preserve non-FieldInfo metadata (like annotated_types constraints)
+    # This is important for constraints like Interval, Gt, Lt, etc.
+    other_metadata = [arg for arg in annotated_args[1:] if not isinstance(arg, FieldInfo)]
+
     # Determine which annotation to use
     powertools_annotation: FieldInfo | None = None
     has_discriminator_with_param = False
@@ -1123,6 +1127,11 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
         raise AssertionError("Only one FieldInfo can be used per parameter")
     else:
         powertools_annotation = next(iter(powertools_annotations), None)
+
+    # Reconstruct type_annotation with non-FieldInfo metadata if present
+    # This ensures constraints like Interval are preserved
+    if other_metadata and not has_discriminator_with_param:
+        type_annotation = Annotated[(type_annotation, *other_metadata)]
 
     # Process the annotation if it exists
     field_info: FieldInfo | None = None

@@ -14,6 +14,7 @@ from pydantic import BaseModel, TypeAdapter, ValidationError, create_model
 # We use this for forward reference, as it allows us to handle forward references in type annotations.
 from pydantic._internal._typing_extra import eval_type_lenient
 from pydantic._internal._utils import lenient_issubclass
+from pydantic.fields import FieldInfo as PydanticFieldInfo
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 from typing_extensions import Annotated, Literal, get_args, get_origin
 
@@ -186,8 +187,36 @@ def model_rebuild(model: type[BaseModel]) -> None:
 def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
     # Create a shallow copy of the field_info to preserve its type and all attributes
     new_field = copy(field_info)
-    # Update only the annotation to the new one
-    new_field.annotation = annotation
+
+    # Recursively extract all metadata from nested Annotated types
+    def extract_metadata(ann: Any) -> tuple[Any, list[Any]]:
+        """Extract base type and all non-FieldInfo metadata from potentially nested Annotated types."""
+        if get_origin(ann) is not Annotated:
+            return ann, []
+
+        args = get_args(ann)
+        base_type = args[0]
+        metadata = list(args[1:])
+
+        # If base type is also Annotated, recursively extract its metadata
+        if get_origin(base_type) is Annotated:
+            inner_base, inner_metadata = extract_metadata(base_type)
+            all_metadata = [m for m in inner_metadata + metadata if not isinstance(m, PydanticFieldInfo)]
+            return inner_base, all_metadata
+        else:
+            constraint_metadata = [m for m in metadata if not isinstance(m, PydanticFieldInfo)]
+            return base_type, constraint_metadata
+
+    # Extract base type and constraints
+    base_type, constraints = extract_metadata(annotation)
+
+    # Set the annotation with base type and all constraint metadata
+    # Use tuple unpacking for Python 3.9+ compatibility
+    if constraints:
+        new_field.annotation = Annotated[(base_type, *constraints)]
+    else:
+        new_field.annotation = base_type
+
     return new_field
 
 

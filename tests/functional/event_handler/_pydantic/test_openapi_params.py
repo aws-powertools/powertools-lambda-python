@@ -1,7 +1,9 @@
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
 
+import pytest
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
@@ -1044,3 +1046,185 @@ def test_openapi_pydantic_complex_types():
     assert type_mapping["int_field"] == "integer"
     assert type_mapping["float_field"] == "number"
     assert type_mapping["bool_field"] == "boolean"
+
+
+@pytest.mark.parametrize(
+    "body_value,expected_value",
+    [
+        ("50", 50),  # Valid: within range
+        ("0", 0),  # Valid: at lower bound
+        ("100", 100),  # Valid: at upper bound
+    ],
+)
+def test_annotated_types_interval_constraints_in_body_params(body_value, expected_value):
+    """
+    Test for issue #7600: Validate that annotated_types.Interval constraints
+    are properly enforced in Body parameters with valid values.
+    """
+    from annotated_types import Interval
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # AND a constrained type using annotated_types.Interval
+    ConstrainedInt = Annotated[int, Interval(ge=0, le=100)]
+
+    @app.post("/items")
+    def create_item(value: Annotated[ConstrainedInt, Body()]):
+        return {"value": value}
+
+    # WHEN sending a request with a valid value
+    event = {
+        "resource": "/items",
+        "path": "/items",
+        "httpMethod": "POST",
+        "body": body_value,
+        "isBase64Encoded": False,
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["value"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "body_value",
+    [
+        "-1",  # Invalid: below range
+        "101",  # Invalid: above range
+    ],
+)
+def test_annotated_types_interval_constraints_in_body_params_invalid(body_value):
+    """
+    Test for issue #7600: Validate that annotated_types.Interval constraints
+    reject invalid values in Body parameters.
+    """
+    from annotated_types import Interval
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # AND a constrained type using annotated_types.Interval
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
+
+    @app.post("/items")
+    def create_item(value: Annotated[constrained_int, Body()]):
+        return {"value": value}
+
+    # WHEN sending a request with an invalid value
+    event = {
+        "resource": "/items",
+        "path": "/items",
+        "httpMethod": "POST",
+        "body": body_value,
+        "isBase64Encoded": False,
+    }
+
+    # THEN validation should fail
+    result = app(event, {})
+    assert result["statusCode"] == 422
+
+
+@pytest.mark.parametrize(
+    "query_value,expected_value",
+    [
+        ("50", 50),  # Valid: within range
+        ("0", 0),  # Valid: at lower bound
+        ("100", 100),  # Valid: at upper bound
+    ],
+)
+def test_annotated_types_interval_constraints_in_query_params(query_value, expected_value):
+    """
+    Test for issue #7600: Validate that annotated_types.Interval constraints
+    are properly enforced in Query parameters with valid values.
+    """
+    from annotated_types import Interval
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # AND a constrained type using annotated_types.Interval
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
+
+    @app.get("/items")
+    def list_items(limit: Annotated[constrained_int, Query()]):
+        return {"limit": limit}
+
+    # WHEN sending a request with a valid value
+    event = {
+        "resource": "/items",
+        "path": "/items",
+        "httpMethod": "GET",
+        "queryStringParameters": {"limit": query_value},
+        "isBase64Encoded": False,
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["limit"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "query_value",
+    [
+        "-1",  # Invalid: below range
+        "101",  # Invalid: above range
+    ],
+)
+def test_annotated_types_interval_constraints_in_query_params_invalid(query_value):
+    """
+    Test for issue #7600: Validate that annotated_types.Interval constraints
+    reject invalid values in Query parameters.
+    """
+    from annotated_types import Interval
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # AND a constrained type using annotated_types.Interval
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
+
+    @app.get("/items")
+    def list_items(limit: Annotated[constrained_int, Query()]):
+        return {"limit": limit}
+
+    # WHEN sending a request with an invalid value
+    event = {
+        "resource": "/items",
+        "path": "/items",
+        "httpMethod": "GET",
+        "queryStringParameters": {"limit": query_value},
+        "isBase64Encoded": False,
+    }
+
+    # THEN validation should fail
+    result = app(event, {})
+    assert result["statusCode"] == 422
+
+
+def test_annotated_types_interval_in_openapi_schema():
+    """
+    Test that annotated_types.Interval constraints are reflected in the OpenAPI schema.
+    """
+    from annotated_types import Interval
+
+    app = APIGatewayRestResolver()
+    constrained_int = Annotated[int, Interval(ge=0, le=100)]
+
+    @app.get("/items")
+    def list_items(limit: Annotated[constrained_int, Query()] = 10):
+        return {"limit": limit}
+
+    schema = app.get_openapi_schema()
+
+    # Verify the Query parameter schema includes constraints
+    get_operation = schema.paths["/items"].get
+    limit_param = next(p for p in get_operation.parameters if p.name == "limit")
+
+    assert limit_param.schema_.type == "integer"
+    assert limit_param.schema_.default == 10
+    assert limit_param.required is False
