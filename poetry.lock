@@ -216,20 +216,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.221.1a0"
+version = "2.222.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.221.1a0-py3-none-any.whl", hash = "sha256:82ae652615039d839ce26475ddaf184c2c525179afd40e4bf1ade224ab682920"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.221.1a0.tar.gz", hash = "sha256:5f8dd2e0872f610cb6d8b79149780f6c387ce64297bd5e1defeaf7e2d073abf9"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.222.0a0-py3-none-any.whl", hash = "sha256:afdcd861eaeaf1c86c96d26d2a482304b3e77f3420a15951589881746cee7635"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.222.0a0.tar.gz", hash = "sha256:1e82749d9a588fe0b5ce7aa37f6b10990241d45ee1d2660914adc96b5f01ee58"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.221.1,<3.0.0"
+aws-cdk-lib = ">=2.222.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.116.0,<2.0.0"
+jsii = ">=1.118.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<4.3.0"
 
@@ -1119,14 +1119,14 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.40.3"
+version = "1.40.4"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "cfn_lint-1.40.3-py3-none-any.whl", hash = "sha256:d13987b5a1726c1b4e8e704352c24d8a697b7b721801b52cf9396279dcbf23ef"},
-    {file = "cfn_lint-1.40.3.tar.gz", hash = "sha256:3f51f7fc66be9a31762d17f821839b32071a891e2d71ed6ab33dbc71a4dec938"},
+    {file = "cfn_lint-1.40.4-py3-none-any.whl", hash = "sha256:7b8bf9dac877842633d8403a8b2c31874b21c9922d74813da34e552b4cf03915"},
+    {file = "cfn_lint-1.40.4.tar.gz", hash = "sha256:7c8bcf3cf5f2cf8d96fd30fdee1115bfc2480a4c619afc8bce36d551fbb228e1"},
 ]
 
 [package.dependencies]
@@ -5091,4 +5091,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0.0"
-content-hash = "1def4780f962b79ed04fb93cac6b94230efae2a1d4349cd9659986e7f6691cf1"
+content-hash = "123ebc834660a5e9ca3e759e8248e587625bd5542a169256deb3a965d2c570dc"
