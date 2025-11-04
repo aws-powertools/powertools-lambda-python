@@ -498,7 +498,7 @@ class Route:
         to force the Python call stack created by the handler call-chain to naturally un-wind.
 
         This becomes a simple concept for developers to understand and reason with - no additional
-        gymanstics other than plain old try ... except.
+        gymnastics other than plain old try ... except.
 
         Notes
         -----
@@ -1650,7 +1650,7 @@ def _registered_api_adapter(
 
 
 class ApiGatewayResolver(BaseRouter):
-    """API Gateway, VPC Laticce, Bedrock and ALB proxy resolver
+    """API Gateway, VPC Lattice, Bedrock and ALB proxy resolver
 
     Examples
     --------
@@ -3079,7 +3079,7 @@ class ApiGatewayResolver(BaseRouter):
         for route in routes:
             if route.body_field:
                 if not isinstance(route.body_field, ModelField):
-                    raise AssertionError("A request body myst be a Pydantic Field")
+                    raise AssertionError("A request body must be a Pydantic Field")
                 body_fields_from_routes.append(route.body_field)
 
             params = get_flat_params(route.dependant)
