@@ -32,7 +32,7 @@ class LambdaPowertoolsLayerPythonV3(lambda_.LayerVersion):
     Example:
         >>> app = cdk.App()
         >>> LambdaPowertoolsLayerPythonV3(app, "PowertoolsLayer",
-        ...     python_version=lambda_.Runtime.PYTHON_3_13,
+        ...     python_version=lambda_.Runtime.PYTHON_3_14,
         ...     include_extras=True,
         ...     architecture=lambda_.Architecture.ARM_64,
         ...     powertools_version="3.0.0",
@@ -50,7 +50,6 @@ class LambdaPowertoolsLayerPythonV3(lambda_.LayerVersion):
         powertools_version: str = "",
         layer_name: str = "",
     ) -> None:
-
         docker_file_path = str(Path(__file__).parent.parent / "docker")
 
         python_normalized_version: str = python_version.to_string().replace("python", "")
