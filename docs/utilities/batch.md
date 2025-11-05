@@ -243,7 +243,7 @@ By default, we catch any exception raised by your record handler function. This 
 
 === "Sample error handling with custom exception"
 
-    ```python title="" hl_lines="24"
+    ```python title="" hl_lines="23"
     --8<-- "examples/batch_processing/src/getting_started_error_handling.py"
     ```
 
