@@ -221,11 +221,11 @@ Dynamic path parameters are defined using angle brackets `<parameter_name>` synt
 * **Parameter names** must contain only word characters (letters, numbers, underscore)
 * **Captured values** can contain letters, numbers, underscores, and these special characters: `-._~()'!*:@,;=+&$%<> \[]{}|^`. Reserved characters must be percent-encoded in URLs to prevent errors.
 
-| Route Pattern | Matches | Doesn't Match |
-|---------------|---------|---------------|
-| `/users/<user_id>` | `/users/123`, `/users/user-456` | `/users/123/profile` |
-| `/api/<version>/users` | `/api/v1/users`, `/api/2.0/users` | `/api/users` |
-| `/files/<path>` | `/files/document.pdf`, `/files/folder%20name` | `/files/sub/folder/file.txt` |
+| Route Pattern            | Matches                                          | Doesn't Match                |
+| ------------------------ | ------------------------------------------------ | ---------------------------- |
+| `/users/<user_id>`       | `/users/123`, `/users/user-456`                  | `/users/123/profile`         |
+| `/api/<version>/users`   | `/api/v1/users`, `/api/2.0/users`                | `/api/users`                 |
+| `/files/<path>`          | `/files/document.pdf`, `/files/folder%20name`    | `/files/sub/folder/file.txt` |
 | `/files/<folder>/<name>` | `/files/src/document.pdf`, `/files/src/test.txt` | `/files/sub/folder/file.txt` |
 
 === "routing_syntax_basic.py"
@@ -253,12 +253,12 @@ For scenarios where you need to handle arbitrary or deeply nested paths, you can
 
 You can use standard [Python regex patterns](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} in your route definitions, for example:
 
-| Pattern | Description | Examples |
-|---------|-------------|----------|
-| `.+` | Matches one or more characters (greedy) | `/proxy/.+` matches `/proxy/any/deep/path` |
-| `.*` | Matches zero or more characters (greedy) | `/files/.*` matches `/files/` and `/files/deep/path` |
+| Pattern | Description                              | Examples                                               |
+| ------- | ---------------------------------------- | ------------------------------------------------------ |
+| `.+`    | Matches one or more characters (greedy)  | `/proxy/.+` matches `/proxy/any/deep/path`             |
+| `.*`    | Matches zero or more characters (greedy) | `/files/.*` matches `/files/` and `/files/deep/path`   |
 | `[^/]+` | Matches one or more non-slash characters | `/api/[^/]+` matches `/api/v1` but not `/api/v1/users` |
-| `\w+` | Matches one or more word characters | `/users/\w+` matches `/users/john123` |
+| `\w+`   | Matches one or more word characters      | `/users/\w+` matches `/users/john123`                  |
 
 === "dynamic_routes_catch_all.py"
 
@@ -889,12 +889,11 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 
 #### Global middlewares
 
-<center>
-![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
-![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
-
-_Request flowing through multiple registered middlewares_
-</center>
+<figure markdown="span">
+  ![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
+  ![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
+  <figcaption>Request flowing through multiple registered middlewares</figcaption>
+</figure>
 
 You can use `app.use` to register middlewares that should always run regardless of the route, also known as global middlewares.
 
@@ -1043,8 +1042,8 @@ This ensures your middlewares can return early responses (401, 403, 429, etc.) w
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                                                | Purpose                                                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Middleware                 | Purpose                                                                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | SchemaValidationMiddleware | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
@@ -1267,13 +1266,13 @@ Security schemes are declared at the top-level first. You can reference them glo
 
 OpenAPI 3 lets you describe APIs protected using the following security schemes:
 
-| Security Scheme                                                                                                                                                                         | Type            | Description                                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [HTTP auth](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml){target="_blank"}                                                                                  | `HTTPBase`      | HTTP authentication schemes using the Authorization header (e.g: [Basic auth](https://swagger.io/docs/specification/authentication/basic-authentication/){target="_blank"}, [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/){target="_blank"}) |
-| [API keys](https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies) | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
-| [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                                                                                | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
-| [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"}                                                             | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
-| [Mutual TLS](https://swagger.io/specification/#security-scheme-object){target="_blank"}.                                                                                                | `MutualTLS`     | Client/server certificate mutual authentication scheme. |
+| Security Scheme                                                                                                             | Type            | Description                                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [HTTP auth](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml){target="_blank"}                      | `HTTPBase`      | HTTP authentication schemes using the Authorization header (e.g: [Basic auth](https://swagger.io/docs/specification/authentication/basic-authentication/){target="_blank"}, [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/){target="_blank"}) |
+| [API keys](https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies)   | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
+| [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                    | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
+| [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"} | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
+| [Mutual TLS](https://swagger.io/specification/#security-scheme-object){target="_blank"}.                                    | `MutualTLS`     | Client/server certificate mutual authentication scheme.                                                                                                                                                                                                                             |
 
 ???-note "Using OAuth2 with the Swagger UI?"
     You can use the `OAuth2Config` option to configure a default OAuth2 app on the generated Swagger UI.
