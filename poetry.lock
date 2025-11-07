@@ -3594,14 +3594,14 @@ testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
 
 [[package]]
 name = "pytest-benchmark"
-version = "5.2.1"
+version = "5.2.2"
 description = "A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pytest_benchmark-5.2.1-py3-none-any.whl", hash = "sha256:a6e18fe0df2155e9d993db6ba03bdf85324794035ad986553787024ca59e8db9"},
-    {file = "pytest_benchmark-5.2.1.tar.gz", hash = "sha256:56dc1455bda7ccb540aa671c496dafc8187d2769f278e5f137689476805b6f9d"},
+    {file = "pytest_benchmark-5.2.2-py3-none-any.whl", hash = "sha256:00a57d6b5c04e09052890bf04a0417192dd74427c7386a65e3db0a375753dc77"},
+    {file = "pytest_benchmark-5.2.2.tar.gz", hash = "sha256:af6717b86a29a9fcd79eda8745883eff3a7fdd626326a6639db0d6cf4d334a89"},
 ]
 
 [package.dependencies]
