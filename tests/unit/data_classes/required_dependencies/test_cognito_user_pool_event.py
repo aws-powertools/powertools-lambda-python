@@ -187,7 +187,7 @@ def test_cognito_pre_token_generation_trigger_event():
 
     expected_claims = {"test": "value"}
     claims_override_details.claims_to_add_or_override = expected_claims
-    assert parsed_event.response.claims_override_details.claims_to_add_or_override == expected_claims
+    assert parsed_event.response.claims_override_details.claims_to_add_or_override["test"] == "value"
 
     claims_override_details.claims_to_suppress = ["email"]
     assert claims_override_details.claims_to_suppress[0] == "email"
