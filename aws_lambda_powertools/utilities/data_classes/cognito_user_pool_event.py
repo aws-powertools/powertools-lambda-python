@@ -575,13 +575,10 @@ class TokenClaimsAndScopeOverrideDetails(ClaimsOverrideBase):
 
 class ClaimsAndScopeOverrideDetails(GroupConfigurationBase):
     @property
-    def id_token_generation(self) -> TokenClaimsAndScopeOverrideDetails | None:
-        id_token_generation_details = self._data.get("idTokenGeneration")
-        return (
-            None
-            if id_token_generation_details is None
-            else TokenClaimsAndScopeOverrideDetails(id_token_generation_details)
-        )
+    def id_token_generation(self) -> TokenClaimsAndScopeOverrideDetails:
+        if self._data.get("idTokenGeneration") is None:
+            self._data["idTokenGeneration"] = {}
+        return TokenClaimsAndScopeOverrideDetails(self._data["idTokenGeneration"])
 
     @id_token_generation.setter
     def id_token_generation(self, value: dict[str, Any]):
@@ -597,13 +594,10 @@ class ClaimsAndScopeOverrideDetails(GroupConfigurationBase):
         self._data["idTokenGeneration"] = value
 
     @property
-    def access_token_generation(self) -> TokenClaimsAndScopeOverrideDetails | None:
-        access_token_generation_details = self._data.get("accessTokenGeneration")
-        return (
-            None
-            if access_token_generation_details is None
-            else TokenClaimsAndScopeOverrideDetails(access_token_generation_details)
-        )
+    def access_token_generation(self) -> TokenClaimsAndScopeOverrideDetails:
+        if self._data.get("accessTokenGeneration") is None:
+            self._data["accessTokenGeneration"] = {}
+        return TokenClaimsAndScopeOverrideDetails(self._data["accessTokenGeneration"])
 
     @access_token_generation.setter
     def access_token_generation(self, value: dict[str, Any]):
@@ -622,13 +616,17 @@ class ClaimsAndScopeOverrideDetails(GroupConfigurationBase):
 class PreTokenGenerationTriggerEventResponse(DictWrapper):
     @property
     def claims_override_details(self) -> ClaimsOverrideDetails:
-        return ClaimsOverrideDetails(self.get("claimsOverrideDetails") or {})
+        if self._data.get("claimsOverrideDetails") is None:
+            self._data["claimsOverrideDetails"] = {}
+        return ClaimsOverrideDetails(self._data["claimsOverrideDetails"])
 
 
 class PreTokenGenerationTriggerV2EventResponse(DictWrapper):
     @property
     def claims_scope_override_details(self) -> ClaimsAndScopeOverrideDetails:
-        return ClaimsAndScopeOverrideDetails(self.get("claimsAndScopeOverrideDetails") or {})
+        if self._data.get("claimsAndScopeOverrideDetails") is None:
+            self._data["claimsAndScopeOverrideDetails"] = {}
+        return ClaimsAndScopeOverrideDetails(self._data["claimsAndScopeOverrideDetails"])
 
 
 class PreTokenGenerationTriggerEvent(BaseTriggerEvent):
