@@ -10,12 +10,14 @@
 
 ## Maintenance
 
+* **ci:** new pre-release 3.22.2a2 ([#7652](https://github.com/aws-powertools/powertools-lambda-python/issues/7652))
 * **ci:** new pre-release 3.22.2a1 ([#7646](https://github.com/aws-powertools/powertools-lambda-python/issues/7646))
 * **ci:** new pre-release 3.22.2a0 ([#7642](https://github.com/aws-powertools/powertools-lambda-python/issues/7642))
-* **deps:** bump pydantic from 2.12.3 to 2.12.4 ([#7641](https://github.com/aws-powertools/powertools-lambda-python/issues/7641))
 * **deps:** bump docker/setup-qemu-action from 3.6.0 to 3.7.0 ([#7639](https://github.com/aws-powertools/powertools-lambda-python/issues/7639))
+* **deps:** bump pydantic from 2.12.3 to 2.12.4 ([#7641](https://github.com/aws-powertools/powertools-lambda-python/issues/7641))
 * **deps-dev:** bump types-protobuf from 6.32.1.20250918 to 6.32.1.20251105 ([#7640](https://github.com/aws-powertools/powertools-lambda-python/issues/7640))
 * **deps-dev:** bump aws-cdk from 2.1031.1 to 2.1031.2 ([#7645](https://github.com/aws-powertools/powertools-lambda-python/issues/7645))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20251008 to 2.9.0.20251108 ([#7657](https://github.com/aws-powertools/powertools-lambda-python/issues/7657))
 * **docs:** fix broken images ([#7644](https://github.com/aws-powertools/powertools-lambda-python/issues/7644))
 
 
