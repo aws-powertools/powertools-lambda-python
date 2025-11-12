@@ -246,8 +246,14 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     expected_claims = {"test": "value"}
     claims_scope_override_details.id_token_generation.claims_to_add_or_override = expected_claims
     claims_scope_override_details.access_token_generation.claims_to_add_or_override = expected_claims
-    assert parsed_event.response.claims_scope_override_details.id_token_generation.claims_to_add_or_override["test"] == "value"
-    assert parsed_event.response.claims_scope_override_details.access_token_generation.claims_to_add_or_override["test"] == "value"
+    assert (
+        parsed_event.response.claims_scope_override_details.id_token_generation.claims_to_add_or_override["test"]
+        == "value"
+    )
+    assert (
+        parsed_event.response.claims_scope_override_details.access_token_generation.claims_to_add_or_override["test"]
+        == "value"
+    )
 
     claims_scope_override_details.id_token_generation.claims_to_suppress = (
         claims_scope_override_details.access_token_generation.claims_to_suppress
