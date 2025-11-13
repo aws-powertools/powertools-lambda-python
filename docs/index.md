@@ -113,7 +113,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         resource "aws_lambda_function" "test_lambda" {
             ...
 
-            runtime = "python3.13"
+            runtime = "python3.14"
 
             layers = [data.aws_ssm_parameter.powertools_version.value]
         }

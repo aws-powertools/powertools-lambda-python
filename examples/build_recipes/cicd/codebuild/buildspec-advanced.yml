@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    PYTHON_VERSION: "3.13"
+    PYTHON_VERSION: "3.14"
     BUILD_STAGE: "build"
   parameter-store:
     POWERTOOLS_VERSION: "/build/powertools-version"

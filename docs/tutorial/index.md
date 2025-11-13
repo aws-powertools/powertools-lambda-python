@@ -24,7 +24,7 @@ Let's clone our sample project before we add one feature at a time.
     ```
 
 ```bash title="Use SAM CLI to initialize the sample project"
-sam init --runtime python3.13 --dependency-manager pip --app-template hello-world --name powertools-quickstart
+sam init --runtime python3.14 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
 
 ### Project structure
@@ -787,7 +787,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 ![CloudWatch ServiceLens View](../media/tracer_utility_showcase_3.png)
 
 ???+ info
-    For more information on Amazon CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html){target="_blank"}.
+    For more information on Amazon CloudWatch ServiceLens, please visit [Amazon CloudWatch ServiceLens](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html){target="_blank"}.
 
 ## Custom Metrics
 

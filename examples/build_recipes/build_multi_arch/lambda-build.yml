@@ -14,13 +14,13 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
 
     - name: Install dependencies with Lambda-compatible wheels
       run: |
         # Force Linux x86_64 wheels compatible with Lambda GLIBC 2.34
         pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-          --python-version 3.13 --target build/ \
+          --python-version 3.14 --target build/ \
           -r requirements.txt
 
     - name: Copy application code
@@ -45,13 +45,13 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
 
     - name: Install dependencies for ARM64 Lambda
       run: |
         # Force Linux ARM64 wheels compatible with Lambda
         pip install --platform manylinux2014_aarch64 --only-binary=:all: \
-          --python-version 3.13 --target build/ \
+          --python-version 3.14 --target build/ \
           -r requirements.txt
 
     - name: Copy application code

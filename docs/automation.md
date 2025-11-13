@@ -111,6 +111,7 @@ graph LR
     Fetch --> P311[<strong>Python 3.11</strong>]
     Fetch --> P312[<strong>Python 3.12</strong>]
     Fetch --> P313[<strong>Python 3.13</strong>]
+    Fetch --> P314[<strong>Python 3.14</strong>]
 
     subgraph build ["LAYER BUILD"]
       P39 --> P39x86[build x86_64]
@@ -123,6 +124,8 @@ graph LR
       P312 --> P312arm64[build arm64]
       P313 --> P313x86[build x86_64]
       P313 --> P313arm64[build arm64]
+      P314 --> P314x86[build x86_64]
+      P314 --> P314arm64[build arm64]
       P39x86 --> CDKP2[CDK Package]
       P39arm64 --> CDKP2[CDK Package]
       P310x86 --> CDKP3[CDK Package]
@@ -133,6 +136,8 @@ graph LR
       P312arm64 --> CDKP5[CDK Package]
       P313x86 --> CDKP6[CDK Package]
       P313arm64 --> CDKP6[CDK Package]
+      P314x86 --> CDKP6[CDK Package]
+      P314arm64 --> CDKP6[CDK Package]
     end
 
     subgraph beta ["BETA (all regions)"]
