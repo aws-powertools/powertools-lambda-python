@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    PYTHON_VERSION: "3.13"
+    PYTHON_VERSION: "3.14"
     POWERTOOLS_VERSION: "3.18.0"
   parameter-store:
     FUNCTION_NAME: "/lambda/powertools-app/function-name"

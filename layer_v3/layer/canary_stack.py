@@ -141,6 +141,8 @@ class Canary(Construct):
             runtime = Runtime.PYTHON_3_12
         elif python_version == "python3.13":
             runtime = Runtime.PYTHON_3_13
+        elif python_version == "python3.14":
+            runtime = Runtime.PYTHON_3_14
         else:
             raise ValueError("Unsupported Python version")
 

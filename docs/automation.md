@@ -94,7 +94,7 @@ This is a snapshot of our automated checks at a glance.
 To build and deploy the Lambda Layers, we run a pipeline with the following steps:
 
 * We fetch the latest PyPi release and use it as the source for our layer.
-* We build Python versions ranging from **3.9 to 3.13** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
+* We build Python versions ranging from **3.9 to 3.14** for x86_64 and arm64 architectures. This is necessary because we use pre-compiled libraries like **Pydantic** and **Cryptography**, which require specific Python versions for each layer.
 * We provide layer distributions for both the **x86_64** and **arm64** architectures.
 * For each Python version, we create a single CDK package containing both x86_64 and arm64 assets to optimize deployment performance.
 
@@ -111,6 +111,7 @@ graph LR
     Fetch --> P311[<strong>Python 3.11</strong>]
     Fetch --> P312[<strong>Python 3.12</strong>]
     Fetch --> P313[<strong>Python 3.13</strong>]
+    Fetch --> P314[<strong>Python 3.14</strong>]
 
     subgraph build ["LAYER BUILD"]
       P39 --> P39x86[build x86_64]
@@ -123,6 +124,8 @@ graph LR
       P312 --> P312arm64[build arm64]
       P313 --> P313x86[build x86_64]
       P313 --> P313arm64[build arm64]
+      P314 --> P314x86[build x86_64]
+      P314 --> P314arm64[build arm64]
       P39x86 --> CDKP2[CDK Package]
       P39arm64 --> CDKP2[CDK Package]
       P310x86 --> CDKP3[CDK Package]
@@ -133,6 +136,8 @@ graph LR
       P312arm64 --> CDKP5[CDK Package]
       P313x86 --> CDKP6[CDK Package]
       P313arm64 --> CDKP6[CDK Package]
+      P314x86 --> CDKP6[CDK Package]
+      P314arm64 --> CDKP6[CDK Package]
     end
 
     subgraph beta ["BETA (all regions)"]

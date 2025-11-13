@@ -97,7 +97,7 @@ def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     assert logs == json.loads('{"m":"item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled until DD release new version")
+@pytest.mark.skip("Temporarily disabled")
 def test_datadog_disable_write_to_log_with_env_variable(capsys, monkeypatch):
     # GIVEN DD_FLUSH_TO_LOG env is configured
     monkeypatch.setenv("DD_FLUSH_TO_LOG", "False")
@@ -107,6 +107,8 @@ def test_datadog_disable_write_to_log_with_env_variable(capsys, monkeypatch):
     metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
     metrics.flush_metrics()
     logs = capsys.readouterr().out.strip()
+
+    print(logs)
 
     # THEN metrics is not flushed
     assert not logs

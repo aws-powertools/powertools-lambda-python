@@ -22,7 +22,7 @@ class LambdaPowertoolsLayerPythonV3(lambda_.LayerVersion):
     Attributes:
         scope (Construct): The scope in which to define this construct.
         construct_id (str): The scoped construct ID. Must be unique amongst siblings in the same scope.
-        python_version (lambda_.Runtime): The Python runtime version for the layer. Defaults to Python 3.13.
+        python_version (lambda_.Runtime): The Python runtime version for the layer. Defaults to Python 3.14.
         include_extras (bool): Whether to include extra dependencies. Defaults to True.
         architecture (lambda_.Architecture): The compatible Lambda architecture. Defaults to x86_64.
         powertools_version (str): The version of Powertools to use. If empty, uses the latest version.
@@ -32,7 +32,7 @@ class LambdaPowertoolsLayerPythonV3(lambda_.LayerVersion):
     Example:
         >>> app = cdk.App()
         >>> LambdaPowertoolsLayerPythonV3(app, "PowertoolsLayer",
-        ...     python_version=lambda_.Runtime.PYTHON_3_13,
+        ...     python_version=lambda_.Runtime.PYTHON_3_14,
         ...     include_extras=True,
         ...     architecture=lambda_.Architecture.ARM_64,
         ...     powertools_version="3.0.0",
@@ -50,7 +50,6 @@ class LambdaPowertoolsLayerPythonV3(lambda_.LayerVersion):
         powertools_version: str = "",
         layer_name: str = "",
     ) -> None:
-
         docker_file_path = str(Path(__file__).parent.parent / "docker")
 
         python_normalized_version: str = python_version.to_string().replace("python", "")

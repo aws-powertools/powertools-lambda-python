@@ -103,7 +103,7 @@ class BaseInfrastructure(InfrastructureProvider):
         self.create_lambda_functions()
         ```
 
-        Creating Lambda functions and override runtime to Python 3.13
+        Creating Lambda functions and override runtime to Python 3.14
 
         ```python
         from aws_cdk.aws_lambda import Runtime
@@ -125,6 +125,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 Runtime.PYTHON_3_11,
                 Runtime.PYTHON_3_12,
                 Runtime.PYTHON_3_13,
+                Runtime.PYTHON_3_14,
             ],
             compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
@@ -266,6 +267,8 @@ class BaseInfrastructure(InfrastructureProvider):
             return Runtime.PYTHON_3_12
         elif version.major == 3 and version.minor == 13:
             return Runtime.PYTHON_3_13
+        elif version.major == 3 and version.minor == 14:
+            return Runtime.PYTHON_3_14
         else:
             raise ValueError(f"Unsupported Python version: {version}")
 

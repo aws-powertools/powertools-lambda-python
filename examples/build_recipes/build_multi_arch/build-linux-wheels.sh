@@ -8,7 +8,7 @@ pip install \
     --platform manylinux2014_x86_64 \
     --target build/ \
     --implementation cp \
-    --python-version 3.13 \
+    --python-version 3.14 \
     --only-binary=:all: \
     --upgrade \
     --abi cp313 \
