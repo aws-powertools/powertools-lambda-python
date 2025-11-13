@@ -229,6 +229,10 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     assert parsed_event.request.scopes == raw_event["request"]["scopes"]
 
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
+    # Test that accessing id_token_generation and access_token_generation properties initialize empty dicts
+    assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
+    assert claims_scope_override_details.access_token_generation.claims_to_add_or_override == {}
+
     claims_scope_override_details.id_token_generation = claims_scope_override_details.access_token_generation = {}
     assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
     assert claims_scope_override_details.id_token_generation.claims_to_suppress == []
