@@ -5,7 +5,7 @@ description: Setting up your development environment for contribution
 
 <!-- markdownlint-disable MD043 -->
 
-[![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}
+[![Join our Discord](https://img.shields.io/badge/Discord-Join_Community-7289da.svg)](https://discord.gg/B8zZKbbyET){target="_blank"}
 
 This page describes how to setup your development environment (Cloud or locally) to contribute to Powertools for AWS Lambda.
 
