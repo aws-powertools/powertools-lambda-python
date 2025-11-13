@@ -11,13 +11,19 @@
 ## Maintenance
 
 * **ci:** new pre-release 3.22.2a2 ([#7652](https://github.com/aws-powertools/powertools-lambda-python/issues/7652))
-* **ci:** new pre-release 3.22.2a1 ([#7646](https://github.com/aws-powertools/powertools-lambda-python/issues/7646))
 * **ci:** new pre-release 3.22.2a0 ([#7642](https://github.com/aws-powertools/powertools-lambda-python/issues/7642))
+* **ci:** new pre-release 3.22.2a1 ([#7646](https://github.com/aws-powertools/powertools-lambda-python/issues/7646))
+* **ci:** new pre-release 3.22.2a3 ([#7659](https://github.com/aws-powertools/powertools-lambda-python/issues/7659))
+* **deps:** bump mkdocstrings-python from 1.18.2 to 1.19.0 in /docs ([#7655](https://github.com/aws-powertools/powertools-lambda-python/issues/7655))
 * **deps:** bump docker/setup-qemu-action from 3.6.0 to 3.7.0 ([#7639](https://github.com/aws-powertools/powertools-lambda-python/issues/7639))
 * **deps:** bump pydantic from 2.12.3 to 2.12.4 ([#7641](https://github.com/aws-powertools/powertools-lambda-python/issues/7641))
-* **deps-dev:** bump types-protobuf from 6.32.1.20250918 to 6.32.1.20251105 ([#7640](https://github.com/aws-powertools/powertools-lambda-python/issues/7640))
-* **deps-dev:** bump aws-cdk from 2.1031.1 to 2.1031.2 ([#7645](https://github.com/aws-powertools/powertools-lambda-python/issues/7645))
 * **deps-dev:** bump types-python-dateutil from 2.9.0.20251008 to 2.9.0.20251108 ([#7657](https://github.com/aws-powertools/powertools-lambda-python/issues/7657))
+* **deps-dev:** bump ruff from 0.14.3 to 0.14.4 ([#7649](https://github.com/aws-powertools/powertools-lambda-python/issues/7649))
+* **deps-dev:** bump boto3-stubs from 1.40.64 to 1.40.69 ([#7654](https://github.com/aws-powertools/powertools-lambda-python/issues/7654))
+* **deps-dev:** bump pytest-benchmark from 5.2.1 to 5.2.3 ([#7658](https://github.com/aws-powertools/powertools-lambda-python/issues/7658))
+* **deps-dev:** bump types-protobuf from 6.32.1.20250918 to 6.32.1.20251105 ([#7640](https://github.com/aws-powertools/powertools-lambda-python/issues/7640))
+* **deps-dev:** bump aws-cdk-lib from 2.222.0 to 2.223.0 ([#7656](https://github.com/aws-powertools/powertools-lambda-python/issues/7656))
+* **deps-dev:** bump aws-cdk from 2.1031.1 to 2.1031.2 ([#7645](https://github.com/aws-powertools/powertools-lambda-python/issues/7645))
 * **docs:** fix broken images ([#7644](https://github.com/aws-powertools/powertools-lambda-python/issues/7644))
 
 
