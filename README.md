@@ -3,7 +3,7 @@
 
 [![Build](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/quality_check.yml/badge.svg)](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/python_build.yml)
 [![codecov.io](https://codecov.io/github/aws-powertools/powertools-lambda-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/aws-powertools/powertools-lambda-python)
-![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.9|%203.10|%203.11|%203.12|%203.13&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python) 
+![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.9|%203.10|%203.11|%203.12|%203.13|%203.14&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python)
 [![Discord](https://img.shields.io/badge/Discord-Join_Community-7289da.svg)](https://discord.gg/B8zZKbbyET)
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/#features).
@@ -82,7 +82,7 @@ The following companies, among others, use Powertools:
 
 ### Sharing your work
 
-Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://docs.powertools.aws.dev/lambda/python/latest/we_made_this/).
+Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [in this link](https://docs.powertools.aws.dev/lambda/python/latest/we_made_this/).
 
 ### Using Lambda Layer or SAR
 
@@ -100,7 +100,7 @@ This helps us understand who uses Powertools for AWS Lambda (Python) in a non-in
 
 ## Security disclosures
 
-If you think you’ve found a potential security issue, please do not post it in the Issues.  Instead, please follow the instructions [here](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
+If you think you’ve found a potential security issue, please do not post it in the Issues.  Instead, please follow the instructions [in this link](https://aws.amazon.com/security/vulnerability-reporting/) or [email AWS security directly](mailto:aws-security@amazon.com).
 
 ## License
 
