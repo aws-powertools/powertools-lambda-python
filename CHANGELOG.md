@@ -4,6 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **ci:** new pre-release 3.23.1a0 ([#7685](https://github.com/aws-powertools/powertools-lambda-python/issues/7685))
+* **deps:** bump protobuf from 6.33.0 to 6.33.1 ([#7681](https://github.com/aws-powertools/powertools-lambda-python/issues/7681))
+* **deps-dev:** bump ruff from 0.14.4 to 0.14.5 ([#7682](https://github.com/aws-powertools/powertools-lambda-python/issues/7682))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.223.0a0 to 2.224.0a0 ([#7680](https://github.com/aws-powertools/powertools-lambda-python/issues/7680))
+
 
 <a name="v3.23.0"></a>
 ## [v3.23.0] - 2025-11-13
@@ -11,9 +18,38 @@
 
 * **layer:** bump cdk version ([#7677](https://github.com/aws-powertools/powertools-lambda-python/issues/7677))
 
+## Documentation
+
+* **batch:** fix error handling code highlight line number ([#7638](https://github.com/aws-powertools/powertools-lambda-python/issues/7638))
+* **openapi:** Update docstring's openapi default version to match current default version ([#7669](https://github.com/aws-powertools/powertools-lambda-python/issues/7669))
+
 ## Maintenance
 
 * version bump
+* **ci:** new pre-release 3.22.2a0 ([#7642](https://github.com/aws-powertools/powertools-lambda-python/issues/7642))
+* **ci:** new pre-release 3.22.2a1 ([#7646](https://github.com/aws-powertools/powertools-lambda-python/issues/7646))
+* **ci:** adding support for Python 3.14 - WIP ([#7431](https://github.com/aws-powertools/powertools-lambda-python/issues/7431))
+* **ci:** new pre-release 3.22.2a2 ([#7652](https://github.com/aws-powertools/powertools-lambda-python/issues/7652))
+* **ci:** new pre-release 3.22.2a3 ([#7659](https://github.com/aws-powertools/powertools-lambda-python/issues/7659))
+* **ci:** new pre-release 3.22.2a4 ([#7674](https://github.com/aws-powertools/powertools-lambda-python/issues/7674))
+* **deps:** bump actions/dependency-review-action from 4.8.1 to 4.8.2 ([#7662](https://github.com/aws-powertools/powertools-lambda-python/issues/7662))
+* **deps:** bump pydantic from 2.12.3 to 2.12.4 ([#7641](https://github.com/aws-powertools/powertools-lambda-python/issues/7641))
+* **deps:** bump docker/setup-qemu-action from 3.6.0 to 3.7.0 ([#7639](https://github.com/aws-powertools/powertools-lambda-python/issues/7639))
+* **deps:** bump squidfunk/mkdocs-material from `58dee36` to `980e11f` in /docs ([#7661](https://github.com/aws-powertools/powertools-lambda-python/issues/7661))
+* **deps:** bump mkdocstrings-python from 1.18.2 to 1.19.0 in /docs ([#7655](https://github.com/aws-powertools/powertools-lambda-python/issues/7655))
+* **deps:** bump mkdocs-material from 9.6.23 to 9.7.0 in /docs ([#7663](https://github.com/aws-powertools/powertools-lambda-python/issues/7663))
+* **deps-dev:** bump aws-cdk-lib from 2.222.0 to 2.223.0 ([#7656](https://github.com/aws-powertools/powertools-lambda-python/issues/7656))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20251008 to 2.9.0.20251108 ([#7657](https://github.com/aws-powertools/powertools-lambda-python/issues/7657))
+* **deps-dev:** bump aws-cdk from 2.1031.1 to 2.1031.2 ([#7645](https://github.com/aws-powertools/powertools-lambda-python/issues/7645))
+* **deps-dev:** bump boto3-stubs from 1.40.70 to 1.40.71 ([#7672](https://github.com/aws-powertools/powertools-lambda-python/issues/7672))
+* **deps-dev:** bump sentry-sdk from 2.43.0 to 2.44.0 ([#7665](https://github.com/aws-powertools/powertools-lambda-python/issues/7665))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.222.0a0 to 2.223.0a0 ([#7664](https://github.com/aws-powertools/powertools-lambda-python/issues/7664))
+* **deps-dev:** bump boto3-stubs from 1.40.64 to 1.40.69 ([#7654](https://github.com/aws-powertools/powertools-lambda-python/issues/7654))
+* **deps-dev:** bump types-protobuf from 6.32.1.20250918 to 6.32.1.20251105 ([#7640](https://github.com/aws-powertools/powertools-lambda-python/issues/7640))
+* **deps-dev:** bump pytest-benchmark from 5.2.1 to 5.2.3 ([#7658](https://github.com/aws-powertools/powertools-lambda-python/issues/7658))
+* **deps-dev:** bump nox from 2025.10.16 to 2025.11.12 ([#7671](https://github.com/aws-powertools/powertools-lambda-python/issues/7671))
+* **deps-dev:** bump ruff from 0.14.3 to 0.14.4 ([#7649](https://github.com/aws-powertools/powertools-lambda-python/issues/7649))
+* **docs:** fix broken images ([#7644](https://github.com/aws-powertools/powertools-lambda-python/issues/7644))
 
 
 <a name="v3.22.1"></a>
