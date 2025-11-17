@@ -12,14 +12,13 @@ class UnauthorizedException(Exception):
         message (str): The error message describing the unauthorized access.
     """
 
-    def __init__(self, message: str | None = None, *args, **kwargs):
+    def __init__(self, message: str | None = None, *args):
         """
         Initialize the UnauthorizedException.
 
         Args:
             message (str): A descriptive error message.
             *args: Variable positional arguments.
-            **kwargs: Variable keyword arguments.
         """
-        super().__init__(message, *args, **kwargs)
+        super().__init__(message, *args)
         self.name = "UnauthorizedException"
