@@ -187,7 +187,7 @@ def test_cognito_pre_token_generation_trigger_event():
 
     expected_claims = {"test": "value"}
     claims_override_details.claims_to_add_or_override = expected_claims
-    assert claims_override_details.claims_to_add_or_override["test"] == "value"
+    assert parsed_event.response.claims_override_details.claims_to_add_or_override["test"] == "value"
 
     claims_override_details.claims_to_suppress = ["email"]
     assert claims_override_details.claims_to_suppress[0] == "email"
@@ -229,6 +229,10 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     assert parsed_event.request.scopes == raw_event["request"]["scopes"]
 
     claims_scope_override_details = parsed_event.response.claims_scope_override_details
+    # Test that accessing id_token_generation and access_token_generation properties initialize empty dicts
+    assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
+    assert claims_scope_override_details.access_token_generation.claims_to_add_or_override == {}
+
     claims_scope_override_details.id_token_generation = claims_scope_override_details.access_token_generation = {}
     assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
     assert claims_scope_override_details.id_token_generation.claims_to_suppress == []
@@ -246,8 +250,14 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     expected_claims = {"test": "value"}
     claims_scope_override_details.id_token_generation.claims_to_add_or_override = expected_claims
     claims_scope_override_details.access_token_generation.claims_to_add_or_override = expected_claims
-    assert claims_scope_override_details.id_token_generation.claims_to_add_or_override["test"] == "value"
-    assert claims_scope_override_details.access_token_generation.claims_to_add_or_override["test"] == "value"
+    assert (
+        parsed_event.response.claims_scope_override_details.id_token_generation.claims_to_add_or_override["test"]
+        == "value"
+    )
+    assert (
+        parsed_event.response.claims_scope_override_details.access_token_generation.claims_to_add_or_override["test"]
+        == "value"
+    )
 
     claims_scope_override_details.id_token_generation.claims_to_suppress = (
         claims_scope_override_details.access_token_generation.claims_to_suppress
