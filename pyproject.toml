@@ -114,7 +114,7 @@ urllib3 = [
     { version = ">=1.25.4,!=2.2.0,<3", python = ">=3.10" },
 ]
 requests = ">=2.32.0"
-cfn-lint = "1.40.4"
+cfn-lint = "1.41.0"
 mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 aws-cdk-aws-appsync-alpha = "^2.59.0a0"
