@@ -8,12 +8,25 @@
 
 * **ci:** add missing dollar signs in SSM parameter path variables ([#7695](https://github.com/aws-powertools/powertools-lambda-python/issues/7695))
 
+## Code Refactoring
+
+* **event-handler:** remove kwargs from AppSync exception constructor ([#7699](https://github.com/aws-powertools/powertools-lambda-python/issues/7699))
+
 ## Maintenance
 
+* **ci:** new pre-release 3.23.1a2 ([#7706](https://github.com/aws-powertools/powertools-lambda-python/issues/7706))
 * **ci:** new pre-release 3.23.1a0 ([#7685](https://github.com/aws-powertools/powertools-lambda-python/issues/7685))
+* **ci:** new pre-release 3.23.1a1 ([#7697](https://github.com/aws-powertools/powertools-lambda-python/issues/7697))
+* **deps:** bump actions/checkout from 5.0.0 to 5.0.1 ([#7701](https://github.com/aws-powertools/powertools-lambda-python/issues/7701))
 * **deps:** bump protobuf from 6.33.0 to 6.33.1 ([#7681](https://github.com/aws-powertools/powertools-lambda-python/issues/7681))
+* **deps:** bump redis from 6.4.0 to 7.0.1 ([#7687](https://github.com/aws-powertools/powertools-lambda-python/issues/7687))
+* **deps-dev:** bump boto3-stubs from 1.40.72 to 1.40.73 ([#7688](https://github.com/aws-powertools/powertools-lambda-python/issues/7688))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.224.0a0 to 2.225.0a0 ([#7704](https://github.com/aws-powertools/powertools-lambda-python/issues/7704))
 * **deps-dev:** bump ruff from 0.14.4 to 0.14.5 ([#7682](https://github.com/aws-powertools/powertools-lambda-python/issues/7682))
+* **deps-dev:** bump aws-cdk from 2.1031.2 to 2.1032.0 ([#7700](https://github.com/aws-powertools/powertools-lambda-python/issues/7700))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.223.0a0 to 2.224.0a0 ([#7680](https://github.com/aws-powertools/powertools-lambda-python/issues/7680))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20251108 to 2.9.0.20251115 ([#7702](https://github.com/aws-powertools/powertools-lambda-python/issues/7702))
+* **deps-dev:** bump boto3-stubs from 1.40.73 to 1.40.74 ([#7703](https://github.com/aws-powertools/powertools-lambda-python/issues/7703))
 
 
 <a name="v3.23.0"></a>
