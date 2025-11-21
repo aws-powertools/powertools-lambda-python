@@ -93,3 +93,16 @@ class LambdaContext:
     def get_remaining_time_in_millis() -> int:
         """Returns the number of milliseconds left before the execution times out."""
         return 0
+
+
+class DurableContext:
+    _lambda_context: LambdaContext
+    _state: object
+
+    @property
+    def lambda_context(self) -> LambdaContext:
+        return self._lambda_context
+
+    @property
+    def state(self) -> object:
+        return self._state

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.idempotency.persistence.base import (
         BasePersistenceLayer,
     )
-    from aws_lambda_powertools.utilities.typing import LambdaContext
+    from aws_lambda_powertools.utilities.typing import DurableContext, LambdaContext
 
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
@@ -37,9 +37,9 @@ logger = logging.getLogger(__name__)
 
 @lambda_handler_decorator
 def idempotent(
-    handler: Callable[[Any, LambdaContext], Any],
+    handler: Callable[[Any, LambdaContext | DurableContext], Any],
     event: dict[str, Any],
-    context: LambdaContext,
+    context: LambdaContext | DurableContext,
     persistence_store: BasePersistenceLayer,
     config: IdempotencyConfig | None = None,
     key_prefix: str | None = None,
@@ -55,7 +55,7 @@ def idempotent(
     event: dict
         Lambda's Event
     context: dict
-        Lambda's Context
+        Lambda's Context or Durable Context
     persistence_store: BasePersistenceLayer
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
@@ -91,7 +91,15 @@ def idempotent(
         return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
-    config.register_lambda_context(context)
+
+    if hasattr(context, "state"):
+        # Extract lambda_context from DurableContext for idempotency tracking
+        config.register_lambda_context(context.lambda_context)
+        durable_mode = "REPLAY_MODE" if len(context.state.operations) > 1 else "EXECUTION_MODE"
+    else:
+        # Standard LambdaContext
+        config.register_lambda_context(context)
+        durable_mode = None
 
     args = event, context
     idempotency_handler = IdempotencyHandler(
@@ -104,7 +112,7 @@ def idempotent(
         function_kwargs=kwargs,
     )
 
-    return idempotency_handler.handle()
+    return idempotency_handler.handle(durable_mode=durable_mode)
 
 
 def idempotent_function(
@@ -193,6 +201,10 @@ def idempotent_function(
                 f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument",
             )
 
+        durable_mode = None
+        if len(args) >= 2 and hasattr(args[1], "state"):
+            durable_mode = "REPLAY_MODE" if len(args[1].state.operations) > 1 else "EXECUTION_MODE"
+
         payload = kwargs.get(data_keyword_argument)
 
         idempotency_handler = IdempotencyHandler(
@@ -206,6 +218,6 @@ def idempotent_function(
             function_kwargs=kwargs,
         )
 
-        return idempotency_handler.handle()
+        return idempotency_handler.handle(durable_mode=durable_mode)
 
     return cast(AnyCallableT, decorate)
