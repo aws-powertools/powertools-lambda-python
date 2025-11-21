@@ -201,10 +201,6 @@ def idempotent_function(
                 f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument",
             )
 
-        durable_mode = None
-        if len(args) >= 2 and hasattr(args[1], "state"):
-            durable_mode = "REPLAY_MODE" if len(args[1].state.operations) > 1 else "EXECUTION_MODE"
-
         payload = kwargs.get(data_keyword_argument)
 
         idempotency_handler = IdempotencyHandler(
@@ -218,6 +214,6 @@ def idempotent_function(
             function_kwargs=kwargs,
         )
 
-        return idempotency_handler.handle(durable_mode=durable_mode)
+        return idempotency_handler.handle()
 
     return cast(AnyCallableT, decorate)
