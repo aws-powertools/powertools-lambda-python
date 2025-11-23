@@ -93,9 +93,11 @@ def idempotent(
     config = config or IdempotencyConfig()
 
     if hasattr(context, "state"):
-        # Extract lambda_context from DurableContext for idempotency tracking
-        config.register_lambda_context(context.lambda_context)
-        is_replay = len(context.state.operations) > 1
+        # Extract lambda_context from DurableContext
+        durable_context = cast("DurableContext", context)
+        config.register_lambda_context(durable_context.lambda_context)
+        # Note: state.operations is accessed via duck typing at runtime
+        is_replay = len(durable_context.state.operations) > 1  # type: ignore[attr-defined]
     else:
         # Standard LambdaContext
         config.register_lambda_context(context)
