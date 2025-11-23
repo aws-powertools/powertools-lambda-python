@@ -95,11 +95,11 @@ def idempotent(
     if hasattr(context, "state"):
         # Extract lambda_context from DurableContext for idempotency tracking
         config.register_lambda_context(context.lambda_context)
-        durable_mode = "REPLAY_MODE" if len(context.state.operations) > 1 else "EXECUTION_MODE"
+        is_replay = len(context.state.operations) > 1
     else:
         # Standard LambdaContext
         config.register_lambda_context(context)
-        durable_mode = None
+        is_replay = False
 
     args = event, context
     idempotency_handler = IdempotencyHandler(
@@ -112,7 +112,7 @@ def idempotent(
         function_kwargs=kwargs,
     )
 
-    return idempotency_handler.handle(durable_mode=durable_mode)
+    return idempotency_handler.handle(is_replay=is_replay)
 
 
 def idempotent_function(
