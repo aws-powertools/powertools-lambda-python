@@ -46,6 +46,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict impor
 from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import (
     DataclassSerializer,
 )
+from aws_lambda_powertools.utilities.typing import DurableContext
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.idempotency.utils import (
@@ -2136,3 +2137,189 @@ def test_idempotent_function_with_custom_prefix_lambda_handler(lambda_context):
     result = lambda_handler(mock_event, lambda_context)
     # THEN we expect the function to execute successfully
     assert result == expected_result
+
+
+# Tests: Durable Functions Integration
+
+
+@pytest.fixture
+def durable_context_single_operation(lambda_context):
+    """DurableContext with single operation (execution mode, is_replay=False)"""
+    durable_ctx = DurableContext()
+    durable_ctx._lambda_context = lambda_context
+    durable_ctx._state = Mock(operations=[{"id": "op1"}])
+    return durable_ctx
+
+
+@pytest.fixture
+def durable_context_multiple_operations(lambda_context):
+    """DurableContext with multiple operations (replay mode, is_replay=True)"""
+    durable_ctx = DurableContext()
+    durable_ctx._lambda_context = lambda_context
+    durable_ctx._state = Mock(operations=[{"id": "op1"}, {"id": "op2"}])
+    return durable_ctx
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_with_durable_context_first_execution(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    durable_context_single_operation,
+    lambda_response,
+):
+    """
+    Test idempotent decorator with DurableContext during first execution (execution mode).
+
+    When a durable function executes for the first time (single operation in state),
+    is_replay=False, and the function should execute normally, saving the result.
+    """
+    # GIVEN
+    stubber = stub.Stubber(persistence_store.client)
+    stubber.add_response("put_item", {})
+    stubber.add_response("update_item", {})
+    stubber.activate()
+
+    # WHEN
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    result = lambda_handler(lambda_apigw_event, durable_context_single_operation)
+
+    # THEN
+    assert result == lambda_response
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_with_durable_context_during_replay(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    durable_context_multiple_operations,
+    timestamp_future,
+    lambda_response,
+    serialized_lambda_response,
+):
+    """
+    Test idempotent decorator with DurableContext during workflow replay (replay mode).
+
+    When a durable function replays (multiple operations in state), is_replay=True.
+    The function should execute once to get the response and save it, even when
+    an INPROGRESS record exists from a previous execution.
+    """
+    # GIVEN
+    hashed_key = hash_idempotency_key(data=lambda_apigw_event)
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = {
+        "Item": {
+            "id": {"S": hashed_key},
+            "expiration": {"N": timestamp_future},
+            "data": {"S": serialized_lambda_response},
+            "status": {"S": "INPROGRESS"},
+        },
+    }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    # In replay mode, function still executes once to get response, then saves it
+    stubber.add_response("update_item", {})
+    stubber.activate()
+
+    # WHEN
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    result = lambda_handler(lambda_apigw_event, durable_context_multiple_operations)
+
+    # THEN - Should return result in replay mode
+    assert result == lambda_response
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_extracts_lambda_context_from_durable_context(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    durable_context_single_operation,
+    lambda_response,
+):
+    """
+    Test that idempotency properly extracts LambdaContext from DurableContext.
+
+    The @idempotent decorator should extract the wrapped lambda_context from
+    DurableContext for tracking remaining time and other Lambda-specific features.
+    """
+    # GIVEN
+    stubber = stub.Stubber(persistence_store.client)
+    stubber.add_response("put_item", {})
+    stubber.add_response("update_item", {})
+    stubber.activate()
+
+    # WHEN
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        # Verify we can access lambda_context properties
+        assert hasattr(context, "lambda_context")
+        assert context.lambda_context.function_name == "test-func"
+        return lambda_response
+
+    result = lambda_handler(lambda_apigw_event, durable_context_single_operation)
+
+    # THEN
+    assert result == lambda_response
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_concurrent_durable_executions_raise_in_progress_error(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    durable_context_single_operation,
+    lambda_response,
+):
+    """
+    Test that concurrent durable executions are prevented by IdempotencyAlreadyInProgressError.
+
+    Scenario: Two different durable function executions attempt to process the same
+    idempotent operation concurrently:
+    1. First execution creates an INPROGRESS record
+    2. Second execution (in execution mode, is_replay=False) finds the INPROGRESS record
+    3. Second execution should raise IdempotencyAlreadyInProgressError to prevent duplicate work
+
+    This ensures data consistency when multiple durable function instances execute concurrently.
+    """
+    # GIVEN
+    hashed_key = hash_idempotency_key(data=lambda_apigw_event)
+
+    stubber = stub.Stubber(persistence_store.client)
+    # Simulate existing INPROGRESS record with far future timestamps
+    ddb_response = {
+        "Item": {
+            "id": {"S": hashed_key},
+            "expiration": {"N": "9999999999"},
+            "in_progress_expiration": {"N": "9999999999999"},  # Far future in milliseconds
+            "status": {"S": "INPROGRESS"},
+        },
+    }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    # WHEN / THEN - Should raise IdempotencyAlreadyInProgressError in execution mode
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyAlreadyInProgressError) as exc_info:
+        lambda_handler(lambda_apigw_event, durable_context_single_operation)
+
+    # Verify error message contains the idempotency key
+    assert hashed_key in str(exc_info.value)
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
