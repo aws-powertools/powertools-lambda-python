@@ -261,6 +261,15 @@ class BedrockResponse(Generic[ResponseT]):
     """
     Contains the response body, status code, content type, and optional attributes
     for session management and knowledge base configuration.
+
+    Note
+    ----
+    Amazon Bedrock Agents only support TEXT content type in the responseBody according to the
+    Lambda integration documentation. As a result, all response bodies are automatically serialized
+    as JSON strings regardless of the content_type parameter. The content_type parameter is maintained
+    for API consistency but does not affect the actual format sent to Bedrock Agents.
+
+    See: https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
     """
 
     def __init__(
@@ -282,6 +291,18 @@ class BedrockResponse(Generic[ResponseT]):
     def is_json(self) -> bool:
         """
         Returns True if the response is JSON, based on the Content-Type.
+
+        Note
+        ----
+        This method always returns True for BedrockResponse regardless of the content_type parameter.
+        This is because Amazon Bedrock Agents only support TEXT content type in the responseBody,
+        and the event handler automatically serializes all response bodies as JSON strings when
+        sending to Bedrock Agents.
+
+        See: https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html
+
+        The content_type parameter in BedrockResponse is maintained for API consistency but does not
+        affect the actual response format sent to Bedrock Agents.
         """
         return True
 

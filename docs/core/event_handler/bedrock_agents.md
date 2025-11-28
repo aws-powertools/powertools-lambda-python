@@ -333,6 +333,11 @@ You can enable user confirmation with Bedrock Agents to have your application as
 
 You can use `BedrockResponse` class to add additional fields as needed, such as [session attributes, prompt session attributes, and knowledge base configurations](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-response){target="_blank"}.
 
+???+ tip "Content Type Behavior"
+	Amazon Bedrock Agents only support TEXT content type in the responseBody. All response bodies are automatically serialized as JSON strings regardless of the `content_type` parameter you provide. The `content_type` parameter exists for API consistency but does not affect the actual format sent to Bedrock Agents.
+	
+	Learn more: [AWS Bedrock Lambda Integration](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html){target="_blank"}
+
 ```python title="working_with_bedrockresponse.py" title="Customzing your Bedrock Response" hl_lines="5 16"
 --8<-- "examples/event_handler_bedrock_agents/src/working_with_bedrockresponse.py"
 ```
