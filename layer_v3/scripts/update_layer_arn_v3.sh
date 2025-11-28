@@ -27,11 +27,22 @@ find ./docs ./examples -type f \( -name "*.md" -o -name "*.py" -o -name "*.yaml"
     # -i: edit files in-place without creating a backup
     # -E: use extended regular expressions
     # The regex matches the layer name and replaces only the version number at the end
+    
+    # Commercial AWS (arn:aws:lambda)
     sed -i -E "s/(AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
     sed -i -E "s/(AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    
+    # AWS China (arn:aws-cn:lambda)
+    sed -i -E "s/(arn:aws-cn:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(arn:aws-cn:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    
+    # AWS GovCloud (arn:aws-us-gov:lambda)
+    sed -i -E "s/(arn:aws-us-gov:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(arn:aws-us-gov:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    
     if [ $? -eq 0 ]; then
         echo "Updated $file successfully"
-        grep "arn:aws:lambda:" "$file"
+        grep "arn:aws.*:lambda:" "$file" || true
     else
         echo "Error processing $file"
     fi
