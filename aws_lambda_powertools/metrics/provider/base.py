@@ -206,7 +206,8 @@ class BaseProvider(ABC):
             try:
                 response = lambda_handler(event, context, *args, **kwargs)
                 if capture_cold_start_metric:
-                    self._add_cold_start_metric(context=context)
+                    unwrapped_context = context.lambda_context if hasattr(context, "step") else context
+                    self._add_cold_start_metric(context=unwrapped_context)
             finally:
                 self.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
 

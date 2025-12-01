@@ -520,13 +520,18 @@ class Logger:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, *args, **kwargs):
-            lambda_context = build_lambda_context_model(context)
+            unwrapped_context = (
+                build_lambda_context_model(context.lambda_context)
+                if hasattr(context, "step")
+                else build_lambda_context_model(context)
+            )
+
             cold_start = _is_cold_start()
 
             if clear_state:
-                self.structure_logs(cold_start=cold_start, **lambda_context.__dict__)
+                self.structure_logs(cold_start=cold_start, **unwrapped_context.__dict__)
             else:
-                self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
+                self.append_keys(cold_start=cold_start, **unwrapped_context.__dict__)
 
             if correlation_id_path:
                 self.set_correlation_id(
