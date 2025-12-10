@@ -1740,20 +1740,20 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "8.116.0"
+version = "8.118.0"
 description = "The Datadog AWS Lambda Library"
 optional = true
 python-versions = "<4,>=3.8.0"
 groups = ["main"]
 markers = "extra == \"datadog\""
 files = [
-    {file = "datadog_lambda-8.116.0-py3-none-any.whl", hash = "sha256:a5ac0cdc00a8f10ede0243b15e83eb866d1a6740b2c82db140b7725fe9be7fac"},
-    {file = "datadog_lambda-8.116.0.tar.gz", hash = "sha256:f3f2dbd23a7d87b2a46f0485a7a344698655279061597de21d3481ab0e566f11"},
+    {file = "datadog_lambda-8.118.0-py3-none-any.whl", hash = "sha256:75eab5f16338543a8732d46b784b6f9977e577975279e4f93426c6697b580bec"},
+    {file = "datadog_lambda-8.118.0.tar.gz", hash = "sha256:1e7ce3febc191e8def0cc5697df3cf1188fd0ac738e1fbae688bf7b8dd0993da"},
 ]
 
 [package.dependencies]
 datadog = ">=0.51.0,<1.0.0"
-ddtrace = ">=3.16.2,<4"
+ddtrace = ">=3.16.2,<3.19.0"
 ujson = ">=5.9.0"
 wrapt = ">=1.11.2,<2.0.0"
 
