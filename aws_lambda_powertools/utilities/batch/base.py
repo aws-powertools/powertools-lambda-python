@@ -135,7 +135,7 @@ class BasePartialProcessor(ABC):
             # Python 3.14+ will raise RuntimeError if get_event_loop() is called when there's no running loop
             # We need to handle both cases: existing loop (container reuse) and no loop (cold start)
             try:
-                loop = asyncio.get_running_loop()
+                loop = asyncio.get_event_loop()
             except RuntimeError:
                 # No running loop, create a new one
                 loop = asyncio.new_event_loop()
