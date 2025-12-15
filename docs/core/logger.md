@@ -449,7 +449,7 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 ??? question "What are uncaught exceptions?"
 
-    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"}, leading a Python program to a non-successful exit.
+    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.14/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"}, leading a Python program to a non-successful exit.
 
     They are typically raised intentionally to signal a problem (`raise ValueError`), or a propagated exception from elsewhere in your code that you didn't handle it willingly or not (`KeyError`, `jsonDecoderError`, etc.).
 

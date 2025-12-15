@@ -124,7 +124,6 @@ Lambda managed runtimes use [specific Amazon Linux versions](https://docs.aws.am
 
 | Python Runtime | Base System       | GLIBC Version | Architecture Support |
 |----------------|-------------------|---------------|----------------------|
-| **python3.9**  | Amazon Linux 2    | 2.26          | x86_64, arm64        |
 | **python3.10** | Amazon Linux 2    | 2.26          | x86_64, arm64        |
 | **python3.11** | Amazon Linux 2    | 2.26          | x86_64, arm64        |
 | **python3.12** | Amazon Linux 2023 | 2.34          | x86_64, arm64        |
