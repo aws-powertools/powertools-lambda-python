@@ -96,7 +96,7 @@ class LambdaContext:
 
 
 @runtime_checkable
-class DurableContextProtocol(Protocol):
+class DurableContextProtocol(Protocol):  # pragma: no cover
     @property
     def lambda_context(self) -> LambdaContext: ...
 
