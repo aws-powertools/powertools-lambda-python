@@ -9,7 +9,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT No Attribution License (MIT-0)",
   "Natural Language :: English",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -39,7 +38,7 @@ license = "MIT"
 "Releases" = "https://github.com/aws-powertools/powertools-lambda-python/releases"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0.0"
+python = ">=3.10,<4.0.0"
 
 # Required libraries installed by default
 jmespath = "^1.0.1"
@@ -52,7 +51,7 @@ pydantic = { version = "^2.4.0", optional = true }
 pydantic-settings = {version = "^2.6.1", optional = true}
 boto3 = { version = "^1.34.32", optional = true }
 redis = { version = ">=4.4,<8.0", optional = true }
-valkey-glide = { version = ">=1.3.5,<3.0", optional = true, python = "<3.14" }
+valkey-glide = { version = ">=1.3.5,<3.0", optional = true }
 aws-encryption-sdk = { version = ">=3.1.1,<5.0.0", optional = true }
 jsonpath-ng = { version = "^1.6.0", optional = true }
 datadog-lambda = { version = ">=8.114.0,<9.0.0", optional = true }
@@ -109,10 +108,7 @@ mypy-boto3-appconfigdata = "^1.36.0"
 ijson = "^3.3.0"
 hvac = "^2.3.0"
 aws-requests-auth = "^0.4.3"
-urllib3 = [
-    { version = ">=1.26.0,<2.0.0", python = "<3.10" },
-    { version = ">=1.25.4,!=2.2.0,<3", python = ">=3.10" },
-]
+urllib3 = ">=1.25.4,!=2.2.0,<3"
 requests = ">=2.32.0"
 cfn-lint = "1.43.0"
 mypy = "^1.1.1"

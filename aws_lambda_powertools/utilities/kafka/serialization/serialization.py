@@ -2,13 +2,8 @@ from __future__ import annotations
 
 import sys
 from dataclasses import is_dataclass
+from types import UnionType  # Available in Python 3.10+
 from typing import TYPE_CHECKING, Annotated, Any, Optional, Union, get_args, get_origin
-
-# Conditionally import or define UnionType based on Python version
-if sys.version_info >= (3, 10):
-    from types import UnionType  # Available in Python 3.10+
-else:
-    UnionType = Union  # Fallback for Python 3.9
 
 from aws_lambda_powertools.utilities.kafka.serialization.custom_dict import CustomDictOutputSerializer
 from aws_lambda_powertools.utilities.kafka.serialization.dataclass import DataclassOutputSerializer

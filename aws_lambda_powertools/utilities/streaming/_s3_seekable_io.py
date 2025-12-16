@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import io
 import logging
-from typing import IO, TYPE_CHECKING, Any, TypeVar, cast
+from typing import IO, TYPE_CHECKING, Any, TypeVar
 
 import boto3
 
 from aws_lambda_powertools.shared import user_agent
-from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 
 if TYPE_CHECKING:
@@ -15,6 +14,8 @@ if TYPE_CHECKING:
     from mmap import mmap
 
     from mypy_boto3_s3.client import S3Client
+
+    from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
     _CData = TypeVar("_CData")
 
@@ -103,7 +104,7 @@ class _S3SeekableIO(IO[bytes]):
             self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
             self._closed = False
 
-        return cast(PowertoolsStreamingBody, self._raw_stream)
+        return self._raw_stream
 
     def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
         """

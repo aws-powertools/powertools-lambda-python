@@ -402,7 +402,7 @@ Even better, we can also let Event Handler validate and convert our response acc
 
 ##### Validating payload subset
 
-With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
+With the addition of the [`Annotated` type starting in Python 3.10](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
 
 We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that our payload is located in a particular JSON key.
 
@@ -494,7 +494,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
     --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
     ```
 
-    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    1. If you're not using Python 10 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
     2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
     3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 
@@ -564,7 +564,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
     --8<-- "examples/event_handler_rest/src/validating_headers.py"
     ```
 
-    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    1. If you're not using Python 3.10 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
     2. `Header` is a special OpenAPI type that can add constraints and documentation to a header
     3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 

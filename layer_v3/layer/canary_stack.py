@@ -131,9 +131,7 @@ class Canary(Construct):
             PolicyStatement(effect=Effect.ALLOW, actions=["lambda:GetFunction"], resources=["*"]),
         )
 
-        if python_version == "python3.9":
-            runtime = Runtime.PYTHON_3_9
-        elif python_version == "python3.10":
+        if python_version == "python3.10":
             runtime = Runtime.PYTHON_3_10
         elif python_version == "python3.11":
             runtime = Runtime.PYTHON_3_11

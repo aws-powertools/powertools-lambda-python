@@ -211,7 +211,7 @@ def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
     base_type, constraints = extract_metadata(annotation)
 
     # Set the annotation with base type and all constraint metadata
-    # Use tuple unpacking for Python 3.9+ compatibility
+    # Use tuple unpacking for Python 3.10+ compatibility
     if constraints:
         new_field.annotation = Annotated[(base_type, *constraints)]
     else:
