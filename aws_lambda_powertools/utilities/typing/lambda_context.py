@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing.lambda_client_context import (
@@ -95,14 +95,13 @@ class LambdaContext:
         return 0
 
 
-class DurableContext:
+@runtime_checkable
+class DurableContextProtocol(Protocol):
     _lambda_context: LambdaContext
     _state: object
 
     @property
-    def lambda_context(self) -> LambdaContext:
-        return self._lambda_context
+    def lambda_context(self) -> LambdaContext: ...
 
     @property
-    def state(self) -> object:
-        return self._state
+    def state(self) -> object: ...

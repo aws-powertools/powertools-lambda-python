@@ -46,7 +46,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict impor
 from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import (
     DataclassSerializer,
 )
-from aws_lambda_powertools.utilities.typing import DurableContext
+from aws_lambda_powertools.utilities.typing import DurableContextProtocol
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.idempotency.utils import (
@@ -2145,18 +2145,18 @@ def test_idempotent_function_with_custom_prefix_lambda_handler(lambda_context):
 @pytest.fixture
 def durable_context_single_operation(lambda_context):
     """DurableContext with single operation (execution mode, is_replay=False)"""
-    durable_ctx = DurableContext()
-    durable_ctx._lambda_context = lambda_context
-    durable_ctx._state = Mock(operations=[{"id": "op1"}])
+    durable_ctx = Mock(spec=DurableContextProtocol)
+    durable_ctx.lambda_context = lambda_context
+    durable_ctx.state = Mock(operations=[{"id": "op1"}])
     return durable_ctx
 
 
 @pytest.fixture
 def durable_context_multiple_operations(lambda_context):
     """DurableContext with multiple operations (replay mode, is_replay=True)"""
-    durable_ctx = DurableContext()
-    durable_ctx._lambda_context = lambda_context
-    durable_ctx._state = Mock(operations=[{"id": "op1"}, {"id": "op2"}])
+    durable_ctx = Mock(spec=DurableContextProtocol)
+    durable_ctx.lambda_context = lambda_context
+    durable_ctx.state = Mock(operations=[{"id": "op1"}, {"id": "op2"}])
     return durable_ctx
 
 

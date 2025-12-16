@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.idempotency.persistence.base import (
         BasePersistenceLayer,
     )
-    from aws_lambda_powertools.utilities.typing import DurableContext, LambdaContext
+    from aws_lambda_powertools.utilities.typing import DurableContextProtocol, LambdaContext
 
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
@@ -37,9 +37,9 @@ logger = logging.getLogger(__name__)
 
 @lambda_handler_decorator
 def idempotent(
-    handler: Callable[[Any, LambdaContext | DurableContext], Any],
+    handler: Callable[[Any, LambdaContext | DurableContextProtocol], Any],
     event: dict[str, Any],
-    context: LambdaContext | DurableContext,
+    context: LambdaContext | DurableContextProtocol,
     persistence_store: BasePersistenceLayer,
     config: IdempotencyConfig | None = None,
     key_prefix: str | None = None,
@@ -92,9 +92,9 @@ def idempotent(
 
     config = config or IdempotencyConfig()
 
-    if hasattr(context, "state"):
+    if hasattr(context, "state") and hasattr(context, "lambda_context"):
         # Extract lambda_context from DurableContext
-        durable_context = cast("DurableContext", context)
+        durable_context = cast("DurableContextProtocol", context)
         config.register_lambda_context(durable_context.lambda_context)
         # Note: state.operations is accessed via duck typing at runtime
         is_replay = len(durable_context.state.operations) > 1  # type: ignore[attr-defined]
