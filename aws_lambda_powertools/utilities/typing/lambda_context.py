@@ -97,9 +97,6 @@ class LambdaContext:
 
 @runtime_checkable
 class DurableContextProtocol(Protocol):
-    _lambda_context: LambdaContext
-    _state: object
-
     @property
     def lambda_context(self) -> LambdaContext: ...
 
