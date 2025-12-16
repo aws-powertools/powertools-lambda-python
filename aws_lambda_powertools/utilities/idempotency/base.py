@@ -167,7 +167,7 @@ class IdempotencyHandler:
             # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
             # way of retrieving the existing record after a failed conditional write operation.
             record = exc.old_data_record or self._get_idempotency_record()
-            if is_replay:
+            if is_replay and record is not None and record.status == "INPROGRESS":
                 return self._get_function_response()
             # If a record is found, handle it for status
             if record:
