@@ -1,6 +1,7 @@
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
+from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamLambdaOnFailureDestinationModel
 from tests.functional.utils import load_event
 from tests.unit.parser._pydantic.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
 
@@ -83,3 +84,33 @@ def test_validate_event_does_not_conform_with_model():
     raw_event: dict = {"hello": "s"}
     with pytest.raises(ValidationError):
         parse(event=raw_event, model=MyDynamoBusiness, envelope=envelopes.DynamoDBStreamEnvelope)
+
+
+def test_dynamo_db_stream_lambda_invocation_event():
+    raw_event = load_event("dynamoStreamLambdaInvocationEvent.json")
+    parsed_event: DynamoDBStreamLambdaOnFailureDestinationModel = parse(
+        event=raw_event,
+        model=DynamoDBStreamLambdaOnFailureDestinationModel,
+    )
+    assert (
+        parsed_event.ddb_stream_batch_info.approximate_arrival_of_first_record.strftime("%Y-%m-%dT%H:%M:%SZ")
+        == raw_event["DDBStreamBatchInfo"]["approximateArrivalOfFirstRecord"]
+    )
+    assert (
+        parsed_event.ddb_stream_batch_info.approximate_arrival_of_last_record.strftime("%Y-%m-%dT%H:%M:%SZ")
+        == raw_event["DDBStreamBatchInfo"]["approximateArrivalOfLastRecord"]
+    )
+    assert parsed_event.ddb_stream_batch_info.batch_size == raw_event["DDBStreamBatchInfo"]["batchSize"]
+    assert (
+        parsed_event.ddb_stream_batch_info.end_sequence_number == raw_event["DDBStreamBatchInfo"]["endSequenceNumber"]
+    )
+    assert parsed_event.ddb_stream_batch_info.shard_id == raw_event["DDBStreamBatchInfo"]["shardId"]
+    assert (
+        parsed_event.ddb_stream_batch_info.start_sequence_number
+        == raw_event["DDBStreamBatchInfo"]["startSequenceNumber"]
+    )
+    assert parsed_event.ddb_stream_batch_info.stream_arn == raw_event["DDBStreamBatchInfo"]["streamArn"]
+    assert parsed_event.request_context.model_dump(by_alias=True) == raw_event["requestContext"]
+    assert parsed_event.response_context.model_dump(by_alias=True) == raw_event["responseContext"]
+    assert parsed_event.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ") == raw_event["timestamp"]
+    assert parsed_event.version == raw_event["version"]
