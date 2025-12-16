@@ -66,6 +66,7 @@ from .cognito import (
 )
 from .dynamodb import (
     DynamoDBStreamChangedRecordModel,
+    DynamoDBStreamLambdaOnFailureDestinationModel,
     DynamoDBStreamModel,
     DynamoDBStreamRecordModel,
 )
@@ -173,6 +174,7 @@ __all__ = [
     "DynamoDBStreamModel",
     "EventBridgeModel",
     "DynamoDBStreamChangedRecordModel",
+    "DynamoDBStreamLambdaOnFailureDestinationModel",
     "DynamoDBStreamRecordModel",
     "DynamoDBStreamChangedRecordModel",
     "KinesisDataStreamModel",
