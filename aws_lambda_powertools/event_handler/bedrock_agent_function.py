@@ -133,6 +133,12 @@ class BedrockAgentFunctionResolver:
     context: dict
 
     def __init__(self, serializer: Callable | None = None) -> None:
+        """
+        Parameters
+        ----------
+        serializer: Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        """
         self._tools: dict[str, dict[str, Any]] = {}
         self.current_event: BedrockAgentFunctionEvent | None = None
         self.context = {}

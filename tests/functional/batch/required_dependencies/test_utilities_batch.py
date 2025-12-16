@@ -804,6 +804,37 @@ def test_async_batch_processor_lambda_cold_start_creates_new_loop(sqs_event_fact
     assert result == {"batchItemFailures": []}
 
 
+def test_async_batch_processor_lambda_warm_start_reuses_existing_loop(sqs_event_factory, monkeypatch):
+    """Test async processing reuses an existing event loop in Lambda warm start"""
+    import asyncio
+
+    # GIVEN Lambda environment is set (warm start scenario)
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/var/task")
+
+    # Simple async handler without external dependencies
+    async def simple_async_handler(record: SQSRecord):
+        await asyncio.sleep(0.001)  # Yield control to event loop
+        return {"processed": record.body}
+
+    records = [sqs_event_factory("success"), sqs_event_factory("success")]
+    event = {"Records": records}
+    processor = AsyncBatchProcessor(event_type=EventType.SQS)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    # WHEN calling async_process_partial_response synchronously (like Lambda handler does)
+    result = async_process_partial_response(
+        event=event,
+        record_handler=simple_async_handler,
+        processor=processor,
+    )
+
+    assert asyncio.get_event_loop() == loop
+
+    # THEN all records are processed successfully with new event loop created
+    assert result == {"batchItemFailures": []}
+
+
 def test_async_batch_processor_non_lambda_uses_asyncio_run(sqs_event_factory, monkeypatch):
     """Test async processing uses asyncio.run outside Lambda environment"""
     import asyncio

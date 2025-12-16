@@ -1,0 +1,24 @@
+{
+  "requestContext": {
+    "requestId": "316aa6d0-8154-xmpl-9af7-85d5f4a6bc81",
+    "functionArn": "arn:aws:lambda:us-east-2:123456789012:function:myfunction",
+    "condition": "RetryAttemptsExhausted",
+    "approximateInvokeCount": 1
+  },
+  "responseContext": {
+    "statusCode": 200,
+    "executedVersion": "$LATEST",
+    "functionError": "Unhandled"
+  },
+  "version": "1.0",
+  "timestamp": "2019-11-14T00:13:49Z",
+  "DDBStreamBatchInfo": {
+    "shardId": "shardId-00000001573689847184-864758bb",
+    "startSequenceNumber": "800000000003126276362",
+    "endSequenceNumber": "800000000003126276362",
+    "approximateArrivalOfFirstRecord": "2019-11-14T00:13:19Z",
+    "approximateArrivalOfLastRecord": "2019-11-14T00:13:19Z",
+    "batchSize": 1,
+    "streamArn": "arn:aws:dynamodb:us-east-2:123456789012:table/mytable/stream/2019-11-14T00:04:06.388"
+  }
+}
