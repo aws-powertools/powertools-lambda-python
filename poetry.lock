@@ -242,14 +242,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.232.1"
+version = "2.232.2"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.232.1-py3-none-any.whl", hash = "sha256:d664518ee10391a867c1e5b6633085b7a02acea4bf738ed250bb77e1a0936a69"},
-    {file = "aws_cdk_lib-2.232.1.tar.gz", hash = "sha256:08bd5e4966b07fb1de47012a3007457859a53b32d4b0c5437a5c64701bae2bcb"},
+    {file = "aws_cdk_lib-2.232.2-py3-none-any.whl", hash = "sha256:d1b3a5dbe518fbcbe3a9a06960396d8debdef9472c049fbf42adb3f01d613825"},
+    {file = "aws_cdk_lib-2.232.2.tar.gz", hash = "sha256:329fd448ba3cc9a83bcd83eee372ed13b5efdd3a5b28a4e6dc513c43d9a746f7"},
 ]
 
 [package.dependencies]
@@ -454,14 +454,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.42.7"
-description = "Type annotations for boto3 1.42.7 generated with mypy-boto3-builder 8.12.0"
+version = "1.42.10"
+description = "Type annotations for boto3 1.42.10 generated with mypy-boto3-builder 8.12.0"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "boto3_stubs-1.42.7-py3-none-any.whl", hash = "sha256:e4f153103a3e67a50aa98b9141382a16d37e943aef957319fe3a48e9b4a33a5a"},
-    {file = "boto3_stubs-1.42.7.tar.gz", hash = "sha256:2d3f9e10686ca7ca054b788450fcc3d505b9f74954817afd994f71742df6d883"},
+    {file = "boto3_stubs-1.42.10-py3-none-any.whl", hash = "sha256:311374a6699f6757e2c302c4b520a2254f8a52d7d5f3de9998608fe77e210213"},
+    {file = "boto3_stubs-1.42.10.tar.gz", hash = "sha256:5f0f6d0b3c30c84fb3d1a2fc3fcbaeb2b7bf19329bdea9f6287cbd0eefd33a07"},
 ]
 
 [package.dependencies]
@@ -533,7 +533,7 @@ bedrock-data-automation-runtime = ["mypy-boto3-bedrock-data-automation-runtime (
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.42.0,<1.43.0)"]
 billing = ["mypy-boto3-billing (>=1.42.0,<1.43.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.42.0,<1.43.0)"]
-boto3 = ["boto3 (==1.42.7)"]
+boto3 = ["boto3 (==1.42.10)"]
 braket = ["mypy-boto3-braket (>=1.42.0,<1.43.0)"]
 budgets = ["mypy-boto3-budgets (>=1.42.0,<1.43.0)"]
 ce = ["mypy-boto3-ce (>=1.42.0,<1.43.0)"]
@@ -1740,15 +1740,15 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "8.118.0"
+version = "8.120.0"
 description = "The Datadog AWS Lambda Library"
 optional = true
 python-versions = "<4,>=3.8.0"
 groups = ["main"]
 markers = "extra == \"datadog\""
 files = [
-    {file = "datadog_lambda-8.118.0-py3-none-any.whl", hash = "sha256:75eab5f16338543a8732d46b784b6f9977e577975279e4f93426c6697b580bec"},
-    {file = "datadog_lambda-8.118.0.tar.gz", hash = "sha256:1e7ce3febc191e8def0cc5697df3cf1188fd0ac738e1fbae688bf7b8dd0993da"},
+    {file = "datadog_lambda-8.120.0-py3-none-any.whl", hash = "sha256:333fc797d2671f37436dd63df9ab140083d90811e7bf81f9a901aba65f2ff67c"},
+    {file = "datadog_lambda-8.120.0.tar.gz", hash = "sha256:8f5828a1cf23a6ac47b8fa11f6b3aedf33d62b03ee00122cb622d1261259794c"},
 ]
 
 [package.dependencies]
