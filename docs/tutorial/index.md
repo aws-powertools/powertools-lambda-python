@@ -68,7 +68,7 @@ Let's configure our base application to look like the following code snippet.
             Properties:
                 CodeUri: hello_world/
                 Handler: app.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Architectures:
                     - x86_64
                 Events:
@@ -187,7 +187,7 @@ For this to work, we could create a new Lambda function to handle incoming reque
             Properties:
                 CodeUri: hello_world/
                 Handler: app.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Events:
                     HelloWorld:
                         Type: Api
@@ -200,7 +200,7 @@ For this to work, we could create a new Lambda function to handle incoming reque
             Properties:
                 CodeUri: hello_world/
                 Handler: hello_by_name.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Events:
                     HelloWorldName:
                         Type: Api
@@ -286,7 +286,7 @@ A first attempt at the routing logic might look similar to the following code sn
             Properties:
                 CodeUri: hello_world/
                 Handler: app.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Events:
                     HelloWorld:
                         Type: Api
@@ -588,7 +588,7 @@ Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.a
             Properties:
                 CodeUri: hello_world/
                 Handler: app.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Tracing: Active
                 Events:
                     HelloWorld:
@@ -893,7 +893,7 @@ Let's expand our application with custom metrics using AWS SDK to see how it wor
             Properties:
                 CodeUri: hello_world/
                 Handler: app.lambda_handler
-                Runtime: python3.9
+                Runtime: python3.13
                 Tracing: Active
                 Events:
                     HelloWorld:

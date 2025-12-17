@@ -100,63 +100,64 @@ You can use pre-built models to work events from AWS services, so you don’t ne
 
 The example above uses `SqsModel`. Other built-in models can be found below.
 
-| Model name                                  | Description                                                                                   |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                              |
-| **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                            |
-| **ApiGatewayAuthorizerToken**               | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Token               |
-| **ApiGatewayAuthorizerRequest**             | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Request             |
-| **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                                 |
-| **ApiGatewayAuthorizerRequestV2**           | Lambda Event Source payload for Amazon API Gateway v2 Lambda Authorizer                       |
-| **APIGatewayWebSocketMessageEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API message body                 |
-| **APIGatewayWebSocketConnectEventModel**    | Lambda Event Source payload for Amazon API Gateway WebSocket API $connect message             |
-| **APIGatewayWebSocketDisconnectEventModel** | Lambda Event Source payload for Amazon API Gateway WebSocket API $disconnect message          |
-| **AppSyncResolverEventModel**               | Lambda Event Source payload for AWS AppSync Resolver                                          |
-| **AppSyncEventsModel**                      | Lambda Event Source payload for AWS AppSync Events                                            |
-| **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents - OpenAPI-based                                |
-| **BedrockAgentFunctionEventModel**          | Lambda Event Source payload for Bedrock Agents - Function-based                               |
-| **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                         |
-| **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
-| **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                         |
-| **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
-| **CognitoPreSignupTriggerModel**            | Lambda User Pool Pre-Sign-Up trigger event                                                    |
-| **CognitoPostConfirmationTriggerModel**     | Lambda User Pool Post Confirmation trigger event                                              |
-| **CognitoPreAuthenticationTriggerModel**    | Lambda User Pool Pre Authentication trigger event                                             |
-| **CognitoPostAuthenticationTriggerModel**   | Lambda User Pool Post Authentication trigger event                                            |
-| **CognitoPreTokenGenerationTriggerModelV1** | Lambda User Pool Pre Token Generation V1 trigger event                                        |
-| **CognitoPreTokenGenerationTriggerModelV2AndV3** | Lambda User Pool Pre Token Generation V2 and V3 trigger event                            |
-| **CognitoMigrateUserTriggerModel**          | Lambda User Pool Migrate User trigger event                                                   |
-| **CognitoCustomMessageTriggerModel**        | Lambda User Pool Custom Message trigger event                                                 |
-| **CognitoCustomEmailSenderTriggerModel**    | Lambda User Pool Custom Email Sender trigger event                                            |
-| **CognitoCustomSMSSenderTriggerModel**      | Lambda User Pool Custom SMS Sender trigger event                                              |
-| **CognitoDefineAuthChallengeTriggerModel**  | Lambda User Pool Define Auth Challenge trigger event                                          |
-| **CognitoCreateAuthChallengeTriggerModel**  | Lambda User Pool Create Auth Challenge trigger event                                          |
-| **CognitoVerifyAuthChallengeTriggerModel**  | Lambda User Pool Verify Auth Challenge trigger event                                          |
-| **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                                       |
-| **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                            |
-| **IoTCoreThingEvent**                       | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
-| **IoTCoreThingTypeEvent**                   | Lambda Event Source payload for IoT Core Thing Type events.                                   |
-| **IoTCoreThingTypeAssociationEvent**        | Lambda Event Source payload for IoT Core Thing Type associated or disassociated with a Thing. |
-| **IoTCoreThingGroupEvent**                  | Lambda Event Source payload for IoT Core Thing Group created, updated, or deleted.            |
-| **IoTCoreAddOrRemoveFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing added to or removed from a Thing Group.        |
-| **IoTCoreAddOrDeleteFromThingGroupEvent**   | Lambda Event Source payload for IoT Core Thing Group added to or deleted from a Thing Group.  |
-| **KafkaMskEventModel**                      | Lambda Event Source payload for AWS MSK payload                                               |
-| **KafkaSelfManagedEventModel**              | Lambda Event Source payload for self managed Kafka payload                                    |
-| **KinesisDataStreamModel**                  | Lambda Event Source payload for Amazon Kinesis Data Streams                                   |
-| **KinesisFirehoseModel**                    | Lambda Event Source payload for Amazon Kinesis Firehose                                       |
-| **KinesisFirehoseSqsModel**                 | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records              |
-| **LambdaFunctionUrlModel**                  | Lambda Event Source payload for Lambda Function URL payload                                   |
-| **S3BatchOperationModel**                   | Lambda Event Source payload for Amazon S3 Batch Operation                                     |
-| **S3EventNotificationEventBridgeModel**     | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.                  |
-| **S3Model**                                 | Lambda Event Source payload for Amazon S3                                                     |
-| **S3ObjectLambdaEvent**                     | Lambda Event Source payload for Amazon S3 Object Lambda                                       |
-| **S3SqsEventNotificationModel**             | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS)         |
-| **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                                   |
-| **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                            |
-| **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                                    |
-| **TransferFamilyAuthorizer**                | Lambda Event Source payload for AWS Transfer Family Lambda authorizer                         |
-| **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                            |
-| **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                                 |
+| Model name                                        | Description                                                                                   |
+|---------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| **AlbModel**                                      | Lambda Event Source payload for Amazon Application Load Balancer                              |
+| **APIGatewayProxyEventModel**                     | Lambda Event Source payload for Amazon API Gateway                                            |
+| **ApiGatewayAuthorizerToken**                     | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Token               |
+| **ApiGatewayAuthorizerRequest**                   | Lambda Event Source payload for Amazon API Gateway Lambda Authorizer with Request             |
+| **APIGatewayProxyEventV2Model**                   | Lambda Event Source payload for Amazon API Gateway v2 payload                                 |
+| **ApiGatewayAuthorizerRequestV2**                 | Lambda Event Source payload for Amazon API Gateway v2 Lambda Authorizer                       |
+| **APIGatewayWebSocketMessageEventModel**          | Lambda Event Source payload for Amazon API Gateway WebSocket API message body                 |
+| **APIGatewayWebSocketConnectEventModel**          | Lambda Event Source payload for Amazon API Gateway WebSocket API $connect message             |
+| **APIGatewayWebSocketDisconnectEventModel**       | Lambda Event Source payload for Amazon API Gateway WebSocket API $disconnect message          |
+| **AppSyncResolverEventModel**                     | Lambda Event Source payload for AWS AppSync Resolver                                          |
+| **AppSyncEventsModel**                            | Lambda Event Source payload for AWS AppSync Events                                            |
+| **BedrockAgentEventModel**                        | Lambda Event Source payload for Bedrock Agents - OpenAPI-based                                |
+| **BedrockAgentFunctionEventModel**                | Lambda Event Source payload for Bedrock Agents - Function-based                               |
+| **CloudFormationCustomResourceCreateModel**       | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                         |
+| **CloudFormationCustomResourceUpdateModel**       | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
+| **CloudFormationCustomResourceDeleteModel**       | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                         |
+| **CloudwatchLogsModel**                           | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
+| **CognitoPreSignupTriggerModel**                  | Lambda User Pool Pre-Sign-Up trigger event                                                    |
+| **CognitoPostConfirmationTriggerModel**           | Lambda User Pool Post Confirmation trigger event                                              |
+| **CognitoPreAuthenticationTriggerModel**          | Lambda User Pool Pre Authentication trigger event                                             |
+| **CognitoPostAuthenticationTriggerModel**         | Lambda User Pool Post Authentication trigger event                                            |
+| **CognitoPreTokenGenerationTriggerModelV1**       | Lambda User Pool Pre Token Generation V1 trigger event                                        |
+| **CognitoPreTokenGenerationTriggerModelV2AndV3**  | Lambda User Pool Pre Token Generation V2 and V3 trigger event                                 |
+| **CognitoMigrateUserTriggerModel**                | Lambda User Pool Migrate User trigger event                                                   |
+| **CognitoCustomMessageTriggerModel**              | Lambda User Pool Custom Message trigger event                                                 |
+| **CognitoCustomEmailSenderTriggerModel**          | Lambda User Pool Custom Email Sender trigger event                                            |
+| **CognitoCustomSMSSenderTriggerModel**            | Lambda User Pool Custom SMS Sender trigger event                                              |
+| **CognitoDefineAuthChallengeTriggerModel**        | Lambda User Pool Define Auth Challenge trigger event                                          |
+| **CognitoCreateAuthChallengeTriggerModel**        | Lambda User Pool Create Auth Challenge trigger event                                          |
+| **CognitoVerifyAuthChallengeTriggerModel**        | Lambda User Pool Verify Auth Challenge trigger event                                          |
+| **DynamoDBStreamModel**                           | Lambda Event Source payload for Amazon DynamoDB Streams                                       |
+| **DynamoDBStreamLambdaOnFailureDestinationModel** | Lambda on-failure destination payload for Amazon DynamoDB Streams                                          |
+| **EventBridgeModel**                              | Lambda Event Source payload for Amazon EventBridge                                            |
+| **IoTCoreThingEvent**                             | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
+| **IoTCoreThingTypeEvent**                         | Lambda Event Source payload for IoT Core Thing Type events.                                   |
+| **IoTCoreThingTypeAssociationEvent**              | Lambda Event Source payload for IoT Core Thing Type associated or disassociated with a Thing. |
+| **IoTCoreThingGroupEvent**                        | Lambda Event Source payload for IoT Core Thing Group created, updated, or deleted.            |
+| **IoTCoreAddOrRemoveFromThingGroupEvent**         | Lambda Event Source payload for IoT Core Thing added to or removed from a Thing Group.        |
+| **IoTCoreAddOrDeleteFromThingGroupEvent**         | Lambda Event Source payload for IoT Core Thing Group added to or deleted from a Thing Group.  |
+| **KafkaMskEventModel**                            | Lambda Event Source payload for AWS MSK payload                                               |
+| **KafkaSelfManagedEventModel**                    | Lambda Event Source payload for self managed Kafka payload                                    |
+| **KinesisDataStreamModel**                        | Lambda Event Source payload for Amazon Kinesis Data Streams                                   |
+| **KinesisFirehoseModel**                          | Lambda Event Source payload for Amazon Kinesis Firehose                                       |
+| **KinesisFirehoseSqsModel**                       | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records              |
+| **LambdaFunctionUrlModel**                        | Lambda Event Source payload for Lambda Function URL payload                                   |
+| **S3BatchOperationModel**                         | Lambda Event Source payload for Amazon S3 Batch Operation                                     |
+| **S3EventNotificationEventBridgeModel**           | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.                  |
+| **S3Model**                                       | Lambda Event Source payload for Amazon S3                                                     |
+| **S3ObjectLambdaEvent**                           | Lambda Event Source payload for Amazon S3 Object Lambda                                       |
+| **S3SqsEventNotificationModel**                   | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS)         |
+| **SesModel**                                      | Lambda Event Source payload for Amazon Simple Email Service                                   |
+| **SnsModel**                                      | Lambda Event Source payload for Amazon Simple Notification Service                            |
+| **SqsModel**                                      | Lambda Event Source payload for Amazon SQS                                                    |
+| **TransferFamilyAuthorizer**                      | Lambda Event Source payload for AWS Transfer Family Lambda authorizer                         |
+| **VpcLatticeModel**                               | Lambda Event Source payload for Amazon VPC Lattice                                            |
+| **VpcLatticeV2Model**                             | Lambda Event Source payload for Amazon VPC Lattice v2 payload                                 |
 
 #### Extending built-in models
 

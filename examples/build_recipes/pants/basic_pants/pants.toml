@@ -8,7 +8,7 @@ backend_packages = [
 ]
 
 [python]
-interpreter_constraints = [">=3.9,<3.14"]
+interpreter_constraints = [">=3.10,<3.14"]
 
 [python-infer]
 use_rust_parser = true

@@ -2,7 +2,7 @@
 name = "lambda-powertools-uv"
 version = "0.1.0"
 description = "Lambda function with Powertools using uv"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "aws-lambda-powertools[all]>=3.18.0",
     "pydantic>=2.10.0",
