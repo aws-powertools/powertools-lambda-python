@@ -123,9 +123,17 @@ class IdempotencyHandler:
 
         self.persistence_store = persistence_store
 
-    def handle(self) -> Any:
+    def handle(self, is_replay: bool = False) -> Any:
         """
         Main entry point for handling idempotent execution of a function.
+
+        Parameters
+        ----------
+        is_replay : bool, optional
+            Whether this is a replay of a function that is already in progress.
+            If True, allows replay of functions that are already in progress.
+            If False, uses standard idempotency behavior (raises IdempotencyAlreadyInProgressError).
+            Defaults to False.
 
         Returns
         -------
@@ -138,12 +146,12 @@ class IdempotencyHandler:
         # In most cases we can retry successfully on this exception.
         for i in range(MAX_RETRIES + 1):  # pragma: no cover
             try:
-                return self._process_idempotency()
+                return self._process_idempotency(is_replay)
             except IdempotencyInconsistentStateError:
                 if i == MAX_RETRIES:
                     raise  # Bubble up when exceeded max tries
 
-    def _process_idempotency(self):
+    def _process_idempotency(self, is_replay: bool):
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
@@ -159,7 +167,8 @@ class IdempotencyHandler:
             # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
             # way of retrieving the existing record after a failed conditional write operation.
             record = exc.old_data_record or self._get_idempotency_record()
-
+            if is_replay and record is not None and record.status == "INPROGRESS":
+                return self._get_function_response()
             # If a record is found, handle it for status
             if record:
                 return self._handle_for_status(record)

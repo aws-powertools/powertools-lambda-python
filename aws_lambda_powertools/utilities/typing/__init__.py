@@ -4,6 +4,6 @@ Typing for developer ease in the IDE
     [`Typing`](../utilities/typing.md)
 """
 
-from .lambda_context import LambdaContext
+from .lambda_context import DurableContextProtocol, LambdaContext
 
-__all__ = ["LambdaContext"]
+__all__ = ["DurableContextProtocol", "LambdaContext"]

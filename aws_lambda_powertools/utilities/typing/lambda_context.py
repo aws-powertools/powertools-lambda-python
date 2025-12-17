@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing.lambda_client_context import (
@@ -93,3 +93,12 @@ class LambdaContext:
     def get_remaining_time_in_millis() -> int:
         """Returns the number of milliseconds left before the execution times out."""
         return 0
+
+
+@runtime_checkable
+class DurableContextProtocol(Protocol):  # pragma: no cover
+    @property
+    def lambda_context(self) -> LambdaContext: ...
+
+    @property
+    def state(self) -> object: ...
