@@ -2465,14 +2465,14 @@ testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markdown-it-py"
-version = "4.0.0"
+version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "markdown_it_py-4.0.0-py3-none-any.whl", hash = "sha256:87327c59b172c5011896038353a81343b6754500a08cd7a4973bb48c6d578147"},
-    {file = "markdown_it_py-4.0.0.tar.gz", hash = "sha256:cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3"},
+    {file = "markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"},
+    {file = "markdown_it_py-3.0.0-py3-none-any.whl", hash = "sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1"},
 ]
 
 [package.dependencies]
@@ -2480,12 +2480,13 @@ mdurl = ">=0.1,<1.0"
 
 [package.extras]
 benchmarking = ["psutil", "pytest", "pytest-benchmark"]
-compare = ["commonmark (>=0.9,<1.0)", "markdown (>=3.4,<4.0)", "markdown-it-pyrs", "mistletoe (>=1.0,<2.0)", "mistune (>=3.0,<4.0)", "panflute (>=2.3,<3.0)"]
+code-style = ["pre-commit (>=3.0,<4.0)"]
+compare = ["commonmark (>=0.9,<1.0)", "markdown (>=3.4,<4.0)", "mistletoe (>=1.0,<2.0)", "mistune (>=2.0,<3.0)", "panflute (>=2.3,<3.0)"]
 linkify = ["linkify-it-py (>=1,<3)"]
-plugins = ["mdit-py-plugins (>=0.5.0)"]
+plugins = ["mdit-py-plugins"]
 profiling = ["gprof2dot"]
-rtd = ["ipykernel", "jupyter_sphinx", "mdit-py-plugins (>=0.5.0)", "myst-parser", "pyyaml", "sphinx", "sphinx-book-theme (>=1.0,<2.0)", "sphinx-copybutton", "sphinx-design"]
-testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions", "requests"]
+rtd = ["jupyter_sphinx", "mdit-py-plugins", "myst-parser", "pyyaml", "sphinx", "sphinx-copybutton", "sphinx-design", "sphinx_book_theme"]
+testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
 
 [[package]]
 name = "markdownify"
@@ -2604,19 +2605,38 @@ files = [
 
 [[package]]
 name = "mdformat"
-version = "1.0.0"
+version = "0.7.22"
 description = "CommonMark compliant Markdown formatter"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "mdformat-1.0.0-py3-none-any.whl", hash = "sha256:bca015d65a1d063a02e885a91daee303057bc7829c2cd37b2075a50dbb65944b"},
-    {file = "mdformat-1.0.0.tar.gz", hash = "sha256:4954045fcae797c29f86d4ad879e43bb151fa55dbaf74ac6eaeacf1d45bb3928"},
+    {file = "mdformat-0.7.22-py3-none-any.whl", hash = "sha256:61122637c9e1d9be1329054f3fa216559f0d1f722b7919b060a8c2a4ae1850e5"},
+    {file = "mdformat-0.7.22.tar.gz", hash = "sha256:eef84fa8f233d3162734683c2a8a6222227a229b9206872e6139658d99acb1ea"},
 ]
 
 [package.dependencies]
-markdown-it-py = ">=1,<5"
+markdown-it-py = ">=1.0.0,<4.0.0"
 tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+
+[[package]]
+name = "mdformat-tables"
+version = "1.0.0"
+description = "An mdformat plugin for rendering tables."
+optional = false
+python-versions = ">=3.7.0"
+groups = ["dev"]
+files = [
+    {file = "mdformat_tables-1.0.0-py3-none-any.whl", hash = "sha256:94cd86126141b2adc3b04c08d1441eb1272b36c39146bab078249a41c7240a9a"},
+    {file = "mdformat_tables-1.0.0.tar.gz", hash = "sha256:a57db1ac17c4a125da794ef45539904bb8a9592e80557d525e1f169c96daa2c8"},
+]
+
+[package.dependencies]
+mdformat = ">=0.7.5,<0.8.0"
+wcwidth = ">=0.2.13"
+
+[package.extras]
+test = ["coverage", "pytest (>=6.0,<7.0)", "pytest-cov"]
 
 [[package]]
 name = "mdurl"
@@ -2725,20 +2745,21 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-llmstxt"
-version = "0.2.0"
+version = "0.5.0"
 description = "MkDocs plugin to generate an /llms.txt file."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "mkdocs_llmstxt-0.2.0-py3-none-any.whl", hash = "sha256:907de892e0c8be74002e8b4d553820c2b5bbcf03cc303b95c8bca48fb49c1a29"},
-    {file = "mkdocs_llmstxt-0.2.0.tar.gz", hash = "sha256:104f10b8101167d6baf7761942b4743869be3d8f8a8d909f4e9e0b63307f709e"},
+    {file = "mkdocs_llmstxt-0.5.0-py3-none-any.whl", hash = "sha256:753c699913d2d619a9072604b26b6dc9f5fb6d257d9b107857f80c8a0b787533"},
+    {file = "mkdocs_llmstxt-0.5.0.tar.gz", hash = "sha256:b2fa9e6d68df41d7467e948a4745725b6c99434a36b36204857dbd7bb3dfe041"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.12"
 markdownify = ">=0.14"
 mdformat = ">=0.7.21"
+mdformat-tables = ">=1.0"
 
 [[package]]
 name = "mkdocs-material"
@@ -4962,6 +4983,18 @@ files = [
 watchmedo = ["PyYAML (>=3.10)"]
 
 [[package]]
+name = "wcwidth"
+version = "0.2.14"
+description = "Measures the displayed width of unicode strings in a terminal"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
+    {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
+]
+
+[[package]]
 name = "wrapt"
 version = "1.17.3"
 description = "Module for decorators, wrappers and monkey patching."
@@ -5107,4 +5140,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0.0"
-content-hash = "702e06c62e5f654012bb2503cc87ecfaeb652828d202feea8103523d41abab33"
+content-hash = "808c44e461d6d27b7e0ef8b10036826ad4b1834d0c75caf79a864e658f0e46ab"
