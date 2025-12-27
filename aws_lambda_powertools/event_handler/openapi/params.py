@@ -716,7 +716,11 @@ class Body(FieldInfo):  # type: ignore[misc]
         )
         if examples is not None:
             kwargs["examples"] = examples
+        if openapi_examples is not None:
+            kwargs["openapi_examples"] = openapi_examples
         current_json_schema_extra = json_schema_extra or extra
+
+        self.openapi_examples = openapi_examples
 
         kwargs.update(
             {

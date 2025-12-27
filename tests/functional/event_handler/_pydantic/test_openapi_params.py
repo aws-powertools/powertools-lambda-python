@@ -567,6 +567,45 @@ def test_openapi_with_body_description():
     assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
 
 
+def test_openapi_with_body_examples():
+    app = APIGatewayRestResolver()
+
+    first_example = Example(summary="Example1", description="Example1", value={"name": "Alice"})
+    second_example = Example(summary="Example2", description="Example2", value={"name": "Bob"})
+
+    class User(BaseModel):
+        name: str
+
+    @app.post("/users")
+    def handler(
+        user: Annotated[
+            User,
+            Body(
+                openapi_examples={
+                    "example1": first_example,
+                    "example2": second_example,
+                },
+            ),
+        ],
+    ):
+        print(user)
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
+
+    request_body = post.requestBody
+
+    # Examples should appear in the request_body content schema
+    request_body_examples = request_body.content[JSON_CONTENT_TYPE].examples
+
+    assert request_body_examples["example1"] == first_example
+    assert request_body_examples["example2"] == second_example
+
+
 def test_openapi_with_deprecated_operations():
     app = APIGatewayRestResolver()
 
