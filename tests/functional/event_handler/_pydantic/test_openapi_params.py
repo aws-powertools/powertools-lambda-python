@@ -1436,3 +1436,59 @@ def test_query_validation_alias_only_sets_alias_automatically():
     body = json.loads(result["body"])
     assert body["int_query"] == 20
     assert body["str_query"] == "fooBarFizzBuzz"
+
+
+def test_body_alias_sets_validation_alias_automatically():
+    """
+    When alias is set but validation_alias is not in Body,
+    validation_alias should be automatically set to alias value.
+    """
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/foo")
+    def post_foo(
+        my_body: Annotated[str, Body(alias="myBody")],
+    ):
+        return {"my_body": my_body}
+
+    # WHEN sending a request with body
+    event = {
+        "httpMethod": "POST",
+        "path": "/foo",
+        "body": '"test_value"',
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["my_body"] == "test_value"
+
+
+def test_body_validation_alias_only_sets_alias_automatically():
+    """
+    When only validation_alias is set (without alias) in Body,
+    alias should be automatically set to validation_alias value.
+    """
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/foo")
+    def post_foo(
+        my_body: Annotated[str, Body(validation_alias="myBody")],
+    ):
+        return {"my_body": my_body}
+
+    # WHEN sending a request with body
+    event = {
+        "httpMethod": "POST",
+        "path": "/foo",
+        "body": '"test_value"',
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["my_body"] == "test_value"
