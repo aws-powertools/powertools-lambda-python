@@ -1,13 +1,10 @@
-name: ClusterFuzzLite PR fuzzing
+name: ClusterFuzzLite fuzzing
 
 on:
-  pull_request:
-    branches:
-      - develop
-    paths:
-      - "aws_lambda_powertools/**"
-      - ".clusterfuzzlite/**"
-      - "tests/fuzz/**"
+  schedule:
+    # Run daily at 8 AM UTC
+    - cron: "0 8 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
