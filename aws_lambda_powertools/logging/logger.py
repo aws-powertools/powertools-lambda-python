@@ -820,6 +820,12 @@ class Logger:
         **additional_keys: Any
             Key-value pairs to include in the log context during the lifespan of the context manager.
 
+        Warning
+        -------
+        All keys added within this context are removed when exiting, even if they existed before.
+        If a key with the same name already exists, the original value will be lost after the context exits.
+        To persist keys across multiple log messages, use `append_keys()` instead.
+
         Example
         --------
         **Logging with contextual keys**

@@ -195,6 +195,22 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 
 The append_context_keys method allows temporary modification of a Logger instance's context without creating a new logger. It's useful for adding context keys to specific workflows while maintaining the logger's overall state and simplicity.
 
+???+ danger "Important: Keys are removed on context exit, even if they existed before"
+	All keys added within the context are removed when exiting, **including keys that already existed with the same name**. 
+	
+	If you need to temporarily override a key's value while preserving the original, use `append_keys()` for persistent keys and avoid key name collisions with `append_context_keys()`.
+	
+	**Example of key collision:**
+	```python
+	logger.append_keys(order_id="ORD-123")  # Persistent key
+	logger.info("Order received")  # Has order_id="ORD-123"
+	
+	with logger.append_context_keys(order_id="ORD-CHILD"):  # Overwrites
+	    logger.info("Processing")  # Has order_id="ORD-CHILD"
+	
+	logger.info("Order completed")  # order_id key is now MISSING!
+	```
+
 === "append_context_keys.py"
 
     ```python hl_lines="7 8"
