@@ -1232,7 +1232,7 @@ def test_annotated_types_interval_in_openapi_schema():
 
 def test_query_alias_sets_validation_alias_automatically():
     """
-    Test for issue #7552: When alias is set but validation_alias is not,
+    When alias is set but validation_alias is not,
     validation_alias should be automatically set to alias value.
     This ensures compatibility with Pydantic 2.12+.
     """
@@ -1273,7 +1273,7 @@ def test_query_alias_sets_validation_alias_automatically():
 
 def test_query_alias_with_multivalue_query_string_parameters():
     """
-    Test for issue #7552: Ensure alias works with multiValueQueryStringParameters.
+    Ensure alias works with multiValueQueryStringParameters.
     """
     from annotated_types import Ge, Le
     from pydantic import StringConstraints
@@ -1311,7 +1311,7 @@ def test_query_alias_with_multivalue_query_string_parameters():
 
 def test_query_explicit_validation_alias_takes_precedence():
     """
-    Test that explicitly set validation_alias is preserved and not overwritten by alias.
+    Explicitly set validation_alias is preserved and not overwritten by alias.
     The alias is used by Powertools to extract the value from the request,
     while validation_alias is used by Pydantic for internal validation.
     """
@@ -1342,7 +1342,7 @@ def test_query_explicit_validation_alias_takes_precedence():
 
 def test_header_alias_sets_validation_alias_automatically():
     """
-    Test for issue #7552: Header alias should also set validation_alias automatically.
+    Header alias should also set validation_alias automatically.
     """
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1371,7 +1371,7 @@ def test_header_alias_sets_validation_alias_automatically():
 
 def test_query_without_alias_works_normally():
     """
-    Test that Query without alias continues to work normally.
+    Query without alias continues to work normally.
     """
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1400,7 +1400,7 @@ def test_query_without_alias_works_normally():
 
 def test_query_validation_alias_only_sets_alias_automatically():
     """
-    Test for issue #7552: When only validation_alias is set (without alias),
+    When only validation_alias is set (without alias),
     alias should be automatically set to validation_alias value.
     This ensures the middleware can find the parameter in the request.
     """
