@@ -8,31 +8,36 @@
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/#features).
 
-> Also available in [Java](https://github.com/aws-powertools/powertools-lambda-java), [Typescript](https://github.com/aws-powertools/powertools-lambda-typescript), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet).
+Also available in [Java](https://github.com/aws-powertools/powertools-lambda-java), [TypeScript](https://github.com/aws-powertools/powertools-lambda-typescript), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet).
 
-**[📜Documentation](https://docs.powertools.aws.dev/lambda/python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
+[� Doccumentation](https://docs.powertools.aws.dev/lambda/python/) | [🐍 PyPi](https://pypi.org/project/aws-lambda-powertools/) | [🗺️ Roadmap](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/) | [📰 Blog](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)
 
 ![hero-image](https://user-images.githubusercontent.com/3340292/198254617-d0fdb672-86a6-4988-8a40-adf437135e0a.png)
 
 ## Features
 
+Core utilities such as Tracing, Logging, Metrics, and Event Handler are available across all Powertools for AWS Lambda languages. Additional utilities are subjective to each language ecosystem and customer demand.
+
 * **[Tracing](https://docs.powertools.aws.dev/lambda/python/latest/core/tracer/)** - Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions
-* **[Logging](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/)** - Structured logging made easier, and decorator to enrich structured logging with key Lambda context details
+* **[Logging](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/)** - Structured logging made easier, and target to enrich structured logging with key Lambda context details
 * **[Metrics](https://docs.powertools.aws.dev/lambda/python/latest/core/metrics/)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
-* **[Event handler: AppSync](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/appsync/)** - AWS AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
-* **[Event handler: API Gateway and ALB](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)** - Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration
+* **[Event handler: AppSync](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/appsync/)** - AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
+* **[Event handler: AppSync Events](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/appsync_events/)** - AppSync Events handler for real-time WebSocket APIs with pub/sub pattern
+* **[Event handler: API Gateway, ALB, Lambda Function URL, VPC Lattice](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)** - REST/HTTP API event handler for Lambda functions invoked via Amazon API Gateway, ALB, Lambda Function URL, and VPC Lattice
 * **[Event handler: Agents for Amazon Bedrock](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/bedrock_agents/)** - Create Agents for Amazon Bedrock, automatically generating OpenAPI schemas
-* **[Bring your own middleware](https://docs.powertools.aws.dev/lambda/python/latest/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
-* **[Parameters utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, or DynamoDB
-* **[Batch processing](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/)** - Handle partial failures for AWS SQS batch processing
+* **[Middleware factory](https://docs.powertools.aws.dev/lambda/python/latest/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
+* **[Parameters](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, AppConfig, or DynamoDB
+* **[Batch processing](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/)** - Handle partial failures for AWS SQS, Kinesis Data Streams, and DynamoDB Streams batch processing
 * **[Typing](https://docs.powertools.aws.dev/lambda/python/latest/utilities/typing/)** - Static typing classes to speedup development in your IDE
 * **[Validation](https://docs.powertools.aws.dev/lambda/python/latest/utilities/validation/)** - JSON Schema validator for inbound events and responses
 * **[Event source data classes](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_classes/)** - Data classes describing the schema of common Lambda event triggers
 * **[Parser](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parser/)** - Data parsing and deep validation using Pydantic
 * **[Idempotency](https://docs.powertools.aws.dev/lambda/python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
-* **[Data Masking](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_masking/)** -  Protect confidential data with easy removal or encryption
+* **[Data Masking](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_masking/)** - Protect confidential data with easy removal or encryption
 * **[Feature Flags](https://docs.powertools.aws.dev/lambda/python/latest/utilities/feature_flags/)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
-* **[Streaming](https://docs.powertools.aws.dev/lambda/python/latest/utilities/streaming/)** - Streams datasets larger than the available memory as streaming data.
+* **[Streaming](https://docs.powertools.aws.dev/lambda/python/latest/utilities/streaming/)** - Streams datasets larger than the available memory as streaming data
+* **[Kafka](https://docs.powertools.aws.dev/lambda/python/latest/utilities/kafka/)** - Deserialize and validate Kafka events with support for Avro, Protocol Buffers, and JSON Schema
+* **[JMESPath Functions](https://docs.powertools.aws.dev/lambda/python/latest/utilities/jmespath_functions/)** - Built-in JMESPath functions to easily deserialize common encoded JSON payloads in Lambda functions
 
 ### Installation
 
