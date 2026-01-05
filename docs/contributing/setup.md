@@ -7,7 +7,7 @@ description: Setting up your development environment for contribution
 
 [![Join our Discord](https://img.shields.io/badge/Discord-Join_Community-7289da.svg)](https://discord.gg/B8zZKbbyET){target="_blank"}
 
-This page describes how to setup your development environment (Cloud or locally) to contribute to Powertools for AWS Lambda.
+This page describes how to setup your development environment to contribute to Powertools for AWS Lambda.
 
 <center>
 ```mermaid
@@ -22,7 +22,7 @@ graph LR
 !!! question "First time contributing to an open-source project ever?"
     Read this [introduction on how to fork and clone a project on GitHub](https://docs.github.com/en/get-started/quickstart/contributing-to-projects){target="_blank" rel="nofollow"}.
 
-Unless you're using the pre-configured Cloud environment, you'll need the following installed:
+You'll need the following installed:
 
 * [GitHub account](https://github.com/join){target="_blank" rel="nofollow"}. You'll need to be able to fork, clone, and contribute via pull request.
 * [Python 3.10+](https://www.python.org/downloads/){target="_blank" rel="nofollow"}. Pick any version supported in [AWS Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html).
@@ -35,23 +35,7 @@ Unless you're using the pre-configured Cloud environment, you'll need the follow
     * [AWS Account bootstrapped with CDK](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html){target="_blank"}
     * [AWS CLI installed and configured](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-## Cloud environment
-
-> **NOTE**. Be mindful of [Gitpod pricing structure](https://www.gitpod.io/pricing){target="_blank" rel="nofollow"} for long-running contributions. When in doubt, use the local environment below.
-
-To use a pre-configured environment, replace `YOUR_USERNAME` with your GitHub username or organization.
-
-```bash
-https://gitpod.io/#https://github.com/YOUR_USERNAME/powertools-lambda-python  #(1)!
-```
-
-1. For example, my username is `heitorlessa`. <br><br> Therefore, my final URL should be `https://gitpod.io/#https://github.com/heitorlessa/powertools-lambda-python`
-
-Once provisioned, it'll install all development dependencies and tools you'll need to contribute.
-
 ## Local environment
-
-> Assuming you've got all [requirements](#requirements).
 
 You can use `make dev` to create a local virtual environment and install all dependencies locally.
 
