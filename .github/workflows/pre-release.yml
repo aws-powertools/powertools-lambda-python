@@ -23,6 +23,10 @@ env:
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Pre-release version to publish (e.g., 3.24.0a0)"
+        required: true
+        type: string
       skip_code_quality:
         description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
         default: false
@@ -33,9 +37,6 @@ on:
         default: false
         type: boolean
         required: false
-  schedule:
-    # Note: run daily on weekdays at 8am UTC time
-    - cron: "0 8 * * 1-5"
 
 permissions:
   contents: read
@@ -58,38 +59,26 @@ jobs:
         artifact_name: ${{ steps.seal_source_code.outputs.artifact_name }}
         RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     steps:
-      # NOTE: Different from prod release, we need both poetry and source code available in earlier steps to bump and verify.
-
-      # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@348de6f247222e2953d649932426e63492e0a6bf # v0.3.3
-
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
-      - name: Bump and export release version
+      - name: Set release version
         id: release_version
-        run: |
-          RELEASE_VERSION="$(poetry version prerelease --short | head -n1 | tr -d '\n')"
+        run: echo "RELEASE_VERSION=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
 
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Verifies pre-release version semantics
-        # verify pre-release semantics before proceeding to avoid versioning pollution
-        # e.g., 2.40.0a1 and 2.40.0b2 are valid while 2.40.0 is not
-        # NOTE. we do it in a separate step to handle edge cases like
-        # `poetry` CLI uses immutable install, versioning behaviour could change even in a minor version (we had breaking changes before)
-        # a separate step allows us to pinpoint what happened (before/after)
+      - name: Verify pre-release version semantics
         run: |
-          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-b].*$ ]]; then
-            echo "Version $VERSION doesn't look like a pre-release version; aborting"
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-b][0-9]+$ ]]; then
+            echo "Version ${{ inputs.version }} doesn't look like a pre-release version (e.g., 3.24.0a0); aborting"
             exit 1
           fi
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
+
+      - name: Update version in pyproject.toml
+        run: sed -i 's/^version = ".*"/version = "${{ inputs.version }}"/' pyproject.toml
+
+      - name: Update version in version.py
+        run: sed -i 's/^VERSION = ".*"/VERSION = "${{ inputs.version }}"/' aws_lambda_powertools/shared/version.py
 
       - name: Seal and upload
         id: seal_source_code
