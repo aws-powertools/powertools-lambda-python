@@ -94,6 +94,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         self.metadata_set = metadata_set if metadata_set is not None else {}
         self.timestamp: int | None = None
+        self.dimension_sets: list[dict[str, str]] = []  # Store multiple dimension sets
 
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
@@ -256,21 +257,30 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
             metric_names_and_values.update({metric_name: metric_value})
 
+        # Build Dimensions array: primary set + additional dimension sets
+        dimension_arrays: list[list[str]] = [list(dimensions.keys())]
+        all_dimensions: dict[str, str] = dict(dimensions)
+
+        # Add each additional dimension set
+        for dim_set in self.dimension_sets:
+            all_dimensions.update(dim_set)
+            dimension_arrays.append(list(dim_set.keys()))
+
         return {
             "_aws": {
                 "Timestamp": self.timestamp or int(datetime.datetime.now().timestamp() * 1000),  # epoch
                 "CloudWatchMetrics": [
                     {
                         "Namespace": self.namespace,  # "test_namespace"
-                        "Dimensions": [list(dimensions.keys())],  # [ "service" ]
+                        "Dimensions": dimension_arrays,  # [["service"], ["env", "region"]]
                         "Metrics": metric_definition,
                     },
                 ],
             },
             # NOTE: Mypy doesn't recognize splats '** syntax' in TypedDict
-            **dimensions,  # "service": "test_service"
-            **metadata,  # type: ignore[typeddict-item] # "username": "test"
-            **metric_names_and_values,  # "single_metric": 1.0
+            **all_dimensions,  # type: ignore[typeddict-item]  # All dimension key-value pairs
+            **metadata,  # type: ignore[typeddict-item]
+            **metric_names_and_values,
         }
 
     def add_dimension(self, name: str, value: str) -> None:
@@ -315,6 +325,70 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
 
         self.dimension_set[name] = value
+
+    def add_dimensions(self, **dimensions: str) -> None:
+        """Add a new set of dimensions creating an additional dimension array.
+
+        Creates a new dimension set in the CloudWatch EMF Dimensions array.
+
+        Example
+        -------
+        **Add multiple dimension sets**
+
+            metrics.add_dimensions(environment="prod", region="us-east-1")
+
+        Parameters
+        ----------
+        dimensions : str
+            Dimension key-value pairs as keyword arguments
+        """
+        logger.debug(f"Adding dimension set: {dimensions}")
+
+        if not dimensions:
+            warnings.warn(
+                "Empty dimensions dictionary provided",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
+
+        sanitized = self._sanitize_dimensions(dimensions)
+        if not sanitized:
+            return
+
+        self._validate_dimension_limit(sanitized)
+
+        self.dimension_sets.append({**self.default_dimensions, **sanitized})
+
+    def _sanitize_dimensions(self, dimensions: dict[str, str]) -> dict[str, str]:
+        """Convert dimension values to strings and filter out empty ones."""
+        sanitized: dict[str, str] = {}
+
+        for name, value in dimensions.items():
+            str_name = str(name)
+            str_value = str(value)
+
+            if not str_name.strip() or not str_value.strip():
+                warnings.warn(
+                    f"Dimension {str_name} has empty name or value",
+                    category=PowertoolsUserWarning,
+                    stacklevel=2,
+                )
+                continue
+
+            sanitized[str_name] = str_value
+
+        return sanitized
+
+    def _validate_dimension_limit(self, new_dimensions: dict[str, str]) -> None:
+        """Validate that adding new dimensions won't exceed CloudWatch limits."""
+        all_keys = set(self.dimension_set.keys())
+        for ds in self.dimension_sets:
+            all_keys.update(ds.keys())
+        all_keys.update(new_dimensions.keys())
+
+        if len(all_keys) > MAX_DIMENSIONS:
+            raise SchemaValidationError(f"Maximum dimensions ({MAX_DIMENSIONS}) exceeded")
 
     def add_metadata(self, key: str, value: Any) -> None:
         """Adds high cardinal metadata for metrics object
@@ -377,6 +451,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         logger.debug("Clearing out existing metric set from memory")
         self.metric_set.clear()
         self.dimension_set.clear()
+        self.dimension_sets.clear()
         self.metadata_set.clear()
         self.set_default_dimensions(**self.default_dimensions)
 
