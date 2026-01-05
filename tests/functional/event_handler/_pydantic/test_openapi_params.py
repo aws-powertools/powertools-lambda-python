@@ -1396,3 +1396,43 @@ def test_query_without_alias_works_normally():
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["my_param"] == "test_value"
+
+
+def test_query_validation_alias_only_sets_alias_automatically():
+    """
+    Test for issue #7552: When only validation_alias is set (without alias),
+    alias should be automatically set to validation_alias value.
+    This ensures the middleware can find the parameter in the request.
+    """
+    from annotated_types import Ge, Le
+    from pydantic import StringConstraints
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    IntQuery = Annotated[int, Ge(1), Le(100)]
+    StrQuery = Annotated[str, StringConstraints(min_length=4, max_length=128)]
+
+    @app.get("/foo")
+    def get_foo(
+        str_query: Annotated[StrQuery, Query(validation_alias="strQuery")],
+        int_query: Annotated[IntQuery, Query(validation_alias="intQuery")],
+    ):
+        return {"int_query": int_query, "str_query": str_query}
+
+    # WHEN sending a request with validation_alias names
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "queryStringParameters": {
+            "intQuery": "20",
+            "strQuery": "fooBarFizzBuzz",
+        },
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["int_query"] == 20
+    assert body["str_query"] == "fooBarFizzBuzz"

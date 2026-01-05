@@ -218,9 +218,12 @@ class Param(FieldInfo):  # type: ignore[misc]
         self.openapi_examples = openapi_examples
 
         # Pydantic 2.12+ no longer copies alias to validation_alias automatically
-        # Set validation_alias to alias when not explicitly provided
+        # Ensure alias and validation_alias are in sync when only one is provided
         if validation_alias is _Unset and alias is not None:
             validation_alias = alias
+        elif alias is None and validation_alias is not _Unset and validation_alias is not None:
+            alias = validation_alias
+            kwargs["alias"] = alias
 
         kwargs.update(
             {
@@ -724,9 +727,12 @@ class Body(FieldInfo):  # type: ignore[misc]
         current_json_schema_extra = json_schema_extra or extra
 
         # Pydantic 2.12+ no longer copies alias to validation_alias automatically
-        # Set validation_alias to alias when not explicitly provided
+        # Ensure alias and validation_alias are in sync when only one is provided
         if validation_alias is _Unset and alias is not None:
             validation_alias = alias
+        elif alias is None and validation_alias is not _Unset and validation_alias is not None:
+            alias = validation_alias
+            kwargs["alias"] = alias
 
         kwargs.update(
             {
