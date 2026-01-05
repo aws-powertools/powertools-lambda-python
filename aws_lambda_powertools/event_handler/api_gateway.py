@@ -826,6 +826,8 @@ class Route:
 
         # Generate the request body media type
         request_media_content: dict[str, Any] = {"schema": body_schema}
+        if field_info.openapi_examples:
+            request_media_content["examples"] = field_info.openapi_examples
         request_body_oai["content"] = {request_media_type: request_media_content}
         return request_body_oai
 

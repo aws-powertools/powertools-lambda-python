@@ -9,16 +9,10 @@ name: Build changelog
 
 # USAGE
 #
-# Always triggered on PR merge or manually from GitHub UI if we must.
+# Triggered manually from GitHub UI when needed (e.g., before a release).
 
 on:
   workflow_dispatch:
-#  push:
-#    branches:
-#      - develop
-  schedule:
-    # Note: run daily at 10am UTC time until upstream git-chlog uses stable sorting
-    - cron: "0 10 * * *"
 
 permissions:
   contents: read

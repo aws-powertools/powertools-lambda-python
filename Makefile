@@ -16,11 +16,6 @@ dev-quality-code:
 	poetry install --extras "all redis datamasking valkey"
 	pre-commit install
 
-dev-gitpod:
-	pip install --upgrade pip poetry
-	poetry install --extras "all redis datamasking valkey"
-	pre-commit install
-
 format-check:
 	poetry run ruff format aws_lambda_powertools tests examples --check
 

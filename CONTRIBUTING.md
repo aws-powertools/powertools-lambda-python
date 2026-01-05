@@ -16,7 +16,9 @@
         - [API reference documentation](#api-reference-documentation)
     - [Licensing](#licensing)
 
+<!-- markdownlint-disable MD025 -->
 # Contributing Guidelines
+<!-- markdownlint-disable MD025 -->
 
 <!-- markdownlint-disable MD013 -->
 Thank you for your interest in contributing to our project. Whether it's a [bug report](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug_report.yml&title=Bug%3A+TITLE), [new feature](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE), [correction](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), or [additional documentation](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE), we greatly value feedback and contributions from our community.
@@ -96,13 +98,9 @@ timeline
 
 ### Dev setup
 
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
-
 Firstly, [fork the repository](https://github.com/aws-powertools/powertools-lambda-python/fork).
 
-To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
-
-Alternatively, you can use `make dev` within your local virtual environment.
+You can use `make dev` within your local virtual environment to setup your development environment.
 
 To send us a pull request, please follow these steps:
 
