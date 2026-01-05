@@ -313,7 +313,7 @@ Once you're happy, hit `Publish release` 🎉🎉🎉.
 
 ### Releasing an alpha release
 
-We publish alpha releases _(`prerelease`)_ every morning during business days (~8am UTC). You can also manually trigger `pre-release` workflow when needed.
+You can manually trigger the `pre-release` workflow to publish alpha releases _(`prerelease`)_ to PyPi when needed.
 
 ### Run end to end tests
 
