@@ -326,10 +326,21 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         self.dimension_set[name] = value
 
-    def add_dimensions(self, dimensions: dict[str, str]) -> None:
+    def add_dimensions(self, **dimensions: str) -> None:
         """Add a new set of dimensions creating an additional dimension array.
 
         Creates a new dimension set in the CloudWatch EMF Dimensions array.
+
+        Example
+        -------
+        **Add multiple dimension sets**
+
+            metrics.add_dimensions(environment="prod", region="us-east-1")
+
+        Parameters
+        ----------
+        dimensions : str
+            Dimension key-value pairs as keyword arguments
         """
         logger.debug(f"Adding dimension set: {dimensions}")
 
@@ -341,11 +352,21 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
             return
 
-        # Convert values to strings and validate
+        sanitized = self._sanitize_dimensions(dimensions)
+        if not sanitized:
+            return
+
+        self._validate_dimension_limit(sanitized)
+
+        self.dimension_sets.append({**self.default_dimensions, **sanitized})
+
+    def _sanitize_dimensions(self, dimensions: dict[str, str]) -> dict[str, str]:
+        """Convert dimension values to strings and filter out empty ones."""
         sanitized: dict[str, str] = {}
+
         for name, value in dimensions.items():
-            str_value = value if isinstance(value, str) else str(value)
-            str_name = name if isinstance(name, str) else str(name)
+            str_name = str(name)
+            str_value = str(value)
 
             if not str_name.strip() or not str_value.strip():
                 warnings.warn(
@@ -357,23 +378,17 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
             sanitized[str_name] = str_value
 
-        if not sanitized:
-            return
+        return sanitized
 
-        # Count unique dimensions across all sets
+    def _validate_dimension_limit(self, new_dimensions: dict[str, str]) -> None:
+        """Validate that adding new dimensions won't exceed CloudWatch limits."""
         all_keys = set(self.dimension_set.keys())
         for ds in self.dimension_sets:
             all_keys.update(ds.keys())
-        all_keys.update(sanitized.keys())
+        all_keys.update(new_dimensions.keys())
 
         if len(all_keys) > MAX_DIMENSIONS:
             raise SchemaValidationError(f"Maximum dimensions ({MAX_DIMENSIONS}) exceeded")
-
-        # Add default dimensions to this set
-        with_defaults = dict(self.default_dimensions)
-        with_defaults.update(sanitized)
-
-        self.dimension_sets.append(with_defaults)
 
     def add_metadata(self, key: str, value: Any) -> None:
         """Adds high cardinal metadata for metrics object

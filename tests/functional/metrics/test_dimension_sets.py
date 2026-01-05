@@ -18,9 +18,9 @@ def test_add_dimensions_creates_multiple_dimension_sets(capsys):
 
     # WHEN we add multiple dimension sets
     metrics.add_dimension(name="service", value="booking")
-    metrics.add_dimensions({"environment": "prod", "region": "us-east-1"})
-    metrics.add_dimensions({"environment": "prod"})
-    metrics.add_dimensions({"region": "us-east-1"})
+    metrics.add_dimensions(environment="prod", region="us-east-1")
+    metrics.add_dimensions(environment="prod")
+    metrics.add_dimensions(region="us-east-1")
     metrics.add_metric(name="SuccessfulRequests", unit=MetricUnit.Count, value=10)
 
     # THEN the serialized output should contain multiple dimension arrays
@@ -50,8 +50,8 @@ def test_add_dimensions_with_metrics_wrapper(capsys):
     # WHEN we use add_dimensions through the Metrics wrapper
     @metrics.log_metrics
     def handler(event, context):
-        metrics.add_dimensions({"environment": "staging", "region": "us-west-2"})
-        metrics.add_dimensions({"environment": "staging"})
+        metrics.add_dimensions(environment="staging", region="us-west-2")
+        metrics.add_dimensions(environment="staging")
         metrics.add_metric(name="PaymentProcessed", unit=MetricUnit.Count, value=1)
 
     handler({}, {})
@@ -76,8 +76,8 @@ def test_add_dimensions_with_default_dimensions():
     metrics.set_default_dimensions(tenant_id="123", application="api")
 
     # WHEN we add dimension sets after setting defaults
-    metrics.add_dimensions({"environment": "prod"})
-    metrics.add_dimensions({"region": "eu-west-1"})
+    metrics.add_dimensions(environment="prod")
+    metrics.add_dimensions(region="eu-west-1")
     metrics.add_metric(name="ApiCalls", unit=MetricUnit.Count, value=5)
 
     # THEN default dimensions should be included in all dimension sets
@@ -100,9 +100,9 @@ def test_add_dimensions_duplicate_keys_last_value_wins():
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
     # WHEN we add dimension sets with duplicate keys
-    metrics.add_dimensions({"environment": "dev", "region": "us-east-1"})
-    metrics.add_dimensions({"environment": "staging", "region": "us-west-2"})
-    metrics.add_dimensions({"environment": "prod"})  # Last value for environment
+    metrics.add_dimensions(environment="dev", region="us-east-1")
+    metrics.add_dimensions(environment="staging", region="us-west-2")
+    metrics.add_dimensions(environment="prod")  # Last value for environment
     metrics.add_metric(name="TestMetric", unit=MetricUnit.Count, value=1)
 
     # THEN the last value should be used in the root
@@ -113,13 +113,13 @@ def test_add_dimensions_duplicate_keys_last_value_wins():
     assert output["region"] == "us-west-2"
 
 
-def test_add_dimensions_empty_dict_warns():
+def test_add_dimensions_empty_kwargs_warns():
     # GIVEN metrics instance
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
-    # WHEN we add an empty dimensions dict
+    # WHEN we call add_dimensions without arguments
     with pytest.warns(UserWarning, match="Empty dimensions dictionary"):
-        metrics.add_dimensions({})
+        metrics.add_dimensions()
 
     # THEN no dimension set should be added
     assert len(metrics.dimension_sets) == 0
@@ -129,9 +129,9 @@ def test_add_dimensions_invalid_dimensions_skipped():
     # GIVEN metrics instance
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
-    # WHEN we add dimensions with empty names or values
+    # WHEN we add dimensions with empty values
     with pytest.warns(UserWarning, match="empty name or value"):
-        metrics.add_dimensions({"": "value", "key": ""})
+        metrics.add_dimensions(key="")
 
     # THEN no dimension set should be added
     assert len(metrics.dimension_sets) == 0
@@ -148,15 +148,15 @@ def test_add_dimensions_exceeds_max_dimensions():
     # WHEN we try to add dimension set that would exceed max
     # THEN it should raise SchemaValidationError
     with pytest.raises(SchemaValidationError, match="Maximum dimensions"):
-        metrics.add_dimensions({"extra1": "val1", "extra2": "val2"})
+        metrics.add_dimensions(extra1="val1", extra2="val2")
 
 
 def test_add_dimensions_converts_values_to_strings():
     # GIVEN metrics instance
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
-    # WHEN we add dimensions with non-string values
-    metrics.add_dimensions({"count": 123, "is_active": True, "ratio": 3.14})
+    # WHEN we add dimensions with non-string values (using **dict for non-string values)
+    metrics.add_dimensions(**{"count": 123, "is_active": True, "ratio": 3.14})
     metrics.add_metric(name="TestMetric", unit=MetricUnit.Count, value=1)
 
     # THEN values should be converted to strings
@@ -172,8 +172,8 @@ def test_clear_metrics_clears_dimension_sets(capsys):
 
     @metrics.log_metrics
     def handler(event, context):
-        metrics.add_dimensions({"environment": "prod"})
-        metrics.add_dimensions({"region": "us-east-1"})
+        metrics.add_dimensions(environment="prod")
+        metrics.add_dimensions(region="us-east-1")
         metrics.add_metric(name="Requests", unit=MetricUnit.Count, value=1)
 
     handler({}, {})
@@ -189,9 +189,9 @@ def test_add_dimensions_order_preserved():
 
     # WHEN we add dimension sets in specific order
     metrics.add_dimension(name="service", value="api")
-    metrics.add_dimensions({"environment": "prod", "region": "us-east-1"})
-    metrics.add_dimensions({"environment": "prod"})
-    metrics.add_dimensions({"region": "us-east-1"})
+    metrics.add_dimensions(environment="prod", region="us-east-1")
+    metrics.add_dimensions(environment="prod")
+    metrics.add_dimensions(region="us-east-1")
     metrics.add_metric(name="TestMetric", unit=MetricUnit.Count, value=1)
 
     # THEN dimension sets should appear in order added
@@ -209,7 +209,7 @@ def test_add_dimensions_with_metadata():
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
     # WHEN we add dimension sets and metadata
-    metrics.add_dimensions({"environment": "prod"})
+    metrics.add_dimensions(environment="prod")
     metrics.add_metadata(key="request_id", value="abc-123")
     metrics.add_metric(name="ApiLatency", unit=MetricUnit.Milliseconds, value=150)
 
@@ -227,8 +227,8 @@ def test_multiple_metrics_with_dimension_sets():
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
     # WHEN we add multiple metrics with dimension sets
-    metrics.add_dimensions({"environment": "prod", "region": "us-east-1"})
-    metrics.add_dimensions({"environment": "prod"})
+    metrics.add_dimensions(environment="prod", region="us-east-1")
+    metrics.add_dimensions(environment="prod")
     metrics.add_metric(name="SuccessCount", unit=MetricUnit.Count, value=100)
     metrics.add_metric(name="ErrorCount", unit=MetricUnit.Count, value=5)
     metrics.add_metric(name="Latency", unit=MetricUnit.Milliseconds, value=250)
@@ -249,7 +249,7 @@ def test_add_dimensions_with_high_resolution_metrics():
     metrics = AmazonCloudWatchEMFProvider(namespace="TestApp")
 
     # WHEN we add dimension sets with high-resolution metrics
-    metrics.add_dimensions({"function": "process_order"})
+    metrics.add_dimensions(function="process_order")
     metrics.add_metric(
         name="ProcessingTime",
         unit=MetricUnit.Milliseconds,

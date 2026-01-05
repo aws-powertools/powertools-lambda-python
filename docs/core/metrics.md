@@ -22,7 +22,7 @@ If you're new to Amazon CloudWatch, there are five terminologies you must be awa
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
 * **Metric**. It's the name of the metric, for example: `SuccessfulBooking` or `UpdatedBooking`.
 * **Unit**. It's a value representing the unit of measure for the corresponding metric, for example: `Count` or `Seconds`.
-* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
+* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more in the [high-resolution metrics documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
 
 <figure>
   <img src="../../media/metrics_terminology.png" alt="Terminology" />
@@ -136,6 +136,27 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
 
 **Note:** Dimensions with empty values will not be included.
 
+### Adding multiple dimension sets
+
+You can use `add_dimensions` method to create multiple dimension sets in a single EMF blob. This allows you to aggregate metrics across different dimension combinations without emitting separate metric blobs.
+
+Each call to `add_dimensions` creates a new dimension array in the CloudWatch EMF output, enabling different views of the same metric data.
+
+=== "add_dimensions.py"
+
+    ```python hl_lines="12-13"
+    --8<-- "examples/metrics/src/add_dimensions.py"
+    ```
+
+=== "add_dimensions_output.json"
+
+    ```json hl_lines="8-12"
+    --8<-- "examples/metrics/src/add_dimensions_output.json"
+    ```
+
+???+ tip "When to use multiple dimension sets"
+    Use `add_dimensions` when you need to query the same metric with different dimension combinations. For example, you might want to see `SuccessfulBooking` aggregated by `environment` alone, or by both `environment` and `region`.
+
 ### Changing default timestamp
 
 When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the `set_timestamp` function. You can specify a datetime object or an integer representing an epoch timestamp in milliseconds.
@@ -233,12 +254,12 @@ The priority of the `function_name` dimension value is defined as:
 
 The following environment variable is available to configure Metrics at a global scope:
 
-| Setting            | Description                                                  | Environment variable               | Default |
-| ------------------ | ------------------------------------------------------------ | ---------------------------------- | ------- |
-| **Namespace Name** | Sets **namespace** used for metrics.                             | `POWERTOOLS_METRICS_NAMESPACE`     | `None`  |
-| **Service**        | Sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `None`             |
-| **Function Name**  | Function name used as dimension for the **ColdStart** metric.  | `POWERTOOLS_METRICS_FUNCTION_NAME` | `None`  |
-| **Disable Powertools Metrics**  | **Disables** all metrics emitted by Powertools.	    | `POWERTOOLS_METRICS_DISABLED`      | `None`  |
+| Setting                        | Description                                                         | Environment variable               | Default |
+| ------------------------------ | ------------------------------------------------------------------- | ---------------------------------- | ------- |
+| **Namespace Name**             | Sets **namespace** used for metrics.                                | `POWERTOOLS_METRICS_NAMESPACE`     | `None`  |
+| **Service**                    | Sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`          | `None`  |
+| **Function Name**              | Function name used as dimension for the **ColdStart** metric.       | `POWERTOOLS_METRICS_FUNCTION_NAME` | `None`  |
+| **Disable Powertools Metrics** | **Disables** all metrics emitted by Powertools.                     | `POWERTOOLS_METRICS_DISABLED`      | `None`  |
 
 `POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
 
@@ -393,8 +414,8 @@ We provide a thin-wrapper on top of the most requested observability providers. 
 
 Current providers:
 
-| Provider                              | Notes                                                    |
-| ------------------------------------- | -------------------------------------------------------- |
+| Provider                                 | Notes                                                    |
+| ---------------------------------------- | -------------------------------------------------------- |
 | [Datadog](./datadog.md){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
 
 ## Testing your code

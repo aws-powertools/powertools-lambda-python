@@ -123,12 +123,12 @@ class Metrics:
     def add_dimension(self, name: str, value: str) -> None:
         self.provider.add_dimension(name=name, value=value)
 
-    def add_dimensions(self, dimensions: dict[str, str]) -> None:
+    def add_dimensions(self, **dimensions: str) -> None:
         """Add a new set of dimensions creating an additional dimension array.
 
         Creates a new dimension set in the CloudWatch EMF Dimensions array.
         """
-        self.provider.add_dimensions(dimensions=dimensions)
+        self.provider.add_dimensions(**dimensions)
 
     def serialize_metric_set(
         self,
