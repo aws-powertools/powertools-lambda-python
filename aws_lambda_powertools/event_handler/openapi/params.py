@@ -103,7 +103,7 @@ class Param(FieldInfo):  # type: ignore[misc]
         alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # MAINTENANCE: validation_alias: str | AliasPath | AliasChoices | None
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         title: str | None = None,
         description: str | None = None,
@@ -217,6 +217,11 @@ class Param(FieldInfo):  # type: ignore[misc]
 
         self.openapi_examples = openapi_examples
 
+        # Pydantic 2.12+ no longer copies alias to validation_alias automatically
+        # Set validation_alias to alias when not explicitly provided
+        if validation_alias is _Unset and alias is not None:
+            validation_alias = alias
+
         kwargs.update(
             {
                 "annotation": annotation,
@@ -254,7 +259,7 @@ class Path(Param):  # type: ignore[misc]
         alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # MAINTENANCE: validation_alias: str | AliasPath | AliasChoices | None
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         title: str | None = None,
         description: str | None = None,
@@ -386,7 +391,7 @@ class Query(Param):  # type: ignore[misc]
         annotation: Any | None = None,
         alias: str | None = None,
         alias_priority: int | None = _Unset,
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         title: str | None = None,
         description: str | None = None,
@@ -517,7 +522,7 @@ class Header(Param):  # type: ignore[misc]
         alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         convert_underscores: bool = True,
         title: str | None = None,
@@ -667,7 +672,7 @@ class Body(FieldInfo):  # type: ignore[misc]
         alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         title: str | None = None,
         description: str | None = None,
@@ -718,6 +723,11 @@ class Body(FieldInfo):  # type: ignore[misc]
             kwargs["examples"] = examples
         current_json_schema_extra = json_schema_extra or extra
 
+        # Pydantic 2.12+ no longer copies alias to validation_alias automatically
+        # Set validation_alias to alias when not explicitly provided
+        if validation_alias is _Unset and alias is not None:
+            validation_alias = alias
+
         kwargs.update(
             {
                 "annotation": annotation,
@@ -754,7 +764,7 @@ class Form(Body):  # type: ignore[misc]
         alias_priority: int | None = _Unset,
         # MAINTENANCE: update when deprecating Pydantic v1, import these types
         # str | AliasPath | AliasChoices | None
-        validation_alias: str | None = None,
+        validation_alias: str | None = _Unset,
         serialization_alias: str | None = None,
         title: str | None = None,
         description: str | None = None,

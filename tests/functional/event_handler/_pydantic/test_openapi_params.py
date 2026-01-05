@@ -1228,3 +1228,171 @@ def test_annotated_types_interval_in_openapi_schema():
     assert limit_param.schema_.type == "integer"
     assert limit_param.schema_.default == 10
     assert limit_param.required is False
+
+
+def test_query_alias_sets_validation_alias_automatically():
+    """
+    Test for issue #7552: When alias is set but validation_alias is not,
+    validation_alias should be automatically set to alias value.
+    This ensures compatibility with Pydantic 2.12+.
+    """
+    from annotated_types import Ge, Le
+    from pydantic import StringConstraints
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # AND constrained types using annotated_types
+    IntQuery = Annotated[int, Ge(1), Le(100)]
+    StrQuery = Annotated[str, StringConstraints(min_length=4, max_length=128)]
+
+    @app.get("/foo")
+    def get_foo(
+        str_query: Annotated[StrQuery, Query(alias="strQuery")],
+        int_query: Annotated[IntQuery, Query(alias="intQuery")],
+    ):
+        return {"int_query": int_query, "str_query": str_query}
+
+    # WHEN sending a request with aliased query parameters
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "queryStringParameters": {
+            "intQuery": "20",
+            "strQuery": "fooBarFizzBuzz",
+        },
+    }
+
+    # THEN the request should succeed with correct values
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["int_query"] == 20
+    assert body["str_query"] == "fooBarFizzBuzz"
+
+
+def test_query_alias_with_multivalue_query_string_parameters():
+    """
+    Test for issue #7552: Ensure alias works with multiValueQueryStringParameters.
+    """
+    from annotated_types import Ge, Le
+    from pydantic import StringConstraints
+
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    IntQuery = Annotated[int, Ge(1), Le(100)]
+    StrQuery = Annotated[str, StringConstraints(min_length=4, max_length=128)]
+
+    @app.get("/foo")
+    def get_foo(
+        str_query: Annotated[StrQuery, Query(alias="strQuery")],
+        int_query: Annotated[IntQuery, Query(alias="intQuery")],
+    ):
+        return {"int_query": int_query, "str_query": str_query}
+
+    # WHEN sending a request with multiValueQueryStringParameters
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "multiValueQueryStringParameters": {
+            "intQuery": ["20"],
+            "strQuery": ["fooBarFizzBuzz"],
+        },
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["int_query"] == 20
+    assert body["str_query"] == "fooBarFizzBuzz"
+
+
+def test_query_explicit_validation_alias_takes_precedence():
+    """
+    Test that explicitly set validation_alias is preserved and not overwritten by alias.
+    The alias is used by Powertools to extract the value from the request,
+    while validation_alias is used by Pydantic for internal validation.
+    """
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/foo")
+    def get_foo(
+        my_param: Annotated[str, Query(alias="aliasName", validation_alias="validationAliasName")],
+    ):
+        return {"my_param": my_param}
+
+    # WHEN sending a request with the alias name (used by Powertools to extract value)
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "queryStringParameters": {
+            "aliasName": "test_value",
+        },
+    }
+
+    # THEN the request should succeed using alias for extraction
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["my_param"] == "test_value"
+
+
+def test_header_alias_sets_validation_alias_automatically():
+    """
+    Test for issue #7552: Header alias should also set validation_alias automatically.
+    """
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/foo")
+    def get_foo(
+        custom_header: Annotated[str, Header(alias="X-Custom-Header")],
+    ):
+        return {"custom_header": custom_header}
+
+    # WHEN sending a request with the aliased header
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "headers": {
+            "X-Custom-Header": "header_value",
+        },
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["custom_header"] == "header_value"
+
+
+def test_query_without_alias_works_normally():
+    """
+    Test that Query without alias continues to work normally.
+    """
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/foo")
+    def get_foo(
+        my_param: Annotated[str, Query()],
+    ):
+        return {"my_param": my_param}
+
+    # WHEN sending a request with the parameter name
+    event = {
+        "httpMethod": "GET",
+        "path": "/foo",
+        "queryStringParameters": {
+            "my_param": "test_value",
+        },
+    }
+
+    # THEN the request should succeed
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["my_param"] == "test_value"
