@@ -15,9 +15,15 @@ This is document explains who the maintainers are, their responsibilities, and h
 
 | Maintainer        | GitHub ID                                                                               | Affiliation |
 | ----------------- | --------------------------------------------------------------------------------------- | ----------- |
-| Ana Falcão        | [anafalcao](https://github.com/anafalcao){target="_blank" rel="nofollow"}               | Amazon      |
 | Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena){target="_blank" rel="nofollow"} | Amazon      |
-| Simon Thulbourn   | [sthulb](https://github.com/sthulb){target="_blank" rel="nofollow"}                     | Amazon      |
+
+## AWS Contributors
+
+Active contributors from AWS who help maintain and improve this project.
+
+| Contributor       | GitHub ID                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Ana Falcão        | [anafalcao](https://github.com/anafalcao){target="_blank" rel="nofollow"}               |
 
 ## Emeritus
 
@@ -30,6 +36,7 @@ Previous active maintainers who contributed to this project.
 | Michal Ploski     | [mploski](https://github.com/mploski){target="_blank" rel="nofollow"}           | Splunk      |
 | Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen){target="_blank" rel="nofollow"}     | Apollo      |
 | Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca){target="_blank" rel="nofollow"} | N/A         |
+| Simon Thulbourn   | [sthulb](https://github.com/sthulb){target="_blank" rel="nofollow"}             | N/A         |
 | Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | MongoDB     |
 
 ## Labels
@@ -306,7 +313,7 @@ Once you're happy, hit `Publish release` 🎉🎉🎉.
 
 ### Releasing an alpha release
 
-We publish alpha releases _(`prerelease`)_ every morning during business days (~8am UTC). You can also manually trigger `pre-release` workflow when needed.
+You can manually trigger the `pre-release` workflow to publish alpha releases _(`prerelease`)_ to PyPi when needed.
 
 ### Run end to end tests
 

@@ -8,6 +8,7 @@ site_url: https://docs.powertools.aws.dev/lambda/python/latest/
 nav:
   - Homepage:
       - index.md
+      - Installation: getting-started/install.md
       - Changelog: changelog.md
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
