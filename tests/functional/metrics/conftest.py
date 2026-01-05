@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import namedtuple
 from typing import Any
 
 import pytest
@@ -96,3 +97,13 @@ def a_hundred_metrics() -> list[dict[str, str]]:
 @pytest.fixture
 def a_hundred_metric_values() -> list[dict[str, str]]:
     return [{"name": "metric", "unit": "Count", "value": i} for i in range(100)]
+
+
+@pytest.fixture
+def lambda_context():
+    return namedtuple("LambdaContext", "function_name")("example_fn")
+
+
+@pytest.fixture
+def durable_context(lambda_context):
+    return namedtuple("DurableContext", ["state", "lambda_context"])(state={}, lambda_context=lambda_context)

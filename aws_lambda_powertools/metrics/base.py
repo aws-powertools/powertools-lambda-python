@@ -37,7 +37,7 @@ from aws_lambda_powertools.metrics.provider.cold_start import (
     reset_cold_start_flag,  # noqa: F401  # backwards compatibility
 )
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.shared.functions import is_durable_context, resolve_env_var_choice
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
@@ -430,7 +430,7 @@ class MetricManager:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, *args, **kwargs):
-            unwrapped_context = context.lambda_context if hasattr(context, "step") else context
+            unwrapped_context = context.lambda_context if is_durable_context(context) else context
             try:
                 if default_dimensions:
                     self.set_default_dimensions(**default_dimensions)

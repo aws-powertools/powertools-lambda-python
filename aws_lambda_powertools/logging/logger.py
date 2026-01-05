@@ -38,6 +38,7 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
     get_tracer_id,
+    is_durable_context,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
@@ -522,7 +523,7 @@ class Logger:
         def decorate(event, context, *args, **kwargs):
             unwrapped_context = (
                 build_lambda_context_model(context.lambda_context)
-                if hasattr(context, "step")
+                if is_durable_context(context)
                 else build_lambda_context_model(context)
             )
 

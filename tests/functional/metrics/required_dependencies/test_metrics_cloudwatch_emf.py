@@ -1573,3 +1573,42 @@ def test_metrics_disabled_with_dev_mode_false_and_metrics_disabled_true(monkeypa
     # THEN no metrics should have been recorded
     captured = capsys.readouterr()
     assert not captured.out
+
+
+def test_log_metrics_with_durable_context(capsys, metrics, dimensions, namespace, durable_context):
+    # GIVEN Metrics is initialized and a durable context wrapping the lambda context
+    my_metrics = Metrics(namespace=namespace)
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+    for dimension in dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        pass
+
+    # WHEN handler is called with durable context
+    lambda_handler({}, durable_context)
+    output = capture_metrics_output(capsys)
+    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
+
+    # THEN metrics should be flushed correctly
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_log_metrics_capture_cold_start_metric_with_durable_context(capsys, namespace, service, durable_context):
+    # GIVEN Metrics is initialized and a durable context wrapping the lambda context
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    # WHEN handler is called with durable context
+    lambda_handler({}, durable_context)
+    output = capture_metrics_output(capsys)
+
+    # THEN ColdStart metric should use function_name from unwrapped lambda context
+    assert output["ColdStart"] == [1.0]
+    assert output["function_name"] == "example_fn"
