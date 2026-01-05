@@ -1112,11 +1112,23 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     """
     annotated_args = get_args(annotation)
     type_annotation = annotated_args[0]
-    powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
+
+    # Handle both FieldInfo instances and FieldInfo subclasses (e.g., Body vs Body())
+    powertools_annotations: list[FieldInfo] = []
+    for arg in annotated_args[1:]:
+        if isinstance(arg, FieldInfo):
+            powertools_annotations.append(arg)
+        elif isinstance(arg, type) and issubclass(arg, FieldInfo):
+            # If it's a class (e.g., Body instead of Body()), instantiate it
+            powertools_annotations.append(arg())
 
     # Preserve non-FieldInfo metadata (like annotated_types constraints)
     # This is important for constraints like Interval, Gt, Lt, etc.
-    other_metadata = [arg for arg in annotated_args[1:] if not isinstance(arg, FieldInfo)]
+    other_metadata = [
+        arg
+        for arg in annotated_args[1:]
+        if not isinstance(arg, FieldInfo) and not (isinstance(arg, type) and issubclass(arg, FieldInfo))
+    ]
 
     # Determine which annotation to use
     powertools_annotation: FieldInfo | None = None
