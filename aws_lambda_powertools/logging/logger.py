@@ -473,6 +473,11 @@ class Logger:
         POWERTOOLS_LOGGER_LOG_EVENT : str
             instruct logger to log Lambda Event (e.g. `"true", "True", "TRUE"`)
 
+        Notes
+        -----
+        Supports both standard Lambda Context and DurableContext from AWS Durable Execution SDK.
+        When DurableContext is passed, it automatically unwraps the underlying Lambda Context.
+
         Example
         -------
         **Captures Lambda contextual runtime info (e.g memory, arn, req_id)**
