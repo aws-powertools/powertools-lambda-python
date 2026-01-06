@@ -81,7 +81,8 @@ def test_metrics_provider_class_decorator_with_additional_handler_args():
 
 
 def test_log_metrics_with_durable_context(capsys, metric, durable_context):
-    metrics = Metrics(namespace="test")
+    provider = FakeMetricsProvider()
+    metrics = Metrics(provider=provider)
 
     @metrics.log_metrics
     def lambda_handler(evt, ctx):
@@ -90,18 +91,20 @@ def test_log_metrics_with_durable_context(capsys, metric, durable_context):
     lambda_handler({}, durable_context)
     output = capture_metrics_output(capsys)
 
-    assert output["single_metric"] == [1.0]
+    assert output[0]["name"] == metric["name"]
+    assert output[0]["value"] == metric["value"]
 
 
 def test_log_metrics_cold_start_with_durable_context(capsys, durable_context):
-    metrics = Metrics(namespace="test")
+    provider = FakeMetricsProvider()
+    metrics = Metrics(provider=provider)
 
     @metrics.log_metrics(capture_cold_start_metric=True)
     def lambda_handler(evt, ctx):
-        pass
+        return True
 
     lambda_handler({}, durable_context)
     output = capture_metrics_output(capsys)
 
-    assert output["ColdStart"] == [1.0]
-    assert output["function_name"] == "example_fn"
+    assert output[0]["name"] == "ColdStart"
+    assert output[0]["value"] == 1
