@@ -1,7 +1,7 @@
 # Run nox tests
 #
 # usage:
-#   poetry run nox --error-on-external-run --reuse-venv=yes --non-interactive
+#   uv run nox --error-on-external-run --reuse-venv=yes --non-interactive
 #
 # If you want to target a specific Python version, add -p parameter
 from __future__ import annotations
@@ -33,7 +33,7 @@ def build_and_run_test(session: nox.Session, folders: list, extras: str = "") ->
     """
 
     # Required install to execute any test
-    session.install("poetry", "pytest", "pytest-mock", "pytest_socket", "pytest-asyncio")
+    session.install("pytest", "pytest-mock", "pytest_socket", "pytest-asyncio")
 
     # Powertools project folder is in the root
     if extras:

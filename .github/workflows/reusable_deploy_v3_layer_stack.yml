@@ -156,10 +156,10 @@ jobs:
           integrity_hash: ${{ inputs.source_code_integrity_hash }}
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca  # v6.0.1
+        with:
+          enable-cache: true
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4.3.0
         with:
@@ -179,7 +179,7 @@ jobs:
         # CDK spawns system python when compiling stack
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
-          poetry export --format requirements.txt --output requirements.txt
+          uv export --format requirements-txt --output-file requirements.txt
           pip install --require-hashes -r requirements.txt
       - name: install cdk and deps
         working-directory: ./
@@ -187,7 +187,7 @@ jobs:
           npm ci
           npx cdk --version
       - name: install deps
-        run: poetry install
+        run: uv sync
       - name: Download artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:

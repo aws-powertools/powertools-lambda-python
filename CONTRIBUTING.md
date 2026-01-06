@@ -176,7 +176,7 @@ This happens when:
 - You did not install the local dev environment yet
     - You can install dev deps with `make dev` command
 - The code in the repository is raising an exception while the `pdoc` is scanning the codebase
-    - Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
+    - Unfortunately, this exception is not shown to you, but if you run, `uv run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
     - Once resolved the documentation should load correctly again
 
 ## Licensing

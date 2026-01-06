@@ -43,13 +43,14 @@ jobs:
         working-directory: ./layer_v3/layer_constructors
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca  # v6.0.1
+        with:
+          enable-cache: true
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v2.0.0
         with:
@@ -64,7 +65,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
       - name: Install dependencies
         run: |
-            pip install --upgrade pip pre-commit poetry
-            poetry install
+            pip install --upgrade pip pre-commit uv
+            uv sync
       - name: Test with pytest
-        run: poetry run pytest tests
+        run: uv run pytest tests
