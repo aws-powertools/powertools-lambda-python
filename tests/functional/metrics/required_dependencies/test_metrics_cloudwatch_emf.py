@@ -19,6 +19,7 @@ from aws_lambda_powertools.metrics import (
     SchemaValidationError,
     single_metric,
 )
+from aws_lambda_powertools.metrics.base import SingleMetric
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
     AmazonCloudWatchEMFProvider,
 )
@@ -1612,3 +1613,21 @@ def test_log_metrics_capture_cold_start_metric_with_durable_context(capsys, name
     # THEN ColdStart metric should use function_name from unwrapped lambda context
     assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
+
+
+def test_single_metric_log_metrics_with_durable_context(capsys, namespace, durable_context):
+    # GIVEN SingleMetric is initialized with a durable context
+    metric = SingleMetric(namespace=namespace)
+
+    @metric.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, ctx):
+        metric.add_metric(name="TestMetric", unit=MetricUnit.Count, value=1)
+
+    # WHEN handler is called with durable context
+    lambda_handler({}, durable_context)
+    output = capsys.readouterr().out.strip().split("\n")
+
+    # THEN cold start metric should use function_name from unwrapped context
+    cold_start_output = json.loads(output[0])
+    assert cold_start_output["ColdStart"] == [1.0]
+    assert cold_start_output["function_name"] == "example_fn"
