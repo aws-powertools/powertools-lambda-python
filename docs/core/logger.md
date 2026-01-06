@@ -196,18 +196,18 @@ You can append your own keys to your existing Logger via `append_keys(**addition
 The append_context_keys method allows temporary modification of a Logger instance's context without creating a new logger. It's useful for adding context keys to specific workflows while maintaining the logger's overall state and simplicity.
 
 ???+ danger "Important: Keys are removed on context exit, even if they existed before"
-	All keys added within the context are removed when exiting, **including keys that already existed with the same name**. 
-	
+	All keys added within the context are removed when exiting, **including keys that already existed with the same name**.
+
 	If you need to temporarily override a key's value while preserving the original, use `append_keys()` for persistent keys and avoid key name collisions with `append_context_keys()`.
-	
+
 	**Example of key collision:**
 	```python
 	logger.append_keys(order_id="ORD-123")  # Persistent key
 	logger.info("Order received")  # Has order_id="ORD-123"
-	
+
 	with logger.append_context_keys(order_id="ORD-CHILD"):  # Overwrites
 	    logger.info("Processing")  # Has order_id="ORD-CHILD"
-	
+
 	logger.info("Order completed")  # order_id key is now MISSING!
 	```
 
@@ -1014,7 +1014,7 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in **UTC**.
 
 <!-- markdownlint-disable MD013 -->
-If you prefer to log in a specific timezone, you can configure it by setting the `TZ` environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. [Click here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime){target="_blank"} for a comprehensive list of available Lambda environment variables.
+If you prefer to log in a specific timezone, you can configure it by setting the `TZ` environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. See the [Lambda environment variables documentation](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime){target="_blank"} for a comprehensive list of available options.
 <!-- markdownlint-enable MD013 -->
 
 ???+ tip
