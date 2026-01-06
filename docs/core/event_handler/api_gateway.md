@@ -55,6 +55,7 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 By default, we will use `APIGatewayRestResolver` throughout the documentation. You can use any of the following:
 
+<!-- markdownlint-disable MD051 -->
 | Resolver                                                | AWS service                            |
 | ------------------------------------------------------- | -------------------------------------- |
 | **[`APIGatewayRestResolver`](#api-gateway-rest-api)**   | Amazon API Gateway REST API            |
@@ -62,6 +63,8 @@ By default, we will use `APIGatewayRestResolver` throughout the documentation. Y
 | **[`ALBResolver`](#application-load-balancer)**         | Amazon Application Load Balancer (ALB) |
 | **[`LambdaFunctionUrlResolver`](#lambda-function-url)** | AWS Lambda Function URL                |
 | **[`VPCLatticeResolver`](#vpc-lattice)**                | Amazon VPC Lattice                     |
+| **[`HttpResolverAlpha`](#http-resolver-alpha)**         | Local development with ASGI servers    |
+<!-- markdownlint-enable MD051 -->
 
 #### Response auto-serialization
 
@@ -190,6 +193,8 @@ When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/late
     ```json hl_lines="2 3" title="Example payload delivered to the handler"
     --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.json"
     ```
+
+--8<-- "docs/includes/_http_resolver_alpha.md"
 
 ### Dynamic routes
 
