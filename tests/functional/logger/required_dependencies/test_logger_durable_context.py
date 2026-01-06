@@ -66,7 +66,7 @@ def test_inject_lambda_context_with_durable_context(durable_context, stdout, ser
 
     # THEN lambda contextual info from the unwrapped context should be in the logs
     log = capture_logging_output(stdout)
-    
+
     expected_logger_context_keys = (
         "function_name",
         "function_memory_size",
@@ -75,7 +75,7 @@ def test_inject_lambda_context_with_durable_context(durable_context, stdout, ser
     )
     for key in expected_logger_context_keys:
         assert key in log
-    
+
     # Verify the actual values match the embedded lambda_context
     assert log["function_name"] == durable_context.lambda_context.function_name
     assert log["function_memory_size"] == durable_context.lambda_context.memory_limit_in_mb
@@ -88,7 +88,7 @@ def test_inject_lambda_context_with_durable_context_log_event(durable_context, s
     """Test that inject_lambda_context with log_event=True works with DurableContext."""
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
-    
+
     test_event = {"test_key": "test_value"}
 
     # WHEN a lambda function is decorated with log_event=True and receives DurableContext
@@ -101,7 +101,7 @@ def test_inject_lambda_context_with_durable_context_log_event(durable_context, s
     # THEN both the event and lambda contextual info should be logged
     logs = capture_multiple_logging_statements_output(stdout)
     assert len(logs) >= 2  # At least event log and info log
-    
+
     # First log should be the event
     assert logs[0]["message"] == test_event
 
@@ -121,11 +121,11 @@ def test_inject_lambda_context_with_durable_context_clear_state(durable_context,
 
     # THEN the custom key should be cleared and lambda context should be present
     log = capture_logging_output(stdout)
-    
+
     # Lambda context fields should be present
     assert "function_name" in log
     assert log["function_name"] == durable_context.lambda_context.function_name
-    
+
     # Custom key should not be present (cleared)
     assert "custom_key" not in log or log.get("custom_key") != "initial_value"
 
@@ -144,7 +144,7 @@ def test_inject_lambda_context_standard_context_still_works(lambda_context, stdo
 
     # THEN lambda contextual info should be in the logs
     log = capture_logging_output(stdout)
-    
+
     expected_logger_context_keys = (
         "function_name",
         "function_memory_size",
@@ -153,6 +153,6 @@ def test_inject_lambda_context_standard_context_still_works(lambda_context, stdo
     )
     for key in expected_logger_context_keys:
         assert key in log
-    
+
     assert log["function_name"] == lambda_context.function_name
     assert log["message"] == "Hello from standard lambda"
