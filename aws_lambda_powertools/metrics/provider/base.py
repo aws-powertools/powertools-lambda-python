@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.metrics.provider import cold_start
+from aws_lambda_powertools.shared.functions import is_durable_context
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.shared.types import AnyCallableT
@@ -231,7 +232,8 @@ class BaseProvider(ABC):
             try:
                 response = lambda_handler(event, context, *args, **kwargs)
                 if capture_cold_start_metric:
-                    self._add_cold_start_metric(context=context)
+                    unwrapped_context = context.lambda_context if is_durable_context(context) else context
+                    self._add_cold_start_metric(context=unwrapped_context)
             finally:
                 self.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
 

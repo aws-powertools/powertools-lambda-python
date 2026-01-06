@@ -49,6 +49,11 @@ def lambda_context():
 
 
 @pytest.fixture
+def durable_context(lambda_context):
+    return namedtuple("DurableContext", ["state", "lambda_context"])(state={}, lambda_context=lambda_context)
+
+
+@pytest.fixture
 def lambda_event():
     return {"greeting": "hello"}
 
@@ -1578,3 +1583,20 @@ def test_child_logger_with_caplog(caplog):
 
     assert len(caplog.records) == 1
     assert pytest_handler_existence is True
+
+
+def test_logger_with_durable_context(lambda_context, durable_context, stdout, service_name):
+    # GIVEN Logger is initialized and a durable context wrapping the lambda context
+    logger = Logger(service=service_name, stream=stdout)
+
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    # WHEN handler is called with durable context
+    handler({}, durable_context)
+
+    # THEN lambda contextual info should be extracted from durable context
+    log = capture_logging_output(stdout)
+    assert log["function_name"] == lambda_context.function_name
+    assert log["function_request_id"] == lambda_context.aws_request_id

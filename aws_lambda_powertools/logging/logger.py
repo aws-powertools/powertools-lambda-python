@@ -38,6 +38,7 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
     get_tracer_id,
+    is_durable_context,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
@@ -525,13 +526,18 @@ class Logger:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, *args, **kwargs):
-            lambda_context = build_lambda_context_model(context)
+            unwrapped_context = (
+                build_lambda_context_model(context.lambda_context)
+                if is_durable_context(context)
+                else build_lambda_context_model(context)
+            )
+
             cold_start = _is_cold_start()
 
             if clear_state:
-                self.structure_logs(cold_start=cold_start, **lambda_context.__dict__)
+                self.structure_logs(cold_start=cold_start, **unwrapped_context.__dict__)
             else:
-                self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
+                self.append_keys(cold_start=cold_start, **unwrapped_context.__dict__)
 
             if correlation_id_path:
                 self.set_correlation_id(
