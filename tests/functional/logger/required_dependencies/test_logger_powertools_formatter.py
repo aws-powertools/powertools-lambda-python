@@ -197,6 +197,7 @@ def test_log_custom_formatting(stdout, service_name):
     assert log_dict["timestamp"] == "fake-datefmt"
 
 
+@pytest.mark.skip(reason="Datadog layer injects dd.* keys - to be investigated separately")
 def test_log_dict_key_strip_nones(stdout, service_name):
     # GIVEN a logger confirmation where we set `location` and `timestamp` to None
     # Note: level and service cannot be suppressed
