@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from typing import Any
 
 import pytest
 
@@ -12,6 +13,35 @@ from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 
 # Suppress alpha warning for all tests
 pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverAlpha is an alpha feature")
+
+
+# =============================================================================
+# ASGI Test Helpers
+# =============================================================================
+
+
+def make_asgi_receive(body: bytes = b""):
+    """Create an ASGI receive callable."""
+
+    async def receive() -> dict[str, Any]:
+        await asyncio.sleep(0)  # Yield control to satisfy async requirement
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return receive
+
+
+def make_asgi_send():
+    """Create an ASGI send callable that captures response."""
+    captured: dict[str, Any] = {"status_code": None, "body": b""}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)  # Yield control to satisfy async requirement
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+        elif message["type"] == "http.response.body":
+            captured["body"] = message["body"]
+
+    return send, captured
 
 
 # =============================================================================
@@ -464,25 +494,15 @@ async def test_asgi_get_request():
         "headers": [],
     }
 
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN it returns the expected response
-    assert status_code == 200
-    body = json.loads(response_body)
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
     assert body["message"] == "Hello, World!"
 
 
@@ -511,25 +531,15 @@ async def test_asgi_custom_not_found():
         "headers": [],
     }
 
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN requesting unknown route via ASGI
     await app(scope, receive, send)
 
     # THEN custom handler is called
-    assert status_code == 404
-    body = json.loads(response_body)
+    assert captured["status_code"] == 404
+    body = json.loads(captured["body"])
     assert body["error"] == "Custom 404"
     assert body["path"] == "/unknown-asgi-route"
 
@@ -552,26 +562,15 @@ async def test_asgi_post_request():
         "headers": [(b"content-type", b"application/json")],
     }
 
-    request_body = b'{"name": "John"}'
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": request_body, "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive(b'{"name": "John"}')
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN it parses the body correctly
-    assert status_code == 200
-    body = json.loads(response_body)
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
     assert body["created"] is True
     assert body["name"] == "John"
 
@@ -594,21 +593,14 @@ async def test_asgi_query_params():
         "headers": [],
     }
 
-    response_body = b""
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body
-        if message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN it extracts query params correctly
-    body = json.loads(response_body)
+    body = json.loads(captured["body"])
     assert body["query"] == "python"
 
 
@@ -635,25 +627,15 @@ async def test_async_handler():
         "headers": [],
     }
 
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN async handler executes correctly
-    assert status_code == 200
-    body = json.loads(response_body)
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
     assert body["async"] is True
 
 
@@ -675,21 +657,14 @@ async def test_async_handler_with_path_params():
         "headers": [],
     }
 
-    response_body = b""
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body
-        if message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN path params are extracted correctly
-    body = json.loads(response_body)
+    body = json.loads(captured["body"])
     assert body["user_id"] == "456"
     assert body["async"] is True
 
@@ -711,21 +686,14 @@ async def test_sync_handler_in_async_context():
         "headers": [],
     }
 
-    response_body = b""
-
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
-
-    async def send(message):
-        nonlocal response_body
-        if message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN sync handler works in async context
-    body = json.loads(response_body)
+    body = json.loads(captured["body"])
     assert body["sync"] is True
 
 
@@ -743,17 +711,10 @@ async def test_mixed_sync_async_handlers():
         await asyncio.sleep(0.001)
         return {"type": "async"}
 
-    async def receive():
-        return {"type": "http.request", "body": b"", "more_body": False}
+    receive = make_asgi_receive()
 
     # WHEN calling sync handler
-    sync_body = b""
-
-    async def send_sync(message):
-        nonlocal sync_body
-        if message["type"] == "http.response.body":
-            sync_body = message["body"]
-
+    send_sync, captured_sync = make_asgi_send()
     await app(
         {"type": "http", "method": "GET", "path": "/sync", "query_string": b"", "headers": []},
         receive,
@@ -761,13 +722,7 @@ async def test_mixed_sync_async_handlers():
     )
 
     # WHEN calling async handler
-    async_body = b""
-
-    async def send_async(message):
-        nonlocal async_body
-        if message["type"] == "http.response.body":
-            async_body = message["body"]
-
+    send_async, captured_async = make_asgi_send()
     await app(
         {"type": "http", "method": "GET", "path": "/async", "query_string": b"", "headers": []},
         receive,
@@ -775,5 +730,154 @@ async def test_mixed_sync_async_handlers():
     )
 
     # THEN both work correctly
-    assert json.loads(sync_body)["type"] == "sync"
-    assert json.loads(async_body)["type"] == "async"
+    assert json.loads(captured_sync["body"])["type"] == "sync"
+    assert json.loads(captured_async["body"])["type"] == "async"
+
+
+# =============================================================================
+# Exception Handler Tests
+# =============================================================================
+
+
+def test_exception_handler():
+    # GIVEN an app with a custom exception handler
+    app = HttpResolverAlpha()
+
+    class CustomError(Exception):
+        pass
+
+    @app.exception_handler(CustomError)
+    def handle_custom_error(exc: CustomError):
+        return Response(
+            status_code=400,
+            content_type="application/json",
+            body={"error": "Custom error handled"},
+        )
+
+    @app.get("/error")
+    def raise_error():
+        raise CustomError("Something went wrong")
+
+    event = {
+        "httpMethod": "GET",
+        "path": "/error",
+        "headers": {},
+        "queryStringParameters": {},
+        "body": None,
+    }
+
+    # WHEN the route raises the exception
+    result = app.resolve(event, MockLambdaContext())
+
+    # THEN the custom handler catches it
+    assert result["statusCode"] == 400
+    body = json.loads(result["body"])
+    assert body["error"] == "Custom error handled"
+
+
+@pytest.mark.asyncio
+async def test_async_exception_handler():
+    # GIVEN an app with exception handler and async route
+    app = HttpResolverAlpha()
+
+    class CustomError(Exception):
+        pass
+
+    @app.exception_handler(CustomError)
+    def handle_custom_error(exc: CustomError):
+        return Response(
+            status_code=400,
+            content_type="application/json",
+            body={"error": "Async error handled"},
+        )
+
+    @app.get("/error")
+    async def raise_error():
+        await asyncio.sleep(0.001)
+        raise CustomError("Async error")
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/error",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN the async route raises the exception
+    await app(scope, receive, send)
+
+    # THEN the exception handler catches it
+    assert captured["status_code"] == 400
+    body = json.loads(captured["body"])
+    assert body["error"] == "Async error handled"
+
+
+# =============================================================================
+# ASGI Lifespan Tests
+# =============================================================================
+
+
+@pytest.mark.asyncio
+async def test_asgi_lifespan_startup_shutdown():
+    # GIVEN an app
+    app = HttpResolverAlpha()
+
+    @app.get("/hello")
+    def hello():
+        return {"message": "Hello"}
+
+    scope = {"type": "lifespan"}
+    messages_received: list[str] = []
+    messages_sent: list[str] = []
+
+    async def receive() -> dict[str, Any]:
+        await asyncio.sleep(0)
+        if not messages_received:
+            messages_received.append("startup")
+            return {"type": "lifespan.startup"}
+        else:
+            messages_received.append("shutdown")
+            return {"type": "lifespan.shutdown"}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        messages_sent.append(message["type"])
+
+    # WHEN handling lifespan events
+    await app(scope, receive, send)
+
+    # THEN startup and shutdown are handled
+    assert "lifespan.startup.complete" in messages_sent
+    assert "lifespan.shutdown.complete" in messages_sent
+
+
+@pytest.mark.asyncio
+async def test_asgi_ignores_non_http_scope():
+    # GIVEN an app
+    app = HttpResolverAlpha()
+
+    @app.get("/hello")
+    def hello():
+        return {"message": "Hello"}
+
+    scope = {"type": "websocket"}  # Not HTTP
+    send_called = False
+
+    async def receive() -> dict[str, Any]:
+        await asyncio.sleep(0)
+        return {"type": "websocket.connect"}
+
+    async def send(message: dict[str, Any]) -> None:
+        nonlocal send_called
+        await asyncio.sleep(0)
+        send_called = True
+
+    # WHEN handling non-HTTP scope
+    await app(scope, receive, send)
+
+    # THEN nothing is sent (early return)
+    assert send_called is False

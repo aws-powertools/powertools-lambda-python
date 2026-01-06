@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Annotated
+from typing import Annotated, Any
 
 import pytest
 from pydantic import BaseModel, Field
@@ -15,6 +15,35 @@ from aws_lambda_powertools.event_handler.openapi.params import Query
 
 # Suppress alpha warning for all tests
 pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverAlpha is an alpha feature")
+
+
+# =============================================================================
+# ASGI Test Helpers
+# =============================================================================
+
+
+def make_asgi_receive(body: bytes = b""):
+    """Create an ASGI receive callable."""
+
+    async def receive() -> dict[str, Any]:
+        await asyncio.sleep(0)
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return receive
+
+
+def make_asgi_send():
+    """Create an ASGI send callable that captures response."""
+    captured: dict[str, Any] = {"status_code": None, "body": b""}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+        elif message["type"] == "http.response.body":
+            captured["body"] = message["body"]
+
+    return send, captured
 
 
 class UserModel(BaseModel):
@@ -198,26 +227,15 @@ async def test_async_handler_with_validation():
         "headers": [(b"content-type", b"application/json")],
     }
 
-    request_body = b'{"name": "AsyncUser", "age": 25}'
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": request_body, "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
+    receive = make_asgi_receive(b'{"name": "AsyncUser", "age": 25}')
+    send, captured = make_asgi_send()
 
     # WHEN called via ASGI interface
     await app(scope, receive, send)
 
     # THEN validation works with async handler
-    assert status_code == 200
-    body = json.loads(response_body)
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
     assert body["id"] == "async-123"
     assert body["user"]["name"] == "AsyncUser"
 
