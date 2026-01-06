@@ -915,3 +915,303 @@ async def test_asgi_binary_response():
     # THEN it decodes base64 and returns binary data
     assert captured["status_code"] == 200
     assert captured["body"] == binary_data
+
+
+@pytest.mark.asyncio
+async def test_asgi_duplicate_headers():
+    # GIVEN an ASGI request with duplicate headers
+    app = HttpResolverAlpha()
+
+    @app.get("/headers")
+    def get_headers():
+        # Return the accept header which has duplicates
+        accept = app.current_event.headers.get("accept", "")
+        return {"accept": accept}
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/headers",
+        "query_string": b"",
+        "headers": [
+            (b"accept", b"text/html"),
+            (b"accept", b"application/json"),  # Duplicate header
+        ],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN duplicate headers are joined with comma
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["accept"] == "text/html, application/json"
+
+
+@pytest.mark.asyncio
+async def test_asgi_with_cookies():
+    # GIVEN an app that sets cookies
+    from aws_lambda_powertools.shared.cookies import Cookie
+
+    app = HttpResolverAlpha()
+
+    @app.get("/set-cookie")
+    def set_cookie():
+        cookie = Cookie(name="session", value="abc123")
+        return Response(
+            status_code=200,
+            content_type="application/json",
+            body={"message": "Cookie set"},
+            cookies=[cookie],
+        )
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/set-cookie",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    captured_headers: list[tuple[bytes, bytes]] = []
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured_headers.extend(message.get("headers", []))
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN Set-Cookie header is present
+    cookie_headers = [h for h in captured_headers if h[0] == b"set-cookie"]
+    assert len(cookie_headers) == 1
+    assert b"session=abc123" in cookie_headers[0][1]
+
+
+@pytest.mark.asyncio
+async def test_async_middleware():
+    # GIVEN an app with async middleware
+    app = HttpResolverAlpha()
+    order: list[str] = []
+
+    async def async_middleware(app, next_middleware):
+        order.append("async_before")
+        await asyncio.sleep(0.001)
+        response = await next_middleware(app)
+        order.append("async_after")
+        return response
+
+    app.use([async_middleware])
+
+    @app.get("/test")
+    async def test_route():
+        order.append("handler")
+        return {"ok": True}
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/test",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN async middleware executes correctly
+    assert captured["status_code"] == 200
+    assert order == ["async_before", "handler", "async_after"]
+
+
+def test_unhandled_exception_raises():
+    # GIVEN an app without exception handler for ValueError
+    app = HttpResolverAlpha()
+
+    @app.get("/error")
+    def raise_error():
+        raise ValueError("Unhandled error")
+
+    event = {
+        "httpMethod": "GET",
+        "path": "/error",
+        "headers": {},
+        "queryStringParameters": {},
+        "body": None,
+    }
+
+    # WHEN the route raises an unhandled exception
+    # THEN it propagates up
+    with pytest.raises(ValueError, match="Unhandled error"):
+        app.resolve(event, MockLambdaContext())
+
+
+def test_default_not_found_without_custom_handler():
+    # GIVEN an app WITHOUT custom not_found handler
+    app = HttpResolverAlpha()
+
+    @app.get("/exists")
+    def exists():
+        return {"exists": True}
+
+    event = {
+        "httpMethod": "GET",
+        "path": "/unknown",
+        "headers": {},
+        "queryStringParameters": {},
+        "body": None,
+    }
+
+    # WHEN requesting unknown route
+    result = app.resolve(event, MockLambdaContext())
+
+    # THEN default 404 response is returned
+    assert result["statusCode"] == 404
+    body = json.loads(result["body"])
+    assert body["message"] == "Not found"
+
+
+def test_method_not_matching_continues_search():
+    # GIVEN an app with routes for different methods on same path
+    app = HttpResolverAlpha()
+
+    @app.get("/resource")
+    def get_resource():
+        return {"method": "GET"}
+
+    @app.post("/resource")
+    def post_resource():
+        return {"method": "POST"}
+
+    # WHEN requesting with POST
+    event = {
+        "httpMethod": "POST",
+        "path": "/resource",
+        "headers": {},
+        "queryStringParameters": {},
+        "body": None,
+    }
+    result = app.resolve(event, MockLambdaContext())
+
+    # THEN it finds the POST handler (skipping GET)
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["method"] == "POST"
+
+
+def test_list_headers_serialization():
+    # GIVEN an app that returns list headers
+    app = HttpResolverAlpha()
+
+    @app.get("/multi-header")
+    def multi_header():
+        return Response(
+            status_code=200,
+            content_type="application/json",
+            body={"ok": True},
+            headers={"X-Custom": ["value1", "value2"]},
+        )
+
+    event = {
+        "httpMethod": "GET",
+        "path": "/multi-header",
+        "headers": {},
+        "queryStringParameters": {},
+        "body": None,
+    }
+
+    # WHEN the route is resolved
+    result = app.resolve(event, MockLambdaContext())
+
+    # THEN list headers are joined with comma
+    assert result["statusCode"] == 200
+    assert result["headers"]["X-Custom"] == "value1, value2"
+
+
+def test_string_body_in_event():
+    # GIVEN an event with string body (not bytes)
+    app = HttpResolverAlpha()
+
+    @app.post("/echo")
+    def echo():
+        return {"body": app.current_event.body}
+
+    # Body is already a string, not bytes
+    event = {
+        "httpMethod": "POST",
+        "path": "/echo",
+        "headers": {"content-type": "text/plain"},
+        "queryStringParameters": {},
+        "body": "plain text body",
+    }
+
+    # WHEN the route is resolved
+    result = app.resolve(event, MockLambdaContext())
+
+    # THEN string body is handled correctly
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["body"] == "plain text body"
+
+
+@pytest.mark.asyncio
+async def test_asgi_default_not_found():
+    # GIVEN an app WITHOUT custom not_found handler
+    app = HttpResolverAlpha()
+
+    @app.get("/exists")
+    def exists():
+        return {"exists": True}
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/unknown-route",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN requesting unknown route via ASGI
+    await app(scope, receive, send)
+
+    # THEN default 404 is returned
+    assert captured["status_code"] == 404
+    body = json.loads(captured["body"])
+    assert body["message"] == "Not found"
+
+
+@pytest.mark.asyncio
+async def test_asgi_unhandled_exception_raises():
+    # GIVEN an app without exception handler for ValueError
+    app = HttpResolverAlpha()
+
+    @app.get("/error")
+    async def raise_error():
+        raise ValueError("Async unhandled error")
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/error",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, _ = make_asgi_send()
+
+    # WHEN the route raises an unhandled exception
+    # THEN it propagates up
+    with pytest.raises(ValueError, match="Async unhandled error"):
+        await app(scope, receive, send)

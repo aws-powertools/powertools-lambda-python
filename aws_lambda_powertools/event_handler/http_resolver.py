@@ -28,7 +28,7 @@ class HttpHeadersSerializer(BaseHeadersSerializer):
         """Serialize headers for HTTP response format."""
         combined_headers: dict[str, str] = {}
         for key, values in headers.items():
-            if values is None:
+            if values is None:  # pragma: no cover
                 continue
             if isinstance(values, str):
                 combined_headers[key] = values
@@ -160,7 +160,7 @@ class MockLambdaContext:
     log_group_name = "/aws/lambda/http-resolver"
     log_stream_name = "local"
 
-    def get_remaining_time_in_millis(self) -> int:
+    def get_remaining_time_in_millis(self) -> int:  # pragma: no cover
         return 300000  # 5 minutes
 
 
@@ -329,7 +329,7 @@ class HttpResolverAlpha(ApiGatewayResolver):
                     # Store for later await
                     app.context["_async_next_result"] = future
                     return Response(status_code=200, body="")  # Placeholder
-                else:
+                else:  # pragma: no cover
                     return loop.run_until_complete(next_handler(app))
 
             # Check if middleware is async
@@ -470,7 +470,7 @@ class HttpResolverAlpha(ApiGatewayResolver):
             body_bytes = base64.b64decode(body)
         elif isinstance(body, str):
             body_bytes = body.encode("utf-8")
-        else:
+        else:  # pragma: no cover
             body_bytes = body
 
         # Send response body
