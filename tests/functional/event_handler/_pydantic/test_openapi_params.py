@@ -567,6 +567,45 @@ def test_openapi_with_body_description():
     assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
 
 
+def test_openapi_with_body_examples():
+    app = APIGatewayRestResolver()
+
+    first_example = Example(summary="Example1", description="Example1", value={"name": "Alice"})
+    second_example = Example(summary="Example2", description="Example2", value={"name": "Bob"})
+
+    class User(BaseModel):
+        name: str
+
+    @app.post("/users")
+    def handler(
+        user: Annotated[
+            User,
+            Body(
+                openapi_examples={
+                    "example1": first_example,
+                    "example2": second_example,
+                },
+            ),
+        ],
+    ):
+        print(user)
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
+
+    request_body = post.requestBody
+
+    # Examples should appear in the request_body content schema
+    request_body_examples = request_body.content[JSON_CONTENT_TYPE].examples
+
+    assert request_body_examples["example1"] == first_example
+    assert request_body_examples["example2"] == second_example
+
+
 def test_openapi_with_deprecated_operations():
     app = APIGatewayRestResolver()
 
@@ -1492,3 +1531,123 @@ def test_body_validation_alias_only_sets_alias_automatically():
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["my_body"] == "test_value"
+
+
+def test_body_class_annotation_without_parentheses():
+    """
+    GIVEN an endpoint using Body class (not instance) in Annotated
+    WHEN sending a valid request body
+    THEN the request should be validated correctly
+    """
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class MyRequest(BaseModel):
+        foo: str
+        bar: str = "default_bar"
+
+    class MyResponse(BaseModel):
+        concatenated: str
+
+    # Using Body (class) instead of Body() (instance)
+    @app.patch("/test")
+    def handler(body: Annotated[MyRequest, Body]) -> MyResponse:
+        return MyResponse(concatenated=body.foo + body.bar)
+
+    event = {
+        "resource": "/test",
+        "path": "/test",
+        "httpMethod": "PATCH",
+        "body": '{"foo": "hello"}',
+        "isBase64Encoded": False,
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["concatenated"] == "hellodefault_bar"
+
+
+def test_body_instance_annotation_with_parentheses():
+    """
+    GIVEN an endpoint using Body() instance in Annotated
+    WHEN sending a valid request body
+    THEN the request should be validated correctly
+    """
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class MyRequest(BaseModel):
+        foo: str
+        bar: str = "default_bar"
+
+    class MyResponse(BaseModel):
+        concatenated: str
+
+    # Using Body() (instance)
+    @app.patch("/test")
+    def handler(body: Annotated[MyRequest, Body()]) -> MyResponse:
+        return MyResponse(concatenated=body.foo + body.bar)
+
+    event = {
+        "resource": "/test",
+        "path": "/test",
+        "httpMethod": "PATCH",
+        "body": '{"foo": "hello"}',
+        "isBase64Encoded": False,
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["concatenated"] == "hellodefault_bar"
+
+
+def test_query_class_annotation_without_parentheses():
+    """
+    GIVEN an endpoint using Query class (not instance) in Annotated
+    WHEN sending a valid query parameter
+    THEN the request should be validated correctly
+    """
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/test")
+    def handler(name: Annotated[str, Query]) -> dict:
+        return {"name": name}
+
+    event = {
+        "resource": "/test",
+        "path": "/test",
+        "httpMethod": "GET",
+        "queryStringParameters": {"name": "hello"},
+        "isBase64Encoded": False,
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["name"] == "hello"
+
+
+def test_header_class_annotation_without_parentheses():
+    """
+    GIVEN an endpoint using Header class (not instance) in Annotated
+    WHEN sending a valid header
+    THEN the request should be validated correctly
+    """
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/test")
+    def handler(x_custom: Annotated[str, Header]) -> dict:
+        return {"header": x_custom}
+
+    event = {
+        "resource": "/test",
+        "path": "/test",
+        "httpMethod": "GET",
+        "headers": {"x-custom": "my-value"},
+        "isBase64Encoded": False,
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    response_body = json.loads(result["body"])
+    assert response_body["header"] == "my-value"

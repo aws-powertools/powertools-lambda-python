@@ -1,0 +1,25 @@
+{
+    "_aws": {
+        "Timestamp": 1656620400000,
+        "CloudWatchMetrics": [
+            {
+                "Namespace": "ServerlessAirline",
+                "Dimensions": [
+                    ["service"],
+                    ["environment", "region"],
+                    ["environment"]
+                ],
+                "Metrics": [
+                    {
+                        "Name": "SuccessfulBooking",
+                        "Unit": "Count"
+                    }
+                ]
+            }
+        ]
+    },
+    "service": "booking",
+    "environment": "prod",
+    "region": "us-east-1",
+    "SuccessfulBooking": [1.0]
+}

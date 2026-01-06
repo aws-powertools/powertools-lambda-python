@@ -1,0 +1,4 @@
+language: python
+main_repo: https://github.com/aws-powertools/powertools-lambda-python
+sanitizers:
+  - address
