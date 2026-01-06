@@ -17,8 +17,23 @@ def capture_metrics_output(capsys):
     return json.loads(capsys.readouterr().out.strip())
 
 
+def capture_metrics_output_multiple_emf_objects(capsys):
+    return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
+
+
 def reset_cold_start_flag():
     cold_start.is_cold_start = True
+
+
+@pytest.fixture
+def lambda_context():
+    lambda_context = {
+        "function_name": "test",
+        "memory_limit_in_mb": 128,
+        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
+        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
+    }
+    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
 
 
 @pytest.fixture
@@ -79,12 +94,13 @@ def test_log_metrics_capture_cold_start_with_durable_context(capsys, namespace, 
     lambda_handler({}, durable_ctx)
 
     # THEN ColdStart metric should be captured with the function name from unwrapped context
-    output = capture_metrics_output(capsys)
+    outputs = capture_metrics_output_multiple_emf_objects(capsys)
     
-    assert "ColdStart" in output or output.get("ColdStart") == [1.0]
-    # The function_name should come from the unwrapped lambda_context
-    assert output.get("function_name") == "durable_test_function"
-    assert output["service"] == service
+    # Cold start is in a separate EMF blob
+    cold_start_output = outputs[0]
+    assert cold_start_output["ColdStart"] == [1.0]
+    assert cold_start_output["function_name"] == "durable_test_function"
+    assert cold_start_output["service"] == service
 
 
 def test_log_metrics_capture_cold_start_with_durable_context_explicit_function_name(
