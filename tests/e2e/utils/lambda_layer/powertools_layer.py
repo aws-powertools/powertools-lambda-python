@@ -23,11 +23,11 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
-        self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis,datamasking]"
+        self.source_root = SOURCE_CODE_ROOT_PATH
+        self.extras = "all,redis,datamasking"
 
         self.platform_args = self._resolve_platform(architecture)
         self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"
-        self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
@@ -42,7 +42,23 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.before_build()
 
         if self._has_source_changed():
-            subprocess.run(self.build_command, shell=True, check=True)
+            # Build wheel first, then install with platform constraints
+            dist_dir = self.source_root / "dist"
+            subprocess.run(f"rm -rf {dist_dir}", shell=True, check=True)
+            subprocess.run(
+                f"python -m pip wheel {self.source_root} --no-deps -w {dist_dir}",
+                shell=True,
+                check=True,
+            )
+
+            # Find the built wheel
+            wheel_file = next(dist_dir.glob("*.whl"))
+
+            # Install the wheel with extras and platform constraints
+            install_cmd = (
+                f"python -m pip install '{wheel_file}[{self.extras}]' {self.build_args} --target {self.target_dir}"
+            )
+            subprocess.run(install_cmd, shell=True, check=True)
 
         self.after_build()
 
@@ -52,7 +68,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         subprocess.run(self.cleanup_command, shell=True, check=True)
 
     def _has_source_changed(self) -> bool:
-        """Hashes source code and
+        """Hashes source code and checks if rebuild is needed.
 
         Returns
         -------
@@ -83,5 +99,5 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
         return self._build_platform_args(platforms)
 
-    def _build_platform_args(self, platforms: list[str]):
+    def _build_platform_args(self, platforms: tuple[str, ...]) -> str:
         return " ".join([f"--platform {platform}" for platform in platforms])
