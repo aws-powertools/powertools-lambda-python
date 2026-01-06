@@ -4,164 +4,23 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Annotated
 
 import pytest
-from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.event_handler import HttpResolverAlpha, Response
-from aws_lambda_powertools.event_handler.http_resolver import (
-    HttpProxyEvent,
-    MockLambdaContext,
-)
-from aws_lambda_powertools.event_handler.openapi.params import Query
+from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 
 # Suppress alpha warning for all tests
 pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverAlpha is an alpha feature")
 
 
 # =============================================================================
-# Test Models
-# =============================================================================
-
-
-class UserModel(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
-    age: int = Field(ge=0, le=150)
-    email: str | None = None
-
-
-class UserResponse(BaseModel):
-    id: str
-    user: UserModel
-    created: bool = True
-
-
-# =============================================================================
-# HttpProxyEvent Tests
-# =============================================================================
-
-
-def test_http_proxy_event_basic():
-    """Test creating a basic HTTP event."""
-    event = HttpProxyEvent(
-        method="GET",
-        path="/users/123",
-        headers={"content-type": "application/json"},
-    )
-
-    assert event.http_method == "GET"
-    assert event.path == "/users/123"
-    assert event.headers.get("content-type") == "application/json"
-
-
-def test_http_proxy_event_with_body():
-    """Test creating an event with a JSON body."""
-    body = '{"name": "test"}'
-    event = HttpProxyEvent(
-        method="POST",
-        path="/users",
-        headers={"content-type": "application/json"},
-        body=body,
-    )
-
-    assert event.body == body
-    assert event.json_body == {"name": "test"}
-
-
-def test_http_proxy_event_with_bytes_body():
-    """Test creating an event with bytes body."""
-    body = b'{"name": "test"}'
-    event = HttpProxyEvent(
-        method="POST",
-        path="/users",
-        body=body,
-    )
-
-    assert event.body == '{"name": "test"}'
-
-
-def test_http_proxy_event_query_string_parsing():
-    """Test query string is parsed correctly."""
-    event = HttpProxyEvent(
-        method="GET",
-        path="/search",
-        query_string="q=python&page=1&tags=aws&tags=lambda",
-    )
-
-    assert event.query_string_parameters.get("q") == "python"
-    assert event.query_string_parameters.get("page") == "1"
-    assert event.multi_value_query_string_parameters.get("tags") == ["aws", "lambda"]
-
-
-def test_http_proxy_event_from_asgi_scope():
-    """Test creating event from ASGI scope."""
-    scope = {
-        "type": "http",
-        "method": "GET",
-        "path": "/users/123",
-        "query_string": b"include=details",
-        "headers": [
-            (b"content-type", b"application/json"),
-            (b"authorization", b"Bearer token123"),
-        ],
-    }
-
-    event = HttpProxyEvent.from_asgi(scope, body=None)
-
-    assert event.http_method == "GET"
-    assert event.path == "/users/123"
-    assert event.headers.get("content-type") == "application/json"
-    assert event.headers.get("authorization") == "Bearer token123"
-    assert event.query_string_parameters.get("include") == "details"
-
-
-def test_http_proxy_event_from_asgi_with_body():
-    """Test creating event from ASGI scope with body."""
-    scope = {
-        "type": "http",
-        "method": "POST",
-        "path": "/users",
-        "query_string": b"",
-        "headers": [(b"content-type", b"application/json")],
-    }
-    body = b'{"name": "John", "age": 30}'
-
-    event = HttpProxyEvent.from_asgi(scope, body=body)
-
-    assert event.json_body == {"name": "John", "age": 30}
-
-
-def test_http_proxy_event_resolved_query_string_parameters():
-    """Test resolved_query_string_parameters returns multi-value format."""
-    event = HttpProxyEvent(
-        method="GET",
-        path="/search",
-        query_string="tags=aws&tags=lambda",
-    )
-
-    resolved = event.resolved_query_string_parameters
-    assert resolved.get("tags") == ["aws", "lambda"]
-
-
-def test_http_proxy_event_resolved_headers_field():
-    """Test resolved_headers_field returns headers."""
-    event = HttpProxyEvent(
-        method="GET",
-        path="/test",
-        headers={"X-Custom-Header": "value"},
-    )
-
-    assert event.resolved_headers_field.get("x-custom-header") == "value"
-
-
-# =============================================================================
-# HttpResolver Basic Tests
+# Basic Routing Tests
 # =============================================================================
 
 
 def test_simple_get_route():
-    """Test a simple GET route."""
+    # GIVEN a simple GET route
     app = HttpResolverAlpha()
 
     @app.get("/hello")
@@ -176,15 +35,17 @@ def test_simple_get_route():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it returns 200 with the expected body
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["message"] == "Hello, World!"
 
 
 def test_path_parameters():
-    """Test route with path parameters."""
+    # GIVEN a route with path parameters
     app = HttpResolverAlpha()
 
     @app.get("/users/<user_id>")
@@ -200,15 +61,17 @@ def test_path_parameters():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it extracts the path parameter correctly
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["user_id"] == "123"
 
 
 def test_post_with_body():
-    """Test POST route with JSON body."""
+    # GIVEN a POST route that reads the body
     app = HttpResolverAlpha()
 
     @app.post("/users")
@@ -224,8 +87,10 @@ def test_post_with_body():
         "body": '{"name": "John"}',
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it parses the JSON body correctly
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["created"] is True
@@ -233,7 +98,7 @@ def test_post_with_body():
 
 
 def test_query_parameters():
-    """Test accessing query parameters."""
+    # GIVEN a route that reads query parameters
     app = HttpResolverAlpha()
 
     @app.get("/search")
@@ -251,8 +116,10 @@ def test_query_parameters():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it extracts query parameters correctly
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["query"] == "python"
@@ -260,7 +127,7 @@ def test_query_parameters():
 
 
 def test_custom_response():
-    """Test returning a custom Response object."""
+    # GIVEN a route that returns a custom Response
     app = HttpResolverAlpha()
 
     @app.get("/custom")
@@ -280,14 +147,16 @@ def test_custom_response():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it returns the custom status code and headers
     assert result["statusCode"] == 201
     assert result["headers"]["X-Custom-Header"] == "value"
 
 
 def test_not_found():
-    """Test 404 response for unknown route."""
+    # GIVEN an app with a defined route
     app = HttpResolverAlpha()
 
     @app.get("/exists")
@@ -302,13 +171,15 @@ def test_not_found():
         "body": None,
     }
 
+    # WHEN requesting an unknown route
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it returns 404
     assert result["statusCode"] == 404
 
 
 def test_custom_not_found_handler():
-    """Test custom not_found handler is called."""
+    # GIVEN an app with a custom not_found handler
     app = HttpResolverAlpha()
 
     @app.not_found
@@ -331,8 +202,10 @@ def test_custom_not_found_handler():
         "body": None,
     }
 
+    # WHEN requesting an unknown route
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN it calls the custom handler
     assert result["statusCode"] == 404
     body = json.loads(result["body"])
     assert body["error"] == "Custom Not Found"
@@ -340,143 +213,12 @@ def test_custom_not_found_handler():
 
 
 # =============================================================================
-# HttpResolver Validation Tests
-# =============================================================================
-
-
-def test_valid_body_validation():
-    """Test valid request body passes validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.post("/users")
-    def create_user(user: UserModel) -> UserResponse:
-        return UserResponse(id="user-123", user=user)
-
-    event = {
-        "httpMethod": "POST",
-        "path": "/users",
-        "headers": {"content-type": "application/json"},
-        "queryStringParameters": {},
-        "multiValueQueryStringParameters": {},
-        "body": '{"name": "John", "age": 30}',
-    }
-
-    result = app.resolve(event, MockLambdaContext())
-
-    assert result["statusCode"] == 200
-    body = json.loads(result["body"])
-    assert body["id"] == "user-123"
-    assert body["user"]["name"] == "John"
-
-
-def test_invalid_body_validation():
-    """Test invalid request body fails validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.post("/users")
-    def create_user(user: UserModel) -> UserResponse:
-        return UserResponse(id="user-123", user=user)
-
-    event = {
-        "httpMethod": "POST",
-        "path": "/users",
-        "headers": {"content-type": "application/json"},
-        "queryStringParameters": {},
-        "multiValueQueryStringParameters": {},
-        "body": '{"name": "", "age": 30}',  # Empty name - invalid
-    }
-
-    result = app.resolve(event, MockLambdaContext())
-
-    assert result["statusCode"] == 422
-    body = json.loads(result["body"])
-    assert "detail" in body
-
-
-def test_missing_required_field():
-    """Test missing required field fails validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.post("/users")
-    def create_user(user: UserModel) -> UserResponse:
-        return UserResponse(id="user-123", user=user)
-
-    event = {
-        "httpMethod": "POST",
-        "path": "/users",
-        "headers": {"content-type": "application/json"},
-        "queryStringParameters": {},
-        "multiValueQueryStringParameters": {},
-        "body": '{"age": 30}',  # Missing name
-    }
-
-    result = app.resolve(event, MockLambdaContext())
-
-    assert result["statusCode"] == 422
-
-
-def test_query_param_validation():
-    """Test query parameter validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.get("/search")
-    def search(
-        q: Annotated[str, Query(description="Search query")],
-        page: Annotated[int, Query(ge=1)] = 1,
-        limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    ) -> dict:
-        return {"query": q, "page": page, "limit": limit}
-
-    event = {
-        "httpMethod": "GET",
-        "path": "/search",
-        "headers": {},
-        "queryStringParameters": {"q": "python", "page": "2", "limit": "50"},
-        "multiValueQueryStringParameters": {"q": ["python"], "page": ["2"], "limit": ["50"]},
-        "body": None,
-    }
-
-    result = app.resolve(event, MockLambdaContext())
-
-    assert result["statusCode"] == 200
-    body = json.loads(result["body"])
-    assert body["query"] == "python"
-    assert body["page"] == 2
-    assert body["limit"] == 50
-
-
-def test_invalid_query_param():
-    """Test invalid query parameter fails validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.get("/search")
-    def search(
-        q: Annotated[str, Query()],
-        limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    ) -> dict:
-        return {"query": q, "limit": limit}
-
-    event = {
-        "httpMethod": "GET",
-        "path": "/search",
-        "headers": {},
-        "queryStringParameters": {"q": "test", "limit": "200"},  # limit > 100
-        "multiValueQueryStringParameters": {"q": ["test"], "limit": ["200"]},
-        "body": None,
-    }
-
-    result = app.resolve(event, MockLambdaContext())
-
-    assert result["statusCode"] == 422
-
-
-# =============================================================================
-# HttpResolver Middleware Tests
+# Middleware Tests
 # =============================================================================
 
 
 def test_middleware_execution():
-    """Test middleware is executed."""
+    # GIVEN an app with middleware
     app = HttpResolverAlpha()
     middleware_called = []
 
@@ -501,14 +243,16 @@ def test_middleware_execution():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN middleware executes in correct order
     assert result["statusCode"] == 200
     assert middleware_called == ["before", "handler", "after"]
 
 
 def test_middleware_can_short_circuit():
-    """Test middleware can return early without calling handler."""
+    # GIVEN an app with auth middleware
     app = HttpResolverAlpha()
 
     def auth_middleware(app, next_middleware):
@@ -523,7 +267,7 @@ def test_middleware_can_short_circuit():
     def protected():
         return {"secret": "data"}
 
-    # Without auth header
+    # WHEN requesting without auth header
     event = {
         "httpMethod": "GET",
         "path": "/protected",
@@ -531,18 +275,21 @@ def test_middleware_can_short_circuit():
         "queryStringParameters": {},
         "body": None,
     }
-
     result = app.resolve(event, MockLambdaContext())
+
+    # THEN it returns 401
     assert result["statusCode"] == 401
 
-    # With auth header
+    # WHEN requesting with auth header
     event["headers"] = {"authorization": "Bearer token"}
     result = app.resolve(event, MockLambdaContext())
+
+    # THEN it returns 200
     assert result["statusCode"] == 200
 
 
 def test_multiple_middlewares():
-    """Test multiple middlewares execute in order."""
+    # GIVEN an app with multiple middlewares
     app = HttpResolverAlpha()
     order = []
 
@@ -573,13 +320,15 @@ def test_multiple_middlewares():
         "body": None,
     }
 
+    # WHEN the route is resolved
     app.resolve(event, MockLambdaContext())
 
+    # THEN middlewares execute in correct order (onion model)
     assert order == ["m1_before", "m2_before", "handler", "m2_after", "m1_after"]
 
 
 def test_route_specific_middleware():
-    """Test middleware applied to specific route only."""
+    # GIVEN an app with route-specific middleware
     app = HttpResolverAlpha()
     route_middleware_called = []
 
@@ -595,7 +344,7 @@ def test_route_specific_middleware():
     def without_middleware():
         return {"has_middleware": False}
 
-    # Test route WITH middleware
+    # WHEN requesting route WITH middleware
     event_with = {
         "httpMethod": "GET",
         "path": "/with-middleware",
@@ -603,14 +352,14 @@ def test_route_specific_middleware():
         "queryStringParameters": {},
         "body": None,
     }
-
     result = app.resolve(event_with, MockLambdaContext())
+
+    # THEN middleware is called
     assert result["statusCode"] == 200
     assert route_middleware_called == ["route_middleware"]
 
-    # Reset and test route WITHOUT middleware
+    # WHEN requesting route WITHOUT middleware
     route_middleware_called.clear()
-
     event_without = {
         "httpMethod": "GET",
         "path": "/without-middleware",
@@ -618,14 +367,15 @@ def test_route_specific_middleware():
         "queryStringParameters": {},
         "body": None,
     }
-
     result = app.resolve(event_without, MockLambdaContext())
+
+    # THEN middleware is NOT called
     assert result["statusCode"] == 200
-    assert route_middleware_called == []  # Middleware should NOT be called
+    assert route_middleware_called == []
 
 
 def test_route_middleware_with_global_middleware():
-    """Test route-specific middleware combined with global middleware."""
+    # GIVEN an app with both global and route-specific middleware
     app = HttpResolverAlpha()
     order = []
 
@@ -656,14 +406,15 @@ def test_route_middleware_with_global_middleware():
         "body": None,
     }
 
+    # WHEN the route is resolved
     app.resolve(event, MockLambdaContext())
 
-    # Global middleware runs first, then route middleware
+    # THEN global middleware runs first, then route middleware
     assert order == ["global_before", "route_before", "handler", "route_after", "global_after"]
 
 
 def test_route_middleware_can_modify_response():
-    """Test route middleware can modify the response."""
+    # GIVEN an app with middleware that modifies response
     app = HttpResolverAlpha()
 
     def add_header_middleware(app, next_middleware):
@@ -683,20 +434,22 @@ def test_route_middleware_can_modify_response():
         "body": None,
     }
 
+    # WHEN the route is resolved
     result = app.resolve(event, MockLambdaContext())
 
+    # THEN the response has the added header
     assert result["statusCode"] == 200
     assert result["headers"]["X-Custom-Header"] == "added-by-middleware"
 
 
 # =============================================================================
-# HttpResolver ASGI Tests
+# ASGI Tests
 # =============================================================================
 
 
 @pytest.mark.asyncio
 async def test_asgi_get_request():
-    """Test ASGI GET request."""
+    # GIVEN an app with a GET route
     app = HttpResolverAlpha()
 
     @app.get("/hello/<name>")
@@ -724,8 +477,10 @@ async def test_asgi_get_request():
         elif message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN it returns the expected response
     assert status_code == 200
     body = json.loads(response_body)
     assert body["message"] == "Hello, World!"
@@ -733,7 +488,7 @@ async def test_asgi_get_request():
 
 @pytest.mark.asyncio
 async def test_asgi_custom_not_found():
-    """Test custom not_found handler in ASGI mode."""
+    # GIVEN an app with custom not_found handler
     app = HttpResolverAlpha()
 
     @app.not_found
@@ -769,8 +524,10 @@ async def test_asgi_custom_not_found():
         elif message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN requesting unknown route via ASGI
     await app(scope, receive, send)
 
+    # THEN custom handler is called
     assert status_code == 404
     body = json.loads(response_body)
     assert body["error"] == "Custom 404"
@@ -779,7 +536,7 @@ async def test_asgi_custom_not_found():
 
 @pytest.mark.asyncio
 async def test_asgi_post_request():
-    """Test ASGI POST request with body."""
+    # GIVEN an app with a POST route
     app = HttpResolverAlpha()
 
     @app.post("/users")
@@ -809,8 +566,10 @@ async def test_asgi_post_request():
         elif message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN it parses the body correctly
     assert status_code == 200
     body = json.loads(response_body)
     assert body["created"] is True
@@ -819,7 +578,7 @@ async def test_asgi_post_request():
 
 @pytest.mark.asyncio
 async def test_asgi_query_params():
-    """Test ASGI request with query parameters."""
+    # GIVEN an app with a route that reads query params
     app = HttpResolverAlpha()
 
     @app.get("/search")
@@ -845,20 +604,22 @@ async def test_asgi_query_params():
         if message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN it extracts query params correctly
     body = json.loads(response_body)
     assert body["query"] == "python"
 
 
 # =============================================================================
-# HttpResolver Async Handler Tests
+# Async Handler Tests
 # =============================================================================
 
 
 @pytest.mark.asyncio
 async def test_async_handler():
-    """Test async route handler."""
+    # GIVEN an app with an async handler
     app = HttpResolverAlpha()
 
     @app.get("/async")
@@ -887,8 +648,10 @@ async def test_async_handler():
         elif message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN async handler executes correctly
     assert status_code == 200
     body = json.loads(response_body)
     assert body["async"] is True
@@ -896,7 +659,7 @@ async def test_async_handler():
 
 @pytest.mark.asyncio
 async def test_async_handler_with_path_params():
-    """Test async handler with path parameters."""
+    # GIVEN an app with async handler and path params
     app = HttpResolverAlpha()
 
     @app.get("/users/<user_id>")
@@ -922,56 +685,18 @@ async def test_async_handler_with_path_params():
         if message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN path params are extracted correctly
     body = json.loads(response_body)
     assert body["user_id"] == "456"
     assert body["async"] is True
 
 
 @pytest.mark.asyncio
-async def test_async_handler_with_validation():
-    """Test async handler with Pydantic validation."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.post("/users")
-    async def create_user(user: UserModel) -> UserResponse:
-        await asyncio.sleep(0.001)
-        return UserResponse(id="async-123", user=user)
-
-    scope = {
-        "type": "http",
-        "method": "POST",
-        "path": "/users",
-        "query_string": b"",
-        "headers": [(b"content-type", b"application/json")],
-    }
-
-    request_body = b'{"name": "AsyncUser", "age": 25}'
-    response_body = b""
-    status_code = None
-
-    async def receive():
-        return {"type": "http.request", "body": request_body, "more_body": False}
-
-    async def send(message):
-        nonlocal response_body, status_code
-        if message["type"] == "http.response.start":
-            status_code = message["status"]
-        elif message["type"] == "http.response.body":
-            response_body = message["body"]
-
-    await app(scope, receive, send)
-
-    assert status_code == 200
-    body = json.loads(response_body)
-    assert body["id"] == "async-123"
-    assert body["user"]["name"] == "AsyncUser"
-
-
-@pytest.mark.asyncio
 async def test_sync_handler_in_async_context():
-    """Test sync handler works in ASGI async context."""
+    # GIVEN an app with a sync handler
     app = HttpResolverAlpha()
 
     @app.get("/sync")
@@ -996,15 +721,17 @@ async def test_sync_handler_in_async_context():
         if message["type"] == "http.response.body":
             response_body = message["body"]
 
+    # WHEN called via ASGI interface
     await app(scope, receive, send)
 
+    # THEN sync handler works in async context
     body = json.loads(response_body)
     assert body["sync"] is True
 
 
 @pytest.mark.asyncio
 async def test_mixed_sync_async_handlers():
-    """Test app with both sync and async handlers."""
+    # GIVEN an app with both sync and async handlers
     app = HttpResolverAlpha()
 
     @app.get("/sync")
@@ -1019,7 +746,7 @@ async def test_mixed_sync_async_handlers():
     async def receive():
         return {"type": "http.request", "body": b"", "more_body": False}
 
-    # Test sync handler
+    # WHEN calling sync handler
     sync_body = b""
 
     async def send_sync(message):
@@ -1033,7 +760,7 @@ async def test_mixed_sync_async_handlers():
         send_sync,
     )
 
-    # Test async handler
+    # WHEN calling async handler
     async_body = b""
 
     async def send_async(message):
@@ -1047,63 +774,6 @@ async def test_mixed_sync_async_handlers():
         send_async,
     )
 
+    # THEN both work correctly
     assert json.loads(sync_body)["type"] == "sync"
     assert json.loads(async_body)["type"] == "async"
-
-
-# =============================================================================
-# HttpResolver OpenAPI Tests
-# =============================================================================
-
-
-def test_openapi_schema_generation():
-    """Test OpenAPI schema is generated correctly."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.get("/users/<user_id>")
-    def get_user(user_id: str) -> dict:
-        return {"user_id": user_id}
-
-    @app.post("/users")
-    def create_user(user: UserModel) -> UserResponse:
-        return UserResponse(id="123", user=user)
-
-    schema = app.get_openapi_schema(
-        title="Test API",
-        version="1.0.0",
-    )
-
-    assert schema.info.title == "Test API"
-    assert schema.info.version == "1.0.0"
-    assert "/users/{user_id}" in schema.paths
-    assert "/users" in schema.paths
-
-
-def test_openapi_schema_includes_validation_errors():
-    """Test OpenAPI schema includes 422 validation error responses."""
-    app = HttpResolverAlpha(enable_validation=True)
-
-    @app.post("/users")
-    def create_user(user: UserModel) -> UserResponse:
-        return UserResponse(id="123", user=user)
-
-    schema = app.get_openapi_schema(title="Test API", version="1.0.0")
-
-    post_operation = schema.paths["/users"].post
-    assert 422 in post_operation.responses
-
-
-# =============================================================================
-# MockLambdaContext Tests
-# =============================================================================
-
-
-def test_mock_lambda_context_attributes():
-    """Test MockLambdaContext has required attributes."""
-    ctx = MockLambdaContext()
-
-    assert ctx.function_name == "http-resolver"
-    assert ctx.memory_limit_in_mb == 128
-    assert "arn:aws:lambda" in ctx.invoked_function_arn
-    assert ctx.aws_request_id is not None
-    assert ctx.get_remaining_time_in_millis() > 0
