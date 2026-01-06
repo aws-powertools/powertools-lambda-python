@@ -14,6 +14,26 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _unwrap_durable_context(context: Any) -> LambdaContext:
+    """Unwrap Lambda Context from DurableContext if applicable.
+
+    Parameters
+    ----------
+    context : object
+        Lambda context object or DurableContext
+
+    Returns
+    -------
+    LambdaContext
+        The unwrapped Lambda context
+    """
+    # Check if this is a DurableContext by duck typing
+    if hasattr(context, "lambda_context") and hasattr(context, "state"):
+        return context.lambda_context
+
+    return context
+
+
 class BaseProvider(ABC):
     """
     Interface to create a metrics provider.
@@ -177,6 +197,11 @@ class BaseProvider(ABC):
         default_dimensions: dict[str, str], optional
             metric dimensions as key=value that will always be present
 
+        Notes
+        -----
+        Supports both standard Lambda Context and DurableContext from AWS Durable Execution SDK.
+        When DurableContext is passed, it automatically unwraps the underlying Lambda Context.
+
         Raises
         ------
         e
@@ -221,13 +246,15 @@ class BaseProvider(ABC):
         Parameters
         ----------
         context : Any
-            Lambda context
+            Lambda context or DurableContext
         """
         if not cold_start.is_cold_start:
             return
 
         logger.debug("Adding cold start metric and function_name dimension")
-        self.add_cold_start_metric(context=context)
+        # Unwrap DurableContext if applicable before passing to add_cold_start_metric
+        lambda_context = _unwrap_durable_context(context)
+        self.add_cold_start_metric(context=lambda_context)
 
         cold_start.is_cold_start = False
 
