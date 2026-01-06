@@ -2461,7 +2461,7 @@ class ApiGatewayResolver(BaseRouter):
 
         return register_resolver
 
-    def resolve(self, event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
+    def resolve(self, event: Mapping[str, Any], context: LambdaContext) -> dict[str, Any]:
         """Resolves the response based on the provide event and decorator routes
 
         ## Internals
@@ -2514,10 +2514,10 @@ class ApiGatewayResolver(BaseRouter):
             event = event.raw_event
 
         if self._debug:
-            print(self._serializer(event))
+            print(self._serializer(cast(dict, event)))
 
         # Populate router(s) dependencies without keeping a reference to each registered router
-        BaseRouter.current_event = self._to_proxy_event(event)
+        BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
         BaseRouter.lambda_context = context
 
         response = self._resolve().build(self.current_event, self._cors)
