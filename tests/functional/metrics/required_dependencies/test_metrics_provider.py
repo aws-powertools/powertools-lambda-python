@@ -78,3 +78,33 @@ def test_metrics_provider_class_decorator_with_additional_handler_args():
     # the wrapped function is passed additional arguments
     assert lambda_handler({}, {}, "arg_value", additional_kw_arg="kw_arg_value") == ("arg_value", "kw_arg_value")
     assert lambda_handler({}, {}, "arg_value") == ("arg_value", "default_value")
+
+
+def test_log_metrics_with_durable_context(capsys, metric, durable_context):
+    provider = FakeMetricsProvider()
+    metrics = Metrics(provider=provider)
+
+    @metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        metrics.add_metric(**metric)
+
+    lambda_handler({}, durable_context)
+    output = capture_metrics_output(capsys)
+
+    assert output[0]["name"] == metric["name"]
+    assert output[0]["value"] == metric["value"]
+
+
+def test_log_metrics_cold_start_with_durable_context(capsys, durable_context):
+    provider = FakeMetricsProvider()
+    metrics = Metrics(provider=provider)
+
+    @metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, ctx):
+        return True
+
+    lambda_handler({}, durable_context)
+    output = capture_metrics_output(capsys)
+
+    assert output[0]["name"] == "ColdStart"
+    assert output[0]["value"] == 1

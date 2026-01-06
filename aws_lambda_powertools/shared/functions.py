@@ -8,12 +8,14 @@ import re
 import warnings
 from binascii import Error as BinAsciiError
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 from aws_lambda_powertools.shared import constants
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+    from aws_lambda_powertools.utilities.typing import DurableContextProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -307,3 +309,8 @@ def decode_header_bytes(byte_list):
     # Convert signed bytes to unsigned (0-255 range)
     unsigned_bytes = [(b & 0xFF) for b in byte_list]
     return bytes(unsigned_bytes)
+
+
+def is_durable_context(context: Any) -> TypeGuard[DurableContextProtocol]:
+    """Check if context is a Step Functions durable context wrapping a Lambda context."""
+    return hasattr(context, "state") and hasattr(context, "lambda_context")
