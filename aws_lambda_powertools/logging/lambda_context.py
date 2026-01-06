@@ -1,4 +1,9 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class LambdaContextModel:
@@ -34,25 +39,47 @@ class LambdaContextModel:
         self.function_request_id = function_request_id
 
 
+def _unwrap_durable_context(context: Any) -> LambdaContext:
+    """Unwrap Lambda Context from DurableContext if applicable.
+
+    Parameters
+    ----------
+    context : object
+        Lambda context object or DurableContext
+
+    Returns
+    -------
+    LambdaContext
+        The unwrapped Lambda context
+    """
+    # Check if this is a DurableContext by duck typing
+    if hasattr(context, "lambda_context") and hasattr(context, "state"):
+        return context.lambda_context
+
+    return context
+
+
 def build_lambda_context_model(context: Any) -> LambdaContextModel:
     """Captures Lambda function runtime info to be used across all log statements
 
     Parameters
     ----------
     context : object
-        Lambda context object
+        Lambda context object or DurableContext
 
     Returns
     -------
     LambdaContextModel
         Lambda context only with select fields
     """
+    # Unwrap DurableContext if applicable
+    lambda_context = _unwrap_durable_context(context)
 
     context = {
-        "function_name": context.function_name,
-        "function_memory_size": context.memory_limit_in_mb,
-        "function_arn": context.invoked_function_arn,
-        "function_request_id": context.aws_request_id,
+        "function_name": lambda_context.function_name,
+        "function_memory_size": lambda_context.memory_limit_in_mb,
+        "function_arn": lambda_context.invoked_function_arn,
+        "function_request_id": lambda_context.aws_request_id,
     }
 
     return LambdaContextModel(**context)
