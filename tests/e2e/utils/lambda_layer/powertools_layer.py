@@ -16,18 +16,11 @@ if TYPE_CHECKING:
 
 class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
     IGNORE_EXTENSIONS = ["pyc"]
-    ARCHITECTURE_PLATFORM_MAPPING = {
-        Architecture.X86_64.name: ("manylinux_2_17_x86_64", "manylinux_2_28_x86_64"),
-        Architecture.ARM_64.name: ("manylinux_2_17_aarch64", "manylinux_2_28_aarch64"),
-    }
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
-        self.source_root = SOURCE_CODE_ROOT_PATH
-        self.extras = "all,redis,datamasking"
-
-        self.platform_args = self._resolve_platform(architecture)
-        self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"
+        self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis,datamasking]"
+        self.build_command = f"python -m pip install {self.package} --upgrade --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
@@ -42,23 +35,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.before_build()
 
         if self._has_source_changed():
-            # Build wheel first, then install with platform constraints
-            dist_dir = self.source_root / "dist"
-            subprocess.run(f"rm -rf {dist_dir}", shell=True, check=True)
-            subprocess.run(
-                f"python -m pip wheel {self.source_root} --no-deps -w {dist_dir}",
-                shell=True,
-                check=True,
-            )
-
-            # Find the built wheel
-            wheel_file = next(dist_dir.glob("*.whl"))
-
-            # Install the wheel with extras and platform constraints
-            install_cmd = (
-                f"python -m pip install '{wheel_file}[{self.extras}]' {self.build_args} --target {self.target_dir}"
-            )
-            subprocess.run(install_cmd, shell=True, check=True)
+            subprocess.run(self.build_command, shell=True, check=True)
 
         self.after_build()
 
@@ -82,22 +59,3 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
             return True
 
         return False
-
-    def _resolve_platform(self, architecture: Architecture) -> str:
-        """Returns the correct pip platform tag argument for the manylinux project (see PEP 599)
-
-        Returns
-        -------
-        str
-            pip's platform argument, e.g., --platform manylinux_2_17_x86_64 --platform manylinux_2_28_x86_64
-        """
-        platforms = self.ARCHITECTURE_PLATFORM_MAPPING.get(architecture.name)
-        if not platforms:
-            raise ValueError(
-                f"unknown architecture {architecture.name}. Supported: {self.ARCHITECTURE_PLATFORM_MAPPING.keys()}",
-            )
-
-        return self._build_platform_args(platforms)
-
-    def _build_platform_args(self, platforms: tuple[str, ...]) -> str:
-        return " ".join([f"--platform {platform}" for platform in platforms])
