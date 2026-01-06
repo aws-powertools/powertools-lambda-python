@@ -881,3 +881,37 @@ async def test_asgi_ignores_non_http_scope():
 
     # THEN nothing is sent (early return)
     assert send_called is False
+
+
+@pytest.mark.asyncio
+async def test_asgi_binary_response():
+    # GIVEN an app that returns binary data (bytes body is auto base64 encoded)
+    app = HttpResolverAlpha()
+    binary_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00"  # PNG header bytes
+
+    @app.get("/image")
+    def get_image():
+        # When body is bytes, Response auto base64 encodes it
+        return Response(
+            status_code=200,
+            content_type="image/png",
+            body=binary_data,
+        )
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/image",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN it decodes base64 and returns binary data
+    assert captured["status_code"] == 200
+    assert captured["body"] == binary_data
