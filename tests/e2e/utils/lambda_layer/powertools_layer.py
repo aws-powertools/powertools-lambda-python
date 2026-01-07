@@ -16,18 +16,11 @@ if TYPE_CHECKING:
 
 class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
     IGNORE_EXTENSIONS = ["pyc"]
-    ARCHITECTURE_PLATFORM_MAPPING = {
-        Architecture.X86_64.name: ("manylinux_2_17_x86_64", "manylinux_2_28_x86_64"),
-        Architecture.ARM_64.name: ("manylinux_2_17_aarch64", "manylinux_2_28_aarch64"),
-    }
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
         self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis,datamasking]"
-
-        self.platform_args = self._resolve_platform(architecture)
-        self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"
-        self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
+        self.build_command = f"python -m pip install {self.package} --upgrade --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
@@ -52,7 +45,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         subprocess.run(self.cleanup_command, shell=True, check=True)
 
     def _has_source_changed(self) -> bool:
-        """Hashes source code and
+        """Hashes source code and checks if rebuild is needed.
 
         Returns
         -------
@@ -66,22 +59,3 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
             return True
 
         return False
-
-    def _resolve_platform(self, architecture: Architecture) -> str:
-        """Returns the correct pip platform tag argument for the manylinux project (see PEP 599)
-
-        Returns
-        -------
-        str
-            pip's platform argument, e.g., --platform manylinux_2_17_x86_64 --platform manylinux_2_28_x86_64
-        """
-        platforms = self.ARCHITECTURE_PLATFORM_MAPPING.get(architecture.name)
-        if not platforms:
-            raise ValueError(
-                f"unknown architecture {architecture.name}. Supported: {self.ARCHITECTURE_PLATFORM_MAPPING.keys()}",
-            )
-
-        return self._build_platform_args(platforms)
-
-    def _build_platform_args(self, platforms: list[str]):
-        return " ".join([f"--platform {platform}" for platform in platforms])

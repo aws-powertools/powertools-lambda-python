@@ -24,7 +24,7 @@ on:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
       - "pyproject.toml"
-      - "poetry.lock"
+      - "uv.lock"
       - "mypy.ini"
       - "parallel_run_e2e.py"
 
@@ -53,14 +53,15 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca  # v6.0.1
+        with:
+          enable-cache: true
       - name: "Use Python"
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
-          cache: "poetry"
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:

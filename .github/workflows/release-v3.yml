@@ -69,10 +69,6 @@ permissions:
 
 jobs:
 
-  # This job bumps the package version to the release version
-  # creates an integrity hash from the source code
-  # uploads the artifact with the integrity hash as the key name
-  # so subsequent jobs can restore from a trusted point in time to prevent tampering
   seal:
     runs-on: ubuntu-latest
     permissions:
@@ -93,17 +89,11 @@ jobs:
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
-      # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@348de6f247222e2953d649932426e63492e0a6bf # v0.3.3
+      - name: Update version in pyproject.toml
+        run: sed -i 's/^version = ".*"/version = "${{ steps.release_version.outputs.RELEASE_VERSION }}"/' pyproject.toml
 
-      - name: Bump package version
-        id: versioning
-        run: poetry version "${RELEASE_VERSION}"
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
+      - name: Update version in version.py
+        run: sed -i 's/^VERSION = ".*"/VERSION = "${{ steps.release_version.outputs.RELEASE_VERSION }}"/' aws_lambda_powertools/shared/version.py
 
       - name: Seal and upload
         id: seal_source_code
@@ -111,19 +101,12 @@ jobs:
         with:
           artifact_name_prefix: "source"
 
-  # This job runs our automated test suite, complexity and security baselines
-  # it ensures previously merged have been tested as part of the pull request process
-  #
-  # NOTE
-  #
-  # we don't upload the artifact after testing to prevent any tampering of our source code dependencies
   quality_check:
     needs: seal
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
@@ -137,23 +120,19 @@ jobs:
       - name: Debug cache restore
         run: cat pyproject.toml
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca  # v6.0.1
+        with:
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: "3.14"
-          cache: "poetry"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
         run: make pr
 
-  # This job creates a release artifact (tar.gz, wheel)
-  # it checks out code from release commit for custom actions to work
-  # then restores the sealed source code (overwrites any potential tampering)
-  # it's done separately from release job to enforce least privilege.
-  # We export just the final build artifact for release
   build:
     runs-on: ubuntu-latest
     needs: [quality_check, seal]
@@ -164,7 +143,6 @@ jobs:
       artifact_name: ${{ steps.seal_build.outputs.artifact_name }}
       attestation_hashes: ${{ steps.encoded_hash.outputs.attestation_hashes }}
     steps:
-      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
@@ -175,16 +153,17 @@ jobs:
           integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
           artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca  # v6.0.1
+        with:
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: "3.14"
-          cache: "poetry"
 
       - name: Build python package and wheel
-        run: poetry build
+        run: uv build
 
       - name: Seal and upload
         id: seal_build
@@ -193,47 +172,31 @@ jobs:
           artifact_name_prefix: "build"
           files: "dist/"
 
-      # NOTE: SLSA retraces our build to its artifact to ensure it wasn't tampered
-      # coupled with GitHub OIDC, SLSA can then confidently sign it came from this release pipeline+commit+branch+org+repo+actor+integrity hash
       - name: Create attestation encoded hash for provenance
         id: encoded_hash
         working-directory: dist
         run: echo "attestation_hashes=$(sha256sum ./* | base64 -w0)" >> "$GITHUB_OUTPUT"
 
-  # This job creates a provenance file that describes how our release was built (all steps)
-  # after it verifies our build is reproducible within the same pipeline
-  # it confirms that its own software and the CI build haven't been tampered with (Trust but verify)
-  # lastly, it creates and sign an attestation (multiple.intoto.jsonl) that confirms
-  # this build artifact came from this GitHub org, branch, actor, commit ID, inputs that triggered this pipeline, and matches its integrity hash
-  # NOTE: supply chain threats review (we protect against all of them now): https://slsa.dev/spec/v1.0/threats-overview
   provenance:
     needs: [seal, build]
     permissions:
-      contents: write # nested job explicitly require despite upload assets being set to false
-      actions: read # To read the workflow path.
-      id-token: write # To sign the provenance.
-    # NOTE: provenance fails if we use action pinning... it's a Github limitation
-    # because SLSA needs to trace & attest it came from a given branch; pinning doesn't expose that information
-    # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#referencing-the-slsa-generator
+      contents: write
+      actions: read
+      id-token: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: ${{ needs.build.outputs.attestation_hashes }}
-      upload-assets: false  # we upload its attestation in create_tag job, otherwise it creates a new release
+      upload-assets: false
 
-  # This job uses release artifact to publish to PyPi
-  # it exchanges JWT tokens with GitHub to obtain PyPi credentials
-  # since it's already registered as a Trusted Publisher.
-  # It uses the sealed build artifact (.whl, .tar.gz) to release it
   release:
     needs: [build, seal, provenance]
     environment: release
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # OIDC for PyPi Trusted Publisher feature
+      id-token: write
     env:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
-      # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
@@ -248,26 +211,12 @@ jobs:
         if: ${{ !inputs.skip_pypi }}
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
-      # PyPi test maintenance affected us numerous times, leaving for history purposes
-      # - name: Upload to PyPi test
-      #   if: ${{ !inputs.skip_pypi }}
-      #   uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
-      #   with:
-      #     repository-url: https://test.pypi.org/legacy/
-
-  # We create a Git Tag using our release version (e.g., v3.16.0)
-  # using our sealed source code we created earlier.
-  # Because we bumped version of our project as part of CI
-  # we need to add this into git before pushing the tag
-  # otherwise the release commit will be used as the basis for the tag.
-  # Later, we create a PR to update trunk with our newest release version (e.g., bump_version job)
   create_tag:
     needs: [release, seal, provenance]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      # NOTE: we need actions/checkout to authenticate and configure git first
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
@@ -302,16 +251,13 @@ jobs:
           provenance_name: ${{needs.provenance.outputs.provenance-name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # Creates a PR with the latest version we've just released
-  # since our trunk is protected against any direct pushes from automation
   bump_version:
     needs: [release, seal]
     permissions:
-      contents: write  # create-pr action creates a temporary branch
-      pull-requests: write # create-pr action creates a PR using the temporary branch
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      # NOTE: we need actions/checkout to authenticate and configure git first
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
@@ -331,15 +277,6 @@ jobs:
           pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # This job compiles a Lambda Layer optimized for space and speed (e.g., Cython)
-  # It then deploys to Layer's Beta and Prod account, including SAR Beta and Prod account.
-  # It uses canaries to attest Layers can be used and imported between stages.
-  # Lastly, it updates our documentation with the latest Layer ARN for all regions
-  #
-  # NOTE
-  #
-  # Watch out for the depth limit of 4 nested workflow_calls.
-  # publish_layer -> publish_3_layer -> reusable_deploy_v3_layer_stack
   publish_layer:
     needs: [seal, release, create_tag]
     secrets: inherit
