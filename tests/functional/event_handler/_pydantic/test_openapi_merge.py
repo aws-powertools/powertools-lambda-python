@@ -134,11 +134,6 @@ def test_openapi_merge_on_conflict_last():
     assert schema["paths"]["/users"]["get"]["summary"] == "Get users from conflict_last"
 
 
-# =============================================================================
-# configure_openapi_merge (public API via resolver)
-# =============================================================================
-
-
 def test_configure_openapi_merge_and_get_schema():
     # GIVEN a resolver
     app = APIGatewayRestResolver()
@@ -194,11 +189,6 @@ def test_get_openapi_merge_json_schema_without_configure_raises():
     # WHEN/THEN should raise
     with pytest.raises(RuntimeError, match="configure_openapi_merge must be called"):
         app.get_openapi_merge_json_schema()
-
-
-# =============================================================================
-# enable_swagger integration
-# =============================================================================
 
 
 def test_enable_swagger_uses_merged_schema():

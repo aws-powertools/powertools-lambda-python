@@ -16,11 +16,6 @@ from aws_lambda_powertools.event_handler.openapi.merge import (
 MERGE_HANDLERS_PATH = Path(__file__).parents[3] / "functional/event_handler/_pydantic/merge_handlers"
 
 
-# =============================================================================
-# _discover_resolver_files
-# =============================================================================
-
-
 def test_discover_resolver_files_path_not_exists():
     with pytest.raises(FileNotFoundError, match="Path does not exist"):
         _discover_resolver_files("/non/existent/path", "**/*.py", [], "app")
@@ -36,11 +31,6 @@ def test_discover_resolver_files_multiple_patterns():
     filenames = {f.name for f in files}
     assert "users_handler.py" in filenames
     assert "orders_handler.py" in filenames
-
-
-# =============================================================================
-# _file_has_resolver
-# =============================================================================
 
 
 def test_file_has_resolver_syntax_error(tmp_path: Path):
@@ -67,11 +57,6 @@ app = APIGatewayRestResolver()
     assert _file_has_resolver(handler_file, "app") is True
 
 
-# =============================================================================
-# _is_excluded
-# =============================================================================
-
-
 def test_is_excluded_with_directory_pattern():
     root = Path("/project")
     assert _is_excluded(Path("/project/tests/handler.py"), root, ["**/tests/**"]) is True
@@ -82,11 +67,6 @@ def test_is_excluded_with_file_pattern():
     root = Path("/project")
     assert _is_excluded(Path("/project/src/test_handler.py"), root, ["**/test_*.py"]) is True
     assert _is_excluded(Path("/project/src/handler.py"), root, ["**/test_*.py"]) is False
-
-
-# =============================================================================
-# _load_resolver
-# =============================================================================
 
 
 def test_load_resolver_file_not_found():
