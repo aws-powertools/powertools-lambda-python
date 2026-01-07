@@ -45,3 +45,9 @@ class SchemaValidationError(ValidationException):
     """
     Raised when the OpenAPI schema validation fails
     """
+
+
+class OpenAPIMergeError(Exception):
+    """Exception raised when there's a conflict during OpenAPI merge."""
+
+    pass
