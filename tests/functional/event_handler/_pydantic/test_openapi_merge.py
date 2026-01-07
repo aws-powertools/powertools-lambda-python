@@ -246,3 +246,95 @@ def test_enable_swagger_without_merge_uses_regular_schema():
     assert body["info"]["title"] == "Local API"
     assert "/local" in body["paths"]
     assert "/users" not in body["paths"]
+
+
+def test_openapi_merge_with_all_optional_fields():
+    # GIVEN an OpenAPIMerge with all optional config fields
+    from aws_lambda_powertools.event_handler.openapi.models import (
+        Contact,
+        ExternalDocumentation,
+        License,
+        Server,
+        Tag,
+    )
+
+    merge = OpenAPIMerge(
+        title="Full Config API",
+        version="1.0.0",
+        summary="API summary",
+        description="API description",
+        terms_of_service="https://example.com/tos",
+        contact=Contact(name="Support", email="support@example.com"),
+        license_info=License(name="MIT"),
+        servers=[Server(url="https://api.example.com")],
+        tags=[Tag(name="users", description="User operations"), "orders"],
+        security=[{"api_key": []}],
+        security_schemes={"api_key": {"type": "apiKey", "in": "header", "name": "X-API-Key"}},
+        external_documentation=ExternalDocumentation(url="https://docs.example.com"),
+        openapi_extensions={"x-custom": "value"},
+    )
+    merge.discover(path=MERGE_HANDLERS_PATH, pattern="**/users_handler.py")
+
+    # WHEN getting schema
+    schema = merge.get_openapi_schema()
+
+    # THEN all optional fields should be present
+    assert schema["info"]["summary"] == "API summary"
+    assert schema["info"]["description"] == "API description"
+    assert schema["info"]["termsOfService"] == "https://example.com/tos"
+    assert schema["info"]["contact"]["name"] == "Support"
+    assert schema["info"]["license"]["name"] == "MIT"
+    assert schema["servers"][0]["url"] == "https://api.example.com"
+    assert schema["security"] == [{"api_key": []}]
+    assert "api_key" in schema["components"]["securitySchemes"]
+    assert "https://docs.example.com" in str(schema["externalDocs"]["url"])
+    assert schema["x-custom"] == "value"
+    # Tags should include both config tags and schema tags
+    tag_names = [t["name"] for t in schema["tags"]]
+    assert "users" in tag_names
+    assert "orders" in tag_names
+
+
+def test_openapi_merge_add_file():
+    # GIVEN an OpenAPIMerge instance
+    merge = OpenAPIMerge(title="Add File API", version="1.0.0")
+
+    # WHEN adding a file manually
+    handler_path = MERGE_HANDLERS_PATH / "users_handler.py"
+    merge.add_file(handler_path)
+
+    # THEN it should be in discovered files
+    assert handler_path.resolve() in merge.discovered_files
+
+    # AND adding the same file again should not duplicate
+    merge.add_file(handler_path)
+    assert len([f for f in merge.discovered_files if f.name == "users_handler.py"]) == 1
+
+
+def test_openapi_merge_add_file_with_resolver_name():
+    # GIVEN an OpenAPIMerge instance
+    merge = OpenAPIMerge(title="Add File API", version="1.0.0")
+
+    # WHEN adding a file with custom resolver name
+    handler_path = MERGE_HANDLERS_PATH / "users_handler.py"
+    merge.add_file(handler_path, resolver_name="app")
+
+    # THEN it should update the resolver name
+    schema = merge.get_openapi_schema()
+    assert "/users" in schema["paths"]
+
+
+def test_openapi_merge_add_schema():
+    # GIVEN an OpenAPIMerge instance
+    merge = OpenAPIMerge(title="Add Schema API", version="1.0.0")
+
+    # WHEN adding a schema manually
+    merge.add_schema(
+        {
+            "paths": {"/external": {"get": {"summary": "External endpoint"}}},
+        },
+    )
+
+    # THEN it should be included in the merged schema
+    schema = merge.get_openapi_schema()
+    assert "/external" in schema["paths"]
