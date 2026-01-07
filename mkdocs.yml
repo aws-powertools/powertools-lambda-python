@@ -38,6 +38,10 @@ nav:
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+      - Lambda Features:
+          - lambda-features/index.md
+          - lambda-features/managed-instances.md
+          - lambda-features/durable-functions.md
       - Build recipes:
           - build_recipes/index.md
           - Getting started: build_recipes/getting-started.md
