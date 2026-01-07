@@ -4,6 +4,7 @@ import json
 import warnings
 
 import pytest
+from pydantic import BaseModel, ConfigDict
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.swagger_ui import OAuth2Config
@@ -125,3 +126,40 @@ def test_openapi_swagger_oauth2_with_powertools_dev(monkeypatch):
         )
 
     monkeypatch.delenv("POWERTOOLS_DEV")
+
+
+def test_openapi_swagger_schema_title_property():
+    """Test that schema title property is correctly included in OpenAPI spec.
+
+    This test ensures that when a Pydantic model has a custom title defined
+    via ConfigDict, it is properly reflected in the OpenAPI schema.
+    See: https://github.com/aws-powertools/powertools-lambda-python/issues/7670
+    """
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger()
+
+    @app.get("/todos")
+    def get_todos() -> ToDoWithTitle:
+        return ToDoWithTitle(task="test")
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["path"] = "/swagger"
+    event["queryStringParameters"] = {"format": "json"}
+
+    result = app(event, {})
+
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+
+    # Verify the schema has the title property set
+    assert "components" in body
+    assert "schemas" in body["components"]
+    assert "ToDoWithTitle" in body["components"]["schemas"]
+    assert body["components"]["schemas"]["ToDoWithTitle"]["title"] == "todoTitle"
+
+
+class ToDoWithTitle(BaseModel):
+    """Model with custom title for testing schema title property."""
+
+    model_config = ConfigDict(title="todoTitle")
+    task: str
