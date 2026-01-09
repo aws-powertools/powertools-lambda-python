@@ -338,3 +338,16 @@ def test_openapi_merge_add_schema():
     # THEN it should be included in the merged schema
     schema = merge.get_openapi_schema()
     assert "/external" in schema["paths"]
+
+
+def test_openapi_merge_tags_from_schema():
+    # GIVEN an OpenAPIMerge without config tags
+    merge = OpenAPIMerge(title="Tags API", version="1.0.0")
+
+    # WHEN discovering a handler that has tags in its schema
+    merge.discover(path=MERGE_HANDLERS_PATH, pattern="**/tagged_handler.py")
+
+    # THEN schema tags should include tags from discovered handler
+    schema = merge.get_openapi_schema()
+    tag_names = [t["name"] for t in schema.get("tags", [])]
+    assert "handler-tag" in tag_names
