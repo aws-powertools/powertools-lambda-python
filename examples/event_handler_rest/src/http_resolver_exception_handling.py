@@ -1,6 +1,6 @@
-from aws_lambda_powertools.event_handler import HttpResolverAlpha, Response
+from aws_lambda_powertools.event_handler import HttpResolverLocal, Response
 
-app = HttpResolverAlpha()
+app = HttpResolverLocal()
 
 
 class NotFoundError(Exception):

@@ -1,4 +1,4 @@
-"""Tests for HttpResolverAlpha with Pydantic validation."""
+"""Tests for HttpResolverLocal with Pydantic validation."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from typing import Annotated, Any
 import pytest
 from pydantic import BaseModel, Field
 
-from aws_lambda_powertools.event_handler import HttpResolverAlpha
+from aws_lambda_powertools.event_handler import HttpResolverLocal
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 from aws_lambda_powertools.event_handler.openapi.params import Query
 
-# Suppress alpha warning for all tests
-pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverAlpha is an alpha feature")
+# Suppress warning for all tests
+pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverLocal is intended for local development")
 
 
 # =============================================================================
@@ -65,7 +65,7 @@ class UserResponse(BaseModel):
 
 def test_valid_body_validation():
     # GIVEN an app with validation enabled and a route expecting UserModel
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.post("/users")
     def create_user(user: UserModel) -> UserResponse:
@@ -92,7 +92,7 @@ def test_valid_body_validation():
 
 def test_invalid_body_validation():
     # GIVEN an app with validation enabled
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.post("/users")
     def create_user(user: UserModel) -> UserResponse:
@@ -118,7 +118,7 @@ def test_invalid_body_validation():
 
 def test_missing_required_field():
     # GIVEN an app with validation enabled
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.post("/users")
     def create_user(user: UserModel) -> UserResponse:
@@ -147,7 +147,7 @@ def test_missing_required_field():
 
 def test_query_param_validation():
     # GIVEN an app with validated query parameters
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.get("/search")
     def search(
@@ -179,7 +179,7 @@ def test_query_param_validation():
 
 def test_invalid_query_param():
     # GIVEN an app with validated query parameters
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.get("/search")
     def search(
@@ -212,7 +212,7 @@ def test_invalid_query_param():
 @pytest.mark.asyncio
 async def test_async_handler_with_validation():
     # GIVEN an app with async handler and validation
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.post("/users")
     async def create_user(user: UserModel) -> UserResponse:
@@ -247,7 +247,7 @@ async def test_async_handler_with_validation():
 
 def test_openapi_schema_generation():
     # GIVEN an app with validation and multiple routes
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.get("/users/<user_id>")
     def get_user(user_id: str) -> dict:
@@ -272,7 +272,7 @@ def test_openapi_schema_generation():
 
 def test_openapi_schema_includes_validation_errors():
     # GIVEN an app with validation
-    app = HttpResolverAlpha(enable_validation=True)
+    app = HttpResolverLocal(enable_validation=True)
 
     @app.post("/users")
     def create_user(user: UserModel) -> UserResponse:

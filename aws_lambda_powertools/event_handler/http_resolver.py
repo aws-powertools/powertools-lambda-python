@@ -164,26 +164,29 @@ class MockLambdaContext:
         return 300000  # 5 minutes
 
 
-class HttpResolverAlpha(ApiGatewayResolver):
+class HttpResolverLocal(ApiGatewayResolver):
     """
-    ASGI-compatible HTTP resolver for local development and testing (Alpha).
+    ASGI-compatible HTTP resolver for local development and testing.
 
-    Works with any ASGI server like uvicorn, hypercorn, daphne, etc.
-    Maintains full compatibility with Lambda - same code works in both environments.
+    This resolver is designed specifically for local development workflows.
+    It allows you to run your Powertools application locally with any ASGI server
+    (uvicorn, hypercorn, daphne, etc.) while maintaining full compatibility with Lambda.
+
+    The same code works in both environments - locally via ASGI and in Lambda via the handler.
 
     Supports both sync and async route handlers.
 
     WARNING
     -------
-    This is an Alpha feature intended for local development and testing only.
+    This is intended for local development and testing only.
     The API may change in future releases. Do not use in production environments.
 
     Example
     -------
     ```python
-    from aws_lambda_powertools.event_handler import HttpResolverAlpha
+    from aws_lambda_powertools.event_handler import HttpResolverLocal
 
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/hello/<name>")
     async def hello(name: str):
@@ -212,7 +215,7 @@ class HttpResolverAlpha(ApiGatewayResolver):
         enable_validation: bool = False,
     ):
         warnings.warn(
-            "HttpResolverAlpha is an alpha feature intended for local development and testing only. "
+            "HttpResolverLocal is intended for local development and testing only. "
             "The API may change in future releases. Do not use in production environments.",
             stacklevel=2,
         )

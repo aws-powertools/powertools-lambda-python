@@ -63,7 +63,7 @@ By default, we will use `APIGatewayRestResolver` throughout the documentation. Y
 | **[`ALBResolver`](#application-load-balancer)**         | Amazon Application Load Balancer (ALB) |
 | **[`LambdaFunctionUrlResolver`](#lambda-function-url)** | AWS Lambda Function URL                |
 | **[`VPCLatticeResolver`](#vpc-lattice)**                | Amazon VPC Lattice                     |
-| **[`HttpResolverAlpha`](#http-resolver-alpha)**         | Local development with ASGI servers    |
+| **[`HttpResolverLocal`](#http-resolver-local)**         | Local development with ASGI servers    |
 <!-- markdownlint-enable MD051 -->
 
 #### Response auto-serialization
@@ -194,7 +194,7 @@ When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/late
     --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.json"
     ```
 
---8<-- "docs/includes/_http_resolver_alpha.md"
+--8<-- "docs/includes/_http_resolver_local.md"
 
 ### Dynamic routes
 

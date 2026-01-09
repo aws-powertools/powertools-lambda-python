@@ -1,4 +1,4 @@
-"""Tests for HttpResolverAlpha - ASGI-compatible HTTP resolver for local development."""
+"""Tests for HttpResolverLocal - ASGI-compatible HTTP resolver for local development."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ from typing import Any
 
 import pytest
 
-from aws_lambda_powertools.event_handler import HttpResolverAlpha, Response
+from aws_lambda_powertools.event_handler import HttpResolverLocal, Response
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 
-# Suppress alpha warning for all tests
-pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverAlpha is an alpha feature")
+# Suppress warning for all tests
+pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverLocal is intended for local development")
 
 
 # =============================================================================
@@ -51,7 +51,7 @@ def make_asgi_send():
 
 def test_simple_get_route():
     # GIVEN a simple GET route
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/hello")
     def hello():
@@ -76,7 +76,7 @@ def test_simple_get_route():
 
 def test_path_parameters():
     # GIVEN a route with path parameters
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/users/<user_id>")
     def get_user(user_id: str):
@@ -102,7 +102,7 @@ def test_path_parameters():
 
 def test_post_with_body():
     # GIVEN a POST route that reads the body
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.post("/users")
     def create_user():
@@ -129,7 +129,7 @@ def test_post_with_body():
 
 def test_query_parameters():
     # GIVEN a route that reads query parameters
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/search")
     def search():
@@ -158,7 +158,7 @@ def test_query_parameters():
 
 def test_custom_response():
     # GIVEN a route that returns a custom Response
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/custom")
     def custom():
@@ -187,7 +187,7 @@ def test_custom_response():
 
 def test_not_found():
     # GIVEN an app with a defined route
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/exists")
     def exists():
@@ -210,7 +210,7 @@ def test_not_found():
 
 def test_custom_not_found_handler():
     # GIVEN an app with a custom not_found handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.not_found
     def custom_not_found(exc: Exception):
@@ -249,7 +249,7 @@ def test_custom_not_found_handler():
 
 def test_middleware_execution():
     # GIVEN an app with middleware
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     middleware_called = []
 
     def test_middleware(app, next_middleware):
@@ -283,7 +283,7 @@ def test_middleware_execution():
 
 def test_middleware_can_short_circuit():
     # GIVEN an app with auth middleware
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     def auth_middleware(app, next_middleware):
         auth_header = app.current_event.headers.get("authorization")
@@ -320,7 +320,7 @@ def test_middleware_can_short_circuit():
 
 def test_multiple_middlewares():
     # GIVEN an app with multiple middlewares
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     order = []
 
     def middleware_1(app, next_middleware):
@@ -359,7 +359,7 @@ def test_multiple_middlewares():
 
 def test_route_specific_middleware():
     # GIVEN an app with route-specific middleware
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     route_middleware_called = []
 
     def route_middleware(app, next_middleware):
@@ -406,7 +406,7 @@ def test_route_specific_middleware():
 
 def test_route_middleware_with_global_middleware():
     # GIVEN an app with both global and route-specific middleware
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     order = []
 
     def global_middleware(app, next_middleware):
@@ -445,7 +445,7 @@ def test_route_middleware_with_global_middleware():
 
 def test_route_middleware_can_modify_response():
     # GIVEN an app with middleware that modifies response
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     def add_header_middleware(app, next_middleware):
         response = next_middleware(app)
@@ -480,7 +480,7 @@ def test_route_middleware_can_modify_response():
 @pytest.mark.asyncio
 async def test_asgi_get_request():
     # GIVEN an app with a GET route
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/hello/<name>")
     def hello(name: str):
@@ -509,7 +509,7 @@ async def test_asgi_get_request():
 @pytest.mark.asyncio
 async def test_asgi_custom_not_found():
     # GIVEN an app with custom not_found handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.not_found
     def custom_not_found(exc: Exception):
@@ -547,7 +547,7 @@ async def test_asgi_custom_not_found():
 @pytest.mark.asyncio
 async def test_asgi_post_request():
     # GIVEN an app with a POST route
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.post("/users")
     def create_user():
@@ -578,7 +578,7 @@ async def test_asgi_post_request():
 @pytest.mark.asyncio
 async def test_asgi_query_params():
     # GIVEN an app with a route that reads query params
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/search")
     def search():
@@ -612,7 +612,7 @@ async def test_asgi_query_params():
 @pytest.mark.asyncio
 async def test_async_handler():
     # GIVEN an app with an async handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/async")
     async def async_handler():
@@ -642,7 +642,7 @@ async def test_async_handler():
 @pytest.mark.asyncio
 async def test_async_handler_with_path_params():
     # GIVEN an app with async handler and path params
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/users/<user_id>")
     async def get_user(user_id: str):
@@ -672,7 +672,7 @@ async def test_async_handler_with_path_params():
 @pytest.mark.asyncio
 async def test_sync_handler_in_async_context():
     # GIVEN an app with a sync handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/sync")
     def sync_handler():
@@ -700,7 +700,7 @@ async def test_sync_handler_in_async_context():
 @pytest.mark.asyncio
 async def test_mixed_sync_async_handlers():
     # GIVEN an app with both sync and async handlers
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/sync")
     def sync_handler():
@@ -741,7 +741,7 @@ async def test_mixed_sync_async_handlers():
 
 def test_exception_handler():
     # GIVEN an app with a custom exception handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     class CustomError(Exception):
         pass
@@ -778,7 +778,7 @@ def test_exception_handler():
 @pytest.mark.asyncio
 async def test_async_exception_handler():
     # GIVEN an app with exception handler and async route
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     class CustomError(Exception):
         pass
@@ -824,7 +824,7 @@ async def test_async_exception_handler():
 @pytest.mark.asyncio
 async def test_asgi_lifespan_startup_shutdown():
     # GIVEN an app
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/hello")
     def hello():
@@ -858,7 +858,7 @@ async def test_asgi_lifespan_startup_shutdown():
 @pytest.mark.asyncio
 async def test_asgi_ignores_non_http_scope():
     # GIVEN an app
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/hello")
     def hello():
@@ -886,7 +886,7 @@ async def test_asgi_ignores_non_http_scope():
 @pytest.mark.asyncio
 async def test_asgi_binary_response():
     # GIVEN an app that returns binary data (bytes body is auto base64 encoded)
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     binary_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00"  # PNG header bytes
 
     @app.get("/image")
@@ -920,7 +920,7 @@ async def test_asgi_binary_response():
 @pytest.mark.asyncio
 async def test_asgi_duplicate_headers():
     # GIVEN an ASGI request with duplicate headers
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/headers")
     def get_headers():
@@ -956,7 +956,7 @@ async def test_asgi_with_cookies():
     # GIVEN an app that sets cookies
     from aws_lambda_powertools.shared.cookies import Cookie
 
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/set-cookie")
     def set_cookie():
@@ -996,7 +996,7 @@ async def test_asgi_with_cookies():
 @pytest.mark.asyncio
 async def test_async_middleware():
     # GIVEN an app with async middleware
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
     order: list[str] = []
 
     async def async_middleware(app, next_middleware):
@@ -1034,7 +1034,7 @@ async def test_async_middleware():
 
 def test_unhandled_exception_raises():
     # GIVEN an app without exception handler for ValueError
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/error")
     def raise_error():
@@ -1056,7 +1056,7 @@ def test_unhandled_exception_raises():
 
 def test_default_not_found_without_custom_handler():
     # GIVEN an app WITHOUT custom not_found handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/exists")
     def exists():
@@ -1081,7 +1081,7 @@ def test_default_not_found_without_custom_handler():
 
 def test_method_not_matching_continues_search():
     # GIVEN an app with routes for different methods on same path
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/resource")
     def get_resource():
@@ -1109,7 +1109,7 @@ def test_method_not_matching_continues_search():
 
 def test_list_headers_serialization():
     # GIVEN an app that returns list headers
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/multi-header")
     def multi_header():
@@ -1138,7 +1138,7 @@ def test_list_headers_serialization():
 
 def test_string_body_in_event():
     # GIVEN an event with string body (not bytes)
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.post("/echo")
     def echo():
@@ -1165,7 +1165,7 @@ def test_string_body_in_event():
 @pytest.mark.asyncio
 async def test_asgi_default_not_found():
     # GIVEN an app WITHOUT custom not_found handler
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/exists")
     def exists():
@@ -1194,7 +1194,7 @@ async def test_asgi_default_not_found():
 @pytest.mark.asyncio
 async def test_asgi_unhandled_exception_raises():
     # GIVEN an app without exception handler for ValueError
-    app = HttpResolverAlpha()
+    app = HttpResolverLocal()
 
     @app.get("/error")
     async def raise_error():

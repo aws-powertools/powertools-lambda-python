@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD041 MD043 -->
-#### Http Resolver (Alpha)
+#### Http Resolver (Local Development)
 
-???+ warning "Alpha Feature"
-    `HttpResolverAlpha` is an alpha feature intended for local development and testing only.
+???+ warning "Local Development Only"
+    `HttpResolverLocal` is intended for local development and testing only.
     The API may change in future releases. **Do not use in production environments.**
 
-When developing locally, you can use `HttpResolverAlpha` to run your API with any ASGI server like [uvicorn](https://www.uvicorn.org/){target="_blank"}. It implements the [ASGI specification](https://asgi.readthedocs.io/){target="_blank"}, is lightweight with no external dependencies, and the same code works on any compute platform, including Lambda.
+When developing locally, you can use `HttpResolverLocal` to run your API with any ASGI server like [uvicorn](https://www.uvicorn.org/){target="_blank"}. It implements the [ASGI specification](https://asgi.readthedocs.io/){target="_blank"}, is lightweight with no external dependencies, and the same code works on any compute platform, including Lambda.
 
 If your Lambda is behind [Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter){target="_blank"} or any other HTTP proxy that speaks the HTTP protocol, it works seamlessly.
 
