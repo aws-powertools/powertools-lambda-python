@@ -485,7 +485,7 @@ This value will override the value of the failed response validation http code s
 
 We use the `Annotated` type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
-In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](openapi.md#customizing-parameters), which should read as:
 
 * `completed` is a query string with a `None` as its default value
 * `completed`, when set, should have at minimum 4 characters
@@ -539,7 +539,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
 #### Validating path parameters
 
-Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to [add constraints](#customizing-openapi-parameters).
+Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to [add constraints](openapi.md#customizing-parameters).
 
 For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
 
@@ -555,7 +555,7 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated. Also, we adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive.
 
-In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](openapi.md#customizing-parameters), which should read as:
 
 * `correlation_id` is a header that must be present in the request
 * `correlation_id` should have 16 characters
@@ -716,27 +716,14 @@ We provide pre-defined errors for the most popular ones based on [AWS Lambda API
 
 ### Enabling SwaggerUI
 
-!!! note "This feature requires [data validation](#data-validation) feature to be enabled."
+???+ tip "OpenAPI documentation has moved"
+    For complete OpenAPI documentation including Swagger UI customization, security schemes, and OpenAPI Merge for micro-functions, see the dedicated [OpenAPI documentation](openapi.md).
 
-Behind the scenes, the [data validation](#data-validation) feature auto-generates an OpenAPI specification from your routes and type annotations. You can use [Swagger UI](https://swagger.io/tools/swagger-ui/){target="_blank" rel="nofollow"} to visualize and interact with your newly auto-documented API.
-
-There are some important **caveats** that you should know before enabling it:
-
-| Caveat                                                  | Description                                                                                                                                                                                                                |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Swagger UI is **publicly accessible by default**        | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism.                                   |
-| **No micro-functions support** yet                      | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                                       |
-| You need to expose a **new route**                      | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                                                                                                                |
-| JS and CSS  files are **embedded within Swagger HTML**  | If you are not using an external CDN to serve Swagger UI assets, we embed JS and CSS directly into the HTML. To enhance performance, please consider enabling the `compress` option to minimize the size of HTTP requests. |
-| Authorization data is **lost** on browser close/refresh | Use `enable_swagger(persist_authorization=True)` to persist authorization data, like OAuath 2.0 access tokens.                                                                                                             |
+Use `enable_swagger()` to serve interactive API documentation:
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
 ```
-
-1. `enable_swagger` creates a route to serve Swagger UI and allows quick customizations. <br><br> You can also include  middlewares to protect or enhance the overall experience.
-
-Here's an example of what it looks like by default:
 
 ![Swagger UI picture](../../media/swagger.png)
 
@@ -1179,128 +1166,8 @@ This will enable full tracebacks errors in the response, print request and respo
 
 ### OpenAPI
 
-When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="_blank" rel="nofollow"} type annotations to add constraints to your API's parameters.
-
-???+ warning "OpenAPI schema version depends on the installed version of Pydantic"
-    Pydantic v1 generates [valid OpenAPI 3.0.3 schemas](https://docs.pydantic.dev/1.10/usage/schema/){target="_blank" rel="nofollow"}, and Pydantic v2 generates [valid OpenAPI 3.1.0 schemas](https://docs.pydantic.dev/latest/why/#json-schema){target="_blank" rel="nofollow"}.
-
-In OpenAPI documentation tools like [SwaggerUI](#enabling-swaggerui), these annotations become readable descriptions, offering a self-explanatory API interface. This reduces boilerplate code while improving functionality and enabling auto-documentation.
-
-???+ note
-	We don't have support for files, form data, and header parameters at the moment. If you're interested in this, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE).
-
-#### Customizing OpenAPI parameters
-
---8<-- "docs/core/event_handler/_openapi_customization_parameters.md"
-
-#### Customizing API operations
-
---8<-- "docs/core/event_handler/_openapi_customization_operations.md"
-
-To implement these customizations, include extra parameters when defining your routes:
-
-```python hl_lines="11-20" title="customizing_api_operations.py"
---8<-- "examples/event_handler_rest/src/customizing_api_operations.py"
-```
-
-#### Customizing OpenAPI metadata
-
---8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
-
-Include extra parameters when exporting your OpenAPI specification to apply these customizations:
-
-=== "customizing_api_metadata.py"
-
-    ```python hl_lines="8-16"
-    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
-    ```
-
-#### Customizing Swagger UI
-
-???+note "Customizing the Swagger metadata"
-	The `enable_swagger` method accepts the same metadata as described at [Customizing OpenAPI metadata](#customizing-openapi-metadata).
-
-The Swagger UI appears by default at the `/swagger` path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.
-
-Below is an example configuration for serving Swagger UI from a custom path or CDN, with assets like CSS and JavaScript loading from a chosen CDN base URL.
-
-=== "customizing_swagger.py"
-
-    ```python hl_lines="10"
-    --8<-- "examples/event_handler_rest/src/customizing_swagger.py"
-    ```
-
-=== "customizing_swagger_middlewares.py"
-
-   A Middleware can handle tasks such as adding security headers, user authentication, or other request processing for serving the Swagger UI.
-
-   ```python hl_lines="7 13-18 21"
-   --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
-   ```
-
-#### Security schemes
-
-???-info "Does Powertools implement any of the security schemes?"
-    No. Powertools adds support for generating OpenAPI documentation with [security schemes](https://swagger.io/docs/specification/authentication/), but it doesn't implement any of the security schemes itself, so you must implement the security mechanisms separately.
-
-Security schemes are declared at the top-level first. You can reference them globally or on a per path _(operation)_ level. **However**, if you reference security schemes that are not defined at the top-level it will lead to a `SchemaValidationError` _(invalid OpenAPI spec)_.
-
-=== "Global OpenAPI security schemes"
-
-    ```python title="security_schemes_global.py" hl_lines="17-27"
-    --8<-- "examples/event_handler_rest/src/security_schemes_global.py"
-    ```
-
-    1. Using the oauth security scheme defined earlier, scoped to the "admin" role.
-
-=== "Per Operation security"
-
-    ```python title="security_schemes_per_operation.py" hl_lines="17-26 30"
-    --8<-- "examples/event_handler_rest/src/security_schemes_per_operation.py"
-    ```
-
-    1. Using the oauth security scheme defined bellow, scoped to the "admin" role.
-
-=== "Global security schemes and optional security per route"
-
-    ```python title="security_schemes_global_and_optional.py" hl_lines="17-26 35"
-    --8<-- "examples/event_handler_rest/src/security_schemes_global_and_optional.py"
-    ```
-
-    1. To make security optional in a specific route, an empty security requirement ({}) can be included in the array.
-
-OpenAPI 3 lets you describe APIs protected using the following security schemes:
-
-| Security Scheme                                                                                                             | Type            | Description                                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [HTTP auth](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml){target="_blank"}                      | `HTTPBase`      | HTTP authentication schemes using the Authorization header (e.g: [Basic auth](https://swagger.io/docs/specification/authentication/basic-authentication/){target="_blank"}, [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/){target="_blank"}) |
-| [API keys](https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies)   | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
-| [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                    | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
-| [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"} | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
-| [Mutual TLS](https://swagger.io/specification/#security-scheme-object){target="_blank"}.                                    | `MutualTLS`     | Client/server certificate mutual authentication scheme.                                                                                                                                                                                                                             |
-
-???-note "Using OAuth2 with the Swagger UI?"
-    You can use the `OAuth2Config` option to configure a default OAuth2 app on the generated Swagger UI.
-
-    ```python hl_lines="10 15-18 22"
-    --8<-- "examples/event_handler_rest/src/swagger_with_oauth2.py"
-    ```
-
-#### OpenAPI extensions
-
-For a better experience when working with Lambda and Amazon API Gateway, customers can define extensions using the `openapi_extensions` parameter. We support defining OpenAPI extensions at the following levels of the OpenAPI JSON Schema: Root, Servers, Operation, and Security Schemes.
-
-???+ warning
-    We do not support the `x-amazon-apigateway-any-method` and `x-amazon-apigateway-integrations` extensions.
-
-```python hl_lines="9 15 25 28" title="Adding OpenAPI extensions"
---8<-- "examples/event_handler_rest/src/working_with_openapi_extensions.py"
-```
-
-1. Server level
-2. Operation level
-3. Security scheme level
-4. Root level
+???+ tip "OpenAPI documentation has moved"
+    For complete OpenAPI documentation including customization, security schemes, extensions, and OpenAPI Merge for micro-functions, see the dedicated [OpenAPI documentation](openapi.md).
 
 ### Custom serializer
 

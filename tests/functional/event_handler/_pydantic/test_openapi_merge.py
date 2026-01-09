@@ -367,3 +367,36 @@ def test_openapi_merge_schema_is_cached():
 
     # AND paths should not be duplicated
     assert len([p for p in schema1["paths"] if p == "/users"]) == 1
+
+
+def test_openapi_merge_shared_resolver_pattern():
+    # GIVEN a shared resolver pattern where:
+    # - resolver.py defines the resolver
+    # - products_routes.py and categories_routes.py import it and register routes
+    merge = OpenAPIMerge(title="Shared Resolver API", version="1.0.0")
+
+    # WHEN discovering with project_root set to allow absolute imports
+    shared_path = MERGE_HANDLERS_PATH / "shared"
+    project_root = Path(__file__).parent.parent.parent.parent.parent  # repo root
+
+    files = merge.discover(
+        path=shared_path,
+        pattern="resolver.py",
+        project_root=project_root,
+    )
+
+    # THEN it should find the resolver file
+    assert len(files) == 1
+    assert files[0].name == "resolver.py"
+
+    # AND it should find dependent files that import the resolver
+    dependent = merge.dependent_files.get(files[0], [])
+    dependent_names = [f.name for f in dependent]
+    assert "products_routes.py" in dependent_names
+    assert "categories_routes.py" in dependent_names
+
+    # AND the merged schema should include routes from all dependent files
+    schema = merge.get_openapi_schema()
+    assert "/products" in schema["paths"]
+    assert "/products/{product_id}" in schema["paths"]
+    assert "/categories" in schema["paths"]

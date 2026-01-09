@@ -21,6 +21,7 @@ nav:
               - Datadog: core/metrics/datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
+              - core/event_handler/openapi.md
               - core/event_handler/appsync.md
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md

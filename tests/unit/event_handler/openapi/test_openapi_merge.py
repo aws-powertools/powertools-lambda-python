@@ -10,7 +10,7 @@ from aws_lambda_powertools.event_handler.openapi.merge import (
     _discover_resolver_files,
     _file_has_resolver,
     _is_excluded,
-    _load_resolver,
+    _load_resolver_with_dependencies,
 )
 
 MERGE_HANDLERS_PATH = Path(__file__).parents[3] / "functional/event_handler/_pydantic/merge_handlers"
@@ -71,7 +71,7 @@ def test_is_excluded_with_file_pattern():
 
 def test_load_resolver_file_not_found():
     with pytest.raises(FileNotFoundError):
-        _load_resolver(Path("/non/existent/file.py"), "app")
+        _load_resolver_with_dependencies(Path("/non/existent/file.py"), "app", [], Path("/"))
 
 
 def test_load_resolver_not_found_in_module(tmp_path: Path):
@@ -79,7 +79,7 @@ def test_load_resolver_not_found_in_module(tmp_path: Path):
     handler_file.write_text("x = 1")
 
     with pytest.raises(AttributeError, match="Resolver 'app' not found"):
-        _load_resolver(handler_file, "app")
+        _load_resolver_with_dependencies(handler_file, "app", [], tmp_path)
 
 
 def test_load_resolver_success(tmp_path: Path):
@@ -93,6 +93,6 @@ def test_endpoint():
     return {"test": True}
 """)
 
-    resolver = _load_resolver(handler_file, "app")
+    resolver = _load_resolver_with_dependencies(handler_file, "app", [], tmp_path)
     assert resolver is not None
     assert hasattr(resolver, "get_openapi_schema")

@@ -53,9 +53,9 @@ def _is_resolver_call(node: ast.expr) -> bool:
     func = node.func
     if isinstance(func, ast.Name) and func.id in RESOLVER_CLASSES:
         return True
-    if isinstance(func, ast.Attribute) and func.attr in RESOLVER_CLASSES:  # pragma: no cover
+    if isinstance(func, ast.Attribute) and func.attr in RESOLVER_CLASSES:
         return True
-    return False  # pragma: no cover
+    return False
 
 
 def _file_has_resolver(file_path: Path, resolver_name: str) -> bool:
@@ -75,6 +75,65 @@ def _file_has_resolver(file_path: Path, resolver_name: str) -> bool:
     return False
 
 
+def _file_imports_resolver(file_path: Path, resolver_file: Path, resolver_name: str, root: Path) -> bool:
+    """Check if a Python file imports the resolver from the resolver file."""
+    try:
+        source = file_path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(file_path))
+    except (SyntaxError, UnicodeDecodeError):
+        return False
+
+    # Get the module path of the resolver file relative to root
+    # e.g., "service/handlers/utils/rest_api_resolver.py" -> "service.handlers.utils.rest_api_resolver"
+    resolver_relative = resolver_file.relative_to(root).with_suffix("")
+    resolver_module = ".".join(resolver_relative.parts)
+
+    for node in ast.walk(tree):
+        # Check "from X import app" or "from X import app as something"
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                if alias.name == resolver_name:
+                    # Check if the import module matches the resolver module
+                    if node.module == resolver_module:
+                        return True
+    return False
+
+
+def _find_dependent_files(
+    search_path: Path,
+    resolver_file: Path,
+    resolver_name: str,
+    exclude: list[str],
+    project_root: Path,
+) -> list[Path]:
+    """Find all Python files that import the resolver.
+
+    Parameters
+    ----------
+    search_path : Path
+        Directory to search for dependent files.
+    resolver_file : Path
+        The resolver file that dependents import from.
+    resolver_name : str
+        Variable name of the resolver.
+    exclude : list[str]
+        Patterns to exclude.
+    project_root : Path
+        Root directory for resolving Python imports.
+    """
+    dependent_files: list[Path] = []
+
+    for file_path in search_path.rglob("*.py"):
+        if file_path == resolver_file:
+            continue
+        if _is_excluded(file_path, search_path, exclude):
+            continue
+        if _file_imports_resolver(file_path, resolver_file, resolver_name, project_root):
+            dependent_files.append(file_path)
+
+    return sorted(dependent_files)
+
+
 def _is_excluded(file_path: Path, root: Path, exclude_patterns: list[str]) -> bool:
     """Check if a file matches any exclusion pattern."""
     relative_str = str(file_path.relative_to(root))
@@ -84,12 +143,11 @@ def _is_excluded(file_path: Path, root: Path, exclude_patterns: list[str]) -> bo
             sub_pattern = pattern[3:]
             if fnmatch.fnmatch(relative_str, pattern) or fnmatch.fnmatch(file_path.name, sub_pattern):
                 return True
-            # Check directory parts - remove trailing glob patterns
             clean_pattern = sub_pattern.replace("/**", "").replace("/*", "")
             for part in file_path.relative_to(root).parts:
-                if fnmatch.fnmatch(part, clean_pattern):  # pragma: no cover
+                if fnmatch.fnmatch(part, clean_pattern):
                     return True
-        elif fnmatch.fnmatch(relative_str, pattern) or fnmatch.fnmatch(file_path.name, pattern):  # pragma: no cover
+        elif fnmatch.fnmatch(relative_str, pattern) or fnmatch.fnmatch(file_path.name, pattern):
             return True
     return False
 
@@ -99,7 +157,7 @@ def _get_glob_pattern(pat: str, recursive: bool) -> str:
     if recursive and not pat.startswith("**/"):
         return f"**/{pat}"
     if not recursive and pat.startswith("**/"):
-        return pat[3:]  # Strip **/ prefix
+        return pat[3:]
     return pat
 
 
@@ -131,133 +189,81 @@ def _discover_resolver_files(
     return sorted(found_files)
 
 
-def _load_resolver(file_path: Path, resolver_name: str) -> Any:
-    """Load a resolver instance from a Python file."""
-    file_path = Path(file_path).resolve()
-    module_name = f"_powertools_openapi_merge_{file_path.stem}_{id(file_path)}"
-
+def _load_module(file_path: Path, module_name: str) -> Any:
+    """Load a Python module from file."""
     spec = importlib.util.spec_from_file_location(module_name, file_path)
-    if spec is None or spec.loader is None:  # pragma: no cover
+    if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load module from {file_path}")
 
     module = importlib.util.module_from_spec(spec)
-    module_dir = str(file_path.parent)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_resolver_with_dependencies(
+    file_path: Path,
+    resolver_name: str,
+    dependent_files: list[Path],
+    root: Path,
+) -> Any:
+    """Load a resolver instance, first loading all dependent files that register routes."""
+    file_path = Path(file_path).resolve()
+
+    # Add root to sys.path if not already there
+    root_str = str(root)
     original_path = sys.path.copy()
 
     try:
-        if module_dir not in sys.path:
-            sys.path.insert(0, module_dir)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
+        if root_str not in sys.path:
+            sys.path.insert(0, root_str)
+
+        # First, load all dependent files (they will import the resolver and register routes)
+        for dep_file in dependent_files:
+            dep_module_name = f"_powertools_dep_{dep_file.stem}_{id(dep_file)}"
+            try:
+                _load_module(dep_file, dep_module_name)
+                logger.debug(f"Loaded dependent file: {dep_file}")
+            except Exception as e:
+                logger.warning(f"Failed to load dependent file {dep_file}: {e}")
+
+        # Now get the resolver - it should already be loaded by the dependent files
+        # Try to get it from the module that was loaded by dependents
+        resolver_relative = file_path.relative_to(root).with_suffix("")
+        resolver_module_name = ".".join(resolver_relative.parts)
+
+        if resolver_module_name in sys.modules:
+            module = sys.modules[resolver_module_name]
+        else:
+            # Fallback: load the resolver file directly
+            module_name = f"_powertools_openapi_merge_{file_path.stem}_{id(file_path)}"
+            module = _load_module(file_path, module_name)
 
         if not hasattr(module, resolver_name):
             raise AttributeError(f"Resolver '{resolver_name}' not found in {file_path}.")
         return getattr(module, resolver_name)
     finally:
         sys.path = original_path
-        sys.modules.pop(module_name, None)
 
 
 def _model_to_dict(obj: Any) -> Any:
     """Convert Pydantic model to dict if needed."""
     if hasattr(obj, "model_dump"):
         return obj.model_dump(by_alias=True, exclude_none=True)
-    return obj  # pragma: no cover
+    return obj
 
 
 class OpenAPIMerge:
     """
     Discover and merge OpenAPI schemas from multiple Lambda handlers.
 
-    This class is designed for micro-functions architectures where you have multiple
-    Lambda functions, each with its own resolver, and need to generate a unified
-    OpenAPI specification. It's particularly useful for:
+    This class supports two patterns:
+    1. Standard pattern: Each handler file defines its own resolver with routes
+    2. Shared resolver pattern: A central resolver file is imported by multiple handler files
+       that register routes on it
 
-    - CI/CD pipelines to generate and publish unified API documentation
-    - Build-time schema generation for API Gateway imports
-    - Creating a dedicated Lambda that serves the consolidated OpenAPI spec
-
-    The class uses AST analysis to detect resolver instances without importing modules,
-    making discovery fast and safe.
-
-    Parameters
-    ----------
-    title : str
-        The title of the unified API.
-    version : str
-        The version of the API (e.g., "1.0.0").
-    openapi_version : str, default "3.1.0"
-        The OpenAPI specification version.
-    summary : str, optional
-        A short summary of the API.
-    description : str, optional
-        A detailed description of the API.
-    tags : list[Tag | str], optional
-        Tags for API documentation organization.
-    servers : list[Server], optional
-        Server objects for API connectivity information.
-    terms_of_service : str, optional
-        URL to the Terms of Service.
-    contact : Contact, optional
-        Contact information for the API.
-    license_info : License, optional
-        License information for the API.
-    security_schemes : dict[str, SecurityScheme], optional
-        Security scheme definitions.
-    security : list[dict[str, list[str]]], optional
-        Global security requirements.
-    external_documentation : ExternalDocumentation, optional
-        Link to external documentation.
-    openapi_extensions : dict[str, Any], optional
-        OpenAPI specification extensions (x-* fields).
-    on_conflict : Literal["warn", "error", "first", "last"], default "warn"
-        Strategy when the same path+method is defined in multiple handlers:
-        - "warn": Log warning and keep first definition
-        - "error": Raise OpenAPIMergeError
-        - "first": Silently keep first definition
-        - "last": Use last definition (override)
-
-    Example
-    -------
-    **CI/CD Pipeline - Generate unified schema at build time:**
-
-    >>> from aws_lambda_powertools.event_handler.openapi import OpenAPIMerge
-    >>>
-    >>> merge = OpenAPIMerge(
-    ...     title="My Unified API",
-    ...     version="1.0.0",
-    ...     description="Consolidated API from multiple Lambda functions",
-    ... )
-    >>> merge.discover(
-    ...     path="./src/functions",
-    ...     pattern="**/handler.py",
-    ...     exclude=["**/tests/**"],
-    ... )
-    >>> schema_json = merge.get_openapi_json_schema()
-    >>>
-    >>> # Write to file for API Gateway import or documentation
-    >>> with open("openapi.json", "w") as f:
-    ...     f.write(schema_json)
-
-    **Dedicated OpenAPI Lambda - Serve unified spec at runtime:**
-
-    >>> from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    >>>
-    >>> app = APIGatewayRestResolver()
-    >>> app.configure_openapi_merge(
-    ...     path="./functions",
-    ...     pattern="**/handler.py",
-    ...     title="My API",
-    ...     version="1.0.0",
-    ... )
-    >>> app.enable_swagger(path="/docs")  # Swagger UI with merged schema
-    >>>
-    >>> def handler(event, context):
-    ...     return app.resolve(event, context)
-
-    See Also
-    --------
-    OpenAPIMergeError : Exception raised on merge conflicts when on_conflict="error"
+    For the shared resolver pattern, this class automatically discovers files that import
+    the resolver and loads them before extracting the schema, ensuring all routes are registered.
     """
 
     def __init__(
@@ -297,9 +303,12 @@ class OpenAPIMerge:
         )
         self._schemas: list[dict[str, Any]] = []
         self._discovered_files: list[Path] = []
+        self._dependent_files: dict[Path, list[Path]] = {}
         self._resolver_name: str = "app"
         self._on_conflict = on_conflict
         self._cached_schema: dict[str, Any] | None = None
+        self._root: Path | None = None
+        self._exclude: list[str] = []
 
     def discover(
         self,
@@ -308,45 +317,41 @@ class OpenAPIMerge:
         exclude: list[str] | None = None,
         resolver_name: str = "app",
         recursive: bool = False,
+        project_root: str | Path | None = None,
     ) -> list[Path]:
-        """
-        Discover resolver files in the specified path using glob patterns.
-
-        This method scans the directory tree for Python files matching the pattern,
-        then uses AST analysis to identify files containing resolver instances.
+        """Discover resolver files and their dependent handler files.
 
         Parameters
         ----------
         path : str | Path
-            Root directory to search for handler files.
-        pattern : str | list[str], default "handler.py"
+            Directory to search for resolver files.
+        pattern : str | list[str]
             Glob pattern(s) to match handler files.
-        exclude : list[str], optional
-            Patterns to exclude. Defaults to ["**/tests/**", "**/__pycache__/**", "**/.venv/**"].
-        resolver_name : str, default "app"
-            Variable name of the resolver instance in handler files.
-        recursive : bool, default False
-            Whether to search recursively in subdirectories.
-
-        Returns
-        -------
-        list[Path]
-            List of discovered files containing resolver instances.
-
-        Example
-        -------
-        >>> merge = OpenAPIMerge(title="API", version="1.0.0")
-        >>> files = merge.discover(
-        ...     path="./src",
-        ...     pattern=["handler.py", "api.py"],
-        ...     exclude=["**/tests/**", "**/legacy/**"],
-        ...     recursive=True,
-        ... )
-        >>> print(f"Found {len(files)} handlers")
+        exclude : list[str] | None
+            Patterns to exclude.
+        resolver_name : str
+            Variable name of the resolver instance.
+        recursive : bool
+            Whether to search recursively.
+        project_root : str | Path | None
+            Root directory for resolving Python imports. If None, uses current working directory.
+            This is needed when handlers import the resolver using absolute imports like
+            'from service.handlers.utils.resolver import app'.
         """
         exclude = exclude or ["**/tests/**", "**/__pycache__/**", "**/.venv/**"]
+        self._exclude = exclude
         self._resolver_name = resolver_name
+        self._search_path = Path(path).resolve()
+        self._root = Path(project_root).resolve() if project_root else self._search_path
+
         self._discovered_files = _discover_resolver_files(path, pattern, exclude, resolver_name, recursive)
+
+        # For each resolver file, find files that import it (search within path, resolve imports with project_root)
+        for resolver_file in self._discovered_files:
+            dependent = _find_dependent_files(self._search_path, resolver_file, resolver_name, exclude, self._root)
+            self._dependent_files[resolver_file] = dependent
+            logger.debug(f"Found {len(dependent)} dependent files for {resolver_file}")
+
         return self._discovered_files
 
     def add_file(self, file_path: str | Path, resolver_name: str | None = None) -> None:
@@ -369,87 +374,59 @@ class OpenAPIMerge:
         """
         self._schemas.append(_model_to_dict(schema))
 
+    @property
+    def discovered_files(self) -> list[Path]:
+        """Get the list of discovered resolver files."""
+        return self._discovered_files.copy()
+
+    @property
+    def dependent_files(self) -> dict[Path, list[Path]]:
+        """Get the mapping of resolver files to their dependent handler files."""
+        return {k: v.copy() for k, v in self._dependent_files.items()}
+
     def get_openapi_schema(self) -> dict[str, Any]:
-        """
-        Generate the merged OpenAPI schema as a dictionary.
-
-        Loads all discovered resolver files, extracts their OpenAPI schemas,
-        and merges them into a single unified specification.
-
-        The schema is cached after the first generation for performance.
-
-        Returns
-        -------
-        dict[str, Any]
-            The merged OpenAPI schema.
-
-        Raises
-        ------
-        OpenAPIMergeError
-            If on_conflict="error" and duplicate path+method combinations are found.
-        """
+        """Generate the merged OpenAPI schema."""
         if self._cached_schema is not None:
             return self._cached_schema
 
-        # Load schemas from discovered files
         for file_path in self._discovered_files:
             try:
-                resolver = _load_resolver(file_path, self._resolver_name)
+                dependent = self._dependent_files.get(file_path, [])
+                root = self._root or file_path.parent
+                resolver = _load_resolver_with_dependencies(
+                    file_path,
+                    self._resolver_name,
+                    dependent,
+                    root,
+                )
                 if hasattr(resolver, "get_openapi_schema"):
                     self._schemas.append(_model_to_dict(resolver.get_openapi_schema()))
-            except (ImportError, AttributeError, FileNotFoundError) as e:  # pragma: no cover
+            except (ImportError, AttributeError, FileNotFoundError) as e:
                 logger.warning(f"Failed to load resolver from {file_path}: {e}")
 
         self._cached_schema = self._merge_schemas()
         return self._cached_schema
 
     def get_openapi_json_schema(self) -> str:
-        """
-        Generate the merged OpenAPI schema as a JSON string.
-
-        This is the recommended method for CI/CD pipelines and build-time
-        schema generation, as the output can be directly written to a file
-        or used for API Gateway imports.
-
-        Returns
-        -------
-        str
-            The merged OpenAPI schema as formatted JSON.
-
-        Example
-        -------
-        >>> merge = OpenAPIMerge(title="API", version="1.0.0")
-        >>> merge.discover(path="./functions", pattern="**/handler.py")
-        >>> json_schema = merge.get_openapi_json_schema()
-        >>> with open("openapi.json", "w") as f:
-        ...     f.write(json_schema)
-        """
+        """Generate the merged OpenAPI schema as JSON string."""
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
 
         schema = self.get_openapi_schema()
         return model_json(OpenAPI(**schema), by_alias=True, exclude_none=True, indent=2)
 
-    @property
-    def discovered_files(self) -> list[Path]:
-        """Get the list of discovered resolver files."""
-        return self._discovered_files.copy()
-
     def _merge_schemas(self) -> dict[str, Any]:
         """Merge all schemas into a single OpenAPI schema."""
         cfg = self._config
 
-        # Build base schema
         merged: dict[str, Any] = {
             "openapi": cfg.openapi_version,
             "info": {"title": cfg.title, "version": cfg.version},
             "servers": [_model_to_dict(s) for s in cfg.servers] if cfg.servers else [{"url": "/"}],
         }
 
-        # Add optional info fields
         self._add_optional_info_fields(merged, cfg)
 
-        # Merge paths and components
         merged_paths: dict[str, Any] = {}
         merged_components: dict[str, dict[str, Any]] = {}
 
@@ -457,7 +434,6 @@ class OpenAPIMerge:
             self._merge_paths(schema.get("paths", {}), merged_paths)
             self._merge_components(schema.get("components", {}), merged_components)
 
-        # Add security schemes from config
         if cfg.security_schemes:
             merged_components.setdefault("securitySchemes", {}).update(cfg.security_schemes)
 
@@ -466,7 +442,6 @@ class OpenAPIMerge:
         if merged_components:
             merged["components"] = merged_components
 
-        # Merge tags
         if merged_tags := self._merge_tags():
             merged["tags"] = merged_tags
 
@@ -514,12 +489,7 @@ class OpenAPIMerge:
             target[path][method] = operation
 
     def _merge_components(self, source: dict[str, Any], target: dict[str, dict[str, Any]]) -> None:
-        """Merge components from source into target.
-
-        Note: Components with the same name are silently overwritten (last wins).
-        This is intentional as component conflicts are typically user errors
-        (e.g., two handlers defining different 'User' schemas).
-        """
+        """Merge components from source into target."""
         for component_type, components in source.items():
             target.setdefault(component_type, {}).update(components)
 
@@ -527,7 +497,6 @@ class OpenAPIMerge:
         """Merge tags from config and schemas."""
         tags_map: dict[str, dict[str, Any]] = {}
 
-        # Config tags first
         for tag in self._config.tags or []:
             if isinstance(tag, str):
                 tags_map[tag] = {"name": tag}
@@ -535,11 +504,10 @@ class OpenAPIMerge:
                 tag_dict = _model_to_dict(tag)
                 tags_map[tag_dict["name"]] = tag_dict
 
-        # Schema tags (don't override config)
         for schema in self._schemas:
             for tag in schema.get("tags", []):
                 name = tag["name"] if isinstance(tag, dict) else tag
                 if name not in tags_map:
-                    tags_map[name] = tag if isinstance(tag, dict) else {"name": tag}  # pragma: no cover
+                    tags_map[name] = tag if isinstance(tag, dict) else {"name": tag}
 
         return list(tags_map.values())
