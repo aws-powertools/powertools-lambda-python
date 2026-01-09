@@ -94,6 +94,15 @@ def _is_excluded(file_path: Path, root: Path, exclude_patterns: list[str]) -> bo
     return False
 
 
+def _get_glob_pattern(pat: str, recursive: bool) -> str:
+    """Get the glob pattern based on recursive flag."""
+    if recursive and not pat.startswith("**/"):
+        return f"**/{pat}"
+    if not recursive and pat.startswith("**/"):
+        return pat[3:]  # Strip **/ prefix
+    return pat
+
+
 def _discover_resolver_files(
     path: str | Path,
     pattern: str | list[str],
@@ -110,18 +119,14 @@ def _discover_resolver_files(
     found_files: set[Path] = set()
 
     for pat in patterns:
-        # Handle recursive flag: add **/ prefix if recursive, strip **/ if not
-        if recursive and not pat.startswith("**/"):
-            glob_pattern = f"**/{pat}"
-        elif not recursive and pat.startswith("**/"):
-            glob_pattern = pat[3:]  # Strip **/ prefix
-        else:
-            glob_pattern = pat
-
+        glob_pattern = _get_glob_pattern(pat, recursive)
         for file_path in root.glob(glob_pattern):
-            if file_path.is_file() and not _is_excluded(file_path, root, exclude):
-                if _file_has_resolver(file_path, resolver_name):
-                    found_files.add(file_path)
+            if (
+                file_path.is_file()
+                and not _is_excluded(file_path, root, exclude)
+                and _file_has_resolver(file_path, resolver_name)
+            ):
+                found_files.add(file_path)
 
     return sorted(found_files)
 
@@ -442,22 +447,7 @@ class OpenAPIMerge:
         }
 
         # Add optional info fields
-        if cfg.summary:
-            merged["info"]["summary"] = cfg.summary
-        if cfg.description:
-            merged["info"]["description"] = cfg.description
-        if cfg.terms_of_service:
-            merged["info"]["termsOfService"] = cfg.terms_of_service
-        if cfg.contact:
-            merged["info"]["contact"] = _model_to_dict(cfg.contact)
-        if cfg.license_info:
-            merged["info"]["license"] = _model_to_dict(cfg.license_info)
-        if cfg.security:
-            merged["security"] = cfg.security
-        if cfg.external_documentation:
-            merged["externalDocs"] = _model_to_dict(cfg.external_documentation)
-        if cfg.openapi_extensions:
-            merged.update(cfg.openapi_extensions)
+        self._add_optional_info_fields(merged, cfg)
 
         # Merge paths and components
         merged_paths: dict[str, Any] = {}
@@ -477,11 +467,29 @@ class OpenAPIMerge:
             merged["components"] = merged_components
 
         # Merge tags
-        merged_tags = self._merge_tags()
-        if merged_tags:
+        if merged_tags := self._merge_tags():
             merged["tags"] = merged_tags
 
         return merged
+
+    def _add_optional_info_fields(self, merged: dict[str, Any], cfg: OpenAPIConfig) -> None:
+        """Add optional fields from config to the merged schema."""
+        if cfg.summary:
+            merged["info"]["summary"] = cfg.summary
+        if cfg.description:
+            merged["info"]["description"] = cfg.description
+        if cfg.terms_of_service:
+            merged["info"]["termsOfService"] = cfg.terms_of_service
+        if cfg.contact:
+            merged["info"]["contact"] = _model_to_dict(cfg.contact)
+        if cfg.license_info:
+            merged["info"]["license"] = _model_to_dict(cfg.license_info)
+        if cfg.security:
+            merged["security"] = cfg.security
+        if cfg.external_documentation:
+            merged["externalDocs"] = _model_to_dict(cfg.external_documentation)
+        if cfg.openapi_extensions:
+            merged.update(cfg.openapi_extensions)
 
     def _merge_paths(self, source_paths: dict[str, Any], target: dict[str, Any]) -> None:
         """Merge paths from source into target."""
