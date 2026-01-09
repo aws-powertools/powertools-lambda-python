@@ -1215,3 +1215,30 @@ async def test_asgi_unhandled_exception_raises():
     # THEN it propagates up
     with pytest.raises(ValueError, match="Async unhandled error"):
         await app(scope, receive, send)
+
+
+@pytest.mark.asyncio
+async def test_asgi_wrong_method_returns_not_found():
+    # GIVEN an app with only a GET route
+    app = HttpResolverLocal()
+
+    @app.get("/hello")
+    def hello():
+        return {"message": "Hello"}
+
+    # WHEN calling with POST method (route exists but method doesn't match)
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/hello",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    await app(scope, receive, send)
+
+    # THEN it returns 404 (method mismatch is treated as not found)
+    assert captured["status_code"] == 404
