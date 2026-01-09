@@ -49,5 +49,3 @@ class SchemaValidationError(ValidationException):
 
 class OpenAPIMergeError(Exception):
     """Exception raised when there's a conflict during OpenAPI merge."""
-
-    pass

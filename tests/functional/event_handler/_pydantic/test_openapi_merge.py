@@ -351,3 +351,19 @@ def test_openapi_merge_tags_from_schema():
     schema = merge.get_openapi_schema()
     tag_names = [t["name"] for t in schema.get("tags", [])]
     assert "handler-tag" in tag_names
+
+
+def test_openapi_merge_schema_is_cached():
+    # GIVEN an OpenAPIMerge with discovered files
+    merge = OpenAPIMerge(title="Cached API", version="1.0.0")
+    merge.discover(path=MERGE_HANDLERS_PATH, pattern="**/users_handler.py")
+
+    # WHEN calling get_openapi_schema multiple times
+    schema1 = merge.get_openapi_schema()
+    schema2 = merge.get_openapi_schema()
+
+    # THEN it should return the same cached object
+    assert schema1 is schema2
+
+    # AND paths should not be duplicated
+    assert len([p for p in schema1["paths"] if p == "/users"]) == 1

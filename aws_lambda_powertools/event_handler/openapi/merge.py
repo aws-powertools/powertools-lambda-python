@@ -110,8 +110,13 @@ def _discover_resolver_files(
     found_files: set[Path] = set()
 
     for pat in patterns:
-        # Add recursive prefix if needed
-        glob_pattern = f"**/{pat}" if recursive and not pat.startswith("**/") else pat
+        # Handle recursive flag: add **/ prefix if recursive, strip **/ if not
+        if recursive and not pat.startswith("**/"):
+            glob_pattern = f"**/{pat}"
+        elif not recursive and pat.startswith("**/"):
+            glob_pattern = pat[3:]  # Strip **/ prefix
+        else:
+            glob_pattern = pat
 
         for file_path in root.glob(glob_pattern):
             if file_path.is_file() and not _is_excluded(file_path, root, exclude):
@@ -289,6 +294,7 @@ class OpenAPIMerge:
         self._discovered_files: list[Path] = []
         self._resolver_name: str = "app"
         self._on_conflict = on_conflict
+        self._cached_schema: dict[str, Any] | None = None
 
     def discover(
         self,
@@ -339,7 +345,11 @@ class OpenAPIMerge:
         return self._discovered_files
 
     def add_file(self, file_path: str | Path, resolver_name: str | None = None) -> None:
-        """Add a specific file to be included in the merge."""
+        """Add a specific file to be included in the merge.
+
+        Note: Must be called before get_openapi_schema(). Adding files after
+        schema generation will not affect the cached result.
+        """
         path = Path(file_path).resolve()
         if path not in self._discovered_files:
             self._discovered_files.append(path)
@@ -347,7 +357,11 @@ class OpenAPIMerge:
             self._resolver_name = resolver_name
 
     def add_schema(self, schema: dict[str, Any]) -> None:
-        """Add a pre-generated OpenAPI schema to be merged."""
+        """Add a pre-generated OpenAPI schema to be merged.
+
+        Note: Must be called before get_openapi_schema(). Adding schemas after
+        schema generation will not affect the cached result.
+        """
         self._schemas.append(_model_to_dict(schema))
 
     def get_openapi_schema(self) -> dict[str, Any]:
@@ -356,6 +370,8 @@ class OpenAPIMerge:
 
         Loads all discovered resolver files, extracts their OpenAPI schemas,
         and merges them into a single unified specification.
+
+        The schema is cached after the first generation for performance.
 
         Returns
         -------
@@ -367,6 +383,9 @@ class OpenAPIMerge:
         OpenAPIMergeError
             If on_conflict="error" and duplicate path+method combinations are found.
         """
+        if self._cached_schema is not None:
+            return self._cached_schema
+
         # Load schemas from discovered files
         for file_path in self._discovered_files:
             try:
@@ -376,7 +395,8 @@ class OpenAPIMerge:
             except (ImportError, AttributeError, FileNotFoundError) as e:  # pragma: no cover
                 logger.warning(f"Failed to load resolver from {file_path}: {e}")
 
-        return self._merge_schemas()
+        self._cached_schema = self._merge_schemas()
+        return self._cached_schema
 
     def get_openapi_json_schema(self) -> str:
         """
@@ -486,7 +506,12 @@ class OpenAPIMerge:
             target[path][method] = operation
 
     def _merge_components(self, source: dict[str, Any], target: dict[str, dict[str, Any]]) -> None:
-        """Merge components from source into target."""
+        """Merge components from source into target.
+
+        Note: Components with the same name are silently overwritten (last wins).
+        This is intentional as component conflicts are typically user errors
+        (e.g., two handlers defining different 'User' schemas).
+        """
         for component_type, components in source.items():
             target.setdefault(component_type, {}).update(components)
 
