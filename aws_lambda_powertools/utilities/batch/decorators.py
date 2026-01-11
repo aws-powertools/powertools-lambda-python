@@ -158,7 +158,7 @@ def batch_processor(
 
 
 def process_partial_response(
-    event: dict,
+    event: dict[str, Any],
     record_handler: Callable,
     processor: BasePartialBatchProcessor,
     context: LambdaContext | None = None,
@@ -227,7 +227,7 @@ def process_partial_response(
 
 
 def async_process_partial_response(
-    event: dict,
+    event: dict[str, Any],
     record_handler: Callable,
     processor: AsyncBatchProcessor,
     context: LambdaContext | None = None,

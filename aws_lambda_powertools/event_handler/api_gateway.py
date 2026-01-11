@@ -2206,6 +2206,162 @@ class ApiGatewayResolver(BaseRouter):
             openapi_extensions=openapi_extensions,
         )
 
+    def configure_openapi_merge(
+        self,
+        path: str,
+        pattern: str | list[str] = "handler.py",
+        exclude: list[str] | None = None,
+        resolver_name: str = "app",
+        recursive: bool = False,
+        title: str = DEFAULT_OPENAPI_TITLE,
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[Tag | str] | None = None,
+        servers: list[Server] | None = None,
+        terms_of_service: str | None = None,
+        contact: Contact | None = None,
+        license_info: License | None = None,
+        security_schemes: dict[str, SecurityScheme] | None = None,
+        security: list[dict[str, list[str]]] | None = None,
+        external_documentation: ExternalDocumentation | None = None,
+        openapi_extensions: dict[str, Any] | None = None,
+        on_conflict: Literal["warn", "error", "first", "last"] = "warn",
+    ):
+        """Configure OpenAPI merge to generate a unified schema from multiple Lambda handlers.
+
+        This method discovers resolver instances across multiple Python files and merges
+        their OpenAPI schemas into a single unified specification. Useful for micro-function
+        architectures where each Lambda has its own resolver.
+
+        Parameters
+        ----------
+        path : str
+            Root directory path to search for resolver files.
+        pattern : str | list[str], optional
+            Glob pattern(s) to match handler files. Default is "handler.py".
+        exclude : list[str], optional
+            Patterns to exclude from search. Default excludes tests, __pycache__, and .venv.
+        resolver_name : str, optional
+            Name of the resolver variable in handler files. Default is "app".
+        recursive : bool, optional
+            Whether to search recursively in subdirectories. Default is False.
+        title : str
+            The title of the unified API.
+        version : str
+            The version of the OpenAPI document.
+        openapi_version : str, default = "3.1.0"
+            The version of the OpenAPI Specification.
+        summary : str, optional
+            A short summary of what the application does.
+        description : str, optional
+            A verbose explanation of the application behavior.
+        tags : list[Tag | str], optional
+            A list of tags used by the specification with additional metadata.
+        servers : list[Server], optional
+            An array of Server Objects for connectivity information.
+        terms_of_service : str, optional
+            A URL to the Terms of Service for the API.
+        contact : Contact, optional
+            The contact information for the exposed API.
+        license_info : License, optional
+            The license information for the exposed API.
+        security_schemes : dict[str, SecurityScheme], optional
+            Security schemes available in the specification.
+        security : list[dict[str, list[str]]], optional
+            Security mechanisms applied globally across the API.
+        external_documentation : ExternalDocumentation, optional
+            A link to external documentation for the API.
+        openapi_extensions : dict[str, Any], optional
+            Additional OpenAPI extensions as a dictionary.
+        on_conflict : str, optional
+            Strategy for handling conflicts when the same path+method is defined
+            in multiple schemas. Options: "warn" (default), "error", "first", "last".
+
+        Example
+        -------
+        >>> from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+        >>>
+        >>> app = APIGatewayRestResolver()
+        >>> app.configure_openapi_merge(
+        ...     path="./functions",
+        ...     pattern="handler.py",
+        ...     exclude=["**/tests/**"],
+        ...     resolver_name="app",
+        ...     title="My Unified API",
+        ...     version="1.0.0",
+        ... )
+
+        See Also
+        --------
+        configure_openapi : Configure OpenAPI for a single resolver
+        enable_swagger : Enable Swagger UI
+        """
+        from aws_lambda_powertools.event_handler.openapi.merge import OpenAPIMerge
+
+        if exclude is None:
+            exclude = ["**/tests/**", "**/__pycache__/**", "**/.venv/**"]
+
+        self._openapi_merge = OpenAPIMerge(
+            title=title,
+            version=version,
+            openapi_version=openapi_version,
+            summary=summary,
+            description=description,
+            tags=tags,
+            servers=servers,
+            terms_of_service=terms_of_service,
+            contact=contact,
+            license_info=license_info,
+            security_schemes=security_schemes,
+            security=security,
+            external_documentation=external_documentation,
+            openapi_extensions=openapi_extensions,
+            on_conflict=on_conflict,
+        )
+        self._openapi_merge.discover(
+            path=path,
+            pattern=pattern,
+            exclude=exclude,
+            resolver_name=resolver_name,
+            recursive=recursive,
+        )
+
+    def get_openapi_merge_schema(self) -> dict[str, Any]:
+        """Get the merged OpenAPI schema from multiple Lambda handlers.
+
+        Returns
+        -------
+        dict[str, Any]
+            The merged OpenAPI schema.
+
+        Raises
+        ------
+        RuntimeError
+            If configure_openapi_merge has not been called.
+        """
+        if not hasattr(self, "_openapi_merge") or self._openapi_merge is None:
+            raise RuntimeError("configure_openapi_merge must be called before get_openapi_merge_schema")
+        return self._openapi_merge.get_openapi_schema()
+
+    def get_openapi_merge_json_schema(self) -> str:
+        """Get the merged OpenAPI schema as JSON from multiple Lambda handlers.
+
+        Returns
+        -------
+        str
+            The merged OpenAPI schema as a JSON string.
+
+        Raises
+        ------
+        RuntimeError
+            If configure_openapi_merge has not been called.
+        """
+        if not hasattr(self, "_openapi_merge") or self._openapi_merge is None:
+            raise RuntimeError("configure_openapi_merge must be called before get_openapi_merge_json_schema")
+        return self._openapi_merge.get_openapi_json_schema()
+
     def enable_swagger(
         self,
         *,
@@ -2312,32 +2468,38 @@ class ApiGatewayResolver(BaseRouter):
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
-            spec = self.get_openapi_schema(
-                title=title,
-                version=version,
-                openapi_version=openapi_version,
-                summary=summary,
-                description=description,
-                tags=tags,
-                servers=openapi_servers,
-                terms_of_service=terms_of_service,
-                contact=contact,
-                license_info=license_info,
-                security_schemes=security_schemes,
-                security=security,
-                external_documentation=external_documentation,
-                openapi_extensions=openapi_extensions,
-            )
+            # Use merged schema if configure_openapi_merge was called, otherwise use regular schema
+            if hasattr(self, "_openapi_merge") and self._openapi_merge is not None:
+                # Get merged schema as JSON string (already properly serialized)
+                escaped_spec = self._openapi_merge.get_openapi_json_schema().replace("</", "<\\/")
+            else:
+                spec = self.get_openapi_schema(
+                    title=title,
+                    version=version,
+                    openapi_version=openapi_version,
+                    summary=summary,
+                    description=description,
+                    tags=tags,
+                    servers=openapi_servers,
+                    terms_of_service=terms_of_service,
+                    contact=contact,
+                    license_info=license_info,
+                    security_schemes=security_schemes,
+                    security=security,
+                    external_documentation=external_documentation,
+                    openapi_extensions=openapi_extensions,
+                )
 
-            # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
-            # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not
-            # inadvertently close the script tag, and the JSON remains a valid string within the JavaScript code.
-            escaped_spec = model_json(
-                spec,
-                by_alias=True,
-                exclude_none=True,
-                indent=2,
-            ).replace("</", "<\\/")
+                # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON
+                # string contains </script> or similar tags. Escaping the forward slash in </ as <\/ ensures
+                # that the JSON does not inadvertently close the script tag, and the JSON remains a valid
+                # string within the JavaScript code.
+                escaped_spec = model_json(
+                    spec,
+                    by_alias=True,
+                    exclude_none=True,
+                    indent=2,
+                ).replace("</", "<\\/")
 
             # Check for query parameters; if "format" is specified as "json",
             # respond with the JSON used in the OpenAPI spec

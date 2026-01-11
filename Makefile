@@ -100,6 +100,8 @@ changelog:
 mypy:
 	poetry run mypy --pretty aws_lambda_powertools examples
 
+ty:
+	poetry run ty check .
 
 dev-version-plugin:
 	poetry self add git+https://github.com/monim67/poetry-bumpversion@348de6f247222e2953d649932426e63492e0a6bf
