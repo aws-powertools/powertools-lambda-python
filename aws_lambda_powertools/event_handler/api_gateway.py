@@ -3156,7 +3156,32 @@ class ALBResolver(ApiGatewayResolver):
         json_body_deserializer: Callable[[str], dict] | None = None,
         decode_query_parameters: bool = False,
     ):
-        """Amazon Application Load Balancer (ALB) resolver"""
+        """Amazon Application Load Balancer (ALB) resolver
+
+
+        Parameters
+        ----------
+        cors: CORSConfig
+            Optionally configure and enabled CORS. Not each route will need to have to cors=True
+        debug: bool | None
+            Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_DEV"
+            environment variable
+        serializer: Callable, optional
+            function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+        strip_prefixes: list[str | Pattern], optional
+            optional list of prefixes to be removed from the request path before doing the routing.
+            This is often used with api gateways with multiple custom mappings.
+            Each prefix can be a static string or a compiled regex pattern
+        enable_validation: bool | None
+            Enables validation of the request body against the route schema, by default False.
+        response_validation_error_http_code
+            Sets the returned status code if response is not validated. enable_validation must be True.
+        json_body_deserializer: Callable[[str], dict], optional
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
+            by default json.loads when integrating with EventSource data class
+        decode_query_parameters: bool | None
+            Enables URL-decoding of query parameters (both keys and values), by default False.
+        """
         super().__init__(
             ProxyEventType.ALBEvent,
             cors,
