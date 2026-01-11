@@ -3154,6 +3154,7 @@ class ALBResolver(ApiGatewayResolver):
         enable_validation: bool = False,
         response_validation_error_http_code: HTTPStatus | int | None = None,
         json_body_deserializer: Callable[[str], dict] | None = None,
+        decode_query_parameters: bool = False,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(
@@ -3166,6 +3167,7 @@ class ALBResolver(ApiGatewayResolver):
             response_validation_error_http_code,
             json_body_deserializer=json_body_deserializer,
         )
+        self.decode_query_parameters = decode_query_parameters
 
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string
@@ -3192,3 +3194,10 @@ class ALBResolver(ApiGatewayResolver):
             result.body = ""
 
         return super()._to_response(result)
+
+    @override
+    def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
+        proxy_event = super()._to_proxy_event(event)
+        if isinstance(proxy_event, ALBEvent):
+            proxy_event.decode_query_parameters = self.decode_query_parameters
+        return proxy_event

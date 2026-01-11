@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 from dataclasses import dataclass
 from enum import Enum
@@ -20,6 +21,7 @@ from aws_lambda_powertools.event_handler import (
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValidationError
 from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Query
+from tests.functional.utils import load_event
 
 
 def test_validate_scalars(gw_event):
@@ -1068,6 +1070,26 @@ def test_validation_query_string_with_alb_resolver(
     # IF expected_error_text is provided, THEN check for its presence in the response body
     if expected_error_text:
         assert any(text in result["body"] for text in expected_error_text)
+
+
+def test_validation_query_string_with_encoded_datetime_alb_resolver():
+    # GIVEN a ALBResolver with validation enabled,
+    # and an event with a url-encoded datetime
+    # as a query string parameter
+    app = ALBResolver(enable_validation=True, decode_query_parameters=True)
+    raw_event = load_event("albEvent.json")
+    raw_event["path"] = "/users"
+    raw_event["queryStringParameters"] = {"query_dt": "2025-12-20T16%3A56%3A02.032000"}
+
+    # WHEN a handler is defined with various parameters and routes
+    @app.get("/users")
+    def handler(query_dt: datetime.datetime):
+        return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(raw_event, {})
+    assert result["statusCode"] == 200
 
 
 @pytest.mark.parametrize(
