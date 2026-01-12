@@ -57,6 +57,10 @@ jsonpath-ng = { version = "^1.6.0", optional = true }
 datadog-lambda = { version = ">=8.114.0,<9.0.0", optional = true }
 avro = { version = "^1.12.0", optional = true }
 protobuf = {version = "^6.30.2", optional = true }
+opentelemetry-api = { version = "^1.20.0", optional = true }
+opentelemetry-sdk = { version = "^1.20.0", optional = true }
+opentelemetry-exporter-otlp-proto-http = { version = "^1.20.0", optional = true }
+opentelemetry-propagator-aws-xray = { version = "^1.0.0", optional = true }
 
 [tool.poetry.extras]
 parser = ["pydantic"]
@@ -78,6 +82,7 @@ datadog = ["datadog-lambda"]
 datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
 kafka-consumer-avro = ["avro"]
 kafka-consumer-protobuf = ["protobuf"]
+otel = ["opentelemetry-api", "opentelemetry-sdk", "opentelemetry-exporter-otlp-proto-http", "opentelemetry-propagator-aws-xray"]
 
 [tool.poetry.group.dev.dependencies]
 coverage = { extras = ["toml"], version = "^7.6" }

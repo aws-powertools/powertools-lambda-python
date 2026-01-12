@@ -8,6 +8,9 @@ XRAY_TRACE_ID_ENV: str = "_X_AMZN_TRACE_ID"
 MIDDLEWARE_FACTORY_TRACE_ENV: str = "POWERTOOLS_TRACE_MIDDLEWARES"
 INVALID_XRAY_NAME_CHARACTERS = r"[?;*()!$~^<>]"
 
+# OpenTelemetry Tracer constants
+OTEL_SDK_MODULE: str = "opentelemetry"
+
 # Logger constants
 # maintenance: future major version should start having localized `constants.py` to ease future modularization
 LOGGER_LOG_SAMPLING_RATE: str = "POWERTOOLS_LOGGER_SAMPLE_RATE"
