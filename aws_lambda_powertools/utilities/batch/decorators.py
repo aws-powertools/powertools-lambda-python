@@ -22,6 +22,47 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
+def _get_records_from_event(
+    event: dict[str, Any],
+    processor: BasePartialBatchProcessor,
+) -> list[dict]:
+    """
+    Extract records from the event based on the processor's event type.
+
+    For SQS, Kinesis, and DynamoDB: Records are in event["Records"] as a list
+    For Kafka: Records are in event["records"] as a dict with topic-partition keys
+
+    Parameters
+    ----------
+    event: dict
+        Lambda's original event
+    processor: BasePartialBatchProcessor
+        Batch Processor to determine event type
+
+    Returns
+    -------
+    records: list[dict]
+        Flattened list of records to process
+    """
+    # Kafka events use lowercase "records" and have a nested dict structure
+    if processor.event_type == EventType.Kafka:
+        kafka_records = event.get("records", {})
+        if not kafka_records or not isinstance(kafka_records, dict):
+            raise UnexpectedBatchTypeError(
+                "Invalid Kafka event structure. Expected 'records' to be a non-empty dict with topic-partition keys.",
+            )
+        # Flatten the nested dict: {"topic-0": [r1, r2], "topic-1": [r3]} -> [r1, r2, r3]
+        return [record for topic_records in kafka_records.values() for record in topic_records]
+
+    # SQS, Kinesis, DynamoDB use uppercase "Records" as a list
+    records = event.get("Records", [])
+    if not records or not isinstance(records, list):
+        raise UnexpectedBatchTypeError(
+            "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams, Kafka",
+        )
+    return records
+
+
 @lambda_handler_decorator
 @deprecated(
     "`async_batch_processor` decorator is deprecated; use `async_process_partial_response` function instead.",
@@ -206,12 +247,7 @@ def process_partial_response(
     * Async batch processors. Use `async_process_partial_response` instead.
     """
     try:
-        records: list[dict] = event.get("Records", [])
-        if not records or not isinstance(records, list):
-            raise UnexpectedBatchTypeError(
-                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
-            )
-
+        records = _get_records_from_event(event, processor)
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
@@ -275,12 +311,7 @@ def async_process_partial_response(
     * Sync batch processors. Use `process_partial_response` instead.
     """
     try:
-        records: list[dict] = event.get("Records", [])
-        if not records or not isinstance(records, list):
-            raise UnexpectedBatchTypeError(
-                "Unexpected batch event type. Possible values are: SQS, KinesisDataStreams, DynamoDBStreams",
-            )
-
+        records = _get_records_from_event(event, processor)
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line

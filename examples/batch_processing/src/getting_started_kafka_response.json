@@ -1,0 +1,10 @@
+{
+  "batchItemFailures": [
+    {
+      "itemIdentifier": {
+        "topic-partition": "mytopic-0",
+        "offset": 1
+      }
+    }
+  ]
+}

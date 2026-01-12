@@ -25,6 +25,9 @@ from aws_lambda_powertools.utilities.batch.types import BatchTypeModels
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBRecord,
 )
+from aws_lambda_powertools.utilities.data_classes.kafka_event import (
+    KafkaEventRecord,
+)
 from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
@@ -46,12 +49,13 @@ class EventType(Enum):
     SQS = "SQS"
     KinesisDataStreams = "KinesisDataStreams"
     DynamoDBStreams = "DynamoDBStreams"
+    Kafka = "Kafka"
 
 
 # When using processor with default arguments, records will carry EventSourceDataClassTypes
 # and depending on what EventType it's passed it'll correctly map to the right record
-# When using Pydantic Models, it'll accept any subclass from SQS, DynamoDB and Kinesis
-EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord]
+# When using Pydantic Models, it'll accept any subclass from SQS, DynamoDB, Kinesis and Kafka
+EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord, KafkaEventRecord]
 BatchEventTypes = Union[EventSourceDataClassTypes, BatchTypeModels]
 SuccessResponse = Tuple[str, Any, BatchEventTypes]
 FailureResponse = Tuple[str, str, BatchEventTypes]
@@ -272,11 +276,13 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             EventType.SQS: self._collect_sqs_failures,
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
             EventType.DynamoDBStreams: self._collect_dynamodb_failures,
+            EventType.Kafka: self._collect_kafka_failures,
         }
         self._DATA_CLASS_MAPPING = {
             EventType.SQS: SQSRecord,
             EventType.KinesisDataStreams: KinesisStreamRecord,
             EventType.DynamoDBStreams: DynamoDBRecord,
+            EventType.Kafka: KafkaEventRecord,
         }
 
         super().__init__()
@@ -363,6 +369,21 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             else:
                 msg_id = msg.dynamodb.sequence_number
             failures.append({"itemIdentifier": msg_id})
+        return failures
+
+    def _collect_kafka_failures(self):
+        failures = []
+        for msg in self.fail_messages:
+            # Kafka uses a composite identifier with topic-partition and offset
+            # Both data class and Pydantic model use the same field names
+            failures.append(
+                {
+                    "itemIdentifier": {
+                        "topic-partition": f"{msg.topic}-{msg.partition}",
+                        "offset": msg.offset,
+                    },
+                },
+            )
         return failures
 
     @overload
