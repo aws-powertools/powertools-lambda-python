@@ -56,8 +56,8 @@ def test_manual_mode_uses_provided_tracer_provider(mock_tracer_provider):
     assert tracer.provider == mock_provider
 
 
-def test_manual_mode_creates_vanilla_provider_if_none_given():
-    """Manual mode should create vanilla TracerProvider if none provided."""
+def test_manual_mode_creates_default_provider_if_none_given():
+    """Manual mode should create default TracerProvider if none provided."""
     from aws_lambda_powertools.tracing.otel import TracerOpenTelemetry
 
     with mock.patch("opentelemetry.sdk.trace.TracerProvider") as mock_sdk:

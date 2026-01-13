@@ -46,7 +46,7 @@ class TracerOpenTelemetry:
     ----------
     mode : Literal["auto", "manual"]
         Instrumentation mode. "auto" uses global TracerProvider from OTel SDK (e.g., ADOT).
-        "manual" uses provided TracerProvider or creates vanilla one.
+        "manual" uses provided TracerProvider or creates default one.
     service : str, optional
         Service name for spans. Falls back to POWERTOOLS_SERVICE_NAME or Lambda function name.
     tracer_provider : TracerProvider, optional
@@ -117,11 +117,11 @@ class TracerOpenTelemetry:
                 raise ValueError("tracer_provider cannot be provided in auto mode")
             return None  # Will use global provider
 
-        # Manual mode: use provided or create vanilla
+        # Manual mode: use provided or create default
         if tracer_provider is not None:
             return tracer_provider
 
-        # Create vanilla TracerProvider
+        # Create default TracerProvider
         from opentelemetry.sdk.trace import TracerProvider as SDKTracerProvider
 
         return SDKTracerProvider()

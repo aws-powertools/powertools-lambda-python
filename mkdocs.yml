@@ -13,7 +13,9 @@ nav:
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
       - Features:
-          - core/tracer.md
+          - Tracer:
+              - X-Ray SDK: core/tracer.md
+              - OpenTelemetry: core/tracer-otel.md
           - core/logger.md
           - Metrics:
               - core/metrics/index.md
