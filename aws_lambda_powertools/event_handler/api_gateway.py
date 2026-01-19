@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import copy
 import json
 import logging
 import re
@@ -666,7 +667,8 @@ class Route:
         # Add the response to the OpenAPI operation
         if self.responses:
             for status_code in list(self.responses):
-                response = self.responses[status_code]
+                # Create a deep copy to prevent mutation of the shared dictionary
+                response = copy.deepcopy(self.responses[status_code])
 
                 # Case 1: there is not 'content' key
                 if "content" not in response:
