@@ -2694,3 +2694,60 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
     full_name_error = next((e for e in errors if "full_name" in e["loc"] or "fullName" in e["loc"]), None)
     assert full_name_error is not None
     assert full_name_error["type"] == "string_too_short"
+
+
+def test_validation_query_string_with_fully_encoded_datetime_alb_resolver():
+    # GIVEN a ALBResolver with validation enabled,
+    # and an event with a fully url-encoded datetime
+    # as a query string parameter
+    app = ALBResolver(enable_validation=True, decode_query_parameters=True)
+    raw_event = load_event("albEvent.json")
+    raw_event["path"] = "/users"
+    # Fully encoded: "2025-12-20T16:56:02.032000" -> "2025-12-20T16%3A56%3A02.032000"
+    # With spaces or special chars: "2025-12-20 16:56:02" -> "2025-12-20%2016%3A56%3A02"
+    raw_event["queryStringParameters"] = {"query_dt": "2025-12-20T16%3A56%3A02.032000"}
+
+    @app.get("/users")
+    def handler(query_dt: datetime.datetime):
+        return {"received": query_dt.isoformat()}
+
+    result = app(raw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["received"] == "2025-12-20T16:56:02.032000"
+
+
+def test_validation_query_string_with_encoded_key_and_value_alb_resolver():
+    # GIVEN a ALBResolver with validation enabled,
+    # and an event with url-encoded key AND value
+    app = ALBResolver(enable_validation=True, decode_query_parameters=True)
+    raw_event = load_event("albEvent.json")
+    raw_event["path"] = "/search"
+    # Key: "search query" -> "search%20query"
+    # Value: "hello world" -> "hello%20world"
+    raw_event["queryStringParameters"] = {"search%20query": "hello%20world"}
+
+    @app.get("/search")
+    def handler(search_query: Annotated[str, Query(alias="search query")]):
+        return {"result": search_query}
+
+    result = app(raw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["result"] == "hello world"
+
+
+def test_validation_without_decode_query_parameters_alb_resolver():
+    # GIVEN a ALBResolver WITHOUT decode_query_parameters (default behavior)
+    app = ALBResolver(enable_validation=True)
+    raw_event = load_event("albEvent.json")
+    raw_event["path"] = "/users"
+    raw_event["queryStringParameters"] = {"query_dt": "2025-12-20T16%3A56%3A02.032000"}
+
+    @app.get("/users")
+    def handler(query_dt: datetime.datetime):
+        return None
+
+    # THEN validation should fail because the encoded string is not a valid datetime
+    result = app(raw_event, {})
+    assert result["statusCode"] == 422
