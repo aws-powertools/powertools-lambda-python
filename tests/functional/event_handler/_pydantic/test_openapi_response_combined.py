@@ -1,6 +1,4 @@
-"""Test for bug #7711: OpenAPI schema return types bleed across routes when reusing response dictionaries"""
-
-from __future__ import annotations
+from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -39,7 +37,7 @@ class Responses:
     STANDARD_ERRORS = {**NOT_FOUND, **VALIDATION_ERROR, **SERVER_ERROR}
 
     @classmethod
-    def combine(cls, *response_dicts: dict[int, OpenAPIResponse]) -> dict[int, OpenAPIResponse]:
+    def combine(cls, *response_dicts: Dict[int, OpenAPIResponse]) -> Dict[int, OpenAPIResponse]:
         """Combine multiple response dictionaries."""
         result = {}
         for response_dict in response_dicts:
@@ -62,7 +60,7 @@ def test_openapi_shared_response_no_bleed():
         tags=["Exams"],
         responses=Responses.combine(Responses.OK, Responses.STANDARD_ERRORS),
     )
-    def list_exams() -> Response[list[ExamSummary]]:
+    def list_exams() -> Response[List[ExamSummary]]:
         """Lists all available exams."""
         return Response(
             status_code=200,
