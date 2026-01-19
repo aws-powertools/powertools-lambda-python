@@ -377,7 +377,7 @@ class MetricManager:
 
     def set_default_dimensions(self, **dimensions: str) -> None:
         """Persist dimensions across Lambda invocations. Override in subclass."""
-        pass
+        pass  # pragma: no cover
 
     def log_metrics(
         self,
