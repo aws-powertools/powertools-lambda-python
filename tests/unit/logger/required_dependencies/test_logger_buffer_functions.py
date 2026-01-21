@@ -29,3 +29,10 @@ def test_resolve_buffer_log_level_edge_cases():
     # Additional edge cases
     assert _check_minimum_buffer_log_level("DEBUG", "CRITICAL") is True
     assert _check_minimum_buffer_log_level("CRITICAL", "DEBUG") is False
+
+
+def test_resolve_buffer_log_level_invalid_level():
+    # Invalid log levels should return False
+    assert _check_minimum_buffer_log_level("INVALID", "DEBUG") is False
+    assert _check_minimum_buffer_log_level("DEBUG", "INVALID") is False
+    assert _check_minimum_buffer_log_level("INVALID", "INVALID") is False
