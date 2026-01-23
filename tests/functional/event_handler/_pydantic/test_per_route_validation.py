@@ -222,9 +222,9 @@ def test_per_route_validation_response_error_code():
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.get("/invalid-response")
-    def invalid_response() -> TodoItem:
+    def invalid_response() -> TodoItem:  # type: ignore[return-value]
         # Return dict that doesn't match TodoItem model
-        return {"bad": "response"}  # type: ignore
+        return {"bad": "response"}
 
     # WHEN calling route that returns invalid response
     event = load_event("apiGatewayProxyEvent.json")
