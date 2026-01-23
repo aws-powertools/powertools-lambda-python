@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -223,8 +225,8 @@ def test_per_route_validation_response_error_code():
 
     @app.get("/invalid-response")
     def invalid_response() -> TodoItem:
-        # Return dict that doesn't match TodoItem model
-        return {"bad": "response"}  # type: ignore
+        # Return dict that doesn't match TodoItem model to test validation error handling
+        return cast(TodoItem, {"bad": "response"})
 
     # WHEN calling route that returns invalid response
     event = load_event("apiGatewayProxyEvent.json")
