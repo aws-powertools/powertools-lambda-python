@@ -121,6 +121,9 @@ def _check_minimum_buffer_log_level(buffer_log_level, current_log_level):
     buffer_level_num = log_levels.get(buffer_log_level.upper())
     current_level_num = log_levels.get(current_log_level.upper())
 
+    if buffer_level_num is None or current_level_num is None:
+        return False
+
     # Compare numeric levels
     if buffer_level_num < current_level_num:
         return True

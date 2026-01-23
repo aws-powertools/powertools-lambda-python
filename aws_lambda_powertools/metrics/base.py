@@ -15,7 +15,7 @@ import os
 import warnings
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,
@@ -375,6 +375,10 @@ class MetricManager:
             print(json.dumps(metrics, separators=(",", ":")))
             self.clear_metrics()
 
+    def set_default_dimensions(self, **dimensions: str) -> None:
+        """Persist dimensions across Lambda invocations. Override in subclass."""
+        pass  # pragma: no cover
+
     def log_metrics(
         self,
         lambda_handler: Callable[[dict, Any], Any] | Callable[[dict, Any, dict | None], Any] | None = None,
@@ -428,7 +432,7 @@ class MetricManager:
                 default_dimensions=default_dimensions,
             )
 
-        @functools.wraps(lambda_handler)
+        @functools.wraps(cast("Callable[..., Any]", lambda_handler))
         def decorate(event, context, *args, **kwargs):
             unwrapped_context = context.lambda_context if is_durable_context(context) else context
             try:
