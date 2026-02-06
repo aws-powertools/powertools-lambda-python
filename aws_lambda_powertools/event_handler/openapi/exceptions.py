@@ -49,3 +49,14 @@ class SchemaValidationError(ValidationException):
 
 class OpenAPIMergeError(Exception):
     """Exception raised when there's a conflict during OpenAPI merge."""
+
+
+class RequestUnsupportedContentType(NotImplementedError):
+    """Exception raised when trying to read request body data, with unknown headers"""
+
+    def __init__(self, msg: str, errors: Sequence[Any]) -> None:
+        super().__init__(msg)
+        self._errors = errors
+
+    def errors(self) -> Sequence[Any]:
+        return self._errors
