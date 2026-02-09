@@ -93,20 +93,20 @@ zstandard = ["zstandard"]
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.242"
+version = "2.2.263"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_asset_awscli_v1-2.2.242-py3-none-any.whl", hash = "sha256:d1001bf56a12f7d1162d4211003d1e8f72a213159465e2d0e1c598cc0ea44aad"},
-    {file = "aws_cdk_asset_awscli_v1-2.2.242.tar.gz", hash = "sha256:a957d679a118f4375307ed90b9aed7127c5c1402989438060eae4ab29ab0d13f"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.263-py3-none-any.whl", hash = "sha256:185150757d4216ea982d7b35596de5b3d767776be00cd78cacce02eaa08f8851"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.263.tar.gz", hash = "sha256:657605260ace055fac4ae30a6fb84a80504a6e24ce0b1d278913d4db4bafa266"},
 ]
 
 [package.dependencies]
-jsii = ">=1.112.0,<2.0.0"
+jsii = ">=1.125.0,<2.0.0"
 publication = ">=0.0.3"
-typeguard = ">=2.13.3,<4.3.0"
+typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-asset-node-proxy-agent-v6"
@@ -241,22 +241,22 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.233.0"
+version = "2.237.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.233.0-py3-none-any.whl", hash = "sha256:b0d134fac0d661d0d2a0acad2cd71c2cc3cb35cc46a60360115dd5c987910835"},
-    {file = "aws_cdk_lib-2.233.0.tar.gz", hash = "sha256:a5d3e5b5710fda435e3466106301ecaab02c5ca376301126fda280bfe5063938"},
+    {file = "aws_cdk_lib-2.237.1-py3-none-any.whl", hash = "sha256:90e9d1f59d1a8e8b318932fd321c876711c1b2de4f08714333866a8f3e7a5a5e"},
+    {file = "aws_cdk_lib-2.237.1.tar.gz", hash = "sha256:3ae2f6b487e487f1e6264a45952efe8aca6f9ccc4f172fda26d1b61ac7b5cd58"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = "2.2.242"
+"aws-cdk.asset-awscli-v1" = "2.2.263"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
 "aws-cdk.cloud-assembly-schema" = ">=48.20.0,<49.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.121.0,<2.0.0"
+jsii = ">=1.126.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
