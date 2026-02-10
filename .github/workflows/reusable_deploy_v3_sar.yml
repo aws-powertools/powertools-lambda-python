@@ -75,7 +75,7 @@ jobs:
         python-version: ["3.10","3.11","3.12","3.13","3.14"]
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -87,7 +87,7 @@ jobs:
 
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4.3.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -98,7 +98,7 @@ jobs:
       # we then jump to our specific SAR Account with the correctly scoped IAM Role
       # this allows us to have a single trail when a release occurs for a given layer (beta+prod+SAR beta+SAR prod)
       - name: AWS credentials SAR role
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4.3.0
         id: aws-credentials-sar-role
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
