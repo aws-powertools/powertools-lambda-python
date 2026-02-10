@@ -1606,7 +1606,39 @@ def test_validate_with_minimal_event():
     assert result["statusCode"] == 200
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
+def test_validate_list_response(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    response_before_validation = [
+        {
+            "name": "Joe",
+            "age": 20,
+        },
+        {
+            "name": "Jane",
+            "age": 20,
+        },
+    ]
+
+    @app.get("/list_response_with_same_element_types")
+    def handler_different_list() -> List[Model]:
+        return response_before_validation
+
+    # WHEN returning list with the same element type as the non-Optional return type
+    gw_event["path"] = "/list_response_with_same_element_types"
+    result = app(gw_event, {})
+    body = json.loads(result["body"])
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 200
+    assert body == response_before_validation
+
+
 def test_validation_error_none_returned_non_optional_type(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1628,6 +1660,32 @@ def test_validation_error_none_returned_non_optional_type(gw_event):
     body = json.loads(result["body"])
     assert body["detail"][0]["type"] == "model_attributes_type"
     assert body["detail"][0]["loc"] == ["response"]
+
+
+def test_validation_error_different_list_returned_non_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    different_list_response = ["a", "b", "c"]
+
+    @app.get("/list_response_with_different_element_types")
+    def handler_different_list() -> List[Model]:
+        return different_list_response
+
+    # WHEN returning list with the different element type as the non-Optional return type
+    gw_event["path"] = "/list_response_with_different_element_types"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert len(body["detail"]) == len(different_list_response)
+    assert body["detail"][0]["type"] == "model_attributes_type"
+    assert body["detail"][0]["loc"] == ["response", 0]
 
 
 def test_validation_error_incomplete_model_returned_non_optional_type(gw_event):
