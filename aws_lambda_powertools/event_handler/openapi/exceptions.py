@@ -51,12 +51,11 @@ class OpenAPIMergeError(Exception):
     """Exception raised when there's a conflict during OpenAPI merge."""
 
 
-class RequestUnsupportedContentType(NotImplementedError):
+class RequestUnsupportedContentType(NotImplementedError, ValidationException):
     """Exception raised when trying to read request body data, with unknown headers"""
 
+    # REVIEW: This inheritance is for backwards compatibility.
+    # Just inherit from ValidationException in Powertools V4
     def __init__(self, msg: str, errors: Sequence[Any]) -> None:
-        super().__init__(msg)
-        self._errors = errors
-
-    def errors(self) -> Sequence[Any]:
-        return self._errors
+        NotImplementedError.__init__(self, msg)
+        ValidationException.__init__(self, errors)
