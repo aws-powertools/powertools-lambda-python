@@ -40,6 +40,16 @@ class S3EventRecordGlacierEventData(BaseModel):
     )
 
 
+class S3EventRecordIntelligentTieringEventData(BaseModel):
+    destinationAccessTier: str = Field(
+        description="The new access tier for the object. For IntelligentTiering events.",
+        examples=[
+            "ARCHIVE_ACCESS",
+            "DEEP_ARCHIVE_ACCESS",
+        ],
+    )
+
+
 class S3Identity(BaseModel):
     principalId: str = Field(
         description="Amazon identifier of the user, role, account or services who caused the event.",
@@ -178,8 +188,9 @@ class S3Message(BaseModel):
             },
         ],
     )
-    object: S3Object = Field(
-        description="The S3 object object.",
+    object: Optional[S3Object] = Field(
+        default=None,
+        description="The S3 object object. Used by most S3 event types.",
         examples=[
             {
                 "key": "b21b84d653bb07b05b1e6b33684dc11b",
@@ -189,6 +200,20 @@ class S3Message(BaseModel):
             },
         ],
     )  # noqa: A003
+    get_object: Optional[S3Object] = Field(
+        default=None,
+        alias="get_object",
+        description="The S3 object object. Used by IntelligentTiering events instead of 'object'.",
+        examples=[
+            {
+                "key": "myobject",
+                "size": 252294,
+                "eTag": "4e9270240d7d62d5ee8dbfcb7a7a3279",
+                "versionId": "tiogA9Ga7Xi49yfJ6lkeTxPYx7ZK75yn",
+                "sequencer": "0066A8D0E77DE42BC5",
+            },
+        ],
+    )
 
 
 class S3EventNotificationObjectModel(BaseModel):
@@ -449,11 +474,22 @@ class S3RecordModel(BaseModel):
             },
         ],
     )
+    intelligentTieringEventData: Optional[S3EventRecordIntelligentTieringEventData] = Field(
+        default=None,
+        description="The Intelligent-Tiering event data object.",
+        examples=[
+            {
+                "destinationAccessTier": "ARCHIVE_ACCESS",
+            },
+        ],
+    )
 
     @model_validator(mode="before")
     def validate_s3_object(cls, values):
         event_name = values.get("eventName")
-        s3_object = values.get("s3").get("object")
+        s3_data = values.get("s3")
+        # IntelligentTiering events use 'get_object' instead of 'object'
+        s3_object = s3_data.get("object") or s3_data.get("get_object")
         if ":Delete" not in event_name and (s3_object.get("size") is None or s3_object.get("eTag") is None):
             raise ValueError(
                 "Size and eTag fields are required for all events except ObjectRemoved:* and LifecycleExpiration:*.",
