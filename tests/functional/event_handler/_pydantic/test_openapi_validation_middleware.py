@@ -715,6 +715,32 @@ def test_validate_body_param_with_stripped_headers(gw_event):
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
+def test_validate_unsupported_content_type_headers(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    # WHEN headers has unsupported content-type
+    @app.post("/")
+    def handler(user: Model) -> Model:
+        return user
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"] = {"Content-type": "text/fake-content-type"}
+    gw_event["path"] = "/"
+    gw_event["body"] = json.dumps({"name": "John", "age": 30})
+
+    # THEN the handler should return 415 (Unsupported Media Type)
+    # THEN the body must have the "unsupported_content_type" error message
+    result = app(gw_event, {})
+    assert result["statusCode"] == 415
+    assert "unsupported_content_type" in result["body"]
+
+
 def test_validate_body_param_with_invalid_date(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)

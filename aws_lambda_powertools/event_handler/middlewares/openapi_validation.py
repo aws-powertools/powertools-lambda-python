@@ -19,7 +19,11 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestUnsupportedContentType,
+    RequestValidationError,
+    ResponseValidationError,
+)
 from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
@@ -129,7 +133,18 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             return self._parse_form_data(app)
 
         else:
-            raise NotImplementedError("Only JSON body or Form() are supported")
+            raise RequestUnsupportedContentType(
+                "Only JSON body or Form() are supported",
+                errors=[
+                    {
+                        "type": "unsupported_content_type",
+                        "loc": ("body",),
+                        "msg": "Only JSON body or Form() are supported",
+                        "input": {},
+                        "ctx": {},
+                    },
+                ],
+            )
 
     def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
         """Parse JSON data from the request body."""
