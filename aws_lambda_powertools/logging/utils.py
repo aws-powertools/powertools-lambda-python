@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from aws_lambda_powertools.logging.buffer.handler import BufferingHandler
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -16,6 +18,7 @@ def copy_config_to_registered_loggers(
     source_logger: Logger,
     log_level: int | str | None = None,
     ignore_log_level=False,
+    include_buffering=False,
     exclude: set[str] | None = None,
     include: set[str] | None = None,
 ) -> None:
@@ -30,6 +33,8 @@ def copy_config_to_registered_loggers(
         Logging level to set to registered loggers, by default uses source_logger logging level
     ignore_log_level: bool
         Whether to not touch log levels for discovered loggers. log_level param is disregarded when this is set.
+    include_buffering: bool
+        Whether to buffer logs from external libraries and report to powertools logger
     include : set[str] | None, optional
         List of logger names to include, by default all registered loggers are included
     exclude : set[str] | None, optional
@@ -64,7 +69,13 @@ def copy_config_to_registered_loggers(
 
     registered_loggers = _find_registered_loggers(loggers=loggers, filter_func=filter_func)
     for logger in registered_loggers:
-        _configure_logger(source_logger=source_logger, logger=logger, level=level, ignore_log_level=ignore_log_level)
+        _configure_logger(
+            source_logger=source_logger,
+            logger=logger,
+            level=level,
+            ignore_log_level=ignore_log_level,
+            include_buffering=include_buffering,
+        )
 
 
 def _include_registered_loggers_filter(loggers: set[str]):
@@ -92,6 +103,7 @@ def _configure_logger(
     logger: logging.Logger,
     level: int | str,
     ignore_log_level: bool = False,
+    include_buffering: bool = False,
 ) -> None:
     # customers may not want to copy the same log level from Logger to discovered loggers
     if not ignore_log_level:
@@ -101,6 +113,17 @@ def _configure_logger(
     logger.handlers = []
     logger.propagate = False  # ensure we don't propagate logs to existing loggers, #1073
     source_logger.append_keys(name="%(name)s")  # include logger name, see #1267
+
+    buffer_config = getattr(source_logger, "_buffer_config", None)
+    if include_buffering and buffer_config is not None:
+        buffer_handler = BufferingHandler(
+            buffer_cache=source_logger._buffer_cache,
+            buffer_config=buffer_config,
+            source_logger=source_logger,
+        )
+        logger.addHandler(buffer_handler)
+        LOGGER.debug(f"Logger {logger} configured with BufferingHandler")
+        return  # exit earlier and don't add source handlers, would cause double logging
 
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)
