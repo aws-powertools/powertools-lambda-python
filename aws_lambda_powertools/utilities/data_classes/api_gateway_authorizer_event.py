@@ -437,8 +437,15 @@ class APIGatewayAuthorizerResponse:
     - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
     """
 
-    path_regex = r"^[/.a-zA-Z0-9-_\*]+$"
-    """The regular expression used to validate resource paths for the policy"""
+    path_regex = r"^[/.a-zA-Z0-9-_\*{}+]+$"
+    """The regular expression used to validate resource paths for the policy.
+
+    Supports standard path characters and API Gateway path parameters:
+    - Standard: `/path/to/resource`
+    - Wildcard: `/path/*` or `/path/*/resource`
+    - Path parameter: `/path/{param}`
+    - Greedy path parameter: `/{proxy+}` or `/path/{proxy+}`
+    """
 
     def __init__(
         self,

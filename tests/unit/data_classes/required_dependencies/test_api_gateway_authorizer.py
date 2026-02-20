@@ -221,3 +221,60 @@ def test_parse_api_gateway_arn_with_resource():
     response = authorizer_policy.asdict()
 
     assert mock_event["methodArn"] == response["policyDocument"]["Statement"][0]["Resource"][0]
+
+
+def test_authorizer_response_allow_route_with_proxy_plus(builder: APIGatewayAuthorizerResponse):
+    """Test that {proxy+} greedy path parameter is supported.
+
+    See: https://github.com/aws-powertools/powertools-lambda-python/issues/7979
+    """
+    builder.allow_route(http_method="*", resource="/{proxy+}")
+    assert builder.asdict() == {
+        "principalId": "foo",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/{proxy+}"],
+                },
+            ],
+        },
+    }
+
+
+def test_authorizer_response_allow_route_with_path_parameter(builder: APIGatewayAuthorizerResponse):
+    """Test that standard path parameters like {id} are supported."""
+    builder.allow_route(http_method="GET", resource="/users/{userId}")
+    assert builder.asdict() == {
+        "principalId": "foo",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/users/{userId}"],
+                },
+            ],
+        },
+    }
+
+
+def test_authorizer_response_allow_route_with_nested_proxy(builder: APIGatewayAuthorizerResponse):
+    """Test that {proxy+} can be used with a path prefix."""
+    builder.allow_route(http_method="*", resource="/api/v1/{proxy+}")
+    assert builder.asdict() == {
+        "principalId": "foo",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/api/v1/{proxy+}"],
+                },
+            ],
+        },
+    }
