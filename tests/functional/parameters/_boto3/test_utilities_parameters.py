@@ -2347,6 +2347,38 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
     parameters.get_parameters_by_name(parameters=params)
 
 
+def test_get_parameters_by_name_accumulates_results_across_chunks(monkeypatch, config):
+    # GIVEN a batch of 12 parameters (more than 10, which is the max batch size)
+    # This test verifies the fix for GitHub issue #7832:
+    # When fetching more than 10 parameters, results from all chunks should be accumulated
+    params = {f"/dev/param{i}": {} for i in range(12)}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
+
+        def _get_parameters_by_name(
+            self,
+            parameters: dict[str, dict],
+            raise_on_error: bool = True,
+            decrypt: bool = False,
+        ) -> tuple[dict[str, Any], list[str]]:
+            # Return a value for each parameter in this chunk
+            return {name: f"value_{name}" for name in parameters.keys()}, []
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called with more than 10 parameters
+    result = parameters.get_parameters_by_name(parameters=params)
+
+    # THEN all 12 parameters should be returned (not just the last chunk of 2)
+    assert len(result) == 12
+    for i in range(12):
+        param_name = f"/dev/param{i}"
+        assert param_name in result
+        assert result[param_name] == f"value_{param_name}"
+
+
 def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
