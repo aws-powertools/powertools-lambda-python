@@ -205,57 +205,57 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.233.0a0"
+version = "2.240.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.233.0a0-py3-none-any.whl", hash = "sha256:f0661486e0b6cb896928cea6fdbf019422e74f5b4766801d46b5aaba87c6ef02"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.233.0a0.tar.gz", hash = "sha256:d47387207cc5c915fcec626a2d7414b77565c2737b5667713350cc013cc412ae"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.240.0a0-py3-none-any.whl", hash = "sha256:83579e5b793cc2278259064ec25803d63cb8b982fd81f65ca023c38cb667a1b2"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.240.0a0.tar.gz", hash = "sha256:aa1c0000ea45b6e29e915ce1a226b4065dec46268a9dda5f27ee0882f8eabdea"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.233.0,<3.0.0"
-constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.121.0,<2.0.0"
+aws-cdk-lib = ">=2.240.0,<3.0.0"
+constructs = ">=10.5.0,<11.0.0"
+jsii = ">=1.126.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "48.20.0"
+version = "50.4.0"
 description = "Schema for the protocol between CDK framework and CDK CLI"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_cloud_assembly_schema-48.20.0-py3-none-any.whl", hash = "sha256:f5b6cf661cac8690add9461de13aeae3f3742eec71c066032bd045b08d0b7c3e"},
-    {file = "aws_cdk_cloud_assembly_schema-48.20.0.tar.gz", hash = "sha256:229aa136c26b71b0a82b5a32658eabcd30e344f7e136315fdb6e3de8ef523bfa"},
+    {file = "aws_cdk_cloud_assembly_schema-50.4.0-py3-none-any.whl", hash = "sha256:3f98f06d99f68f5bae5c72f0f392494dd3ef4211197afd0e75cfe1d5fc487d1c"},
+    {file = "aws_cdk_cloud_assembly_schema-50.4.0.tar.gz", hash = "sha256:c9aa7a108ca63f3880f26594166d3e8c16b504a50424011baf785231dc009f30"},
 ]
 
 [package.dependencies]
-jsii = ">=1.118.0,<2.0.0"
+jsii = ">=1.121.0,<2.0.0"
 publication = ">=0.0.3"
-typeguard = ">=2.13.3,<4.3.0"
+typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.238.0"
+version = "2.240.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.238.0-py3-none-any.whl", hash = "sha256:6602d6678597c649d80ff884972c3fa67a98fd6cacb56adcb77cd8fc4a735d43"},
-    {file = "aws_cdk_lib-2.238.0.tar.gz", hash = "sha256:cef10c71e1575196df277fdac57c54010a8d28d77646da09200b1d1cb3625f8e"},
+    {file = "aws_cdk_lib-2.240.0-py3-none-any.whl", hash = "sha256:6ba3343885e0ad10cb38981ea4f7e6c721253519d2601af9d6784bb5787d1292"},
+    {file = "aws_cdk_lib-2.240.0.tar.gz", hash = "sha256:096fcb3efd41ba30cdcee0c97a54537f6cb3ab9e53a1f0ed68981a8b86860784"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = "2.2.263"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.0,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=48.20.0,<49.0.0"
-constructs = ">=10.0.0,<11.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=50.3.0,<51.0.0"
+constructs = ">=10.5.0,<11.0.0"
 jsii = ">=1.126.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
@@ -1323,18 +1323,18 @@ development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
 
 [[package]]
 name = "constructs"
-version = "10.4.4"
+version = "10.5.1"
 description = "A programming model for software-defined state"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "constructs-10.4.4-py3-none-any.whl", hash = "sha256:7c160b149aa16360531c55a55eb1aaf973fa1949f35477c6bd4f3d6171d279e5"},
-    {file = "constructs-10.4.4.tar.gz", hash = "sha256:50e9fa7bddbb09b5fc897b318f6316acccf2392850bbf45abc15438027528890"},
+    {file = "constructs-10.5.1-py3-none-any.whl", hash = "sha256:fc5c14f6b2770c8542a43e298aa29b63dee4b18701763e8c0fdce202624c3a7c"},
+    {file = "constructs-10.5.1.tar.gz", hash = "sha256:c0e90bb2b9c2782f292017820b91714321cb78393c8965c9362b0b624bfaf23b"},
 ]
 
 [package.dependencies]
-jsii = ">=1.121.0,<2.0.0"
+jsii = ">=1.126.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
