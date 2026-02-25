@@ -290,18 +290,12 @@ class HttpResolverLocal(ApiGatewayResolver):
         # Build middleware list
         all_middlewares: list[Callable[..., Any]] = []
 
-        # Determine if validation should be enabled for this route
-        # If route has explicit enable_validation setting, use it; otherwise, use resolver's global setting
-        route_validation_enabled = (
-            route.enable_validation if route.enable_validation is not None else self._enable_validation
-        )
-
-        if route_validation_enabled and hasattr(self, "_request_validation_middleware"):
+        if hasattr(self, "_request_validation_middleware"):
             all_middlewares.append(self._request_validation_middleware)
 
         all_middlewares.extend(self._router_middlewares + route.middlewares)
 
-        if route_validation_enabled and hasattr(self, "_response_validation_middleware"):
+        if hasattr(self, "_response_validation_middleware"):
             all_middlewares.append(self._response_validation_middleware)
 
         # Create the final handler that calls the route function
