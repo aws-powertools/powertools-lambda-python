@@ -27,6 +27,7 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_OPENAPI_VERSION,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestUnsupportedContentType,
     RequestValidationError,
     ResponseValidationError,
     SchemaValidationError,
@@ -2992,6 +2993,18 @@ class ApiGatewayResolver(BaseRouter):
                     status_code=http_code.value,
                     content_type=content_types.APPLICATION_JSON,
                     body={"statusCode": http_code, "detail": errors},
+                ),
+                serializer=self._serializer,
+                route=route,
+            )
+
+        if isinstance(exp, RequestUnsupportedContentType):
+            errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
+            return self._response_builder_class(
+                response=Response(
+                    status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                    content_type=content_types.APPLICATION_JSON,
+                    body={"statusCode": HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "detail": errors},
                 ),
                 serializer=self._serializer,
                 route=route,
