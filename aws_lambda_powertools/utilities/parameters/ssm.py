@@ -583,12 +583,12 @@ class SSMProvider(BaseProvider):
         diff = {key: value for key, value in batch.items() if key not in cache}
 
         for chunk in slice_dictionary(data=diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
-            response, possible_errors = self._get_parameters_by_name(
+            chunk_response, possible_errors = self._get_parameters_by_name(
                 parameters=chunk,
                 raise_on_error=raise_on_error,
                 decrypt=decrypt,
             )
-            response.update(response)
+            response.update(chunk_response)
             errors.extend(possible_errors)
 
         return response, errors
