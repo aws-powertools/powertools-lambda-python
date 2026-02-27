@@ -13,8 +13,7 @@ name: PR requirements
 
 # NOTES
 #
-# PR requirements are checked async in on_opened_pr.yml and enforced here synchronously
-# due to limitations in GH API.
+# PR requirements are enforced synchronously here.
 
 on:
   pull_request:
