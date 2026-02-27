@@ -2347,6 +2347,26 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
     parameters.get_parameters_by_name(parameters=params)
 
 
+def test_get_parameters_by_name_chunks(monkeypatch, config):
+    # GIVEN a batch of 12 parameters (more than max batch size of 10)
+    params = {f"param{i}": {} for i in range(12)}
+
+    class TestProvider(SSMProvider):
+        def __init__(self, boto_config: Config = config, **kwargs):
+            super().__init__(boto_config=boto_config, **kwargs)
+
+        def _get_parameters_by_name(self, parameters, raise_on_error=True, decrypt=False):
+            return {name: f"val_{name}" for name in parameters}, []
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    # WHEN get_parameters_by_name is called
+    result = parameters.get_parameters_by_name(parameters=params)
+
+    # THEN all parameters should be returned across chunks
+    assert len(result) == 12
+
+
 def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
