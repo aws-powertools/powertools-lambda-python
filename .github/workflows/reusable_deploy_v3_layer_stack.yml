@@ -189,7 +189,7 @@ jobs:
       - name: install deps
         run: poetry install
       - name: Download artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
           path: layer_v3
@@ -213,7 +213,7 @@ jobs:
           cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
           path: ./layer_v3/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
