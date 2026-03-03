@@ -240,8 +240,45 @@ def test_per_route_validation_response_error_code():
 
 
 def test_per_route_validation_with_pydantic_v2():
-    """Test that per-route validation works correctly with Pydantic v2 models"""
-    # GIVEN APIGatewayRestResolver with mixed validation
+    """Test that per-route validation actually validates when resolver has validation disabled"""
+    # GIVEN APIGatewayRestResolver WITHOUT global validation
+    app = APIGatewayRestResolver()
+
+    class Task(BaseModel):
+        title: str
+        priority: int
+
+    @app.get("/task", enable_validation=True)
+    def get_task() -> Task:
+        # Return invalid data — missing 'title' and 'priority'
+        return cast(Task, {"wrong": "data"})
+
+    @app.get("/unvalidated-task")
+    def get_unvalidated_task():
+        return {"title": "Anything", "extra": "field"}
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["httpMethod"] = "GET"
+
+    # WHEN calling validated route with invalid data
+    event["path"] = "/task"
+    result = app(event, {})
+
+    # THEN validation must reject it with 422
+    assert result["statusCode"] == 422
+
+    # WHEN calling unvalidated route
+    event["path"] = "/unvalidated-task"
+    result = app(event, {})
+
+    # THEN should return as-is without validation
+    assert result["statusCode"] == 200
+    assert "extra" in result["body"]
+
+
+def test_per_route_opt_in_validation_with_valid_data():
+    """Test that per-route opt-in validation passes valid data and serializes correctly"""
+    # GIVEN APIGatewayRestResolver WITHOUT global validation
     app = APIGatewayRestResolver()
 
     class Task(BaseModel):
@@ -252,25 +289,13 @@ def test_per_route_validation_with_pydantic_v2():
     def get_task() -> Task:
         return Task(title="Important", priority=1)
 
-    @app.get("/unvalidated-task")
-    def get_unvalidated_task():
-        return {"title": "Anything", "extra": "field"}
-
     event = load_event("apiGatewayProxyEvent.json")
     event["httpMethod"] = "GET"
-
-    # WHEN calling validated route
     event["path"] = "/task"
+
+    # WHEN calling validated route with valid data
     result = app(event, {})
 
-    # THEN should validate and serialize correctly
+    # THEN validation passes and response is serialized
     assert result["statusCode"] == 200
     assert "Important" in result["body"]
-
-    # WHEN calling unvalidated route
-    event["path"] = "/unvalidated-task"
-    result = app(event, {})
-
-    # THEN should return as-is without validation
-    assert result["statusCode"] == 200
-    assert "extra" in result["body"]
