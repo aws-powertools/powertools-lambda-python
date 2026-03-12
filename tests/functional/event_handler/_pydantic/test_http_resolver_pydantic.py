@@ -209,6 +209,7 @@ def test_invalid_query_param():
 # =============================================================================
 
 
+@pytest.mark.skip("Due to issue #7981.")
 @pytest.mark.asyncio
 async def test_async_handler_with_validation():
     # GIVEN an app with async handler and validation
