@@ -19,7 +19,11 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestUnsupportedContentType,
+    RequestValidationError,
+    ResponseValidationError,
+)
 from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
@@ -129,7 +133,18 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             return self._parse_form_data(app)
 
         else:
-            raise NotImplementedError("Only JSON body or Form() are supported")
+            raise RequestUnsupportedContentType(
+                "Only JSON body or Form() are supported",
+                errors=[
+                    {
+                        "type": "unsupported_content_type",
+                        "loc": ("body",),
+                        "msg": "Only JSON body or Form() are supported",
+                        "input": {},
+                        "ctx": {},
+                    },
+                ],
+            )
 
     def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
         """Parse JSON data from the request body."""
@@ -213,20 +228,27 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
-        # Process the response body if it exists
-        if response.body and response.is_json():
-            response.body = self._serialize_response(
-                field=route.dependant.return_param,
+        field = route.dependant.return_param
+
+        if field is None:
+            if not response.is_json():
+                return response
+            else:
+                # JSON serialize the body without validation
+                response.body = jsonable_encoder(response.body, custom_serializer=self._validation_serializer)
+        else:
+            response.body = self._serialize_response_with_validation(
+                field=field,
                 response_content=response.body,
                 has_route_custom_response_validation=route.custom_response_validation_http_code is not None,
             )
 
         return response
 
-    def _serialize_response(
+    def _serialize_response_with_validation(
         self,
         *,
-        field: ModelField | None = None,
+        field: ModelField,
         response_content: Any,
         include: IncEx | None = None,
         exclude: IncEx | None = None,
@@ -239,33 +261,23 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         """
         Serialize the response content according to the field type.
         """
-        if field:
-            errors: list[dict[str, Any]] = []
-            value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
-            if errors:
-                # route-level validation must take precedence over app-level
-                if has_route_custom_response_validation:
-                    raise ResponseValidationError(
-                        errors=_normalize_errors(errors),
-                        body=response_content,
-                        source="route",
-                    )
-                if self._has_response_validation_error:
-                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
-
-                raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
-
-            if hasattr(field, "serialize"):
-                return field.serialize(
-                    value,
-                    include=include,
-                    exclude=exclude,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_defaults=exclude_defaults,
-                    exclude_none=exclude_none,
+        errors: list[dict[str, Any]] = []
+        value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
+        if errors:
+            # route-level validation must take precedence over app-level
+            if has_route_custom_response_validation:
+                raise ResponseValidationError(
+                    errors=_normalize_errors(errors),
+                    body=response_content,
+                    source="route",
                 )
-            return jsonable_encoder(
+            if self._has_response_validation_error:
+                raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+
+            raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
+
+        if hasattr(field, "serialize"):
+            return field.serialize(
                 value,
                 include=include,
                 exclude=exclude,
@@ -273,11 +285,18 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
-                custom_serializer=self._validation_serializer,
             )
-        else:
-            # Just serialize the response content returned from the handler.
-            return jsonable_encoder(response_content, custom_serializer=self._validation_serializer)
+
+        return jsonable_encoder(
+            value,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            custom_serializer=self._validation_serializer,
+        )
 
     def _prepare_response_content(
         self,

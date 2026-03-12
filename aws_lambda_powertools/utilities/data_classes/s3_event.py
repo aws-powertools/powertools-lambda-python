@@ -215,9 +215,14 @@ class S3Message(DictWrapper):
 
     @property
     def get_object(self) -> S3Object:
-        """Get the `object` property as an S3Object"""
-        # Note: this name conflicts with existing python builtins
-        return S3Object(self["object"])
+        """Get the `object` property as an S3Object
+
+        Note: IntelligentTiering events use 'get_object' as the actual key name,
+        while other S3 events use 'object'. This method handles both cases.
+        """
+        # IntelligentTiering events use 'get_object', others use 'object'
+        object_data = self.get("get_object") or self["object"]
+        return S3Object(object_data)
 
 
 class S3EventRecordGlacierRestoreEventData(DictWrapper):
@@ -240,6 +245,16 @@ class S3EventRecordGlacierEventData(DictWrapper):
         The glacierEventData key is only visible for s3:ObjectRestore:Completed events
         """
         return S3EventRecordGlacierRestoreEventData(self["restoreEventData"])
+
+
+class S3EventRecordIntelligentTieringEventData(DictWrapper):
+    @property
+    def destination_access_tier(self) -> str:
+        """The new access tier for the object.
+
+        The intelligentTieringEventData key is only visible for IntelligentTiering events.
+        """
+        return self["destinationAccessTier"]
 
 
 class S3EventRecord(DictWrapper):
@@ -297,6 +312,12 @@ class S3EventRecord(DictWrapper):
         item = self.get("glacierEventData")
         return None if item is None else S3EventRecordGlacierEventData(item)
 
+    @property
+    def intelligent_tiering_event_data(self) -> S3EventRecordIntelligentTieringEventData | None:
+        """The intelligentTieringEventData key is only visible for IntelligentTiering events."""
+        item = self.get("intelligentTieringEventData")
+        return None if item is None else S3EventRecordIntelligentTieringEventData(item)
+
 
 class S3Event(DictWrapper):
     """S3 event notification
@@ -325,5 +346,12 @@ class S3Event(DictWrapper):
 
     @property
     def object_key(self) -> str:
-        """Get the object key for the first s3 event record and unquote plus"""
-        return unquote_plus(self["Records"][0]["s3"]["object"]["key"])
+        """Get the object key for the first s3 event record and unquote plus
+
+        Note: IntelligentTiering events use 'get_object' as the key name,
+        while other S3 events use 'object'. This method handles both cases.
+        """
+        s3_data = self["Records"][0]["s3"]
+        # IntelligentTiering events use 'get_object', others use 'object'
+        object_data = s3_data.get("get_object") or s3_data["object"]
+        return unquote_plus(object_data["key"])

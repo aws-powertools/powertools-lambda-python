@@ -108,7 +108,7 @@ jobs:
         working-directory: ./layer_v3
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -127,7 +127,7 @@ jobs:
         with:
           node-version: "18.20.4"
       - name: Setup python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -168,7 +168,7 @@ jobs:
       - name: zip output
         run: zip -r cdk.py${{ matrix.python-version }}.out.zip cdk.out
       - name: Archive CDK artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
           path: layer_v3/cdk.py${{ matrix.python-version }}.out.zip
@@ -263,7 +263,7 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 

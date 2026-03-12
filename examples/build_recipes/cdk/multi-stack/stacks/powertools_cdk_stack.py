@@ -25,7 +25,7 @@ class PowertoolsStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, environment: str = "dev", **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        self.env = environment
+        self.deploy_environment = environment
 
         # Shared Powertools Layer (using public layer)
         self.powertools_layer = self._create_powertools_layer()
@@ -47,24 +47,24 @@ class PowertoolsStack(Stack):
         return _lambda.LayerVersion.from_layer_version_arn(
             self,
             "PowertoolsLayer",
-            layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:28",
+            layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:29",
         )
 
     def _create_dynamodb_table(self) -> dynamodb.Table:
         return dynamodb.Table(
             self,
             "DataTable",
-            table_name=f"powertools-{self.env}-data",
+            table_name=f"powertools-{self.deploy_environment}-data",
             partition_key=dynamodb.Attribute(name="pk", type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            removal_policy=RemovalPolicy.DESTROY if self.env != "prod" else RemovalPolicy.RETAIN,
+            removal_policy=RemovalPolicy.DESTROY if self.deploy_environment != "prod" else RemovalPolicy.RETAIN,
         )
 
     def _create_sqs_queue(self) -> sqs.Queue:
         return sqs.Queue(
             self,
             "WorkerQueue",
-            queue_name=f"powertools-{self.env}-worker",
+            queue_name=f"powertools-{self.deploy_environment}-worker",
             visibility_timeout=Duration.seconds(180),
         )
 
@@ -77,12 +77,12 @@ class PowertoolsStack(Stack):
             code=_lambda.Code.from_asset("src/app"),
             layers=[self.powertools_layer],
             timeout=Duration.seconds(30),
-            memory_size=512 if self.env == "prod" else 256,
+            memory_size=512 if self.deploy_environment == "prod" else 256,
             environment={
-                "ENVIRONMENT": self.env,
-                "POWERTOOLS_SERVICE_NAME": f"app-{self.env}",
-                "POWERTOOLS_METRICS_NAMESPACE": f"MyApp/{self.env}",
-                "POWERTOOLS_LOG_LEVEL": "INFO" if self.env == "prod" else "DEBUG",
+                "ENVIRONMENT": self.deploy_environment,
+                "POWERTOOLS_SERVICE_NAME": f"app-{self.deploy_environment}",
+                "POWERTOOLS_METRICS_NAMESPACE": f"MyApp/{self.deploy_environment}",
+                "POWERTOOLS_LOG_LEVEL": "INFO" if self.deploy_environment == "prod" else "DEBUG",
                 "TABLE_NAME": self.table.table_name,
                 "QUEUE_URL": self.queue.queue_url,
             },
@@ -103,12 +103,12 @@ class PowertoolsStack(Stack):
             code=_lambda.Code.from_asset("src/worker"),
             layers=[self.powertools_layer],
             timeout=Duration.seconds(120),
-            memory_size=1024 if self.env == "prod" else 512,
+            memory_size=1024 if self.deploy_environment == "prod" else 512,
             environment={
-                "ENVIRONMENT": self.env,
-                "POWERTOOLS_SERVICE_NAME": f"worker-{self.env}",
-                "POWERTOOLS_METRICS_NAMESPACE": f"MyApp/{self.env}",
-                "POWERTOOLS_LOG_LEVEL": "INFO" if self.env == "prod" else "DEBUG",
+                "ENVIRONMENT": self.deploy_environment,
+                "POWERTOOLS_SERVICE_NAME": f"worker-{self.deploy_environment}",
+                "POWERTOOLS_METRICS_NAMESPACE": f"MyApp/{self.deploy_environment}",
+                "POWERTOOLS_LOG_LEVEL": "INFO" if self.deploy_environment == "prod" else "DEBUG",
                 "TABLE_NAME": self.table.table_name,
             },
         )
@@ -131,8 +131,8 @@ class PowertoolsStack(Stack):
         api = apigateway.RestApi(
             self,
             "ApiGateway",
-            rest_api_name=f"Powertools API - {self.env}",
-            description=f"API for {self.env} environment",
+            rest_api_name=f"Powertools API - {self.deploy_environment}",
+            description=f"API for {self.deploy_environment} environment",
         )
 
         integration = apigateway.LambdaIntegration(self.api_function)

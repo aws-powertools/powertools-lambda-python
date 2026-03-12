@@ -124,6 +124,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
@@ -144,6 +145,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -165,6 +167,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
@@ -185,6 +188,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -206,6 +210,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
@@ -226,6 +231,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -247,6 +253,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ):
@@ -267,6 +274,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -288,6 +296,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
@@ -308,6 +317,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )

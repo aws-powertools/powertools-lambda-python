@@ -715,6 +715,32 @@ def test_validate_body_param_with_stripped_headers(gw_event):
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
+def test_validate_unsupported_content_type_headers(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    # WHEN headers has unsupported content-type
+    @app.post("/")
+    def handler(user: Model) -> Model:
+        return user
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"] = {"Content-type": "text/fake-content-type"}
+    gw_event["path"] = "/"
+    gw_event["body"] = json.dumps({"name": "John", "age": 30})
+
+    # THEN the handler should return 415 (Unsupported Media Type)
+    # THEN the body must have the "unsupported_content_type" error message
+    result = app(gw_event, {})
+    assert result["statusCode"] == 415
+    assert "unsupported_content_type" in result["body"]
+
+
 def test_validate_body_param_with_invalid_date(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1606,7 +1632,39 @@ def test_validate_with_minimal_event():
     assert result["statusCode"] == 200
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
+def test_validate_list_response(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    response_before_validation = [
+        {
+            "name": "Joe",
+            "age": 20,
+        },
+        {
+            "name": "Jane",
+            "age": 20,
+        },
+    ]
+
+    @app.get("/list_response_with_same_element_types")
+    def handler_different_list() -> List[Model]:
+        return response_before_validation
+
+    # WHEN returning list with the same element type as the non-Optional return type
+    gw_event["path"] = "/list_response_with_same_element_types"
+    result = app(gw_event, {})
+    body = json.loads(result["body"])
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 200
+    assert body == response_before_validation
+
+
 def test_validation_error_none_returned_non_optional_type(gw_event):
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -1628,6 +1686,32 @@ def test_validation_error_none_returned_non_optional_type(gw_event):
     body = json.loads(result["body"])
     assert body["detail"][0]["type"] == "model_attributes_type"
     assert body["detail"][0]["loc"] == ["response"]
+
+
+def test_validation_error_different_list_returned_non_optional_type(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    different_list_response = ["a", "b", "c"]
+
+    @app.get("/list_response_with_different_element_types")
+    def handler_different_list() -> List[Model]:
+        return different_list_response
+
+    # WHEN returning list with the different element type as the non-Optional return type
+    gw_event["path"] = "/list_response_with_different_element_types"
+    result = app(gw_event, {})
+
+    # THEN it should return a validation error
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert len(body["detail"]) == len(different_list_response)
+    assert body["detail"][0]["type"] == "model_attributes_type"
+    assert body["detail"][0]["loc"] == ["response", 0]
 
 
 def test_validation_error_incomplete_model_returned_non_optional_type(gw_event):
@@ -1674,7 +1758,6 @@ def test_none_returned_for_optional_type(gw_event):
     assert result["body"] == "null"
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
 @pytest.mark.parametrize(
     "path, body",
     [
@@ -1730,7 +1813,6 @@ def test_custom_response_validation_error_http_code_valid_response(gw_event):
     assert body == {"name": "Joe", "age": 18}
 
 
-@pytest.mark.skipif(reason="Test temporarily disabled until falsy return is fixed")
 @pytest.mark.parametrize(
     "http_code",
     (422, 500, 510),

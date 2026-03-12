@@ -1116,7 +1116,7 @@ class Logger:
             fn=log_line["filename"],
             lno=log_line["line"],
             msg=log_line["msg"],
-            args=(),
+            args=log_line.get("args", ()),
             exc_info=log_line["exc_info"],
             func=log_line["function"],
             extra=log_line["extra"],

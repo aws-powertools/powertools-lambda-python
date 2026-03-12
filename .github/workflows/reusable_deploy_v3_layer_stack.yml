@@ -76,7 +76,7 @@ jobs:
                  "ap-south-1", "ap-south-2", "ap-southeast-1", "ap-southeast-2", "ap-southeast-3",
                  "ap-southeast-4", "ap-southeast-5", "ap-southeast-7", "ca-central-1", "ca-west-1", "eu-central-1", "eu-central-2",
                  "eu-north-1", "eu-south-1", "eu-south-2", "eu-west-1", "eu-west-2", "eu-west-3",
-                 "il-central-1", "me-central-1", "me-south-1", "mx-central-1", "sa-east-1", "us-east-1",
+                 "il-central-1", "me-south-1", "mx-central-1", "sa-east-1", "us-east-1",
                  "us-east-2", "us-west-1", "us-west-2"]
         python-version: ["3.10","3.11","3.12","3.13","3.14"]
         include:
@@ -128,8 +128,6 @@ jobs:
             has_arm64_support: "true"
           - region: "il-central-1"
             has_arm64_support: "true"
-          - region: "me-central-1"
-            has_arm64_support: "true"
           - region: "me-south-1"
             has_arm64_support: "true"
           - region: "mx-central-1"
@@ -146,7 +144,7 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -161,7 +159,7 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4.3.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -171,7 +169,7 @@ jobs:
         with:
           node-version: "18.20.4"
       - name: Setup python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -189,7 +187,7 @@ jobs:
       - name: install deps
         run: poetry install
       - name: Download artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
           path: layer_v3
@@ -213,7 +211,7 @@ jobs:
           cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
           path: ./layer_v3/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.

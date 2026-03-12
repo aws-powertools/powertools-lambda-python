@@ -27,6 +27,7 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_OPENAPI_VERSION,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestUnsupportedContentType,
     RequestValidationError,
     ResponseValidationError,
     SchemaValidationError,
@@ -378,6 +379,7 @@ class Route:
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: HTTPStatus | None = None,
         middlewares: list[Callable[..., Response]] | None = None,
     ):
@@ -420,6 +422,8 @@ class Route:
             Additional OpenAPI extensions as a dictionary.
         deprecated: bool
             Whether or not to mark this route as deprecated in the OpenAPI schema
+        enable_validation: bool | None, optional
+            Enable or disable validation for this specific route. If None, inherits from resolver setting.
         custom_response_validation_http_code: int | HTTPStatus | None, optional
             Whether to have custom http status code for this route if response validation fails
         middlewares: list[Callable[..., Response]] | None
@@ -449,6 +453,7 @@ class Route:
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
         self.deprecated = deprecated
+        self.enable_validation = enable_validation
 
         # _middleware_stack_built is used to ensure the middleware stack is only built once.
         self._middleware_stack_built = False
@@ -535,15 +540,34 @@ class Route:
 
         all_middlewares = []
 
+        # Determine if validation should be enabled for this route
+        # If route has explicit enable_validation setting, use it; otherwise, use resolver's global setting
+        route_validation_enabled = (
+            self.enable_validation if self.enable_validation is not None else app._enable_validation
+        )
+
+        # If route needs validation but resolver didn't create the middlewares, create them now
+        if route_validation_enabled and not hasattr(app, "_request_validation_middleware"):
+            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import (
+                OpenAPIRequestValidationMiddleware,
+                OpenAPIResponseValidationMiddleware,
+            )
+
+            app._request_validation_middleware = OpenAPIRequestValidationMiddleware()
+            app._response_validation_middleware = OpenAPIResponseValidationMiddleware(
+                validation_serializer=app._serializer,
+                has_response_validation_error=app._has_response_validation_error,
+            )
+
         # Add request validation middleware first if validation is enabled
-        if hasattr(app, "_request_validation_middleware"):
+        if route_validation_enabled and hasattr(app, "_request_validation_middleware"):
             all_middlewares.append(app._request_validation_middleware)
 
         # Add user middlewares in the middle
         all_middlewares.extend(router_middlewares + self.middlewares)
 
         # Add response validation middleware before the route handler if validation is enabled
-        if hasattr(app, "_response_validation_middleware"):
+        if route_validation_enabled and hasattr(app, "_response_validation_middleware"):
             all_middlewares.append(app._response_validation_middleware)
 
         logger.debug(f"Building middleware stack: {all_middlewares}")
@@ -1132,6 +1156,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1194,6 +1219,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1235,6 +1261,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -1255,6 +1282,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1297,6 +1325,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -1317,6 +1346,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1359,6 +1389,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -1379,6 +1410,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1420,6 +1452,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -1440,6 +1473,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1484,6 +1518,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -1504,6 +1539,7 @@ class BaseRouter(ABC):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -1547,6 +1583,7 @@ class BaseRouter(ABC):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
@@ -2568,6 +2605,7 @@ class ApiGatewayResolver(BaseRouter):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -2602,6 +2640,7 @@ class ApiGatewayResolver(BaseRouter):
                     security,
                     openapi_extensions,
                     deprecated,
+                    enable_validation,
                     custom_response_validation_http_code,
                     middlewares,
                 )
@@ -2972,6 +3011,18 @@ class ApiGatewayResolver(BaseRouter):
                 route=route,
             )
 
+        if isinstance(exp, RequestUnsupportedContentType):
+            errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
+            return self._response_builder_class(
+                response=Response(
+                    status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+                    content_type=content_types.APPLICATION_JSON,
+                    body={"statusCode": HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "detail": errors},
+                ),
+                serializer=self._serializer,
+                route=route,
+            )
+
         if isinstance(exp, ServiceError):
             return self._response_builder_class(
                 response=Response(
@@ -3117,6 +3168,7 @@ class Router(BaseRouter):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -3144,6 +3196,7 @@ class Router(BaseRouter):
                 frozen_security,
                 frozen_openapi_extensions,
                 deprecated,
+                enable_validation,
                 custom_response_validation_http_code,
             )
 
@@ -3233,6 +3286,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         security: list[dict[str, list[str]]] | None = None,
         openapi_extensions: dict[str, Any] | None = None,
         deprecated: bool = False,
+        enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
@@ -3253,6 +3307,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             security,
             openapi_extensions,
             deprecated,
+            enable_validation,
             custom_response_validation_http_code,
             middlewares,
         )
