@@ -546,6 +546,19 @@ class Route:
             self.enable_validation if self.enable_validation is not None else app._enable_validation
         )
 
+        # If route needs validation but resolver didn't create the middlewares, create them now
+        if route_validation_enabled and not hasattr(app, "_request_validation_middleware"):
+            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import (
+                OpenAPIRequestValidationMiddleware,
+                OpenAPIResponseValidationMiddleware,
+            )
+
+            app._request_validation_middleware = OpenAPIRequestValidationMiddleware()
+            app._response_validation_middleware = OpenAPIResponseValidationMiddleware(
+                validation_serializer=app._serializer,
+                has_response_validation_error=app._has_response_validation_error,
+            )
+
         # Add request validation middleware first if validation is enabled
         if route_validation_enabled and hasattr(app, "_request_validation_middleware"):
             all_middlewares.append(app._request_validation_middleware)
