@@ -150,7 +150,7 @@ class TestKafkaBatchProcessing:
         # THEN - Kafka uses composite identifier
         assert len(result["batchItemFailures"]) == 1
         assert result["batchItemFailures"][0]["itemIdentifier"] == {
-            "topic-partition": "mytopic-0",
+            "partition": "mytopic-0",
             "offset": 1,
         }
 
@@ -203,7 +203,7 @@ class TestKafkaBatchProcessing:
 
         # THEN
         assert len(result["batchItemFailures"]) == 2
-        topic_partitions = [f["itemIdentifier"]["topic-partition"] for f in result["batchItemFailures"]]
+        topic_partitions = [f["itemIdentifier"]["partition"] for f in result["batchItemFailures"]]
         assert "topic1-0" in topic_partitions
         assert "topic2-1" in topic_partitions
 
@@ -332,7 +332,7 @@ class TestAsyncKafkaBatchProcessing:
         # THEN
         assert len(result["batchItemFailures"]) == 1
         assert result["batchItemFailures"][0]["itemIdentifier"] == {
-            "topic-partition": "mytopic-0",
+            "partition": "mytopic-0",
             "offset": 1,
         }
 

@@ -374,12 +374,12 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_kafka_failures(self):
         failures = []
         for msg in self.fail_messages:
-            # Kafka uses a composite identifier with topic-partition and offset
+            # Kafka uses a composite identifier with partition and offset
             # Both data class and Pydantic model use the same field names
             failures.append(
                 {
                     "itemIdentifier": {
-                        "topic-partition": f"{msg.topic}-{msg.partition}",
+                        "partition": f"{msg.topic}-{msg.partition}",
                         "offset": msg.offset,
                     },
                 },

@@ -29,9 +29,9 @@ else:  # pragma: no cover
 
 
 class KafkaItemIdentifier(TypedDict):
-    """Kafka uses a composite identifier with topic-partition and offset."""
+    """Kafka uses a composite identifier with partition and offset."""
 
-    topic_partition: str  # Maps to "topic-partition" in the actual response
+    partition: str
     offset: int
 
 
@@ -40,7 +40,7 @@ class PartialItemFailures(TypedDict):
     Represents a partial item failure response.
 
     For SQS, Kinesis, and DynamoDB: itemIdentifier is a string (message_id or sequence_number)
-    For Kafka: itemIdentifier is a KafkaItemIdentifier dict with topic-partition and offset
+    For Kafka: itemIdentifier is a KafkaItemIdentifier dict with partition and offset
     """
 
     itemIdentifier: str | KafkaItemIdentifier
