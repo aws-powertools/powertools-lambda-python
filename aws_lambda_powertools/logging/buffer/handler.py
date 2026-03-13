@@ -65,8 +65,8 @@ class BufferingHandler(logging.Handler):
 
         self.source_logger._add_log_record_to_buffer(
             level=record.levelno,
-            msg=record.getMessage(),
-            args=(),
+            msg=record.msg,
+            args=record.args,
             exc_info=record.exc_info,
             stack_info=False,
         )

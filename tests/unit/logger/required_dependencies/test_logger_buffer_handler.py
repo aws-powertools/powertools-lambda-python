@@ -60,7 +60,7 @@ def test_buffering_handler_emit_calls_add_log_record_to_buffer(monkeypatch):
     # THEN the message is NOT in output yet (it's buffered)
     assert "test arg" not in stream.getvalue()
 
-    # AND when buffer is flushed, the buffered message appears in the logger output
+    # AND when buffer is flushed, the buffered message appears with interpolated args
     source_logger.flush_buffer()
     output = stream.getvalue()
     log_line = json.loads(output.strip())
