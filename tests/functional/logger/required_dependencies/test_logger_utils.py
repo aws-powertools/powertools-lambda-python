@@ -322,8 +322,9 @@ def test_copy_config_to_ext_loggers_but_preserve_log_levels(stdout, logger, log_
 
 def test_copy_config_with_buffering_uses_buffering_handler(stdout, logger, log_level):
     # GIVEN an external logger and Powertools logger with buffer_config
+    # Using buffer_at_verbosity="WARNING" so INFO logs are buffered (not emitted directly)
     ext_logger = logger()
-    buffer_config = LoggerBufferConfig(max_bytes=10240)
+    buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING")
     powertools_logger = Logger(
         service=service_name(),
         level=log_level.INFO.value,
