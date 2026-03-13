@@ -219,6 +219,9 @@ replace = 'VERSION = "{new_version}"'
 
 [tool.ty]
 # ty type checker configuration
+# Ignore unused type: ignore comments since we also run mypy which may need them
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
 
 [tool.ty.src]
 include = ["aws_lambda_powertools/**"]

@@ -654,7 +654,7 @@ class SSMProvider(BaseProvider):
 
             # NOTE: If transform is set, we do it before caching to reduce number of operations
             if transform:
-                value = transform_value(value=value, transform=transform, raise_on_transform_error=raise_on_error)
+                value = transform_value(value=value, transform=transform, raise_on_transform_error=raise_on_error)  # type: ignore[assignment]
 
             _cache_key = (name, transform)
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
@@ -1065,11 +1065,11 @@ def set_parameter(
     return provider.set(  # ty: ignore[no-matching-overload]
         name,
         value,
-        parameter_type=parameter_type,
+        parameter_type=parameter_type,  # type: ignore[arg-type]
         overwrite=overwrite,
         tier=tier,
         description=description,
-        kms_key_id=kms_key_id,
+        kms_key_id=kms_key_id,  # type: ignore[arg-type]
         **sdk_options,
     )
 
