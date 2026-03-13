@@ -95,14 +95,14 @@ jobs:
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}-${{ matrix.arch }}.zip
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}-${{ matrix.arch }}.json
       - name: Store Zip
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.zip
           path: ${{ matrix.layer }}-${{ matrix.arch }}.zip
           retention-days: 1
           if-no-files-found: error
       - name: Store Metadata
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.json
           path: ${{ matrix.layer }}-${{ matrix.arch }}.json
@@ -135,11 +135,11 @@ jobs:
           - x86_64
     steps:
       - name: Download Zip
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.zip
       - name: Download Metadata
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.json
       - name: Verify Layer Signature
@@ -187,7 +187,7 @@ jobs:
           jq -s -r '["Layer Arn", "Runtimes", "Version", "Description", "SHA256"], ([.[0], .[1]] | .[] | [.LayerArn, (.CompatibleRuntimes | join("/")), .Version, .Description, .Content.CodeSha256]) |@tsv' '${{ matrix.layer }}-${{ matrix.arch }}.json' $layer_output | column -t -s $'\t'
 
       - name: Store Metadata - ${{ matrix.region }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}-${{ matrix.region }}.json
           path: ${{ matrix.layer }}-${{ matrix.arch }}-${{ matrix.region }}.json
