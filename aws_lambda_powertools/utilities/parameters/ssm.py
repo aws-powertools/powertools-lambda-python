@@ -786,7 +786,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: int | None = None,
     **sdk_options,
-) -> str | bytes | dict:
+) -> str | bytes | dict | None:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -1060,14 +1060,16 @@ def set_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].set(
+    provider: SSMProvider = DEFAULT_PROVIDERS["ssm"]
+
+    return provider.set(  # ty: ignore[no-matching-overload]
         name,
         value,
-        parameter_type=parameter_type,
+        parameter_type=parameter_type,  # type: ignore[arg-type]
         overwrite=overwrite,
         tier=tier,
         description=description,
-        kms_key_id=kms_key_id,
+        kms_key_id=kms_key_id,  # type: ignore[arg-type]
         **sdk_options,
     )
 

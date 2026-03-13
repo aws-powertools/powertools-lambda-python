@@ -459,7 +459,7 @@ def get_secret(
     force_fetch: bool = False,
     max_age: int | None = None,
     **sdk_options,
-) -> str | bytes | dict:
+) -> str | bytes | dict | None:
     """
     Retrieve a parameter value from AWS Secrets Manager
 
