@@ -4,6 +4,7 @@ import inspect
 import re
 from typing import TYPE_CHECKING, Any, ForwardRef, cast
 
+from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     create_body_model,
@@ -187,6 +188,11 @@ def get_dependant(
 
     # Add each parameter to the dependant model
     for param_name, param in signature_params.items():
+        # Request-typed parameters are injected by the resolver at call time;
+        # they carry no OpenAPI meaning and must be excluded from schema generation.
+        if param.annotation is Request:
+            continue
+
         # If the parameter is a path parameter, we need to set the in_ field to "path".
         is_path_param = param_name in path_param_names
 

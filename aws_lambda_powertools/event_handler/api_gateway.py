@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import traceback
+import typing
 import warnings
 import zlib
 from abc import ABC, abstractmethod
@@ -20,6 +21,7 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
 from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_API_VERSION,
@@ -465,6 +467,11 @@ class Route:
         self._body_field: ModelField | None = None
 
         self.custom_response_validation_http_code = custom_response_validation_http_code
+
+        # _request_param_name caches the name of any Request-typed parameter in the handler (None = "not found").
+        # _request_param_checked avoids re-scanning the signature on every invocation.
+        self._request_param_name: str | None = None
+        self._request_param_name_checked: bool = False
 
     def __call__(
         self,
@@ -1608,6 +1615,41 @@ class BaseRouter(ABC):
         """Resets routing context"""
         self.context.clear()
 
+    @property
+    def request(self) -> Request:
+        """Current resolved :class:`Request` object.
+
+        Available inside middleware and in route handlers that declare a parameter
+        typed as :class:`Request <aws_lambda_powertools.event_handler.request.Request>`.
+
+        Raises
+        ------
+        RuntimeError
+            When accessed before route resolution (i.e. outside of middleware / handler scope).
+
+        Examples
+        --------
+        **Middleware**
+
+        ```python
+        def my_middleware(app, next_middleware):
+            req = app.request
+            print(req.route, req.method, req.path_parameters)
+            return next_middleware(app)
+        ```
+        """
+        route: Route | None = self.context.get("_route")
+        if route is None:
+            raise RuntimeError(
+                "app.request is only available after route resolution. "
+                "Use it inside middleware or a route handler.",
+            )
+        return Request(
+            route_path=route.openapi_path,
+            path_parameters=self.context.get("_route_args", {}),
+            current_event=self.current_event,
+        )
+
 
 class MiddlewareFrame:
     """
@@ -1680,6 +1722,22 @@ class MiddlewareFrame:
         return self.current_middleware(app, self.next_middleware)
 
 
+def _find_request_param_name(func: Callable) -> str | None:
+    """Return the name of the first parameter annotated as ``Request``, or ``None``."""
+    try:
+        # get_type_hints resolves string annotations from ``from __future__ import annotations``
+        # using the function's own module globals — no pydantic dependency required.
+        hints = typing.get_type_hints(func)
+    except Exception:
+        hints = {}
+
+    for param_name, annotation in hints.items():
+        if annotation is Request:
+            return param_name
+
+    return None
+
+
 def _registered_api_adapter(
     app: ApiGatewayResolver,
     next_middleware: Callable[..., Any],
@@ -1708,6 +1766,17 @@ def _registered_api_adapter(
     """
     route_args: dict = app.context.get("_route_args", {})
     logger.debug(f"Calling API Route Handler: {route_args}")
+
+    # Inject a Request object when the handler declares a parameter typed as Request.
+    # Lookup is cached on the Route object to avoid repeated signature inspection.
+    route: Route | None = app.context.get("_route")
+    if route is not None:
+        if not route._request_param_name_checked:
+            route._request_param_name = _find_request_param_name(next_middleware)
+            route._request_param_name_checked = True
+        if route._request_param_name:
+            route_args = {**route_args, route._request_param_name: app.request}
+
     return app._to_response(next_middleware(**route_args))
 
 
