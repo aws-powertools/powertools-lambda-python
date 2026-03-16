@@ -237,7 +237,6 @@ exclude = [
     "aws_lambda_powertools/metrics/**",
     "aws_lambda_powertools/middleware_factory/**",
     "aws_lambda_powertools/utilities/streaming/**",
-    "aws_lambda_powertools/utilities/parser/**",
     "aws_lambda_powertools/utilities/data_masking/**",
     "aws_lambda_powertools/tracing/**",
     "aws_lambda_powertools/utilities/data_classes/**",

@@ -98,7 +98,7 @@ def _validate_source_ip(value):
     try:
         # The value is always an instance of str before Pydantic validation occurs.
         # So the first thing to do is try to convert it.
-        IPvAnyNetwork(value)
+        IPvAnyNetwork(value)  # ty: ignore[call-non-callable]
     except ValueError:
         try:
             # Handle IPv6 with port: [IPv6]:port
@@ -110,7 +110,7 @@ def _validate_source_ip(value):
                 # If it"s not in IP:port format, validate as-is
                 ip_part = value
 
-            IPvAnyNetwork(ip_part)
+            IPvAnyNetwork(ip_part)  # ty: ignore[call-non-callable]
         except (ValueError, IndexError) as e:
             raise ValueError(f"Invalid IP address in sourceIp: {ip_part}") from e
 
