@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     DictWrapper,
 )
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
+    get_header_value,  # ty: ignore[deprecated]
 )
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
@@ -232,7 +232,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(self.headers, name, default_value, case_sensitive)  # ty: ignore[deprecated]
 
 
 class APIGatewayAuthorizerEventV2(DictWrapper):
@@ -358,7 +358,7 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(self.headers, name, default_value, case_sensitive)  # ty: ignore[deprecated]
 
 
 class APIGatewayAuthorizerResponseV2:
@@ -691,12 +691,12 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
             self._deny_routes.append(route)
 
     @override
-    def allow_all_routes(self):
+    def allow_all_routes(self, http_method: str = HttpVerb.ALL.value):  # type: ignore[override]  # noqa: ARG002
         """Adds a '*' allow to the policy to authorize access to all methods of an API"""
         self._add_route(effect="Allow", resource="*")
 
     @override
-    def deny_all_routes(self):
+    def deny_all_routes(self, http_method: str = HttpVerb.ALL.value):  # type: ignore[override]  # noqa: ARG002
         """Adds a '*' allow to the policy to deny access to all methods of an API"""
 
         self._add_route(effect="Deny", resource="*")
