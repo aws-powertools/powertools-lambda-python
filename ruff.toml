@@ -62,7 +62,7 @@ exclude = [
 # Maximum line length
 line-length = 120
 
-target-version = "py38"
+target-version = "py310"
 
 fix = true
 lint.fixable = ["I", "COM812", "W"]
