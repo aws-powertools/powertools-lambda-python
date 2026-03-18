@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools import Logger
@@ -78,7 +76,7 @@ def legacy_info() -> dict:
 
 
 @app.get("/tasks")
-def list_tasks() -> List[Task]:
+def list_tasks() -> list[Task]:
     """
     This route has validation enabled (inherited from resolver).
     Response will be validated to ensure it's a list of Task objects.

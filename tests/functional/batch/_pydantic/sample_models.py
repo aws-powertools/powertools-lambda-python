@@ -1,5 +1,4 @@
 import json
-from typing import Dict, Optional
 
 from pydantic import field_validator
 
@@ -36,7 +35,7 @@ class OrderDynamoDB(BaseModel):
     # auto transform json string
     # so Pydantic can auto-initialize nested Order model
     @field_validator("Message", mode="before")
-    def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
+    def transform_message_to_dict(cls, value: dict[Literal["S"], str]):
         try:
             return json.loads(value)
         except TypeError:
@@ -44,8 +43,8 @@ class OrderDynamoDB(BaseModel):
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[OrderDynamoDB] = None
-    OldImage: Optional[OrderDynamoDB] = None
+    NewImage: OrderDynamoDB | None = None
+    OldImage: OrderDynamoDB | None = None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):

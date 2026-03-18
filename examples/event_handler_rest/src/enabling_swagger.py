@@ -1,5 +1,3 @@
-from typing import List
-
 import requests
 from pydantic import BaseModel, Field
 
@@ -29,7 +27,7 @@ def create_todo(todo: Todo) -> str:
 
 
 @app.get("/todos")
-def get_todos() -> List[Todo]:
+def get_todos() -> list[Todo]:
     todo = requests.get("https://jsonplaceholder.typicode.com/todos")
     todo.raise_for_status()
 

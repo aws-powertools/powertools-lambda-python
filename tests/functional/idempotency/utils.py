@@ -1,6 +1,6 @@
 import hashlib
 import json
-from typing import Any, Dict, Optional
+from typing import Any
 
 from botocore import stub
 from pytest import FixtureRequest
@@ -14,12 +14,12 @@ def hash_idempotency_key(data: Any):
 
 
 def build_idempotency_put_item_stub(
-    data: Dict,
+    data: dict,
     function_name: str = "test-func",
     function_qualified_name: str = "test_idempotent_lambda_first_execution_event_mutation.<locals>",
     module_name: str = "tests.functional.idempotency._boto3.test_idempotency",
     handler_name: str = "lambda_handler",
-) -> Dict:
+) -> dict:
     idempotency_key_hash = (
         f"{function_name}.{module_name}.{function_qualified_name}.{handler_name}#{hash_idempotency_key(data)}"
     )
@@ -51,13 +51,13 @@ def build_idempotency_put_item_stub(
 
 
 def build_idempotency_update_item_stub(
-    data: Dict,
-    handler_response: Dict,
+    data: dict,
+    handler_response: dict,
     function_name: str = "test-func",
     function_qualified_name: str = "test_idempotent_lambda_first_execution_event_mutation.<locals>",
     module_name: str = "tests.functional.idempotency._boto3.test_idempotency",
     handler_name: str = "lambda_handler",
-) -> Dict:
+) -> dict:
     idempotency_key_hash = (
         f"{function_name}.{module_name}.{function_qualified_name}.{handler_name}#{hash_idempotency_key(data)}"
     )
@@ -79,16 +79,16 @@ def build_idempotency_update_item_stub(
     }
 
 
-def build_idempotency_key_id(data: Dict, request: FixtureRequest):
+def build_idempotency_key_id(data: dict, request: FixtureRequest):
     return f"test-func.{request.function.__module__}.{request.function.__qualname__}.<locals>.lambda_handler#{hash_idempotency_key(data)}"  # noqa: E501
 
 
 def build_idempotency_put_item_response_stub(
-    data: Dict,
+    data: dict,
     expiration: int,
     status: str,
     request: FixtureRequest,
-    validation_data: Optional[Any],
+    validation_data: Any | None,
 ):
     response = {
         "Item": {

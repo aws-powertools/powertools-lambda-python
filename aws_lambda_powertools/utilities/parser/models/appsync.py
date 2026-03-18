@@ -1,21 +1,21 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class AppSyncIamIdentity(BaseModel):
     accountId: str = Field(description="The AWS account ID of the caller.", examples=["123456789012"])
-    cognitoIdentityPoolId: Optional[str] = Field(
+    cognitoIdentityPoolId: str | None = Field(
         default=None,
         description="The Amazon Cognito identity pool ID associated with the caller.",
         examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
     )
-    cognitoIdentityId: Optional[str] = Field(
+    cognitoIdentityId: str | None = Field(
         default=None,
         description="The Amazon Cognito identity ID of the caller.",
         examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
     )
-    sourceIp: List[str] = Field(
+    sourceIp: list[str] = Field(
         description=(
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
@@ -29,12 +29,12 @@ class AppSyncIamIdentity(BaseModel):
         description="The Amazon Resource Name (ARN) of the IAM user.",
         examples=["arn:aws:iam::123456789012:user/appsync", "arn:aws:iam::123456789012:user/service-user"],
     )
-    cognitoIdentityAuthType: Optional[str] = Field(
+    cognitoIdentityAuthType: str | None = Field(
         default=None,
         description="Either authenticated or unauthenticated based on the identity type.",
         examples=["authenticated", "unauthenticated"],
     )
-    cognitoIdentityAuthProvider: Optional[str] = Field(
+    cognitoIdentityAuthProvider: str | None = Field(
         default=None,
         description=(
             "A comma-separated list of external identity provider information "
@@ -63,8 +63,8 @@ class AppSyncCognitoIdentity(BaseModel):
         description="The username of the authenticated user (cognito:username attribute).",
         examples=["mike", "jdoe", "user123"],
     )
-    claims: Dict[str, Any] = Field(description="The JWT claims that the user has from Cognito User Pool.")
-    sourceIp: List[str] = Field(
+    claims: dict[str, Any] = Field(description="The JWT claims that the user has from Cognito User Pool.")
+    sourceIp: list[str] = Field(
         description=(
             "The source IP address of the caller that AWS AppSync receives. "
             "If the request includes a x-forwarded-for header, this is a list of IP addresses."
@@ -74,7 +74,7 @@ class AppSyncCognitoIdentity(BaseModel):
         description="The default authorization strategy for this caller (ALLOW or DENY).",
         examples=["ALLOW", "DENY"],
     )
-    groups: Optional[List[str]] = Field(
+    groups: list[str] | None = Field(
         default=None,
         description="The Cognito User Pool groups that the user belongs to.",
         examples=[["admin", "users"], ["developers"]],
@@ -82,7 +82,7 @@ class AppSyncCognitoIdentity(BaseModel):
 
 
 class AppSyncOidcIdentity(BaseModel):
-    claims: Dict[str, Any] = Field(description="The JWT claims from the OpenID Connect provider.")
+    claims: dict[str, Any] = Field(description="The JWT claims from the OpenID Connect provider.")
     issuer: str = Field(
         description="The token issuer URL from the OpenID Connect provider.",
         examples=["https://accounts.google.com", "https://login.microsoftonline.com/tenant-id/v2.0"],
@@ -94,7 +94,7 @@ class AppSyncOidcIdentity(BaseModel):
 
 
 class AppSyncLambdaIdentity(BaseModel):
-    resolverContext: Dict[str, Any] = Field(
+    resolverContext: dict[str, Any] = Field(
         description=(
             "The resolver context returned by the Lambda function authorizing the request. "
             "Contains custom authorization data from AWS_LAMBDA authorization."
@@ -106,16 +106,11 @@ class AppSyncLambdaIdentity(BaseModel):
     )
 
 
-AppSyncIdentity = Union[
-    AppSyncIamIdentity,
-    AppSyncCognitoIdentity,
-    AppSyncOidcIdentity,
-    AppSyncLambdaIdentity,
-]
+AppSyncIdentity = AppSyncIamIdentity | AppSyncCognitoIdentity | AppSyncOidcIdentity | AppSyncLambdaIdentity
 
 
 class AppSyncRequestModel(BaseModel):
-    domainName: Optional[str] = Field(
+    domainName: str | None = Field(
         default=None,
         description=(
             "The custom domain name used to access the GraphQL endpoint. "
@@ -123,7 +118,7 @@ class AppSyncRequestModel(BaseModel):
         ),
         examples=["api.example.com", "graphql.mycompany.com"],
     )
-    headers: Dict[str, str] = Field(
+    headers: dict[str, str] = Field(
         description="HTTP headers from the GraphQL request, including custom headers.",
         examples=[
             {
@@ -137,7 +132,7 @@ class AppSyncRequestModel(BaseModel):
 
 
 class AppSyncInfoModel(BaseModel):
-    selectionSetList: List[str] = Field(
+    selectionSetList: list[str] = Field(
         description=(
             "A list representation of the fields in the GraphQL selection set. "
             "Fields that are aliased are referenced only by the alias name."
@@ -162,14 +157,14 @@ class AppSyncInfoModel(BaseModel):
         description="The name of the field that is currently being resolved.",
         examples=["getUser", "createPost", "locations", "updateProfile"],
     )
-    variables: Dict[str, Any] = Field(
+    variables: dict[str, Any] = Field(
         description="A map which holds all variables that are passed into the GraphQL request.",
         examples=[{"userId": "123", "limit": 10}, {"input": {"name": "John", "email": "john@example.com"}}, {}],
     )
 
 
 class AppSyncPrevModel(BaseModel):
-    result: Dict[str, Any] = Field(
+    result: dict[str, Any] = Field(
         description=(
             "The result of whatever previous operation was executed in a pipeline resolver. "
             "Contains the output from the previous function or Before mapping template."
@@ -182,7 +177,7 @@ class AppSyncPrevModel(BaseModel):
 
 
 class AppSyncResolverEventModel(BaseModel):
-    arguments: Dict[str, Any] = Field(
+    arguments: dict[str, Any] = Field(
         description="The arguments passed to the GraphQL field.",
         examples=[
             {"id": "123", "limit": 10},
@@ -190,11 +185,11 @@ class AppSyncResolverEventModel(BaseModel):
             {"page": 2, "size": 1, "name": "value"},
         ],
     )
-    identity: Optional[AppSyncIdentity] = Field(
+    identity: AppSyncIdentity | None = Field(
         default=None,
         description="Information about the caller identity (authenticated user or API key).",
     )
-    source: Optional[Dict[str, Any]] = Field(
+    source: dict[str, Any] | None = Field(
         default=None,
         description="The parent object for the field. For top-level fields, this will be null.",
         examples=[
@@ -208,11 +203,11 @@ class AppSyncResolverEventModel(BaseModel):
     info: AppSyncInfoModel = Field(
         description="Information about the GraphQL request including selection set and field details.",
     )
-    prev: Optional[AppSyncPrevModel] = Field(
+    prev: AppSyncPrevModel | None = Field(
         default=None,
         description="Results from the previous resolver in a pipeline resolver.",
     )
-    stash: Dict[str, Any] = Field(
+    stash: dict[str, Any] = Field(
         description=(
             "The stash is a map that is made available inside each resolver and function mapping template. "
             "The same stash instance lives through a single resolver execution."
@@ -221,4 +216,4 @@ class AppSyncResolverEventModel(BaseModel):
     )
 
 
-AppSyncBatchResolverEventModel = List[AppSyncResolverEventModel]
+AppSyncBatchResolverEventModel = list[AppSyncResolverEventModel]

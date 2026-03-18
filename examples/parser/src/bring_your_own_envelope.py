@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -11,7 +11,7 @@ Model = TypeVar("Model", bound=BaseModel)
 
 
 class EventBridgeEnvelope(BaseEnvelope):
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Optional[Model]:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[Model]) -> Model | None:
         if data is None:
             return None
 

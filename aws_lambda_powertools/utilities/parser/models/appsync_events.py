@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -10,7 +10,7 @@ class AppSyncEventsInfoChannelModel(BaseModel):
         description="The full path of the AppSync Events channel.",
         examples=["/default/channel", "/notifications/user-updates", "/chat/room-123"],
     )
-    segments: List[str] = Field(
+    segments: list[str] = Field(
         description="The path segments of the channel, split by forward slashes.",
         examples=[["default", "channel"], ["notifications", "user-updates"], ["chat", "room-123"]],
     )
@@ -39,7 +39,7 @@ class AppSyncEventsEventModel(BaseModel):
         description="The unique identifier for the event.",
         examples=["1", "2", "event-123", "notification-456"],
     )
-    payload: Dict[str, Any] = Field(
+    payload: dict[str, Any] = Field(
         description="The event data payload containing the actual event information.",
         examples=[
             {"event_1": "data_1"},
@@ -51,7 +51,7 @@ class AppSyncEventsEventModel(BaseModel):
 
 
 class AppSyncEventsModel(BaseModel):
-    identity: Optional[AppSyncIdentity] = Field(
+    identity: AppSyncIdentity | None = Field(
         default=None,
         description="Information about the caller identity (authenticated user or API key).",
     )
@@ -59,17 +59,17 @@ class AppSyncEventsModel(BaseModel):
     info: AppSyncEventsInfoModel = Field(
         description="Information about the AppSync Events operation including channel details.",
     )
-    prev: Optional[str] = Field(
+    prev: str | None = Field(
         default=None,
         description="Results from the previous operation in a pipeline resolver.",
         examples=["previous-result-data"],
     )
-    outErrors: Optional[List[str]] = Field(
+    outErrors: list[str] | None = Field(
         default=None,
         description="List of output errors that occurred during event processing.",
         examples=[["Error message 1", "Error message 2"]],
     )
-    stash: Optional[Dict[str, Any]] = Field(
+    stash: dict[str, Any] | None = Field(
         default=None,
         description=(
             "The stash is a map that is made available inside each resolver and function mapping template. "
@@ -77,7 +77,7 @@ class AppSyncEventsModel(BaseModel):
         ),
         examples=[{"customData": "value", "userId": "123"}],
     )
-    events: Optional[List[AppSyncEventsEventModel]] = Field(
+    events: list[AppSyncEventsEventModel] | None = Field(
         default=None,
         description="List of events being published or subscribed to in the AppSync Events operation.",
         examples=[

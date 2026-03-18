@@ -1,7 +1,5 @@
 from enum import Enum
-from typing import List
-
-from typing_extensions import Annotated
+from typing import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Query
@@ -21,7 +19,7 @@ class ExampleEnum(Enum):
 @app.get("/todos")
 def get(
     example_multi_value_param: Annotated[
-        List[ExampleEnum],  # (1)!
+        list[ExampleEnum],  # (1)!
         Query(
             description="This is multi value query parameter.",
         ),

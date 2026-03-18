@@ -5,9 +5,13 @@ import logging
 import warnings
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.event_handler.events_appsync.exceptions import UnauthorizedException
+from aws_lambda_powertools.event_handler.events_appsync.exceptions import (
+    UnauthorizedException,
+)
 from aws_lambda_powertools.event_handler.events_appsync.router import Router
-from aws_lambda_powertools.utilities.data_classes.appsync_resolver_events_event import AppSyncResolverEventsEvent
+from aws_lambda_powertools.utilities.data_classes.appsync_resolver_events_event import (
+    AppSyncResolverEventsEvent,
+)
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
@@ -321,7 +325,7 @@ class AppSyncEventsResolver(Router):
                     if isinstance(ret, Exception)
                     else {"id": e.get("id"), "payload": ret}
                 )
-                for e, ret in zip(self.current_event.events, results)
+                for e, ret in zip(self.current_event.events, results, strict=False)
             ],
         )
 

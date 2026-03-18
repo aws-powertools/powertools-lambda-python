@@ -1,7 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Annotated, Any
 
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -16,14 +15,14 @@ app = APIGatewayRestResolver(enable_validation=True)
 
 class Todo(BaseModel):
     userId: int
-    id_: Optional[int] = Field(alias="id", default=None)
+    id_: int | None = Field(alias="id", default=None)
     title: str
     completed: bool
 
 
 @app.get("/todos")
 @tracer.capture_method
-def get_todos(todo: Annotated[Todo, Query()]) -> Dict[str, Any]:  # (1)!
+def get_todos(todo: Annotated[Todo, Query()]) -> dict[str, Any]:  # (1)!
     return todo.model_dump()
 
 

@@ -1,28 +1,30 @@
 from __future__ import annotations
 
 import sys
-from typing import Optional, Type, TypedDict, Union
+from typing import TypedDict
 
 has_pydantic = "pydantic" in sys.modules
 
 # For IntelliSense and Mypy to work, we need to account for possible SQS subclasses
 # We need them as subclasses as we must access their message ID or sequence number metadata via dot notation
 if has_pydantic:  # pragma: no cover
-    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamRecordModel, SqsRecordModel
+    from aws_lambda_powertools.utilities.parser.models import (
+        DynamoDBStreamRecordModel,
+        SqsRecordModel,
+    )
     from aws_lambda_powertools.utilities.parser.models import (
         KinesisDataStreamRecord as KinesisDataStreamRecordModel,
     )
     from aws_lambda_powertools.utilities.parser.models.kafka import KafkaRecordModel
 
-    BatchTypeModels = Optional[
-        Union[
-            Type[SqsRecordModel],
-            Type[DynamoDBStreamRecordModel],
-            Type[KinesisDataStreamRecordModel],
-            Type[KafkaRecordModel],
-        ]
-    ]
-    BatchSqsTypeModel = Optional[Type[SqsRecordModel]]
+    BatchTypeModels = (
+        type[SqsRecordModel]
+        | type[DynamoDBStreamRecordModel]
+        | type[KinesisDataStreamRecordModel]
+        | type[KafkaRecordModel]
+        | None
+    )
+    BatchSqsTypeModel = type[SqsRecordModel] | None
 else:  # pragma: no cover
     BatchTypeModels = "BatchTypeModels"  # type: ignore
     BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore

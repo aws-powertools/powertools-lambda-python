@@ -1,5 +1,4 @@
 import time
-from typing import Tuple
 
 from aws_cdk import Duration
 from aws_cdk import aws_ec2 as ec2
@@ -21,7 +20,7 @@ class IdempotencyRedisServerlessStack(BaseInfrastructure):
         service_name = build_random_value(10).replace("_", "")
 
         vpc_stack: Vpc = self._create_vpc(service_name, "172.150.0.0/16")
-        security_groups: Tuple = self._create_security_groups(vpc_stack)
+        security_groups: tuple = self._create_security_groups(vpc_stack)
         redis_cluster: CfnServerlessCache = self._create_redis_cache(service_name, vpc_stack, security_groups[0])
 
         env_vars = {"RedisEndpoint": f"{str(redis_cluster.attr_endpoint_address)}"}
@@ -51,7 +50,7 @@ class IdempotencyRedisServerlessStack(BaseInfrastructure):
 
         return vpc_stack
 
-    def _create_security_groups(self, vpc_stack: Vpc) -> Tuple[SecurityGroup, SecurityGroup]:
+    def _create_security_groups(self, vpc_stack: Vpc) -> tuple[SecurityGroup, SecurityGroup]:
         # Create a security group for the ElastiCache cluster
         cache_security_group: SecurityGroup = SecurityGroup(self.stack, "ElastiCacheSecurityGroup", vpc=vpc_stack)
         cache_security_group.add_ingress_rule(

@@ -1,5 +1,4 @@
-from aws_lambda_powertools import (Logger, Metrics, Tracer)
-
+from aws_lambda_powertools import Logger, Metrics, Tracer
 
 # Initialize core utilities
 logger = Logger()
@@ -13,5 +12,5 @@ tracer = Tracer()
 @tracer.capture_lambda_handler
 def handler(event, context):
     return {
-        "message": "success"
+        "message": "success",
     }

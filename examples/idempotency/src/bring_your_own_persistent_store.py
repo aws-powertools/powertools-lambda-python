@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import boto3
 from botocore.config import Config
@@ -24,8 +24,8 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
-        boto_config: Optional[Config] = None,
-        boto3_session: Optional[boto3.session.Session] = None,
+        boto_config: Config | None = None,
+        boto3_session: boto3.session.Session | None = None,
     ):
         boto3_session = boto3_session or boto3.session.Session()
         self._ddb_resource = boto3_session.resource("dynamodb", config=boto_config)
@@ -38,7 +38,7 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         super().__init__()
 
-    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
+    def _item_to_data_record(self, item: dict[str, Any]) -> DataRecord:
         """
         Translate raw item records from DynamoDB to DataRecord
 

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import requests
 from pydantic import BaseModel, Field
 
@@ -15,7 +13,7 @@ app = APIGatewayRestResolver(enable_validation=True)  # (1)!
 
 class Todo(BaseModel):  # (2)!
     userId: int
-    id_: Optional[int] = Field(alias="id", default=None)
+    id_: int | None = Field(alias="id", default=None)
     title: str
     completed: bool
 
@@ -30,7 +28,7 @@ def create_todo(todo: Todo) -> str:  # (3)!
 
 @app.get("/todos")
 @tracer.capture_method
-def get_todos() -> List[Todo]:
+def get_todos() -> list[Todo]:
     todo = requests.get("https://jsonplaceholder.typicode.com/todos")
     todo.raise_for_status()
 

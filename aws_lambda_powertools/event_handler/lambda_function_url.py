@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Pattern
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
@@ -10,6 +10,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 if TYPE_CHECKING:
     from collections.abc import Callable
     from http import HTTPStatus
+    from re import Pattern
 
     from aws_lambda_powertools.event_handler import CORSConfig
     from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent

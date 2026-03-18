@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 import pytest
 from pydantic import BaseModel, Field
@@ -89,7 +89,7 @@ def test_kafka_consumer_with_json_value_and_union_tag(kafka_event_with_json_data
         name: Literal["Not using"]
         email: str
 
-    UnionModel = Annotated[Union[UserValueModel, UserValueModel2], Field(discriminator="name")]
+    UnionModel = Annotated[UserValueModel | UserValueModel2, Field(discriminator="name")]
 
     # GIVEN
     # A Kafka consumer configured to deserialize JSON data

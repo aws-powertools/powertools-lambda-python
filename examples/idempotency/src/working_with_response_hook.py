@@ -1,6 +1,5 @@
 import os
 import uuid
-from typing import Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.idempotency import (
@@ -16,7 +15,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
+def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
     # Return inserted Header data into the Idempotent Response
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 

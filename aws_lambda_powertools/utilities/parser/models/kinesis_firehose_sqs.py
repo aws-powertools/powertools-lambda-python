@@ -1,5 +1,4 @@
 import json
-from typing import List, Optional
 
 from pydantic import BaseModel, Field, PositiveInt, field_validator
 
@@ -20,7 +19,7 @@ class KinesisFirehoseSqsRecord(BaseModel):
         (Unix timestamp in milliseconds).",
         examples=[1428537600000, 1609459200500],
     )
-    kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata] = Field(
+    kinesisRecordMetadata: KinesisFirehoseRecordMetadata | None = Field(
         None,
         description="Metadata about the original Kinesis stream record \
         (only present when the delivery stream source is a Kinesis stream).",
@@ -45,13 +44,13 @@ class KinesisFirehoseSqsModel(BaseModel):
         description="The AWS region where the delivery stream is located.",
         examples=["us-east-1", "us-west-2", "eu-west-1"],
     )
-    sourceKinesisStreamArn: Optional[str] = Field(
+    sourceKinesisStreamArn: str | None = Field(
         None,
         description="The ARN of the source Kinesis stream \
         (only present when the delivery stream source is a Kinesis stream).",
         examples=["arn:aws:kinesis:us-east-1:123456789012:stream/my-source-stream"],
     )
-    records: List[KinesisFirehoseSqsRecord] = Field(
+    records: list[KinesisFirehoseSqsRecord] = Field(
         description="A list of SQS records delivered through Kinesis Data Firehose \
         to be processed by the Lambda function.",
         examples=[[]],

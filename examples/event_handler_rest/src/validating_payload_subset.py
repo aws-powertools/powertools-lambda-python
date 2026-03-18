@@ -1,8 +1,7 @@
-from typing import Optional
+from typing import Annotated
 
 import requests
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body  # (1)!
@@ -13,7 +12,7 @@ app = APIGatewayRestResolver(enable_validation=True)
 
 class Todo(BaseModel):
     userId: int
-    id_: Optional[int] = Field(alias="id", default=None)
+    id_: int | None = Field(alias="id", default=None)
     title: str
     completed: bool
 

@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Sequence, Type, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -13,12 +14,12 @@ class SqsAttributesModel(BaseModel):
         description="The time the message was first received from the queue (epoch time in milliseconds).",
         examples=["1545082649185", "1545082650649", "1713185156612"],
     )
-    MessageDeduplicationId: Optional[str] = Field(
+    MessageDeduplicationId: str | None = Field(
         default=None,
         description="Returns the value provided by the producer that calls the SendMessage action.",
         examples=["msg-dedup-12345", "unique-msg-abc123", None],
     )
-    MessageGroupId: Optional[str] = Field(
+    MessageGroupId: str | None = Field(
         default=None,
         description="Returns the value provided by the producer that calls the SendMessage action.",
         examples=["order-processing", "user-123-updates", None],
@@ -31,17 +32,17 @@ class SqsAttributesModel(BaseModel):
         description="The time the message was sent to the queue (epoch time in milliseconds).",
         examples=["1545082649183", "1545082650636", "1713185156609"],
     )
-    SequenceNumber: Optional[str] = Field(
+    SequenceNumber: str | None = Field(
         default=None,
         description="Returns the value provided by Amazon SQS.",
         examples=["18849496460467696128", "18849496460467696129", None],
     )
-    AWSTraceHeader: Optional[str] = Field(
+    AWSTraceHeader: str | None = Field(
         default=None,
         description="The AWS X-Ray trace header for request tracing.",
         examples=["Root=1-5e1b4151-5ac6c58239c1e5b4", None],
     )
-    DeadLetterQueueSourceArn: Optional[str] = Field(
+    DeadLetterQueueSourceArn: str | None = Field(
         default=None,
         description="The ARN of the dead-letter queue from which the message was moved.",
         examples=["arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleQueue-RNvLCpwGmLi7", None],
@@ -49,22 +50,22 @@ class SqsAttributesModel(BaseModel):
 
 
 class SqsMsgAttributeModel(BaseModel):
-    stringValue: Optional[str] = Field(
+    stringValue: str | None = Field(
         default=None,
         description="The string value of the message attribute.",
         examples=["100", "active", "user-12345", None],
     )
-    binaryValue: Optional[str] = Field(
+    binaryValue: str | None = Field(
         default=None,
         description="The binary value of the message attribute, base64-encoded.",
         examples=["base64Str", "SGVsbG8gV29ybGQ=", None],
     )
-    stringListValues: List[str] = Field(
+    stringListValues: list[str] = Field(
         default=[],
         description="A list of string values for the message attribute.",
         examples=[["item1", "item2"], ["tag1", "tag2", "tag3"], []],
     )
-    binaryListValues: List[str] = Field(
+    binaryListValues: list[str] = Field(
         default=[],
         description="A list of binary values for the message attribute, each base64-encoded.",
         examples=[["dmFsdWUx", "dmFsdWUy"], ["aGVsbG8="], []],
@@ -115,7 +116,7 @@ class SqsRecordModel(BaseModel):
             "AQEBzWwaftRI0KuVm4tP+/7q1rGgNqicHq...",
         ],
     )
-    body: Union[str, Type[BaseModel], BaseModel] = Field(
+    body: str | type[BaseModel] | BaseModel = Field(
         description="The message's contents (not URL-encoded). Can be plain text or JSON.",
         examples=[
             "Test message.",
@@ -126,7 +127,7 @@ class SqsRecordModel(BaseModel):
     attributes: SqsAttributesModel = Field(
         description="A map of the attributes requested in ReceiveMessage to their respective values.",
     )
-    messageAttributes: Dict[str, SqsMsgAttributeModel] = Field(
+    messageAttributes: dict[str, SqsMsgAttributeModel] = Field(
         description="User-defined message attributes as key-value pairs.",
         examples=[
             {"testAttr": {"stringValue": "100", "binaryValue": "base64Str", "dataType": "Number"}},
@@ -140,7 +141,7 @@ class SqsRecordModel(BaseModel):
             "6a204bd89f3c8348afd5c77c717a097a",
         ],
     )
-    md5OfMessageAttributes: Optional[str] = Field(
+    md5OfMessageAttributes: str | None = Field(
         default=None,
         description="An MD5 digest of the non-URL-encoded message attribute string.",
         examples=[

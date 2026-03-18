@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 from aws_lambda_powertools.utilities.parser.models import (
@@ -21,8 +19,8 @@ class MyDynamoBusiness(BaseModel):
 
 
 class MyDynamoScheme(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[MyDynamoBusiness] = None
-    OldImage: Optional[MyDynamoBusiness] = None
+    NewImage: MyDynamoBusiness | None = None
+    OldImage: MyDynamoBusiness | None = None
 
 
 class MyDynamoDBStreamRecordModel(DynamoDBStreamRecordModel):
@@ -30,7 +28,7 @@ class MyDynamoDBStreamRecordModel(DynamoDBStreamRecordModel):
 
 
 class MyAdvancedDynamoBusiness(DynamoDBStreamModel):
-    Records: List[MyDynamoDBStreamRecordModel]
+    Records: list[MyDynamoDBStreamRecordModel]
 
 
 class MyEventbridgeBusiness(BaseModel):
@@ -52,7 +50,7 @@ class MyAdvancedSqsRecordModel(SqsRecordModel):
 
 
 class MyAdvancedSqsBusiness(SqsModel):
-    Records: List[MyAdvancedSqsRecordModel]
+    Records: list[MyAdvancedSqsRecordModel]
 
 
 class MySnsBusiness(BaseModel):
@@ -69,7 +67,7 @@ class MyAdvancedSnsRecordModel(SnsRecordModel):
 
 
 class MyAdvancedSnsBusiness(SnsModel):
-    Records: List[MyAdvancedSnsRecordModel]
+    Records: list[MyAdvancedSnsRecordModel]
 
 
 class MyKinesisBusiness(BaseModel):

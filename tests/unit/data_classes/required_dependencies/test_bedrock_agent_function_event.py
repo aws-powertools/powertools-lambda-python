@@ -32,7 +32,7 @@ def test_bedrock_agent_function_event():
     raw_parameters = raw_event["parameters"]
     assert len(parameters) == len(raw_parameters)
 
-    for param, raw_param in zip(parameters, raw_parameters):
+    for param, raw_param in zip(parameters, raw_parameters, strict=False):
         assert param.name == raw_param["name"]
         assert param.type == raw_param["type"]
         assert param.value == raw_param["value"]

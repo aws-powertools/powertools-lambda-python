@@ -1,10 +1,9 @@
 import json
 import warnings
-from typing import Literal, Optional
+from typing import Annotated, Literal
 
 import pytest
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, Server
@@ -52,7 +51,7 @@ def test_openapi_3_1_complex_handler(openapi31_schema):
     # GIVEN a complex pydantic model
     class TodoAttributes(BaseModel):
         userId: int
-        id_: Optional[int] = Field(alias="id", default=None)
+        id_: int | None = Field(alias="id", default=None)
         title: str
         completed: bool
 

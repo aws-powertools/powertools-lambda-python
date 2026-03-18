@@ -10,7 +10,6 @@ from layer_v3.layer_constructors.layer_stack import LambdaPowertoolsLayerPythonV
 
 
 def test_with_no_configuration_constructor():
-
     app = aws_cdk.App()
     stack = aws_cdk.Stack(app, "TestStack")
     LambdaPowertoolsLayerPythonV3(stack, "LambdaPowertoolsLayerPythonV3")
@@ -33,7 +32,6 @@ def test_with_no_configuration_constructor():
     ],
 )
 def test_with_different_python_version_x86_64(python_version):
-
     inner_python_version: lambda_.Runtime = python_version
 
     app = aws_cdk.App()
@@ -69,7 +67,6 @@ def test_with_different_python_version_x86_64(python_version):
     ],
 )
 def test_with_different_python_version_arm64(python_version):
-
     inner_python_version: lambda_.Runtime = python_version
 
     app = aws_cdk.App()
@@ -95,7 +92,6 @@ def test_with_different_python_version_arm64(python_version):
 
 
 def test_with_custom_name():
-
     app = aws_cdk.App()
     stack = aws_cdk.Stack(app, "TestStack")
     LambdaPowertoolsLayerPythonV3(stack, "LambdaPowertoolsLayerPythonV3", layer_name="custom_name_layer")
@@ -112,7 +108,6 @@ def test_with_custom_name():
 
 
 def test_with_extras():
-
     app = aws_cdk.App()
     stack = aws_cdk.Stack(app, "TestStack")
     LambdaPowertoolsLayerPythonV3(
@@ -135,7 +130,6 @@ def test_with_extras():
 
 
 def test_with_extras_arm64():
-
     app = aws_cdk.App()
     stack = aws_cdk.Stack(app, "TestStack")
     LambdaPowertoolsLayerPythonV3(
@@ -159,21 +153,18 @@ def test_with_extras_arm64():
 
 
 def test_build_args_with_version():
-
     build_args = construct_build_args(include_extras=True, version="3.0.0")
 
     assert build_args == "[all]==3.0.0"
 
 
 def test_build_args_without_version():
-
     build_args = construct_build_args(include_extras=True)
 
     assert build_args == "[all]"
 
 
 def test_build_args_with_github_tag():
-
     version = "git+https://github.com/awslabs/aws-lambda-powertools-python@v2"
 
     build_args = construct_build_args(include_extras=True, version=version)
@@ -182,7 +173,6 @@ def test_build_args_with_github_tag():
 
 
 def test_build_args_with_no_version_and_no_extra():
-
     build_args = construct_build_args(include_extras=False)
 
     assert build_args == ""

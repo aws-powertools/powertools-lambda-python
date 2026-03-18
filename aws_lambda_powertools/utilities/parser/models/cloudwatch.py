@@ -3,7 +3,6 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List, Optional, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -19,7 +18,7 @@ class CloudWatchLogsLogEvent(BaseModel):
         description="The time when the event occurred in milliseconds since Jan 1, 1970 00:00:00 UTC.",
         examples=[1673779200000],
     )
-    message: Union[str, Type[BaseModel]] = Field(
+    message: str | type[BaseModel] = Field(
         description="The actual log message string or structured JSON payload emitted by the service or application.",
         examples=["This is a sample log message", '{"statusCode":200,"path":"/hello"}'],
     )
@@ -39,15 +38,15 @@ class CloudWatchLogsDecode(BaseModel):
         description="The name of the log stream that stores the log events.",
         examples=["2023/01/15/[$LATEST]abcdef1234567890", "i-1234567890abcdef0"],
     )
-    subscriptionFilters: List[str] = Field(
+    subscriptionFilters: list[str] = Field(
         description="List of subscription filter names associated with the log group.",
         examples=[["LambdaStream_cloudwatch", "AlertFilter"]],
     )
-    logEvents: List[CloudWatchLogsLogEvent] = Field(
+    logEvents: list[CloudWatchLogsLogEvent] = Field(
         description="Array of log events included in the message.",
         examples=[[{"id": "eventId1", "timestamp": 1673779200000, "message": "Sample log line"}]],
     )
-    policyLevel: Optional[str] = Field(
+    policyLevel: str | None = Field(
         default=None,
         description="Optional field specifying the policy level applied to the subscription filter, if present.",
         examples=["ACCOUNT", "LOG_GROUP"],

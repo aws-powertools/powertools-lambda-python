@@ -4,11 +4,10 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Annotated, Any, Literal
 
 import pytest
 from pydantic import AfterValidator, Base64UrlStr, BaseModel, ConfigDict, Field, StringConstraints, alias_generators
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
     ALBResolver,
@@ -57,7 +56,7 @@ def test_validate_pydantic_query_params(gw_event):
 
     class QueryParams(BaseModel):
         limit: int = Field(default=10, ge=1, le=100, description="Number of items")
-        search: Optional[str] = Field(default=None, description="Search term")
+        search: str | None = Field(default=None, description="Search term")
 
     @app.get("/search")
     def search_handler(params: Annotated[QueryParams, Query()]):
@@ -103,7 +102,7 @@ def test_validate_multi_value_query_params(gw_event):
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.get("/users")
-    def users_handler(ids: Annotated[List[int], Query()]):
+    def users_handler(ids: Annotated[list[int], Query()]):
         return {"ids": ids}
 
     # Test valid request
@@ -132,7 +131,7 @@ def test_validate_pydantic_multi_value_query_params(gw_event):
     app = APIGatewayRestResolver(enable_validation=True)
 
     class QueryParams(BaseModel):
-        ids: List[int] = Field(..., description="List of user IDs")
+        ids: list[int] = Field(..., description="List of user IDs")
 
     @app.get("/users")
     def users_handler(params: Annotated[QueryParams, Query()]):
@@ -259,7 +258,7 @@ def test_validate_multi_value_header_params(gw_event):
     del gw_event["multiValueHeaders"]
 
     @app.get("/multi-value-headers")
-    def multi_value_handler(my_headers: Annotated[List[str], Header()]):
+    def multi_value_handler(my_headers: Annotated[list[str], Header()]):
         return {"items": my_headers}
 
     # Test valid request
@@ -290,7 +289,7 @@ def test_validate_pydantic_multi_value_header_params(gw_event):
     del gw_event["multiValueHeaders"]
 
     class MultiValueHeaderParams(BaseModel):
-        list_items: List[str] = Field(description="List of items")
+        list_items: list[str] = Field(description="List of items")
 
     @app.get("/multi-value-headers")
     def multi_value_handler(my_headers: Annotated[MultiValueHeaderParams, Header()]):
@@ -524,7 +523,7 @@ def test_validate_return_list(gw_event):
 
     # WHEN a handler is defined with a return type
     @app.get("/")
-    def handler() -> List[int]:
+    def handler() -> list[int]:
         return [123, 234]
 
     gw_event["path"] = "/"
@@ -544,7 +543,7 @@ def test_validate_return_tuple(gw_event):
 
     # WHEN a handler is defined with a return type as Tuple
     @app.get("/")
-    def handler() -> Tuple:
+    def handler() -> tuple:
         return sample_tuple
 
     gw_event["path"] = "/"
@@ -963,14 +962,14 @@ def test_validation_query_string_with_api_rest_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+        def handler1(parameter1: Annotated[list[str], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+        def handler2(parameter1: Annotated[list[int], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler3 without params
@@ -1018,14 +1017,14 @@ def test_validation_query_string_with_api_http_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+        def handler1(parameter1: Annotated[list[str], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+        def handler2(parameter1: Annotated[list[int], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler3 without params
@@ -1070,14 +1069,14 @@ def test_validation_query_string_with_alb_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+        def handler1(parameter1: Annotated[list[str], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+        def handler2(parameter1: Annotated[list[int], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler3 without params
@@ -1144,14 +1143,14 @@ def test_validation_query_string_with_lambda_url_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+        def handler1(parameter1: Annotated[list[str], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+        def handler2(parameter1: Annotated[list[int], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler3 without params
@@ -1197,14 +1196,14 @@ def test_validation_query_string_with_vpc_lattice_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+        def handler1(parameter1: Annotated[list[str], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+        def handler2(parameter1: Annotated[list[int], Query()], parameter2: str):
             print(parameter2)
 
     # Define handler3 without params
@@ -1252,14 +1251,14 @@ def test_validation_header_with_api_rest_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1267,7 +1266,7 @@ def test_validation_header_with_api_rest_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1318,14 +1317,14 @@ def test_validation_header_with_http_rest_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1333,7 +1332,7 @@ def test_validation_header_with_http_rest_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1381,14 +1380,14 @@ def test_validation_header_with_alb_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1396,7 +1395,7 @@ def test_validation_header_with_alb_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1446,14 +1445,14 @@ def test_validation_header_with_lambda_url_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1461,7 +1460,7 @@ def test_validation_header_with_lambda_url_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1510,14 +1509,14 @@ def test_validation_header_with_vpc_lattice_v1_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1525,7 +1524,7 @@ def test_validation_header_with_vpc_lattice_v1_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1574,14 +1573,14 @@ def test_validation_header_with_vpc_lattice_v2_resolver(
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[str], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler1(header2: Annotated[list[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -1589,7 +1588,7 @@ def test_validation_header_with_vpc_lattice_v2_resolver(
 
         @app.get("/users")
         def handler3(
-            header2: Annotated[List[str], Header(alias="Header2")],
+            header2: Annotated[list[str], Header(alias="Header2")],
             header1: Annotated[str, Header(alias="Header1")],
         ):
             print(header2)
@@ -1652,7 +1651,7 @@ def test_validate_list_response(gw_event):
     ]
 
     @app.get("/list_response_with_same_element_types")
-    def handler_different_list() -> List[Model]:
+    def handler_different_list() -> list[Model]:
         return response_before_validation
 
     # WHEN returning list with the same element type as the non-Optional return type
@@ -1699,7 +1698,7 @@ def test_validation_error_different_list_returned_non_optional_type(gw_event):
     different_list_response = ["a", "b", "c"]
 
     @app.get("/list_response_with_different_element_types")
-    def handler_different_list() -> List[Model]:
+    def handler_different_list() -> list[Model]:
         return different_list_response
 
     # WHEN returning list with the different element type as the non-Optional return type
@@ -1746,7 +1745,7 @@ def test_none_returned_for_optional_type(gw_event):
         age: int
 
     @app.get("/none_allowed")
-    def handler_none_allowed() -> Optional[Model]:
+    def handler_none_allowed() -> Model | None:
         return None
 
     # WHEN returning None for an Optional type
@@ -2084,7 +2083,7 @@ def test_parse_form_data_url_encoded(gw_event):
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form")
-    def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
+    def post_form(name: Annotated[str, Form()], tags: Annotated[list[str], Form()]):
         return {"name": name, "tags": tags}
 
     # WHEN sending a POST request with URL-encoded form data
@@ -2115,7 +2114,7 @@ def test_parse_form_data_wrong_value(gw_event):
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/form")
-    def post_form(name: Annotated[str, Form()], tags: Annotated[List[str], Form()]):
+    def post_form(name: Annotated[str, Form()], tags: Annotated[list[str], Form()]):
         return {"name": name, "tags": tags}
 
     gw_event["httpMethod"] = "POST"
@@ -2609,7 +2608,7 @@ def test_field_discriminator_validation(gw_event):
         action: Literal["bar"]
         bar_data: int
 
-    action_type = Annotated[Union[FooAction, BarAction], Field(discriminator="action")]
+    action_type = Annotated[FooAction | BarAction, Field(discriminator="action")]
 
     @app.post("/actions")
     def create_action(action: Annotated[action_type, Body()]):
@@ -2663,7 +2662,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
         search_id: str
 
     @app.get("/query-model-simple")
-    def query_model(params: Annotated[QuerySimple, Query()]) -> Dict[str, Any]:
+    def query_model(params: Annotated[QuerySimple, Query()]) -> dict[str, Any]:
         return {
             "fullName": params.full_name,
             "nextToken": params.next_token,
@@ -2683,7 +2682,7 @@ def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event
         )
 
     @app.get("/query-model-advanced")
-    def query_model_advanced(params: Annotated[QueryAdvanced, Query()]) -> Dict[str, Any]:
+    def query_model_advanced(params: Annotated[QueryAdvanced, Query()]) -> dict[str, Any]:
         return params.model_dump()
 
     # Test QuerySimple with validators

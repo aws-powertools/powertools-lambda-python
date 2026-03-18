@@ -1,8 +1,7 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Annotated, Any
 
 import pytest
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, BedrockResponse, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body, Query
@@ -17,7 +16,7 @@ def test_bedrock_agent_event():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
         return {"output": claims_response}
@@ -110,7 +109,7 @@ def test_bedrock_agent_event_with_validation_error():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return "oh no, this is not a dict"  # type: ignore
 
     # WHEN calling the event handler
@@ -191,7 +190,7 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
 
     # WHEN we have a simple handler
     @app.get("/", description="Testing")
-    def handler() -> Optional[Dict]:
+    def handler() -> dict | None:
         pass
 
     # WHEN we get the schema
@@ -266,7 +265,7 @@ def test_bedrock_agent_with_partial_bedrock_response():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             session_attributes={"user_id": "123"},
@@ -305,7 +304,7 @@ def test_bedrock_agent_with_different_attributes_combination():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             prompt_session_attributes={"context": "testing"},
@@ -335,7 +334,7 @@ def test_bedrock_resolver_with_openapi_extensions():
 
     # WHEN we have a simple handler with openapi extension
     @app.get("/", description="Testing", openapi_extensions={"x-requireConfirmation": "ENABLED"})
-    def handler() -> Optional[Dict]:
+    def handler() -> dict | None:
         pass
 
     # WHEN we get the schema

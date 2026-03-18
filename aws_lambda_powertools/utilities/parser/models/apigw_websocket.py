@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Type, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyNetwork
@@ -7,7 +7,7 @@ from pydantic.networks import IPvAnyNetwork
 
 class APIGatewayWebSocketEventIdentity(BaseModel):
     source_ip: IPvAnyNetwork = Field(alias="sourceIp")
-    user_agent: Optional[str] = Field(None, alias="userAgent")
+    user_agent: str | None = Field(None, alias="userAgent")
 
 
 class APIGatewayWebSocketEventRequestContextBase(BaseModel):
@@ -45,15 +45,15 @@ class APIGatewayWebSocketDisconnectEventRequestContext(APIGatewayWebSocketEventR
 
 
 class APIGatewayWebSocketConnectEventModel(BaseModel):
-    headers: Dict[str, str] = Field(alias="headers")
-    multi_value_headers: Dict[str, List[str]] = Field(alias="multiValueHeaders")
+    headers: dict[str, str] = Field(alias="headers")
+    multi_value_headers: dict[str, list[str]] = Field(alias="multiValueHeaders")
     request_context: APIGatewayWebSocketConnectEventRequestContext = Field(alias="requestContext")
     is_base64_encoded: bool = Field(alias="isBase64Encoded")
 
 
 class APIGatewayWebSocketDisconnectEventModel(BaseModel):
-    headers: Dict[str, str] = Field(alias="headers")
-    multi_value_headers: Dict[str, List[str]] = Field(alias="multiValueHeaders")
+    headers: dict[str, str] = Field(alias="headers")
+    multi_value_headers: dict[str, list[str]] = Field(alias="multiValueHeaders")
     request_context: APIGatewayWebSocketDisconnectEventRequestContext = Field(alias="requestContext")
     is_base64_encoded: bool = Field(alias="isBase64Encoded")
 
@@ -61,4 +61,4 @@ class APIGatewayWebSocketDisconnectEventModel(BaseModel):
 class APIGatewayWebSocketMessageEventModel(BaseModel):
     request_context: APIGatewayWebSocketMessageEventRequestContext = Field(alias="requestContext")
     is_base64_encoded: bool = Field(alias="isBase64Encoded")
-    body: Optional[Union[str, Type[BaseModel]]] = Field(None, alias="body")
+    body: str | type[BaseModel] | None = Field(None, alias="body")

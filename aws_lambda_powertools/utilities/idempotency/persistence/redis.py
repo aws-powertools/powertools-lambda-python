@@ -5,10 +5,10 @@ import json
 import logging
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, TypeAlias
 
 import redis
-from typing_extensions import TypeAlias, deprecated
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (

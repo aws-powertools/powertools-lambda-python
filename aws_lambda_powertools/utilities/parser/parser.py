@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import typing
-from typing import TYPE_CHECKING, Any, Callable, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from pydantic import PydanticSchemaGenerationError
 
@@ -21,6 +21,8 @@ from aws_lambda_powertools.utilities.parser.functions import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
     from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, T
     from aws_lambda_powertools.utilities.typing import LambdaContext

@@ -1,65 +1,64 @@
 from datetime import datetime
-from typing import Dict, Optional, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
 
 class VpcLatticeV2RequestContextIdentity(BaseModel):
-    source_vpc_arn: Optional[str] = Field(
+    source_vpc_arn: str | None = Field(
         None,
         alias="sourceVpcArn",
         description="The ARN of the VPC from which the request originated.",
         examples=["arn:aws:ec2:us-east-2:123456789012:vpc/vpc-0b8276c84697e7339"],
     )
-    get_type: Optional[str] = Field(
+    get_type: str | None = Field(
         None,
         alias="type",
         description="The type of identity making the request.",
         examples=["AWS_IAM", "NONE"],
     )
-    principal: Optional[str] = Field(
+    principal: str | None = Field(
         None,
         alias="principal",
         description="The principal ARN of the identity making the request.",
         examples=["arn:aws:sts::123456789012:assumed-role/example-role/057d00f8b51257ba3c853a0f248943cf"],
     )
-    principal_org_id: Optional[str] = Field(
+    principal_org_id: str | None = Field(
         None,
         alias="principalOrgID",
         description="The AWS organization ID of the principal.",
         examples=["o-1234567890"],
     )
-    session_name: Optional[str] = Field(
+    session_name: str | None = Field(
         None,
         alias="sessionName",
         description="The session name for assumed role sessions.",
         examples=["057d00f8b51257ba3c853a0f248943cf"],
     )
-    x509_subject_cn: Optional[str] = Field(
+    x509_subject_cn: str | None = Field(
         None,
         alias="X509SubjectCn",
         description="The X.509 certificate subject common name.",
         examples=["example.com"],
     )
-    x509_issuer_ou: Optional[str] = Field(
+    x509_issuer_ou: str | None = Field(
         None,
         alias="X509IssuerOu",
         description="The X.509 certificate issuer organizational unit.",
         examples=["IT Department"],
     )
-    x509_san_dns: Optional[str] = Field(
+    x509_san_dns: str | None = Field(
         None,
         alias="x509SanDns",
         description="The X.509 certificate Subject Alternative Name DNS entry.",
         examples=["example.com"],
     )
-    x509_san_uri: Optional[str] = Field(
+    x509_san_uri: str | None = Field(
         None,
         alias="X509SanUri",
         description="The X.509 certificate Subject Alternative Name URI entry.",
         examples=["https://example.com"],
     )
-    x509_san_name_cn: Optional[str] = Field(
+    x509_san_name_cn: str | None = Field(
         None,
         alias="X509SanNameCn",
         description="The X.509 certificate Subject Alternative Name common name.",
@@ -113,24 +112,24 @@ class VpcLatticeV2Model(BaseModel):
         description="The HTTP method used for the request.",
         examples=["GET", "POST", "PUT", "DELETE", "PATCH"],
     )
-    headers: Dict[str, str] = Field(
+    headers: dict[str, str] = Field(
         description="The request headers as key-value pairs.",
         examples=[
             {"host": "test-lambda-service.vpc-lattice-svcs.us-east-2.on.aws", "user-agent": "curl/7.64.1"},
             {"content-type": "application/json"},
         ],
     )
-    query_string_parameters: Optional[Dict[str, str]] = Field(
+    query_string_parameters: dict[str, str] | None = Field(
         None,
         alias="queryStringParameters",
         description="The query string parameters as key-value pairs.",
         examples=[{"order-id": "1"}, {"page": "2", "limit": "10"}],
     )
-    body: Optional[Union[str, Type[BaseModel]]] = Field(
+    body: str | type[BaseModel] | None = Field(
         None,
         description="The request body. Can be a string or a parsed model if content-type allows parsing.",
     )
-    is_base64_encoded: Optional[bool] = Field(
+    is_base64_encoded: bool | None = Field(
         None,
         alias="isBase64Encoded",
         description="Indicates whether the body is base64-encoded.",

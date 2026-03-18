@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, ItemsView, Iterator, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import ItemsView, Iterator
 
 
 class SQSRecordAttributes(DictWrapper):

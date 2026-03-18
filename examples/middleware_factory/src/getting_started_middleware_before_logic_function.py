@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator

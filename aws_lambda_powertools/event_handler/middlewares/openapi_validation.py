@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -27,6 +27,8 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
 from aws_lambda_powertools.event_handler.openapi.params import Param
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, MutableMapping, Sequence
+
     from pydantic.fields import FieldInfo
 
     from aws_lambda_powertools.event_handler import Response

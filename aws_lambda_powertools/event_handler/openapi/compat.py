@@ -5,7 +5,15 @@ from collections import deque
 from collections.abc import Mapping, Sequence
 from copy import copy
 from dataclasses import dataclass, is_dataclass
-from typing import TYPE_CHECKING, Any, Deque, FrozenSet, List, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    Literal,
+    Union,
+    get_args,
+    get_origin,
+)
 
 from pydantic import BaseModel, TypeAdapter, ValidationError, create_model
 
@@ -16,7 +24,6 @@ from pydantic._internal._typing_extra import eval_type_lenient
 from pydantic._internal._utils import lenient_issubclass
 from pydantic.fields import FieldInfo as PydanticFieldInfo
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
-from typing_extensions import Annotated, Literal, get_args, get_origin
 
 from aws_lambda_powertools.event_handler.openapi.types import UnionType
 
@@ -34,15 +41,10 @@ evaluate_forwardref = eval_type_lenient
 
 sequence_annotation_to_type = {
     Sequence: list,
-    List: list,
     list: list,
-    Tuple: tuple,
     tuple: tuple,
-    Set: set,
     set: set,
-    FrozenSet: frozenset,
     frozenset: frozenset,
-    Deque: deque,
     deque: deque,
 }
 
