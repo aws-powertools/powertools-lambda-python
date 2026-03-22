@@ -8,7 +8,10 @@ Covers:
 - Backward compatibility: routes without ``Request`` continue to work unchanged
 - ``APIGatewayHttpResolver`` and ``ALBResolver`` variants
 """
+
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -19,9 +22,10 @@ from aws_lambda_powertools.event_handler import (
     Request,
     Response,
 )
-from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType
-from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
 from tests.functional.utils import load_event
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
 
 # ---------------------------------------------------------------------------
 # Shared test events
