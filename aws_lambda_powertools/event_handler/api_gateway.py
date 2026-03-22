@@ -21,7 +21,6 @@ from typing_extensions import override
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
 from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_API_VERSION,
@@ -44,6 +43,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
+from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.util import (
     _FrozenDict,
     _FrozenListDict,
@@ -1641,8 +1641,7 @@ class BaseRouter(ABC):
         route: Route | None = self.context.get("_route")
         if route is None:
             raise RuntimeError(
-                "app.request is only available after route resolution. "
-                "Use it inside middleware or a route handler.",
+                "app.request is only available after route resolution. Use it inside middleware or a route handler.",
             )
         return Request(
             route_path=route.openapi_path,

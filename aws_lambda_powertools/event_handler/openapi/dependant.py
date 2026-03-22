@@ -4,7 +4,6 @@ import inspect
 import re
 from typing import TYPE_CHECKING, Any, ForwardRef, cast
 
-from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     create_body_model,
@@ -23,6 +22,7 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     get_flat_dependant,
 )
 from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse, OpenAPIResponseContentModel
+from aws_lambda_powertools.event_handler.request import Request
 
 if TYPE_CHECKING:
     from collections.abc import Callable
