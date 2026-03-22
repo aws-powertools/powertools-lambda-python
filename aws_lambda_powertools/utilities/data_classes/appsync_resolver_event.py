@@ -7,7 +7,7 @@ from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
+    get_header_value,  # ty: ignore[deprecated]
 )
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
@@ -275,4 +275,4 @@ class AppSyncResolverEvent(AppSyncEventBase):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(self.request_headers, name, default_value, case_sensitive)
+        return get_header_value(self.request_headers, name, default_value, case_sensitive)  # ty: ignore[deprecated]

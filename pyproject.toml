@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "3.25.0"
+version = "3.26.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -237,10 +237,8 @@ exclude = [
     "aws_lambda_powertools/metrics/**",
     "aws_lambda_powertools/middleware_factory/**",
     "aws_lambda_powertools/utilities/streaming/**",
-    "aws_lambda_powertools/utilities/parser/**",
     "aws_lambda_powertools/utilities/data_masking/**",
     "aws_lambda_powertools/tracing/**",
-    "aws_lambda_powertools/utilities/data_classes/**",
     "aws_lambda_powertools/utilities/batch/**",
     "aws_lambda_powertools/utilities/idempotency/**",
     "aws_lambda_powertools/event_handler/**",
