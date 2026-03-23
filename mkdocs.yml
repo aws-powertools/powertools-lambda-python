@@ -34,6 +34,7 @@ nav:
           - utilities/idempotency.md
           - utilities/data_masking.md
           - utilities/feature_flags.md
+          - utilities/metadata.md
           - utilities/streaming.md
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
@@ -244,6 +245,7 @@ plugins:
           - utilities/idempotency.md
           - utilities/data_masking.md
           - utilities/feature_flags.md
+          - utilities/metadata.md
           - utilities/streaming.md
           - utilities/middleware_factory.md
           - utilities/jmespath_functions.md
