@@ -48,11 +48,11 @@ jobs:
         with:
           ref: ${{ github.sha }}
       - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: "22"
       - name: Setup dependencies
-        uses: aws-powertools/actions/.github/actions/cached-node-modules@3b5b8e2e58b7af07994be982e83584a94e8c76c5
+        uses: aws-powertools/actions/.github/actions/cached-node-modules@828e78a26eee3554dc2e1d96048004548fbb169f
       - id: credentials
         name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
