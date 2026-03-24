@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 import pytest
 from pydantic import BaseModel
@@ -191,6 +192,19 @@ def test_idempotent_function_pydantic():
     data = Foo(name="Bar")
     as_dict = _prepare_data(data)
     assert as_dict == data.dict()
+    assert as_dict == expected_result
+
+
+def test_idempotent_function_pydantic_uuid():
+    # Scenario _prepare_data should convert a pydantic model with UUIDs to a dict
+    # with serialization of UUIDs to strings
+    class Foo(BaseModel):
+        uuid: UUID
+
+    uuid = UUID("01234567-0123-0123-0123-0123456789ab")
+    expected_result = {"uuid": str(uuid)}
+    data = Foo(uuid=uuid)
+    as_dict = _prepare_data(data)
     assert as_dict == expected_result
 
 
