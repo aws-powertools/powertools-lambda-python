@@ -7,7 +7,7 @@ from pathlib import PurePath
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import pytest
-from pydantic import AfterValidator, Base64UrlStr, BaseModel, ConfigDict, Field, StringConstraints, alias_generators
+from pydantic import AfterValidator, Base64UrlStr, BaseModel, ConfigDict, Field, RootModel, StringConstraints, alias_generators
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -2833,3 +2833,149 @@ def test_validation_without_decode_query_parameters_alb_resolver():
     # THEN validation should fail because the encoded string is not a valid datetime
     result = app(raw_event, {})
     assert result["statusCode"] == 422
+
+
+def test_validate_union_single_or_list_body_with_list(gw_event):
+    """Test that Union[Model, List[Model]] correctly handles a list of items"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Item(BaseModel):
+        name: str
+        value: int
+
+    # WHEN a handler is defined with Union[Model, List[Model]] body parameter
+    @app.post("/items")
+    def handler(items: Annotated[Union[Item, List[Item]], Body()]) -> Dict[str, Any]:
+        # Should receive the full list, not just the first element
+        if isinstance(items, list):
+            return {"count": len(items), "items": [item.model_dump() for item in items]}
+        else:
+            return {"count": 1, "items": [items.model_dump()]}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/items"
+    # Send a list of items
+    gw_event["body"] = json.dumps([
+        {"name": "item1", "value": 10},
+        {"name": "item2", "value": 20},
+        {"name": "item3", "value": 30},
+    ])
+
+    # THEN the handler should receive all items in the list, not just the first one
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["count"] == 3
+    assert len(body["items"]) == 3
+    assert body["items"][0]["name"] == "item1"
+    assert body["items"][1]["name"] == "item2"
+    assert body["items"][2]["name"] == "item3"
+
+
+def test_validate_union_single_or_list_body_with_single(gw_event):
+    """Test that Union[Model, List[Model]] correctly handles a single item"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Item(BaseModel):
+        name: str
+        value: int
+
+    # WHEN a handler is defined with Union[Model, List[Model]] body parameter
+    @app.post("/items")
+    def handler(items: Annotated[Union[Item, List[Item]], Body()]) -> Dict[str, Any]:
+        if isinstance(items, list):
+            return {"count": len(items), "items": [item.model_dump() for item in items]}
+        else:
+            return {"count": 1, "items": [items.model_dump()]}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/items"
+    # Send a single item
+    gw_event["body"] = json.dumps({"name": "single_item", "value": 42})
+
+    # THEN the handler should receive the single item
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["count"] == 1
+    assert len(body["items"]) == 1
+    assert body["items"][0]["name"] == "single_item"
+    assert body["items"][0]["value"] == 42
+
+
+def test_validate_rootmodel_list_body(gw_event):
+    """Test that RootModel[List[Model]] correctly handles a list of items"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Item(BaseModel):
+        name: str
+        value: int
+
+    class ItemCollection(RootModel[List[Item]]):
+        root: List[Item]
+
+    # WHEN a handler is defined with RootModel[List[Model]] body parameter
+    @app.post("/items")
+    def handler(collection: Annotated[ItemCollection, Body()]) -> Dict[str, Any]:
+        # collection.root should contain the full list
+        items = collection.root
+        return {"count": len(items), "items": [item.model_dump() for item in items]}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/items"
+    # Send a list of items
+    gw_event["body"] = json.dumps([
+        {"name": "item1", "value": 100},
+        {"name": "item2", "value": 200},
+    ])
+
+    # THEN the handler should receive all items in the collection
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["count"] == 2
+    assert len(body["items"]) == 2
+    assert body["items"][0]["name"] == "item1"
+    assert body["items"][0]["value"] == 100
+    assert body["items"][1]["name"] == "item2"
+    assert body["items"][1]["value"] == 200
+
+
+def test_validate_nested_union_with_sequence(gw_event):
+    """Test that nested Union types containing sequences are handled correctly"""
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Person(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a complex Union including List
+    @app.post("/people")
+    def handler(
+        data: Annotated[Union[str, List[Person], Person], Body()],
+    ) -> Dict[str, Any]:
+        if isinstance(data, str):
+            return {"type": "string", "value": data}
+        elif isinstance(data, list):
+            return {"type": "list", "count": len(data)}
+        else:
+            return {"type": "person", "name": data.name}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/people"
+    # Send a list
+    gw_event["body"] = json.dumps([
+        {"name": "Alice", "age": 30},
+        {"name": "Bob", "age": 25},
+    ])
+
+    # THEN the handler should receive the full list
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["type"] == "list"
+    assert body["count"] == 2
