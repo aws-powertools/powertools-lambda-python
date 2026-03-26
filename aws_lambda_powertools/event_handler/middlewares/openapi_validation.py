@@ -438,28 +438,29 @@ def _is_or_contains_sequence(annotation: Any) -> bool:
     Check if annotation is a sequence or Union/RootModel containing a sequence.
 
     This function handles complex type annotations like:
+    - List[Model] - direct sequence
     - Union[Model, List[Model]] - checks if any Union member is a sequence
+    - Optional[List[Model]] - Union[List[Model], None]
     - RootModel[List[Model]] - checks if the RootModel wraps a sequence
+    - Optional[RootModel[List[Model]]] - Union member that is a RootModel
+    - RootModel[Union[Model, List[Model]]] - RootModel wrapping a Union with a sequence
     """
     # Direct sequence check
     if field_annotation_is_sequence(annotation):
         return True
 
-    # Check Union members for any sequence types
+    # Check Union members — recurse so we catch RootModel inside Union
     origin = get_origin(annotation)
     if origin is Union or origin is UnionType:
         for arg in get_args(annotation):
-            if field_annotation_is_sequence(arg):
+            if _is_or_contains_sequence(arg):
                 return True
 
-    # Check if it's a RootModel wrapping a sequence
-    if lenient_issubclass(annotation, BaseModel):
-        # Check if it's a RootModel by looking for __pydantic_root_model__
-        if getattr(annotation, "__pydantic_root_model__", False):
-            # Get the inner type from model_fields['root']
-            if hasattr(annotation, "model_fields") and "root" in annotation.model_fields:
-                root_field = annotation.model_fields["root"]
-                return field_annotation_is_sequence(root_field.annotation)
+    # Check if it's a RootModel wrapping a sequence (or Union containing a sequence)
+    if lenient_issubclass(annotation, BaseModel) and getattr(annotation, "__pydantic_root_model__", False):
+        if hasattr(annotation, "model_fields") and "root" in annotation.model_fields:
+            root_annotation = annotation.model_fields["root"].annotation
+            return _is_or_contains_sequence(root_annotation)
 
     return False
 

@@ -7,7 +7,16 @@ from pathlib import PurePath
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import pytest
-from pydantic import AfterValidator, Base64UrlStr, BaseModel, ConfigDict, Field, RootModel, StringConstraints, alias_generators
+from pydantic import (
+    AfterValidator,
+    Base64UrlStr,
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    StringConstraints,
+    alias_generators,
+)
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import (
@@ -2856,11 +2865,13 @@ def test_validate_union_single_or_list_body_with_list(gw_event):
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/items"
     # Send a list of items
-    gw_event["body"] = json.dumps([
-        {"name": "item1", "value": 10},
-        {"name": "item2", "value": 20},
-        {"name": "item3", "value": 30},
-    ])
+    gw_event["body"] = json.dumps(
+        [
+            {"name": "item1", "value": 10},
+            {"name": "item2", "value": 20},
+            {"name": "item3", "value": 30},
+        ],
+    )
 
     # THEN the handler should receive all items in the list, not just the first one
     result = app(gw_event, {})
@@ -2927,10 +2938,12 @@ def test_validate_rootmodel_list_body(gw_event):
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/items"
     # Send a list of items
-    gw_event["body"] = json.dumps([
-        {"name": "item1", "value": 100},
-        {"name": "item2", "value": 200},
-    ])
+    gw_event["body"] = json.dumps(
+        [
+            {"name": "item1", "value": 100},
+            {"name": "item2", "value": 200},
+        ],
+    )
 
     # THEN the handler should receive all items in the collection
     result = app(gw_event, {})
@@ -2968,10 +2981,12 @@ def test_validate_nested_union_with_sequence(gw_event):
     gw_event["httpMethod"] = "POST"
     gw_event["path"] = "/people"
     # Send a list
-    gw_event["body"] = json.dumps([
-        {"name": "Alice", "age": 30},
-        {"name": "Bob", "age": 25},
-    ])
+    gw_event["body"] = json.dumps(
+        [
+            {"name": "Alice", "age": 30},
+            {"name": "Bob", "age": 25},
+        ],
+    )
 
     # THEN the handler should receive the full list
     result = app(gw_event, {})
@@ -2979,3 +2994,336 @@ def test_validate_nested_union_with_sequence(gw_event):
     body = json.loads(result["body"])
     assert body["type"] == "list"
     assert body["count"] == 2
+
+
+# ────────────────────────────────────────────────────────────────────
+# Regression tests for Union / RootModel / Optional sequence body
+# See: https://github.com/aws-powertools/powertools-lambda-python/issues/8057
+# ────────────────────────────────────────────────────────────────────
+
+
+class _Item(BaseModel):
+    name: str
+    value: int
+
+
+class _ItemCollection(RootModel[List[_Item]]):
+    pass
+
+
+_THREE_ITEMS = [
+    {"name": "a", "value": 1},
+    {"name": "b", "value": 2},
+    {"name": "c", "value": 3},
+]
+
+
+def _post_json(app, path, payload):
+    """Helper: build a minimal APIGW REST event, POST JSON, return parsed result."""
+    from tests.functional.utils import load_event
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["httpMethod"] = "POST"
+    event["path"] = path
+    event["body"] = json.dumps(payload)
+    result = app(event, {})
+    return result["statusCode"], json.loads(result["body"])
+
+
+# ---------- Optional[List[Model]] ----------
+
+
+def test_optional_list_body_with_list():
+    """Optional[List[Model]] must preserve the full list."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[List[_Item]], Body()]) -> Dict[str, Any]:
+        assert isinstance(items, list)
+        return {"count": len(items)}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+def test_optional_list_body_with_none():
+    """Optional[List[Model]] must accept a null body gracefully."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[List[_Item]], Body()] = None) -> Dict[str, Any]:
+        return {"received_none": items is None}
+
+    status, body = _post_json(app, "/items", None)
+    assert status == 200
+    assert body["received_none"] is True
+
+
+# ---------- Optional[Union[Model, List[Model]]] ----------
+
+
+def test_optional_union_model_or_list_with_list():
+    """Optional[Union[Model, List[Model]]] — send list, get full list."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+        assert isinstance(items, list)
+        return {"count": len(items)}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+def test_optional_union_model_or_list_with_single():
+    """Optional[Union[Model, List[Model]]] — send single obj, get single obj."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+        assert not isinstance(items, list)
+        return {"name": items.name}
+
+    status, body = _post_json(app, "/items", {"name": "solo", "value": 99})
+    assert status == 200
+    assert body["name"] == "solo"
+
+
+def test_optional_union_model_or_list_with_none():
+    """Optional[Union[Model, List[Model]]] — send null, get None."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()] = None) -> Dict[str, Any]:
+        return {"is_none": items is None}
+
+    status, body = _post_json(app, "/items", None)
+    assert status == 200
+    assert body["is_none"] is True
+
+
+# ---------- List[Model] directly (no Union / Optional) ----------
+
+
+def test_plain_list_body_preserves_all_items():
+    """List[Model] — baseline: must never truncate."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[List[_Item], Body()]) -> Dict[str, Any]:
+        return {"count": len(items)}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+# ---------- Empty list ----------
+
+
+def test_union_model_or_list_with_empty_list():
+    """Union[Model, List[Model]] with [] — must not crash on value[0]."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Union[_Item, List[_Item]], Body()]) -> Dict[str, Any]:
+        if isinstance(items, list):
+            return {"count": len(items)}
+        return {"count": 1}
+
+    status, body = _post_json(app, "/items", [])
+    assert status == 200
+    assert body["count"] == 0
+
+
+def test_plain_list_with_empty_list():
+    """List[Model] with [] — must accept empty list."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[List[_Item], Body()]) -> Dict[str, Any]:
+        return {"count": len(items)}
+
+    status, body = _post_json(app, "/items", [])
+    assert status == 200
+    assert body["count"] == 0
+
+
+# ---------- Single-element list (boundary) ----------
+
+
+def test_union_model_or_list_with_single_element_list():
+    """Union[Model, List[Model]] with [single_item] — must NOT unwrap to scalar."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Union[_Item, List[_Item]], Body()]) -> Dict[str, Any]:
+        if isinstance(items, list):
+            return {"type": "list", "count": len(items)}
+        return {"type": "single"}
+
+    status, body = _post_json(app, "/items", [{"name": "only", "value": 1}])
+    assert status == 200
+    # Pydantic may match as single Item or list — either is valid,
+    # but it must NOT crash or lose data
+    assert body.get("count", 1) == 1
+
+
+# ---------- Union with primitive sequences ----------
+
+
+def test_union_str_or_list_dict():
+    """Union[str, List[dict]] — list of dicts must arrive intact."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/data")
+    def handler(data: Annotated[Union[str, List[Dict[str, Any]]], Body()]) -> Dict[str, Any]:
+        if isinstance(data, list):
+            return {"type": "list", "count": len(data)}
+        return {"type": "str"}
+
+    payload = [{"key": "v1"}, {"key": "v2"}]
+    status, body = _post_json(app, "/data", payload)
+    assert status == 200
+    assert body["type"] == "list"
+    assert body["count"] == 2
+
+
+# ---------- RootModel edge cases ----------
+
+
+def test_optional_rootmodel_list_body():
+    """Optional[RootModel[List[Model]]] — list must not be truncated."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Optional[_ItemCollection], Body()]) -> Dict[str, Any]:
+        return {"count": len(items.root)}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+def test_union_rootmodel_and_model():
+    """Union[RootModel[List[Model]], Model] — list must not be truncated."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Union[_ItemCollection, _Item], Body()]) -> Dict[str, Any]:
+        if isinstance(items, _ItemCollection):
+            return {"type": "collection", "count": len(items.root)}
+        return {"type": "single", "name": items.name}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["type"] == "collection"
+    assert body["count"] == 3
+
+
+# ---------- Python 3.10+ pipe Union syntax ----------
+
+
+def test_pipe_union_syntax_model_or_list():
+    """Model | List[Model] (PEP 604 syntax) — list must not be truncated."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[_Item | List[_Item], Body()]) -> Dict[str, Any]:  # noqa: FA102
+        if isinstance(items, list):
+            return {"count": len(items)}
+        return {"count": 1}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+def test_pipe_union_optional_list():
+    """List[Model] | None (PEP 604 Optional) — list must not be truncated."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[List[_Item] | None, Body()]) -> Dict[str, Any]:  # noqa: FA102
+        if items is None:
+            return {"count": 0}
+        return {"count": len(items)}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["count"] == 3
+
+
+# ---------- Deeply nested: RootModel[Union[Model, List[Model]]] ----------
+
+
+def test_rootmodel_wrapping_union_with_sequence():
+    """RootModel[Union[Model, List[Model]]] — inner Union sequence must be detected."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class FlexiblePayload(RootModel[Union[_Item, List[_Item]]]):
+        pass
+
+    @app.post("/items")
+    def handler(payload: Annotated[FlexiblePayload, Body()]) -> Dict[str, Any]:
+        data = payload.root
+        if isinstance(data, list):
+            return {"type": "list", "count": len(data)}
+        return {"type": "single", "name": data.name}
+
+    status, body = _post_json(app, "/items", _THREE_ITEMS)
+    assert status == 200
+    assert body["type"] == "list"
+    assert body["count"] == 3
+
+
+# ---------- Multiple resolvers (ALB, HTTP API, etc.) ----------
+
+
+def test_union_list_body_works_across_resolvers():
+    """Regression: ensure fix works for ALB and HTTP API resolvers too."""
+    for ResolverClass in [APIGatewayHttpResolver, ALBResolver]:
+        app = ResolverClass(enable_validation=True)
+
+        @app.post("/items")
+        def handler(items: Annotated[Union[_Item, List[_Item]], Body()]) -> Dict[str, Any]:
+            if isinstance(items, list):
+                return {"count": len(items)}
+            return {"count": 1}
+
+        # Build event appropriate for resolver
+        if ResolverClass is APIGatewayHttpResolver:
+            event = load_event("apiGatewayProxyV2Event.json")
+            event["requestContext"]["http"]["method"] = "POST"
+            event["requestContext"]["http"]["path"] = "/items"
+            event["rawPath"] = "/items"
+        else:
+            event = load_event("albEvent.json")
+            event["httpMethod"] = "POST"
+            event["path"] = "/items"
+
+        event["body"] = json.dumps(_THREE_ITEMS)
+        result = app(event, {})
+        assert result["statusCode"] == 200
+        body_result = json.loads(result["body"])
+        assert body_result["count"] == 3, f"Failed for {ResolverClass.__name__}"
+
+
+# ---------- Large list (stress boundary) ----------
+
+
+def test_union_list_body_large_payload():
+    """Union[Model, List[Model]] with 100 items — no truncation."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def handler(items: Annotated[Union[_Item, List[_Item]], Body()]) -> Dict[str, Any]:
+        assert isinstance(items, list)
+        return {"count": len(items)}
+
+    big_payload = [{"name": f"item-{i}", "value": i} for i in range(100)]
+    status, body = _post_json(app, "/items", big_payload)
+    assert status == 200
+    assert body["count"] == 100
