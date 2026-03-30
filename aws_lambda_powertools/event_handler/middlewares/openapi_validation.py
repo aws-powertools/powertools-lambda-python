@@ -3,10 +3,11 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union, cast
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
+from typing_extensions import get_args, get_origin
 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -25,6 +26,7 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
     ResponseValidationError,
 )
 from aws_lambda_powertools.event_handler.openapi.params import Param
+from aws_lambda_powertools.event_handler.openapi.types import UnionType
 
 if TYPE_CHECKING:
     from pydantic.fields import FieldInfo
@@ -228,20 +230,27 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
-        # Process the response body if it exists
-        if response.body and response.is_json():
-            response.body = self._serialize_response(
-                field=route.dependant.return_param,
+        field = route.dependant.return_param
+
+        if field is None:
+            if not response.is_json():
+                return response
+            else:
+                # JSON serialize the body without validation
+                response.body = jsonable_encoder(response.body, custom_serializer=self._validation_serializer)
+        else:
+            response.body = self._serialize_response_with_validation(
+                field=field,
                 response_content=response.body,
                 has_route_custom_response_validation=route.custom_response_validation_http_code is not None,
             )
 
         return response
 
-    def _serialize_response(
+    def _serialize_response_with_validation(
         self,
         *,
-        field: ModelField | None = None,
+        field: ModelField,
         response_content: Any,
         include: IncEx | None = None,
         exclude: IncEx | None = None,
@@ -254,33 +263,23 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         """
         Serialize the response content according to the field type.
         """
-        if field:
-            errors: list[dict[str, Any]] = []
-            value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
-            if errors:
-                # route-level validation must take precedence over app-level
-                if has_route_custom_response_validation:
-                    raise ResponseValidationError(
-                        errors=_normalize_errors(errors),
-                        body=response_content,
-                        source="route",
-                    )
-                if self._has_response_validation_error:
-                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
-
-                raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
-
-            if hasattr(field, "serialize"):
-                return field.serialize(
-                    value,
-                    include=include,
-                    exclude=exclude,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_defaults=exclude_defaults,
-                    exclude_none=exclude_none,
+        errors: list[dict[str, Any]] = []
+        value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
+        if errors:
+            # route-level validation must take precedence over app-level
+            if has_route_custom_response_validation:
+                raise ResponseValidationError(
+                    errors=_normalize_errors(errors),
+                    body=response_content,
+                    source="route",
                 )
-            return jsonable_encoder(
+            if self._has_response_validation_error:
+                raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+
+            raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
+
+        if hasattr(field, "serialize"):
+            return field.serialize(
                 value,
                 include=include,
                 exclude=exclude,
@@ -288,11 +287,18 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
-                custom_serializer=self._validation_serializer,
             )
-        else:
-            # Just serialize the response content returned from the handler.
-            return jsonable_encoder(response_content, custom_serializer=self._validation_serializer)
+
+        return jsonable_encoder(
+            value,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            custom_serializer=self._validation_serializer,
+        )
 
     def _prepare_response_content(
         self,
@@ -427,9 +433,41 @@ def _handle_missing_field_value(
         values[field.name] = field.get_default()
 
 
+def _is_or_contains_sequence(annotation: Any) -> bool:
+    """
+    Check if annotation is a sequence or Union/RootModel containing a sequence.
+
+    This function handles complex type annotations like:
+    - List[Model] - direct sequence
+    - Union[Model, List[Model]] - checks if any Union member is a sequence
+    - Optional[List[Model]] - Union[List[Model], None]
+    - RootModel[List[Model]] - checks if the RootModel wraps a sequence
+    - Optional[RootModel[List[Model]]] - Union member that is a RootModel
+    - RootModel[Union[Model, List[Model]]] - RootModel wrapping a Union with a sequence
+    """
+    # Direct sequence check
+    if field_annotation_is_sequence(annotation):
+        return True
+
+    # Check Union members — recurse so we catch RootModel inside Union
+    origin = get_origin(annotation)
+    if origin is Union or origin is UnionType:
+        for arg in get_args(annotation):
+            if _is_or_contains_sequence(arg):
+                return True
+
+    # Check if it's a RootModel wrapping a sequence (or Union containing a sequence)
+    if lenient_issubclass(annotation, BaseModel) and getattr(annotation, "__pydantic_root_model__", False):
+        if hasattr(annotation, "model_fields") and "root" in annotation.model_fields:
+            root_annotation = annotation.model_fields["root"].annotation
+            return _is_or_contains_sequence(root_annotation)
+
+    return False
+
+
 def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
-    if field_annotation_is_sequence(field_info.annotation):
+    if _is_or_contains_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
         return value[0]

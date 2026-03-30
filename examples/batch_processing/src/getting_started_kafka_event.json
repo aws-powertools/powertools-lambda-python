@@ -1,0 +1,39 @@
+{
+  "eventSource": "aws:kafka",
+  "eventSourceArn": "arn:aws:kafka:us-east-1:123456789012:cluster/MyCluster/abcd1234-abcd-cafe-abab-9876543210ab-4",
+  "bootstrapServers": "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092,b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
+  "records": {
+    "mytopic-0": [
+      {
+        "topic": "mytopic",
+        "partition": 0,
+        "offset": 0,
+        "timestamp": 1545084650987,
+        "timestampType": "CREATE_TIME",
+        "key": "MQ==",
+        "value": "eyJtZXNzYWdlIjogIlN1Y2Nlc3MifQ==",
+        "headers": []
+      },
+      {
+        "topic": "mytopic",
+        "partition": 0,
+        "offset": 1,
+        "timestamp": 1545084650988,
+        "timestampType": "CREATE_TIME",
+        "key": "Mg==",
+        "value": "eyJtZXNzYWdlIjogIkZhaWx1cmUifQ==",
+        "headers": []
+      },
+      {
+        "topic": "mytopic",
+        "partition": 0,
+        "offset": 2,
+        "timestamp": 1545084650989,
+        "timestampType": "CREATE_TIME",
+        "key": "Mw==",
+        "value": "eyJtZXNzYWdlIjogIlN1Y2Nlc3MifQ==",
+        "headers": []
+      }
+    ]
+  }
+}

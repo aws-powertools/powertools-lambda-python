@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
+    get_header_value,  # ty: ignore[deprecated]
     get_multi_value_query_string_values,
     get_query_string_value,
 )
@@ -39,8 +39,8 @@ class CaseInsensitiveDict(dict):
     def get(self, k, default=None):
         return super().get(k.lower(), default)
 
-    def pop(self, k):
-        return super().pop(k.lower())
+    def pop(self, k, *args):
+        return super().pop(k.lower(), *args)
 
     def setdefault(self, k, default=None):
         return super().setdefault(k.lower(), default)
@@ -125,7 +125,7 @@ class DictWrapper(Mapping):
         properties = self._properties()
         sensitive_properties = ["raw_event"]
         if hasattr(self, "_sensitive_properties"):
-            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore
+            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore  # type: ignore[arg-type]
 
         result: dict[str, Any] = {}
         for property_key in properties:
@@ -142,7 +142,7 @@ class DictWrapper(Mapping):
                     # Checks if the key is a list and if it is a subclass of the parent class
                     elif isinstance(property_value, list):
                         for seq, item in enumerate(property_value):
-                            if issubclass(item.__class__, DictWrapper):
+                            if issubclass(item.__class__, DictWrapper) and isinstance(item, DictWrapper):
                                 result[property_key][seq] = item._str_helper()
                 except Exception:
                     result[property_key] = "[Cannot be deserialized]"
@@ -331,7 +331,7 @@ class BaseProxyEvent(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(
+        return get_header_value(  # ty: ignore[deprecated]
             headers=self.headers,
             name=name,
             default_value=default_value,
