@@ -1000,14 +1000,14 @@ typeguard = ">=2.13.3,<4.3.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.315"
+version = "0.1.316"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.315-py3-none-any.whl", hash = "sha256:3a523112f312e6fa92c367058b651d03817ae7766492c6b45856c35b89cae963"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.315.tar.gz", hash = "sha256:f3178e9750846dcdd61e6ecfa2a088ef8b07cdef66d2108f0a5868da2d2272b1"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.316-py3-none-any.whl", hash = "sha256:925926882b2978156918536460bbfa03ab1ed0b7641ff0982d7370c8a3f81f83"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.316.tar.gz", hash = "sha256:8347018014753f5c99a14f93ea05756ded83f05286eef6fc712b492364fe173b"},
 ]
 
 [package.dependencies]
@@ -1912,6 +1912,7 @@ python-versions = ">=3.10"
 groups = ["dev"]
 files = [
     {file = "griffe-2.0.0-py3-none-any.whl", hash = "sha256:5418081135a391c3e6e757a7f3f156f1a1a746cc7b4023868ff7d5e2f9a980aa"},
+    {file = "griffe-2.0.0.tar.gz", hash = "sha256:c68979cd8395422083a51ea7cf02f9c119d889646d99b7b656ee43725de1b80f"},
 ]
 
 [package.dependencies]
@@ -1930,6 +1931,7 @@ python-versions = ">=3.10"
 groups = ["dev"]
 files = [
     {file = "griffecli-2.0.0-py3-none-any.whl", hash = "sha256:9f7cd9ee9b21d55e91689358978d2385ae65c22f307a63fb3269acf3f21e643d"},
+    {file = "griffecli-2.0.0.tar.gz", hash = "sha256:312fa5ebb4ce6afc786356e2d0ce85b06c1c20d45abc42d74f0cda65e159f6ef"},
 ]
 
 [package.dependencies]
@@ -1945,6 +1947,7 @@ python-versions = ">=3.10"
 groups = ["dev"]
 files = [
     {file = "griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f"},
+    {file = "griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934"},
 ]
 
 [package.extras]
