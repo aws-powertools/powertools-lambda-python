@@ -60,7 +60,7 @@ def _prepare_data(data: Any) -> Any:
 
     # Convert from Pydantic model
     if callable(getattr(data, "model_dump", None)):
-        return data.model_dump()
+        return data.model_dump(mode="json")
 
     # Convert from event source data class
     if callable(getattr(data, "dict", None)):
