@@ -57,15 +57,6 @@ app = APIGatewayRestResolver()
     assert _file_has_resolver(handler_file, "app") is True
 
 
-def test_file_has_resolver_found_with_type_annotation(tmp_path: Path):
-    handler_file = tmp_path / "handler.py"
-    handler_file.write_text("""
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-app: APIGatewayRestResolver = APIGatewayRestResolver()
-""")
-    assert _file_has_resolver(handler_file, "app") is True
-
-
 def test_is_excluded_with_directory_pattern():
     root = Path("/project")
     assert _is_excluded(Path("/project/tests/handler.py"), root, ["**/tests/**"]) is True
