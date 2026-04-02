@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from google.protobuf.internal.decoder import _DecodeSignedVarint  # type: ignore[attr-defined]
+from google.protobuf.internal.decoder import (  # type: ignore[attr-defined]
+    _DecodeSignedVarint,  # ty: ignore[unresolved-import]
+)
 from google.protobuf.json_format import MessageToDict
 
 from aws_lambda_powertools.utilities.kafka.deserializer.base import DeserializerBase
