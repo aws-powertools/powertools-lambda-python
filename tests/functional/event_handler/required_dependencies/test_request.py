@@ -515,3 +515,74 @@ def test_request_resolves_path_params_from_proxy_plus_event():
     assert req.route == "/applications/{application_id}"
     assert req.path_parameters == {"application_id": "4da715ee-79d4-4e52-81cb-1ecc464708fb"}
     assert req.method == "PUT"
+
+
+# ---------------------------------------------------------------------------
+# Missing coverage: json_body, query_parameters=None, request caching
+# ---------------------------------------------------------------------------
+
+
+def test_request_json_body_in_middleware():
+    app = APIGatewayRestResolver()
+    bodies_seen: list = []
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        bodies_seen.append(app.request.json_body)
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.post("/items")
+    def handler():
+        return {}
+
+    event = _make_rest_event("/items", method="POST", body='{"name": "widget"}')
+    app(event, {})
+
+    assert bodies_seen == [{"name": "widget"}]
+
+
+def test_request_query_parameters_empty():
+    """When no query string parameters are present, query_parameters returns empty or None."""
+    app = APIGatewayRestResolver()
+    captured: list = []
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        captured.append(app.request.query_parameters)
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.get("/my/path")
+    def handler():
+        return {}
+
+    event = _make_rest_event("/my/path")
+    app(event, {})
+
+    # No query params present — should be falsy (empty dict or None depending on event source)
+    assert not captured[0]
+
+
+def test_request_is_cached_across_multiple_accesses():
+    """Accessing app.request multiple times in the same invocation returns the same object."""
+    app = APIGatewayRestResolver()
+    ids_seen: list[int] = []
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        ids_seen.append(id(app.request))
+        ids_seen.append(id(app.request))
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.get("/my/path")
+    def handler(request: Request):
+        ids_seen.append(id(request))
+        return {}
+
+    app(API_REST_EVENT, {})
+
+    # All accesses should return the same cached instance
+    assert len(ids_seen) == 3
+    assert ids_seen[0] == ids_seen[1] == ids_seen[2]

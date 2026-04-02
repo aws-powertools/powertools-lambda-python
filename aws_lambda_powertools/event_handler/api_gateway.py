@@ -6,7 +6,6 @@ import json
 import logging
 import re
 import traceback
-import typing
 import warnings
 import zlib
 from abc import ABC, abstractmethod
@@ -468,10 +467,10 @@ class Route:
 
         self.custom_response_validation_http_code = custom_response_validation_http_code
 
-        # _request_param_name caches the name of any Request-typed parameter in the handler (None = "not found").
-        # _request_param_checked avoids re-scanning the signature on every invocation.
-        self._request_param_name: str | None = None
-        self._request_param_name_checked: bool = False
+        # Caches the name of any Request-typed parameter in the handler.
+        # Avoids re-scanning the signature on every invocation.
+        self.request_param_name: str | None = None
+        self.request_param_name_checked: bool = False
 
     def __call__(
         self,
@@ -1638,16 +1637,23 @@ class BaseRouter(ABC):
             return next_middleware(app)
         ```
         """
+        cached: Request | None = self.context.get("_request")
+        if cached is not None:
+            return cached
+
         route: Route | None = self.context.get("_route")
         if route is None:
             raise RuntimeError(
                 "app.request is only available after route resolution. Use it inside middleware or a route handler.",
             )
-        return Request(
+
+        request = Request(
             route_path=route.openapi_path,
             path_parameters=self.context.get("_route_args", {}),
             current_event=self.current_event,
         )
+        self.context["_request"] = request
+        return request
 
 
 class MiddlewareFrame:
@@ -1723,10 +1729,12 @@ class MiddlewareFrame:
 
 def _find_request_param_name(func: Callable) -> str | None:
     """Return the name of the first parameter annotated as ``Request``, or ``None``."""
+    from typing import get_type_hints
+
     try:
         # get_type_hints resolves string annotations from ``from __future__ import annotations``
-        # using the function's own module globals — no pydantic dependency required.
-        hints = typing.get_type_hints(func)
+        # using the function's own module globals.
+        hints = get_type_hints(func)
     except Exception:
         hints = {}
 
@@ -1770,11 +1778,11 @@ def _registered_api_adapter(
     # Lookup is cached on the Route object to avoid repeated signature inspection.
     route: Route | None = app.context.get("_route")
     if route is not None:
-        if not route._request_param_name_checked:
-            route._request_param_name = _find_request_param_name(next_middleware)
-            route._request_param_name_checked = True
-        if route._request_param_name:
-            route_args = {**route_args, route._request_param_name: app.request}
+        if not route.request_param_name_checked:
+            route.request_param_name = _find_request_param_name(next_middleware)
+            route.request_param_name_checked = True
+        if route.request_param_name:
+            route_args = {**route_args, route.request_param_name: app.request}
 
     return app._to_response(next_middleware(**route_args))
 
