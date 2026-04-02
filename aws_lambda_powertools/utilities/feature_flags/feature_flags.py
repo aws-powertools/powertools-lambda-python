@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.feature_flags.types import JSONType, P, T
 
 
-RULE_ACTION_MAPPING = {
+RULE_ACTION_MAPPING: dict[str, Callable[..., bool]] = {
     schema.RuleAction.EQUALS.value: lambda a, b: a == b,
     schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
     schema.RuleAction.KEY_GREATER_THAN_VALUE.value: lambda a, b: a > b,
@@ -38,13 +38,13 @@ RULE_ACTION_MAPPING = {
     schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
     schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
     schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
-    schema.RuleAction.ALL_IN_VALUE.value: lambda a, b: compare_all_in_list(a, b),
-    schema.RuleAction.ANY_IN_VALUE.value: lambda a, b: compare_any_in_list(a, b),
-    schema.RuleAction.NONE_IN_VALUE.value: lambda a, b: compare_none_in_list(a, b),
-    schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
-    schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
-    schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
-    schema.RuleAction.MODULO_RANGE.value: lambda a, b: compare_modulo_range(a, b),
+    schema.RuleAction.ALL_IN_VALUE.value: compare_all_in_list,
+    schema.RuleAction.ANY_IN_VALUE.value: compare_any_in_list,
+    schema.RuleAction.NONE_IN_VALUE.value: compare_none_in_list,
+    schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: compare_time_range,
+    schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: compare_datetime_range,
+    schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: compare_days_of_week,
+    schema.RuleAction.MODULO_RANGE.value: compare_modulo_range,
 }
 
 
