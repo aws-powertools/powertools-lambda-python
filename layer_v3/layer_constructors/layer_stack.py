@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# trigger CI: validate docker/setup-buildx-action v4 compatibility
 from pathlib import Path
 from typing import TYPE_CHECKING
 
