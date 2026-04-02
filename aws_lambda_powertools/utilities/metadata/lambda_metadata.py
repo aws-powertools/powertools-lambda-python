@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from json import JSONDecodeError
