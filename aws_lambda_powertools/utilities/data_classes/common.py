@@ -125,7 +125,7 @@ class DictWrapper(Mapping):
         properties = self._properties()
         sensitive_properties = ["raw_event"]
         if hasattr(self, "_sensitive_properties"):
-            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore  # type: ignore[arg-type]
+            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
         result: dict[str, Any] = {}
         for property_key in properties:

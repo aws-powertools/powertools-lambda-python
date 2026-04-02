@@ -367,3 +367,19 @@ def test_openapi_merge_schema_is_cached():
 
     # AND paths should not be duplicated
     assert len([p for p in schema1["paths"] if p == "/users"]) == 1
+
+
+def test_openapi_merge_discover_type_annotated_resolver():
+    # GIVEN an OpenAPIMerge instance
+    merge = OpenAPIMerge(title="Typed API", version="1.0.0")
+
+    # WHEN discovering a handler with a type-annotated resolver (app: Resolver = Resolver())
+    merge.discover(
+        path=MERGE_HANDLERS_PATH,
+        pattern="**/typed_handler.py",
+        resolver_name="app",
+    )
+
+    # THEN it should find the resolver and include its routes in the schema
+    schema = merge.get_openapi_schema()
+    assert "/products" in schema["paths"]

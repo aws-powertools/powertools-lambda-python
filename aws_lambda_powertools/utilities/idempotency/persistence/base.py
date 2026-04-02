@@ -111,7 +111,10 @@ class BasePersistenceLayer(ABC):
 
         """
         if self.event_key_jmespath:
-            data = self.event_key_compiled_jmespath.search(data, options=jmespath.Options(**self.jmespath_options))
+            data = self.event_key_compiled_jmespath.search(
+                data,
+                options=jmespath.Options(**(self.jmespath_options or {})),
+            )
 
         if self.is_missing_idempotency_key(data=data):
             if self.raise_on_no_idempotency_key:
