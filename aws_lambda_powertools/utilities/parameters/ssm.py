@@ -133,7 +133,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__(client=self.client)
 
-    def get_multiple(  # type: ignore[override]
+    def get_multiple(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self,
         path: str,
         max_age: int | None = None,
@@ -192,7 +192,7 @@ class SSMProvider(BaseProvider):
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
-    def get(  # type: ignore[override]
+    def get(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self,
         name: str,
         max_age: int | None = None,
