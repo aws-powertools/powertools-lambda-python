@@ -202,7 +202,7 @@ class DynamoDBProvider(BaseProvider):
 
         # maintenance: look for better ways to correctly type DynamoDB multiple return types
         # without a breaking change within ABC return type
-        return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]
+        return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]  # ty: ignore[invalid-return-type]
 
     def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
@@ -230,4 +230,4 @@ class DynamoDBProvider(BaseProvider):
 
         # maintenance: look for better ways to correctly type DynamoDB multiple return types
         # without a breaking change within ABC return type
-        return {item[self.sort_attr]: item[self.value_attr] for item in items}  # type: ignore[misc]
+        return {item[self.sort_attr]: item[self.value_attr] for item in items}  # type: ignore[misc]  # ty: ignore[invalid-return-type]
