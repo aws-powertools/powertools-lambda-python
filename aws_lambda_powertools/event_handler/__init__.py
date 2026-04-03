@@ -21,7 +21,6 @@ from aws_lambda_powertools.event_handler.http_resolver import HttpResolverLocal
 from aws_lambda_powertools.event_handler.lambda_function_url import (
     LambdaFunctionUrlResolver,
 )
-from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
 from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.vpc_lattice import VPCLatticeResolver, VPCLatticeV2Resolver
 
@@ -37,12 +36,10 @@ __all__ = [
     "BedrockResponse",
     "BedrockFunctionResponse",
     "CORSConfig",
-    "File",
     "HttpResolverLocal",
     "LambdaFunctionUrlResolver",
     "Request",
     "Response",
-    "UploadFile",
     "VPCLatticeResolver",
     "VPCLatticeV2Resolver",
 ]
