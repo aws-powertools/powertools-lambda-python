@@ -42,6 +42,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
+from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.util import (
     _FrozenDict,
     _FrozenListDict,
@@ -465,6 +466,11 @@ class Route:
         self._body_field: ModelField | None = None
 
         self.custom_response_validation_http_code = custom_response_validation_http_code
+
+        # Caches the name of any Request-typed parameter in the handler.
+        # Avoids re-scanning the signature on every invocation.
+        self.request_param_name: str | None = None
+        self.request_param_name_checked: bool = False
 
     def __call__(
         self,
@@ -1608,6 +1614,47 @@ class BaseRouter(ABC):
         """Resets routing context"""
         self.context.clear()
 
+    @property
+    def request(self) -> Request:
+        """Current resolved :class:`Request` object.
+
+        Available inside middleware and in route handlers that declare a parameter
+        typed as :class:`Request <aws_lambda_powertools.event_handler.request.Request>`.
+
+        Raises
+        ------
+        RuntimeError
+            When accessed before route resolution (i.e. outside of middleware / handler scope).
+
+        Examples
+        --------
+        **Middleware**
+
+        ```python
+        def my_middleware(app, next_middleware):
+            req = app.request
+            print(req.route, req.method, req.path_parameters)
+            return next_middleware(app)
+        ```
+        """
+        cached: Request | None = self.context.get("_request")
+        if cached is not None:
+            return cached
+
+        route: Route | None = self.context.get("_route")
+        if route is None:
+            raise RuntimeError(
+                "app.request is only available after route resolution. Use it inside middleware or a route handler.",
+            )
+
+        request = Request(
+            route_path=route.openapi_path,
+            path_parameters=self.context.get("_route_args", {}),
+            current_event=self.current_event,
+        )
+        self.context["_request"] = request
+        return request
+
 
 class MiddlewareFrame:
     """
@@ -1680,6 +1727,24 @@ class MiddlewareFrame:
         return self.current_middleware(app, self.next_middleware)
 
 
+def _find_request_param_name(func: Callable) -> str | None:
+    """Return the name of the first parameter annotated as ``Request``, or ``None``."""
+    from typing import get_type_hints
+
+    try:
+        # get_type_hints resolves string annotations from ``from __future__ import annotations``
+        # using the function's own module globals.
+        hints = get_type_hints(func)
+    except Exception:
+        hints = {}
+
+    for param_name, annotation in hints.items():
+        if annotation is Request:
+            return param_name
+
+    return None
+
+
 def _registered_api_adapter(
     app: ApiGatewayResolver,
     next_middleware: Callable[..., Any],
@@ -1708,6 +1773,17 @@ def _registered_api_adapter(
     """
     route_args: dict = app.context.get("_route_args", {})
     logger.debug(f"Calling API Route Handler: {route_args}")
+
+    # Inject a Request object when the handler declares a parameter typed as Request.
+    # Lookup is cached on the Route object to avoid repeated signature inspection.
+    route: Route | None = app.context.get("_route")
+    if route is not None:
+        if not route.request_param_name_checked:
+            route.request_param_name = _find_request_param_name(next_middleware)
+            route.request_param_name_checked = True
+        if route.request_param_name:
+            route_args = {**route_args, route.request_param_name: app.request}
+
     return app._to_response(next_middleware(**route_args))
 
 
