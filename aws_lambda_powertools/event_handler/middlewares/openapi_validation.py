@@ -96,10 +96,17 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             headers,
         )
 
+        # Process cookie values
+        cookie_values, cookie_errors = _request_params_to_args(
+            route.dependant.cookie_params,
+            app.current_event.resolved_cookies_field,
+        )
+
         values.update(path_values)
         values.update(query_values)
         values.update(header_values)
-        errors += path_errors + query_errors + header_errors
+        values.update(cookie_values)
+        errors += path_errors + query_errors + header_errors + cookie_errors
 
         # Process the request body, if it exists
         if route.dependant.body_params:

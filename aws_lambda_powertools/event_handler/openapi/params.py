@@ -658,6 +658,79 @@ class Header(Param):  # type: ignore[misc]
             self._alias = value.lower()
 
 
+class Cookie(Param):  # type: ignore[misc]
+    """
+    A class used internally to represent a cookie parameter in a path operation.
+    """
+
+    in_ = ParamTypes.cookie
+
+    def __init__(
+        self,
+        default: Any = Undefined,
+        *,
+        default_factory: Callable[[], Any] | None = _Unset,
+        annotation: Any | None = None,
+        alias: str | None = None,
+        alias_priority: int | None = _Unset,
+        # MAINTENANCE: update when deprecating Pydantic v1, import these types
+        # str | AliasPath | AliasChoices | None
+        validation_alias: str | None = _Unset,
+        serialization_alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
+        discriminator: str | None = None,
+        strict: bool | None = _Unset,
+        multiple_of: float | None = _Unset,
+        allow_inf_nan: bool | None = _Unset,
+        max_digits: int | None = _Unset,
+        decimal_places: int | None = _Unset,
+        examples: list[Any] | None = None,
+        openapi_examples: dict[str, Example] | None = None,
+        deprecated: bool | None = None,
+        include_in_schema: bool = True,
+        json_schema_extra: dict[str, Any] | None = None,
+        **extra: Any,
+    ):
+        super().__init__(
+            default=default,
+            default_factory=default_factory,
+            annotation=annotation,
+            alias=alias,
+            alias_priority=alias_priority,
+            validation_alias=validation_alias,
+            serialization_alias=serialization_alias,
+            title=title,
+            description=description,
+            gt=gt,
+            ge=ge,
+            lt=lt,
+            le=le,
+            min_length=min_length,
+            max_length=max_length,
+            pattern=pattern,
+            discriminator=discriminator,
+            strict=strict,
+            multiple_of=multiple_of,
+            allow_inf_nan=allow_inf_nan,
+            max_digits=max_digits,
+            decimal_places=decimal_places,
+            deprecated=deprecated,
+            examples=examples,
+            openapi_examples=openapi_examples,
+            include_in_schema=include_in_schema,
+            json_schema_extra=json_schema_extra,
+            **extra,
+        )
+
+
 class Body(FieldInfo):  # type: ignore[misc]
     """
     A class used internally to represent a body parameter in a path operation.
