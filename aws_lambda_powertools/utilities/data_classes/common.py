@@ -29,6 +29,17 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
 )
 
 
+def _parse_cookie_string(cookie_string: str) -> dict[str, str]:
+    """Parse a cookie string (``key=value; key2=value2``) into a dict."""
+    cookies: dict[str, str] = {}
+    for segment in cookie_string.split(";"):
+        stripped = segment.strip()
+        if "=" in stripped:
+            name, _, value = stripped.partition("=")
+            cookies[name.strip()] = value.strip()
+    return cookies
+
+
 class CaseInsensitiveDict(dict):
     """Case insensitive dict implementation. Assumes string keys only."""
 
@@ -202,6 +213,36 @@ class BaseProxyEvent(DictWrapper):
         Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
         """
         return self.headers
+
+    @property
+    def resolved_cookies_field(self) -> dict[str, str]:
+        """
+        This property extracts cookies from the request as a dict of name-value pairs.
+
+        By default, cookies are parsed from the ``Cookie`` header.
+        Uses ``self.headers`` (CaseInsensitiveDict) first for reliable case-insensitive
+        lookup, then falls back to ``resolved_headers_field`` for proxies that only
+        populate multi-value headers (e.g., ALB without single-value headers).
+        Subclasses may override this for event formats that provide cookies
+        in a dedicated field (e.g., API Gateway HTTP API v2).
+        """
+        # Primary: self.headers is CaseInsensitiveDict — case-insensitive lookup
+        cookie_value: str | list[str] = self.headers.get("cookie") or ""
+
+        # Fallback: resolved_headers_field covers ALB/REST v1 multi-value headers
+        # where the event may not have a single-value 'headers' dict at all
+        if not cookie_value:
+            headers = self.resolved_headers_field or {}
+            cookie_value = headers.get("cookie") or headers.get("Cookie") or ""
+
+        # Multi-value headers (ALB, REST v1) may return a list
+        if isinstance(cookie_value, list):
+            cookie_value = "; ".join(cookie_value)
+
+        if not cookie_value:
+            return {}
+
+        return _parse_cookie_string(cookie_value)
 
     @property
     def is_base64_encoded(self) -> bool | None:
