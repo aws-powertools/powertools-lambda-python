@@ -209,7 +209,6 @@ def test_invalid_query_param():
 # =============================================================================
 
 
-@pytest.mark.skip("Due to issue #7981.")
 @pytest.mark.asyncio
 async def test_async_handler_with_validation():
     # GIVEN an app with async handler and validation
@@ -239,6 +238,91 @@ async def test_async_handler_with_validation():
     body = json.loads(captured["body"])
     assert body["id"] == "async-123"
     assert body["user"]["name"] == "AsyncUser"
+
+
+@pytest.mark.asyncio
+async def test_async_handler_invalid_response_returns_422():
+    # GIVEN an app with async handler and validation
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.get("/user")
+    async def get_user() -> UserResponse:
+        await asyncio.sleep(0.001)
+        return {"name": "John"}  # type: ignore  # Missing required fields
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/user",
+        "query_string": b"",
+        "headers": [(b"content-type", b"application/json")],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN it returns 422 for invalid response
+    assert captured["status_code"] == 422
+
+
+@pytest.mark.asyncio
+async def test_sync_handler_with_validation_via_asgi():
+    # GIVEN an app with a sync handler and validation, called via ASGI
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.post("/users")
+    def create_user(user: UserModel) -> UserResponse:
+        return UserResponse(id="sync-123", user=user)
+
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/users",
+        "query_string": b"",
+        "headers": [(b"content-type", b"application/json")],
+    }
+
+    receive = make_asgi_receive(b'{"name": "SyncUser", "age": 30}')
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN validation works with sync handler
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["id"] == "sync-123"
+    assert body["user"]["name"] == "SyncUser"
+
+
+@pytest.mark.asyncio
+async def test_sync_handler_invalid_response_returns_422_via_asgi():
+    # GIVEN an app with a sync handler and validation, called via ASGI
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.get("/user")
+    def get_user() -> UserResponse:
+        return {"name": "John"}  # type: ignore  # Missing required fields
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/user",
+        "query_string": b"",
+        "headers": [(b"content-type", b"application/json")],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN it returns 422 for invalid response
+    assert captured["status_code"] == 422
 
 
 # =============================================================================
