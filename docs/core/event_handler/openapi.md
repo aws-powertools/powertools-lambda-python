@@ -61,9 +61,6 @@ The Swagger UI appears by default at the `/swagger` path, but you can customize 
 
 ## Customization
 
-???+ warning "OpenAPI schema version depends on the installed version of Pydantic"
-    Pydantic v1 generates [valid OpenAPI 3.0.3 schemas](https://docs.pydantic.dev/1.10/usage/schema/){target="_blank" rel="nofollow"}, and Pydantic v2 generates [valid OpenAPI 3.1.0 schemas](https://docs.pydantic.dev/latest/why/#json-schema){target="_blank" rel="nofollow"}.
-
 ### Customizing parameters
 
 --8<-- "docs/core/event_handler/_openapi_customization_parameters.md"
@@ -184,6 +181,11 @@ OpenAPI Merge uses AST (Abstract Syntax Tree) analysis to detect resolver instan
 * No Lambda cold starts
 * No security concerns from arbitrary code execution
 * Fast discovery across many files
+
+???+ warning "Handler modules must be side-effect-free at import time"
+    While discovery uses static analysis (AST), **schema generation requires importing your handler modules** to extract route definitions. If a handler module runs code at import time - such as validating environment variables, opening database connections, or calling external services — the import will fail silently and its routes will be missing from the final schema.
+
+    If your schema is unexpectedly empty, check whether your handler files have decorators or top-level code that depends on runtime state. Move these to the handler function body or guard them with `if __name__ == "__main__"`.
 
 ### Discovery parameters
 

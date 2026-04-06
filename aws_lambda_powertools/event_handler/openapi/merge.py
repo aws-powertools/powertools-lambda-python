@@ -7,6 +7,7 @@ import fnmatch
 import importlib.util
 import logging
 import sys
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -232,7 +233,13 @@ def _load_resolver_with_dependencies(
                 _load_module(dep_file, dep_module_name)
                 logger.debug(f"Loaded dependent file: {dep_file}")
             except Exception as e:
-                logger.warning(f"Failed to load dependent file {dep_file}: {e}")
+                warnings.warn(
+                    f"Failed to load dependent file {dep_file}: {e}. "
+                    "If your handler module has side effects at import time "
+                    "(e.g. environment variable validation, database connections), "
+                    "consider deferring them to runtime.",
+                    stacklevel=2,
+                )
 
         # Now get the resolver - it should already be loaded by the dependent files
         # Try to get it from the module that was loaded by dependents
@@ -409,9 +416,25 @@ class OpenAPIMerge:
                 if hasattr(resolver, "get_openapi_schema"):
                     self._schemas.append(_model_to_dict(resolver.get_openapi_schema()))
             except (ImportError, AttributeError, FileNotFoundError) as e:
-                logger.warning(f"Failed to load resolver from {file_path}: {e}")
+                warnings.warn(
+                    f"Failed to load resolver from {file_path}: {e}. "
+                    "If your handler module has side effects at import time "
+                    "(e.g. environment variable validation, database connections), "
+                    "consider deferring them to runtime.",
+                    stacklevel=1,
+                )
 
         self._cached_schema = self._merge_schemas()
+
+        if self._discovered_files and not self._cached_schema.get("paths"):
+            warnings.warn(
+                f"OpenAPIMerge discovered {len(self._discovered_files)} handler file(s) "
+                "but the final schema has no paths. "
+                "Check if your handler modules have side effects at import time "
+                "that prevent route registration.",
+                stacklevel=1,
+            )
+
         return self._cached_schema
 
     def get_openapi_json_schema(self) -> str:
