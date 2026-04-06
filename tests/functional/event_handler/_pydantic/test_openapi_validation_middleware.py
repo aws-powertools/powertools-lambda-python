@@ -3327,3 +3327,298 @@ def test_union_list_body_large_payload():
     status, body = _post_json(app, "/items", big_payload)
     assert status == 200
     assert body["count"] == 100
+
+
+# ---------- Cookie parameter tests ----------
+
+
+def test_cookie_param_basic(gw_event):
+    """Test basic cookie parameter extraction from REST API v1 (Cookie header)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"]["cookie"] = "session_id=abc123; theme=dark"
+    # Clear multiValueHeaders to avoid interference
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "abc123"
+
+
+def test_cookie_param_missing_required(gw_event):
+    """Test that a missing required cookie returns 422."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"]["cookie"] = "theme=dark"
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+
+def test_cookie_param_with_default(gw_event):
+    """Test cookie parameter with a default value when cookie is absent."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(theme: Annotated[str, Cookie()] = "light"):
+        return {"theme": theme}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"].pop("cookie", None)
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["theme"] == "light"
+
+
+def test_cookie_param_multiple_cookies(gw_event):
+    """Test extracting multiple cookie parameters."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(
+        session_id: Annotated[str, Cookie()],
+        theme: Annotated[str, Cookie()] = "light",
+    ):
+        return {"session_id": session_id, "theme": theme}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"]["cookie"] = "session_id=abc123; theme=dark"
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "abc123"
+    assert body["theme"] == "dark"
+
+
+def test_cookie_param_int_validation(gw_event):
+    """Test cookie parameter with int type validation."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(visits: Annotated[int, Cookie()]):
+        return {"visits": visits}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"]["cookie"] = "visits=42"
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["visits"] == 42
+
+    # Invalid int
+    gw_event["headers"]["cookie"] = "visits=not_a_number"
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+
+
+def test_cookie_param_http_api_v2(gw_event_http):
+    """Test cookie parameter with HTTP API v2 (dedicated cookies field)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event_http["rawPath"] = "/me"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["cookies"] = ["session_id=xyz789", "theme=dark"]
+
+    result = app(gw_event_http, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "xyz789"
+
+
+def test_cookie_param_lambda_function_url(gw_event_lambda_url):
+    """Test cookie parameter with Lambda Function URL (v2 format)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = LambdaFunctionUrlResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event_lambda_url["rawPath"] = "/me"
+    gw_event_lambda_url["requestContext"]["http"]["method"] = "GET"
+    gw_event_lambda_url["cookies"] = ["session_id=fn_url_abc"]
+
+    result = app(gw_event_lambda_url, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "fn_url_abc"
+
+
+def test_cookie_param_alb(gw_event_alb):
+    """Test cookie parameter with ALB (Cookie header in multiValueHeaders)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = ALBResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event_alb["path"] = "/me"
+    gw_event_alb["httpMethod"] = "GET"
+    gw_event_alb["multiValueHeaders"]["cookie"] = ["session_id=alb_abc"]
+
+    result = app(gw_event_alb, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "alb_abc"
+
+
+def test_cookie_param_openapi_schema():
+    """Test that Cookie() generates correct OpenAPI schema with in=cookie."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(
+        session_id: Annotated[str, Cookie(description="Session identifier")],
+        theme: Annotated[str, Cookie(description="UI theme")] = "light",
+    ):
+        return {"session_id": session_id}
+
+    schema = app.get_openapi_schema()
+    schema_dict = schema.model_dump(mode="json", by_alias=True, exclude_none=True)
+
+    path = schema_dict["paths"]["/me"]["get"]
+    params = path["parameters"]
+
+    cookie_params = [p for p in params if p["in"] == "cookie"]
+    assert len(cookie_params) == 2
+
+    session_param = next(p for p in cookie_params if p["name"] == "session_id")
+    assert session_param["required"] is True
+    assert session_param["description"] == "Session identifier"
+
+    theme_param = next(p for p in cookie_params if p["name"] == "theme")
+    assert theme_param.get("required") is not True
+    assert theme_param["description"] == "UI theme"
+
+
+def test_cookie_param_with_query_and_header(gw_event):
+    """Test that Cookie(), Query(), and Header() work together."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(
+        user_id: Annotated[str, Query()],
+        x_request_id: Annotated[str, Header()],
+        session_id: Annotated[str, Cookie()],
+    ):
+        return {
+            "user_id": user_id,
+            "x_request_id": x_request_id,
+            "session_id": session_id,
+        }
+
+    gw_event["path"] = "/me"
+    gw_event["queryStringParameters"] = {"user_id": "u123"}
+    gw_event["multiValueQueryStringParameters"] = {"user_id": ["u123"]}
+    gw_event["headers"]["x-request-id"] = "req-456"
+    gw_event["multiValueHeaders"] = {"x-request-id": ["req-456"], "cookie": ["session_id=sess-789"]}
+    gw_event["headers"]["cookie"] = "session_id=sess-789"
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["user_id"] == "u123"
+    assert body["x_request_id"] == "req-456"
+    assert body["session_id"] == "sess-789"
+
+
+def test_cookie_param_no_cookies_in_request(gw_event):
+    """Test that empty cookies dict is handled gracefully."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(theme: Annotated[str, Cookie()] = "light"):
+        return {"theme": theme}
+
+    gw_event["path"] = "/me"
+    gw_event["headers"] = {}
+    gw_event.pop("multiValueHeaders", None)
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["theme"] == "light"
+
+
+def test_cookie_param_vpc_lattice_v2(gw_event_vpc_lattice):
+    """Test cookie parameter with VPC Lattice v2 (headers are lists)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event_vpc_lattice["method"] = "GET"
+    gw_event_vpc_lattice["path"] = "/me"
+    gw_event_vpc_lattice["headers"]["cookie"] = ["session_id=lattice_abc"]
+
+    result = app(gw_event_vpc_lattice, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "lattice_abc"
+
+
+def test_cookie_param_vpc_lattice_v1(gw_event_vpc_lattice_v1):
+    """Test cookie parameter with VPC Lattice v1 (comma-separated headers)."""
+    from aws_lambda_powertools.event_handler.openapi.params import Cookie
+
+    app = VPCLatticeResolver(enable_validation=True)
+
+    @app.get("/me")
+    def handler(session_id: Annotated[str, Cookie()]):
+        return {"session_id": session_id}
+
+    gw_event_vpc_lattice_v1["method"] = "GET"
+    gw_event_vpc_lattice_v1["raw_path"] = "/me"
+    gw_event_vpc_lattice_v1["headers"]["cookie"] = "session_id=lattice_v1_abc"
+
+    result = app(gw_event_vpc_lattice_v1, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["session_id"] == "lattice_v1_abc"
