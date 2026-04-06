@@ -93,18 +93,18 @@ zstandard = ["zstandard"]
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.263"
+version = "2.2.273"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_asset_awscli_v1-2.2.263-py3-none-any.whl", hash = "sha256:185150757d4216ea982d7b35596de5b3d767776be00cd78cacce02eaa08f8851"},
-    {file = "aws_cdk_asset_awscli_v1-2.2.263.tar.gz", hash = "sha256:657605260ace055fac4ae30a6fb84a80504a6e24ce0b1d278913d4db4bafa266"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.273-py3-none-any.whl", hash = "sha256:1a0994afa7b48f63b580603be64c7a99d19ed6777bdf81d3c2435d8b43cf0d71"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.273.tar.gz", hash = "sha256:6580dad3416e53712db434f81add6fb4a314e1a80f9c57cc42606df1f64c8e0f"},
 ]
 
 [package.dependencies]
-jsii = ">=1.125.0,<2.0.0"
+jsii = ">=1.127.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -205,18 +205,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.243.0a0"
+version = "2.248.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.243.0a0-py3-none-any.whl", hash = "sha256:96f9d7281dd84f1bff3cc8b8e0d403589f957845c6ba2a34a570dd8d7b776e0e"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.243.0a0.tar.gz", hash = "sha256:d97718daedab795f9652ab7799ac3d206a6dd33efa5e622b60c8fa5cc6a526d2"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.248.0a0-py3-none-any.whl", hash = "sha256:bf9303515649511fb5299ef36cfcdc042f3422de05321ed30f565dcb3642737f"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.248.0a0.tar.gz", hash = "sha256:2b5f4f3a2ca249355fd86509da800ae36b2e368cfec76372dc3dd25f25ef23af"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.243.0,<3.0.0"
+aws-cdk-lib = ">=2.248.0,<3.0.0"
 constructs = ">=10.5.0,<11.0.0"
 jsii = ">=1.127.0,<2.0.0"
 publication = ">=0.0.3"
@@ -224,37 +224,37 @@ typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "52.2.0"
+version = "53.13.0"
 description = "Schema for the protocol between CDK framework and CDK CLI"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_cloud_assembly_schema-52.2.0-py3-none-any.whl", hash = "sha256:87b918589f7d627f45e330726f592ec0b39056e1403558f3a1ba8a2134dacd6f"},
-    {file = "aws_cdk_cloud_assembly_schema-52.2.0.tar.gz", hash = "sha256:737309e2c7c7e4b46bd669cb9fe8799a36424c9a174523b54833cf1cd12b5e3f"},
+    {file = "aws_cdk_cloud_assembly_schema-53.13.0-py3-none-any.whl", hash = "sha256:b6612da9451a23e1f1ddacfe94dc5359b5ca42bad91a923b04a3d12e14078016"},
+    {file = "aws_cdk_cloud_assembly_schema-53.13.0.tar.gz", hash = "sha256:d0f4ed7f8122f57d62983c0274d10480909e4b15362d28ff1f9b505e2bd92a72"},
 ]
 
 [package.dependencies]
-jsii = ">=1.121.0,<2.0.0"
+jsii = ">=1.127.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.243.0"
+version = "2.248.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.243.0-py3-none-any.whl", hash = "sha256:9de49529fbca82680c7e4fa28040bf3895efd4250a32c812d31133c2274708b5"},
-    {file = "aws_cdk_lib-2.243.0.tar.gz", hash = "sha256:ae39b90d0eef422293d22c6f2c67c5e1edfbfce7a5135a463f29e7c23538318c"},
+    {file = "aws_cdk_lib-2.248.0-py3-none-any.whl", hash = "sha256:e89db288365371e6b42aaae8b45ad2064615dfbe87e95741a2f2bb7ec1f33dad"},
+    {file = "aws_cdk_lib-2.248.0.tar.gz", hash = "sha256:a00c73bfa6865ef62d700d6f97dd4124979ccfe69dc1ef70f2526aa49c52bbc8"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = "2.2.263"
+"aws-cdk.asset-awscli-v1" = "2.2.273"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.1,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=52.1.0,<53.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=53.0.0,<54.0.0"
 constructs = ">=10.5.0,<11.0.0"
 jsii = ">=1.127.0,<2.0.0"
 publication = ">=0.0.3"
