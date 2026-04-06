@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
@@ -3327,6 +3328,610 @@ def test_union_list_body_large_payload():
     status, body = _post_json(app, "/items", big_payload)
     assert status == 200
     assert body["count"] == 100
+
+
+# ---------- File upload (multipart/form-data) ----------
+
+
+def _build_multipart_body(fields: List[Dict], boundary: str = "----TestBoundary") -> Tuple[str, str]:
+    """
+    Build a multipart/form-data body and return (base64_body, content_type).
+
+    Each field dict can have:
+      - name: field name (required)
+      - value: str or bytes (required)
+      - filename: optional filename (makes it a file part)
+      - content_type: optional content type for the part
+    """
+    parts = []
+    for field in fields:
+        headers = f'Content-Disposition: form-data; name="{field["name"]}"'
+        if "filename" in field:
+            headers += f'; filename="{field["filename"]}"'
+        if "content_type" in field:
+            headers += f"\r\nContent-Type: {field['content_type']}"
+        value = field["value"]
+        if isinstance(value, str):
+            value = value.encode("utf-8")
+        parts.append((headers, value))
+
+    body = b""
+    for headers, value in parts:
+        body += f"--{boundary}\r\n".encode()
+        body += f"{headers}\r\n\r\n".encode()
+        body += value
+        body += b"\r\n"
+    body += f"--{boundary}--\r\n".encode()
+
+    content_type = f"multipart/form-data; boundary={boundary}"
+    return base64.b64encode(body).decode("utf-8"), content_type
+
+
+def test_file_upload_basic(gw_event):
+    """Test basic file upload with File() parameter."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    body, content_type = _build_multipart_body(
+        [
+            {"name": "file_data", "value": b"hello world", "filename": "test.txt"},
+        ],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"size": 11}
+
+
+def test_file_upload_with_form_field(gw_event):
+    """Test file upload mixed with a regular form field."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(
+        description: Annotated[str, Form()],
+        file_data: Annotated[bytes, File()],
+    ):
+        return {"description": description, "size": len(file_data)}
+
+    body, content_type = _build_multipart_body(
+        [
+            {"name": "description", "value": "my file"},
+            {"name": "file_data", "value": b"\x89PNG\r\n\x1a\n", "filename": "image.png", "content_type": "image/png"},
+        ],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["description"] == "my file"
+    assert parsed["size"] == 8
+
+
+def test_file_upload_missing_required(gw_event):
+    """Test that missing required File() parameter returns 422."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    # Send empty multipart body (no file_data field)
+    body, content_type = _build_multipart_body(
+        [
+            {"name": "other_field", "value": "some value"},
+        ],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
+
+
+def test_file_upload_openapi_schema():
+    """Test that File() parameters generate correct OpenAPI schema."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File(description="The file to upload")]):
+        return {"size": len(file_data)}
+
+    schema = app.get_openapi_schema()
+    path = schema.paths["/upload"]
+    post_op = path.post
+
+    # Should have a request body with multipart/form-data
+    assert post_op.requestBody is not None
+    content = post_op.requestBody.content
+    assert "multipart/form-data" in content
+
+    # The schema should reference a binary format field
+    multipart_schema = content["multipart/form-data"].schema_
+    assert multipart_schema is not None
+
+
+def test_file_upload_non_base64(gw_event):
+    """Test file upload when body is not base64-encoded (edge case)."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    # Build multipart body without base64 encoding
+    boundary = "----TestBoundary"
+    raw_body = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="test.txt"\r\n'
+        f"\r\n"
+        f"hello world\r\n"
+        f"--{boundary}--\r\n"
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = raw_body
+    gw_event["isBase64Encoded"] = False
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"size": 11}
+
+
+def test_file_upload_non_base64_emits_warning(gw_event):
+    """Test that non-base64 multipart body emits a warning about API Gateway config."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    boundary = "----TestBoundary"
+    raw_body = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="test.txt"\r\n'
+        f"\r\n"
+        f"hello world\r\n"
+        f"--{boundary}--\r\n"
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = raw_body
+    gw_event["isBase64Encoded"] = False
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+    assert len(w) == 1
+    assert "Binary Media Types" in str(w[0].message)
+
+
+def test_file_upload_non_base64_binary_content(gw_event):
+    """Test file upload with raw binary bytes (e.g. JPEG) without base64 encoding."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    # Simulate binary content with bytes that are NOT valid UTF-8 (like JPEG header 0xFF 0xD8)
+    binary_content = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00"
+    boundary = "----TestBoundary"
+    raw_bytes = (
+        (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file_data"; filename="photo.jpg"\r\n'
+            f"Content-Type: image/jpeg\r\n"
+            f"\r\n"
+        ).encode("latin-1")
+        + binary_content
+        + f"\r\n--{boundary}--\r\n".encode("latin-1")
+    )
+
+    # Without binary mode, API Gateway passes body as latin-1 compatible string
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = raw_bytes.decode("latin-1")
+    gw_event["isBase64Encoded"] = False
+
+    with warnings.catch_warnings(record=True):
+        warnings.simplefilter("always")
+        result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"size": len(binary_content)}
+
+
+def test_upload_file_with_metadata(gw_event):
+    """Test UploadFile annotation provides filename and content_type."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[UploadFile, File()]):
+        return {
+            "filename": file_data.filename,
+            "content_type": file_data.content_type,
+            "size": len(file_data),
+        }
+
+    body, content_type = _build_multipart_body(
+        [
+            {"name": "file_data", "value": b"fake jpeg", "filename": "photo.jpg", "content_type": "image/jpeg"},
+        ],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["filename"] == "photo.jpg"
+    assert parsed["content_type"] == "image/jpeg"
+    assert parsed["size"] == 9
+
+
+def test_upload_file_mixed_with_form(gw_event):
+    """Test UploadFile + Form fields together."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(
+        file_data: Annotated[UploadFile, File()],
+        title: Annotated[str, Form()],
+    ):
+        return {
+            "title": title,
+            "filename": file_data.filename,
+            "size": len(file_data),
+        }
+
+    body, content_type = _build_multipart_body(
+        [
+            {"name": "title", "value": "My Document"},
+            {
+                "name": "file_data",
+                "value": b"pdf content here",
+                "filename": "doc.pdf",
+                "content_type": "application/pdf",
+            },
+        ],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["title"] == "My Document"
+    assert parsed["filename"] == "doc.pdf"
+    assert parsed["size"] == 16
+
+
+def test_upload_file_openapi_schema():
+    """Test UploadFile generates correct OpenAPI schema."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[UploadFile, File(description="A file")]):
+        return {}
+
+    schema = app.get_openapi_schema()
+    schema_dict = schema.model_dump(exclude_none=True, by_alias=True)
+    upload_path = schema_dict["paths"]["/upload"]["post"]
+    content = upload_path["requestBody"]["content"]
+    assert "multipart/form-data" in content
+
+    # Resolve $ref to get the actual schema
+    ref = content["multipart/form-data"]["schema"]["$ref"]
+    schema_name = ref.split("/")[-1]
+    props = schema_dict["components"]["schemas"][schema_name]["properties"]
+    assert props["file_data"]["type"] == "string"
+    assert props["file_data"]["format"] == "binary"
+
+
+def test_multipart_missing_boundary(gw_event):
+    """Test that missing boundary in content-type raises ValueError."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = "multipart/form-data"  # no boundary
+    gw_event["body"] = base64.b64encode(b"some data").decode()
+    gw_event["isBase64Encoded"] = True
+
+    with pytest.raises(ValueError, match="Missing boundary"):
+        app(gw_event, {})
+
+
+def test_multipart_quoted_boundary(gw_event):
+    """Test that boundary with quotes is parsed correctly."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    boundary = "----TestBoundary"
+    body, _ = _build_multipart_body(
+        [
+            {"name": "file_data", "value": b"hello", "filename": "test.txt"},
+        ],
+        boundary=boundary,
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    # Use quoted boundary
+    gw_event["headers"]["content-type"] = f'multipart/form-data; boundary="{boundary}"'
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"size": 5}
+
+
+def test_multipart_multiple_values_same_field(gw_event):
+    """Test multiple values for the same field name are collected as list."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[List[UploadFile], File()]):
+        return {"count": len(file_data), "filenames": [f.filename for f in file_data]}
+
+    # Build body with two parts having the same field name
+    boundary = "----TestBoundary"
+    raw = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="a.txt"\r\n'
+        f"\r\n"
+        f"content a\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="b.txt"\r\n'
+        f"\r\n"
+        f"content b\r\n"
+        f"--{boundary}--\r\n"
+    ).encode()
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = base64.b64encode(raw).decode()
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["count"] == 2
+    assert parsed["filenames"] == ["a.txt", "b.txt"]
+
+
+def test_multipart_three_values_same_field(gw_event):
+    """Test three or more values for same field name builds onto existing list."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[List[UploadFile], File()]):
+        return {"count": len(file_data), "filenames": [f.filename for f in file_data]}
+
+    boundary = "----TestBoundary"
+    raw = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="a.txt"\r\n'
+        f"\r\n"
+        f"aaa\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="b.txt"\r\n'
+        f"\r\n"
+        f"bbb\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="c.txt"\r\n'
+        f"\r\n"
+        f"ccc\r\n"
+        f"--{boundary}--\r\n"
+    ).encode()
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = base64.b64encode(raw).decode()
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["count"] == 3
+    assert parsed["filenames"] == ["a.txt", "b.txt", "c.txt"]
+
+
+def test_multipart_part_without_headers_separator(gw_event):
+    """Test that a malformed part missing the header/body separator is skipped."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[UploadFile, File()]):
+        return {"filename": file_data.filename}
+
+    # Build a body with one malformed part (no \r\n\r\n) and one valid part
+    boundary = "----TestBoundary"
+    raw = (
+        f"--{boundary}\r\n"
+        f"This part has no header separator at all\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="good.txt"\r\n'
+        f"\r\n"
+        f"good content\r\n"
+        f"--{boundary}--\r\n"
+    ).encode()
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = base64.b64encode(raw).decode()
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["filename"] == "good.txt"
+
+
+def test_multipart_part_without_field_name(gw_event):
+    """Test that a part missing the name parameter in Content-Disposition is skipped."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[UploadFile, File()]):
+        return {"filename": file_data.filename}
+
+    # Build a body with one part that has no name= param and one valid part
+    boundary = "----TestBoundary"
+    raw = (
+        f"--{boundary}\r\n"
+        f"Content-Disposition: form-data\r\n"
+        f"\r\n"
+        f"orphan content\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file_data"; filename="valid.txt"\r\n'
+        f"\r\n"
+        f"valid content\r\n"
+        f"--{boundary}--\r\n"
+    ).encode()
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = base64.b64encode(raw).decode()
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    parsed = json.loads(result["body"])
+    assert parsed["filename"] == "valid.txt"
+
+
+def test_upload_file_validate_error():
+    """Test UploadFile._validate raises ValueError for non-UploadFile values."""
+    from aws_lambda_powertools.event_handler.openapi.params import UploadFile
+
+    with pytest.raises(ValueError, match="Expected UploadFile, got str"):
+        UploadFile._validate("not an upload file")
+
+    with pytest.raises(ValueError, match="Expected UploadFile, got int"):
+        UploadFile._validate(42)
+
+
+def test_multipart_unclosed_quote_in_header():
+    """Test that _extract_header_param returns None when quote is unclosed."""
+    from aws_lambda_powertools.event_handler.middlewares.openapi_validation import _extract_header_param
+
+    # name=" is present but closing quote is missing
+    result = _extract_header_param('Content-Disposition: form-data; name="broken', "name")
+    assert result is None
+
+
+def test_multipart_generic_parse_error(gw_event):
+    """Test that non-ValueError exceptions during multipart parsing produce 422."""
+    from unittest.mock import patch
+
+    from aws_lambda_powertools.event_handler.openapi.params import File, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[UploadFile, File()]):
+        return {"filename": file_data.filename}
+
+    body_b64, content_type = _build_multipart_body(
+        [{"name": "file_data", "value": b"data", "filename": "test.txt"}],
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = content_type
+    gw_event["body"] = body_b64
+    gw_event["isBase64Encoded"] = True
+
+    # Patch _parse_multipart_body to raise a non-ValueError (e.g. TypeError)
+    with patch(
+        "aws_lambda_powertools.event_handler.middlewares.openapi_validation._parse_multipart_body",
+        side_effect=TypeError("unexpected type"),
+    ):
+        result = app(gw_event, {})
+        assert result["statusCode"] == 422
+        body = json.loads(result["body"])
+        assert body["detail"][0]["type"] == "multipart_invalid"
 
 
 # ---------- Cookie parameter tests ----------

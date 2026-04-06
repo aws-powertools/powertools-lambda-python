@@ -902,7 +902,57 @@ class Form(Body):  # type: ignore[misc]
         )
 
 
-class _File(Form):  # type: ignore[misc]
+class UploadFile:
+    """
+    Represents an uploaded file with its metadata.
+
+    Use with ``Annotated[UploadFile, File()]`` to receive file content along with
+    filename and content type. For raw bytes only, use ``Annotated[bytes, File()]``.
+
+    Attributes
+    ----------
+    filename : str | None
+        The original filename from the upload.
+    content_type : str | None
+        The MIME type declared by the client (e.g. ``image/jpeg``).
+    content : bytes
+        The raw file content.
+    """
+
+    __slots__ = ("content", "content_type", "filename")
+
+    def __init__(self, *, content: bytes, filename: str | None = None, content_type: str | None = None):
+        self.content = content
+        self.filename = filename
+        self.content_type = content_type
+
+    def __len__(self) -> int:
+        return len(self.content)
+
+    def __repr__(self) -> str:
+        return f"UploadFile(filename={self.filename!r}, content_type={self.content_type!r}, size={len(self.content)})"
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type: Any, _handler: Any) -> Any:
+        from pydantic_core import core_schema
+
+        return core_schema.no_info_plain_validator_function(
+            cls._validate,
+            serialization=core_schema.plain_serializer_function_ser_schema(lambda v: v, info_arg=False),
+        )
+
+    @classmethod
+    def _validate(cls, v: Any) -> UploadFile:
+        if isinstance(v, cls):
+            return v
+        raise ValueError(f"Expected UploadFile, got {type(v).__name__}")
+
+    @classmethod
+    def __get_pydantic_json_schema__(cls, _schema: Any, handler: Any) -> dict[str, Any]:
+        return {"type": "string", "format": "binary"}
+
+
+class File(Form):  # type: ignore[misc]
     """
     A class used to represent a file parameter in a path operation.
     """

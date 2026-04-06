@@ -605,6 +605,57 @@ You can use the `Form` type to tell the Event Handler that a parameter expects f
     --8<-- "examples/event_handler_rest/src/working_with_form_data.py"
     ```
 
+#### Handling file uploads
+
+!!! info "You must set `enable_validation=True` to handle file uploads via type annotation."
+
+You can use the `File` type to accept `multipart/form-data` file uploads. This automatically sets the correct OpenAPI schema, and Swagger UI will render a file picker for each `File()` parameter.
+
+There are two ways to receive uploaded files:
+
+* **`bytes`** — receive raw file content only
+* **`UploadFile`** — receive file content along with metadata (filename, content type)
+
+=== "working_with_file_uploads.py"
+
+    ```python hl_lines="4 12"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads.py"
+    ```
+
+    1. `File` is a special OpenAPI type for `multipart/form-data` file uploads. When annotated as `bytes`, you receive the raw file content.
+
+=== "working_with_file_uploads_metadata.py"
+
+    ```python hl_lines="4 11 15-16"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads_metadata.py"
+    ```
+
+    1. Using `UploadFile` instead of `bytes` gives you access to file metadata.
+    2. `filename` and `content_type` come from the multipart headers sent by the client.
+
+=== "working_with_file_uploads_mixed.py"
+
+    You can combine `File()` and `Form()` parameters in the same route to accept file uploads with additional form fields.
+
+    ```python hl_lines="6 14-15"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads_mixed.py"
+    ```
+
+    1. File upload parameter — receives the uploaded file with metadata.
+    2. Regular form field — receives a string value from the same multipart request.
+
+!!! warning "API Gateway REST API (v1) requires Binary Media Types configuration"
+    When using API Gateway REST API (v1), you must configure Binary Media Types to include `multipart/form-data`, otherwise binary file content will be corrupted.
+
+    ```yaml title="SAM template.yaml"
+    Globals:
+      Api:
+        BinaryMediaTypes:
+          - "multipart~1form-data"
+    ```
+
+    API Gateway HTTP API (v2), Lambda Function URL, and ALB handle binary encoding automatically — no extra configuration needed.
+
 #### Supported types for response serialization
 
 With data validation enabled, we natively support serializing the following data types to JSON:

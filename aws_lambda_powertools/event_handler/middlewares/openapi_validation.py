@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import base64
 import dataclasses
 import json
 import logging
+import warnings
 from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union, cast
 from urllib.parse import parse_qs
 
@@ -25,7 +27,7 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
     RequestValidationError,
     ResponseValidationError,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Param
+from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
 from aws_lambda_powertools.event_handler.openapi.types import UnionType
 
 if TYPE_CHECKING:
@@ -44,6 +46,7 @@ logger = logging.getLogger(__name__)
 CONTENT_DISPOSITION_NAME_PARAM = "name="
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 APPLICATION_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded"
+MULTIPART_FORM_DATA_CONTENT_TYPE = "multipart/form-data"
 
 
 class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
@@ -141,14 +144,18 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
             return self._parse_form_data(app)
 
+        # Handle multipart/form-data (file uploads)
+        elif content_type.startswith(MULTIPART_FORM_DATA_CONTENT_TYPE):
+            return self._parse_multipart_data(app, content_type)
+
         else:
             raise RequestUnsupportedContentType(
-                "Only JSON body or Form() are supported",
+                "Unsupported content type",
                 errors=[
                     {
                         "type": "unsupported_content_type",
                         "loc": ("body",),
-                        "msg": "Only JSON body or Form() are supported",
+                        "msg": f"Unsupported content type: {content_type}",
                         "input": {},
                         "ctx": {},
                     },
@@ -189,6 +196,49 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                         "type": "form_invalid",
                         "loc": ("body",),
                         "msg": "Form data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
+
+    def _parse_multipart_data(self, app: EventHandlerInstance, content_type: str) -> dict[str, Any]:
+        """Parse multipart/form-data from the request body (file uploads)."""
+        try:
+            # Extract the boundary from the content-type header
+            boundary = _extract_multipart_boundary(content_type)
+            if not boundary:
+                raise ValueError("Missing boundary in multipart/form-data content-type header")
+
+            # Get raw body bytes
+            raw_body = app.current_event.body or ""
+            if app.current_event.is_base64_encoded:
+                body_bytes = base64.b64decode(raw_body)
+            else:
+                warnings.warn(
+                    "Received multipart/form-data without base64 encoding. "
+                    "Binary file uploads may be corrupted. "
+                    "If using API Gateway REST API (v1), configure Binary Media Types "
+                    "to include 'multipart/form-data'. "
+                    "See: https://docs.aws.amazon.com/apigateway/latest/developerguide/"
+                    "api-gateway-payload-encodings.html",
+                    stacklevel=2,
+                )
+                # Use latin-1 to preserve all byte values (0-255) since the body
+                # may contain raw binary data that isn't valid UTF-8
+                body_bytes = raw_body.encode("latin-1")
+
+            return _parse_multipart_body(body_bytes, boundary)
+
+        except ValueError:
+            raise
+        except Exception as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "multipart_invalid",
+                        "loc": ("body",),
+                        "msg": "Multipart form data parsing error",
                         "input": {},
                         "ctx": {"error": str(e)},
                     },
@@ -398,7 +448,12 @@ def _request_body_to_args(
             continue
 
         value = _normalize_field_value(value=value, field_info=field.field_info)
-        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
+
+        # UploadFile objects bypass Pydantic validation — they're already constructed
+        if isinstance(value, UploadFile):
+            values[field.name] = value
+        else:
+            values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
 
@@ -474,6 +529,10 @@ def _is_or_contains_sequence(annotation: Any) -> bool:
 
 def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
+    # When annotation is bytes but value is UploadFile, extract raw content
+    if isinstance(value, UploadFile) and field_info.annotation is bytes:
+        return value.content
+
     if _is_or_contains_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
@@ -587,3 +646,106 @@ def _get_param_value(
         value = input_dict.get(field_name)
 
     return value
+
+
+def _extract_multipart_boundary(content_type: str) -> str | None:
+    """Extract the boundary string from a multipart/form-data content-type header."""
+    for segment in content_type.split(";"):
+        stripped = segment.strip()
+        if stripped.startswith("boundary="):
+            boundary = stripped[len("boundary=") :]
+            # Remove optional quotes around boundary
+            if boundary.startswith('"') and boundary.endswith('"'):
+                boundary = boundary[1:-1]
+            return boundary
+    return None
+
+
+def _parse_multipart_body(body: bytes, boundary: str) -> dict[str, Any]:
+    """
+    Parse a multipart/form-data body into a dict of field names to values.
+
+    File fields get bytes values; regular form fields get string values.
+    Multiple values for the same field name are collected into lists.
+    """
+    delimiter = f"--{boundary}".encode()
+    end_delimiter = f"--{boundary}--".encode()
+
+    result: dict[str, Any] = {}
+
+    # Split body by the boundary delimiter
+    raw_parts = body.split(delimiter)
+
+    for raw_part in raw_parts:
+        # Skip the preamble (before first boundary) and epilogue (after closing boundary)
+        if not raw_part or raw_part.strip() == b"" or raw_part.strip() == b"--":
+            continue
+
+        # Remove the end delimiter marker if present
+        chunk = raw_part
+        if chunk.endswith(end_delimiter):
+            chunk = chunk[: -len(end_delimiter)]
+
+        # Strip leading \r\n
+        if chunk.startswith(b"\r\n"):
+            chunk = chunk[2:]
+
+        # Strip trailing \r\n
+        if chunk.endswith(b"\r\n"):
+            chunk = chunk[:-2]
+
+        # Split headers from body at the double CRLF
+        header_end = chunk.find(b"\r\n\r\n")
+        if header_end == -1:
+            continue
+
+        header_section = chunk[:header_end].decode("utf-8")
+        body_section = chunk[header_end + 4 :]
+
+        # Parse Content-Disposition to get the field name and optional filename
+        field_name = None
+        filename = None
+        content_type_header = None
+
+        for header_line in header_section.split("\r\n"):
+            header_lower = header_line.lower()
+            if header_lower.startswith("content-disposition:"):
+                field_name = _extract_header_param(header_line, "name")
+                filename = _extract_header_param(header_line, "filename")
+            elif header_lower.startswith("content-type:"):
+                content_type_header = header_line.split(":", 1)[1].strip()
+
+        if field_name is None:
+            continue
+
+        # If it has a filename, it's a file upload — wrap as UploadFile
+        # Otherwise it's a regular form field — decode to string
+        if filename is not None:
+            value: Any = UploadFile(content=body_section, filename=filename, content_type=content_type_header)
+        else:
+            value = body_section.decode("utf-8")
+
+        # Collect multiple values for same field name into a list
+        if field_name in result:
+            existing = result[field_name]
+            if isinstance(existing, list):
+                existing.append(value)
+            else:
+                result[field_name] = [existing, value]
+        else:
+            result[field_name] = value
+
+    return result
+
+
+def _extract_header_param(header_line: str, param_name: str) -> str | None:
+    """Extract a parameter value from a header line (e.g., name="file" from Content-Disposition)."""
+    search = f'{param_name}="'
+    idx = header_line.find(search)
+    if idx == -1:
+        return None
+    start = idx + len(search)
+    end = header_line.find('"', start)
+    if end == -1:
+        return None
+    return header_line[start:end]
