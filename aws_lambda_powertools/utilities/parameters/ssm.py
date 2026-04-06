@@ -133,7 +133,7 @@ class SSMProvider(BaseProvider):
 
         super().__init__(client=self.client)
 
-    def get_multiple(  # type: ignore[override]
+    def get_multiple(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self,
         path: str,
         max_age: int | None = None,
@@ -192,7 +192,7 @@ class SSMProvider(BaseProvider):
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
     # We ignore mypy error, as changes to the signature here or in a superclass is a breaking change to users
-    def get(  # type: ignore[override]
+    def get(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self,
         name: str,
         max_age: int | None = None,
@@ -583,12 +583,12 @@ class SSMProvider(BaseProvider):
         diff = {key: value for key, value in batch.items() if key not in cache}
 
         for chunk in slice_dictionary(data=diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
-            response, possible_errors = self._get_parameters_by_name(
+            chunk_response, possible_errors = self._get_parameters_by_name(
                 parameters=chunk,
                 raise_on_error=raise_on_error,
                 decrypt=decrypt,
             )
-            response.update(response)
+            response.update(chunk_response)
             errors.extend(possible_errors)
 
         return response, errors
@@ -786,7 +786,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: int | None = None,
     **sdk_options,
-) -> str | bytes | dict:
+) -> str | bytes | dict | None:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -1060,14 +1060,16 @@ def set_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].set(
+    provider: SSMProvider = DEFAULT_PROVIDERS["ssm"]
+
+    return provider.set(  # ty: ignore[no-matching-overload]
         name,
         value,
-        parameter_type=parameter_type,
+        parameter_type=parameter_type,  # type: ignore[arg-type]
         overwrite=overwrite,
         tier=tier,
         description=description,
-        kms_key_id=kms_key_id,
+        kms_key_id=kms_key_id,  # type: ignore[arg-type]
         **sdk_options,
     )
 

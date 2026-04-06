@@ -12,9 +12,15 @@ if has_pydantic:  # pragma: no cover
     from aws_lambda_powertools.utilities.parser.models import (
         KinesisDataStreamRecord as KinesisDataStreamRecordModel,
     )
+    from aws_lambda_powertools.utilities.parser.models.kafka import KafkaRecordModel
 
     BatchTypeModels = Optional[
-        Union[Type[SqsRecordModel], Type[DynamoDBStreamRecordModel], Type[KinesisDataStreamRecordModel]]
+        Union[
+            Type[SqsRecordModel],
+            Type[DynamoDBStreamRecordModel],
+            Type[KinesisDataStreamRecordModel],
+            Type[KafkaRecordModel],
+        ]
     ]
     BatchSqsTypeModel = Optional[Type[SqsRecordModel]]
 else:  # pragma: no cover
@@ -22,8 +28,22 @@ else:  # pragma: no cover
     BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore
 
 
+class KafkaItemIdentifier(TypedDict):
+    """Kafka uses a composite identifier with partition and offset."""
+
+    partition: str
+    offset: int
+
+
 class PartialItemFailures(TypedDict):
-    itemIdentifier: str
+    """
+    Represents a partial item failure response.
+
+    For SQS, Kinesis, and DynamoDB: itemIdentifier is a string (message_id or sequence_number)
+    For Kafka: itemIdentifier is a KafkaItemIdentifier dict with partition and offset
+    """
+
+    itemIdentifier: str | KafkaItemIdentifier
 
 
 class PartialItemFailureResponse(TypedDict):

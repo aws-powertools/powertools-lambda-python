@@ -67,11 +67,18 @@ def _file_has_resolver(file_path: Path, resolver_name: str) -> bool:
         return False
 
     for node in ast.walk(tree):
+        targets: list[ast.expr] = []
+        value: ast.expr | None = None
         if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == resolver_name:
-                    if _is_resolver_call(node.value):
-                        return True
+            targets = node.targets
+            value = node.value
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+            value = node.value
+        for target in targets:
+            if isinstance(target, ast.Name) and target.id == resolver_name:
+                if value is not None and _is_resolver_call(value):
+                    return True
     return False
 
 

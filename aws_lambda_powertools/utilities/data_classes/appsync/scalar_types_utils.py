@@ -55,7 +55,7 @@ def aws_date(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSDate scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.utcnow(), "%Y-%m-%d", timezone_offset)
+    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%Y-%m-%d", timezone_offset)
 
 
 def aws_time(timezone_offset: int = 0) -> str:
@@ -71,7 +71,7 @@ def aws_time(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.utcnow(), "%H:%M:%S.%f", timezone_offset)
+    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%H:%M:%S.%f", timezone_offset)
 
 
 def aws_datetime(timezone_offset: int = 0) -> str:
@@ -87,7 +87,7 @@ def aws_datetime(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSDateTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.utcnow(), "%Y-%m-%dT%H:%M:%S.%f", timezone_offset)
+    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%Y-%m-%dT%H:%M:%S.%f", timezone_offset)
 
 
 def aws_timestamp() -> int:

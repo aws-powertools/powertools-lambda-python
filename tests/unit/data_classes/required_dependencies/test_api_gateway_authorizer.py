@@ -200,6 +200,40 @@ def test_authorizer_response_allow_route_with_underscore(builder: APIGatewayAuth
     }
 
 
+def test_authorizer_response_allow_route_with_proxy_plus(builder: APIGatewayAuthorizerResponse):
+    builder.allow_route(http_method="GET", resource="/{proxy+}")
+    assert builder.asdict() == {
+        "principalId": "foo",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/{proxy+}"],
+                },
+            ],
+        },
+    }
+
+
+def test_authorizer_response_allow_route_with_path_parameter(builder: APIGatewayAuthorizerResponse):
+    builder.allow_route(http_method="GET", resource="/users/{user_id}")
+    assert builder.asdict() == {
+        "principalId": "foo",
+        "policyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Allow",
+                    "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/users/{user_id}"],
+                },
+            ],
+        },
+    }
+
+
 def test_parse_api_gateway_arn_with_resource():
     mock_event = {
         "type": "TOKEN",

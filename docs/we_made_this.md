@@ -35,29 +35,29 @@ GitHub: [https://github.com/serverless-dna/powertools-mcp](https://github.com/se
 
 A collection of articles explaining in detail how Powertools for AWS Lambda helps with a Serverless adoption strategy and its challenges.
 
-* [Part 1 - Logging](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging){target="_blank" rel="nofollow"}
+* [Part 1 - Logging](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-elevate-your-handler-s-code-part-1-logging/){target="_blank" rel="nofollow"}
 
-* [Part 2 - Observability: monitoring and tracing](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability){target="_blank" rel="nofollow"}
+* [Part 2 - Observability: monitoring and tracing](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-elevate-your-handler-s-code-part-2-observability/){target="_blank" rel="nofollow"}
 
-* [Part 3 - Business Domain Observability](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability){target="_blank" rel="nofollow"}
+* [Part 3 - Business Domain Observability](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-elevate-your-handler-s-code-part-3-business-domain-observability/){target="_blank" rel="nofollow"}
 
-* [Part 4 - Environment Variables](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-environment-variables){target="_blank" rel="nofollow"}
+* [Part 4 - Environment Variables](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-environment-variables/){target="_blank" rel="nofollow"}
 
-* [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){target="_blank" rel="nofollow"}
+* [Part 5 - Input Validation](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation/){target="_blank" rel="nofollow"}
 
-* [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){target="_blank" rel="nofollow"}
+* [Part 6 - Configuration & Feature Flags](https://ranthebuilder.cloud/blog/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices/){target="_blank" rel="nofollow"}
 
-* [Serverless API Idempotency with AWS Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){target="_blank" rel="nofollow"}
+* [Serverless API Idempotency with AWS Powertools for AWS Lambda and CDK](https://ranthebuilder.cloud/blog/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk/){target="_blank" rel="nofollow"}
 
-* [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){target="_blank" rel="nofollow"}
+* [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://ranthebuilder.cloud/blog/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools/){target="_blank" rel="nofollow"}
 
-* [Serverless API Documentation with Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
+* [Serverless API Documentation with Powertools for AWS Lambda](https://ranthebuilder.cloud/blog/serverless-open-api-documentation-with-aws-powertools/){:target="_blank"}
 
 * [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){target="_blank" rel="nofollow"}
 
-* [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools){target="_blank" rel="nofollow"}
+* [Build a Chatbot with Amazon Bedrock: Automate API Calls Using Powertools for AWS Lambda and CDK](https://ranthebuilder.cloud/blog/automating-api-calls-with-agents-for-amazon-bedrock-with-powertools/){target="_blank" rel="nofollow"}
 
-* [Build Serverless WebSockets with AWS AppSync Events and Powertools for AWS Lambda](https://www.ranthebuilder.cloud/post/aws-appsync-events-and-powertools-for-aws-lambda){target="_blank" rel="nofollow"}
+* [Build Serverless WebSockets with AWS AppSync Events and Powertools for AWS Lambda](https://ranthebuilder.cloud/blog/aws-appsync-events-and-powertools-for-aws-lambda/){target="_blank" rel="nofollow"}
 
 #### Lambda MCP Server Cookbook
 
@@ -138,7 +138,7 @@ This article will guide you through personalizing observability by integrating C
 
 > **Author: [Nathan Hanks](https://www.linkedin.com/in/nathan-hanks-25151815/){target="_blank" rel="nofollow"}** :material-linkedin:
 
-[Creating a serverless API using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/boost-app-engagement-with-aws-cloudwatch-metrics-powertools-for-aws){target="_blank" rel="nofollow"}
+[Creating a serverless API using Powertools for AWS Lambda and CDK](https://ranthebuilder.cloud/blog/boost-app-engagement-with-aws-cloudwatch-metrics-powertools-for-aws/){target="_blank" rel="nofollow"}
 
 ### Streaming data with AWS Lambda & Powertools for AWS Lambda
 
@@ -192,7 +192,7 @@ Are you developing AWS Lambda functions with Python? Always looking for tools to
 
 This session covers an opinionated approach to Python project setup, testing, profiling, deployments, and operations. Learn about many open source tools, including Powertools for AWS Lambda—a toolkit that can help you implement serverless best practices and increase developer velocity.
 
-Join to discover tools and patterns for effective serverless development with Python. To maximize your learning experience, the session includes a sample application that implements what’s described.
+Join to discover tools and patterns for effective serverless development with Python. To maximize your learning experience, the session includes a sample application that implements what's described.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/52W3Qyg242Y?si=NL-k4Wwt1WNfgb_b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 

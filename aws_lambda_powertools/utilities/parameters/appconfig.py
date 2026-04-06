@@ -162,7 +162,7 @@ def get_app_config(
     force_fetch: bool = False,
     max_age: int | None = None,
     **sdk_options,
-) -> str | bytes | list | dict:
+) -> str | bytes | list | dict | None:
     """
     Retrieve a configuration value from AWS App Config.
 

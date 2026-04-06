@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     DictWrapper,
 )
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
+    get_header_value,  # ty: ignore[deprecated]
 )
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
@@ -232,7 +232,7 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(self.headers, name, default_value, case_sensitive)  # ty: ignore[deprecated]
 
 
 class APIGatewayAuthorizerEventV2(DictWrapper):
@@ -358,7 +358,7 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(self.headers, name, default_value, case_sensitive)  # ty: ignore[deprecated]
 
 
 class APIGatewayAuthorizerResponseV2:
@@ -437,7 +437,7 @@ class APIGatewayAuthorizerResponse:
     - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html
     """
 
-    path_regex = r"^[/.a-zA-Z0-9-_\*]+$"
+    path_regex = r"^[/.a-zA-Z0-9\-_\*\{\}\+]+$"
     """The regular expression used to validate resource paths for the policy"""
 
     def __init__(
@@ -668,7 +668,7 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
 
     # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def _add_route(self, effect: str, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+    def _add_route(self, effect: str, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]  # ty: ignore[invalid-method-override]
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
@@ -691,19 +691,19 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
             self._deny_routes.append(route)
 
     @override
-    def allow_all_routes(self):
+    def allow_all_routes(self, http_method: str = HttpVerb.ALL.value):  # type: ignore[override]  # noqa: ARG002
         """Adds a '*' allow to the policy to authorize access to all methods of an API"""
         self._add_route(effect="Allow", resource="*")
 
     @override
-    def deny_all_routes(self):
+    def deny_all_routes(self, http_method: str = HttpVerb.ALL.value):  # type: ignore[override]  # noqa: ARG002
         """Adds a '*' allow to the policy to deny access to all methods of an API"""
 
         self._add_route(effect="Deny", resource="*")
 
     # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def allow_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+    def allow_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]  # ty: ignore[invalid-method-override]
         """
         Add an API Gateway Websocket method to the list of allowed methods for the policy.
 
@@ -732,7 +732,7 @@ class APIGatewayAuthorizerResponseWebSocket(APIGatewayAuthorizerResponse):
 
     # Note: we need ignore[override] because we are removing the http_method field
     @override
-    def deny_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]
+    def deny_route(self, resource: str, conditions: list[dict] | None = None):  # type: ignore[override]  # ty: ignore[invalid-method-override]
         """
         Add an API Gateway Websocket method to the list of allowed methods for the policy.
 

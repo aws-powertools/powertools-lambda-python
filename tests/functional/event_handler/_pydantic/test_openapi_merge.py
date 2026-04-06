@@ -400,3 +400,19 @@ def test_openapi_merge_shared_resolver_pattern():
     assert "/products" in schema["paths"]
     assert "/products/{product_id}" in schema["paths"]
     assert "/categories" in schema["paths"]
+
+
+def test_openapi_merge_discover_type_annotated_resolver():
+    # GIVEN an OpenAPIMerge instance
+    merge = OpenAPIMerge(title="Typed API", version="1.0.0")
+
+    # WHEN discovering a handler with a type-annotated resolver (app: Resolver = Resolver())
+    merge.discover(
+        path=MERGE_HANDLERS_PATH,
+        pattern="**/typed_handler.py",
+        resolver_name="app",
+    )
+
+    # THEN it should find the resolver and include its routes in the schema
+    schema = merge.get_openapi_schema()
+    assert "/products" in schema["paths"]

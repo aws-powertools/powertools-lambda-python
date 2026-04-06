@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Kafka/MSK partial batch response sample
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: python3.12
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_LOG_LEVEL: INFO
+        POWERTOOLS_SERVICE_NAME: kafka-processor
+
+Parameters:
+  MSKClusterArn:
+    Type: String
+    Description: ARN of the MSK cluster
+  KafkaTopic:
+    Type: String
+    Description: Name of the Kafka topic to consume from
+    Default: mytopic
+
+Resources:
+  KafkaConsumerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: hello_world
+      Policies:
+        # Permissions for MSK
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - kafka:DescribeCluster
+                - kafka:DescribeClusterV2
+                - kafka:GetBootstrapBrokers
+              Resource: !Ref MSKClusterArn
+            - Effect: "Allow"
+              Action:
+                - kafka-cluster:Connect
+                - kafka-cluster:DescribeGroup
+                - kafka-cluster:AlterGroup
+                - kafka-cluster:DescribeTopic
+                - kafka-cluster:ReadData
+                - kafka-cluster:DescribeClusterDynamicConfiguration
+              Resource:
+                - !Ref MSKClusterArn
+                - !Sub "${MSKClusterArn}/*"
+        # Lambda Destinations require additional permissions
+        # to send failure records to DLQ
+        - Version: "2012-10-17"
+          Statement:
+            Effect: "Allow"
+            Action:
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Resource: !GetAtt SampleDLQ.Arn
+      Events:
+        MSKEvent:
+          Type: MSK
+          Properties:
+            Stream: !Ref MSKClusterArn
+            Topics:
+              - !Ref KafkaTopic
+            StartingPosition: LATEST
+            BatchSize: 100
+            MaximumBatchingWindowInSeconds: 5
+            DestinationConfig:
+              OnFailure:
+                Destination: !GetAtt SampleDLQ.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  SampleDLQ:
+    Type: AWS::SQS::Queue
+
+Outputs:
+  KafkaConsumerFunctionArn:
+    Description: "Kafka Consumer Lambda Function ARN"
+    Value: !GetAtt KafkaConsumerFunction.Arn
+  SampleDLQUrl:
+    Description: "Dead Letter Queue URL"
+    Value: !Ref SampleDLQ

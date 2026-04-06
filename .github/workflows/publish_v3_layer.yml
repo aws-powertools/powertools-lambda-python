@@ -108,7 +108,7 @@ jobs:
         working-directory: ./layer_v3
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -123,11 +123,11 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: "18.20.4"
       - name: Setup python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -139,16 +139,15 @@ jobs:
           pip install --require-hashes -r requirements.txt
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v2.0.0
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
 
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
         with:
-          install: true
           driver: docker
           platforms: linux/amd64,linux/arm64
 
@@ -165,10 +164,12 @@ jobs:
 
       - name: CDK build
         run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" --context pythonVersion="python${{ matrix.python-version }}" -o cdk.out
+        env:
+          BUILDX_BUILDER: ${{ steps.builder.outputs.name }}
       - name: zip output
         run: zip -r cdk.py${{ matrix.python-version }}.out.zip cdk.out
       - name: Archive CDK artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: cdk-layer-artifact-py${{ matrix.python-version }}
           path: layer_v3/cdk.py${{ matrix.python-version }}.out.zip
@@ -263,7 +264,7 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 

@@ -568,3 +568,19 @@ def test_warning_when_alc_less_verbose_than_buffer(stdout, monkeypatch):
     # THEN another warning should be emitted about ALC and buffer level mismatch
     with pytest.warns(PowertoolsUserWarning, match="Advanced Logging Controls*"):
         logger.flush_buffer()
+
+
+def test_flush_buffer_preserves_percent_style_formatting(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a buffer
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging a message with percent-style formatting
+    logger.debug("user=%s count=%d", "alice", 42)
+    logger.flush_buffer()
+
+    # THEN The flushed log should contain the interpolated message
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["message"] == "user=alice count=42"

@@ -271,7 +271,7 @@ def get_transform_method(value: str, transform: TransformOptions = None) -> Call
     transform_method = TRANSFORM_METHOD_MAPPING.get(transform)
 
     if transform == "auto":
-        key_suffix = value.rsplit(".")[-1]
+        key_suffix = value.rsplit(".", maxsplit=1)[-1]
         transform_method = TRANSFORM_METHOD_MAPPING.get(key_suffix, TRANSFORM_METHOD_MAPPING[None])
 
     return cast(Callable, transform_method)  # https://github.com/python/mypy/issues/10740

@@ -281,6 +281,17 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return self.get("cookies") or []
 
     @property
+    def resolved_cookies_field(self) -> dict[str, str]:
+        """
+        Parse cookies from the dedicated ``cookies`` field in API Gateway HTTP API v2 format.
+
+        The ``cookies`` field contains a list of strings like ``["session=abc", "theme=dark"]``.
+        """
+        from aws_lambda_powertools.utilities.data_classes.common import _parse_cookie_string
+
+        return _parse_cookie_string("; ".join(self.cookies))
+
+    @property
     def request_context(self) -> RequestContextV2:
         return RequestContextV2(self["requestContext"])
 

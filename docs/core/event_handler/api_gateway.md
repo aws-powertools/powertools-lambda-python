@@ -605,6 +605,57 @@ You can use the `Form` type to tell the Event Handler that a parameter expects f
     --8<-- "examples/event_handler_rest/src/working_with_form_data.py"
     ```
 
+#### Handling file uploads
+
+!!! info "You must set `enable_validation=True` to handle file uploads via type annotation."
+
+You can use the `File` type to accept `multipart/form-data` file uploads. This automatically sets the correct OpenAPI schema, and Swagger UI will render a file picker for each `File()` parameter.
+
+There are two ways to receive uploaded files:
+
+* **`bytes`** — receive raw file content only
+* **`UploadFile`** — receive file content along with metadata (filename, content type)
+
+=== "working_with_file_uploads.py"
+
+    ```python hl_lines="4 12"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads.py"
+    ```
+
+    1. `File` is a special OpenAPI type for `multipart/form-data` file uploads. When annotated as `bytes`, you receive the raw file content.
+
+=== "working_with_file_uploads_metadata.py"
+
+    ```python hl_lines="4 11 15-16"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads_metadata.py"
+    ```
+
+    1. Using `UploadFile` instead of `bytes` gives you access to file metadata.
+    2. `filename` and `content_type` come from the multipart headers sent by the client.
+
+=== "working_with_file_uploads_mixed.py"
+
+    You can combine `File()` and `Form()` parameters in the same route to accept file uploads with additional form fields.
+
+    ```python hl_lines="6 14-15"
+    --8<-- "examples/event_handler_rest/src/working_with_file_uploads_mixed.py"
+    ```
+
+    1. File upload parameter — receives the uploaded file with metadata.
+    2. Regular form field — receives a string value from the same multipart request.
+
+!!! warning "API Gateway REST API (v1) requires Binary Media Types configuration"
+    When using API Gateway REST API (v1), you must configure Binary Media Types to include `multipart/form-data`, otherwise binary file content will be corrupted.
+
+    ```yaml title="SAM template.yaml"
+    Globals:
+      Api:
+        BinaryMediaTypes:
+          - "multipart~1form-data"
+    ```
+
+    API Gateway HTTP API (v2), Lambda Function URL, and ALB handle binary encoding automatically — no extra configuration needed.
+
 #### Supported types for response serialization
 
 With data validation enabled, we natively support serializing the following data types to JSON:
@@ -879,6 +930,50 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
     --8<-- "examples/event_handler_rest/src/middleware_getting_started_output.json"
     ```
 
+#### Accessing the Request object
+
+After route resolution, Event Handler creates a `Request` object with the **resolved** route context. You can access it in two ways:
+
+1. **`app.request`** - available in middleware functions.
+2. **`request: Request` type annotation** - injected automatically into route handlers as a parameter.
+
+`Request` gives you the resolved route context that `app.current_event` doesn't have:
+
+| Property              | Example                                  | Description                                           |
+| --------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| `route`               | `/todos/{todo_id}`                       | Matched route pattern in OpenAPI path-template format |
+| `path_parameters`     | `{"todo_id": "123"}`                     | Powertools-resolved path parameters                   |
+| `method`              | `GET`                                    | HTTP method (upper-case)                              |
+| `headers`             | `{"content-type": "application/json"}`   | Request headers                                       |
+| `query_parameters`    | `{"page": "1"}`                          | Query string parameters                               |
+| `body`                | `'{"name": "task"}'`                     | Raw request body                                      |
+| `json_body`           | `{"name": "task"}`                       | Deserialized request body                             |
+
+=== "Using `app.request` in middleware"
+
+    ```python hl_lines="10 13-15 21" title="Accessing Request via app.request"
+    --8<-- "examples/event_handler_rest/src/middleware_request_object.py"
+    ```
+
+    1. Access the resolved `Request` object from the app instance.
+    2. `request.route` returns the matched route pattern, e.g. `/todos/{todo_id}`.
+    3. `request.path_parameters` returns the Powertools-resolved parameters, e.g. `{"todo_id": "123"}`.
+    4. You can include route metadata in the response headers.
+
+=== "Using `request: Request` in route handlers"
+
+    ```python hl_lines="7 10" title="Accessing Request via type annotation"
+    --8<-- "examples/event_handler_rest/src/middleware_request_handler_injection.py"
+    ```
+
+    1. Add `request: Request` as a parameter - Event Handler injects it automatically.
+    2. Access resolved route, path parameters, headers, query parameters, and body.
+
+???+ note "When to use `Request` vs `app.current_event`"
+    Use `Request` for **route-aware** logic like authorization, logging, and metrics - it gives you the matched route pattern and Powertools-resolved path parameters.
+
+    Use `app.current_event` when you need the **raw event** data like request context, stage variables, or authorizer context that is available from the start of the request, before route resolution.
+
 #### Global middlewares
 
 <figure markdown="span">
@@ -1048,7 +1143,7 @@ Keep the following in mind when authoring middlewares for Event Handler:
 2. **Call the next middleware**. Return the result of `next_middleware(app)`, or a [Response object](#fine-grained-responses) when you want to [return early](#returning-early).
 3. **Keep a lean scope**. Focus on a single task per middleware to ease composability and maintenance. In [debug mode](#debug-mode), we also print out the order middlewares will be triggered to ease operations.
 4. **Catch your own exceptions**. Catch and handle known exceptions to your logic. Unless you want to raise [HTTP Errors](#raising-http-errors), or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the [exception_handler](#exception-handling) decorator.
-5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
+5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request. For route-aware request data, use [`app.request`](#accessing-the-request-object) instead.
 
 ### Fine grained responses
 
