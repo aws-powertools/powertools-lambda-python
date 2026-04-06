@@ -5,15 +5,36 @@
 # Unreleased
 
 
+<a name="v3.27.0"></a>
+## [v3.27.0] - 2026-04-06
+## Maintenance
+
+* version bump
+
+
 <a name="v3.26.0"></a>
 ## [v3.26.0] - 2026-03-20
+## Bug Fixes
+
+* **ci:** add ty check to dataclasses utility ([#8038](https://github.com/aws-powertools/powertools-lambda-python/issues/8038))
+* **ci:** add ty check to parser folder ([#8037](https://github.com/aws-powertools/powertools-lambda-python/issues/8037))
+* **ci:** add ty check to parameters folder ([#8035](https://github.com/aws-powertools/powertools-lambda-python/issues/8035))
+* **openapi:** correct response validation for falsy objects ([#7990](https://github.com/aws-powertools/powertools-lambda-python/issues/7990))
+
 ## Features
 
 * add ldms feature ([#8051](https://github.com/aws-powertools/powertools-lambda-python/issues/8051))
+* **batch:** add Kafka/MSK batch processing support ([#7941](https://github.com/aws-powertools/powertools-lambda-python/issues/7941))
+* **buffer-handler:** add buffering support for external loggers ([#7994](https://github.com/aws-powertools/powertools-lambda-python/issues/7994))
 
 ## Maintenance
 
 * version bump
+* **deps:** bump aws-encryption-sdk from 4.0.3 to 4.0.4 ([#8027](https://github.com/aws-powertools/powertools-lambda-python/issues/8027))
+* **deps:** bump valkey-glide from 2.2.5 to 2.2.7 ([#8030](https://github.com/aws-powertools/powertools-lambda-python/issues/8030))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20260124 to 2.9.0.20260305 ([#8029](https://github.com/aws-powertools/powertools-lambda-python/issues/8029))
+* **deps-dev:** bump ijson from 3.4.0.post0 to 3.5.0 ([#8028](https://github.com/aws-powertools/powertools-lambda-python/issues/8028))
+* **deps-dev:** bump aws-cdk from 2.1108.0 to 2.1110.0 in the aws-cdk group ([#8023](https://github.com/aws-powertools/powertools-lambda-python/issues/8023))
 
 
 <a name="v3.25.0"></a>
@@ -7551,7 +7572,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.26.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.27.0...HEAD
+[v3.27.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.26.0...v3.27.0
 [v3.26.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.25.0...v3.26.0
 [v3.25.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.24.0...v3.25.0
 [v3.24.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.23.0...v3.24.0
