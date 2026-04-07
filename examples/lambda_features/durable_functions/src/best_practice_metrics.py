@@ -14,6 +14,10 @@ def handler(event: dict, context: DurableContext) -> str:
         name="process",
     )
 
-    # Emit only at the end
-    metrics.add_metric(name="WorkflowCompleted", unit=MetricUnit.Count, value=1)
+    # Emit metrics in a dedicated step to ensure they are only counted once
+    context.step(
+        lambda _: metrics.add_metric(name="WorkflowCompleted", unit=MetricUnit.Count, value=1),
+        name="emit_completion_metric",
+    )
+
     return result

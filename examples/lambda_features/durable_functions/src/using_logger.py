@@ -7,10 +7,10 @@ logger = Logger(service="order-processing")
 
 @durable_execution
 def handler(event: dict, context: DurableContext) -> str:
-    # Set Powertools Logger on the context
+    # Set Logger on the context for automatic deduplication
     context.set_logger(logger)
 
-    # Now context.logger uses Powertools with automatic enrichment and deduplication
+    # Logs via context.logger appear only once, even during replays
     context.logger.info("Starting workflow", extra={"order_id": event.get("order_id")})
 
     result: str = context.step(
@@ -18,5 +18,7 @@ def handler(event: dict, context: DurableContext) -> str:
         name="process_order",
     )
 
+    # This log won't repeat when the function replays after completing the step above
     context.logger.info("Workflow completed", extra={"result": result})
+
     return result

@@ -14,54 +14,44 @@ description: Using Powertools for AWS Lambda (Python) with Lambda Durable Functi
 | **Durable execution** | Complete lifecycle of a durable function, from start to completion |
 | **Checkpoint**        | Saved state that tracks progress through the workflow              |
 | **Replay**            | Re-execution from the beginning, skipping completed checkpoints    |
-| **Steps**             | Business logic with built-in retries and progress tracking         |
-| **Waits**             | Suspend execution without incurring compute charges                |
+| **Step**              | Business logic with built-in retries and progress tracking         |
+| **Wait**              | Suspend execution without incurring compute charges                |
 
 ## How it works
 
 Durable functions use a **checkpoint/replay mechanism**:
 
-1. Your code runs from the beginning
+1. Your code runs always from the beginning
 2. Completed operations are skipped using stored results
-3. Execution continues from where it left off
+3. Execution of new steps continues from where it left off
 4. State is automatically managed by the SDK
 
 ## Powertools integration
 
-Powertools for AWS Lambda (Python) works seamlessly with Durable Functions. The [Durable Execution SDK](https://github.com/aws/aws-durable-execution-sdk-python){target="_blank" rel="nofollow"} has native integration with Powertools Logger via `context.set_logger()`.
+Powertools for AWS Lambda (Python) works seamlessly with Durable Functions. The [Durable Execution SDK](https://github.com/aws/aws-durable-execution-sdk-python){target="_blank" rel="nofollow"} has native integration with Logger via `context.set_logger()`.
 
 ???+ note "Found an issue?"
-    If you encounter any issues using Powertools for AWS with Durable Functions, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?template=bug_report.yml){target="_blank"}.
+    If you encounter any issues using Powertools for AWS Lambda (Python) with Durable Functions, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?template=bug_report.yml){target="_blank"}.
 
 ### Logger
 
-The Durable Execution SDK provides a `context.logger` that automatically handles **log deduplication during replays**. You can integrate Powertools Logger to get structured JSON logging while keeping the deduplication benefits.
+The Durable Execution SDK provides a `context.logger` instance that automatically handles **log deduplication during replays**. You can integrate Logger to get structured JSON logging while keeping the deduplication benefits.
 
-#### Using Powertools Logger with context.set_logger
+For the best experience, set the Logger on the durable context. This gives you structured JSON logging with automatic log deduplication during replays:
 
-For the best experience, set the Powertools Logger on the durable context:
-
-```python hl_lines="5 10" title="Integrating Powertools Logger with Durable Functions"
+```python hl_lines="5 11 14 22" title="Integrating Logger with Durable Functions"
 --8<-- "examples/lambda_features/durable_functions/src/using_logger.py"
 ```
 
 This gives you:
 
-- **JSON structured logging** from Powertools for AWS
+- **JSON structured logging** from Powertools for AWS Lambda (Python)
 - **Log deduplication** during replays (logs from completed operations don't repeat)
 - **Automatic SDK enrichment** (execution_arn, parent_id, name, attempt)
 - **Lambda context injection** (request_id, function_name, etc.)
 
-#### Log deduplication during replay
-
-When you use `context.logger`, the SDK prevents duplicate logs during replays:
-
-```python title="Log deduplication behavior"
---8<-- "examples/lambda_features/durable_functions/src/log_deduplication.py"
-```
-
 ???+ warning "Direct logger usage"
-    If you use the Powertools Logger directly (not through `context.logger`), logs will be emitted on every replay:
+    If you use the Logger directly (not through `context.logger`), logs will be emitted on every replay:
 
     ```python
     # Logs will duplicate during replays
@@ -76,7 +66,7 @@ When you use `context.logger`, the SDK prevents duplicate logs during replays:
 Tracer works with Durable Functions. Each execution creates trace segments.
 
 ???+ note "Trace continuity"
-    Due to the replay mechanism, traces may not show a continuous flow. Each execution (including replays) creates separate trace segments. Use the `execution_arn` to correlate traces.
+    Due to the replay mechanism, traces may be interleaved. Each execution (including replays) creates separate trace segments. Use the `execution_arn` to correlate traces.
 
 ```python hl_lines="5 9" title="Using Tracer with Durable Functions"
 --8<-- "examples/lambda_features/durable_functions/src/using_tracer.py"
@@ -84,14 +74,11 @@ Tracer works with Durable Functions. Each execution creates trace segments.
 
 ### Metrics
 
-Metrics work with Durable Functions, but be aware that **metrics may be emitted multiple times** during replay if not handled carefully.
+Metrics work with Durable Functions, but be aware that **metrics may be emitted multiple times** during replay if not handled carefully. Emit metrics at workflow completion rather than during intermediate steps to avoid counting replays as new executions.
 
-```python hl_lines="6 10 21" title="Using Metrics with Durable Functions"
---8<-- "examples/lambda_features/durable_functions/src/using_metrics.py"
+```python hl_lines="6 9 18 19 20 21" title="Using Metrics with Durable Functions"
+--8<-- "examples/lambda_features/durable_functions/src/best_practice_metrics.py"
 ```
-
-???+ tip "Accurate metrics"
-    Emit metrics at workflow completion rather than during intermediate steps to avoid counting replays as new executions.
 
 ### Idempotency
 
@@ -111,14 +98,6 @@ The `@idempotent` decorator integrates with Durable Functions and is **replay-aw
 
 - Steps within a durable function are already idempotent via the checkpoint mechanism
 
-### Parser
-
-Parser works with Durable Functions for validating and parsing event payloads.
-
-```python hl_lines="9 14" title="Using Parser with Durable Functions"
---8<-- "examples/lambda_features/durable_functions/src/using_parser.py"
-```
-
 ### Parameters
 
 Parameters work normally with Durable Functions.
@@ -128,25 +107,9 @@ Parameters work normally with Durable Functions.
 ```
 
 ???+ note "Parameter freshness"
-    For long-running workflows (hours/days), parameters fetched at the start may become stale. Consider fetching parameters within steps that need the latest values.
+    If the replay or execution happens within the cache TTL on the same execution environment, the parameter value may come from cache. For long-running workflows (hours/days), parameters fetched at the start may become stale. Consider fetching parameters within steps that need the latest values, and customize the caching behavior with `max_age` to control freshness.
 
 ## Best practices
-
-### Use context.logger for log deduplication
-
-Always use `context.set_logger()` and `context.logger` instead of using the Powertools Logger directly. This ensures logs are deduplicated during replays.
-
-```python title="Recommended logging pattern"
---8<-- "examples/lambda_features/durable_functions/src/best_practice_logging.py"
-```
-
-### Emit metrics at workflow completion
-
-To avoid counting replays as new executions, emit metrics only when the workflow completes successfully.
-
-```python title="Metrics at completion"
---8<-- "examples/lambda_features/durable_functions/src/best_practice_metrics.py"
-```
 
 ### Use Idempotency for ESM triggers
 
