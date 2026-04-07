@@ -842,390 +842,60 @@ class BaseRouter(ABC):
         """
         self._router_middlewares = self._router_middlewares + middlewares
 
-    def get(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable[..., Any]] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Get route decorator with GET `method`
+    @staticmethod
+    def _create_http_method(http_method: str) -> Callable:
+        """Factory that creates an HTTP method decorator (get, post, put, etc.)."""
 
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+        def method_decorator(
+            self: BaseRouter,
+            rule: str,
+            cors: bool | None = None,
+            compress: bool = False,
+            cache_control: str | None = None,
+            summary: str | None = None,
+            description: str | None = None,
+            responses: dict[int, OpenAPIResponse] | None = None,
+            response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+            tags: list[str] | None = None,
+            operation_id: str | None = None,
+            include_in_schema: bool = True,
+            security: list[dict[str, list[str]]] | None = None,
+            openapi_extensions: dict[str, Any] | None = None,
+            deprecated: bool = False,
+            enable_validation: bool | None = None,
+            custom_response_validation_http_code: int | HTTPStatus | None = None,
+            middlewares: list[Callable[..., Any]] | None = None,
+        ) -> Callable[[AnyCallableT], AnyCallableT]:
+            return self.route(
+                rule,
+                http_method,
+                cors,
+                compress,
+                cache_control,
+                summary,
+                description,
+                responses,
+                response_description,
+                tags,
+                operation_id,
+                include_in_schema,
+                security,
+                openapi_extensions,
+                deprecated,
+                enable_validation,
+                custom_response_validation_http_code,
+                middlewares,
+            )
 
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+        method_decorator.__doc__ = f"Route decorator for {http_method} method. Use @app.{http_method.lower()}('/path')."
+        return method_decorator
 
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.get("/get-call")
-        def simple_get():
-            return {"message": "Foo"}
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "GET",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
-
-    def post(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable[..., Any]] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Post route decorator with POST `method`
-
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.post("/post-call")
-        def simple_post():
-            post_data: dict = app.current_event.json_body
-            return {"message": post_data["value"]}
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "POST",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
-
-    def put(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable[..., Any]] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Put route decorator with PUT `method`
-
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.put("/put-call")
-        def simple_put():
-            put_data: dict = app.current_event.json_body
-            return {"message": put_data["value"]}
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "PUT",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
-
-    def delete(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable[..., Any]] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Delete route decorator with DELETE `method`
-
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.delete("/delete-call")
-        def simple_delete():
-            return {"message": "deleted"}
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "DELETE",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
-
-    def patch(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Patch route decorator with PATCH `method`
-
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.patch("/patch-call")
-        def simple_patch():
-            patch_data: dict = app.current_event.json_body
-            patch_data["value"] = patched
-
-            return {"message": patch_data}
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "PATCH",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
-
-    def head(
-        self,
-        rule: str,
-        cors: bool | None = None,
-        compress: bool = False,
-        cache_control: str | None = None,
-        summary: str | None = None,
-        description: str | None = None,
-        responses: dict[int, OpenAPIResponse] | None = None,
-        response_description: str = DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: list[str] | None = None,
-        operation_id: str | None = None,
-        include_in_schema: bool = True,
-        security: list[dict[str, list[str]]] | None = None,
-        openapi_extensions: dict[str, Any] | None = None,
-        deprecated: bool = False,
-        enable_validation: bool | None = None,
-        custom_response_validation_http_code: int | HTTPStatus | None = None,
-        middlewares: list[Callable] | None = None,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        """Head route decorator with HEAD `method`
-
-        Examples
-        --------
-        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
-
-        ```python
-        from aws_lambda_powertools import Tracer
-        from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
-
-        tracer = Tracer()
-        app = APIGatewayRestResolver()
-
-        @app.head("/head-call")
-        def simple_head():
-            return Response(status_code=200,
-                            content_type=content_types.APPLICATION_JSON,
-                            headers={"Content-Length": "123"})
-
-        @tracer.capture_lambda_handler
-        def lambda_handler(event, context):
-            return app.resolve(event, context)
-        ```
-        """
-        return self.route(
-            rule,
-            "HEAD",
-            cors,
-            compress,
-            cache_control,
-            summary,
-            description,
-            responses,
-            response_description,
-            tags,
-            operation_id,
-            include_in_schema,
-            security,
-            openapi_extensions,
-            deprecated,
-            enable_validation,
-            custom_response_validation_http_code,
-            middlewares,
-        )
+    get = _create_http_method.__func__("GET")  # type: ignore[attr-defined]
+    post = _create_http_method.__func__("POST")  # type: ignore[attr-defined]
+    put = _create_http_method.__func__("PUT")  # type: ignore[attr-defined]
+    delete = _create_http_method.__func__("DELETE")  # type: ignore[attr-defined]
+    patch = _create_http_method.__func__("PATCH")  # type: ignore[attr-defined]
+    head = _create_http_method.__func__("HEAD")  # type: ignore[attr-defined]
 
     def _push_processed_stack_frame(self, frame: str):
         """
