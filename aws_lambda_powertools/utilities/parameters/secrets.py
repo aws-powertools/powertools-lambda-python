@@ -130,7 +130,7 @@ class SecretsProvider(BaseProvider):
 
         return secret_value["SecretBinary"]
 
-    def _get_multiple(self, names: list[str], **sdk_options) -> dict[str, Any]:  # type: ignore[override]
+    def _get_multiple(self, names: list[str], **sdk_options) -> dict[str, Any]:  # type: ignore[override]  # ty: ignore[invalid-method-override]
         """
         Retrieve multiple secrets using AWS Secrets Manager batch_get_secret_value API
 
@@ -200,7 +200,7 @@ class SecretsProvider(BaseProvider):
 
         return secrets
 
-    def get_multiple(  # type: ignore[override]
+    def get_multiple(  # type: ignore[override]  # ty: ignore[invalid-method-override]
         self,
         names: list[str],
         max_age: int | None = None,
@@ -459,7 +459,7 @@ def get_secret(
     force_fetch: bool = False,
     max_age: int | None = None,
     **sdk_options,
-) -> str | bytes | dict:
+) -> str | bytes | dict | None:
     """
     Retrieve a parameter value from AWS Secrets Manager
 

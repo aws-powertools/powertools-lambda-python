@@ -1,0 +1,42 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.3",
+      "eventSource": "aws:s3",
+      "awsRegion": "ap-southeast-2",
+      "eventTime": "2025-09-29T00:47:23.967Z",
+      "eventName": "IntelligentTiering",
+      "userIdentity": {
+        "principalId": "s3.amazonaws.com"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "s3.amazonaws.com"
+      },
+      "responseElements": {
+        "x-amz-request-id": "4C05BE601E268FCD",
+        "x-amz-id-2": "Wt0dgzBP/wQ47PWP5BqoD4nAZC08NOjfdZj2prx5gVPBCI+YQtrx/UKVlnT63Dj+vse4x5koWp61HaoVyz6fUFe1yLkhNpK3"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "ZDM3MGVjY2MtZTlmNC00ZTk0LThiNjItMWJiNTMwOTYwY2Rl",
+        "bucket": {
+          "name": "mybucket",
+          "ownerIdentity": {
+            "principalId": "ANY597T3BWFY2"
+          },
+          "arn": "arn:aws:s3:::mybucket"
+        },
+        "get_object": {
+          "key": "myobject",
+          "size": 252294,
+          "eTag": "4e9270240d7d62d5ee8dbfcb7a7a3279",
+          "versionId": "tiogA9Ga7Xi49yfJ6lkeTxPYx7ZK75yn",
+          "sequencer": "0066A8D0E77DE42BC5"
+        }
+      },
+      "intelligentTieringEventData": {
+        "destinationAccessTier": "ARCHIVE_ACCESS"
+      }
+    }
+  ]
+}

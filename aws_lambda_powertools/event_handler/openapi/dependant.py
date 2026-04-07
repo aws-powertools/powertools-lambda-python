@@ -13,15 +13,16 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    File,
     Form,
     Param,
     ParamTypes,
-    _File,
     analyze_param,
     create_response_field,
     get_flat_dependant,
 )
 from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse, OpenAPIResponseContentModel
+from aws_lambda_powertools.event_handler.request import Request
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -187,6 +188,11 @@ def get_dependant(
 
     # Add each parameter to the dependant model
     for param_name, param in signature_params.items():
+        # Request-typed parameters are injected by the resolver at call time;
+        # they carry no OpenAPI meaning and must be excluded from schema generation.
+        if param.annotation is Request:
+            continue
+
         # If the parameter is a path parameter, we need to set the in_ field to "path".
         is_path_param = param_name in path_param_names
 
@@ -364,9 +370,9 @@ def get_body_field_info(
     if not required:
         body_field_info_kwargs["default"] = None
 
-    if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
-        # MAINTENANCE: body_field_info: type[Body] = _File
-        raise NotImplementedError("_File fields are not supported in request bodies")
+    if any(isinstance(f.field_info, File) for f in flat_dependant.body_params):
+        body_field_info = Body
+        body_field_info_kwargs["media_type"] = "multipart/form-data"
     elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
         body_field_info = Body
         body_field_info_kwargs["media_type"] = "application/x-www-form-urlencoded"

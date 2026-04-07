@@ -6,11 +6,14 @@ import logging
 import random
 import string
 from enum import Enum
+from unittest.mock import patch
 
 import pytest
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging import formatter, utils
+from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
+from aws_lambda_powertools.logging.buffer.handler import BufferingHandler
 
 
 @pytest.fixture
@@ -315,3 +318,85 @@ def test_copy_config_to_ext_loggers_but_preserve_log_levels(stdout, logger, log_
     # THEN external loggers log levels should be preserved
     assert logger_1.level != powertools_logger.log_level
     assert logger_2.level != powertools_logger.log_level
+
+
+def test_copy_config_with_buffering_uses_buffering_handler(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools logger with buffer_config
+    # Using buffer_at_verbosity="WARNING" so INFO logs are buffered (not emitted directly)
+    ext_logger = logger()
+    buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING")
+    powertools_logger = Logger(
+        service=service_name(),
+        level=log_level.INFO.value,
+        stream=stdout,
+        buffer_config=buffer_config,
+    )
+
+    # WHEN configuration is copied with include_buffering=True
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        include_buffering=True,
+        include={ext_logger.name},
+    )
+
+    # THEN external logger has exactly one handler and it is BufferingHandler (not StreamHandler)
+    assert len(ext_logger.handlers) == 1
+    assert isinstance(ext_logger.handlers[0], BufferingHandler)
+    assert not isinstance(ext_logger.handlers[0], logging.StreamHandler)
+
+    # AND when external logger emits a log with mocked tracer_id, it is buffered
+    with patch("aws_lambda_powertools.logging.logger.get_tracer_id", return_value="test-trace-id"):
+        ext_logger.info("Test message from external logger")
+        output = stdout.getvalue()
+        assert "Test message from external logger" not in output
+
+        # AND when buffer is flushed, the log appears
+        powertools_logger.flush_buffer()
+        output = stdout.getvalue()
+        assert "Test message from external logger" in output
+
+
+def test_copy_config_buffering_without_config_uses_normal_handlers(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools logger WITHOUT buffer_config
+    ext_logger = logger()
+    powertools_logger = Logger(
+        service=service_name(),
+        level=log_level.INFO.value,
+        stream=stdout,
+    )
+
+    # WHEN configuration is copied with include_buffering=True
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        include_buffering=True,
+        include={ext_logger.name},
+    )
+
+    # THEN external logger gets normal Powertools handler (no BufferingHandler)
+    assert len(ext_logger.handlers) == 1
+    assert isinstance(ext_logger.handlers[0], logging.StreamHandler)
+    assert isinstance(ext_logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
+    assert not isinstance(ext_logger.handlers[0], BufferingHandler)
+
+
+def test_copy_config_to_ext_loggers_default_include_buffering_false(stdout, logger, log_level):
+    # GIVEN Powertools logger with buffer_config and external logger
+    ext_logger = logger()
+    buffer_config = LoggerBufferConfig(max_bytes=10240)
+    powertools_logger = Logger(
+        service=service_name(),
+        level=log_level.INFO.value,
+        stream=stdout,
+        buffer_config=buffer_config,
+    )
+
+    # WHEN configuration is copied without include_buffering (default False)
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        include={ext_logger.name},
+    )
+
+    # THEN external logger gets normal StreamHandler, not BufferingHandler
+    assert len(ext_logger.handlers) == 1
+    assert isinstance(ext_logger.handlers[0], logging.StreamHandler)
+    assert not isinstance(ext_logger.handlers[0], BufferingHandler)

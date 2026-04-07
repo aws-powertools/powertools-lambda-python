@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import base64
 import dataclasses
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, cast
+import warnings
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union, cast
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
+from typing_extensions import get_args, get_origin
 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -19,8 +22,13 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 )
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Param
+from aws_lambda_powertools.event_handler.openapi.exceptions import (
+    RequestUnsupportedContentType,
+    RequestValidationError,
+    ResponseValidationError,
+)
+from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
+from aws_lambda_powertools.event_handler.openapi.types import UnionType
 
 if TYPE_CHECKING:
     from pydantic.fields import FieldInfo
@@ -38,6 +46,7 @@ logger = logging.getLogger(__name__)
 CONTENT_DISPOSITION_NAME_PARAM = "name="
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 APPLICATION_FORM_CONTENT_TYPE = "application/x-www-form-urlencoded"
+MULTIPART_FORM_DATA_CONTENT_TYPE = "multipart/form-data"
 
 
 class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
@@ -90,10 +99,17 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             headers,
         )
 
+        # Process cookie values
+        cookie_values, cookie_errors = _request_params_to_args(
+            route.dependant.cookie_params,
+            app.current_event.resolved_cookies_field,
+        )
+
         values.update(path_values)
         values.update(query_values)
         values.update(header_values)
-        errors += path_errors + query_errors + header_errors
+        values.update(cookie_values)
+        errors += path_errors + query_errors + header_errors + cookie_errors
 
         # Process the request body, if it exists
         if route.dependant.body_params:
@@ -128,8 +144,23 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
             return self._parse_form_data(app)
 
+        # Handle multipart/form-data (file uploads)
+        elif content_type.startswith(MULTIPART_FORM_DATA_CONTENT_TYPE):
+            return self._parse_multipart_data(app, content_type)
+
         else:
-            raise NotImplementedError("Only JSON body or Form() are supported")
+            raise RequestUnsupportedContentType(
+                "Unsupported content type",
+                errors=[
+                    {
+                        "type": "unsupported_content_type",
+                        "loc": ("body",),
+                        "msg": f"Unsupported content type: {content_type}",
+                        "input": {},
+                        "ctx": {},
+                    },
+                ],
+            )
 
     def _parse_json_data(self, app: EventHandlerInstance) -> dict[str, Any]:
         """Parse JSON data from the request body."""
@@ -165,6 +196,49 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                         "type": "form_invalid",
                         "loc": ("body",),
                         "msg": "Form data parsing error",
+                        "input": {},
+                        "ctx": {"error": str(e)},
+                    },
+                ],
+            ) from e
+
+    def _parse_multipart_data(self, app: EventHandlerInstance, content_type: str) -> dict[str, Any]:
+        """Parse multipart/form-data from the request body (file uploads)."""
+        try:
+            # Extract the boundary from the content-type header
+            boundary = _extract_multipart_boundary(content_type)
+            if not boundary:
+                raise ValueError("Missing boundary in multipart/form-data content-type header")
+
+            # Get raw body bytes
+            raw_body = app.current_event.body or ""
+            if app.current_event.is_base64_encoded:
+                body_bytes = base64.b64decode(raw_body)
+            else:
+                warnings.warn(
+                    "Received multipart/form-data without base64 encoding. "
+                    "Binary file uploads may be corrupted. "
+                    "If using API Gateway REST API (v1), configure Binary Media Types "
+                    "to include 'multipart/form-data'. "
+                    "See: https://docs.aws.amazon.com/apigateway/latest/developerguide/"
+                    "api-gateway-payload-encodings.html",
+                    stacklevel=2,
+                )
+                # Use latin-1 to preserve all byte values (0-255) since the body
+                # may contain raw binary data that isn't valid UTF-8
+                body_bytes = raw_body.encode("latin-1")
+
+            return _parse_multipart_body(body_bytes, boundary)
+
+        except ValueError:
+            raise
+        except Exception as e:
+            raise RequestValidationError(
+                [
+                    {
+                        "type": "multipart_invalid",
+                        "loc": ("body",),
+                        "msg": "Multipart form data parsing error",
                         "input": {},
                         "ctx": {"error": str(e)},
                     },
@@ -213,20 +287,27 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
-        # Process the response body if it exists
-        if response.body and response.is_json():
-            response.body = self._serialize_response(
-                field=route.dependant.return_param,
+        field = route.dependant.return_param
+
+        if field is None:
+            if not response.is_json():
+                return response
+            else:
+                # JSON serialize the body without validation
+                response.body = jsonable_encoder(response.body, custom_serializer=self._validation_serializer)
+        else:
+            response.body = self._serialize_response_with_validation(
+                field=field,
                 response_content=response.body,
                 has_route_custom_response_validation=route.custom_response_validation_http_code is not None,
             )
 
         return response
 
-    def _serialize_response(
+    def _serialize_response_with_validation(
         self,
         *,
-        field: ModelField | None = None,
+        field: ModelField,
         response_content: Any,
         include: IncEx | None = None,
         exclude: IncEx | None = None,
@@ -239,33 +320,23 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         """
         Serialize the response content according to the field type.
         """
-        if field:
-            errors: list[dict[str, Any]] = []
-            value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
-            if errors:
-                # route-level validation must take precedence over app-level
-                if has_route_custom_response_validation:
-                    raise ResponseValidationError(
-                        errors=_normalize_errors(errors),
-                        body=response_content,
-                        source="route",
-                    )
-                if self._has_response_validation_error:
-                    raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
-
-                raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
-
-            if hasattr(field, "serialize"):
-                return field.serialize(
-                    value,
-                    include=include,
-                    exclude=exclude,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_defaults=exclude_defaults,
-                    exclude_none=exclude_none,
+        errors: list[dict[str, Any]] = []
+        value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
+        if errors:
+            # route-level validation must take precedence over app-level
+            if has_route_custom_response_validation:
+                raise ResponseValidationError(
+                    errors=_normalize_errors(errors),
+                    body=response_content,
+                    source="route",
                 )
-            return jsonable_encoder(
+            if self._has_response_validation_error:
+                raise ResponseValidationError(errors=_normalize_errors(errors), body=response_content, source="app")
+
+            raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
+
+        if hasattr(field, "serialize"):
+            return field.serialize(
                 value,
                 include=include,
                 exclude=exclude,
@@ -273,11 +344,18 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
-                custom_serializer=self._validation_serializer,
             )
-        else:
-            # Just serialize the response content returned from the handler.
-            return jsonable_encoder(response_content, custom_serializer=self._validation_serializer)
+
+        return jsonable_encoder(
+            value,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            custom_serializer=self._validation_serializer,
+        )
 
     def _prepare_response_content(
         self,
@@ -370,7 +448,12 @@ def _request_body_to_args(
             continue
 
         value = _normalize_field_value(value=value, field_info=field.field_info)
-        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
+
+        # UploadFile objects bypass Pydantic validation — they're already constructed
+        if isinstance(value, UploadFile):
+            values[field.name] = value
+        else:
+            values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
 
@@ -412,9 +495,45 @@ def _handle_missing_field_value(
         values[field.name] = field.get_default()
 
 
+def _is_or_contains_sequence(annotation: Any) -> bool:
+    """
+    Check if annotation is a sequence or Union/RootModel containing a sequence.
+
+    This function handles complex type annotations like:
+    - List[Model] - direct sequence
+    - Union[Model, List[Model]] - checks if any Union member is a sequence
+    - Optional[List[Model]] - Union[List[Model], None]
+    - RootModel[List[Model]] - checks if the RootModel wraps a sequence
+    - Optional[RootModel[List[Model]]] - Union member that is a RootModel
+    - RootModel[Union[Model, List[Model]]] - RootModel wrapping a Union with a sequence
+    """
+    # Direct sequence check
+    if field_annotation_is_sequence(annotation):
+        return True
+
+    # Check Union members — recurse so we catch RootModel inside Union
+    origin = get_origin(annotation)
+    if origin is Union or origin is UnionType:
+        for arg in get_args(annotation):
+            if _is_or_contains_sequence(arg):
+                return True
+
+    # Check if it's a RootModel wrapping a sequence (or Union containing a sequence)
+    if lenient_issubclass(annotation, BaseModel) and getattr(annotation, "__pydantic_root_model__", False):
+        if hasattr(annotation, "model_fields") and "root" in annotation.model_fields:
+            root_annotation = annotation.model_fields["root"].annotation
+            return _is_or_contains_sequence(root_annotation)
+
+    return False
+
+
 def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
-    if field_annotation_is_sequence(field_info.annotation):
+    # When annotation is bytes but value is UploadFile, extract raw content
+    if isinstance(value, UploadFile) and field_info.annotation is bytes:
+        return value.content
+
+    if _is_or_contains_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
         return value[0]
@@ -527,3 +646,106 @@ def _get_param_value(
         value = input_dict.get(field_name)
 
     return value
+
+
+def _extract_multipart_boundary(content_type: str) -> str | None:
+    """Extract the boundary string from a multipart/form-data content-type header."""
+    for segment in content_type.split(";"):
+        stripped = segment.strip()
+        if stripped.startswith("boundary="):
+            boundary = stripped[len("boundary=") :]
+            # Remove optional quotes around boundary
+            if boundary.startswith('"') and boundary.endswith('"'):
+                boundary = boundary[1:-1]
+            return boundary
+    return None
+
+
+def _parse_multipart_body(body: bytes, boundary: str) -> dict[str, Any]:
+    """
+    Parse a multipart/form-data body into a dict of field names to values.
+
+    File fields get bytes values; regular form fields get string values.
+    Multiple values for the same field name are collected into lists.
+    """
+    delimiter = f"--{boundary}".encode()
+    end_delimiter = f"--{boundary}--".encode()
+
+    result: dict[str, Any] = {}
+
+    # Split body by the boundary delimiter
+    raw_parts = body.split(delimiter)
+
+    for raw_part in raw_parts:
+        # Skip the preamble (before first boundary) and epilogue (after closing boundary)
+        if not raw_part or raw_part.strip() == b"" or raw_part.strip() == b"--":
+            continue
+
+        # Remove the end delimiter marker if present
+        chunk = raw_part
+        if chunk.endswith(end_delimiter):
+            chunk = chunk[: -len(end_delimiter)]
+
+        # Strip leading \r\n
+        if chunk.startswith(b"\r\n"):
+            chunk = chunk[2:]
+
+        # Strip trailing \r\n
+        if chunk.endswith(b"\r\n"):
+            chunk = chunk[:-2]
+
+        # Split headers from body at the double CRLF
+        header_end = chunk.find(b"\r\n\r\n")
+        if header_end == -1:
+            continue
+
+        header_section = chunk[:header_end].decode("utf-8")
+        body_section = chunk[header_end + 4 :]
+
+        # Parse Content-Disposition to get the field name and optional filename
+        field_name = None
+        filename = None
+        content_type_header = None
+
+        for header_line in header_section.split("\r\n"):
+            header_lower = header_line.lower()
+            if header_lower.startswith("content-disposition:"):
+                field_name = _extract_header_param(header_line, "name")
+                filename = _extract_header_param(header_line, "filename")
+            elif header_lower.startswith("content-type:"):
+                content_type_header = header_line.split(":", 1)[1].strip()
+
+        if field_name is None:
+            continue
+
+        # If it has a filename, it's a file upload — wrap as UploadFile
+        # Otherwise it's a regular form field — decode to string
+        if filename is not None:
+            value: Any = UploadFile(content=body_section, filename=filename, content_type=content_type_header)
+        else:
+            value = body_section.decode("utf-8")
+
+        # Collect multiple values for same field name into a list
+        if field_name in result:
+            existing = result[field_name]
+            if isinstance(existing, list):
+                existing.append(value)
+            else:
+                result[field_name] = [existing, value]
+        else:
+            result[field_name] = value
+
+    return result
+
+
+def _extract_header_param(header_line: str, param_name: str) -> str | None:
+    """Extract a parameter value from a header line (e.g., name="file" from Content-Disposition)."""
+    search = f'{param_name}="'
+    idx = header_line.find(search)
+    if idx == -1:
+        return None
+    start = idx + len(search)
+    end = header_line.find('"', start)
+    if end == -1:
+        return None
+    return header_line[start:end]

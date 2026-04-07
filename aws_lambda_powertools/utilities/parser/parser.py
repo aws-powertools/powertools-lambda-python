@@ -115,7 +115,7 @@ def event_parser(
     else:
         parsed_event = parse(event=event, model=model)
 
-    logger.debug(f"Calling handler {handler.__name__}")
+    logger.debug(f"Calling handler {handler.__name__}")  # ty: ignore[unresolved-attribute]
     return handler(parsed_event, context, **kwargs)
 
 

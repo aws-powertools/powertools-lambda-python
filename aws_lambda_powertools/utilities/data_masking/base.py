@@ -406,7 +406,7 @@ class DataMasking:
 
             json_parse.update(
                 data_parsed,
-                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),  # type: ignore[misc] # noqa: B023
+                update_callback,  # type: ignore[misc] # noqa: B023
             )
 
         return data_parsed

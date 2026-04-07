@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
+from urllib.parse import unquote
+
+from typing_extensions import override
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -30,13 +33,27 @@ class ALBEvent(BaseProxyEvent):
     - https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html
     """
 
+    @override
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer)
+        self.decode_query_parameters = False
+
     @property
     def request_context(self) -> ALBEventRequestContext:
         return ALBEventRequestContext(self["requestContext"])
 
     @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
-        return self.multi_value_query_string_parameters or super().resolved_query_string_parameters
+        params = self.multi_value_query_string_parameters or super().resolved_query_string_parameters
+        if not self.decode_query_parameters:
+            return params
+
+        # Decode the parameter keys and values
+        decoded_params = {}
+        for k, vals in params.items():
+            decoded_params[unquote(k)] = [unquote(v) for v in vals]
+
+        return decoded_params
 
     @property
     def multi_value_headers(self) -> dict[str, list[str]]:

@@ -14,7 +14,6 @@ name: Quality check - check code
 #
 # Always triggered on new PRs, PR changes and PR merge.
 
-
 on:
   pull_request:
     paths:
@@ -44,19 +43,20 @@ jobs:
   quality_check:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       max-parallel: 5
       matrix:
-        python-version: ["3.10","3.11","3.12","3.13","3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
-      contents: read  # checkout code only
+      contents: read # checkout code only
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -65,8 +65,10 @@ jobs:
         run: make format-check
       - name: Formatting and Linting
         run: make lint
-      - name: Static type checking
+      - name: Static type checking (mypy)
         run: make mypy
+      - name: Static type checking (ty)
+        run: make ty
       - name: Test with pytest
         run: make test
       - name: Test dependencies with Nox
@@ -76,7 +78,7 @@ jobs:
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # 5.5.2
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # 6.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml

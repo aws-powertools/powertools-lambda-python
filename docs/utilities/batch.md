@@ -3,12 +3,12 @@ title: Batch Processing
 description: Utility
 ---
 
-The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, and Amazon DynamoDB Streams.
+The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, Amazon DynamoDB Streams, and Amazon MSK/self-managed Apache Kafka.
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    BatchSource: Amazon SQS <br/><br/> Amazon Kinesis Data Streams <br/><br/> Amazon DynamoDB Streams <br/><br/>
+    BatchSource: Amazon SQS <br/><br/> Amazon Kinesis Data Streams <br/><br/> Amazon DynamoDB Streams <br/><br/> Amazon MSK / Apache Kafka <br/><br/>
     LambdaInit: Lambda invocation
     BatchProcessor: Batch Processor
     RecordHandler: Record Handler function
@@ -38,7 +38,7 @@ stateDiagram-v2
 
 ## Background
 
-When using SQS, Kinesis Data Streams, or DynamoDB Streams as a Lambda event source, your Lambda functions are triggered with a batch of messages.
+When using SQS, Kinesis Data Streams, DynamoDB Streams, or Amazon MSK/Apache Kafka as a Lambda event source, your Lambda functions are triggered with a batch of messages.
 
 If your function fails to process any message from the batch, the entire batch returns to your queue or stream. This same batch is then retried until either condition happens first: **a)** your Lambda function returns a successful response, **b)** record reaches maximum retry attempts, or **c)** records expire.
 
@@ -55,13 +55,14 @@ This behavior changes when you enable Report Batch Item Failures feature in your
 <!-- markdownlint-disable MD013 -->
 * [**SQS queues**](#sqs-standard). Only messages reported as failure will return to the queue for a retry, while successful ones will be deleted.
 * [**Kinesis data streams**](#kinesis-and-dynamodb-streams) and [**DynamoDB streams**](#kinesis-and-dynamodb-streams). Single reported failure will use its sequence number as the stream checkpoint. Multiple  reported failures will use the lowest sequence number as checkpoint.
+* [**Kafka (MSK and self-managed)**](#processing-messages-from-kafka). Failed records are identified by topic-partition and offset. Only failed records will be retried.
 
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
 ???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
     We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
-    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"} in the AWS Documentation.
+    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"}, or [MSK/Kafka](https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html){target="_blank"} in the AWS Documentation.
 
 ## Getting started
 
@@ -91,6 +92,12 @@ The remaining sections of the documentation will rely on these samples. For comp
 
     ```yaml title="template.yaml" hl_lines="43-44"
     --8<-- "examples/batch_processing/sam/dynamodb_batch_processing.yaml"
+    ```
+
+=== "Kafka (MSK)"
+
+    ```yaml title="template.yaml" hl_lines="74-75"
+    --8<-- "examples/batch_processing/sam/kafka_batch_processing.yaml"
     ```
 
 ### Processing messages from SQS
@@ -236,6 +243,44 @@ Processing batches from DynamoDB Streams works in three stages:
     ```json
     --8<-- "examples/batch_processing/src/getting_started_dynamodb_event.json"
     ```
+
+### Processing messages from Kafka
+
+Processing batches from Amazon MSK or self-managed Apache Kafka works in three stages:
+
+1. Instantiate **`BatchProcessor`** and choose **`EventType.Kafka`** for the event type
+2. Define your function to handle each batch record, and use [`KafkaEventRecord`](data_classes.md#kafka){target="_blank"} type annotation for autocompletion
+3. Use **`process_partial_response`** to kick off processing
+
+!!! info "This works with both MSK and self-managed Apache Kafka"
+    The batch processor automatically handles the different event structures from MSK and self-managed Kafka clusters.
+
+=== "Recommended"
+
+    ```python hl_lines="2-9 12 18 27"
+    --8<-- "examples/batch_processing/src/getting_started_kafka.py"
+    ```
+
+    1.  **Step 1**. Creates a partial failure batch processor for Kafka. See [partial failure mechanics for details](#partial-failure-mechanics)
+
+=== "Sample response"
+
+    The second record failed to be processed, therefore the processor added its topic-partition and offset in the response.
+
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_kafka_response.json"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_kafka_event.json"
+    ```
+
+!!! tip "Extracting message value"
+    Use `record.json_value` to get the deserialized JSON body from the Kafka record. For raw bytes access, use `record.decoded_value`.
+
+    For advanced deserialization (Avro, Protobuf), see the [Kafka Consumer utility](kafka.md){target="_blank"} which can be used alongside the batch processor.
 
 ### Error handling
 

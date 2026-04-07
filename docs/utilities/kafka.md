@@ -50,7 +50,7 @@ flowchart LR
 Lambda processes Kafka messages as discrete events rather than continuous streams, requiring a different approach to consumer development that Powertools for AWS helps standardize.
 
 | Aspect | Traditional Kafka Consumers | Lambda Kafka Consumer |
-|--------|----------------------------|----------------------|
+| ------ | --------------------------- | --------------------- |
 | **Model** | Pull-based (you poll for messages) | Push-based (Lambda invoked with messages) |
 | **Scaling** | Manual scaling configuration | Automatic scaling to partition count |
 | **State** | Long-running application with state | Stateless, ephemeral executions |
@@ -241,7 +241,7 @@ Each Kafka record contains important metadata that you can access alongside the 
 #### Available metadata properties
 
 | Property | Description | Example Use Case |
-|----------|-------------|-----------------|
+| -------- | ----------- | ---------------- |
 | `topic` | Topic name the record was published to | Routing logic in multi-topic consumers |
 | `partition` | Kafka partition number | Tracking message distribution |
 | `offset` | Position in the partition | De-duplication, exactly-once processing |
@@ -253,7 +253,7 @@ Each Kafka record contains important metadata that you can access alongside the 
 | `original_value` | Base64-encoded original message value | Debugging or custom deserialization |
 | `original_key` | Base64-encoded original message key | Debugging or custom deserialization |
 | `value_schema_metadata` | Metadata about the value schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
-| `key_schema_metadata`   | Metadata about the key schema like `schemaId` and `dataFormat`   | Data format and schemaId propagated when integrating with Schema Registry |
+| `key_schema_metadata` | Metadata about the key schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
 
 ### Custom output serializers
 
@@ -304,7 +304,7 @@ Handle errors gracefully when processing Kafka messages to ensure your applicati
 #### Exception types
 
 | Exception | Description | Common Causes |
-|-----------|-------------|---------------|
+| --------- | ----------- | ------------- |
 | `KafkaConsumerDeserializationError` | Raised when message deserialization fails | Corrupted message data, schema mismatch, or wrong schema type configuration |
 | `KafkaConsumerAvroSchemaParserError` | Raised when parsing Avro schema definition fails | Syntax errors in schema JSON, invalid field types, or malformed schema |
 | `KafkaConsumerMissingSchemaError` | Raised when a required schema is not provided | Missing schema for AVRO or PROTOBUF formats (required parameter) |
@@ -324,6 +324,21 @@ The [idempotency utility](idempotency.md){target="_blank"} automatically stores 
     ```
 
 TIP: By using the Kafka record's unique coordinates (topic, partition, offset) as the idempotency key, you ensure that even if a batch fails and Lambda retries the messages, each message will be processed exactly once.
+
+### Handling partial batch failures
+
+When processing Kafka messages, individual records may fail while others succeed. By default, Lambda retries the entire batch when any record fails. To retry only the failed records, use the [Batch Processing utility](batch.md#processing-messages-from-kafka){target="_blank"} with `EventType.Kafka`.
+
+This feature allows Lambda to checkpoint successful records and only retry the failed ones, significantly improving processing efficiency and reducing duplicate processing.
+
+=== "Kafka with Batch Processing"
+
+    ```python hl_lines="2-6 12 18-19 27"
+    --8<-- "examples/batch_processing/src/getting_started_kafka.py"
+    ```
+
+!!! note "Using with deserialization"
+    The Batch Processing utility uses the basic `KafkaEventRecord` data class. For advanced deserialization (Avro, Protobuf), you can use the Kafka Consumer's deserialization utilities inside your record handler function.
 
 ### Best practices
 

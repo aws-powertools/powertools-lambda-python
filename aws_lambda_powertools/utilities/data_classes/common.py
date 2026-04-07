@@ -23,10 +23,21 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
+    get_header_value,  # ty: ignore[deprecated]
     get_multi_value_query_string_values,
     get_query_string_value,
 )
+
+
+def _parse_cookie_string(cookie_string: str) -> dict[str, str]:
+    """Parse a cookie string (``key=value; key2=value2``) into a dict."""
+    cookies: dict[str, str] = {}
+    for segment in cookie_string.split(";"):
+        stripped = segment.strip()
+        if "=" in stripped:
+            name, _, value = stripped.partition("=")
+            cookies[name.strip()] = value.strip()
+    return cookies
 
 
 class CaseInsensitiveDict(dict):
@@ -39,8 +50,8 @@ class CaseInsensitiveDict(dict):
     def get(self, k, default=None):
         return super().get(k.lower(), default)
 
-    def pop(self, k):
-        return super().pop(k.lower())
+    def pop(self, k, *args):
+        return super().pop(k.lower(), *args)
 
     def setdefault(self, k, default=None):
         return super().setdefault(k.lower(), default)
@@ -125,7 +136,7 @@ class DictWrapper(Mapping):
         properties = self._properties()
         sensitive_properties = ["raw_event"]
         if hasattr(self, "_sensitive_properties"):
-            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore
+            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
         result: dict[str, Any] = {}
         for property_key in properties:
@@ -142,7 +153,7 @@ class DictWrapper(Mapping):
                     # Checks if the key is a list and if it is a subclass of the parent class
                     elif isinstance(property_value, list):
                         for seq, item in enumerate(property_value):
-                            if issubclass(item.__class__, DictWrapper):
+                            if issubclass(item.__class__, DictWrapper) and isinstance(item, DictWrapper):
                                 result[property_key][seq] = item._str_helper()
                 except Exception:
                     result[property_key] = "[Cannot be deserialized]"
@@ -202,6 +213,36 @@ class BaseProxyEvent(DictWrapper):
         Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
         """
         return self.headers
+
+    @property
+    def resolved_cookies_field(self) -> dict[str, str]:
+        """
+        This property extracts cookies from the request as a dict of name-value pairs.
+
+        By default, cookies are parsed from the ``Cookie`` header.
+        Uses ``self.headers`` (CaseInsensitiveDict) first for reliable case-insensitive
+        lookup, then falls back to ``resolved_headers_field`` for proxies that only
+        populate multi-value headers (e.g., ALB without single-value headers).
+        Subclasses may override this for event formats that provide cookies
+        in a dedicated field (e.g., API Gateway HTTP API v2).
+        """
+        # Primary: self.headers is CaseInsensitiveDict — case-insensitive lookup
+        cookie_value: str | list[str] = self.headers.get("cookie") or ""
+
+        # Fallback: resolved_headers_field covers ALB/REST v1 multi-value headers
+        # where the event may not have a single-value 'headers' dict at all
+        if not cookie_value:
+            headers = self.resolved_headers_field or {}
+            cookie_value = headers.get("cookie") or headers.get("Cookie") or ""
+
+        # Multi-value headers (ALB, REST v1) may return a list
+        if isinstance(cookie_value, list):
+            cookie_value = "; ".join(cookie_value)
+
+        if not cookie_value:
+            return {}
+
+        return _parse_cookie_string(cookie_value)
 
     @property
     def is_base64_encoded(self) -> bool | None:
@@ -331,7 +372,7 @@ class BaseProxyEvent(DictWrapper):
             category=PowertoolsDeprecationWarning,
             stacklevel=2,
         )
-        return get_header_value(
+        return get_header_value(  # ty: ignore[deprecated]
             headers=self.headers,
             name=name,
             default_value=default_value,

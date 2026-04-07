@@ -17,9 +17,11 @@ from aws_lambda_powertools.event_handler.bedrock_agent_function import (
     BedrockFunctionResponse,
 )
 from aws_lambda_powertools.event_handler.events_appsync.appsync_events import AppSyncEventsResolver
+from aws_lambda_powertools.event_handler.http_resolver import HttpResolverLocal
 from aws_lambda_powertools.event_handler.lambda_function_url import (
     LambdaFunctionUrlResolver,
 )
+from aws_lambda_powertools.event_handler.request import Request
 from aws_lambda_powertools.event_handler.vpc_lattice import VPCLatticeResolver, VPCLatticeV2Resolver
 
 __all__ = [
@@ -34,7 +36,9 @@ __all__ = [
     "BedrockResponse",
     "BedrockFunctionResponse",
     "CORSConfig",
+    "HttpResolverLocal",
     "LambdaFunctionUrlResolver",
+    "Request",
     "Response",
     "VPCLatticeResolver",
     "VPCLatticeV2Resolver",
