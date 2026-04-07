@@ -113,6 +113,17 @@ class ProxyEventType(Enum):
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
+_PROXY_EVENT_MAP: dict[ProxyEventType, tuple[type[BaseProxyEvent], str]] = {
+    ProxyEventType.APIGatewayProxyEvent: (APIGatewayProxyEvent, "API Gateway REST API"),
+    ProxyEventType.APIGatewayProxyEventV2: (APIGatewayProxyEventV2, "API Gateway HTTP API"),
+    ProxyEventType.BedrockAgentEvent: (BedrockAgentEvent, "Bedrock Agent"),
+    ProxyEventType.LambdaFunctionUrlEvent: (LambdaFunctionUrlEvent, "Lambda Function URL"),
+    ProxyEventType.VPCLatticeEvent: (VPCLatticeEvent, "VPC Lattice"),
+    ProxyEventType.VPCLatticeEventV2: (VPCLatticeEventV2, "VPC LatticeV2"),
+    ProxyEventType.ALBEvent: (ALBEvent, "ALB"),
+}
+
+
 class CORSConfig:
     """CORS Config
 
@@ -2498,28 +2509,11 @@ class ApiGatewayResolver(BaseRouter):
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
-    def _to_proxy_event(self, event: dict) -> BaseProxyEvent:  # noqa: PLR0911  # ignore many returns
+    def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
-        if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
-            logger.debug("Converting event to API Gateway REST API contract")
-            return APIGatewayProxyEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
-            logger.debug("Converting event to API Gateway HTTP API contract")
-            return APIGatewayProxyEventV2(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.BedrockAgentEvent:
-            logger.debug("Converting event to Bedrock Agent contract")
-            return BedrockAgentEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
-            logger.debug("Converting event to Lambda Function URL contract")
-            return LambdaFunctionUrlEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.VPCLatticeEvent:
-            logger.debug("Converting event to VPC Lattice contract")
-            return VPCLatticeEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.VPCLatticeEventV2:
-            logger.debug("Converting event to VPC LatticeV2 contract")
-            return VPCLatticeEventV2(event, self._json_body_deserializer)
-        logger.debug("Converting event to ALB contract")
-        return ALBEvent(event, self._json_body_deserializer)
+        event_class, label = _PROXY_EVENT_MAP.get(self._proxy_type, (ALBEvent, "ALB"))
+        logger.debug("Converting event to %s contract", label)
+        return event_class(event, self._json_body_deserializer)
 
     def _resolve(self) -> ResponseBuilder:
         """Resolves the response or return the not found response"""
