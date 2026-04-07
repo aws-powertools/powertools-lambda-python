@@ -113,7 +113,7 @@ class ProxyEventType(Enum):
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
-_PROXY_EVENT_MAP: dict[ProxyEventType, tuple[type[BaseProxyEvent], str]] = {
+_PROXY_EVENT_MAP: dict[Enum, tuple[type[BaseProxyEvent], str]] = {
     ProxyEventType.APIGatewayProxyEvent: (APIGatewayProxyEvent, "API Gateway REST API"),
     ProxyEventType.APIGatewayProxyEventV2: (APIGatewayProxyEventV2, "API Gateway HTTP API"),
     ProxyEventType.BedrockAgentEvent: (BedrockAgentEvent, "Bedrock Agent"),
