@@ -1460,9 +1460,11 @@ class ApiGatewayResolver(BaseRouter):
     ```
     """
 
+    _proxy_event_type: Enum = ProxyEventType.APIGatewayProxyEvent
+
     def __init__(
         self,
-        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        proxy_type: Enum | None = None,
         cors: CORSConfig | None = None,
         debug: bool | None = None,
         serializer: Callable[[dict], str] | None = None,
@@ -1495,7 +1497,7 @@ class ApiGatewayResolver(BaseRouter):
             function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
             by default json.loads when integrating with EventSource data class
         """
-        self._proxy_type = proxy_type
+        self._proxy_type = proxy_type or self._proxy_event_type
         self._dynamic_routes: list[Route] = []
         self._static_routes: list[Route] = []
         self._route_keys: list[str] = []
@@ -2935,28 +2937,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     """Amazon API Gateway REST and HTTP API v1 payload resolver"""
 
     current_event: APIGatewayProxyEvent
-
-    def __init__(
-        self,
-        cors: CORSConfig | None = None,
-        debug: bool | None = None,
-        serializer: Callable[[dict], str] | None = None,
-        strip_prefixes: list[str | Pattern] | None = None,
-        enable_validation: bool = False,
-        response_validation_error_http_code: HTTPStatus | int | None = None,
-        json_body_deserializer: Callable[[str], dict] | None = None,
-    ):
-        """Amazon API Gateway REST and HTTP API v1 payload resolver"""
-        super().__init__(
-            ProxyEventType.APIGatewayProxyEvent,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
-            json_body_deserializer=json_body_deserializer,
-        )
+    _proxy_event_type = ProxyEventType.APIGatewayProxyEvent
 
     def _get_base_path(self) -> str:
         # 3 different scenarios:
@@ -3025,28 +3006,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
     """Amazon API Gateway HTTP API v2 payload resolver"""
 
     current_event: APIGatewayProxyEventV2
-
-    def __init__(
-        self,
-        cors: CORSConfig | None = None,
-        debug: bool | None = None,
-        serializer: Callable[[dict], str] | None = None,
-        strip_prefixes: list[str | Pattern] | None = None,
-        enable_validation: bool = False,
-        response_validation_error_http_code: HTTPStatus | int | None = None,
-        json_body_deserializer: Callable[[str], dict] | None = None,
-    ):
-        """Amazon API Gateway HTTP API v2 payload resolver"""
-        super().__init__(
-            ProxyEventType.APIGatewayProxyEventV2,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
-            json_body_deserializer=json_body_deserializer,
-        )
+    _proxy_event_type = ProxyEventType.APIGatewayProxyEventV2
 
     def _get_base_path(self) -> str:
         # 3 different scenarios:
@@ -3066,6 +3026,7 @@ class ALBResolver(ApiGatewayResolver):
     """Amazon Application Load Balancer (ALB) resolver"""
 
     current_event: ALBEvent
+    _proxy_event_type = ProxyEventType.ALBEvent
 
     def __init__(
         self,
@@ -3105,13 +3066,12 @@ class ALBResolver(ApiGatewayResolver):
             Enables URL-decoding of query parameters (both keys and values), by default False.
         """
         super().__init__(
-            ProxyEventType.ALBEvent,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
+            cors=cors,
+            debug=debug,
+            serializer=serializer,
+            strip_prefixes=strip_prefixes,
+            enable_validation=enable_validation,
+            response_validation_error_http_code=response_validation_error_http_code,
             json_body_deserializer=json_body_deserializer,
         )
         self.decode_query_parameters = decode_query_parameters
