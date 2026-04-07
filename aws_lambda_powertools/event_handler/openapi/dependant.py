@@ -4,6 +4,7 @@ import inspect
 import re
 from typing import TYPE_CHECKING, Annotated, Any, ForwardRef, cast, get_args, get_origin, get_type_hints
 
+from aws_lambda_powertools.event_handler.depends import Depends
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     create_body_model,
@@ -14,7 +15,6 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
     DependencyParam,
-    Depends,
     File,
     Form,
     Param,

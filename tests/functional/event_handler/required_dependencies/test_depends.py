@@ -5,7 +5,7 @@ import json
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
-from aws_lambda_powertools.event_handler.openapi.params import Depends
+from aws_lambda_powertools.event_handler.depends import Depends
 from aws_lambda_powertools.event_handler.request import Request
 from tests.functional.utils import load_event
 
