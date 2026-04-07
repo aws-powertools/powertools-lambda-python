@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, ForwardRef, cast, get_type_hints
-
-from typing_extensions import Annotated, get_args, get_origin
+from typing import TYPE_CHECKING, Annotated, Any, ForwardRef, cast, get_args, get_origin, get_type_hints
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
