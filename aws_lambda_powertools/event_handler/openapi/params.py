@@ -42,6 +42,47 @@ class ParamTypes(Enum):
 _Unset: Any = Undefined
 
 
+class Depends:
+    """
+    Declares a dependency for a route handler parameter.
+
+    Dependencies are resolved automatically before the handler is called. The return value
+    of the dependency callable is injected as the parameter value.
+
+    Parameters
+    ----------
+    dependency: Callable[..., Any]
+        A callable whose return value will be injected into the handler parameter.
+        The callable can itself declare ``Depends()`` parameters to form a dependency tree.
+    use_cache: bool
+        If ``True`` (default), the dependency result is cached per invocation so that
+        the same dependency used multiple times is only called once.
+
+    Examples
+    --------
+
+    ```python
+    from typing_extensions import Annotated
+
+    from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+    from aws_lambda_powertools.event_handler.openapi.params import Depends
+
+    app = APIGatewayHttpResolver()
+
+    def get_tenant() -> str:
+        return "default-tenant"
+
+    @app.get("/orders")
+    def list_orders(tenant_id: Annotated[str, Depends(get_tenant)]):
+        return {"tenant": tenant_id}
+    ```
+    """
+
+    def __init__(self, dependency: Callable[..., Any], *, use_cache: bool = True) -> None:
+        self.dependency = dependency
+        self.use_cache = use_cache
+
+
 class Dependant:
     """
     A class used internally to represent a dependency between path operation decorators and the path operation function.
@@ -64,6 +105,7 @@ class Dependant:
         http_connection_param_name: str | None = None,
         response_param_name: str | None = None,
         background_tasks_param_name: str | None = None,
+        dependencies: list[DependencyParam] | None = None,
         path: str | None = None,
     ) -> None:
         self.path_params = path_params or []
@@ -78,12 +120,22 @@ class Dependant:
         self.http_connection_param_name = http_connection_param_name
         self.response_param_name = response_param_name
         self.background_tasks_param_name = background_tasks_param_name
+        self.dependencies = dependencies or []
         self.name = name
         self.call = call
         # Store the path to be able to re-generate a dependable from it in overrides
         self.path = path
         # Save the cache key at creation to optimize performance
         self.cache_key: CacheKey = self.call
+
+
+class DependencyParam:
+    """Holds a dependency's parameter name and its resolved Dependant sub-tree."""
+
+    def __init__(self, *, param_name: str, depends: Depends, dependant: Dependant) -> None:
+        self.param_name = param_name
+        self.depends = depends
+        self.dependant = dependant
 
 
 class Param(FieldInfo):  # type: ignore[misc]
@@ -816,7 +868,7 @@ def get_flat_dependant(
         visited = []
     visited.append(dependant.cache_key)
 
-    return Dependant(
+    flat = Dependant(
         path_params=dependant.path_params.copy(),
         query_params=dependant.query_params.copy(),
         header_params=dependant.header_params.copy(),
@@ -824,6 +876,18 @@ def get_flat_dependant(
         body_params=dependant.body_params.copy(),
         path=dependant.path,
     )
+
+    # Flatten sub-dependencies that declare HTTP params (query, header, etc.)
+    for dep in dependant.dependencies:
+        if dep.dependant.cache_key not in visited:
+            sub_flat = get_flat_dependant(dep.dependant, visited=visited)
+            flat.path_params.extend(sub_flat.path_params)
+            flat.query_params.extend(sub_flat.query_params)
+            flat.header_params.extend(sub_flat.header_params)
+            flat.cookie_params.extend(sub_flat.cookie_params)
+            flat.body_params.extend(sub_flat.body_params)
+
+    return flat
 
 
 def analyze_param(

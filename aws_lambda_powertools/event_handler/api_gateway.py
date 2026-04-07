@@ -472,6 +472,9 @@ class Route:
 
         self.custom_response_validation_http_code = custom_response_validation_http_code
 
+        # Cache whether this route's handler declares Depends() parameters
+        self._has_dependencies: bool | None = None
+
         # Caches the name of any Request-typed parameter in the handler.
         # Avoids re-scanning the signature on every invocation.
         self.request_param_name: str | None = None
@@ -612,6 +615,21 @@ class Route:
             self._dependant = get_dependant(path=self.openapi_path, call=self.func, responses=self.responses)
 
         return self._dependant
+
+    @property
+    def has_dependencies(self) -> bool:
+        """Check if handler declares Depends() parameters without triggering full dependant computation."""
+        if self._has_dependencies is None:
+            from aws_lambda_powertools.event_handler.openapi.dependant import (
+                _get_depends_from_annotation,
+                get_typed_signature,
+            )
+
+            sig = get_typed_signature(self.func)
+            self._has_dependencies = any(
+                _get_depends_from_annotation(p.annotation) is not None for p in sig.parameters.values()
+            )
+        return self._has_dependencies
 
     @property
     def body_field(self) -> ModelField | None:
@@ -1428,6 +1446,17 @@ def _registered_api_adapter(
         if route.request_param_name:
             route_args = {**route_args, route.request_param_name: app.request}
 
+        # Resolve Depends() parameters
+        if route.has_dependencies:
+            from aws_lambda_powertools.event_handler.openapi.dependant import solve_dependencies
+
+            dep_values = solve_dependencies(
+                dependant=route.dependant,
+                request=app.request,
+                dependency_overrides=app.dependency_overrides or None,
+            )
+            route_args.update(dep_values)
+
     return app._to_response(next_middleware(**route_args))
 
 
@@ -1496,6 +1525,7 @@ class ApiGatewayResolver(BaseRouter):
             by default json.loads when integrating with EventSource data class
         """
         self._proxy_type = proxy_type
+        self.dependency_overrides: dict[Callable, Callable] = {}
         self._dynamic_routes: list[Route] = []
         self._static_routes: list[Route] = []
         self._route_keys: list[str] = []
