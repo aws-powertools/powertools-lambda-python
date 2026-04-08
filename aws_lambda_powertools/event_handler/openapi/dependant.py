@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Annotated, Any, ForwardRef, cast, get_args, get_origin, get_type_hints
+from typing import TYPE_CHECKING, Any, ForwardRef, cast
 
-from aws_lambda_powertools.event_handler.depends import Depends
+from aws_lambda_powertools.event_handler.depends import DependencyParam, _get_depends_from_annotation
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     create_body_model,
@@ -14,7 +14,6 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
-    DependencyParam,
     File,
     Form,
     Param,
@@ -149,15 +148,6 @@ def get_path_param_names(path: str) -> set[str]:
 
     """
     return set(re.findall("{(.*?)}", path))
-
-
-def _get_depends_from_annotation(annotation: Any) -> Depends | None:
-    """Extract a Depends instance from an Annotated[Type, Depends(...)] annotation."""
-    if get_origin(annotation) is Annotated:
-        for arg in get_args(annotation)[1:]:
-            if isinstance(arg, Depends):
-                return arg
-    return None
 
 
 def get_dependant(
@@ -413,75 +403,3 @@ def get_body_field_info(
             body_field_info_kwargs["media_type"] = body_param_media_types[0]
 
     return body_field_info, body_field_info_kwargs
-
-
-def solve_dependencies(
-    *,
-    dependant: Dependant,
-    request: Request | None = None,
-    dependency_overrides: dict[Callable[..., Any], Callable[..., Any]] | None = None,
-    dependency_cache: dict[Callable[..., Any], Any] | None = None,
-) -> dict[str, Any]:
-    """
-    Recursively resolve all ``Depends()`` parameters for a given dependant.
-
-    Parameters
-    ----------
-    dependant: Dependant
-        The dependant model containing dependency declarations
-    request: Request, optional
-        The current request object, injected into dependencies that declare a Request parameter
-    dependency_overrides: dict, optional
-        Mapping of original dependency callable to override callable (for testing)
-    dependency_cache: dict, optional
-        Per-invocation cache of resolved dependency values
-
-    Returns
-    -------
-    dict[str, Any]
-        Mapping of parameter name to resolved dependency value
-    """
-    if dependency_cache is None:
-        dependency_cache = {}
-
-    values: dict[str, Any] = {}
-
-    for dep in dependant.dependencies:
-        use_fn = dep.depends.dependency
-
-        # Apply overrides (for testing)
-        if dependency_overrides and use_fn in dependency_overrides:
-            use_fn = dependency_overrides[use_fn]
-
-        # Check cache
-        if dep.depends.use_cache and use_fn in dependency_cache:
-            values[dep.param_name] = dependency_cache[use_fn]
-            continue
-
-        # Recursively resolve sub-dependencies
-        sub_values = solve_dependencies(
-            dependant=dep.dependant,
-            request=request,
-            dependency_overrides=dependency_overrides,
-            dependency_cache=dependency_cache,
-        )
-
-        # Inject Request if the dependency declares it
-        if request is not None:
-            try:
-                hints = get_type_hints(use_fn)
-            except Exception:
-                hints = {}
-            for param_name, annotation in hints.items():
-                if annotation is Request:
-                    sub_values[param_name] = request
-
-        solved = use_fn(**sub_values)
-
-        # Cache result
-        if dep.depends.use_cache:
-            dependency_cache[use_fn] = solved
-
-        values[dep.param_name] = solved
-
-    return values

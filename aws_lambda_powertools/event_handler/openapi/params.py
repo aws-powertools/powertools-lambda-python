@@ -23,7 +23,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from aws_lambda_powertools.event_handler.depends import Depends
+    from aws_lambda_powertools.event_handler.depends import DependencyParam
     from aws_lambda_powertools.event_handler.openapi.models import Example
     from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
@@ -87,15 +87,6 @@ class Dependant:
         self.path = path
         # Save the cache key at creation to optimize performance
         self.cache_key: CacheKey = self.call
-
-
-class DependencyParam:
-    """Holds a dependency's parameter name and its resolved Dependant sub-tree."""
-
-    def __init__(self, *, param_name: str, depends: Depends, dependant: Dependant) -> None:
-        self.param_name = param_name
-        self.depends = depends
-        self.dependant = dependant
 
 
 class Param(FieldInfo):  # type: ignore[misc]

@@ -197,3 +197,20 @@ def test_depends_with_path_params_and_validation():
     body = json.loads(result["body"])
     assert body["order_id"] == "abc-123"
     assert body["tenant"] == "tenant-abc"
+
+
+def test_depends_with_regular_params_and_validation():
+    """Depends() works alongside regular handler parameters with validation."""
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    def get_greeting() -> str:
+        return "hello"
+
+    @app.post("/my/path")
+    def handler(name: str = "world", greeting: Annotated[str, Depends(get_greeting)] = ""):
+        return {"message": f"{greeting}, {name}!"}
+
+    event = {**API_GW_V2_EVENT, "queryStringParameters": {"name": "Lambda"}}
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"message": "hello, Lambda!"}

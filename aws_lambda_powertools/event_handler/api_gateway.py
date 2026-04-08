@@ -620,15 +620,9 @@ class Route:
     def has_dependencies(self) -> bool:
         """Check if handler declares Depends() parameters without triggering full dependant computation."""
         if self._has_dependencies is None:
-            from aws_lambda_powertools.event_handler.openapi.dependant import (
-                _get_depends_from_annotation,
-                get_typed_signature,
-            )
+            from aws_lambda_powertools.event_handler.depends import _has_depends
 
-            sig = get_typed_signature(self.func)
-            self._has_dependencies = any(
-                _get_depends_from_annotation(p.annotation) is not None for p in sig.parameters.values()
-            )
+            self._has_dependencies = _has_depends(self.func)
         return self._has_dependencies
 
     @property
@@ -1448,10 +1442,10 @@ def _registered_api_adapter(
 
         # Resolve Depends() parameters
         if route.has_dependencies:
-            from aws_lambda_powertools.event_handler.openapi.dependant import solve_dependencies
+            from aws_lambda_powertools.event_handler.depends import build_dependency_tree, solve_dependencies
 
             dep_values = solve_dependencies(
-                dependant=route.dependant,
+                dependant=build_dependency_tree(route.func),
                 request=app.request,
                 dependency_overrides=app.dependency_overrides or None,
             )

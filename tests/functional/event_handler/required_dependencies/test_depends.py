@@ -174,23 +174,6 @@ def test_depends_multiple_handlers():
     assert json.loads(result["body"]) == {"user": "user-123", "action": "post"}
 
 
-def test_depends_with_regular_params():
-    """Depends() works alongside regular handler parameters."""
-    app = APIGatewayHttpResolver(enable_validation=True)
-
-    def get_greeting() -> str:
-        return "hello"
-
-    @app.post("/my/path")
-    def handler(name: str = "world", greeting: Annotated[str, Depends(get_greeting)] = ""):
-        return {"message": f"{greeting}, {name}!"}
-
-    event = {**API_GW_V2_EVENT, "queryStringParameters": {"name": "Lambda"}}
-    result = app(event, {})
-    assert result["statusCode"] == 200
-    assert json.loads(result["body"]) == {"message": "hello, Lambda!"}
-
-
 def test_depends_reusable_type_alias():
     """Annotated type aliases can be reused across handlers."""
     app = APIGatewayHttpResolver()
@@ -207,3 +190,109 @@ def test_depends_reusable_type_alias():
     result = app(API_GW_V2_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"tenant": "tenant-abc"}
+
+
+def test_handler_without_depends_works_normally():
+    """A plain handler with no Depends() params is not affected by DI."""
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def handler():
+        return {"ok": True}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"ok": True}
+
+
+def test_depends_not_cached_across_invocations():
+    """Each app() call resolves dependencies fresh — no cross-request leakage."""
+    app = APIGatewayHttpResolver()
+    call_count = 0
+
+    def get_counter() -> int:
+        nonlocal call_count
+        call_count += 1
+        return call_count
+
+    @app.post("/my/path")
+    def handler(c: Annotated[int, Depends(get_counter)]):
+        return {"c": c}
+
+    result1 = app(API_GW_V2_EVENT, {})
+    result2 = app(API_GW_V2_EVENT, {})
+
+    assert json.loads(result1["body"]) == {"c": 1}
+    assert json.loads(result2["body"]) == {"c": 2}
+    assert call_count == 2
+
+
+def test_depends_deeply_nested():
+    """Three-level dependency chain resolves correctly."""
+    app = APIGatewayHttpResolver()
+
+    def get_url() -> str:
+        return "postgres://localhost"
+
+    def get_conn(url: Annotated[str, Depends(get_url)]) -> str:
+        return f"conn({url})"
+
+    def get_session(conn: Annotated[str, Depends(get_conn)]) -> str:
+        return f"session({conn})"
+
+    @app.post("/my/path")
+    def handler(session: Annotated[str, Depends(get_session)]):
+        return {"session": session}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"session": "session(conn(postgres://localhost))"}
+
+
+def test_depends_with_request_reads_headers():
+    """A dependency using Request can read actual request headers."""
+    app = APIGatewayHttpResolver()
+
+    def get_user_agent(request: Request) -> str:
+        return request.headers.get("user-agent", "unknown")
+
+    @app.post("/my/path")
+    def handler(ua: Annotated[str, Depends(get_user_agent)]):
+        return {"ua": ua}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert isinstance(json.loads(result["body"])["ua"], str)
+
+
+def test_depends_returning_none():
+    """A dependency can return None without breaking."""
+    app = APIGatewayHttpResolver()
+
+    def get_nothing() -> None:
+        return None
+
+    @app.post("/my/path")
+    def handler(val: Annotated[None, Depends(get_nothing)]):
+        return {"val": val}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"val": None}
+
+
+def test_depends_exception_propagates():
+    """If a dependency raises, the exception propagates."""
+    import pytest
+
+    app = APIGatewayHttpResolver()
+
+    def broken() -> str:
+        raise ValueError("boom")
+
+    @app.post("/my/path")
+    def handler(val: Annotated[str, Depends(broken)]):
+        return {"val": val}
+
+    with pytest.raises(ValueError, match="boom"):
+        app(API_GW_V2_EVENT, {})
