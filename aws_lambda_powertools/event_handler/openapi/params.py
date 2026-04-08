@@ -23,6 +23,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.event_handler.depends import DependencyParam
     from aws_lambda_powertools.event_handler.openapi.models import Example
     from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
@@ -64,6 +65,7 @@ class Dependant:
         http_connection_param_name: str | None = None,
         response_param_name: str | None = None,
         background_tasks_param_name: str | None = None,
+        dependencies: list[DependencyParam] | None = None,
         path: str | None = None,
     ) -> None:
         self.path_params = path_params or []
@@ -78,6 +80,7 @@ class Dependant:
         self.http_connection_param_name = http_connection_param_name
         self.response_param_name = response_param_name
         self.background_tasks_param_name = background_tasks_param_name
+        self.dependencies = dependencies or []
         self.name = name
         self.call = call
         # Store the path to be able to re-generate a dependable from it in overrides
@@ -816,7 +819,7 @@ def get_flat_dependant(
         visited = []
     visited.append(dependant.cache_key)
 
-    return Dependant(
+    flat = Dependant(
         path_params=dependant.path_params.copy(),
         query_params=dependant.query_params.copy(),
         header_params=dependant.header_params.copy(),
@@ -824,6 +827,18 @@ def get_flat_dependant(
         body_params=dependant.body_params.copy(),
         path=dependant.path,
     )
+
+    # Flatten sub-dependencies that declare HTTP params (query, header, etc.)
+    for dep in dependant.dependencies:
+        if dep.dependant.cache_key not in visited:
+            sub_flat = get_flat_dependant(dep.dependant, visited=visited)
+            flat.path_params.extend(sub_flat.path_params)
+            flat.query_params.extend(sub_flat.query_params)
+            flat.header_params.extend(sub_flat.header_params)
+            flat.cookie_params.extend(sub_flat.cookie_params)
+            flat.body_params.extend(sub_flat.body_params)
+
+    return flat
 
 
 def analyze_param(
