@@ -113,6 +113,17 @@ class ProxyEventType(Enum):
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
+_PROXY_EVENT_MAP: dict[Enum, tuple[type[BaseProxyEvent], str]] = {
+    ProxyEventType.APIGatewayProxyEvent: (APIGatewayProxyEvent, "API Gateway REST API"),
+    ProxyEventType.APIGatewayProxyEventV2: (APIGatewayProxyEventV2, "API Gateway HTTP API"),
+    ProxyEventType.BedrockAgentEvent: (BedrockAgentEvent, "Bedrock Agent"),
+    ProxyEventType.LambdaFunctionUrlEvent: (LambdaFunctionUrlEvent, "Lambda Function URL"),
+    ProxyEventType.VPCLatticeEvent: (VPCLatticeEvent, "VPC Lattice"),
+    ProxyEventType.VPCLatticeEventV2: (VPCLatticeEventV2, "VPC LatticeV2"),
+    ProxyEventType.ALBEvent: (ALBEvent, "ALB"),
+}
+
+
 class CORSConfig:
     """CORS Config
 
@@ -1449,9 +1460,11 @@ class ApiGatewayResolver(BaseRouter):
     ```
     """
 
+    _proxy_event_type: Enum = ProxyEventType.APIGatewayProxyEvent
+
     def __init__(
         self,
-        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        proxy_type: Enum | None = None,
         cors: CORSConfig | None = None,
         debug: bool | None = None,
         serializer: Callable[[dict], str] | None = None,
@@ -1484,7 +1497,7 @@ class ApiGatewayResolver(BaseRouter):
             function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
             by default json.loads when integrating with EventSource data class
         """
-        self._proxy_type = proxy_type
+        self._proxy_type = proxy_type or self._proxy_event_type
         self._dynamic_routes: list[Route] = []
         self._static_routes: list[Route] = []
         self._route_keys: list[str] = []
@@ -2498,28 +2511,11 @@ class ApiGatewayResolver(BaseRouter):
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
-    def _to_proxy_event(self, event: dict) -> BaseProxyEvent:  # noqa: PLR0911  # ignore many returns
+    def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
         """Convert the event dict to the corresponding data class"""
-        if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
-            logger.debug("Converting event to API Gateway REST API contract")
-            return APIGatewayProxyEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
-            logger.debug("Converting event to API Gateway HTTP API contract")
-            return APIGatewayProxyEventV2(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.BedrockAgentEvent:
-            logger.debug("Converting event to Bedrock Agent contract")
-            return BedrockAgentEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
-            logger.debug("Converting event to Lambda Function URL contract")
-            return LambdaFunctionUrlEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.VPCLatticeEvent:
-            logger.debug("Converting event to VPC Lattice contract")
-            return VPCLatticeEvent(event, self._json_body_deserializer)
-        if self._proxy_type == ProxyEventType.VPCLatticeEventV2:
-            logger.debug("Converting event to VPC LatticeV2 contract")
-            return VPCLatticeEventV2(event, self._json_body_deserializer)
-        logger.debug("Converting event to ALB contract")
-        return ALBEvent(event, self._json_body_deserializer)
+        event_class, label = _PROXY_EVENT_MAP.get(self._proxy_type, (ALBEvent, "ALB"))
+        logger.debug("Converting event to %s contract", label)
+        return event_class(event, self._json_body_deserializer)
 
     def _resolve(self) -> ResponseBuilder:
         """Resolves the response or return the not found response"""
@@ -2941,28 +2937,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
     """Amazon API Gateway REST and HTTP API v1 payload resolver"""
 
     current_event: APIGatewayProxyEvent
-
-    def __init__(
-        self,
-        cors: CORSConfig | None = None,
-        debug: bool | None = None,
-        serializer: Callable[[dict], str] | None = None,
-        strip_prefixes: list[str | Pattern] | None = None,
-        enable_validation: bool = False,
-        response_validation_error_http_code: HTTPStatus | int | None = None,
-        json_body_deserializer: Callable[[str], dict] | None = None,
-    ):
-        """Amazon API Gateway REST and HTTP API v1 payload resolver"""
-        super().__init__(
-            ProxyEventType.APIGatewayProxyEvent,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
-            json_body_deserializer=json_body_deserializer,
-        )
+    _proxy_event_type = ProxyEventType.APIGatewayProxyEvent
 
     def _get_base_path(self) -> str:
         # 3 different scenarios:
@@ -3031,28 +3006,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
     """Amazon API Gateway HTTP API v2 payload resolver"""
 
     current_event: APIGatewayProxyEventV2
-
-    def __init__(
-        self,
-        cors: CORSConfig | None = None,
-        debug: bool | None = None,
-        serializer: Callable[[dict], str] | None = None,
-        strip_prefixes: list[str | Pattern] | None = None,
-        enable_validation: bool = False,
-        response_validation_error_http_code: HTTPStatus | int | None = None,
-        json_body_deserializer: Callable[[str], dict] | None = None,
-    ):
-        """Amazon API Gateway HTTP API v2 payload resolver"""
-        super().__init__(
-            ProxyEventType.APIGatewayProxyEventV2,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
-            json_body_deserializer=json_body_deserializer,
-        )
+    _proxy_event_type = ProxyEventType.APIGatewayProxyEventV2
 
     def _get_base_path(self) -> str:
         # 3 different scenarios:
@@ -3072,6 +3026,7 @@ class ALBResolver(ApiGatewayResolver):
     """Amazon Application Load Balancer (ALB) resolver"""
 
     current_event: ALBEvent
+    _proxy_event_type = ProxyEventType.ALBEvent
 
     def __init__(
         self,
@@ -3111,13 +3066,12 @@ class ALBResolver(ApiGatewayResolver):
             Enables URL-decoding of query parameters (both keys and values), by default False.
         """
         super().__init__(
-            ProxyEventType.ALBEvent,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
+            cors=cors,
+            debug=debug,
+            serializer=serializer,
+            strip_prefixes=strip_prefixes,
+            enable_validation=enable_validation,
+            response_validation_error_http_code=response_validation_error_http_code,
             json_body_deserializer=json_body_deserializer,
         )
         self.decode_query_parameters = decode_query_parameters

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Pattern
+from typing import TYPE_CHECKING
 
 from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
@@ -8,10 +8,6 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-    from http import HTTPStatus
-
-    from aws_lambda_powertools.event_handler import CORSConfig
     from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
 
 
@@ -52,27 +48,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
     """
 
     current_event: LambdaFunctionUrlEvent
-
-    def __init__(
-        self,
-        cors: CORSConfig | None = None,
-        debug: bool | None = None,
-        serializer: Callable[[dict], str] | None = None,
-        strip_prefixes: list[str | Pattern] | None = None,
-        enable_validation: bool = False,
-        response_validation_error_http_code: HTTPStatus | int | None = None,
-        json_body_deserializer: Callable[[str], dict] | None = None,
-    ):
-        super().__init__(
-            ProxyEventType.LambdaFunctionUrlEvent,
-            cors,
-            debug,
-            serializer,
-            strip_prefixes,
-            enable_validation,
-            response_validation_error_http_code,
-            json_body_deserializer=json_body_deserializer,
-        )
+    _proxy_event_type = ProxyEventType.LambdaFunctionUrlEvent
 
     def _get_base_path(self) -> str:
         stage = self.current_event.request_context.stage

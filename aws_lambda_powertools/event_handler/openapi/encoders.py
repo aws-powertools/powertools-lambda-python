@@ -5,7 +5,7 @@ import datetime
 from collections import defaultdict, deque
 from decimal import Decimal
 from enum import Enum
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from re import Pattern
 from types import GeneratorType
 from typing import TYPE_CHECKING, Any
@@ -103,17 +103,14 @@ def jsonable_encoder(  # noqa: PLR0911
                 custom_serializer=custom_serializer,
             )
 
-        # Enums
-        if isinstance(obj, Enum):
-            return obj.value
+        # Simple type dispatch (exact type match, then isinstance for subclasses)
+        encoder = ENCODERS_BY_TYPE.get(type(obj))
+        if encoder is not None:
+            return encoder(obj)
 
-        # Paths
-        if isinstance(obj, PurePath):
-            return str(obj)
-
-        # Scalars
-        if isinstance(obj, (str, int, float, type(None))):
-            return obj
+        for encoder_fn, classes_tuple in _encoders_by_class_tuples.items():
+            if isinstance(obj, classes_tuple):
+                return encoder_fn(obj)
 
         # Dictionaries
         if isinstance(obj, dict):
@@ -139,14 +136,6 @@ def jsonable_encoder(  # noqa: PLR0911
                 exclude_unset=exclude_unset,
                 custom_serializer=custom_serializer,
             )
-
-        # Other types
-        if type(obj) in ENCODERS_BY_TYPE:
-            return ENCODERS_BY_TYPE[type(obj)](obj)
-
-        for encoder, classes_tuple in encoders_by_class_tuples.items():
-            if isinstance(obj, classes_tuple):
-                return encoder(obj)
 
         # Use custom serializer if present
         if custom_serializer:
@@ -346,6 +335,11 @@ def decimal_encoder(dec_value: Decimal) -> int | float:
 
 # Encoders for types that are not JSON serializable
 ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
+    bool: lambda o: o,
+    int: lambda o: o,
+    float: lambda o: o,
+    str: lambda o: o,
+    type(None): lambda o: o,
     bytes: lambda o: o.decode(),
     datetime.date: iso_format,
     datetime.datetime: iso_format,
@@ -353,14 +347,10 @@ ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
     datetime.timedelta: lambda td: td.total_seconds(),
     Decimal: decimal_encoder,
     Enum: lambda o: o.value,
-    frozenset: list,
-    deque: list,
-    GeneratorType: list,
-    Path: str,
+    PurePath: str,
     Pattern: lambda o: o.pattern,
     SecretBytes: str,
     SecretStr: str,
-    set: list,
     UUID: str,
 }
 
@@ -376,4 +366,4 @@ def generate_encoders_by_class_tuples(
 
 
 # Mapping of encoders to a tuple of classes that they can encode
-encoders_by_class_tuples = generate_encoders_by_class_tuples(ENCODERS_BY_TYPE)
+_encoders_by_class_tuples = generate_encoders_by_class_tuples(ENCODERS_BY_TYPE)
