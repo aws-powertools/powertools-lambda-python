@@ -1365,6 +1365,48 @@ You can use `append_context` when you want to share data between your App and Ro
     --8<-- "examples/event_handler_rest/src/split_route_append_context_module.py"
 	```
 
+### Dependency injection
+
+You can use `Depends()` to declare dependencies that are automatically resolved and injected into your route handlers. This provides type-safe, composable, and testable dependency injection.
+
+#### Basic usage
+
+Use `Annotated[Type, Depends(fn)]` to declare a dependency. The return value of `fn` is injected into the parameter automatically.
+
+```python hl_lines="5 8 20 25"
+--8<-- "examples/event_handler_rest/src/dependency_injection.py"
+```
+
+#### Nested dependencies
+
+Dependencies can depend on other dependencies, forming a composable tree. Shared sub-dependencies are resolved once per invocation and cached automatically.
+
+```python hl_lines="18 22 29-30"
+--8<-- "examples/event_handler_rest/src/dependency_injection_nested.py"
+```
+
+#### Accessing the request
+
+Dependencies that need access to the current request can declare a parameter typed as `Request`. It will be injected automatically.
+
+```python hl_lines="5-6 12 20"
+--8<-- "examples/event_handler_rest/src/dependency_injection_with_request.py"
+```
+
+#### Testing with dependency overrides
+
+Use `dependency_overrides` to replace any dependency with a mock or stub during testing - no monkeypatching needed.
+
+```python hl_lines="3 12 26"
+--8<-- "examples/event_handler_rest/src/dependency_injection_testing.py"
+```
+
+???+ tip "Caching behavior"
+    By default, dependencies are cached within the same invocation (`use_cache=True`). If the same dependency is used by multiple handlers or sub-dependencies, it is resolved once and the result is reused. Use `Depends(fn, use_cache=False)` to resolve every time.
+
+???+ info "`append_context` vs `Depends()`"
+    `append_context` remains available for backward compatibility. `Depends()` is recommended for new code because it provides type safety, IDE autocomplete, composable dependency trees, and `dependency_overrides` for testing.
+
 #### Sample layout
 
 This is a sample project layout for a monolithic function with routes split in different files (`/todos`, `/health`).

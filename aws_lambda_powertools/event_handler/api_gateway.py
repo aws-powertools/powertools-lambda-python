@@ -478,6 +478,9 @@ class Route:
         self.custom_response_validation_http_code = custom_response_validation_http_code
         self.status_code = status_code
 
+        # Cache whether this route's handler declares Depends() parameters
+        self._has_dependencies: bool | None = None
+
         # Caches the name of any Request-typed parameter in the handler.
         # Avoids re-scanning the signature on every invocation.
         self.request_param_name: str | None = None
@@ -618,6 +621,15 @@ class Route:
             self._dependant = get_dependant(path=self.openapi_path, call=self.func, responses=self.responses)
 
         return self._dependant
+
+    @property
+    def has_dependencies(self) -> bool:
+        """Check if handler declares Depends() parameters without triggering full dependant computation."""
+        if self._has_dependencies is None:
+            from aws_lambda_powertools.event_handler.depends import _has_depends
+
+            self._has_dependencies = _has_depends(self.func)
+        return self._has_dependencies
 
     @property
     def body_field(self) -> ModelField | None:
@@ -1448,6 +1460,17 @@ def _registered_api_adapter(
         if route.request_param_name:
             route_args = {**route_args, route.request_param_name: app.request}
 
+        # Resolve Depends() parameters
+        if route.has_dependencies:
+            from aws_lambda_powertools.event_handler.depends import build_dependency_tree, solve_dependencies
+
+            dep_values = solve_dependencies(
+                dependant=build_dependency_tree(route.func),
+                request=app.request,
+                dependency_overrides=app.dependency_overrides or None,
+            )
+            route_args.update(dep_values)
+
     return app._to_response(next_middleware(**route_args))
 
 
@@ -1517,6 +1540,7 @@ class ApiGatewayResolver(BaseRouter):
             function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `dict`,
             by default json.loads when integrating with EventSource data class
         """
+        self.dependency_overrides: dict[Callable, Callable] = {}
         self._proxy_type = proxy_type or self._proxy_event_type
         self._dynamic_routes: list[Route] = []
         self._static_routes: list[Route] = []
@@ -2244,8 +2268,12 @@ class ApiGatewayResolver(BaseRouter):
                 # We now inject CSS and JS into the SwaggerUI file
                 swagger_js = Path.open(
                     Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js",
+                    encoding="utf-8",
                 ).read()
-                swagger_css = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
+                swagger_css = Path.open(
+                    Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css",
+                    encoding="utf-8",
+                ).read()
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
