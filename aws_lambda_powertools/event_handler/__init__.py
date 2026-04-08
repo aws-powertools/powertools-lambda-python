@@ -16,7 +16,7 @@ from aws_lambda_powertools.event_handler.bedrock_agent_function import (
     BedrockAgentFunctionResolver,
     BedrockFunctionResponse,
 )
-from aws_lambda_powertools.event_handler.depends import Depends
+from aws_lambda_powertools.event_handler.depends import DependencyResolutionError, Depends
 from aws_lambda_powertools.event_handler.events_appsync.appsync_events import AppSyncEventsResolver
 from aws_lambda_powertools.event_handler.http_resolver import HttpResolverLocal
 from aws_lambda_powertools.event_handler.lambda_function_url import (
@@ -38,6 +38,7 @@ __all__ = [
     "BedrockFunctionResponse",
     "CORSConfig",
     "Depends",
+    "DependencyResolutionError",
     "HttpResolverLocal",
     "LambdaFunctionUrlResolver",
     "Request",

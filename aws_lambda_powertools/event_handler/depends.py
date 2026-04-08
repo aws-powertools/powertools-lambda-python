@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from typing import TYPE_CHECKING, Annotated, Any, get_args, get_origin, get_type_hints
 
 if TYPE_CHECKING:
@@ -10,6 +9,10 @@ if TYPE_CHECKING:
 
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.request import Request
+
+
+class DependencyResolutionError(Exception):
+    """Raised when a dependency cannot be resolved."""
 
 
 class Depends:
@@ -48,26 +51,39 @@ class Depends:
     """
 
     def __init__(self, dependency: Callable[..., Any], *, use_cache: bool = True) -> None:
+        if not callable(dependency):
+            raise DependencyResolutionError(
+                f"Depends() requires a callable, got {type(dependency).__name__}: {dependency!r}",
+            )
         self.dependency = dependency
         self.use_cache = use_cache
+
+
+class _DependencyNode:
+    """Lightweight node in a dependency tree — used by ``build_dependency_tree``."""
+
+    def __init__(self, *, param_name: str, depends: Depends, sub_tree: DependencyTree) -> None:
+        self.param_name = param_name
+        self.depends = depends
+        self.dependant = sub_tree
 
 
 class DependencyTree:
     """Lightweight dependency tree — no pydantic required.
 
     This mirrors the shape that ``solve_dependencies`` expects (a ``.dependencies``
-    attribute containing ``DependencyParam`` objects), but can be built without
-    importing pydantic.
+    attribute containing nodes with ``.param_name``, ``.depends``, and ``.dependant``),
+    but can be built without importing pydantic.
     """
 
-    def __init__(self, *, dependencies: list[DependencyParam] | None = None) -> None:
-        self.dependencies: list[DependencyParam] = dependencies or []
+    def __init__(self, *, dependencies: list[_DependencyNode] | None = None) -> None:
+        self.dependencies: list[_DependencyNode] = dependencies or []
 
 
 class DependencyParam:
-    """Holds a dependency's parameter name and its resolved dependency sub-tree."""
+    """Holds a dependency's parameter name and its resolved Dependant sub-tree (OpenAPI path)."""
 
-    def __init__(self, *, param_name: str, depends: Depends, dependant: Dependant | DependencyTree) -> None:
+    def __init__(self, *, param_name: str, depends: Depends, dependant: Dependant) -> None:
         self.param_name = param_name
         self.depends = depends
         self.dependant = dependant
@@ -84,16 +100,12 @@ def _get_depends_from_annotation(annotation: Any) -> Depends | None:
 
 def _has_depends(func: Callable[..., Any]) -> bool:
     """Check if a callable has any Depends() parameters, without importing pydantic."""
-    signature = inspect.signature(func)
-    globalns = getattr(func, "__globals__", {})
+    try:
+        hints = get_type_hints(func, include_extras=True)
+    except Exception:
+        return False
 
-    for param in signature.parameters.values():
-        annotation = param.annotation
-        if isinstance(annotation, str):  # pragma: no cover - from __future__ annotations
-            try:
-                annotation = eval(annotation, globalns)  # noqa: S307
-            except Exception:
-                continue
+    for annotation in hints.values():
         if _get_depends_from_annotation(annotation) is not None:
             return True
     return False
@@ -105,26 +117,25 @@ def build_dependency_tree(func: Callable[..., Any]) -> DependencyTree:
     This inspects the function parameters for ``Annotated[Type, Depends(...)]``
     annotations and recursively builds the tree — all without importing pydantic.
     """
-    signature = inspect.signature(func)
-    globalns = getattr(func, "__globals__", {})
-    dependencies: list[DependencyParam] = []
+    try:
+        hints = get_type_hints(func, include_extras=True)
+    except Exception:
+        return DependencyTree()
 
-    for param_name, param in signature.parameters.items():
-        annotation = param.annotation
-        if isinstance(annotation, str):  # pragma: no cover - from __future__ annotations
-            try:
-                annotation = eval(annotation, globalns)  # noqa: S307
-            except Exception:
-                continue
+    dependencies: list[_DependencyNode] = []
+
+    for param_name, annotation in hints.items():
+        if param_name == "return":
+            continue
 
         depends_instance = _get_depends_from_annotation(annotation)
         if depends_instance is not None:
             sub_tree = build_dependency_tree(depends_instance.dependency)
             dependencies.append(
-                DependencyParam(
+                _DependencyNode(
                     param_name=param_name,
                     depends=depends_instance,
-                    dependant=sub_tree,
+                    sub_tree=sub_tree,
                 ),
             )
 
@@ -194,7 +205,13 @@ def solve_dependencies(
                 if annotation is RequestClass:
                     sub_values[param_name] = request
 
-        solved = use_fn(**sub_values)
+        try:
+            solved = use_fn(**sub_values)
+        except Exception as exc:
+            dep_name = getattr(use_fn, "__name__", repr(use_fn))
+            raise DependencyResolutionError(
+                f"Failed to resolve dependency '{dep_name}' for parameter '{dep.param_name}': {exc}",
+            ) from exc
 
         # Cache result
         if dep.depends.use_cache:

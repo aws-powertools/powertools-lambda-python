@@ -2,10 +2,11 @@
 
 import json
 
+import pytest
 from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
-from aws_lambda_powertools.event_handler.depends import Depends
+from aws_lambda_powertools.event_handler.depends import DependencyResolutionError, Depends
 from aws_lambda_powertools.event_handler.request import Request
 from tests.functional.utils import load_event
 
@@ -281,10 +282,8 @@ def test_depends_returning_none():
     assert json.loads(result["body"]) == {"val": None}
 
 
-def test_depends_exception_propagates():
-    """If a dependency raises, the exception propagates."""
-    import pytest
-
+def test_depends_exception_raises_dependency_resolution_error():
+    """If a dependency raises, a DependencyResolutionError wraps the original exception."""
     app = APIGatewayHttpResolver()
 
     def broken() -> str:
@@ -294,5 +293,64 @@ def test_depends_exception_propagates():
     def handler(val: Annotated[str, Depends(broken)]):
         return {"val": val}
 
-    with pytest.raises(ValueError, match="boom"):
+    with pytest.raises(DependencyResolutionError, match="broken.*boom"):
         app(API_GW_V2_EVENT, {})
+
+
+def test_depends_non_callable_raises_dependency_resolution_error():
+    """Passing a non-callable to Depends() raises DependencyResolutionError immediately."""
+    with pytest.raises(DependencyResolutionError, match="requires a callable"):
+        Depends("not_a_function")  # type: ignore
+
+    with pytest.raises(DependencyResolutionError, match="requires a callable"):
+        Depends(42)  # type: ignore
+
+    with pytest.raises(DependencyResolutionError, match="requires a callable"):
+        Depends(None)  # type: ignore
+
+
+def test_depends_accepts_lambda():
+    """Depends() works with a lambda as the dependency."""
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def handler(val: Annotated[str, Depends(lambda: "from-lambda")]):
+        return {"val": val}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"val": "from-lambda"}
+
+
+def test_depends_accepts_class_with_call():
+    """Depends() works with a class that implements __call__."""
+    app = APIGatewayHttpResolver()
+
+    class TenantProvider:
+        def __call__(self) -> str:
+            return "tenant-from-class"
+
+    @app.post("/my/path")
+    def handler(tenant: Annotated[str, Depends(TenantProvider())]):
+        return {"tenant": tenant}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"tenant": "tenant-from-class"}
+
+
+def test_depends_accepts_class_as_factory():
+    """Depends() works with a class itself (constructor as callable)."""
+    app = APIGatewayHttpResolver()
+
+    class Config:
+        def __init__(self):
+            self.region = "us-east-1"
+
+    @app.post("/my/path")
+    def handler(config: Annotated[Config, Depends(Config)]):
+        return {"region": config.region}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"region": "us-east-1"}
