@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_CONTENT_TYPE,
     DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+    DEFAULT_STATUS_CODE,
 )
 
 
@@ -54,7 +55,7 @@ def generate_openapi_path(
     response_description: str | None,
     body_field: ModelField | None,
     custom_response_validation_http_code: HTTPStatus | None,
-    status_code: int = 200,
+    status_code: int = DEFAULT_STATUS_CODE,
     dependant: Dependant,
     operation_ids: set[str],
     model_name_map: dict[TypeModelOrEnum, str],
@@ -222,7 +223,7 @@ def _build_responses(
     responses: dict[int, OpenAPIResponse] | None,
     response_description: str | None,
     custom_response_validation_http_code: HTTPStatus | None,
-    status_code: int = 200,
+    status_code: int = DEFAULT_STATUS_CODE,
     dependant: Dependant,
     model_name_map: dict[TypeModelOrEnum, str],
     field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
