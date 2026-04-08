@@ -354,3 +354,63 @@ def test_depends_accepts_class_as_factory():
     result = app(API_GW_V2_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"region": "us-east-1"}
+
+
+def test_depends_with_unresolvable_annotations_is_ignored():
+    """A handler whose annotations cannot be resolved by get_type_hints is treated as having no deps."""
+    app = APIGatewayHttpResolver()
+
+    # Build a function with broken annotations that get_type_hints cannot resolve.
+    # The param has a default so the handler can still be called without it.
+    def make_handler():
+        def handler(x: "CompletelyBogusType" = None):  # noqa: F821
+            return {"ok": True}
+
+        return handler
+
+    app.post("/my/path")(make_handler())
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"ok": True}
+
+
+def test_depends_without_request_does_not_inject():
+    """A dependency that does NOT declare Request still works when request is available."""
+    app = APIGatewayHttpResolver()
+
+    def get_static() -> str:
+        return "no-request-needed"
+
+    @app.post("/my/path")
+    def handler(val: Annotated[str, Depends(get_static)]):
+        return {"val": val}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"val": "no-request-needed"}
+
+
+def test_depends_with_broken_type_hints_on_dependency():
+    """A dependency callable with broken annotations still resolves (get_type_hints fails gracefully)."""
+    app = APIGatewayHttpResolver()
+
+    # Create a callable whose annotations reference a nonexistent type
+    # so get_type_hints() will raise inside solve_dependencies
+    broken_dep = type(
+        "BrokenDep",
+        (),
+        {
+            "__call__": lambda self: "it-works",
+            "__annotations__": {"x": "NonExistentType"},
+            "__module__": __name__,
+        },
+    )()
+
+    @app.post("/my/path")
+    def handler(val: Annotated[str, Depends(broken_dep)]):
+        return {"val": val}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"val": "it-works"}
