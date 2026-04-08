@@ -4,6 +4,7 @@ import inspect
 import re
 from typing import TYPE_CHECKING, Any, ForwardRef, cast
 
+from aws_lambda_powertools.event_handler.depends import DependencyParam, _get_depends_from_annotation
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     create_body_model,
@@ -191,6 +192,22 @@ def get_dependant(
         # Request-typed parameters are injected by the resolver at call time;
         # they carry no OpenAPI meaning and must be excluded from schema generation.
         if param.annotation is Request:
+            continue
+
+        # Depends() parameters (via Annotated[Type, Depends(fn)]) are resolved at call time.
+        depends_instance = _get_depends_from_annotation(param.annotation)
+        if depends_instance is not None:
+            sub_dependant = get_dependant(
+                path=path,
+                call=depends_instance.dependency,
+            )
+            dependant.dependencies.append(
+                DependencyParam(
+                    param_name=param_name,
+                    depends=depends_instance,
+                    dependant=sub_dependant,
+                ),
+            )
             continue
 
         # If the parameter is a path parameter, we need to set the in_ field to "path".
