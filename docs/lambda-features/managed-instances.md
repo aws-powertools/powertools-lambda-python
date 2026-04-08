@@ -45,7 +45,7 @@ Core utilities work without any changes. Each process has its own instances, so 
 
 ### Parameters
 
-Parameters utility works as expected, but be aware that **caching is per-process**.
+The Parameters utility works as expected, but be aware that **caching is per-process**.
 
 ```python hl_lines="9" title="Using Parameters with Managed Instances"
 --8<-- "examples/lambda_features/managed_instances/src/using_parameters.py"
