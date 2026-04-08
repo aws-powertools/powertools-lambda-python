@@ -6,6 +6,7 @@ tracer = Tracer()
 logger = Logger()
 
 
+@logger.inject_lambda_context
 @tracer.capture_lambda_handler
 @durable_execution
 def handler(event: dict, context: DurableContext) -> str:

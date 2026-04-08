@@ -39,7 +39,7 @@ The Durable Execution SDK provides a `context.logger` instance that automaticall
 
 For the best experience, set the Logger on the durable context. This gives you structured JSON logging with automatic log deduplication during replays:
 
-```python hl_lines="5 11 14 22" title="Integrating Logger with Durable Functions"
+```python hl_lines="5 8 12 15" title="Integrating Logger with Durable Functions"
 --8<-- "examples/lambda_features/durable_functions/src/using_logger.py"
 ```
 
@@ -68,7 +68,7 @@ Tracer works with Durable Functions. Each execution creates trace segments.
 ???+ note "Trace continuity"
     Due to the replay mechanism, traces may be interleaved. Each execution (including replays) creates separate trace segments. Use the `execution_arn` to correlate traces.
 
-```python hl_lines="5 9" title="Using Tracer with Durable Functions"
+```python hl_lines="5-6 9-10" title="Using Tracer with Durable Functions"
 --8<-- "examples/lambda_features/durable_functions/src/using_tracer.py"
 ```
 
@@ -84,9 +84,12 @@ Metrics work with Durable Functions, but be aware that **metrics may be emitted 
 
 The `@idempotent` decorator integrates with Durable Functions and is **replay-aware**. It's useful for protecting the Lambda handler entry point, especially for Event Source Mapping (ESM) invocations like SQS, Kinesis, or DynamoDB Streams.
 
-```python hl_lines="9 15" title="Using Idempotency with Durable Functions"
+```python hl_lines="8 15" title="Using Idempotency with Durable Functions"
 --8<-- "examples/lambda_features/durable_functions/src/using_idempotency.py"
 ```
+
+???+ warning "Decorator ordering matters"
+    The `@idempotent` decorator must be placed **above** `@durable_execution`. This ensures the idempotency check runs first, preventing duplicate executions before the durable workflow begins. Reversing the order would cause the durable execution to start before the idempotency check, defeating its purpose.
 
 **When to use Powertools Idempotency:**
 

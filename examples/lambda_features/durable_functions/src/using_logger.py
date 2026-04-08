@@ -5,6 +5,7 @@ from aws_lambda_powertools import Logger
 logger = Logger(service="order-processing")
 
 
+@logger.inject_lambda_context
 @durable_execution
 def handler(event: dict, context: DurableContext) -> str:
     # Set Logger on the context for automatic deduplication
