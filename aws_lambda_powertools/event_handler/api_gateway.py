@@ -2248,8 +2248,12 @@ class ApiGatewayResolver(BaseRouter):
                 # We now inject CSS and JS into the SwaggerUI file
                 swagger_js = Path.open(
                     Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js",
+                    encoding="utf-8",
                 ).read()
-                swagger_css = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
+                swagger_css = Path.open(
+                    Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css",
+                    encoding="utf-8",
+                ).read()
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
