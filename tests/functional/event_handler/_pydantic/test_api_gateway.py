@@ -80,3 +80,69 @@ def test_data_validation_error():
     assert result["statusCode"] == 422
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert "missing" in result["body"]
+
+
+def test_route_custom_status_code_with_dict():
+    # GIVEN a route with a custom status_code returning a dict
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.post("/my/path", status_code=201)
+    def create_item():
+        return {"name": "test"}
+
+    event = {"httpMethod": "POST", "path": "/my/path", "body": "{}"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the response should use the route's custom status code
+    assert result["statusCode"] == 201
+
+
+def test_route_custom_status_code_tuple_override():
+    # GIVEN a route with status_code=201 but handler returns a tuple with 202
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.post("/my/path", status_code=201)
+    def create_item():
+        return {"name": "test"}, 202
+
+    event = {"httpMethod": "POST", "path": "/my/path", "body": "{}"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the tuple status code should override the route's status code
+    assert result["statusCode"] == 202
+
+
+def test_route_custom_status_code_response_object_override():
+    # GIVEN a route with status_code=201 but handler returns a Response with 204
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.post("/my/path", status_code=201)
+    def create_item():
+        return Response(status_code=204, content_type=content_types.APPLICATION_JSON, body="{}")
+
+    event = {"httpMethod": "POST", "path": "/my/path", "body": "{}"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the Response object's status code should take precedence
+    assert result["statusCode"] == 204
+
+
+def test_route_default_status_code_with_dict():
+    # GIVEN a route without custom status_code returning a dict
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.get("/my/path")
+    def get_items():
+        return {"items": []}
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the response should default to 200
+    assert result["statusCode"] == 200

@@ -370,3 +370,89 @@ def test_openapi_response_examples_preserved_with_model():
     assert "example2" in examples
     assert examples["example2"].summary == "Example 2"
     assert examples["example2"].value["id"] == 2
+
+
+def test_openapi_custom_status_code():
+    # GIVEN a route with a custom status_code
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Item(BaseModel):
+        name: str
+
+    @app.post("/items", status_code=201)
+    def create_item() -> Item:
+        return Item(name="test")
+
+    # WHEN we retrieve the OpenAPI schema
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/items"].post.responses
+
+    # THEN the schema should use 201 as the success response code instead of 200
+    assert 201 in responses
+    assert responses[201].description == "Successful Response"
+    assert 200 not in responses
+
+
+def test_openapi_custom_status_code_with_description():
+    # GIVEN a route with a custom status_code and response_description
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items", status_code=201, response_description="Item created")
+    def create_item():
+        return {"name": "test"}
+
+    # WHEN we retrieve the OpenAPI schema
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/items"].post.responses
+
+    # THEN the schema should use 201 with the custom description
+    assert 201 in responses
+    assert responses[201].description == "Item created"
+    assert 200 not in responses
+
+
+def test_openapi_default_status_code():
+    # GIVEN a route without a custom status_code
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/items")
+    def get_items():
+        return {"items": []}
+
+    # WHEN we retrieve the OpenAPI schema
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/items"].get.responses
+
+    # THEN the schema should default to 200
+    assert 200 in responses
+    assert responses[200].description == "Successful Response"
+
+
+def test_openapi_custom_status_code_all_methods():
+    # GIVEN routes with custom status_code on different HTTP methods
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items", status_code=201)
+    def create():
+        return {}
+
+    @app.put("/items", status_code=204)
+    def update():
+        return {}
+
+    @app.delete("/items", status_code=204)
+    def delete():
+        return {}
+
+    @app.patch("/items", status_code=202)
+    def patch():
+        return {}
+
+    # WHEN we retrieve the OpenAPI schema
+    schema = app.get_openapi_schema()
+
+    # THEN each method should have the correct custom status code
+    assert 201 in schema.paths["/items"].post.responses
+    assert 204 in schema.paths["/items"].put.responses
+    assert 204 in schema.paths["/items"].delete.responses
+    assert 202 in schema.paths["/items"].patch.responses
