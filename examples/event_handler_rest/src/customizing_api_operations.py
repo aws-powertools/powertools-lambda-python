@@ -26,5 +26,17 @@ def get_todo_title(todo_id: int) -> str:
     return todo.json()["title"]
 
 
+@app.post(
+    "/todos",
+    summary="Creates a new todo item",
+    description="Creates a new todo item and returns it",
+    response_description="The created todo object",
+    status_code=201,
+    tags=["Todos"],
+)
+def create_todo(title: str) -> dict:
+    return {"id": 1, "title": title}
+
+
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     return app.resolve(event, context)

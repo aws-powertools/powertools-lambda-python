@@ -73,7 +73,7 @@ To implement these customizations, include extra parameters when defining your r
 
 === "customizing_api_operations.py"
 
-    ```python hl_lines="11-20"
+    ```python hl_lines="11-20 29-36"
     --8<-- "examples/event_handler_rest/src/customizing_api_operations.py"
     ```
 

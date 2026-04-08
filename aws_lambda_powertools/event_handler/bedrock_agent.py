@@ -15,6 +15,7 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_API_VERSION,
     DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
     DEFAULT_OPENAPI_VERSION,
+    DEFAULT_STATUS_CODE,
 )
 
 if TYPE_CHECKING:
@@ -129,6 +130,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         security = None
@@ -150,6 +152,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -172,6 +175,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
@@ -193,6 +197,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -215,6 +220,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
@@ -236,6 +242,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -258,6 +265,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable] | None = None,
     ):
         security = None
@@ -279,6 +287,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -301,6 +310,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ):
         security = None
@@ -322,6 +332,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 

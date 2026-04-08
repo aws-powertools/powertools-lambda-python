@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_CONTENT_TYPE,
     DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+    DEFAULT_STATUS_CODE,
 )
 
 
@@ -54,6 +55,7 @@ def generate_openapi_path(
     response_description: str | None,
     body_field: ModelField | None,
     custom_response_validation_http_code: HTTPStatus | None,
+    status_code: int = DEFAULT_STATUS_CODE,
     dependant: Dependant,
     operation_ids: set[str],
     model_name_map: dict[TypeModelOrEnum, str],
@@ -108,6 +110,7 @@ def generate_openapi_path(
         responses=responses,
         response_description=response_description,
         custom_response_validation_http_code=custom_response_validation_http_code,
+        status_code=status_code,
         dependant=dependant,
         model_name_map=model_name_map,
         field_mapping=field_mapping,
@@ -220,6 +223,7 @@ def _build_responses(
     responses: dict[int, OpenAPIResponse] | None,
     response_description: str | None,
     custom_response_validation_http_code: HTTPStatus | None,
+    status_code: int = DEFAULT_STATUS_CODE,
     dependant: Dependant,
     model_name_map: dict[TypeModelOrEnum, str],
     field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
@@ -237,9 +241,9 @@ def _build_responses(
     )
 
     if responses:
-        for status_code in list(responses):
-            operation_responses[status_code] = _build_custom_response(
-                response=copy.deepcopy(responses[status_code]),
+        for resp_code in list(responses):
+            operation_responses[resp_code] = _build_custom_response(
+                response=copy.deepcopy(responses[resp_code]),
                 dependant=dependant,
                 model_name_map=model_name_map,
                 field_mapping=field_mapping,
@@ -251,7 +255,7 @@ def _build_responses(
             field_mapping=field_mapping,
         )
 
-        operation_responses[200] = {
+        operation_responses[status_code] = {
             "description": response_description or DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
             "content": {DEFAULT_CONTENT_TYPE: response_schema},
         }

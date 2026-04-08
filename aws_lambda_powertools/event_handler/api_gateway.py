@@ -26,6 +26,7 @@ from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
     DEFAULT_OPENAPI_TITLE,
     DEFAULT_OPENAPI_VERSION,
+    DEFAULT_STATUS_CODE,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import (
     RequestUnsupportedContentType,
@@ -283,7 +284,7 @@ class BedrockResponse(Generic[ResponseT]):
     def __init__(
         self,
         body: Any = None,
-        status_code: int = 200,
+        status_code: int = DEFAULT_STATUS_CODE,
         content_type: str = DEFAULT_CONTENT_TYPE,
         session_attributes: dict[str, Any] | None = None,
         prompt_session_attributes: dict[str, Any] | None = None,
@@ -387,6 +388,7 @@ class Route:
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Response]] | None = None,
     ):
         """
@@ -432,6 +434,9 @@ class Route:
             Enable or disable validation for this specific route. If None, inherits from resolver setting.
         custom_response_validation_http_code: int | HTTPStatus | None, optional
             Whether to have custom http status code for this route if response validation fails
+        status_code: int
+            The default HTTP status code for successful responses. Used in both the OpenAPI schema
+            and the actual response when the handler returns a dict. Defaults to 200.
         middlewares: list[Callable[..., Response]] | None
             The list of route middlewares to be called in order.
         """
@@ -471,6 +476,7 @@ class Route:
         self._body_field: ModelField | None = None
 
         self.custom_response_validation_http_code = custom_response_validation_http_code
+        self.status_code = status_code
 
         # Cache whether this route's handler declares Depends() parameters
         self._has_dependencies: bool | None = None
@@ -664,6 +670,7 @@ class Route:
             response_description=self.response_description,
             body_field=self.body_field,
             custom_response_validation_http_code=self.custom_response_validation_http_code,
+            status_code=self.status_code,
             dependant=dependant,
             operation_ids=operation_ids,
             model_name_map=model_name_map,
@@ -820,6 +827,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         raise NotImplementedError()
@@ -883,6 +891,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Get route decorator with GET `method`
@@ -925,6 +934,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -946,6 +956,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Post route decorator with POST `method`
@@ -989,6 +1000,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -1010,6 +1022,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Put route decorator with PUT `method`
@@ -1053,6 +1066,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -1074,6 +1088,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Delete route decorator with DELETE `method`
@@ -1116,6 +1131,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -1137,6 +1153,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Patch route decorator with PATCH `method`
@@ -1182,6 +1199,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -1203,6 +1221,7 @@ class BaseRouter(ABC):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Head route decorator with HEAD `method`
@@ -1247,6 +1266,7 @@ class BaseRouter(ABC):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
@@ -2357,6 +2377,7 @@ class ApiGatewayResolver(BaseRouter):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         """Route decorator includes parameter `method`"""
@@ -2392,6 +2413,7 @@ class ApiGatewayResolver(BaseRouter):
                     deprecated,
                     enable_validation,
                     custom_response_validation_http_code,
+                    status_code,
                     middlewares,
                 )
 
@@ -2779,12 +2801,15 @@ class ApiGatewayResolver(BaseRouter):
         - tuple[dict, int]: Same dict handling as above but with the option of including a status code
         - Response: returned as is, and allows for more flexibility
         """
-        status_code = HTTPStatus.OK
         if isinstance(result, (Response, BedrockResponse)):
             return result
         elif isinstance(result, tuple) and len(result) == 2:
             # Unpack result dict and status code from tuple
             result, status_code = result
+        else:
+            # Use the route's status_code if available, otherwise default to 200
+            route: Route | None = self.context.get("_route")
+            status_code = route.status_code if route else HTTPStatus.OK
 
         logger.debug("Simple response detected, serializing return before constructing final response")
         return Response(
@@ -2903,6 +2928,7 @@ class Router(BaseRouter):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         def register_route(func: AnyCallableT) -> AnyCallableT:
@@ -2931,6 +2957,7 @@ class Router(BaseRouter):
                 deprecated,
                 enable_validation,
                 custom_response_validation_http_code,
+                status_code,
             )
 
             # Collate Middleware for routes
@@ -3000,6 +3027,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         deprecated: bool = False,
         enable_validation: bool | None = None,
         custom_response_validation_http_code: int | HTTPStatus | None = None,
+        status_code: int = DEFAULT_STATUS_CODE,
         middlewares: list[Callable[..., Any]] | None = None,
     ) -> Callable[[AnyCallableT], AnyCallableT]:
         # NOTE: see #1552 for more context.
@@ -3021,6 +3049,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             deprecated,
             enable_validation,
             custom_response_validation_http_code,
+            status_code,
             middlewares,
         )
 
