@@ -157,7 +157,7 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v4.3.0
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v4.3.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -209,7 +209,7 @@ jobs:
           cat cdk-layer-stack/${{steps.constants.outputs.LAYER_VERSION}}
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cdk-layer-stack-${{ matrix.region }}-${{ matrix.python-version }}
           path: ./layer_v3/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
