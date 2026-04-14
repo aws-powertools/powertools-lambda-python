@@ -10,7 +10,8 @@ app = APIGatewayHttpResolver()
 
 
 def get_authenticated_user(request: Request) -> str:
-    user_id = request.headers.get("x-user-id")
+    # Use resolved_event for full Powertools event access (cookies, request_context, path, etc.)
+    user_id = request.resolved_event.headers.get("x-user-id", "")
     if not user_id:
         raise UnauthorizedError("Missing authentication")
     return user_id

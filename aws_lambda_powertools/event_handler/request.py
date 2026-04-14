@@ -12,11 +12,35 @@ class Request:
     """Represents the resolved HTTP request.
 
     Provides structured access to the matched route pattern, extracted path parameters,
-    HTTP method, headers, query parameters, and body.  Available via ``app.request``
-    inside middleware and, when added as a type-annotated parameter, inside route handlers.
+    HTTP method, headers, query parameters, body, the full Powertools proxy event
+    (``resolved_event``), and the shared resolver context (``context``).
+
+    Available via ``app.request`` inside middleware and, when added as a type-annotated
+    parameter, inside ``Depends()`` dependency functions and route handlers.
 
     Examples
     --------
+    **Dependency injection with Depends()**
+
+    ```python
+    from typing import Annotated
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Request, Depends
+
+    app = APIGatewayRestResolver()
+
+    def get_auth_user(request: Request) -> str:
+        # Full event access via resolved_event
+        token = request.resolved_event.get_header_value("authorization", default_value="")
+        user = validate_token(token)
+        # Bridge with middleware via shared context
+        request.context["user"] = user
+        return user
+
+    @app.get("/orders")
+    def list_orders(user: Annotated[str, Depends(get_auth_user)]):
+        return {"user": user}
+    ```
+
     **Middleware usage**
 
     ```python
@@ -39,32 +63,21 @@ class Request:
 
     app.use(middlewares=[auth_middleware])
     ```
-
-    **Route handler injection (type-annotated)**
-
-    ```python
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Request
-
-    app = APIGatewayRestResolver()
-
-    @app.get("/applications/<application_id>")
-    def get_application(application_id: str, request: Request):
-        user_agent = request.headers.get("user-agent")
-        return {"id": application_id, "user_agent": user_agent}
-    ```
     """
 
-    __slots__ = ("_current_event", "_path_parameters", "_route_path")
+    __slots__ = ("_context", "_current_event", "_path_parameters", "_route_path")
 
     def __init__(
         self,
         route_path: str,
         path_parameters: dict[str, Any],
         current_event: BaseProxyEvent,
+        context: dict[str, Any] | None = None,
     ) -> None:
         self._route_path = route_path
         self._path_parameters = path_parameters
         self._current_event = current_event
+        self._context = context if context is not None else {}
 
     @property
     def route(self) -> str:
@@ -113,3 +126,45 @@ class Request:
     def json_body(self) -> Any:
         """Request body deserialized as a Python object (dict / list), or ``None``."""
         return self._current_event.json_body
+
+    @property
+    def resolved_event(self) -> BaseProxyEvent:
+        """Full Powertools proxy event with all helpers and properties.
+
+        Provides access to the complete ``BaseProxyEvent`` (or subclass) that
+        Powertools resolved for the current invocation. This includes cookies,
+        request context, path, and event-source-specific properties that are not
+        available through the convenience properties on :class:`Request`.
+
+        Examples
+        --------
+        ```python
+        def get_request_details(request: Request) -> dict:
+            event = request.resolved_event
+            return {
+                "path": event.path,
+                "cookies": event.cookies,
+                "request_context": event.request_context,
+            }
+        ```
+        """
+        return self._current_event
+
+    @property
+    def context(self) -> dict[str, Any]:
+        """Shared resolver context (``app.context``) for this invocation.
+
+        Provides read/write access to the same ``dict`` that middleware and
+        ``app.append_context()`` populate. This enables incremental migration
+        from middleware-based data sharing to ``Depends()``-based injection:
+        middleware writes to ``app.context``, dependencies read from
+        ``request.context``.
+
+        Examples
+        --------
+        ```python
+        def get_current_user(request: Request) -> dict:
+            return request.context["user"]
+        ```
+        """
+        return self._context
