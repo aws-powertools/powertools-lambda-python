@@ -1327,6 +1327,7 @@ class BaseRouter(ABC):
             route_path=route.openapi_path,
             path_parameters=self.context.get("_route_args", {}),
             current_event=self.current_event,
+            context=self.context,
         )
         self.context["_request"] = request
         return request

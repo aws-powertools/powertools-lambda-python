@@ -586,3 +586,84 @@ def test_request_is_cached_across_multiple_accesses():
     # All accesses should return the same cached instance
     assert len(ids_seen) == 3
     assert ids_seen[0] == ids_seen[1] == ids_seen[2]
+
+
+# ---------------------------------------------------------------------------
+# resolved_event — full Powertools proxy event access
+# ---------------------------------------------------------------------------
+
+
+def test_request_resolved_event_exposes_full_event():
+    """resolved_event should return the full BaseProxyEvent with all helpers."""
+    app = APIGatewayRestResolver()
+    captured: list[Request] = []
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        captured.append(app.request)
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.get("/my/path")
+    def handler():
+        return {}
+
+    app(API_REST_EVENT, {})
+
+    req = captured[0]
+    resolved = req.resolved_event
+
+    # resolved_event should be the same object as app.current_event
+    assert resolved is not None
+    assert resolved.http_method == "GET"
+    # Should have helper methods not available on Request directly
+    assert hasattr(resolved, "get_header_value")
+    assert hasattr(resolved, "get_query_string_value")
+
+
+def test_request_resolved_event_provides_cookies_and_path():
+    """resolved_event gives access to path and properties not on Request."""
+    app = APIGatewayRestResolver()
+    captured: list[Request] = []
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        captured.append(app.request)
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.get("/items/<item_id>")
+    def handler(item_id: str):
+        return {}
+
+    event = _make_rest_event("/items/42", path_parameters={"item_id": "42"})
+    app(event, {})
+
+    resolved = captured[0].resolved_event
+    assert resolved.path == "/items/42"
+
+
+# ---------------------------------------------------------------------------
+# context — shared resolver context (app.context)
+# ---------------------------------------------------------------------------
+
+
+def test_request_context_shares_app_context():
+    """request.context should be the same dict as app.context."""
+    app = APIGatewayRestResolver()
+
+    def mw(app: APIGatewayRestResolver, next_middleware):
+        app.append_context(user="test-user")
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    @app.get("/my/path")
+    def handler(request: Request):
+        return {"user": request.context.get("user")}
+
+    result = app(API_REST_EVENT, {})
+    assert result["statusCode"] == 200
+    import json
+
+    assert json.loads(result["body"]) == {"user": "test-user"}
