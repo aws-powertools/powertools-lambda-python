@@ -414,3 +414,96 @@ def test_depends_with_broken_type_hints_on_dependency():
     result = app(API_GW_V2_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"val": "it-works"}
+
+
+# ---------------------------------------------------------------------------
+# request.context — bridge between middleware and Depends()
+# ---------------------------------------------------------------------------
+
+
+def test_depends_request_context_writable():
+    """Dependencies can write to request.context and handlers can read it."""
+    app = APIGatewayHttpResolver()
+
+    def set_tenant(request: Request) -> str:
+        tenant = request.headers.get("x-tenant-id", "default")
+        request.context["tenant"] = tenant
+        return tenant
+
+    @app.post("/my/path")
+    def handler(tenant: Annotated[str, Depends(set_tenant)], request: Request):
+        return {"tenant": tenant, "from_context": request.context.get("tenant")}
+
+    event = {**API_GW_V2_EVENT, "headers": {**API_GW_V2_EVENT.get("headers", {}), "x-tenant-id": "acme-corp"}}
+    result = app(event, {})
+
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["tenant"] == "acme-corp"
+    assert body["from_context"] == "acme-corp"
+
+
+def test_depends_request_context_bridges_middleware():
+    """Middleware writes to app.context, Depends() reads via request.context."""
+    app = APIGatewayHttpResolver()
+
+    def auth_middleware(app, next_middleware):
+        app.append_context(user="admin-user")
+        return next_middleware(app)
+
+    app.use(middlewares=[auth_middleware])
+
+    def get_current_user(request: Request) -> str:
+        return request.context["user"]
+
+    @app.post("/my/path")
+    def handler(user: Annotated[str, Depends(get_current_user)]):
+        return {"user": user}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"user": "admin-user"}
+
+
+def test_depends_request_context_with_router():
+    """request.context works when routes come from an included Router."""
+    from aws_lambda_powertools.event_handler.api_gateway import Router
+
+    app = APIGatewayHttpResolver()
+    router = Router()
+
+    def mw(app, next_middleware):
+        app.append_context(role="admin")
+        return next_middleware(app)
+
+    app.use(middlewares=[mw])
+
+    def get_role(request: Request) -> str:
+        return request.context["role"]
+
+    @router.post("/my/path")
+    def handler(role: Annotated[str, Depends(get_role)]):
+        return {"role": role}
+
+    app.include_router(router)
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"role": "admin"}
+
+
+def test_depends_request_resolved_event():
+    """Dependencies can access the full event via request.resolved_event."""
+    app = APIGatewayHttpResolver()
+
+    def get_path(request: Request) -> str:
+        return request.resolved_event.path
+
+    @app.post("/my/path")
+    def handler(path: Annotated[str, Depends(get_path)]):
+        return {"path": path}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["path"] == "/my/path"
