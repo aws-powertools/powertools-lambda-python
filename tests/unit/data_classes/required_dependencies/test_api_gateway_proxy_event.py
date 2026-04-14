@@ -241,3 +241,53 @@ def test_api_gateway_proxy_v2_iam_event():
     assert iam.principal_org_id == iam_raw["principalOrgId"]
     assert iam.user_arn == iam_raw["userArn"]
     assert iam.user_id == iam_raw["userId"]
+
+
+def test_api_gateway_proxy_event_merged_query_string_parameters():
+    """When both multiValueQueryStringParameters and queryStringParameters are present,
+    resolved_query_string_parameters should merge them (GH #7993)."""
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["multiValueQueryStringParameters"] = {"ids": ["1", "2", "3"]}
+    raw_event["queryStringParameters"] = {"status": "fizzbuzz"}
+
+    parsed_event = APIGatewayProxyEvent(raw_event)
+    resolved = parsed_event.resolved_query_string_parameters
+
+    assert resolved["ids"] == ["1", "2", "3"]
+    assert resolved["status"] == ["fizzbuzz"]
+
+
+def test_api_gateway_proxy_event_multi_value_takes_precedence():
+    """When the same key exists in both, multiValueQueryStringParameters wins."""
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["multiValueQueryStringParameters"] = {"key": ["a", "b"]}
+    raw_event["queryStringParameters"] = {"key": "c"}
+
+    parsed_event = APIGatewayProxyEvent(raw_event)
+    resolved = parsed_event.resolved_query_string_parameters
+
+    assert resolved["key"] == ["a", "b"]
+
+
+def test_api_gateway_proxy_event_only_single_value_query_params():
+    """When only queryStringParameters is present, it should still work."""
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["multiValueQueryStringParameters"] = None
+    raw_event["queryStringParameters"] = {"status": "active"}
+
+    parsed_event = APIGatewayProxyEvent(raw_event)
+    resolved = parsed_event.resolved_query_string_parameters
+
+    assert resolved["status"] == ["active"]
+
+
+def test_api_gateway_proxy_event_only_multi_value_query_params():
+    """When only multiValueQueryStringParameters is present, it should still work."""
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    raw_event["multiValueQueryStringParameters"] = {"ids": ["1", "2"]}
+    raw_event["queryStringParameters"] = None
+
+    parsed_event = APIGatewayProxyEvent(raw_event)
+    resolved = parsed_event.resolved_query_string_parameters
+
+    assert resolved["ids"] == ["1", "2"]

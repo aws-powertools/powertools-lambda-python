@@ -44,7 +44,17 @@ class ALBEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
-        params = self.multi_value_query_string_parameters or super().resolved_query_string_parameters
+        multi_value = self.multi_value_query_string_parameters
+        single_value = super().resolved_query_string_parameters
+
+        if not multi_value:
+            params = single_value
+        elif not single_value:
+            params = multi_value
+        else:
+            # Merge both: multi_value takes precedence, single_value fills missing keys
+            params = {**single_value, **multi_value}
+
         if not self.decode_query_parameters:
             return params
 
