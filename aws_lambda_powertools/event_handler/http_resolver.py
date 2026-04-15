@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 import base64
 import inspect
-import threading
 import warnings
 from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import parse_qs
@@ -15,6 +13,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     Response,
     Route,
 )
+from aws_lambda_powertools.event_handler.middlewares.async_utils import wrap_middleware_async
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
@@ -320,72 +319,9 @@ class HttpResolverLocal(ApiGatewayResolver):
         next_handler = final_handler
 
         for middleware in reversed(all_middlewares):
-            next_handler = self._wrap_middleware_async(middleware, next_handler)
+            next_handler = wrap_middleware_async(middleware, next_handler)
 
         return await next_handler(self)
-
-    def _wrap_middleware_async(self, middleware: Callable, next_handler: Callable) -> Callable:
-        """Wrap a middleware to work in async context.
-
-        For sync middlewares, we split execution into pre/post phases around the
-        call to next(). The sync middleware runs its pre-processing (e.g. request
-        validation), then we intercept the next() call, await the async handler,
-        and resume the middleware with the real response so post-processing
-        (e.g. response validation) sees the actual data.
-        """
-
-        async def wrapped(app):
-            if inspect.iscoroutinefunction(middleware):
-                return await middleware(app, next_handler)
-
-            # We use an Event to coordinate: the sync middleware runs in a thread,
-            # calls sync_next which signals us to resolve the async handler,
-            # then waits for the real response.
-            middleware_called_next = asyncio.Event()
-            next_app_holder: list = []
-            real_response_holder: list = []
-            middleware_result_holder: list = []
-            middleware_error_holder: list = []
-
-            def sync_next(app):
-                next_app_holder.append(app)
-                middleware_called_next.set()
-                # Block this thread until the real response is available
-                event = threading.Event()
-                next_app_holder.append(event)
-                event.wait()
-                return real_response_holder[0]
-
-            def run_middleware():
-                try:
-                    result = middleware(app, sync_next)
-                    middleware_result_holder.append(result)
-                except Exception as e:
-                    middleware_error_holder.append(e)
-
-            thread = threading.Thread(target=run_middleware, daemon=True)
-            thread.start()
-
-            # Wait for the middleware to call next()
-            await middleware_called_next.wait()
-
-            # Now resolve the async next_handler
-            real_response = await next_handler(next_app_holder[0])
-            real_response_holder.append(real_response)
-
-            # Signal the thread that the response is ready
-            threading_event = next_app_holder[1]
-            threading_event.set()
-
-            # Wait for the middleware thread to finish
-            thread.join()
-
-            if middleware_error_holder:
-                raise middleware_error_holder[0]
-
-            return middleware_result_holder[0]
-
-        return wrapped
 
     async def _handle_not_found_async(self) -> dict:
         """Handle 404 responses, using custom not_found handler if registered."""
