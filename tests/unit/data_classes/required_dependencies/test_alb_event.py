@@ -52,3 +52,17 @@ def test_alb_event_decode_multi_value_query_parameters():
     # With decode_query_parameters, the key and value are not decoded
     parsed_event.decode_query_parameters = True
     assert parsed_event.resolved_query_string_parameters == {expected_key: expected_values}
+
+
+def test_alb_event_merged_query_string_parameters():
+    """When both multiValueQueryStringParameters and queryStringParameters are present,
+    resolved_query_string_parameters should merge them (GH #7993)."""
+    raw_event = load_event("albMultiValueQueryStringEvent.json")
+    raw_event["multiValueQueryStringParameters"] = {"ids": ["1", "2", "3"]}
+    raw_event["queryStringParameters"] = {"status": "fizzbuzz"}
+
+    parsed_event = ALBEvent(raw_event)
+    resolved = parsed_event.resolved_query_string_parameters
+
+    assert resolved["ids"] == ["1", "2", "3"]
+    assert resolved["status"] == ["fizzbuzz"]

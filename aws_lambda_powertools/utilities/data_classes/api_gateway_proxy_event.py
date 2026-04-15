@@ -120,7 +120,17 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> dict[str, list[str]]:
-        return self.multi_value_query_string_parameters or super().resolved_query_string_parameters
+        multi_value = self.multi_value_query_string_parameters
+        single_value = super().resolved_query_string_parameters
+
+        if not multi_value:
+            return single_value
+
+        if not single_value:
+            return multi_value
+
+        # Merge both: multi_value takes precedence, single_value fills missing keys
+        return {**single_value, **multi_value}
 
     @property
     def resolved_headers_field(self) -> dict[str, Any]:
