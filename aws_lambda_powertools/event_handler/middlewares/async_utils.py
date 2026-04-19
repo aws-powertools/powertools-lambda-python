@@ -106,10 +106,11 @@ async def _run_sync_middleware_in_thread(
 
     return middleware_result_holder[0]
 
+
 async def _registered_api_adapter_async(
-    app: "ApiGatewayResolver",
+    app: ApiGatewayResolver,
     next_middleware: Callable[..., Any],
-) -> "dict | tuple | Response | BedrockResponse":
+) -> dict | tuple | Response | BedrockResponse:
     """
     Async version of _registered_api_adapter.
 
@@ -138,6 +139,7 @@ async def _registered_api_adapter_async(
     if route is not None:
         if not route.request_param_name_checked:
             from aws_lambda_powertools.event_handler.api_gateway import _find_request_param_name
+
             route.request_param_name = _find_request_param_name(next_middleware)
             route.request_param_name_checked = True
         if route.request_param_name:
@@ -145,6 +147,7 @@ async def _registered_api_adapter_async(
 
         if route.has_dependencies:
             from aws_lambda_powertools.event_handler.depends import build_dependency_tree, solve_dependencies
+
             dep_values = solve_dependencies(
                 dependant=build_dependency_tree(route.func),
                 request=app.request,
