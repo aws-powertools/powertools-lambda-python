@@ -30,6 +30,7 @@ class TestAsyncMiddlewareFrameWithAsyncMiddleware:
             return await next_middleware(app)
 
         async def next_handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "from handler")
 
         frame = AsyncMiddlewareFrame(current_middleware=my_middleware, next_middleware=next_handler)
@@ -47,9 +48,11 @@ class TestAsyncMiddlewareFrameWithAsyncMiddleware:
         app = _make_app()
 
         async def blocking_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
+            await asyncio.sleep(0)
             return Response(403, content_types.TEXT_PLAIN, "forbidden")
 
         async def next_handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "should not reach")
 
         frame = AsyncMiddlewareFrame(current_middleware=blocking_middleware, next_middleware=next_handler)
@@ -74,6 +77,7 @@ class TestAsyncMiddlewareFrameWithAsyncMiddleware:
             return await next_middleware(app)
 
         async def final_handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "done")
 
         # WHEN building a chain: first -> second -> handler
@@ -98,6 +102,7 @@ class TestAsyncMiddlewareFrameWithSyncMiddleware:
             return next_middleware(app)
 
         async def next_handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "async handler")
 
         frame = AsyncMiddlewareFrame(current_middleware=sync_middleware, next_middleware=next_handler)
@@ -118,6 +123,7 @@ class TestAsyncMiddlewareFrameWithSyncMiddleware:
             return Response(401, content_types.TEXT_PLAIN, "unauthorized")
 
         async def next_handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "should not reach")
 
         frame = AsyncMiddlewareFrame(current_middleware=sync_blocking, next_middleware=next_handler)
@@ -144,6 +150,7 @@ class TestAsyncMiddlewareFrameMixedChain:
             return await next_middleware(app)
 
         async def handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "mixed chain")
 
         inner = AsyncMiddlewareFrame(current_middleware=async_mw, next_middleware=handler)
@@ -161,11 +168,11 @@ class TestAsyncMiddlewareFrameMixedChain:
 class TestAsyncMiddlewareFrameProperties:
     def test_name_property(self):
         # GIVEN a middleware with a known name
-        async def my_named_middleware(app, next_mw):
-            pass
+        def my_named_middleware(app, next_mw):
+            return next_mw(app)
 
-        async def next_handler(app):
-            pass
+        def next_handler(app):
+            return Response(200, content_types.TEXT_HTML, "ok")
 
         frame = AsyncMiddlewareFrame(current_middleware=my_named_middleware, next_middleware=next_handler)
 
@@ -174,11 +181,11 @@ class TestAsyncMiddlewareFrameProperties:
 
     def test_str_representation(self):
         # GIVEN a frame with named middleware and next handler
-        async def auth_middleware(app, next_mw):
-            pass
+        def auth_middleware(app, next_mw):
+            return next_mw(app)
 
-        async def logging_middleware(app):
-            pass
+        def logging_middleware(app):
+            return Response(200, content_types.TEXT_HTML, "ok")
 
         frame = AsyncMiddlewareFrame(current_middleware=auth_middleware, next_middleware=logging_middleware)
 
@@ -193,6 +200,7 @@ class TestAsyncMiddlewareFrameProperties:
             return await next_middleware(app)
 
         async def handler(app: ApiGatewayResolver):
+            await asyncio.sleep(0)
             return Response(200, content_types.TEXT_HTML, "ok")
 
         frame = AsyncMiddlewareFrame(current_middleware=my_middleware, next_middleware=handler)
