@@ -67,7 +67,7 @@ def test_async_handler_is_awaited(app: ApiGatewayResolver, event):
     _setup_resolver_context(app, event)
     app.append_context(_route_args={})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -94,7 +94,7 @@ def test_sync_handler_through_adapter(app: ApiGatewayResolver, event):
     _setup_resolver_context(app, event)
     app.append_context(_route_args={})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -120,7 +120,7 @@ def test_adapter_passes_route_args_to_async_handler(app: ApiGatewayResolver, eve
     _setup_resolver_context(app, event)
     app.append_context(_route_args={"name": "powertools"})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -146,7 +146,7 @@ def test_adapter_passes_route_args_to_sync_handler(app: ApiGatewayResolver, even
     _setup_resolver_context(app, event)
     app.append_context(_route_args={"name": "powertools"})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -166,7 +166,7 @@ def test_adapter_converts_dict_response_from_async_handler():
     _setup_resolver_context(app, API_REST_EVENT)
     app.append_context(_route_args={})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -186,7 +186,7 @@ def test_adapter_converts_tuple_response_from_async_handler():
     _setup_resolver_context(app, API_REST_EVENT)
     app.append_context(_route_args={})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
@@ -205,7 +205,7 @@ def test_adapter_with_no_route_in_context():
     _setup_resolver_context(app, API_REST_EVENT)
     app.append_context(_route_args={})
 
-    result = asyncio.get_event_loop().run_until_complete(
+    result = asyncio.run(
         _registered_api_adapter_async(app, get_lambda),
     )
 
