@@ -1,9 +1,9 @@
-from __future__ import annotations
-
 import asyncio
+import re
 from typing import cast
 
 import pytest
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
@@ -13,8 +13,11 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     BaseRouter,
     ProxyEventType,
     Response,
+    Route,
 )
+from aws_lambda_powertools.event_handler.depends import Depends
 from aws_lambda_powertools.event_handler.middlewares.async_utils import _registered_api_adapter_async
+from aws_lambda_powertools.event_handler.request import Request
 from tests.functional.utils import load_event
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -212,3 +215,121 @@ def test_adapter_with_no_route_in_context():
     # THEN the adapter skips request injection and dependency resolution
     assert result.status_code == 200
     assert result.body == "no route"
+
+
+def test_adapter_injects_request_param():
+    # GIVEN an async handler that declares a Request parameter
+    app = APIGatewayHttpResolver()
+
+    async def get_lambda(request: Request):
+        return Response(200, content_types.TEXT_HTML, request.method)
+
+    # WHEN a Route is present in context with request_param_name not yet checked
+    _setup_resolver_context(app, API_RESTV2_EVENT)
+    route = Route(
+        method="GET",
+        path="/my/path",
+        rule=re.compile(r"^/my/path$"),
+        func=get_lambda,
+        cors=False,
+        compress=False,
+    )
+    app.append_context(_route=route, _route_args={})
+
+    result = asyncio.run(
+        _registered_api_adapter_async(app, get_lambda),
+    )
+
+    # THEN the Request object is injected and request_param_name is cached
+    assert result.status_code == 200
+    assert route.request_param_name_checked is True
+    assert route.request_param_name == "request"
+
+
+def test_adapter_uses_cached_request_param_name():
+    # GIVEN a Route where request_param_name was already resolved
+    app = APIGatewayHttpResolver()
+
+    async def get_lambda(req: Request):
+        return Response(200, content_types.TEXT_HTML, req.method)
+
+    _setup_resolver_context(app, API_RESTV2_EVENT)
+    route = Route(
+        method="GET",
+        path="/my/path",
+        rule=re.compile(r"^/my/path$"),
+        func=get_lambda,
+        cors=False,
+        compress=False,
+    )
+    route.request_param_name = "req"
+    route.request_param_name_checked = True
+    app.append_context(_route=route, _route_args={})
+
+    # WHEN calling the adapter a second time (cache hit)
+    result = asyncio.run(
+        _registered_api_adapter_async(app, get_lambda),
+    )
+
+    # THEN it still injects the Request using the cached param name
+    assert result.status_code == 200
+
+
+def test_adapter_resolves_dependencies():
+    # GIVEN an async handler with Depends() parameters
+    app = APIGatewayHttpResolver()
+
+    def get_greeting() -> str:
+        return "hello"
+
+    async def get_lambda(greeting: Annotated[str, Depends(get_greeting)]):
+        return {"greeting": greeting}
+
+    _setup_resolver_context(app, API_RESTV2_EVENT)
+    route = Route(
+        method="GET",
+        path="/my/path",
+        rule=re.compile(r"^/my/path$"),
+        func=get_lambda,
+        cors=False,
+        compress=False,
+    )
+    app.append_context(_route=route, _route_args={})
+
+    # WHEN calling the adapter
+    result = asyncio.run(
+        _registered_api_adapter_async(app, get_lambda),
+    )
+
+    # THEN dependencies are resolved and injected
+    assert result.status_code == 200
+
+
+def test_adapter_resolves_dependencies_with_sync_handler():
+    # GIVEN a sync handler with Depends() parameters
+    app = APIGatewayHttpResolver()
+
+    def get_greeting() -> str:
+        return "hello"
+
+    def get_lambda(greeting: Annotated[str, Depends(get_greeting)]):
+        return {"greeting": greeting}
+
+    _setup_resolver_context(app, API_RESTV2_EVENT)
+    route = Route(
+        method="GET",
+        path="/my/path",
+        rule=re.compile(r"^/my/path$"),
+        func=get_lambda,
+        cors=False,
+        compress=False,
+    )
+    app.append_context(_route=route, _route_args={})
+
+    # WHEN calling the adapter with a sync handler that has dependencies
+    result = asyncio.run(
+        _registered_api_adapter_async(app, get_lambda),
+    )
+
+    # THEN dependencies are resolved and injected for sync handler too
+    assert result.status_code == 200
