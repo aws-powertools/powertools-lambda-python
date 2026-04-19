@@ -110,6 +110,56 @@ async def _run_sync_middleware_in_thread(
     return middleware_result_holder[0]
 
 
+class AsyncMiddlewareFrame:
+    """Async version of MiddlewareFrame for the async middleware chain.
+
+    Each instance wraps a middleware (sync or async) and the next handler in the stack.
+    When called, it auto-detects whether the current middleware is sync or async:
+
+    - **Async middleware**: awaited directly with ``(app, next_middleware)``
+    - **Sync middleware**: executed in a background thread so the event loop is never blocked
+
+    Parameters
+    ----------
+    current_middleware : Callable
+        The current middleware function to be called as a request is processed.
+    next_middleware : Callable
+        The next middleware in the middleware stack.
+    """
+
+    def __init__(
+        self,
+        current_middleware: Callable[..., Any],
+        next_middleware: Callable[..., Any],
+    ) -> None:
+        self.current_middleware: Callable[..., Any] = current_middleware
+        self.next_middleware: Callable[..., Any] = next_middleware
+        self._next_middleware_name = next_middleware.__name__
+
+    @property
+    def __name__(self) -> str:  # noqa: A003
+        return self.current_middleware.__name__
+
+    def __str__(self) -> str:
+        middleware_name = self.__name__
+        return f"[{middleware_name}] next call chain is {middleware_name} -> {self._next_middleware_name}"
+
+    async def __call__(self, app: ApiGatewayResolver) -> dict | tuple | Response:
+        logger.debug("AsyncMiddlewareFrame: %s", self)
+        app._push_processed_stack_frame(str(self))
+
+        if inspect.iscoroutinefunction(self.current_middleware):
+            return await self.current_middleware(app, self.next_middleware)
+
+        loop = asyncio.get_running_loop()
+
+        def sync_next(app: ApiGatewayResolver) -> Any:
+            future = asyncio.run_coroutine_threadsafe(self.next_middleware(app), loop)
+            return future.result()
+
+        return await asyncio.to_thread(self.current_middleware, app, sync_next)
+
+
 async def _registered_api_adapter_async(
     app: ApiGatewayResolver,
     next_middleware: Callable[..., Any],
