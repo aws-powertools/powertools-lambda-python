@@ -156,6 +156,14 @@ Learn to implement data masking in AWS Lambda with Powertools, protecting sensit
 
 [Simplified Data Masking in AWS Lambda with Powertools](https://www.internetkatta.com/simplified-data-masking-in-aws-lambda-with-powertool){target="_blank" rel="nofollow"}
 
+### Stop Writing Lambda Boilerplate
+
+Introducing the [AWS Lambda Templates](https://github.com/amrabed/aws-lambda-templates){target="_blank"} repository — a collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios, pre-wired with AWS Lambda Powertools, AWS CDK, Pydantic, and a robust testing infrastructure.
+
+> **Author: [Amr Abed :material-linkedin:](https://www.linkedin.com/in/amrabed){target="_blank" rel="nofollow"}**
+
+[Stop Writing Lambda Boilerplate](https://builder.aws.com/content/3CDoe07m8JBNTQyzcrYWTWkfNPz/stop-writing-lambda-boilerplate){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
