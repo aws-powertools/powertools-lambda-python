@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 import threading
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -134,6 +137,7 @@ async def _registered_api_adapter_async(
         The API Response Object
     """
     route_args: dict = app.context.get("_route_args", {})
+    logger.debug(f"Calling API Route Handler: {route_args}")
 
     route = app.context.get("_route")
     if route is not None:
