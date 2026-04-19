@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 import threading
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+    from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, BedrockResponse, Response
 
 
 def wrap_middleware_async(middleware: Callable, next_handler: Callable) -> Callable:
@@ -105,3 +108,60 @@ async def _run_sync_middleware_in_thread(
         raise middleware_error_holder[0]
 
     return middleware_result_holder[0]
+
+
+async def _registered_api_adapter_async(
+    app: ApiGatewayResolver,
+    next_middleware: Callable[..., Any],
+) -> dict | tuple | Response | BedrockResponse:
+    """
+    Async version of _registered_api_adapter.
+
+    Detects if the route handler is a coroutine and awaits it.
+    _to_response() stays sync (CPU-bound — no async benefit).
+
+    IMPORTANT: This is an internal building block only.
+    Nothing calls it in the resolve chain yet. It will be used
+    by resolve_async() (see issue #8137).
+
+    Parameters
+    ----------
+    app: ApiGatewayResolver
+        The API Gateway resolver
+    next_middleware: Callable[..., Any]
+        The function to handle the API
+
+    Returns
+    -------
+    Response
+        The API Response Object
+    """
+    route_args: dict = app.context.get("_route_args", {})
+    logger.debug(f"Calling API Route Handler: {route_args}")
+
+    route = app.context.get("_route")
+    if route is not None:
+        if not route.request_param_name_checked:
+            from aws_lambda_powertools.event_handler.api_gateway import _find_request_param_name
+
+            route.request_param_name = _find_request_param_name(next_middleware)
+            route.request_param_name_checked = True
+        if route.request_param_name:
+            route_args = {**route_args, route.request_param_name: app.request}
+
+        if route.has_dependencies:
+            from aws_lambda_powertools.event_handler.depends import build_dependency_tree, solve_dependencies
+
+            dep_values = solve_dependencies(
+                dependant=build_dependency_tree(route.func),
+                request=app.request,
+                dependency_overrides=app.dependency_overrides or None,
+            )
+            route_args.update(dep_values)
+
+    # Call handler — detect if result is a coroutine and await it
+    result = next_middleware(**route_args)
+    if inspect.iscoroutine(result):
+        result = await result
+
+    return app._to_response(result)
