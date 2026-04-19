@@ -252,3 +252,11 @@ This repository contains a well documented example of a Transactional Messages A
 It uses Powertools for AWS Lambda Logger, Tracing, DataClasses and includes unit tests.
 
 :material-github: [github.com/san99tiago/aws-cdk-transactional-messages](https://github.com/san99tiago/aws-cdk-transactional-messages){:target="_blank"}
+
+### AWS Lambda Templates - Python
+
+> **Author: [Amr Abed :material-linkedin:](https://www.linkedin.com/in/amrabed){target="_blank"}**
+
+A collection of production-ready Python Lambda templates for Bedrock Agent, REST API, GraphQL, DynamoDB Stream, EventBridge, S3, and SQS scenarios, pre-wired with AWS Lambda Powertools, AWS CDK, Pydantic, and a robust testing infrastructure.
+
+:material-github: [github.com/amrabed/aws-lambda-templates](https://github.com/amrabed/aws-lambda-templates){target="_blank"}
