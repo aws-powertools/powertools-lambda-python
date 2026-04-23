@@ -239,7 +239,7 @@ class HttpResolverLocal(ApiGatewayResolver):
         """Return the base path for HTTP resolver (no stage prefix)."""
         return ""
 
-    async def _resolve_async(self) -> dict:
+    async def _resolve_async(self) -> dict:  # type: ignore[override]
         """Async version of resolve that supports async handlers."""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
@@ -258,7 +258,7 @@ class HttpResolverLocal(ApiGatewayResolver):
         # Handle not found
         return await self._handle_not_found_async()
 
-    async def _call_route_async(self, route: Route, route_arguments: dict[str, str]) -> dict:
+    async def _call_route_async(self, route: Route, route_arguments: dict[str, str]) -> dict:  # type: ignore[override]
         """Call route handler, supporting both sync and async handlers."""
         from aws_lambda_powertools.event_handler.api_gateway import ResponseBuilder
 
@@ -323,7 +323,7 @@ class HttpResolverLocal(ApiGatewayResolver):
 
         return await next_handler(self)
 
-    async def _handle_not_found_async(self) -> dict:
+    async def _handle_not_found_async(self, method: str = "", path: str = "") -> dict:  # type: ignore[override]
         """Handle 404 responses, using custom not_found handler if registered."""
         from http import HTTPStatus
 
