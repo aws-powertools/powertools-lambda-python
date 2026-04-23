@@ -2596,7 +2596,7 @@ class ApiGatewayResolver(BaseRouter):
             )
 
             return self._response_builder_class(
-                response=self._to_response(response),
+                response=self._to_response(response),  # type: ignore[arg-type]
                 serializer=self._serializer,
                 route=route,
             )
