@@ -33,3 +33,23 @@ class TestResolveAsyncValidation:
         assert response["statusCode"] == 200
         assert hasattr(app, "_request_validation_middleware")
         assert hasattr(app, "_response_validation_middleware")
+
+    def test_validation_middleware_lazy_created_for_per_route_validation(self):
+        # GIVEN a resolver WITHOUT global validation, but a route WITH enable_validation=True
+        app = APIGatewayHttpResolver()
+        assert not hasattr(app, "_request_validation_middleware")
+
+        @app.get("/my/path", enable_validation=True)
+        async def get_lambda() -> dict:
+            await asyncio.sleep(0)
+            return {"message": "lazy validated"}
+
+        # WHEN calling _resolve_async (triggers lazy creation in Route.call_async)
+        _setup_app(app, API_RESTV2_EVENT)
+        result = asyncio.run(app._resolve_async())
+
+        # THEN validation middlewares are lazily created on the app
+        response = result.build(app.current_event, app._cors)
+        assert response["statusCode"] == 200
+        assert hasattr(app, "_request_validation_middleware")
+        assert hasattr(app, "_response_validation_middleware")
