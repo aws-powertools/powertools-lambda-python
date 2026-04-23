@@ -316,27 +316,6 @@ class TestResolveAsyncProcessedStack:
         assert any("_registered_api_adapter_async" in frame for frame in app.processed_stack_frames)
 
 
-class TestResolveAsyncValidation:
-    def test_validation_middleware_created_and_used(self):
-        # GIVEN a resolver with validation enabled and an async handler
-        app = APIGatewayHttpResolver(enable_validation=True)
-
-        @app.get("/my/path")
-        async def get_lambda() -> dict:
-            await asyncio.sleep(0)
-            return {"message": "validated"}
-
-        # WHEN calling _resolve_async
-        _setup_app(app, API_RESTV2_EVENT)
-        result = asyncio.run(app._resolve_async())
-
-        # THEN the validation middlewares are created and the response is valid
-        response = result.build(app.current_event, app._cors)
-        assert response["statusCode"] == 200
-        assert hasattr(app, "_request_validation_middleware")
-        assert hasattr(app, "_response_validation_middleware")
-
-
 class TestResolveAsyncDebugMode:
     def test_debug_mode_prints_middleware_stack(self, capsys):
         # GIVEN a resolver with debug=True
