@@ -314,3 +314,80 @@ class TestResolveAsyncProcessedStack:
         # THEN the processed stack frames are populated
         assert len(app.processed_stack_frames) > 0
         assert any("_registered_api_adapter_async" in frame for frame in app.processed_stack_frames)
+
+
+class TestResolveAsyncValidation:
+    def test_validation_middleware_created_and_used(self):
+        # GIVEN a resolver with validation enabled and an async handler
+        app = APIGatewayHttpResolver(enable_validation=True)
+
+        @app.get("/my/path")
+        async def get_lambda() -> dict:
+            await asyncio.sleep(0)
+            return {"message": "validated"}
+
+        # WHEN calling _resolve_async
+        _setup_app(app, API_RESTV2_EVENT)
+        result = asyncio.run(app._resolve_async())
+
+        # THEN the validation middlewares are created and the response is valid
+        response = result.build(app.current_event, app._cors)
+        assert response["statusCode"] == 200
+        assert hasattr(app, "_request_validation_middleware")
+        assert hasattr(app, "_response_validation_middleware")
+
+
+class TestResolveAsyncDebugMode:
+    def test_debug_mode_prints_middleware_stack(self, capsys):
+        # GIVEN a resolver with debug=True
+        app = APIGatewayRestResolver(debug=True)
+
+        @app.get("/my/path")
+        async def get_lambda():
+            await asyncio.sleep(0)
+            return Response(200, content_types.TEXT_HTML, "debug")
+
+        # WHEN calling _resolve_async
+        _setup_app(app, API_REST_EVENT)
+        asyncio.run(app._resolve_async())
+
+        # THEN the async middleware stack is printed
+        captured = capsys.readouterr()
+        assert "Async Middleware Stack:" in captured.out
+        assert "_registered_api_adapter_async" in captured.out
+
+
+class TestResolveAsyncExceptionNoHandler:
+    def test_unhandled_exception_reraises(self):
+        # GIVEN an async handler that raises with no matching exception handler
+        app = APIGatewayRestResolver()
+
+        @app.get("/my/path")
+        async def get_lambda():
+            await asyncio.sleep(0)
+            raise RuntimeError("unhandled")
+
+        # WHEN calling _resolve_async
+        _setup_app(app, API_REST_EVENT)
+
+        # THEN the exception propagates
+        with pytest.raises(RuntimeError, match="unhandled"):
+            asyncio.run(app._resolve_async())
+
+    def test_unhandled_exception_with_debug_returns_traceback(self):
+        # GIVEN a resolver with debug=True and no exception handler
+        app = APIGatewayRestResolver(debug=True)
+
+        @app.get("/my/path")
+        async def get_lambda():
+            await asyncio.sleep(0)
+            raise RuntimeError("debug error")
+
+        # WHEN calling _resolve_async
+        _setup_app(app, API_REST_EVENT)
+        result = asyncio.run(app._resolve_async())
+
+        # THEN a 500 response with traceback is returned
+        response = result.build(app.current_event, app._cors)
+        assert response["statusCode"] == 500
+        assert "debug error" in response["body"]
