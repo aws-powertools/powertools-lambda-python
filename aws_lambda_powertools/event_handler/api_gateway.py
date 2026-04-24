@@ -663,7 +663,7 @@ class Route:
 
         app.append_context(_route_args=route_arguments)
 
-        # Build async chain from inside-out (not cached — avoids state conflicts with sync cache)
+        # Build async chain from inside-out (not cached, avoids state conflicts with sync cache)
         next_handler: Callable = self.func
         for handler in reversed(all_middlewares):
             next_handler = AsyncMiddlewareFrame(current_middleware=handler, next_middleware=next_handler)
@@ -2556,6 +2556,66 @@ class ApiGatewayResolver(BaseRouter):
         response = self._resolve().build(self.current_event, self._cors)
 
         # Debug print Processed Middlewares
+        if self._debug:
+            print("\nProcessed Middlewares:")
+            print("======================")
+            print("\n".join(self.processed_stack_frames))
+            print("======================")
+
+        self.clear_context()
+
+        return response
+
+    async def resolve_async(self, event: Mapping[str, Any], context: LambdaContext) -> dict[str, Any]:
+        """Async version of resolve() for native async handler support.
+
+        Use this method when your route handlers use async/await. The resolution
+        pipeline supports both sync and async handlers transparently.
+
+        Parameters
+        ----------
+        event: dict[str, Any]
+            Event
+        context: LambdaContext
+            Lambda context
+        Returns
+        -------
+        dict
+            Returns the dict response
+
+        Example
+        -------
+
+        ```python
+        import asyncio
+        from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+
+        app = APIGatewayHttpResolver()
+
+        @app.get("/async")
+        async def async_handler():
+            return {"message": "async works"}
+
+        def lambda_handler(event, context):
+            return asyncio.run(app.resolve_async(event, context))
+        ```
+        """
+        if isinstance(event, BaseProxyEvent):
+            warnings.warn(
+                "You don't need to serialize event to Event Source Data Class when using Event Handler; "
+                "see issue #1152",
+                stacklevel=2,
+            )
+            event = event.raw_event
+
+        if self._debug:
+            print(self._serializer(cast(dict, event)))
+
+        BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
+        BaseRouter.lambda_context = context
+
+        response = (await self._resolve_async()).build(self.current_event, self._cors)
+
         if self._debug:
             print("\nProcessed Middlewares:")
             print("======================")

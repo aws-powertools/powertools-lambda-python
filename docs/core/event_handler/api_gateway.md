@@ -11,6 +11,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
+* Native async handler support with `resolve_async()` for non-blocking I/O
 * Support for Middleware
 * Support for OpenAPI schema generation
 * Support data validation for requests/responses
@@ -1464,6 +1465,99 @@ Use `dependency_overrides` to replace any dependency with a mock or stub during 
 ???+ info "`append_context` vs `Depends()`"
     `append_context` remains available for backward compatibility. `Depends()` is recommended for new code because it provides type safety, IDE autocomplete, composable dependency trees, and `dependency_overrides` for testing.
 
+### Async support
+
+Use `resolve_async()` to natively support async route handlers with `async/await`. This enables non-blocking I/O operations like concurrent HTTP calls, database queries, and parallel processing within your Lambda function.
+
+Both sync and async handlers can coexist in the same resolver. Async handlers are automatically detected and awaited.
+
+=== "Getting started"
+
+    ```python hl_lines="9 22" title="async_resolve_getting_started.py"
+    --8<-- "examples/event_handler_rest/src/async_resolve_getting_started.py"
+    ```
+
+    1. Define your route handler as `async def` to use `await`
+    2. Sync handlers continue to work as before, no changes needed
+    3. Use `resolve_async()` instead of `resolve()` and wrap with `asyncio.run()`
+
+=== "Concurrent I/O with gather"
+
+    ```python hl_lines="21-24" title="async_resolve_concurrent.py"
+    --8<-- "examples/event_handler_rest/src/async_resolve_concurrent.py"
+    ```
+
+    1. `asyncio.gather()` runs multiple I/O operations concurrently, reducing total latency
+
+=== "All resolvers"
+
+    ```python hl_lines="1 10-12" title="async_resolve_all_resolvers.py"
+    --8<-- "examples/event_handler_rest/src/async_resolve_all_resolvers.py"
+    ```
+
+    1. API Gateway REST API
+    2. API Gateway HTTP API
+    3. Application Load Balancer
+
+#### Middlewares
+
+Both sync and async middlewares work in the async chain. Sync middlewares are executed in a background thread so the event loop is never blocked.
+
+=== "Sync middleware"
+
+    ```python hl_lines="11 24" title="async_resolve_middleware.py"
+    --8<-- "examples/event_handler_rest/src/async_resolve_middleware.py"
+    ```
+
+    1. Sync middleware works as-is, no changes needed
+    2. Async handler is awaited natively in the async chain
+
+=== "Async middleware"
+
+    ```python hl_lines="11 16" title="async_resolve_async_middleware.py"
+    --8<-- "examples/event_handler_rest/src/async_resolve_async_middleware.py"
+    ```
+
+    1. Define your middleware as `async def` to use `await`
+    2. Use `await next_middleware(app)` instead of `next_middleware(app)`
+
+#### Async with data validation
+
+Data validation with Pydantic works with async handlers. Use `enable_validation=True` as you would with sync handlers.
+
+```python hl_lines="1 3 7"
+app = APIGatewayHttpResolver(enable_validation=True)
+
+@app.get("/todos/<todo_id>")
+async def get_todo(todo_id: int) -> dict:
+    return {"todo_id": todo_id}
+
+def lambda_handler(event, context):
+    return asyncio.run(app.resolve_async(event, context))
+```
+
+#### Operations that remain synchronous
+
+These operations run synchronously on the event loop. They are CPU-bound and complete in microseconds, so they do not benefit from async.
+
+| Operation | Why it stays synchronous |
+| ----------------------------- | --------------------------------------------------------------- |
+| **Route matching** | Regex matching and string comparison against registered routes |
+| **Event deserialization** | Converting the raw event dict into a proxy event data class |
+| **Response serialization** | JSON encoding, base64 encoding, header assembly |
+| **Response validation** | Pydantic model validation is CPU-bound |
+| **Request validation** | Pydantic model validation is CPU-bound |
+| **Compression** | Gzip compression of response body |
+| **CORS header injection** | Building Access-Control headers from config |
+| **Dependency resolution** | `Depends()` tree is resolved synchronously |
+
+#### Known limitations
+
+| Limitation | Detail |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **AWS X-Ray with `asyncio.gather`** | X-Ray SDK does not propagate trace context across `asyncio.gather` tasks. Use individual `await` calls if you need per-call tracing. |
+| **Sync middlewares use thread pool** | Sync middlewares run in the default `ThreadPoolExecutor`. Avoid long blocking I/O inside sync middlewares when using `resolve_async()`. |
+
 ### Considerations
 
 This utility is optimized for fast startup, minimal feature set, and to quickly on-board customers familiar with frameworks like Flask — it's not meant to be a fully fledged framework.
@@ -1545,6 +1639,20 @@ Each endpoint will be it's own Lambda function that is configured as a [Lambda i
 <!-- markdownlint-enable MD013 -->
 
 ## Testing your code
+
+### Testing async handlers
+
+You can test async handlers by calling `resolve_async()` with `asyncio.run()`.
+
+```python hl_lines="24 26" title="async_resolve_testing.py"
+--8<-- "examples/event_handler_rest/src/async_resolve_testing.py"
+```
+
+1. Import your app as usual
+2. Use `asyncio.run(app.resolve_async(...))` instead of `app.resolve(...)`
+3. Assert on the response dict as you would with sync handlers
+
+### Testing sync handlers
 
 You can test your routes by passing a proxy event request with required params.
 
