@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.parser.models import KinesisFirehoseModel
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.parser.types import Model
+    from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +25,19 @@ class KinesisFirehoseEnvelope(BaseEnvelope):
     https://docs.aws.amazon.com/lambda/latest/dg/services-kinesisfirehose.html
     """
 
-    def parse(self, data: dict[str, Any] | Any | None, model: type[Model]) -> list[Model | None]:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[T]) -> list[T | None]:
         """Parses records found with model provided
 
         Parameters
         ----------
         data : dict
             Lambda event to be parsed
-        model : type[Model]
+        model : type[T]
             Data model provided to parse after extracting data using envelope
 
         Returns
         -------
-        list
+        list[T | None]
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with Kinesis Firehose model {KinesisFirehoseModel}")
