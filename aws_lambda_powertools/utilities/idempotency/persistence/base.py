@@ -137,6 +137,27 @@ class BasePersistenceLayer(ABC):
             return False
         return not data
 
+    def _get_idempotency_key_or_return_none(self, data: dict[str, Any]) -> str | None:
+        """
+        Get hashed idempotency key or return None early if key is None.
+        If the idempotency key is None, no data will be saved in the Persistence Layer.
+        See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
+
+        Parameters
+        ----------
+        data: dict[str, Any]
+            Payload
+
+        Returns
+        -------
+        str | None
+            Hashed idempotency key or None
+        """
+        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        if idempotency_key is None:
+            return None
+        return idempotency_key
+        
     def _get_hashed_payload(self, data: dict[str, Any]) -> str:
         """
         Extract payload using validation key jmespath and return a hashed representation
@@ -267,10 +288,8 @@ class BasePersistenceLayer(ABC):
         result: dict
             The response from function
         """
-        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        idempotency_key = self._get_idempotency_key_or_return_none(data=data)
         if idempotency_key is None:
-            # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
@@ -302,10 +321,8 @@ class BasePersistenceLayer(ABC):
             If expiry of in-progress invocations is enabled, this will contain the remaining time available in millis
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        idempotency_key = self._get_idempotency_key_or_return_none(data=data)
         if idempotency_key is None:
-            # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(
@@ -349,10 +366,8 @@ class BasePersistenceLayer(ABC):
             The exception raised by the function
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        idempotency_key = self._get_idempotency_key_or_return_none(data=data)
         if idempotency_key is None:
-            # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(idempotency_key=idempotency_key)
@@ -387,10 +402,8 @@ class BasePersistenceLayer(ABC):
             Payload doesn't match the stored record for the given idempotency key
         """
 
-        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        idempotency_key = self._get_idempotency_key_or_return_none(data=data)
         if idempotency_key is None:
-            # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
