@@ -538,7 +538,28 @@ class TestResolveAsyncPublic:
         # WHEN calling resolve_async
         response = asyncio.run(app.resolve_async(API_REST_EVENT, MockLambdaContext()))
 
-        # THEN debug output includes middleware stack and the response is valid
+        # THEN debug output includes raw event and middleware stack
         captured = capsys.readouterr()
         assert response["statusCode"] == 200
         assert "Processed Middlewares:" in captured.out
+        assert "httpMethod" in captured.out
+
+    def test_resolve_async_with_base_proxy_event(self):
+        # GIVEN a resolver and a BaseProxyEvent passed directly
+        from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+
+        app = APIGatewayRestResolver()
+
+        @app.get("/my/path")
+        async def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "from proxy event")
+
+        # WHEN calling resolve_async with a data class instead of raw dict
+        proxy_event = APIGatewayProxyEvent(API_REST_EVENT)
+
+        with pytest.warns(UserWarning, match="You don't need to serialize event"):
+            response = asyncio.run(app.resolve_async(proxy_event, MockLambdaContext()))
+
+        # THEN it still works after extracting raw_event
+        assert response["statusCode"] == 200
+        assert response["body"] == "from proxy event"
