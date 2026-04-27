@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventV2Model
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.parser.types import Model
+    from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -15,19 +15,19 @@ logger = logging.getLogger(__name__)
 class ApiGatewayV2Envelope(BaseEnvelope):
     """API Gateway V2 envelope to extract data within body key"""
 
-    def parse(self, data: dict[str, Any] | Any | None, model: type[Model]) -> Model | None:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[T]) -> T | None:
         """Parses data found with model provided
 
         Parameters
         ----------
         data : dict
             Lambda event to be parsed
-        model : type[Model]
+        model : type[T]
             Data model provided to parse after extracting data using envelope
 
         Returns
         -------
-        Any
+        T | None
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with Api Gateway model V2 {APIGatewayProxyEventV2Model}")

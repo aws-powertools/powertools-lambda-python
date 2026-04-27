@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope
 from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamModel
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.parser.types import Model
+    from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -19,19 +19,19 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
     length of the list is the record's amount in the original event.
     """
 
-    def parse(self, data: dict[str, Any] | Any | None, model: type[Model]) -> list[dict[str, Model | None]]:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[T]) -> list[dict[str, T | None]]:
         """Parses DynamoDB Stream records found in either NewImage and OldImage with model provided
 
         Parameters
         ----------
         data : dict
             Lambda event to be parsed
-        model : type[Model]
+        model : type[T]
             Data model provided to parse after extracting data using envelope
 
         Returns
         -------
-        list
+        list[T | None]
             List of dictionaries with NewImage and OldImage records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")

@@ -124,7 +124,11 @@ def parse(event: dict[str, Any], model: type[T]) -> T: ...  # pragma: no cover
 
 
 @overload
-def parse(event: dict[str, Any], model: type[T], envelope: type[Envelope]) -> T: ...  # pragma: no cover
+def parse(  # pragma: no cover
+    event: dict[str, Any],
+    model: type[T],
+    envelope: type[Envelope],
+) -> T | list[T | None] | list[dict[str, T | None]] | None: ...
 
 
 def parse(event: dict[str, Any], model: type[T], envelope: type[Envelope] | None = None):

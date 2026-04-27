@@ -44,7 +44,11 @@ class BaseEnvelope(ABC):
         return _parse_and_validate_event(data=data, adapter=adapter)
 
     @abstractmethod
-    def parse(self, data: dict[str, Any] | Any | None, model: type[T]):
+    def parse(
+        self,
+        data: dict[str, Any] | Any | None,
+        model: type[T],
+    ) -> T | list[T | None] | list[dict[str, T | None]] | None:
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.

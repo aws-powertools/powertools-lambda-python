@@ -16,7 +16,7 @@ CACHE_TYPE_ADAPTER = LRUDict(max_items=1024)
 logger = logging.getLogger(__name__)
 
 
-def _retrieve_or_set_model_from_cache(model: type[T]) -> TypeAdapter:
+def _retrieve_or_set_model_from_cache(model: type[T]) -> TypeAdapter[T]:
     """
     Retrieves or sets a TypeAdapter instance from the cache for the given model.
 
@@ -49,7 +49,7 @@ def _retrieve_or_set_model_from_cache(model: type[T]) -> TypeAdapter:
     return CACHE_TYPE_ADAPTER[id_model]
 
 
-def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter):
+def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter[T]):
     """
     Parse and validate the event data using the provided adapter.
 
