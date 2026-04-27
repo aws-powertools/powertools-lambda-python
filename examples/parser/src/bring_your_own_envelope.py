@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, Optional, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
@@ -7,11 +9,11 @@ from aws_lambda_powertools.utilities.parser import BaseEnvelope, event_parser
 from aws_lambda_powertools.utilities.parser.models import EventBridgeModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-Model = TypeVar("Model", bound=BaseModel)
+T = TypeVar("T")
 
 
 class EventBridgeEnvelope(BaseEnvelope):
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Optional[Model]:
+    def parse(self, data: dict[str, Any] | Any | None, model: type[T]) -> T | None:
         if data is None:
             return None
 
