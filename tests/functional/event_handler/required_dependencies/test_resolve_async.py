@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 import pytest
 
@@ -370,3 +371,195 @@ class TestResolveAsyncExceptionNoHandler:
         response = result.build(app.current_event, app._cors)
         assert response["statusCode"] == 500
         assert "debug error" in response["body"]
+
+
+# ============================================================================
+# Public resolve_async() tests
+# ============================================================================
+
+
+class MockLambdaContext:
+    function_name = "test-func"
+    memory_limit_in_mb = 128
+    invoked_function_arn = "arn:aws:lambda:eu-west-1:123456789012:function:test-func"
+    aws_request_id = "52fdfc07-2182-154f-163f-5f0f9a621d72"
+
+    def get_remaining_time_in_millis(self) -> int:
+        return 1000
+
+
+RESOLVE_ASYNC_IDS = ["APIGatewayRestResolver", "APIGatewayHttpResolver", "ALBResolver"]
+
+
+@pytest.fixture(
+    params=[
+        ("apigw_rest", API_REST_EVENT, "/my/path"),
+        ("apigw_v2", API_RESTV2_EVENT, "/my/path"),
+        ("alb", ALB_EVENT, "/lambda"),
+    ],
+    ids=RESOLVE_ASYNC_IDS,
+)
+def public_resolver_and_event(request):
+    key, event, path = request.param
+    resolvers = {
+        "apigw_rest": APIGatewayRestResolver(),
+        "apigw_v2": APIGatewayHttpResolver(),
+        "alb": ALBResolver(),
+    }
+    return resolvers[key], event, path
+
+
+class TestResolveAsyncPublic:
+    def test_resolve_async_returns_dict_response(self, public_resolver_and_event):
+        # GIVEN an async handler
+        app, event, path = public_resolver_and_event
+
+        @app.get(path)
+        async def get_lambda():
+            await asyncio.sleep(0)
+            return Response(200, content_types.TEXT_HTML, "async public")
+
+        # WHEN calling resolve_async with event and context
+        response = asyncio.run(app.resolve_async(event, MockLambdaContext()))
+
+        # THEN a dict response is returned directly (no need to call .build())
+        assert response["statusCode"] == 200
+        assert response["body"] == "async public"
+
+    def test_resolve_async_with_sync_handler(self, public_resolver_and_event):
+        # GIVEN a sync handler
+        app, event, path = public_resolver_and_event
+
+        @app.get(path)
+        def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "sync via public async")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(event, MockLambdaContext()))
+
+        # THEN sync handlers work through the async chain
+        assert response["statusCode"] == 200
+        assert response["body"] == "sync via public async"
+
+    def test_resolve_async_clears_context(self, public_resolver_and_event):
+        # GIVEN an async handler
+        app, event, path = public_resolver_and_event
+
+        @app.get(path)
+        async def get_lambda():
+            app.append_context(custom_key="value")
+            return Response(200, content_types.TEXT_HTML, "ok")
+
+        # WHEN calling resolve_async
+        asyncio.run(app.resolve_async(event, MockLambdaContext()))
+
+        # THEN the context is cleared after resolution
+        assert app.context == {}
+
+    def test_resolve_async_not_found(self, public_resolver_and_event):
+        # GIVEN no matching route
+        app, event, _path = public_resolver_and_event
+
+        @app.get("/non/existent/path")
+        async def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "unreachable")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(event, MockLambdaContext()))
+
+        # THEN a 404 response is returned
+        assert response["statusCode"] == 404
+
+    def test_resolve_async_with_cors(self):
+        # GIVEN a resolver with CORS and an async handler
+        app = APIGatewayRestResolver(cors=CORSConfig())
+
+        @app.get("/my/path")
+        async def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "cors")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(API_REST_EVENT, MockLambdaContext()))
+
+        # THEN CORS headers are included
+        assert response["statusCode"] == 200
+        assert "Access-Control-Allow-Origin" in response.get("multiValueHeaders", response.get("headers", {}))
+
+    def test_resolve_async_with_middleware(self):
+        # GIVEN a resolver with a middleware
+        app = APIGatewayRestResolver()
+        middleware_order = []
+
+        def tracking_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
+            middleware_order.append("before")
+            result = next_middleware(app)
+            middleware_order.append("after")
+            return result
+
+        @app.get("/my/path", middlewares=[tracking_middleware])
+        async def get_lambda():
+            middleware_order.append("handler")
+            return Response(200, content_types.TEXT_HTML, "ok")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(API_REST_EVENT, MockLambdaContext()))
+
+        # THEN middleware runs in correct order around the handler
+        assert response["statusCode"] == 200
+        assert middleware_order == ["before", "handler", "after"]
+
+    def test_resolve_async_exception_handler(self):
+        # GIVEN an async handler that raises with an exception handler registered
+        app = APIGatewayRestResolver()
+
+        @app.exception_handler(ValueError)
+        def handle_value_error(exc):
+            return Response(422, content_types.APPLICATION_JSON, json.dumps({"error": str(exc)}))
+
+        @app.get("/my/path")
+        async def get_lambda():
+            raise ValueError("invalid input")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(API_REST_EVENT, MockLambdaContext()))
+
+        # THEN the exception handler catches the error
+        assert response["statusCode"] == 422
+        assert "invalid input" in response["body"]
+
+    def test_resolve_async_debug_mode(self, capsys):
+        # GIVEN a resolver with debug=True
+        app = APIGatewayRestResolver(debug=True)
+
+        @app.get("/my/path")
+        async def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "debug")
+
+        # WHEN calling resolve_async
+        response = asyncio.run(app.resolve_async(API_REST_EVENT, MockLambdaContext()))
+
+        # THEN debug output includes raw event and middleware stack
+        captured = capsys.readouterr()
+        assert response["statusCode"] == 200
+        assert "Processed Middlewares:" in captured.out
+        assert "httpMethod" in captured.out
+
+    def test_resolve_async_with_base_proxy_event(self):
+        # GIVEN a resolver and a BaseProxyEvent passed directly
+        from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
+
+        app = APIGatewayRestResolver()
+
+        @app.get("/my/path")
+        async def get_lambda():
+            return Response(200, content_types.TEXT_HTML, "from proxy event")
+
+        # WHEN calling resolve_async with a data class instead of raw dict
+        proxy_event = APIGatewayProxyEvent(API_REST_EVENT)
+
+        with pytest.warns(UserWarning, match="You don't need to serialize event"):
+            response = asyncio.run(app.resolve_async(proxy_event, MockLambdaContext()))
+
+        # THEN it still works after extracting raw_event
+        assert response["statusCode"] == 200
+        assert response["body"] == "from proxy event"
