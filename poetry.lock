@@ -4699,14 +4699,14 @@ types-setuptools = "*"
 
 [[package]]
 name = "types-protobuf"
-version = "7.34.1.20260403"
+version = "7.34.1.20260408"
 description = "Typing stubs for protobuf"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_protobuf-7.34.1.20260403-py3-none-any.whl", hash = "sha256:16d9bbca52ab0f306279958878567df2520f3f5579059419b0ce149a0ad1e332"},
-    {file = "types_protobuf-7.34.1.20260403.tar.gz", hash = "sha256:8d7881867888e667eb9563c08a916fccdc12bdb5f9f34c31d217cce876e36765"},
+    {file = "types_protobuf-7.34.1.20260408-py3-none-any.whl", hash = "sha256:ebbcd4e27b145aef6a59bc0cb6c013b3528151c1ba5e7f7337aeee355d276a5e"},
+    {file = "types_protobuf-7.34.1.20260408.tar.gz", hash = "sha256:e2c0a0430e08c75b52671a6f0035abfdcc791aad12af16274282de1b721758ab"},
 ]
 
 [[package]]
