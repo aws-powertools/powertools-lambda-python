@@ -167,7 +167,7 @@ class IdempotencyHandler:
             # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
             # way of retrieving the existing record after a failed conditional write operation.
             record = exc.old_data_record or self._get_idempotency_record()
-            if is_replay and record is not None and record.status == "INPROGRESS":
+            if is_replay and record is not None and record.status == STATUS_CONSTANTS["INPROGRESS"]:
                 return self._get_function_response()
             # If a record is found, handle it for status
             if record:
@@ -296,7 +296,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                serialized_response: dict = self.output_serializer.to_dict(response) if response else None
+                serialized_response: dict = self.output_serializer.to_dict(response) if response is not None else None
                 self.persistence_store.save_success(data=self.data, result=serialized_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
