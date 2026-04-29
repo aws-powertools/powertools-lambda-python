@@ -330,7 +330,7 @@ def test_item_to_datarecord_conversion(valid_record):
     assert record.in_progress_expiry_timestamp == item[layer.in_progress_expiry_attr]
 
 
-def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_store_redis):
+def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_store_standalone_redis):
     """
     When data_attr or validation_key_attr is missing from Redis,
     response_data and payload_hash should be None — not the string "None".
@@ -338,16 +338,16 @@ def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_s
     """
     idempotency_key = "test-func#abc123"
     item = {
-        persistence_store_redis.status_attr: "COMPLETED",
-        persistence_store_redis.expiry_attr: 9999999999,
+        persistence_store_standalone_redis.status_attr: "COMPLETED",
+        persistence_store_standalone_redis.expiry_attr: 9999999999,
         # data_attr and validation_key_attr intentionally absent
     }
 
-    record = persistence_store_redis._item_to_data_record(idempotency_key, item)
+    record = persistence_store_standalone_redis._item_to_data_record(idempotency_key, item)
 
     assert record.response_data is None
     assert record.payload_hash is None
-    
+
 
 def test_idempotent_function_and_lambda_handler_redis_basic(
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
