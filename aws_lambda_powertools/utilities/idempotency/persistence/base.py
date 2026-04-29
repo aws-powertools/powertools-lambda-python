@@ -136,7 +136,7 @@ class BasePersistenceLayer(ABC):
         elif isinstance(data, (int, float, bool)):
             return False
         return not data
-        
+
     def _get_hashed_payload(self, data: dict[str, Any]) -> str:
         """
         Extract payload using validation key jmespath and return a hashed representation
