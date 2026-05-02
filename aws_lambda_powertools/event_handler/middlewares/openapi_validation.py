@@ -296,9 +296,13 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
                 # JSON serialize the body without validation
                 response.body = jsonable_encoder(response.body, custom_serializer=self._validation_serializer)
         else:
+            # ALB resolver converts None body to "" to prevent ALB 5xx errors,
+            # but the validation should still see it as None.
+            response_content = None if response.body == "" and field.type_ is None else response.body
+
             response.body = self._serialize_response_with_validation(
                 field=field,
-                response_content=response.body,
+                response_content=response_content,
                 has_route_custom_response_validation=route.custom_response_validation_http_code is not None,
             )
 
