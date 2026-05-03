@@ -298,7 +298,7 @@ class OpenAPIResponseValidationMiddleware(BaseMiddlewareHandler):
         else:
             # ALB resolver converts None body to "" to prevent ALB 5xx errors,
             # but the validation should still see it as None.
-            response_content = None if response.body == "" and field.type_ is None else response.body
+            response_content = None if response.body == "" and field.type_ in (None, type(None)) else response.body
 
             response.body = self._serialize_response_with_validation(
                 field=field,

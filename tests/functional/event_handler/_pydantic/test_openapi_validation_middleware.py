@@ -4245,3 +4245,21 @@ def test_alb_response_none_body_with_validation(gw_event_alb):
     result = app(gw_event_alb, {})
     assert result["statusCode"] == 204
     assert result["body"] == ""
+
+
+def test_alb_response_typed_none_body_with_validation(gw_event_alb):
+    # GIVEN an ALBResolver with validation enabled
+    app = ALBResolver(enable_validation=True)
+
+    gw_event_alb["path"] = "/no-content"
+    gw_event_alb["httpMethod"] = "DELETE"
+
+    # WHEN a handler returns Response[None] with body=None
+    @app.delete("/no-content")
+    def handler() -> Response[None]:
+        return Response(status_code=204, body=None)
+
+    # THEN the response should be 204 with empty body (not 422 validation error)
+    result = app(gw_event_alb, {})
+    assert result["statusCode"] == 204
+    assert result["body"] == ""
