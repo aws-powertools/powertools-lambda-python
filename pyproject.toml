@@ -129,7 +129,7 @@ mkdocs-llmstxt = ">=0.2,<0.5"
 avro = "^1.12.0"
 protobuf = ">=6.30.2,<8.0.0"
 types-protobuf = ">=6.30.2.20250516,<8.0.0.0"
-ty = ">=0.0.23,<0.0.33"
+ty = ">=0.0.23,<0.0.35"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
