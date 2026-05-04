@@ -9,7 +9,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     Response,
 )
 from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
-from aws_lambda_powertools.event_handler.middlewares.async_utils import AsyncMiddlewareFrame
+from aws_lambda_powertools.event_handler.middlewares.async_utils import AsyncMiddlewareFrame, wrap_middleware_async
 from tests.functional.utils import load_event
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -43,6 +43,28 @@ def test_sync_middleware_raising_before_next_does_not_deadlock():
     # THEN the exception propagates without deadlocking
     with pytest.raises(AuthError, match="denied"):
         asyncio.run(frame(app))
+
+
+def test_wrap_middleware_async_sync_raising_before_next_does_not_deadlock():
+    # GIVEN a sync middleware that raises before calling next(), using wrap_middleware_async
+    # This exercises _run_sync_middleware_in_thread directly
+    app = _make_app()
+
+    class AuthError(Exception):
+        pass
+
+    def failing_middleware(app, next_middleware):
+        raise AuthError("denied")
+
+    async def next_handler(app):
+        return Response(200, content_types.TEXT_HTML, "should not reach")
+
+    wrapped = wrap_middleware_async(failing_middleware, next_handler)
+
+    # WHEN calling the wrapped middleware
+    # THEN the exception propagates without deadlocking
+    with pytest.raises(AuthError, match="denied"):
+        asyncio.run(wrapped(app))
 
 
 def test_async_middleware_raising_before_next_propagates():
