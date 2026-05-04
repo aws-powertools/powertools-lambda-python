@@ -86,12 +86,19 @@ async def _run_sync_middleware_in_thread(
             middleware_result_holder.append(result)
         except Exception as e:
             middleware_error_holder.append(e)
+        finally:
+            middleware_called_next.set()
 
     thread = threading.Thread(target=run_middleware, daemon=True)
     thread.start()
 
-    # Wait for the middleware to call next()
+    # Wait for the middleware to call next() or raise
     await middleware_called_next.wait()
+
+    # If middleware raised before calling next, propagate immediately
+    if not next_app_holder:
+        thread.join()
+        raise middleware_error_holder[0]
 
     # Resolve the async next_handler on the event-loop
     real_response = await next_handler(next_app_holder[0])
