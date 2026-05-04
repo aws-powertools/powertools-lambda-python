@@ -5,15 +5,55 @@
 # Unreleased
 
 
+<a name="v3.29.0"></a>
+## [v3.29.0] - 2026-05-04
+## Bug Fixes
+
+* **event_handler:** prevent deadlock when async middleware raises before calling next() ([#8196](https://github.com/aws-powertools/powertools-lambda-python/issues/8196))
+
+## Maintenance
+
+* version bump
+
+
 <a name="v3.28.0"></a>
 ## [v3.28.0] - 2026-04-14
 ## Bug Fixes
 
 * **data_class:** merge querystring parameters in ALB/APIGW classes ([#8154](https://github.com/aws-powertools/powertools-lambda-python/issues/8154))
+* **event_handler:** read swagger files with UTF-8 encoding ([#8131](https://github.com/aws-powertools/powertools-lambda-python/issues/8131))
+
+## Code Refactoring
+
+* **event_handler:** refactoring encoder file ([#8126](https://github.com/aws-powertools/powertools-lambda-python/issues/8126))
+* **event_handler:** refactoring proxy events ([#8125](https://github.com/aws-powertools/powertools-lambda-python/issues/8125))
+* **event_handler:** refactoring params to reduce code ([#8124](https://github.com/aws-powertools/powertools-lambda-python/issues/8124))
+* **event_handler:** extract OpenAPI schema generation from Route class ([#8098](https://github.com/aws-powertools/powertools-lambda-python/issues/8098))
+* **event_handlers:** remove unnecessary init methods ([#8127](https://github.com/aws-powertools/powertools-lambda-python/issues/8127))
+
+## Documentation
+
+* adding new Lambda features ([#7917](https://github.com/aws-powertools/powertools-lambda-python/issues/7917))
+* add openapi docs ([#7939](https://github.com/aws-powertools/powertools-lambda-python/issues/7939))
+
+## Features
+
+* **event_handler:** enrich request object ([#8153](https://github.com/aws-powertools/powertools-lambda-python/issues/8153))
+* **event_handler:** adding status_code OpenAPI field ([#8130](https://github.com/aws-powertools/powertools-lambda-python/issues/8130))
+* **event_handler:** add Dependency injection with Depends() ([#8128](https://github.com/aws-powertools/powertools-lambda-python/issues/8128))
 
 ## Maintenance
 
 * version bump
+* bump dependabot dependencies. ([#8152](https://github.com/aws-powertools/powertools-lambda-python/issues/8152))
+* **deps:** bump cryptography from 46.0.6 to 46.0.7 ([#8132](https://github.com/aws-powertools/powertools-lambda-python/issues/8132))
+* **deps-dev:** bump aws-cdk from 2.1117.0 to 2.1118.0 in the aws-cdk group ([#8142](https://github.com/aws-powertools/powertools-lambda-python/issues/8142))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20260305 to 2.9.0.20260402 ([#8114](https://github.com/aws-powertools/powertools-lambda-python/issues/8114))
+* **deps-dev:** bump aws-cdk from 2.1115.0 to 2.1117.0 in the aws-cdk group ([#8111](https://github.com/aws-powertools/powertools-lambda-python/issues/8111))
+* **deps-dev:** bump boto3-stubs from 1.42.74 to 1.42.84 ([#8115](https://github.com/aws-powertools/powertools-lambda-python/issues/8115))
+* **deps-dev:** bump types-protobuf from 6.32.1.20260221 to 7.34.1.20260403 ([#8117](https://github.com/aws-powertools/powertools-lambda-python/issues/8117))
+* **deps-dev:** bump testcontainers from 4.14.1 to 4.14.2 ([#8116](https://github.com/aws-powertools/powertools-lambda-python/issues/8116))
+* **deps-dev:** bump cfn-lint from 1.46.0 to 1.48.1 ([#8113](https://github.com/aws-powertools/powertools-lambda-python/issues/8113))
 
 
 <a name="v3.27.0"></a>
@@ -7626,7 +7666,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.28.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...HEAD
+[v3.29.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.28.0...v3.29.0
 [v3.28.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.27.0...v3.28.0
 [v3.27.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.26.0...v3.27.0
 [v3.26.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.25.0...v3.26.0
