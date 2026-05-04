@@ -3343,22 +3343,13 @@ class ALBResolver(ApiGatewayResolver):
         # ALB doesn't have a stage variable, so we just return an empty string
         return ""
 
-    # BedrockResponse is not used here but adding the same signature to keep strong typing
     @override
     def _to_response(self, result: dict | tuple | Response | BedrockResponse) -> Response | BedrockResponse:
         """Convert the route's result to a Response
 
         ALB requires a non-null body otherwise it converts as HTTP 5xx
-
-         3 main result types are supported:
-
-        - Dict[str, Any]: Rest api response with just the Dict to json stringify and content-type is set to
-          application/json
-        - Tuple[dict, int]: Same dict handling as above but with the option of including a status code
-        - Response: returned as is, and allows for more flexibility
         """
-
-        # NOTE: Minor override for early return on Response with null body for ALB
+        # ALB doesn't support null body - convert before building the final response
         if isinstance(result, Response) and result.body is None:
             logger.debug("ALB doesn't allow None responses; converting to empty string")
             result.body = ""
