@@ -1,2 +1,2 @@
 aws-lambda-powertools[tracer]
-requests>=2.32.0
+requests>=2.33.1

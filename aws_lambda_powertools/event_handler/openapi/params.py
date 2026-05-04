@@ -901,7 +901,7 @@ def analyze_param(
     if is_response_param:
         field_info.default = Required
 
-    field = _create_model_field(field_info, type_annotation, param_name, is_path_param)
+    field = _create_model_field(field_info, type_annotation, param_name, is_path_param, is_response_param)
     return field
 
 
@@ -1138,6 +1138,7 @@ def _create_model_field(
     type_annotation: Any,
     param_name: str,
     is_path_param: bool,
+    is_response_param: bool = False,
 ) -> ModelField | None:
     """
     Create a new ModelField from a FieldInfo and type annotation.
@@ -1164,4 +1165,5 @@ def _create_model_field(
         alias=field_info.alias,
         required=field_info.default in (Required, Undefined),
         field_info=field_info,
+        mode="serialization" if is_response_param else "validation",
     )
