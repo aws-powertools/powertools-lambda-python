@@ -6,7 +6,7 @@ status: new
 
 <!-- markdownlint-disable MD043 -->
 
-The Metadata utility allows you to fetch data from the [AWS Lambda Metadata Endpoint (LMDS)](https://docs.aws.amazon.com/lambda/latest/dg/lambda-metadata-endpoint.html){target="_blank"}. This can be useful for retrieving information about the Lambda execution environment, such as the Availability Zone ID.
+The Metadata utility allows you to fetch data from the [AWS Lambda Metadata Endpoint (LMDS)](https://docs.aws.amazon.com/lambda/latest/dg/configuration-metadata-endpoint.html){target="_blank"}. This can be useful for retrieving information about the Lambda execution environment, such as the Availability Zone ID.
 
 ## Key features
 
