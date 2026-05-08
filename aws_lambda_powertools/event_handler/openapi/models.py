@@ -26,7 +26,11 @@ class OpenAPIExtensions(BaseModel):
     """
 
     openapi_extensions: dict[str, Any] | None = None
-
+    
+    # If the 'openapi_extensions' field is present in the 'values' dictionary,
+    # And if the extension starts with x- (must respect the RFC)
+    # update the 'values' dictionary with the contents of 'openapi_extensions',
+    # and then remove the 'openapi_extensions' field from the 'values' dictionary
     model_config = {"extra": "allow"}
 
     @model_validator(mode="before")
