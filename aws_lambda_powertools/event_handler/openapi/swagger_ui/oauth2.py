@@ -1,4 +1,6 @@
 # ruff: noqa: E501 FA100
+from __future__ import annotations
+
 import warnings
 from typing import Sequence
 
