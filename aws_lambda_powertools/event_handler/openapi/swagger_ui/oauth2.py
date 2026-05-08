@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Optional, Sequence
+from typing import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -49,7 +49,7 @@ class OAuth2Config(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
     @field_validator("clientSecret")
-    def client_secret_only_on_dev(cls, v: Optional[str]) -> Optional[str]:
+    def client_secret_only_on_dev(cls, v: str | None) -> str | None:
         if not v:
             return None
 
