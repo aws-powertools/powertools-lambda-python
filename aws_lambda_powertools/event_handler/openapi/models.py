@@ -1,5 +1,4 @@
 # ruff: noqa: FA100
-# ruff: noqa: FA100
 from enum import Enum
 from typing import Any, Literal, Union
 
@@ -27,11 +26,7 @@ class OpenAPIExtensions(BaseModel):
     """
 
     openapi_extensions: dict[str, Any] | None = None
-    
-    # If the 'openapi_extensions' field is present in the 'values' dictionary,
-    # And if the extension starts with x- (must respect the RFC)
-    # update the 'values' dictionary with the contents of 'openapi_extensions',
-    # and then remove the 'openapi_extensions' field from the 'values' dictionary
+
     # If the 'openapi_extensions' field is present in the 'values' dictionary,
     # And if the extension starts with x- (must respect the RFC)
     # update the 'values' dictionary with the contents of 'openapi_extensions',
@@ -156,11 +151,11 @@ class Schema(BaseModel):
     else_: "SchemaOrBool | None" = Field(default=None, alias="else")
     dependentSchemas: dict[str, "SchemaOrBool"] | None = None
     prefixItems: list["SchemaOrBool"] | None = None
-    items: Union["SchemaOrBool", list["SchemaOrBool"]] | None = None
-    contains: "SchemaOrBool | None" = None
     # MAINTENANCE: uncomment and remove below when deprecating Pydantic v1
     # MAINTENANCE: It generates a list of schemas for tuples, before prefixItems was available
     # MAINTENANCE: items: Optional["SchemaOrBool"] = None
+    items: Union["SchemaOrBool", list["SchemaOrBool"]] | None = None
+    contains: "SchemaOrBool | None" = None
     properties: dict[str, "SchemaOrBool"] | None = None
     patternProperties: dict[str, "SchemaOrBool"] | None = None
     additionalProperties: "SchemaOrBool | None" = None
@@ -332,9 +327,9 @@ class Operation(OpenAPIExtensions):
     operationId: str | None = None
     parameters: list[Union[Parameter, Reference]] | None = None
     requestBody: Union[RequestBody, Reference] | None = None
+    # Using Any for Specification Extensions
     responses: dict[int, Union[Response, Any]] | None = None
     callbacks: dict[str, Union[dict[str, "PathItem"], Reference]] | None = None
-    # Using Any for Specification Extensions
     deprecated: bool | None = None
     security: list[dict[str, list[str]]] | None = None
     servers: list[Server] | None = None
@@ -462,10 +457,10 @@ class Components(BaseModel):
     headers: dict[str, Union[Header, Reference]] | None = None
     securitySchemes: dict[str, Union[SecurityScheme, Reference]] | None = None
     links: dict[str, Union[Link, Reference]] | None = None
+    # Using Any for Specification Extensions
     callbacks: dict[str, Union[dict[str, PathItem], Reference, Any]] | None = None
     pathItems: dict[str, Union[PathItem, Reference]] | None = None
 
-    # Using Any for Specification Extensions
     model_config = MODEL_CONFIG_ALLOW
 
 
@@ -475,9 +470,9 @@ class OpenAPI(OpenAPIExtensions):
     info: Info
     jsonSchemaDialect: str | None = None
     servers: list[Server] | None = None
+    # Using Any for Specification Extensions
     paths: dict[str, Union[PathItem, Any]] | None = None
     webhooks: dict[str, Union[PathItem, Reference]] | None = None
-    # Using Any for Specification Extensions
     components: Components | None = None
     security: list[dict[str, list[str]]] | None = None
     tags: list[Tag] | None = None
