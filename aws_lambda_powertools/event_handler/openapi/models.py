@@ -1,4 +1,5 @@
 # ruff: noqa: FA100
+# ruff: noqa: FA100
 from enum import Enum
 from typing import Any, Literal, Union
 
@@ -31,6 +32,10 @@ class OpenAPIExtensions(BaseModel):
     # And if the extension starts with x- (must respect the RFC)
     # update the 'values' dictionary with the contents of 'openapi_extensions',
     # and then remove the 'openapi_extensions' field from the 'values' dictionary
+    # If the 'openapi_extensions' field is present in the 'values' dictionary,
+    # And if the extension starts with x- (must respect the RFC)
+    # update the 'values' dictionary with the contents of 'openapi_extensions',
+    # and then remove the 'openapi_extensions' field from the 'values' dictionary
     model_config = {"extra": "allow"}
 
     @model_validator(mode="before")
@@ -48,6 +53,7 @@ class OpenAPIExtensions(BaseModel):
         return self
 
 
+# https://swagger.io/specification/#contact-object
 class Contact(BaseModel):
     name: str | None = None
     url: AnyUrl | None = None
@@ -56,6 +62,7 @@ class Contact(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#license-object
 class License(BaseModel):
     name: str
     identifier: str | None = None
@@ -64,6 +71,7 @@ class License(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#info-object
 class Info(BaseModel):
     title: str
     description: str | None = None
@@ -76,6 +84,7 @@ class Info(BaseModel):
     model_config = MODEL_CONFIG_IGNORE
 
 
+# https://swagger.io/specification/#server-variable-object
 class ServerVariable(BaseModel):
     enum: Annotated[list[str] | None, Field(min_length=1)] = None
     default: str
@@ -84,6 +93,7 @@ class ServerVariable(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#server-object
 class Server(OpenAPIExtensions):
     url: Union[AnyUrl, str]
     description: str | None = None
@@ -92,15 +102,18 @@ class Server(OpenAPIExtensions):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#reference-object
 class Reference(BaseModel):
     ref: str = Field(alias="$ref")
 
 
+# https://swagger.io/specification/#discriminator-object
 class Discriminator(BaseModel):
     propertyName: str
     mapping: dict[str, str] | None = None
 
 
+# https://swagger.io/specification/#xml-object
 class XML(BaseModel):
     name: str | None = None
     namespace: str | None = None
@@ -111,6 +124,7 @@ class XML(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#external-documentation-object
 class ExternalDocumentation(BaseModel):
     description: str | None = None
     url: AnyUrl
@@ -118,7 +132,10 @@ class ExternalDocumentation(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#schema-object
 class Schema(BaseModel):
+    # Ref: JSON Schema 2020-12: https://json-schema.org/draft/2020-12/json-schema-core.html#name-the-json-schema-core-vocabu
+    # Core Vocabulary
     schema_: str | None = Field(default=None, alias="$schema")
     vocabulary: str | None = Field(default=None, alias="$vocabulary")
     id: str | None = Field(default=None, alias="$id")  # noqa: A003
@@ -128,6 +145,8 @@ class Schema(BaseModel):
     dynamicRef: str | None = Field(default=None, alias="$dynamicRef")
     defs: dict[str, "SchemaOrBool"] | None = Field(default=None, alias="$defs")
     comment: str | None = Field(default=None, alias="$comment")
+    # Ref: JSON Schema 2020-12: https://json-schema.org/draft/2020-12/json-schema-core.html#name-a-vocabulary-for-applying-s
+    # A Vocabulary for Applying Subschemas
     allOf: list["SchemaOrBool"] | None = None
     anyOf: list["SchemaOrBool"] | None = None
     oneOf: list["SchemaOrBool"] | None = None
@@ -139,12 +158,17 @@ class Schema(BaseModel):
     prefixItems: list["SchemaOrBool"] | None = None
     items: Union["SchemaOrBool", list["SchemaOrBool"]] | None = None
     contains: "SchemaOrBool | None" = None
+    # MAINTENANCE: uncomment and remove below when deprecating Pydantic v1
+    # MAINTENANCE: It generates a list of schemas for tuples, before prefixItems was available
+    # MAINTENANCE: items: Optional["SchemaOrBool"] = None
     properties: dict[str, "SchemaOrBool"] | None = None
     patternProperties: dict[str, "SchemaOrBool"] | None = None
     additionalProperties: "SchemaOrBool | None" = None
     propertyNames: "SchemaOrBool | None" = None
     unevaluatedItems: "SchemaOrBool | None" = None
     unevaluatedProperties: "SchemaOrBool | None" = None
+    # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-a-vocabulary-for-structural
+    # A Vocabulary for Structural Validation
     type: str | None = None  # noqa: A003
     enum: list[Any] | None = None
     const: Any | None = None
@@ -165,10 +189,16 @@ class Schema(BaseModel):
     minProperties: int | None = Field(default=None, ge=0)
     required: list[str] | None = None
     dependentRequired: dict[str, set[str]] | None = None
+    # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-vocabularies-for-semantic-c
+    # Vocabularies for Semantic Content With "format"
     format: str | None = None  # noqa: A003
+    # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-a-vocabulary-for-the-conten
+    # A Vocabulary for the Contents of String-Encoded Data
     contentEncoding: str | None = None
     contentMediaType: str | None = None
     contentSchema: "SchemaOrBool | None" = None
+    # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-a-vocabulary-for-basic-meta
+    # A Vocabulary for Basic Meta-Data Annotations
     title: str | None = None
     description: str | None = None
     default: Any | None = None
@@ -176,6 +206,8 @@ class Schema(BaseModel):
     readOnly: bool | None = None
     writeOnly: bool | None = None
     examples: list[Any] | None = None
+    # Ref: OpenAPI 3.0.0: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#schema-object
+    # Schema Object
     discriminator: Discriminator | None = None
     xml: XML | None = None
     externalDocs: ExternalDocumentation | None = None
@@ -183,9 +215,12 @@ class Schema(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# Ref: https://json-schema.org/draft/2020-12/json-schema-core.html#name-json-schema-documents
+# A JSON Schema MUST be an object or a boolean.
 SchemaOrBool = Union[Schema, bool]
 
 
+# https://swagger.io/specification/#example-object
 class Example(BaseModel):
     summary: str | None = None
     description: str | None = None
@@ -202,6 +237,7 @@ class ParameterInType(Enum):
     cookie = "cookie"
 
 
+# https://swagger.io/specification/#encoding-object
 class Encoding(BaseModel):
     contentType: str | None = None
     headers: dict[str, Union["Header", Reference]] | None = None
@@ -212,6 +248,7 @@ class Encoding(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#media-type-object
 class MediaType(BaseModel):
     schema_: Union[Schema, Reference] | None = Field(default=None, alias="schema")
     examples: dict[str, Union[Example, Reference]] | None = None
@@ -220,15 +257,18 @@ class MediaType(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#parameter-object
 class ParameterBase(BaseModel):
     description: str | None = None
     required: bool | None = None
     deprecated: bool | None = None
+    # Serialization rules for simple scenarios
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
     schema_: Union[Schema, Reference] | None = Field(default=None, alias="schema")
     examples: dict[str, Union[Example, Reference]] | None = None
+    # Serialization rules for more complex scenarios
     content: dict[str, MediaType] | None = None
 
     model_config = MODEL_CONFIG_ALLOW
@@ -243,6 +283,7 @@ class Header(ParameterBase):
     pass
 
 
+# https://swagger.io/specification/#request-body-object
 class RequestBody(BaseModel):
     description: str | None = None
     content: dict[str, MediaType]
@@ -251,6 +292,7 @@ class RequestBody(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#link-object
 class Link(BaseModel):
     operationRef: str | None = None
     operationId: str | None = None
@@ -262,6 +304,7 @@ class Link(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#response-object
 class Response(BaseModel):
     description: str
     headers: dict[str, Union[Header, Reference]] | None = None
@@ -271,6 +314,7 @@ class Response(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#tag-object
 class Tag(BaseModel):
     name: str
     description: str | None = None
@@ -279,6 +323,7 @@ class Tag(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#operation-object
 class Operation(OpenAPIExtensions):
     tags: list[str] | None = None
     summary: str | None = None
@@ -289,6 +334,7 @@ class Operation(OpenAPIExtensions):
     requestBody: Union[RequestBody, Reference] | None = None
     responses: dict[int, Union[Response, Any]] | None = None
     callbacks: dict[str, Union[dict[str, "PathItem"], Reference]] | None = None
+    # Using Any for Specification Extensions
     deprecated: bool | None = None
     security: list[dict[str, list[str]]] | None = None
     servers: list[Server] | None = None
@@ -296,6 +342,7 @@ class Operation(OpenAPIExtensions):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#path-item-object
 class PathItem(BaseModel):
     ref: str | None = Field(default=None, alias="$ref")
     summary: str | None = None
@@ -314,6 +361,7 @@ class PathItem(BaseModel):
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#security-scheme-object
 class SecuritySchemeType(Enum):
     apiKey = "apiKey"
     http = "http"
@@ -404,6 +452,7 @@ class MutualTLS(SecurityBase):
 SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer, MutualTLS]
 
 
+# https://swagger.io/specification/#components-object
 class Components(BaseModel):
     schemas: dict[str, Union[Schema, Reference]] | None = None
     responses: dict[str, Union[Response, Reference]] | None = None
@@ -416,9 +465,11 @@ class Components(BaseModel):
     callbacks: dict[str, Union[dict[str, PathItem], Reference, Any]] | None = None
     pathItems: dict[str, Union[PathItem, Reference]] | None = None
 
+    # Using Any for Specification Extensions
     model_config = MODEL_CONFIG_ALLOW
 
 
+# https://swagger.io/specification/#openapi-object
 class OpenAPI(OpenAPIExtensions):
     openapi: str
     info: Info
@@ -426,6 +477,7 @@ class OpenAPI(OpenAPIExtensions):
     servers: list[Server] | None = None
     paths: dict[str, Union[PathItem, Any]] | None = None
     webhooks: dict[str, Union[PathItem, Reference]] | None = None
+    # Using Any for Specification Extensions
     components: Components | None = None
     security: list[dict[str, list[str]]] | None = None
     tags: list[Tag] | None = None
