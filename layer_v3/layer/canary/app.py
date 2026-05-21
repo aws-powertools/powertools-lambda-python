@@ -66,7 +66,7 @@ def on_event(event, context):
 
 def on_create(event):
     props = event["ResourceProperties"]
-    logger.info("create new resource with properties %s" % props)
+    logger.info(f"create new resource with properties {props}")
     handler(event)
 
 
