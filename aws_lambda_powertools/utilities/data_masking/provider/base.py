@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 PRESERVE_CHARS = set("-_. ")
-_regex_cache = {}
+_regex_cache: dict[str, re.Pattern[str]] = {}
 
 JSON_DUMPS_CALL = functools.partial(json.dumps, ensure_ascii=False)
 
