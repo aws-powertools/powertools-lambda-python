@@ -267,39 +267,39 @@ typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "53.18.0"
+version = "53.24.0"
 description = "Schema for the protocol between CDK framework and CDK CLI"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_cloud_assembly_schema-53.18.0-py3-none-any.whl", hash = "sha256:291a9645d70bb1e2fd73fb8e58fd48503353751b8330d8f2d72dafc13bdf84ac"},
-    {file = "aws_cdk_cloud_assembly_schema-53.18.0.tar.gz", hash = "sha256:bb377de485f5214a47c78268b2a985332c83d7fd5c06922d1a9538ba31320afc"},
+    {file = "aws_cdk_cloud_assembly_schema-53.24.0-py3-none-any.whl", hash = "sha256:360c4804f3073601ac320d1773432bc45b34201d7c8fb85aff7ed536801efb0c"},
+    {file = "aws_cdk_cloud_assembly_schema-53.24.0.tar.gz", hash = "sha256:f999f4c777deaca6631c61993bf5583022ff57c3a94a65930e2fc6b68cb7c407"},
 ]
 
 [package.dependencies]
-jsii = ">=1.128.0,<2.0.0"
+jsii = ">=1.129.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.253.1"
+version = "2.254.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.253.1-py3-none-any.whl", hash = "sha256:03a6f5080978f9e3576f490d06fbd1f41f159280d34dbca50721de4a19694136"},
-    {file = "aws_cdk_lib-2.253.1.tar.gz", hash = "sha256:df03363cdaef4d2d7bac368b2d5d2bf4209921d21096cd5f8e5889347fee4793"},
+    {file = "aws_cdk_lib-2.254.0-py3-none-any.whl", hash = "sha256:626095eaa742e0b9d894c3a1bf06a6e7d1245a986165a72408871d41886c6d07"},
+    {file = "aws_cdk_lib-2.254.0.tar.gz", hash = "sha256:ddbef134cad91f8985444f77f052f0337af5f132101ad7aea2215b4775ff7828"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = "2.2.273"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.1,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=53.18.0,<54.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=53.21.0,<54.0.0"
 constructs = ">=10.5.0,<11.0.0"
-jsii = ">=1.128.0,<2.0.0"
+jsii = ">=1.129.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -1031,40 +1031,40 @@ ujson = ["ujson (>=5.10.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.37.55"
+version = "2.38.2"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "cdk_nag-2.37.55-py3-none-any.whl", hash = "sha256:bf83bcdeb98ac20bb813cac291af121d91c5a296fa815e01f93886b4f8b38845"},
-    {file = "cdk_nag-2.37.55.tar.gz", hash = "sha256:e9dc517070ef5a19deef95e79731e5624bd86cd07b56d210380408ea1314e47b"},
+    {file = "cdk_nag-2.38.2-py3-none-any.whl", hash = "sha256:d37f18ae9450f401bcc55d5d82138beee561486806579849cb9be25ff7565904"},
+    {file = "cdk_nag-2.38.2.tar.gz", hash = "sha256:a4d419062ea4d64c2892942214b9184b124eb2bc36d087982007b3455e1ac443"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.176.0,<3.0.0"
-constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.116.0,<2.0.0"
+constructs = ">=10.5.1,<11.0.0"
+jsii = ">=1.128.0,<2.0.0"
 publication = ">=0.0.3"
-typeguard = ">=2.13.3,<4.3.0"
+typeguard = "2.13.3"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.316"
+version = "0.1.317"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
-python-versions = "~=3.9"
+python-versions = "~=3.10"
 groups = ["dev"]
 files = [
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.316-py3-none-any.whl", hash = "sha256:925926882b2978156918536460bbfa03ab1ed0b7641ff0982d7370c8a3f81f83"},
-    {file = "cdklabs_generative_ai_cdk_constructs-0.1.316.tar.gz", hash = "sha256:8347018014753f5c99a14f93ea05756ded83f05286eef6fc712b492364fe173b"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.317-py3-none-any.whl", hash = "sha256:86359377bbb56c946a460b0b7244ad5f9b8be3ab290201ad2e197fc7a6628dfb"},
+    {file = "cdklabs_generative_ai_cdk_constructs-0.1.317.tar.gz", hash = "sha256:e04ed66168736f65cc4d13449a719dbb8d84c7ffb054d22a034865918315d157"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.233.0,<3.0.0"
-cdk-nag = ">=2.37.55,<3.0.0"
-constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.127.0,<2.0.0"
+aws-cdk-lib = ">=2.254.0,<3.0.0"
+cdk-nag = ">=2.38.2,<3.0.0"
+constructs = ">=10.6.0,<11.0.0"
+jsii = ">=1.130.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -1375,18 +1375,18 @@ development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
 
 [[package]]
 name = "constructs"
-version = "10.5.1"
+version = "10.6.0"
 description = "A programming model for software-defined state"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "constructs-10.5.1-py3-none-any.whl", hash = "sha256:fc5c14f6b2770c8542a43e298aa29b63dee4b18701763e8c0fdce202624c3a7c"},
-    {file = "constructs-10.5.1.tar.gz", hash = "sha256:c0e90bb2b9c2782f292017820b91714321cb78393c8965c9362b0b624bfaf23b"},
+    {file = "constructs-10.6.0-py3-none-any.whl", hash = "sha256:ad4ffabdb53c17cde00fb94e441a1ba9fddac57c92ad49d263f8dbd416cec513"},
+    {file = "constructs-10.6.0.tar.gz", hash = "sha256:bc55d1d390142424861e5ff5c6b8c243c4bae18fe7302e0939c2003f329ba365"},
 ]
 
 [package.dependencies]
-jsii = ">=1.126.0,<2.0.0"
+jsii = ">=1.127.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -2319,14 +2319,14 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.128.0"
+version = "1.130.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "jsii-1.128.0-py3-none-any.whl", hash = "sha256:25912f66516c08c21dfcd350c9efd4c71548a98fd1af61ed08e73d99a73e0af0"},
-    {file = "jsii-1.128.0.tar.gz", hash = "sha256:05f21e1c16e899cd65db27e54c9379b561cf368c6d670b60ea012bffa801b6d7"},
+    {file = "jsii-1.130.0-py3-none-any.whl", hash = "sha256:ce50e11ea588fe6b2d0766d90edaf4c78b9e97e2e1f075fbd8bc29349c6503c8"},
+    {file = "jsii-1.130.0.tar.gz", hash = "sha256:7436ae382e2de27970b34a4ccfef953a45980c5070241c1bd610bf3af68a2d6b"},
 ]
 
 [package.dependencies]
