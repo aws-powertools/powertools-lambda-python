@@ -21,7 +21,7 @@ client = Redis(
     max_connections=1000,
 )
 
-persistence_layer = CachePersistenceLayer(client=client)
+persistence_layer = CachePersistenceLayer(client=client)  # type: ignore[arg-type]
 
 
 @dataclass
