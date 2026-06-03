@@ -60,7 +60,7 @@ jobs:
     environment: Prod (Readonly)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -118,7 +118,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-east-1
@@ -188,7 +188,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-west-1
