@@ -24,7 +24,7 @@ config = CircuitBreakerConfig(
 
 
 class PaymentBackend:
-    def charge(self, order: dict) -> dict: ...
+    def charge(self, order: dict): ...
 
 
 payment_api = PaymentBackend()
@@ -40,4 +40,5 @@ def lambda_handler(event: dict, context: LambdaContext):
         return charge(event)
     except CircuitBreakerOpenError as exc:
         # No callback registered, so we decide what to do with the rejected request here.
-        return {"statusCode": 202, "circuit": exc.circuit.name}
+        circuit_name = exc.circuit.name if exc.circuit else "unknown"
+        return {"statusCode": 202, "circuit": circuit_name}

@@ -16,7 +16,7 @@ sqs = boto3.client("sqs")
 
 
 class PaymentBackend:
-    def charge(self, order: dict) -> dict: ...
+    def charge(self, order: dict): ...
 
 
 payment_api = PaymentBackend()

@@ -149,10 +149,10 @@ Register an `on_circuit_open` callback to decide what happens to a rejected requ
 
 If no callback is registered, an open circuit raises `CircuitBreakerOpenError`. Catch it to decide how to respond. The exception carries a `circuit` attribute (`CircuitInfo`) so you can inspect why the request was rejected.
 
-=== "working_with_custom_config.py"
+=== "working_without_callback.py"
 
     ```python hl_lines="5 16-22 38-43"
-    --8<-- "examples/circuit_breaker_alpha/src/working_with_custom_config.py"
+    --8<-- "examples/circuit_breaker_alpha/src/working_without_callback.py"
     ```
 
 ## Configuration

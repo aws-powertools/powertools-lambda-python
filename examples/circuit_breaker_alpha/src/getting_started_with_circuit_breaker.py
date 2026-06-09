@@ -11,7 +11,7 @@ persistence = CircuitBreakerDynamoDBPersistence(table_name=table)
 
 
 class PaymentBackend:
-    def charge(self, order: dict) -> dict: ...
+    def charge(self, order: dict): ...
 
 
 payment_api = PaymentBackend()

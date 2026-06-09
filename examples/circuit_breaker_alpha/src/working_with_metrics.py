@@ -26,7 +26,7 @@ def emit_transition_metric(transition: CircuitTransition) -> None:
 
 
 class PaymentBackend:
-    def charge(self, order: dict) -> dict: ...
+    def charge(self, order: dict): ...
 
 
 payment_api = PaymentBackend()
