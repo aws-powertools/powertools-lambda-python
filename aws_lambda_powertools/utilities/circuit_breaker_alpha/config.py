@@ -61,6 +61,31 @@ class CircuitBreakerConfig:
         ignored_exceptions: tuple[type[Exception], ...] | None = None,
         local_cache_max_age: int = 5,
     ):
+        self._validate(
+            failure_threshold=failure_threshold,
+            recovery_timeout=recovery_timeout,
+            success_threshold=success_threshold,
+            handled_exceptions=handled_exceptions,
+            ignored_exceptions=ignored_exceptions,
+            local_cache_max_age=local_cache_max_age,
+        )
+
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.success_threshold = success_threshold
+        self.handled_exceptions = handled_exceptions
+        self.ignored_exceptions = ignored_exceptions
+        self.local_cache_max_age = local_cache_max_age
+
+    @staticmethod
+    def _validate(
+        failure_threshold: int,
+        recovery_timeout: int,
+        success_threshold: int,
+        handled_exceptions: tuple[type[Exception], ...] | None,
+        ignored_exceptions: tuple[type[Exception], ...] | None,
+        local_cache_max_age: int,
+    ) -> None:
         if handled_exceptions and ignored_exceptions:
             raise CircuitBreakerConfigError(
                 "handled_exceptions and ignored_exceptions are mutually exclusive; pass only one.",
@@ -79,13 +104,6 @@ class CircuitBreakerConfig:
             raise CircuitBreakerConfigError(
                 f"local_cache_max_age must be a non-negative integer, got {local_cache_max_age!r}.",
             )
-
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.success_threshold = success_threshold
-        self.handled_exceptions = handled_exceptions
-        self.ignored_exceptions = ignored_exceptions
-        self.local_cache_max_age = local_cache_max_age
 
     def counts_as_failure(self, exception: Exception) -> bool:
         """
