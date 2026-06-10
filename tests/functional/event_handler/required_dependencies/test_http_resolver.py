@@ -1242,3 +1242,219 @@ async def test_asgi_wrong_method_returns_not_found():
 
     # THEN it returns 404 (method mismatch is treated as not found)
     assert captured["status_code"] == 404
+
+
+# =============================================================================
+# CORS Tests (issue #8267)
+# =============================================================================
+
+
+@pytest.mark.asyncio
+async def test_cors_options_preflight_returns_204():
+    # GIVEN an app with CORSConfig and a POST route
+    from aws_lambda_powertools.event_handler.api_gateway import CORSConfig
+
+    app = HttpResolverLocal(cors=CORSConfig(allow_origin="*"))
+
+    @app.post("/items")
+    def create_item():
+        return {"ok": True}
+
+    # WHEN a browser sends a CORS preflight OPTIONS request
+    scope = {
+        "type": "http",
+        "method": "OPTIONS",
+        "path": "/items",
+        "query_string": b"",
+        "headers": [
+            (b"origin", b"http://localhost:3000"),
+            (b"access-control-request-method", b"POST"),
+        ],
+    }
+
+    receive = make_asgi_receive()
+    captured: dict[str, Any] = {"status_code": None, "headers": []}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+            captured["headers"].extend(message.get("headers", []))
+
+    await app(scope, receive, send)
+
+    # THEN it returns 204 with CORS headers (not 500 or 404)
+    assert captured["status_code"] == 204
+
+    header_names = [name.lower() for name, _ in captured["headers"]]
+    assert b"access-control-allow-origin" in header_names
+    assert b"access-control-allow-methods" in header_names
+
+
+@pytest.mark.asyncio
+async def test_cors_options_preflight_with_exception_handler_does_not_return_500():
+    # GIVEN an app with CORSConfig and a generic exception handler that returns 500
+    import json
+
+    from aws_lambda_powertools.event_handler.api_gateway import CORSConfig
+
+    app = HttpResolverLocal(cors=CORSConfig(allow_origin="*"))
+
+    @app.post("/items")
+    def create_item():
+        return {"ok": True}
+
+    @app.exception_handler(Exception)
+    def handle_server_error(ex: Exception):
+        return Response(
+            status_code=500,
+            content_type="application/json",
+            body=json.dumps({"error": "internal"}),
+        )
+
+    # WHEN a browser sends a CORS preflight OPTIONS request
+    scope = {
+        "type": "http",
+        "method": "OPTIONS",
+        "path": "/items",
+        "query_string": b"",
+        "headers": [
+            (b"origin", b"http://localhost:3000"),
+            (b"access-control-request-method", b"POST"),
+        ],
+    }
+
+    receive = make_asgi_receive()
+    captured: dict[str, Any] = {"status_code": None, "headers": []}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+            captured["headers"].extend(message.get("headers", []))
+
+    await app(scope, receive, send)
+
+    # THEN the OPTIONS request returns 204, not 500
+    assert captured["status_code"] == 204
+    header_names = [name.lower() for name, _ in captured["headers"]]
+    assert b"access-control-allow-origin" in header_names
+
+
+@pytest.mark.asyncio
+async def test_no_cors_options_returns_404():
+    # GIVEN an app WITHOUT CORSConfig
+    app = HttpResolverLocal()
+
+    @app.post("/items")
+    def create_item():
+        return {"ok": True}
+
+    # WHEN a browser sends an OPTIONS request (no CORS configured)
+    scope = {
+        "type": "http",
+        "method": "OPTIONS",
+        "path": "/items",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    await app(scope, receive, send)
+
+    # THEN it returns 404 (no CORS config, no special handling)
+    assert captured["status_code"] == 404
+
+
+@pytest.mark.asyncio
+async def test_cors_options_includes_allowed_methods_header():
+    # GIVEN an app with CORSConfig and multiple routes
+    from aws_lambda_powertools.event_handler.api_gateway import CORSConfig
+
+    app = HttpResolverLocal(cors=CORSConfig(allow_origin="https://example.com"))
+
+    @app.get("/resource")
+    def get_resource():
+        return {"method": "GET"}
+
+    @app.post("/resource")
+    def post_resource():
+        return {"method": "POST"}
+
+    # WHEN an OPTIONS preflight is sent
+    scope = {
+        "type": "http",
+        "method": "OPTIONS",
+        "path": "/resource",
+        "query_string": b"",
+        "headers": [
+            (b"origin", b"https://example.com"),
+            (b"access-control-request-method", b"GET"),
+        ],
+    }
+
+    receive = make_asgi_receive()
+    captured: dict[str, Any] = {"status_code": None, "headers": []}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+            captured["headers"].extend(message.get("headers", []))
+
+    await app(scope, receive, send)
+
+    # THEN 204 is returned with Access-Control-Allow-Methods header
+    assert captured["status_code"] == 204
+    allow_methods_headers = [v for name, v in captured["headers"] if name.lower() == b"access-control-allow-methods"]
+    assert len(allow_methods_headers) == 1
+
+
+@pytest.mark.asyncio
+async def test_cors_disallowed_header_not_in_allow_headers():
+    # GIVEN an app with CORSConfig that only allows specific headers
+    from aws_lambda_powertools.event_handler.api_gateway import CORSConfig
+
+    app = HttpResolverLocal(cors=CORSConfig(allow_origin="*", allow_headers=["X-Custom-Allowed"]))
+
+    @app.post("/items")
+    def create_item():
+        return {"ok": True}
+
+    # WHEN a preflight requests an unlisted header
+    scope = {
+        "type": "http",
+        "method": "OPTIONS",
+        "path": "/items",
+        "query_string": b"",
+        "headers": [
+            (b"origin", b"http://localhost:3000"),
+            (b"access-control-request-method", b"POST"),
+            (b"access-control-request-headers", b"X-Not-Allowed"),
+        ],
+    }
+
+    receive = make_asgi_receive()
+    captured: dict[str, Any] = {"status_code": None, "headers": []}
+
+    async def send(message: dict[str, Any]) -> None:
+        await asyncio.sleep(0)
+        if message["type"] == "http.response.start":
+            captured["status_code"] = message["status"]
+            captured["headers"].extend(message.get("headers", []))
+
+    await app(scope, receive, send)
+
+    # THEN the server still returns 204 (browser enforces the rejection, not the server)
+    assert captured["status_code"] == 204
+
+    # AND the unlisted header is absent from Access-Control-Allow-Headers
+    allow_headers_value = next(
+        (v.decode() for name, v in captured["headers"] if name.lower() == b"access-control-allow-headers"),
+        "",
+    )
+    assert "X-Not-Allowed" not in allow_headers_value
+    # AND the explicitly allowed header IS present
+    assert "X-Custom-Allowed" in allow_headers_value
