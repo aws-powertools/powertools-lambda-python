@@ -27,7 +27,7 @@ redis_client = Redis(
     ssl_ca_certs=f"{abs_lambda_path()}/certs/cache_ca.pem",  # (4)!
 )
 
-persistence_layer = CachePersistenceLayer(client=redis_client)
+persistence_layer = CachePersistenceLayer(client=redis_client)  # type: ignore[arg-type]
 config = IdempotencyConfig(
     expires_after_seconds=2 * 60,  # 2 minutes
 )

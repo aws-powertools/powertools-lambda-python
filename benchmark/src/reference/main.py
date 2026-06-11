@@ -1,4 +1,4 @@
 def handler(event, context):
     return {
-        "message": "success"
+        "message": "success",
     }

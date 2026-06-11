@@ -5,7 +5,7 @@ import json
 import logging
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, cast
 
 import redis
 from typing_extensions import TypeAlias, deprecated
@@ -76,7 +76,7 @@ class RedisClientProtocol(Protocol):
     ) -> bool | None:
         raise NotImplementedError
 
-    def delete(self, keys: bytes | str | memoryview) -> Any:
+    def delete(self, *names: bytes | str | memoryview) -> Any:
         raise NotImplementedError
 
 
@@ -185,7 +185,7 @@ class RedisConnection:
         try:
             if self.url:
                 logger.debug(f"Using URL format to connect to Cache: {self.host}")
-                return client.from_url(url=self.url)
+                return cast(RedisClientProtocol, client.from_url(url=self.url))
             else:
                 # Cache in cluster mode doesn't support db parameter
                 extra_param_connection: dict[str, Any] = {}
@@ -193,14 +193,17 @@ class RedisConnection:
                     extra_param_connection = {"db": self.db_index}
 
                 logger.debug(f"Using arguments to connect to Cache: {self.host}")
-                return client(
-                    host=self.host,
-                    port=self.port,
-                    username=self.username,
-                    password=self.password,
-                    decode_responses=True,
-                    ssl=self.ssl,
-                    **extra_param_connection,
+                return cast(
+                    RedisClientProtocol,
+                    client(
+                        host=self.host,
+                        port=self.port,
+                        username=self.username,
+                        password=self.password,
+                        decode_responses=True,
+                        ssl=self.ssl,
+                        **extra_param_connection,
+                    ),
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect to Cache endpoint: {self.host}")

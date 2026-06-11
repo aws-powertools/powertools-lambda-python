@@ -232,7 +232,7 @@ def test_openapi_enable_validation_disabled():
     schema = app.get_openapi_schema()
     responses = schema.paths["/"].get.responses
 
-    # THE the schema should include a 200 successful response
+    # The schema should include a 200 successful response
     # but not a 422 validation error response since validation is disabled
     assert 200 in responses.keys()
     assert responses[200].description == "Successful Response"

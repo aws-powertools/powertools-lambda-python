@@ -59,7 +59,7 @@ jobs:
         artifact_name: ${{ steps.seal_source_code.outputs.artifact_name }}
         RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -99,7 +99,7 @@ jobs:
       contents: read
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -140,7 +140,7 @@ jobs:
       attestation_hashes: ${{ steps.encoded_hash.outputs.attestation_hashes }}
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -209,7 +209,7 @@ jobs:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
       # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -233,7 +233,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
