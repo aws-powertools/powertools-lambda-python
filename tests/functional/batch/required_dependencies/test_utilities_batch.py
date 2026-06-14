@@ -861,3 +861,27 @@ def test_async_batch_processor_non_lambda_uses_asyncio_run(sqs_event_factory, mo
     # THEN record is processed successfully using asyncio.run()
     assert result == {"batchItemFailures": []}
     assert result == {"batchItemFailures": []}
+
+
+def test_sqs_batch_processor_missing_message_id_does_not_crash_on_handler_failure():
+    processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False)
+
+    def record_handler(record):
+        raise RuntimeError("boom")
+
+    malformed_record = {
+        "body": "{}",
+        "receiptHandle": "rh",
+        "attributes": {"ApproximateReceiveCount": "1"},
+        "messageAttributes": {},
+        "md5OfBody": "abc",
+        "eventSource": "aws:sqs",
+        "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:my-queue",
+        "awsRegion": "us-east-1",
+    }
+
+    with processor(records=[malformed_record], handler=record_handler):
+        processor.process()
+
+    response = processor.response()
+    assert response == {"batchItemFailures": [{"itemIdentifier": ""}]}

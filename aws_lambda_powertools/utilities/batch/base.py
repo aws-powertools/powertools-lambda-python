@@ -335,18 +335,22 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
     # Event Source Data Classes follow python idioms for fields
     # while Parser/Pydantic follows the event field names to the latter
+    def _sqs_failure_item_identifier(self, msg) -> str:
+        # If a message failed due to model validation (e.g., poison pill)
+        # we convert to an event source data class...but self.model is still true
+        # therefore, we do an additional check on whether the failed message is still a model
+        # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
+        if self.model and getattr(msg, "model_validate", None):
+            return msg.messageId
+        data = msg._data if hasattr(msg, "_data") else msg
+        if isinstance(data, dict):
+            return data.get("messageId", "")
+        return msg.message_id
+
     def _collect_sqs_failures(self):
         failures = []
         for msg in self.fail_messages:
-            # If a message failed due to model validation (e.g., poison pill)
-            # we convert to an event source data class...but self.model is still true
-            # therefore, we do an additional check on whether the failed message is still a model
-            # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
-            if self.model and getattr(msg, "model_validate", None):
-                msg_id = msg.messageId
-            else:
-                msg_id = msg.message_id
-            failures.append({"itemIdentifier": msg_id})
+            failures.append({"itemIdentifier": self._sqs_failure_item_identifier(msg)})
         return failures
 
     def _collect_kinesis_failures(self):
