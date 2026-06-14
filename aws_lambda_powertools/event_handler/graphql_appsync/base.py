@@ -25,8 +25,6 @@ class BaseRouter(ABC):
         Examples
         --------
         ```python
-        from typing import Optional
-
         from aws_lambda_powertools.event_handler import AppSyncResolver
         from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
         from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -34,7 +32,7 @@ class BaseRouter(ABC):
         app = AppSyncResolver()
 
         @app.resolver(type_name="Query", field_name="getPost")
-        def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+        def related_posts(event: AppSyncResolverEvent) -> list | None:
             return {"success": "ok"}
 
         def lambda_handler(event, context: LambdaContext) -> dict:
@@ -76,8 +74,6 @@ class BaseRouter(ABC):
         Examples
         --------
         ```python
-        from typing import Optional
-
         from aws_lambda_powertools.event_handler import AppSyncResolver
         from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
         from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -85,7 +81,7 @@ class BaseRouter(ABC):
         app = AppSyncResolver()
 
         @app.batch_resolver(type_name="Query", field_name="getPost")
-        def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+        def related_posts(event: AppSyncResolverEvent, id) -> list | None:
             return {"post_id": id}
 
         def lambda_handler(event, context: LambdaContext) -> dict:
@@ -127,8 +123,6 @@ class BaseRouter(ABC):
         Examples
         --------
         ```python
-        from typing import Optional
-
         from aws_lambda_powertools.event_handler import AppSyncResolver
         from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
         from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -136,7 +130,7 @@ class BaseRouter(ABC):
         app = AppSyncResolver()
 
         @app.async_batch_resolver(type_name="Query", field_name="getPost")
-        async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+        async def related_posts(event: AppSyncResolverEvent, id) -> list | None:
             return {"post_id": id}
 
         def lambda_handler(event, context: LambdaContext) -> dict:
