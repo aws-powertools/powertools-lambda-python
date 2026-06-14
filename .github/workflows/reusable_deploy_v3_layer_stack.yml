@@ -142,7 +142,7 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -157,7 +157,7 @@ jobs:
           pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
           pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}

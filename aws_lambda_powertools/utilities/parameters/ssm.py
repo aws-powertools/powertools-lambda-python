@@ -504,7 +504,7 @@ class SSMProvider(BaseProvider):
         # NOTE: We need to find out whether all parameters must be decrypted or not to know which API to use
         ## Logic:
         ##
-        ## GetParameters API -> When decrypt is used for all parameters in the the batch
+        ## GetParameters API -> When decrypt is used for all parameters in the batch
         ## GetParameter  API -> When decrypt is used for one or more in the batch
 
         if len(decrypt_params) != len(parameters):

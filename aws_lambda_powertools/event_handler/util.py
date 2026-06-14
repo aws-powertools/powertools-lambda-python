@@ -74,9 +74,9 @@ def _validate_openapi_security_parameters(
 
     Parameters
     ----------
-    security: List[Dict[str, List[str]]]
+    security: list[dict[str, list[str]]]
         A list of security requirements
-    security_schemes: Optional[Dict[str, Any]]
+    security_schemes: dict[str, Any] | None
         A dictionary mapping security scheme names to their corresponding security scheme objects.
 
     Returns
