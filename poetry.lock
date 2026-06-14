@@ -137,35 +137,35 @@ zstandard = ["zstandard"]
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.273"
+version = "2.2.282"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 optional = false
-python-versions = "~=3.9"
+python-versions = "~=3.10"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_asset_awscli_v1-2.2.273-py3-none-any.whl", hash = "sha256:1a0994afa7b48f63b580603be64c7a99d19ed6777bdf81d3c2435d8b43cf0d71"},
-    {file = "aws_cdk_asset_awscli_v1-2.2.273.tar.gz", hash = "sha256:6580dad3416e53712db434f81add6fb4a314e1a80f9c57cc42606df1f64c8e0f"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.282-py3-none-any.whl", hash = "sha256:24139da0eb1be59f8cfda22c6343d51e8d50bb89b5052b049cfab92683de7790"},
+    {file = "aws_cdk_asset_awscli_v1-2.2.282.tar.gz", hash = "sha256:f86e61653927f77fb235b5ec148c955c610117430c869d182c8b20f7e07e2df2"},
 ]
 
 [package.dependencies]
-jsii = ">=1.127.0,<2.0.0"
+jsii = ">=1.130.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-asset-node-proxy-agent-v6"
-version = "2.1.1"
+version = "2.1.2"
 description = "@aws-cdk/asset-node-proxy-agent-v6"
 optional = false
 python-versions = "~=3.9"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_asset_node_proxy_agent_v6-2.1.1-py3-none-any.whl", hash = "sha256:a24fab484423fcb7c729fb376817a4dbb6a09c176243fd1dcbdaa05ddf62f037"},
-    {file = "aws_cdk_asset_node_proxy_agent_v6-2.1.1.tar.gz", hash = "sha256:37211fea7e308144d20666b939d8763d733000d8d837ba968dacaf4983daf574"},
+    {file = "aws_cdk_asset_node_proxy_agent_v6-2.1.2-py3-none-any.whl", hash = "sha256:1028bff16fdb87b8c82404e9b48f32ed383429dece84067f47379c4049da5da4"},
+    {file = "aws_cdk_asset_node_proxy_agent_v6-2.1.2.tar.gz", hash = "sha256:1340588dd351dcae37e07188f39075364f73ccde6ed9468c1184b06ada4af665"},
 ]
 
 [package.dependencies]
-jsii = ">=1.126.0,<2.0.0"
+jsii = ">=1.129.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -249,58 +249,58 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.251.0a0"
+version = "2.259.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
-python-versions = "~=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_aws_lambda_python_alpha-2.251.0a0-py3-none-any.whl", hash = "sha256:c5780e06890582166932269ef594f4f2050961c2a1431429821ea45ea7a338fc"},
-    {file = "aws_cdk_aws_lambda_python_alpha-2.251.0a0.tar.gz", hash = "sha256:04f2b8edb36cb2eb3494169100d3eaad54f7acb577bd870a5343f6d95a5480da"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.259.0a0-py3-none-any.whl", hash = "sha256:6ab839026a26fd9e9c7d0df04e08dbbfe32e9a22d89726175e165e2b5da268f2"},
+    {file = "aws_cdk_aws_lambda_python_alpha-2.259.0a0.tar.gz", hash = "sha256:5d061cb7ba7a76e5699e7a0cc1aaa2ba329d5242ddf945a79eda717c287d2e09"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.251.0,<3.0.0"
+aws-cdk-lib = ">=2.259.0,<3.0.0"
 constructs = ">=10.5.0,<11.0.0"
-jsii = ">=1.127.0,<2.0.0"
+jsii = ">=1.133.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-cloud-assembly-schema"
-version = "53.24.0"
+version = "54.2.0"
 description = "Schema for the protocol between CDK framework and CDK CLI"
 optional = false
-python-versions = "~=3.9"
+python-versions = "~=3.10"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_cloud_assembly_schema-53.24.0-py3-none-any.whl", hash = "sha256:360c4804f3073601ac320d1773432bc45b34201d7c8fb85aff7ed536801efb0c"},
-    {file = "aws_cdk_cloud_assembly_schema-53.24.0.tar.gz", hash = "sha256:f999f4c777deaca6631c61993bf5583022ff57c3a94a65930e2fc6b68cb7c407"},
+    {file = "aws_cdk_cloud_assembly_schema-54.2.0-py3-none-any.whl", hash = "sha256:a7038bffa1aaf3365b72147987396bcf0b9951c3b53b2eebfc181b7cb4227067"},
+    {file = "aws_cdk_cloud_assembly_schema-54.2.0.tar.gz", hash = "sha256:2e3a05fca6a28f49811b7b011fce12b03dd0adb15c37a0ad2d1b16d8d66fe95a"},
 ]
 
 [package.dependencies]
-jsii = ">=1.129.0,<2.0.0"
+jsii = ">=1.132.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.254.0"
+version = "2.259.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
-python-versions = "~=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.254.0-py3-none-any.whl", hash = "sha256:626095eaa742e0b9d894c3a1bf06a6e7d1245a986165a72408871d41886c6d07"},
-    {file = "aws_cdk_lib-2.254.0.tar.gz", hash = "sha256:ddbef134cad91f8985444f77f052f0337af5f132101ad7aea2215b4775ff7828"},
+    {file = "aws_cdk_lib-2.259.0-py3-none-any.whl", hash = "sha256:4ea916f3673bd372d5e5a7bf84eb5bfb20c171b74a02c14ec8af2620441457a3"},
+    {file = "aws_cdk_lib-2.259.0.tar.gz", hash = "sha256:5481f23b51dd771146c747d54e5d442f25a346a78c60077bd21b7d968af898e7"},
 ]
 
 [package.dependencies]
-"aws-cdk.asset-awscli-v1" = "2.2.273"
-"aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.1,<3.0.0"
-"aws-cdk.cloud-assembly-schema" = ">=53.21.0,<54.0.0"
+"aws-cdk.asset-awscli-v1" = "2.2.282"
+"aws-cdk.asset-node-proxy-agent-v6" = ">=2.1.2,<3.0.0"
+"aws-cdk.cloud-assembly-schema" = ">=54.0.0,<55.0.0"
 constructs = ">=10.5.0,<11.0.0"
-jsii = ">=1.129.0,<2.0.0"
+jsii = ">=1.133.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = "2.13.3"
 
@@ -2249,26 +2249,6 @@ test = ["flufl.flake8", "jaraco.test (>=5.4)", "packaging", "pyfakefs", "pytest 
 type = ["mypy (<1.19) ; platform_python_implementation == \"PyPy\"", "pytest-mypy (>=1.0.1)"]
 
 [[package]]
-name = "importlib-resources"
-version = "6.5.2"
-description = "Read resources from Python packages"
-optional = false
-python-versions = ">=3.9"
-groups = ["dev"]
-files = [
-    {file = "importlib_resources-6.5.2-py3-none-any.whl", hash = "sha256:789cfdc3ed28c78b67a06acb8126751ced69a3d5f79c095a98298cd8a760ccec"},
-    {file = "importlib_resources-6.5.2.tar.gz", hash = "sha256:185f87adef5bcc288449d98fb4fba07cea78bc036455dd44c5fc4a2fe78fed2c"},
-]
-
-[package.extras]
-check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
-cover = ["pytest-cov"]
-doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-enabler = ["pytest-enabler (>=2.2)"]
-test = ["jaraco.test (>=5.4)", "pytest (>=6,!=8.1.*)", "zipp (>=3.17)"]
-type = ["pytest-mypy"]
-
-[[package]]
 name = "iniconfig"
 version = "2.3.0"
 description = "brain-dead simple config-ini parsing"
@@ -2327,20 +2307,19 @@ files = [
 
 [[package]]
 name = "jsii"
-version = "1.130.0"
+version = "1.135.0"
 description = "Python client for jsii runtime"
 optional = false
-python-versions = "~=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "jsii-1.130.0-py3-none-any.whl", hash = "sha256:ce50e11ea588fe6b2d0766d90edaf4c78b9e97e2e1f075fbd8bc29349c6503c8"},
-    {file = "jsii-1.130.0.tar.gz", hash = "sha256:7436ae382e2de27970b34a4ccfef953a45980c5070241c1bd610bf3af68a2d6b"},
+    {file = "jsii-1.135.0-py3-none-any.whl", hash = "sha256:bfab0cc3f99bfbc13683af2afb8d62522af867fb826fc825ab6b27fe636bb087"},
+    {file = "jsii-1.135.0.tar.gz", hash = "sha256:3d860404e9e350beae0bdae48b473173653bd2be3a901c620feb656b690f9c2f"},
 ]
 
 [package.dependencies]
-attrs = ">=21.2,<26.0"
-cattrs = ">=1.8,<25.4"
-importlib_resources = ">=5.2.0"
+attrs = ">=21.2,<27.0"
+cattrs = ">=1.8,<27.0"
 publication = ">=0.0.3"
 python-dateutil = "*"
 typeguard = "2.13.3"
@@ -4426,14 +4405,14 @@ pathspec = ">=0.10.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.57.0"
+version = "2.62.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["dev"]
 files = [
-    {file = "sentry_sdk-2.57.0-py2.py3-none-any.whl", hash = "sha256:812c8bf5ff3d2f0e89c82f5ce80ab3a6423e102729c4706af7413fd1eb480585"},
-    {file = "sentry_sdk-2.57.0.tar.gz", hash = "sha256:4be8d1e71c32fb27f79c577a337ac8912137bba4bcbc64a4ec1da4d6d8dc5199"},
+    {file = "sentry_sdk-2.62.0-py3-none-any.whl", hash = "sha256:27f61d13a86c3c1648dec666dd5a64f79772dd6a84b446f11866601ecab24f6f"},
+    {file = "sentry_sdk-2.62.0.tar.gz", hash = "sha256:3c870b9f50d9fd15b58c817dbde1c7cfaa9fe3f05df0a4c6edd5571cb82f5491"},
 ]
 
 [package.dependencies]
