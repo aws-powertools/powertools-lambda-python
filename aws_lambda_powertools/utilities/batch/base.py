@@ -36,6 +36,7 @@ from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.logging import Logger
     from aws_lambda_powertools.utilities.batch.types import (
         PartialItemFailureResponse,
         PartialItemFailures,
@@ -68,10 +69,11 @@ class BasePartialProcessor(ABC):
 
     lambda_context: LambdaContext
 
-    def __init__(self):
+    def __init__(self, logger: logging.Logger | Logger | None = None):
         self.success_messages: list[BatchEventTypes] = []
         self.fail_messages: list[BatchEventTypes] = []
         self.exceptions: list[ExceptionInfo] = []
+        self.logger = logger
 
     @abstractmethod
     def _prepare(self):
@@ -237,6 +239,13 @@ class BasePartialProcessor(ABC):
         exception_string = f"{exception[0]}:{exception[1]}"
         entry = ("fail", exception_string, record)
         logger.debug(f"Record processing exception: {exception_string}")
+
+        if getattr(self, "logger", None) and exception[2] is not None:
+            self.logger.warning(
+                "Record processing exception; skipping this record",
+                exc_info=exception,
+            )
+
         self.exceptions.append(exception)
         self.fail_messages.append(record)
         return entry
@@ -250,6 +259,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         event_type: EventType,
         model: BatchTypeModels | None = None,
         raise_on_entire_batch_failure: bool = True,
+        logger: logging.Logger | Logger | None = None,
     ):
         """Process batch and partially report failed items
 
@@ -262,6 +272,8 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         raise_on_entire_batch_failure: bool
             Raise an exception when the entire batch has failed processing.
             When set to False, partial failures are reported in the response
+        logger: logging.Logger | Logger | None
+            Optional Logger instance to output warnings with tracebacks for failed records.
 
         Exceptions
         ----------
@@ -285,7 +297,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             EventType.Kafka: KafkaEventRecord,
         }
 
-        super().__init__()
+        super().__init__(logger=logger)
 
     def response(self) -> PartialItemFailureResponse:
         """Batch items that failed processing, if any"""

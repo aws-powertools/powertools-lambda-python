@@ -861,3 +861,85 @@ def test_async_batch_processor_non_lambda_uses_asyncio_run(sqs_event_factory, mo
     # THEN record is processed successfully using asyncio.run()
     assert result == {"batchItemFailures": []}
     assert result == {"batchItemFailures": []}
+
+
+def test_batch_processor_logs_exception_with_injected_logger(sqs_event_factory, caplog):
+    import logging
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+
+    fail_record = sqs_event_factory("fail")
+    success_record = sqs_event_factory("success")
+
+    def handler(record):
+        if "fail" in record["body"]:
+            raise ValueError("intentional failure")
+        return record["body"]
+
+    test_logger = logging.getLogger("test_logger")
+    processor = BatchProcessor(event_type=EventType.SQS, logger=test_logger)
+
+    with caplog.at_level(logging.WARNING, logger="test_logger"):
+        process_partial_response(
+            event={"Records": [fail_record, success_record]},
+            record_handler=handler,
+            processor=processor,
+        )
+
+    warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warning_records) == 1, f"Expected 1 WARNING log, got {len(warning_records)}"
+    assert "intentional failure" in warning_records[0].getMessage() or warning_records[0].exc_info is not None
+    assert warning_records[0].exc_info is not None, "Expected exc_info (traceback) in log record"
+    assert warning_records[0].exc_info[0] is ValueError
+
+
+def test_batch_processor_does_not_log_without_injected_logger(sqs_event_factory, caplog):
+    import logging
+    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
+
+    fail_record = sqs_event_factory("fail")
+
+    def handler(record):
+        raise ValueError("intentional failure")
+
+    processor = BatchProcessor(event_type=EventType.SQS, raise_on_entire_batch_failure=False, logger=None)
+
+    with caplog.at_level(logging.WARNING, logger="aws_lambda_powertools.utilities.batch.base"):
+        process_partial_response(
+            event={"Records": [fail_record]},
+            record_handler=handler,
+            processor=processor,
+        )
+
+    warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warning_records) == 0, "Expected no WARNING logs when logger is None"
+
+
+def test_sqs_fifo_circuit_breaker_does_not_log(sqs_event_fifo_factory, caplog):
+    import logging
+    from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor, process_partial_response
+
+    failing_record = sqs_event_fifo_factory("fail", "group-1")
+    short_circuited_record = sqs_event_fifo_factory("would-succeed", "group-1")
+
+    def handler(record):
+        if "fail" in record["body"]:
+            raise ValueError("first record failure")
+        return record["body"]
+
+    test_logger = logging.getLogger("test_logger")
+    processor = SqsFifoPartialProcessor(logger=test_logger)
+    processor.raise_on_entire_batch_failure = False
+
+    with caplog.at_level(logging.WARNING, logger="test_logger"):
+        process_partial_response(
+            event={"Records": [failing_record, short_circuited_record]},
+            record_handler=handler,
+            processor=processor,
+        )
+
+    warning_records = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warning_records) == 1, (
+        f"Expected exactly 1 WARNING (real exception only), got {len(warning_records)}: "
+        + str([r.getMessage() for r in warning_records])
+    )
+    assert warning_records[0].exc_info[0] is ValueError
