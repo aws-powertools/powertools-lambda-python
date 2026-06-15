@@ -52,7 +52,7 @@ jobs:
         with:
           node-version: "22"
       - name: Setup dependencies
-        uses: aws-powertools/actions/.github/actions/cached-node-modules@828e78a26eee3554dc2e1d96048004548fbb169f
+        uses: aws-powertools/actions/.github/actions/cached-node-modules@4bf64a4072489399fbf39b78f558eeeed6767189
       - id: credentials
         name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b
