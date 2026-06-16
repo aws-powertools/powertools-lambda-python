@@ -499,6 +499,24 @@ def test_sqs_fifo_batch_processor_middleware_with_failure(sqs_event_fifo_factory
     assert result["batchItemFailures"][1]["itemIdentifier"] == third_record.message_id
 
 
+def test_sqs_fifo_batch_processor_not_raise_when_entire_batch_fails(sqs_event_fifo_factory, record_handler):
+    first_record = SQSRecord(sqs_event_fifo_factory("fail"))
+    second_record = SQSRecord(sqs_event_fifo_factory("success"))
+    event = {"Records": [first_record.raw_event, second_record.raw_event]}
+
+    processor = SqsFifoPartialProcessor(raise_on_entire_batch_failure=False)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    response = lambda_handler(event, {})
+
+    assert len(response["batchItemFailures"]) == 2
+    assert response["batchItemFailures"][0]["itemIdentifier"] == first_record.message_id
+    assert response["batchItemFailures"][1]["itemIdentifier"] == second_record.message_id
+
+
 def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error(sqs_event_fifo_factory, record_handler):
     # GIVEN a batch of 5 records with 3 different MessageGroupID
     first_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
