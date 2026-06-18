@@ -32,6 +32,11 @@ logger = logging.getLogger(__name__)
 _LOCAL_FAILURES: dict[str, int] = {}
 _LOCAL_SUCCESSES: dict[str, int] = {}
 
+# Tracks the last state this environment observed from the store, per circuit. Used to
+# detect transitions back to CLOSED that happened externally (another env tripped and
+# recovered), so stale local failure streaks can be invalidated.
+_LAST_OBSERVED_STATE: dict[str, CircuitState] = {}
+
 # Stable per-environment identifier used to claim the half-open probe lock.
 _ENVIRONMENT_ID = uuid.uuid4().hex
 
@@ -103,9 +108,17 @@ class CircuitBreakerHandler:
         record = self.persistence_store.get_state(self.name)
 
         if record.state == CircuitState.CLOSED:
+            # If we previously observed a non-CLOSED state and the circuit is now back to
+            # CLOSED, another environment completed the recovery cycle. Reset local counters
+            # so a stale partial failure streak doesn't immediately re-trip the circuit.
+            prev = _LAST_OBSERVED_STATE.get(self.name)
+            if prev is not None and prev != CircuitState.CLOSED:
+                _LOCAL_FAILURES[self.name] = 0
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
             return self._call_closed()
 
         if record.state == CircuitState.OPEN:
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
             # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
             opened_at = record.opened_at if record.opened_at is not None else self._now()
             if self._now() >= opened_at + self.config.recovery_timeout:
@@ -116,8 +129,16 @@ class CircuitBreakerHandler:
             return self._open_response(record.to_circuit_info())
 
         # HALF_OPEN: only the environment that owns the probe lock runs.
+        _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
         if record.half_open_owner == _ENVIRONMENT_ID:
             return self._call_probe()
+
+        # If the probe lease has expired (owner recycled mid-probe), take over.
+        if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
+            logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
+            if self.persistence_store.try_acquire_half_open(self.name, _ENVIRONMENT_ID, record.opened_at or 0):
+                return self._call_probe()
+
         return self._open_response(record.to_circuit_info())
 
     def _call_closed(self) -> Any:
@@ -132,7 +153,12 @@ class CircuitBreakerHandler:
             if failures >= self.config.failure_threshold:
                 logger.debug("Circuit '%s' tripping CLOSED to OPEN after %d failures.", self.name, failures)
                 opened_at = self._now()
-                self.persistence_store.save_open(self.name, failure_count=failures, opened_at=opened_at)
+                self._safe_persist(
+                    self.persistence_store.save_open,
+                    self.name,
+                    failure_count=failures,
+                    opened_at=opened_at,
+                )
                 _LOCAL_FAILURES[self.name] = 0
                 self._notify(CircuitState.CLOSED, CircuitState.OPEN, opened_at=opened_at)
             raise
@@ -149,7 +175,7 @@ class CircuitBreakerHandler:
                 raise
             logger.debug("Circuit '%s' probe failed; reopening.", self.name)
             opened_at = self._now()
-            self.persistence_store.save_reopen(self.name, opened_at=opened_at)
+            self._safe_persist(self.persistence_store.save_reopen, self.name, opened_at=opened_at)
             _LOCAL_SUCCESSES[self.name] = 0
             self._notify(CircuitState.HALF_OPEN, CircuitState.OPEN, opened_at=opened_at)
             raise
@@ -158,11 +184,30 @@ class CircuitBreakerHandler:
             _LOCAL_SUCCESSES[self.name] = successes
             if successes >= self.config.success_threshold:
                 logger.debug("Circuit '%s' closing after %d probe successes.", self.name, successes)
-                self.persistence_store.save_closed(self.name)
+                self._safe_persist(self.persistence_store.save_closed, self.name)
                 _LOCAL_SUCCESSES[self.name] = 0
                 _LOCAL_FAILURES[self.name] = 0
                 self._notify(CircuitState.HALF_OPEN, CircuitState.CLOSED)
             return result
+
+    def _safe_persist(self, fn: Callable, *args: Any, **kwargs: Any) -> None:
+        """
+        Call a persistence write, swallowing and logging failures.
+
+        State-transition writes must never mask the downstream's real result or replace
+        the downstream's real exception. This mirrors the fail-open read policy in the
+        persistence layer.
+        """
+        try:
+            fn(*args, **kwargs)
+        except Exception:
+            logger.warning(
+                "Circuit '%s': persistence write (%s) failed; the transition may be delayed but the "
+                "downstream result is preserved.",
+                self.name,
+                fn.__name__,
+                exc_info=True,
+            )
 
     def _open_response(self, circuit: CircuitInfo) -> Any:
         """Produce the response for an open circuit: callback result or raise."""

@@ -3,12 +3,14 @@ from __future__ import annotations
 import pytest
 
 import aws_lambda_powertools.utilities.circuit_breaker_alpha.base as base_module
+from aws_lambda_powertools.utilities.circuit_breaker_alpha.base import CircuitBreakerHandler
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
     CircuitBreakerRecordNotFoundError,
 )
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
 
 
 class FakePersistence(CircuitBreakerPersistenceLayer):
@@ -29,12 +31,35 @@ class FakePersistence(CircuitBreakerPersistenceLayer):
             failure_count=stored.failure_count,
             opened_at=stored.opened_at,
             half_open_owner=stored.half_open_owner,
+            probe_lease_expiry=stored.probe_lease_expiry,
         )
 
-    def _put_record(self, record: CircuitStateRecord, condition: str | None = None) -> None:
+    def _put_record(
+        self,
+        record: CircuitStateRecord,
+        condition: str | None = None,
+        expected_opened_at: int | None = None,
+    ) -> None:
         if condition == "half_open":
             existing = self.db.get(record.name)
-            if existing is not None and existing.half_open_owner is not None:
+            now = CircuitBreakerHandler._now()
+
+            # Mirror the DynamoDB condition: two valid paths
+            # Path 1: state=OPEN AND no owner (AND opened_at matches if provided)
+            # Path 2: state=HALF_OPEN AND probe_lease_expiry <= now (lease takeover)
+            fresh_election_ok = existing is None or (
+                existing.state == CircuitState.OPEN
+                and existing.half_open_owner is None
+                and (expected_opened_at is None or existing.opened_at == expected_opened_at)
+            )
+            lease_takeover_ok = (
+                existing is not None
+                and existing.state == CircuitState.HALF_OPEN
+                and existing.probe_lease_expiry is not None
+                and now >= existing.probe_lease_expiry
+            )
+
+            if not fresh_election_ok and not lease_takeover_ok:
                 raise CircuitBreakerExistingLockError
         self.db[record.name] = record
 
@@ -50,9 +75,10 @@ class FakePersistence(CircuitBreakerPersistenceLayer):
         existing.state = record.state
         existing.failure_count = record.failure_count
         existing.expiry_timestamp = record.expiry_timestamp
-        # Leaving HALF_OPEN (close or reopen) always releases the probe-owner lock; only
-        # opened_at differs between the two transitions. This mirrors the DynamoDB backend.
+        # Leaving HALF_OPEN (close or reopen) always releases the probe-owner lock and
+        # probe lease; only opened_at differs between the two transitions.
         existing.half_open_owner = None
+        existing.probe_lease_expiry = None
         existing.opened_at = record.opened_at
 
 
@@ -66,9 +92,11 @@ def reset_local_counters():
     """Clear the per-environment module-level counters between tests."""
     base_module._LOCAL_FAILURES.clear()
     base_module._LOCAL_SUCCESSES.clear()
+    base_module._LAST_OBSERVED_STATE.clear()
     yield
     base_module._LOCAL_FAILURES.clear()
     base_module._LOCAL_SUCCESSES.clear()
+    base_module._LAST_OBSERVED_STATE.clear()
 
 
 @pytest.fixture

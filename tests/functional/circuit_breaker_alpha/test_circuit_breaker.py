@@ -4,6 +4,7 @@ import warnings
 
 import pytest
 
+import aws_lambda_powertools.utilities.circuit_breaker_alpha.base as base_module
 from aws_lambda_powertools.utilities.circuit_breaker_alpha import (
     CircuitBreakerConfig,
     CircuitBreakerOpenError,
@@ -11,6 +12,7 @@ from aws_lambda_powertools.utilities.circuit_breaker_alpha import (
     CircuitTransition,
     circuit_breaker,
 )
+from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerError
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
 
 # All tests disable the local read cache (max_age=0) so each call re-reads the fake store.
@@ -400,3 +402,203 @@ def test_raising_on_transition_hook_is_swallowed(store):
     with pytest.raises(ConnectionError):
         call()
     assert store.db["c"].state == CircuitState.OPEN
+
+
+# --------------------------------------------------------------------------- bug regressions
+
+
+def test_stale_local_failures_reset_on_external_close(store, now):
+    """Bug 1: a partial failure streak in env A must not survive an external recovery cycle."""
+    config = CircuitBreakerConfig(failure_threshold=3, local_cache_max_age=0)
+    mode = {"value": "fail"}
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        if mode["value"] == "fail":
+            raise ConnectionError("down")
+        return "ok"
+
+    # Env A accumulates 2 failures (below threshold of 3).
+    for _ in range(2):
+        with pytest.raises(ConnectionError):
+            call()
+    assert base_module._LOCAL_FAILURES["c"] == 2
+
+    # Simulate: another env trips the circuit, then a third closes it.
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=3, opened_at=now)
+    # Force env A to observe OPEN so _LAST_OBSERVED_STATE tracks the transition.
+    with pytest.raises(CircuitBreakerOpenError):
+        call()
+    # Now the circuit is externally closed.
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.CLOSED, failure_count=0)
+
+    # A single failure in env A must NOT re-trip (stale streak was invalidated).
+    mode["value"] = "fail"
+    with pytest.raises(ConnectionError):
+        call()
+    assert "c" not in store.db or store.db["c"].state == CircuitState.CLOSED
+    assert base_module._LOCAL_FAILURES["c"] == 1  # fresh count, not 3
+
+
+def test_store_write_failure_does_not_mask_downstream_result(store, now):
+    """Bug 2: if save_closed() fails, the successful probe result must still be returned."""
+    config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=3, opened_at=now - 100)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "payment_charged"
+
+    # Make the persistence write fail.
+    original_update = store._update_record
+
+    def failing_update(record):
+        raise RuntimeError("DynamoDB timeout")
+
+    store._update_record = failing_update
+
+    # The probe should still return the downstream result despite the write failure.
+    result = call()
+    assert result == "payment_charged"
+
+    store._update_record = original_update
+
+
+def test_store_write_failure_on_trip_does_not_replace_downstream_exception(store):
+    """Bug 2 (trip path): if save_open() fails, the downstream's own exception must propagate."""
+    config = CircuitBreakerConfig(failure_threshold=2, local_cache_max_age=0)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        raise ConnectionError("the real error")
+
+    # Make the persistence write fail.
+    def failing_put(record, condition=None, expected_opened_at=None):
+        raise RuntimeError("DynamoDB throttle")
+
+    store._put_record = failing_put
+
+    # Two failures should raise the ORIGINAL ConnectionError, not a RuntimeError from the store.
+    for _ in range(2):
+        with pytest.raises(ConnectionError, match="the real error"):
+            call()
+
+
+def test_probe_lease_takeover_when_owner_recycled(store, now):
+    """Design issue 1: a stranded HALF_OPEN probe with expired lease can be taken over."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    # Simulate: the probe owner ("dead-env") was recycled, lease has expired.
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 200,
+        half_open_owner="dead-env",
+        probe_lease_expiry=now - 10,  # expired
+    )
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "recovered"
+
+    # Current environment should take over the expired lease and succeed.
+    result = call()
+    assert result == "recovered"
+    assert store.db["c"].state == CircuitState.CLOSED
+
+
+def test_half_open_non_owner_with_active_lease_is_rejected(store, now):
+    """Design issue 1 negative: active lease must NOT allow takeover."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    # Probe owner is alive (lease not expired yet).
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 50,
+        half_open_owner="other-env",
+        probe_lease_expiry=now + 999,  # far in the future
+    )
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "should not run"
+
+    with pytest.raises(CircuitBreakerOpenError):
+        call()
+
+
+def test_open_lost_election_returns_open_response(store, now):
+    """Branch: try_acquire_half_open returns False (another env won the race)."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    # Circuit is OPEN and recovery window has elapsed, but election will fail
+    # because another env already holds the lock.
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.OPEN,
+        failure_count=5,
+        opened_at=now - 100,
+        half_open_owner="winner-env",
+    )
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "should not run"
+
+    with pytest.raises(CircuitBreakerOpenError):
+        call()
+
+
+def test_probe_ignored_exception_propagates_without_affecting_circuit(store, now):
+    """Branch: probe raises an exception that doesn't count as failure."""
+    config = CircuitBreakerConfig(
+        recovery_timeout=30,
+        success_threshold=1,
+        handled_exceptions=(ConnectionError,),
+        local_cache_max_age=0,
+    )
+
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 100)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        raise ValueError("not a counted failure")
+
+    with pytest.raises(ValueError, match="not a counted failure"):
+        call()
+    # Circuit should still be HALF_OPEN (not reopened), the ValueError didn't count.
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+
+
+def test_local_cache_serves_state_without_store_read(store):
+    """Covers the cache hit path (persistence/base.py line 140)."""
+    config = CircuitBreakerConfig(failure_threshold=3, local_cache_max_age=60)
+    call_count = {"value": 0}
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        call_count["value"] += 1
+        return "ok"
+
+    # First call reads the store (cache miss).
+    assert call() == "ok"
+    # Second call should serve from cache — override _get_record to detect reads.
+    original_get = store._get_record
+    get_called = {"value": False}
+
+    def tracked_get(name):
+        get_called["value"] = True
+        return original_get(name)
+
+    store._get_record = tracked_get
+    assert call() == "ok"
+    assert not get_called["value"], "second call should have used the cache, not the store"
+    store._get_record = original_get
+
+
+def test_error_with_details_formatting():
+    """Covers exceptions.py line 28 — __str__ with details."""
+    err = CircuitBreakerError("main message", "extra detail")
+    assert str(err) == "main message - (extra detail)"

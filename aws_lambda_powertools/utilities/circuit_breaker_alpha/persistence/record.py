@@ -40,6 +40,7 @@ class CircuitStateRecord:
     failure_count: int = 0
     opened_at: int | None = None
     half_open_owner: str | None = None
+    probe_lease_expiry: int | None = None
     expiry_timestamp: int | None = None
 
     def to_circuit_info(self) -> CircuitInfo:

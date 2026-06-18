@@ -183,6 +183,12 @@ class CircuitBreakerPersistenceLayer(ABC):
         """
         Atomically elect a single environment to run the half-open probe.
 
+        The conditional write succeeds only when the circuit is OPEN with no existing
+        lock owner AND the ``opened_at`` matches what the caller observed (guards against
+        stale eventually-consistent reads). A lease expiry is stamped so that if the
+        winning environment is recycled before completing the probe, others can take over
+        once the lease lapses.
+
         Parameters
         ----------
         name : str
@@ -198,15 +204,18 @@ class CircuitBreakerPersistenceLayer(ABC):
             ``True`` if this environment won the probe lock, ``False`` if another
             environment already holds it.
         """
+        # Lease = recovery_timeout gives the probe a full cycle to complete.
+        probe_lease_expiry = int(datetime.datetime.now().timestamp()) + self.recovery_timeout
         record = CircuitStateRecord(
             name=name,
             state=CircuitState.HALF_OPEN,
             opened_at=opened_at,
             half_open_owner=owner,
+            probe_lease_expiry=probe_lease_expiry,
             expiry_timestamp=self._durable_ttl(),
         )
         try:
-            self._put_record(record, condition="half_open")
+            self._put_record(record, condition="half_open", expected_opened_at=opened_at)
         except CircuitBreakerExistingLockError:
             return False
         self._save_to_cache(record)
@@ -249,7 +258,12 @@ class CircuitBreakerPersistenceLayer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _put_record(self, record: CircuitStateRecord, condition: str | None = None) -> None:
+    def _put_record(
+        self,
+        record: CircuitStateRecord,
+        condition: str | None = None,
+        expected_opened_at: int | None = None,
+    ) -> None:
         """
         Write a circuit record.
 
@@ -261,6 +275,11 @@ class CircuitBreakerPersistenceLayer(ABC):
             When ``"half_open"``, the write must be conditional so only one
             environment wins the probe lock; on a lost race the backend raises
             :class:`CircuitBreakerExistingLockError`.
+        expected_opened_at : int | None
+            When set alongside ``condition="half_open"``, the write additionally
+            requires that the stored ``opened_at`` matches this value. This closes
+            a race where an eventually-consistent read could let a stale environment
+            win an election immediately after a failed probe reopened the circuit.
         """
         raise NotImplementedError
 

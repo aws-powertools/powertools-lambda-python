@@ -82,8 +82,13 @@ def test_try_acquire_half_open_wins(persistence):
     assert item["half_open_owner"] == {"S": "env-a"}
     assert item["opened_at"] == {"N": "1000"}
     assert "expiration" in item
-    assert captured["ConditionExpression"] == "#state = :open AND attribute_not_exists(#half_open_owner)"
-    assert captured["ExpressionAttributeValues"] == {":open": {"S": "OPEN"}}
+    # Condition supports both fresh election (OPEN, no owner, matching opened_at) and
+    # lease takeover (HALF_OPEN with expired lease).
+    assert "#state = :open AND attribute_not_exists(#half_open_owner)" in captured["ConditionExpression"]
+    assert "#probe_lease_expiry <= :now" in captured["ConditionExpression"]
+    assert captured["ExpressionAttributeValues"][":open"] == {"S": "OPEN"}
+    assert captured["ExpressionAttributeValues"][":expected_opened_at"] == {"N": "1000"}
+    assert "probe_lease_expiry" in item
 
 
 def test_try_acquire_half_open_loses_on_conditional_failure(persistence):
