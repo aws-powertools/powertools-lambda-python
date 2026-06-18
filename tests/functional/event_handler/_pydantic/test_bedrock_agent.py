@@ -1,4 +1,5 @@
 import json
+from functools import partial
 from typing import Any, Dict, Optional
 
 import pytest
@@ -383,3 +384,37 @@ def test_bedrock_agent_with_comma_parameters():
     # THEN the parameter with commas should be correctly passed to the handler
     body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
     assert body["result"] == "SELECT a.source_name, b.thing FROM table"
+
+
+def test_bedrock_agent_with_default_serializer_escapes_non_ascii():
+    # GIVEN a Bedrock Agent resolver using the default serializer
+    app = BedrockAgentResolver()
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> Dict[str, Any]:
+        return {"output": "잔액은 1,000원입니다 💰"}
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN the body is valid JSON and non-ASCII characters are escaped (default json.dumps behavior)
+    body = result["response"]["responseBody"]["application/json"]["body"]
+    assert "\\uc794" in body  # "잔" escaped
+    assert json.loads(body) == {"output": "잔액은 1,000원입니다 💰"}
+
+
+def test_bedrock_agent_with_custom_serializer_preserves_non_ascii():
+    # GIVEN a Bedrock Agent resolver initialized with a custom serializer that keeps non-ASCII characters
+    app = BedrockAgentResolver(serializer=partial(json.dumps, ensure_ascii=False))
+
+    @app.get("/claims", description="Gets claims")
+    def claims() -> Dict[str, Any]:
+        return {"output": "잔액은 1,000원입니다 💰"}
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN the non-ASCII characters are preserved verbatim in the response body
+    body = result["response"]["responseBody"]["application/json"]["body"]
+    assert "잔액은 1,000원입니다 💰" in body
+    assert json.loads(body) == {"output": "잔액은 1,000원입니다 💰"}

@@ -1459,6 +1459,33 @@ Use `dependency_overrides` to replace any dependency with a mock or stub during 
 --8<-- "examples/event_handler_rest/src/dependency_injection_testing.py"
 ```
 
+???+ warning "Import path must match exactly when using dependency_overrides"
+    When using `dependency_overrides` in tests, the imported dependency reference must use the **exact same import path** as the handler file. Python treats differently-imported modules as different objects in `sys.modules`, so the override will be silently ignored otherwise.
+
+    === "✅ Correct"
+
+        ```python
+        # handler.py
+        from depends import get_config
+
+        # test_handler.py - matches handler's import path exactly
+        from depends import get_config
+
+        app.dependency_overrides[get_config] = lambda: "test-value"
+        ```
+
+    === "❌ Wrong"
+
+        ```python
+        # handler.py
+        from depends import get_config
+
+        # test_handler.py - different import path, override won't apply
+        from my_app.api_handler.depends import get_config
+
+        app.dependency_overrides[get_config] = lambda: "test-value"
+        ```
+
 ???+ tip "Caching behavior"
     By default, dependencies are cached within the same invocation (`use_cache=True`). If the same dependency is used by multiple handlers or sub-dependencies, it is resolved once and the result is reused. Use `Depends(fn, use_cache=False)` to resolve every time.
 
