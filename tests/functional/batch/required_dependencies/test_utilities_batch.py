@@ -865,6 +865,7 @@ def test_async_batch_processor_non_lambda_uses_asyncio_run(sqs_event_factory, mo
 
 def test_batch_processor_logs_exception_with_injected_logger(sqs_event_factory, caplog):
     import logging
+
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
 
     fail_record = sqs_event_factory("fail")
@@ -894,6 +895,7 @@ def test_batch_processor_logs_exception_with_injected_logger(sqs_event_factory, 
 
 def test_batch_processor_does_not_log_without_injected_logger(sqs_event_factory, caplog):
     import logging
+
     from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
 
     fail_record = sqs_event_factory("fail")
@@ -916,6 +918,7 @@ def test_batch_processor_does_not_log_without_injected_logger(sqs_event_factory,
 
 def test_sqs_fifo_circuit_breaker_does_not_log(sqs_event_fifo_factory, caplog):
     import logging
+
     from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor, process_partial_response
 
     failing_record = sqs_event_fifo_factory("fail", "group-1")

@@ -14,7 +14,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Tuple, Union, cast, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
@@ -35,6 +35,7 @@ from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from types import TracebackType
 
     from aws_lambda_powertools.logging import Logger
     from aws_lambda_powertools.utilities.batch.types import (
@@ -240,10 +241,19 @@ class BasePartialProcessor(ABC):
         entry = ("fail", exception_string, record)
         logger.debug(f"Record processing exception: {exception_string}")
 
-        if getattr(self, "logger", None) and exception[2] is not None:
-            self.logger.warning(
+        # Log with full traceback when a customer-provided logger is present
+        # and the exception carries a real traceback (e.g. not a synthetic FIFO circuit-breaker)
+        batch_logger = self.logger
+        if batch_logger is not None and exception[2] is not None:
+            # ExceptionInfo allows None on every slot, but logging.warning's exc_info
+            # requires a fully populated tuple. We already excluded synthetic exceptions
+            # (no traceback) above, so the type and value are guaranteed to be set.
+            assert exception[0] is not None
+            assert exception[1] is not None
+            exc_info = cast("tuple[type[BaseException], BaseException, TracebackType]", exception)
+            batch_logger.warning(
                 "Record processing exception; skipping this record",
-                exc_info=exception,
+                exc_info=exc_info,
             )
 
         self.exceptions.append(exception)
