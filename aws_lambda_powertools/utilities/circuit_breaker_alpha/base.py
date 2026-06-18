@@ -205,7 +205,7 @@ class CircuitBreakerHandler:
                 "Circuit '%s': persistence write (%s) failed; the transition may be delayed but the "
                 "downstream result is preserved.",
                 self.name,
-                fn.__name__,
+                getattr(fn, "__name__", repr(fn)),
                 exc_info=True,
             )
 
