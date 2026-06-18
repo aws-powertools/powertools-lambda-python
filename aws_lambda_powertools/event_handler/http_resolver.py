@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import inspect
 import warnings
 from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import parse_qs
@@ -10,10 +9,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     BaseRouter,
     ProxyEventType,
-    Response,
-    Route,
 )
-from aws_lambda_powertools.event_handler.middlewares.async_utils import wrap_middleware_async
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
@@ -240,113 +236,13 @@ class HttpResolverLocal(ApiGatewayResolver):
         return ""
 
     async def _resolve_async(self) -> dict:  # type: ignore[override]
-        """Async version of resolve that supports async handlers."""
-        method = self.current_event.http_method.upper()
-        path = self._remove_prefix(self.current_event.path)
+        """Thin async resolver: delegates entirely to the parent and serializes to dict.
 
-        registered_routes = self._static_routes + self._dynamic_routes
-
-        for route in registered_routes:
-            if method != route.method:
-                continue
-            match_results = route.rule.match(path)
-            if match_results:
-                self.append_context(_route=route, _path=path)
-                route_keys = self._convert_matches_into_route_keys(match_results)
-                return await self._call_route_async(route, route_keys)
-
-        # Handle not found
-        return await self._handle_not_found_async()
-
-    async def _call_route_async(self, route: Route, route_arguments: dict[str, str]) -> dict:  # type: ignore[override]
-        """Call route handler, supporting both sync and async handlers."""
-        from aws_lambda_powertools.event_handler.api_gateway import ResponseBuilder
-
-        try:
-            self._reset_processed_stack()
-
-            # Get the route args (may be modified by validation middleware)
-            self.append_context(_route_args=route_arguments)
-
-            # Run middleware chain (sync for now, handlers can be async)
-            response = await self._run_middleware_chain_async(route)
-
-            response_builder: ResponseBuilder = ResponseBuilder(
-                response=response,
-                serializer=self._serializer,
-                route=route,
-            )
-
-            return response_builder.build(self.current_event, self._cors)
-
-        except Exception as exc:
-            exc_response_builder = self._call_exception_handler(exc, route)
-            if exc_response_builder:
-                return exc_response_builder.build(self.current_event, self._cors)
-            raise
-
-    async def _run_middleware_chain_async(self, route: Route) -> Response:
-        """Run the middleware chain, awaiting async handlers."""
-        # Build middleware list
-        all_middlewares: list[Callable[..., Any]] = []
-
-        # Determine if validation should be enabled for this route
-        # If route has explicit enable_validation setting, use it; otherwise, use resolver's global setting
-        route_validation_enabled = (
-            route.enable_validation if route.enable_validation is not None else self._enable_validation
-        )
-
-        if route_validation_enabled and hasattr(self, "_request_validation_middleware"):
-            all_middlewares.append(self._request_validation_middleware)
-
-        all_middlewares.extend(self._router_middlewares + route.middlewares)
-
-        if route_validation_enabled and hasattr(self, "_response_validation_middleware"):
-            all_middlewares.append(self._response_validation_middleware)
-
-        # Create the final handler that calls the route function
-        async def final_handler(app):
-            route_args = app.context.get("_route_args", {})
-            result = route.func(**route_args)
-
-            # Await if coroutine
-            if inspect.iscoroutine(result):
-                result = await result
-
-            return self._to_response(result)
-
-        # Build middleware chain from end to start
-        next_handler = final_handler
-
-        for middleware in reversed(all_middlewares):
-            next_handler = wrap_middleware_async(middleware, next_handler)
-
-        return await next_handler(self)
-
-    async def _handle_not_found_async(self, method: str = "", path: str = "") -> dict:  # type: ignore[override]
-        """Handle 404 responses, using custom not_found handler if registered."""
-        from http import HTTPStatus
-
-        from aws_lambda_powertools.event_handler.api_gateway import ResponseBuilder
-        from aws_lambda_powertools.event_handler.exceptions import NotFoundError
-
-        # Check for custom not_found handler
-        custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
-        if custom_not_found_handler:
-            response = custom_not_found_handler(NotFoundError())
-        else:
-            response = Response(
-                status_code=HTTPStatus.NOT_FOUND.value,
-                content_type="application/json",
-                body={"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"},
-            )
-
-        response_builder: ResponseBuilder = ResponseBuilder(
-            response=response,
-            serializer=self._serializer,
-            route=None,
-        )
-
+        The parent's _resolve_async handles route matching, CORS preflight, not-found
+        logic, and exception handling. The only adaptation needed here is converting
+        the returned ResponseBuilder into the dict format that asgi_handler expects.
+        """
+        response_builder = await super()._resolve_async()
         return response_builder.build(self.current_event, self._cors)
 
     async def asgi_handler(self, scope: dict, receive: Callable, send: Callable) -> None:
