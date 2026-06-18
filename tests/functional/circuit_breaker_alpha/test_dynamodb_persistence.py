@@ -152,3 +152,119 @@ def test_save_open_item_contains_expiration_attribute(persistence):
 
     item = captured["Item"]
     assert "expiration" in item, "open item must carry a DynamoDB TTL attribute"
+
+
+# --------------------------------------------------------------------------- serialization coverage
+
+
+def test_item_to_record_full_item(persistence):
+    """Cover _item_to_record with all fields present (lines 109-122)."""
+    item = {
+        "id": {"S": "payment"},
+        "state": {"S": "HALF_OPEN"},
+        "failure_count": {"N": "3"},
+        "opened_at": {"N": "1000"},
+        "half_open_owner": {"S": "env-x"},
+        "probe_lease_expiry": {"N": "2000"},
+        "expiration": {"N": "9999"},
+    }
+    record = persistence._item_to_record(item)
+    assert record.name == "payment"
+    assert record.state == CircuitState.HALF_OPEN
+    assert record.failure_count == 3
+    assert record.opened_at == 1000
+    assert record.half_open_owner == "env-x"
+    assert record.probe_lease_expiry == 2000
+    assert record.expiry_timestamp == 9999
+
+
+def test_item_to_record_minimal_item(persistence):
+    """Cover _item_to_record with optional fields absent."""
+    item = {
+        "id": {"S": "payment"},
+        "state": {"S": "CLOSED"},
+    }
+    record = persistence._item_to_record(item)
+    assert record.name == "payment"
+    assert record.state == CircuitState.CLOSED
+    assert record.failure_count == 0
+    assert record.opened_at is None
+    assert record.half_open_owner is None
+    assert record.probe_lease_expiry is None
+
+
+def test_record_to_item_full_record(persistence):
+    """Cover _record_to_item with all fields set (lines 124-139)."""
+    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+
+    record = CircuitStateRecord(
+        name="payment",
+        state=CircuitState.HALF_OPEN,
+        failure_count=5,
+        opened_at=1000,
+        half_open_owner="env-a",
+        probe_lease_expiry=2000,
+        expiry_timestamp=9999,
+    )
+    item = persistence._record_to_item(record)
+    assert item["id"] == {"S": "payment"}
+    assert item["state"] == {"S": "HALF_OPEN"}
+    assert item["failure_count"] == {"N": "5"}
+    assert item["opened_at"] == {"N": "1000"}
+    assert item["half_open_owner"] == {"S": "env-a"}
+    assert item["probe_lease_expiry"] == {"N": "2000"}
+    assert item["expiration"] == {"N": "9999"}
+
+
+def test_record_to_item_minimal_record(persistence):
+    """Cover _record_to_item with optional fields as None (branch misses on lines 131-137)."""
+    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+
+    record = CircuitStateRecord(name="payment", state=CircuitState.CLOSED)
+    item = persistence._record_to_item(record)
+    assert item == {
+        "id": {"S": "payment"},
+        "state": {"S": "CLOSED"},
+        "failure_count": {"N": "0"},
+    }
+    assert "opened_at" not in item
+    assert "half_open_owner" not in item
+    assert "probe_lease_expiry" not in item
+    assert "expiration" not in item
+
+
+def test_get_record_returns_deserialized_item(persistence):
+    """Cover _get_record success path (lines 141-153)."""
+    stubber = Stubber(persistence.client)
+    stubber.add_response(
+        "get_item",
+        {
+            "Item": {
+                "id": {"S": "payment"},
+                "state": {"S": "OPEN"},
+                "failure_count": {"N": "5"},
+                "opened_at": {"N": "1000"},
+            },
+        },
+        {"TableName": TABLE_NAME, "Key": {"id": {"S": "payment"}}, "ConsistentRead": False},
+    )
+    with stubber:
+        record = persistence._get_record("payment")
+    assert record.state == CircuitState.OPEN
+    assert record.failure_count == 5
+    assert record.opened_at == 1000
+
+
+def test_build_half_open_condition_without_expected_opened_at(persistence):
+    """Cover _build_half_open_condition when expected_opened_at is None (line 172 branch)."""
+    result = persistence._build_half_open_condition(expected_opened_at=None)
+    assert ":expected_opened_at" not in result["ConditionExpression"]
+    assert "#opened_at" not in result["ExpressionAttributeNames"]
+
+
+def test_build_half_open_condition_with_expected_opened_at(persistence):
+    """Cover _build_half_open_condition when expected_opened_at is set (lines 172-177)."""
+    result = persistence._build_half_open_condition(expected_opened_at=5000)
+    assert "#opened_at = :expected_opened_at" in result["ConditionExpression"]
+    assert result["ExpressionAttributeNames"]["#opened_at"] == "opened_at"
+    assert result["ExpressionAttributeValues"][":expected_opened_at"] == {"N": "5000"}
