@@ -14,7 +14,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Tuple, TypeGuard, Union, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
@@ -35,6 +35,7 @@ from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from types import TracebackType
 
     from aws_lambda_powertools.utilities.batch.types import (
         PartialItemFailureResponse,
@@ -59,6 +60,10 @@ EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord
 BatchEventTypes = Union[EventSourceDataClassTypes, BatchTypeModels]
 SuccessResponse = Tuple[str, Any, BatchEventTypes]
 FailureResponse = Tuple[str, str, BatchEventTypes]
+
+
+def _has_traceback(exception: ExceptionInfo) -> TypeGuard[tuple[type[BaseException], BaseException, TracebackType]]:
+    return exception[0] is not None and exception[1] is not None and exception[2] is not None
 
 
 class BasePartialProcessor(ABC):
@@ -239,15 +244,10 @@ class BasePartialProcessor(ABC):
         entry = ("fail", exception_string, record)
         logger.debug(f"Record processing exception: {exception_string}")
 
-        if (
-            self.logger is not None
-            and exception[0] is not None
-            and exception[1] is not None
-            and exception[2] is not None
-        ):
+        if self.logger is not None and _has_traceback(exception):
             self.logger.warning(
                 "Record processing exception; skipping this record",
-                exc_info=(exception[0], exception[1], exception[2]),
+                exc_info=exception,
             )
 
         self.exceptions.append(exception)
