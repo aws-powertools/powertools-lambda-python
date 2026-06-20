@@ -64,7 +64,7 @@ By default, we will use `APIGatewayRestResolver` throughout the documentation. Y
 | **[`ALBResolver`](#application-load-balancer)**         | Amazon Application Load Balancer (ALB) |
 | **[`LambdaFunctionUrlResolver`](#lambda-function-url)** | AWS Lambda Function URL                |
 | **[`VPCLatticeResolver`](#vpc-lattice)**                | Amazon VPC Lattice                     |
-| **[`HttpResolverLocal`](#http-resolver-local)**         | Local development with ASGI servers    |
+| **[`HttpResolverLocal`](#http-resolver-local)**         | ASGI-compatible resolver               |
 <!-- markdownlint-enable MD051 -->
 
 #### Response auto-serialization

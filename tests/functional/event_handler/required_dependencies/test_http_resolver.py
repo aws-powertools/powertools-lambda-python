@@ -1,4 +1,4 @@
-"""Tests for HttpResolverLocal - ASGI-compatible HTTP resolver for local development."""
+"""Tests for HttpResolverLocal - ASGI-compatible HTTP resolver."""
 
 from __future__ import annotations
 
@@ -10,10 +10,6 @@ import pytest
 
 from aws_lambda_powertools.event_handler import HttpResolverLocal, Response
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
-
-# Suppress warning for all tests
-pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverLocal is intended for local development")
-
 
 # =============================================================================
 # ASGI Test Helpers

@@ -13,10 +13,6 @@ from aws_lambda_powertools.event_handler import HttpResolverLocal
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 from aws_lambda_powertools.event_handler.openapi.params import Query
 
-# Suppress warning for all tests
-pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverLocal is intended for local development")
-
-
 # =============================================================================
 # ASGI Test Helpers
 # =============================================================================
