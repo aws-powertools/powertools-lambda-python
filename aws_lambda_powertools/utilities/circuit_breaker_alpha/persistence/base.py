@@ -36,10 +36,6 @@ class CircuitBreakerExistingLockError(Exception):
     """Internal signal that a conditional half-open probe write lost the race."""
 
 
-class CircuitBreakerRecordNotFoundError(Exception):
-    """Internal signal that no record exists for a circuit name."""
-
-
 class CircuitBreakerPersistenceLayer(ABC):
     """
     Abstract base class for circuit breaker persistence layers.
@@ -104,11 +100,13 @@ class CircuitBreakerPersistenceLayer(ABC):
         cached = self._cache.get(self._cache_key(name))
         if cached is None:
             return None
+
         local_expiry, record = cached
-        if int(datetime.datetime.now().timestamp()) < local_expiry:
-            return record
-        del self._cache[self._cache_key(name)]
-        return None
+        if int(datetime.datetime.now().timestamp()) >= local_expiry:
+            del self._cache[self._cache_key(name)]
+            return None
+
+        return record
 
     # ------------------------------------------------------------- public API
 
@@ -141,8 +139,6 @@ class CircuitBreakerPersistenceLayer(ABC):
 
         try:
             record = self._get_record(name)
-        except CircuitBreakerRecordNotFoundError:
-            record = CircuitStateRecord(name=name, state=CircuitState.CLOSED)
         except Exception:
             # Fail open without caching, so the next invocation retries the store rather
             # than serving a synthesized CLOSED for the whole local cache window.
@@ -152,6 +148,11 @@ class CircuitBreakerPersistenceLayer(ABC):
                 exc_info=True,
             )
             return CircuitStateRecord(name=name, state=CircuitState.CLOSED)
+
+        # A missing record is the expected cold-start case, not a failure: treat it as a
+        # closed circuit and cache it like any other read.
+        if record is None:
+            record = CircuitStateRecord(name=name, state=CircuitState.CLOSED)
 
         self._save_to_cache(record)
         return record
@@ -233,7 +234,13 @@ class CircuitBreakerPersistenceLayer(ABC):
         self._save_to_cache(record)
 
     def save_reopen(self, name: str, opened_at: int) -> None:
-        """Persist a HALF_OPEN to OPEN transition after a failed probe."""
+        """
+        Persist a HALF_OPEN to OPEN transition after a failed probe.
+
+        If this write fails the stored row stays in HALF_OPEN, but it does not strand the
+        circuit: the probe lease expiry still applies, so once it lapses another
+        environment wins the next election and drives the transition.
+        """
         record = CircuitStateRecord(
             name=name,
             state=CircuitState.OPEN,
@@ -246,14 +253,9 @@ class CircuitBreakerPersistenceLayer(ABC):
     # --------------------------------------------------------- backend hooks
 
     @abstractmethod
-    def _get_record(self, name: str) -> CircuitStateRecord:
+    def _get_record(self, name: str) -> CircuitStateRecord | None:
         """
-        Fetch a circuit record from the store.
-
-        Raises
-        ------
-        CircuitBreakerRecordNotFoundError
-            If no record exists for ``name``.
+        Fetch a circuit record from the store, or ``None`` if no record exists for ``name``.
         """
         raise NotImplementedError
 

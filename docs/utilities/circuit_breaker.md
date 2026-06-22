@@ -26,7 +26,7 @@ The circuit breaker utility stops sending traffic to an unhealthy downstream dep
 
 **Circuit** is a named guard around a single downstream dependency. Each `name` is an independent circuit.
 
-**State** is the circuit's current mode: `CLOSED` (normal), `OPEN` (downstream considered unhealthy, calls skipped), or `HALF_OPEN` (testing recovery).
+**State** is the circuit's current mode: `CLOSED` (healthy), `OPEN` (downstream considered unhealthy, calls skipped), or `HALF_OPEN` (testing recovery).
 
 **Persistence layer** is the shared storage that holds each circuit's state so every execution environment agrees on whether a circuit is open.
 
@@ -140,14 +140,13 @@ Register an `on_circuit_open` callback to decide what happens to a rejected requ
     ```
 
 !!! info "Why a callback instead of built-in S3/SQS sinks?"
-    A managed sink would have to own client setup, payload-size handling, retries, and
-    IAM, and it would leak *where* the payload landed back to the caller. A one-line
-    callback does the same thing with full control and no lock-in, so the utility stays
-    out of your way.
+    A callback keeps you in control of where rejected requests go. You pick the
+    destination, the client, and the IAM, and you avoid coupling your function to a
+    sink the utility manages for you.
 
 ### Without a callback
 
-If no callback is registered, an open circuit raises `CircuitBreakerOpenError`. Catch it to decide how to respond. The exception carries a `circuit` attribute (`CircuitInfo`) so you can inspect why the request was rejected.
+If you don't register a callback, an open circuit raises `CircuitBreakerOpenError`. Catch it to decide how to respond. The exception carries a `circuit` attribute (`CircuitInfo`) so you can inspect why the circuit rejected the request.
 
 === "working_without_callback.py"
 
@@ -181,15 +180,15 @@ Passing both raises `CircuitBreakerConfigError`. An exception that doesn't count
 
 ### How recovery works
 
-After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and a **single** execution environment is elected (via a conditional DynamoDB write) to run a probe. If `success_threshold` consecutive probes succeed, the circuit closes; a single failing probe reopens it. This avoids a thundering herd of every environment hammering a recovering backend at once.
+After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a **single** execution environment (via a conditional DynamoDB write) to run a probe. If `success_threshold` consecutive probes succeed, the circuit closes; a single failing probe reopens it. This stops a thundering herd of every environment hammering a recovering backend at once.
 
 ### State coordination across environments
 
 The consecutive-failure counter lives in memory per execution environment, so a healthy circuit performs **no writes**. Only when an environment reaches `failure_threshold` does it persist `OPEN`. The shared state is cached locally for `local_cache_max_age` seconds to avoid a read per invocation. A cache miss (cold start or expired entry) forces a read-through before routing.
 
 !!! note "Fail-open by design"
-    If the persistence store cannot be reached when reading state, the circuit is treated
-    as **closed**. A circuit breaker should never become the outage it is meant to prevent.
+    If the utility cannot reach the persistence store when reading state, it treats the
+    circuit as **closed**. A circuit breaker should never become the outage it is meant to prevent.
 
 ### Observability with metrics
 

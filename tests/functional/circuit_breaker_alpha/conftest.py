@@ -7,7 +7,6 @@ from aws_lambda_powertools.utilities.circuit_breaker_alpha.base import CircuitBr
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
-    CircuitBreakerRecordNotFoundError,
 )
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
@@ -20,9 +19,9 @@ class FakePersistence(CircuitBreakerPersistenceLayer):
         self.db: dict[str, CircuitStateRecord] = {}
         super().__init__()
 
-    def _get_record(self, name: str) -> CircuitStateRecord:
+    def _get_record(self, name: str) -> CircuitStateRecord | None:
         if name not in self.db:
-            raise CircuitBreakerRecordNotFoundError
+            return None
         stored = self.db[name]
         # Return a copy so the handler can't mutate stored state by reference.
         return CircuitStateRecord(

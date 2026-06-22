@@ -16,7 +16,6 @@ from aws_lambda_powertools.shared import user_agent
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
-    CircuitBreakerRecordNotFoundError,
 )
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
@@ -121,35 +120,44 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
             expiry_timestamp=data.get(self.expiry_attr),
         )
 
+    @staticmethod
+    def _n(value: int | str) -> dict:
+        """Wrap a value as a DynamoDB number attribute."""
+        return {"N": str(value)}
+
+    @staticmethod
+    def _s(value: str) -> dict:
+        """Wrap a value as a DynamoDB string attribute."""
+        return {"S": value}
+
     def _record_to_item(self, record: CircuitStateRecord) -> dict:
         """Translate a :class:`CircuitStateRecord` into a DynamoDB item."""
         item: dict = {
-            self.key_attr: {"S": record.name},
-            self.state_attr: {"S": str(record.state)},
-            self.failure_count_attr: {"N": str(record.failure_count)},
+            self.key_attr: self._s(record.name),
+            self.state_attr: self._s(str(record.state)),
+            self.failure_count_attr: self._n(record.failure_count),
         }
         if record.opened_at is not None:
-            item[self.opened_at_attr] = {"N": str(record.opened_at)}
+            item[self.opened_at_attr] = self._n(record.opened_at)
         if record.half_open_owner is not None:
-            item[self.half_open_owner_attr] = {"S": record.half_open_owner}
+            item[self.half_open_owner_attr] = self._s(record.half_open_owner)
         if record.probe_lease_expiry is not None:
-            item[self.probe_lease_expiry_attr] = {"N": str(record.probe_lease_expiry)}
+            item[self.probe_lease_expiry_attr] = self._n(record.probe_lease_expiry)
         if record.expiry_timestamp is not None:
-            item[self.expiry_attr] = {"N": str(record.expiry_timestamp)}
+            item[self.expiry_attr] = self._n(record.expiry_timestamp)
         return item
 
-    def _get_record(self, name: str) -> CircuitStateRecord:
+    def _get_record(self, name: str) -> CircuitStateRecord | None:
         # Eventually consistent on purpose: matches the local cache's stale tolerance
         # and halves the read cost on the hot path.
         response = self.client.get_item(
             TableName=self.table_name,
-            Key={self.key_attr: {"S": name}},
+            Key={self.key_attr: self._s(name)},
             ConsistentRead=False,
         )
-        try:
-            item = response["Item"]
-        except KeyError as exc:
-            raise CircuitBreakerRecordNotFoundError from exc
+        item = response.get("Item")
+        if item is None:
+            return None
         return self._item_to_record(item)
 
     def _build_half_open_condition(self, expected_opened_at: int | None = None) -> dict:
@@ -164,9 +172,9 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
             "#probe_lease_expiry": self.probe_lease_expiry_attr,
         }
         expression_values: dict = {
-            ":open": {"S": str(CircuitState.OPEN)},
-            ":half_open": {"S": str(CircuitState.HALF_OPEN)},
-            ":now": {"N": str(int(datetime.datetime.now().timestamp()))},
+            ":open": self._s(str(CircuitState.OPEN)),
+            ":half_open": self._s(str(CircuitState.HALF_OPEN)),
+            ":now": self._n(int(datetime.datetime.now().timestamp())),
         }
 
         if expected_opened_at is not None:
@@ -174,7 +182,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
                 "(#state = :open AND attribute_not_exists(#half_open_owner) AND #opened_at = :expected_opened_at)"
             )
             expression_attr_names["#opened_at"] = self.opened_at_attr
-            expression_values[":expected_opened_at"] = {"N": str(expected_opened_at)}
+            expression_values[":expected_opened_at"] = self._n(expected_opened_at)
 
         return {
             "ConditionExpression": " OR ".join(condition_parts),
@@ -202,42 +210,43 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
                 raise CircuitBreakerExistingLockError from exc
             raise
 
-    def _update_record(self, record: CircuitStateRecord) -> None:
+    def _build_update_query(self, record: CircuitStateRecord) -> dict:
+        """Build the update_item kwargs for an unconditional state change."""
         update_expression = "SET #state = :state, #failure_count = :failure_count"
         expression_attr_names = {
             "#state": self.state_attr,
             "#failure_count": self.failure_count_attr,
         }
         expression_attr_values: dict = {
-            ":state": {"S": str(record.state)},
-            ":failure_count": {"N": str(record.failure_count)},
+            ":state": self._s(str(record.state)),
+            ":failure_count": self._n(record.failure_count),
         }
 
         if record.expiry_timestamp is not None:
             update_expression += ", #expiration = :expiration"
             expression_attr_names["#expiration"] = self.expiry_attr
-            expression_attr_values[":expiration"] = {"N": str(record.expiry_timestamp)}
+            expression_attr_values[":expiration"] = self._n(record.expiry_timestamp)
 
         # Clear the half-open owner lock and probe lease on every state change out of
         # HALF_OPEN, whether the probe closed the circuit (opened_at is None) or reopened
         # it (opened_at set). Otherwise the stale owner/lease makes the next probe
         # election's condition fail forever, stranding the circuit.
+        expression_attr_names["#opened_at"] = self.opened_at_attr
+        expression_attr_names["#half_open_owner"] = self.half_open_owner_attr
+        expression_attr_names["#probe_lease_expiry"] = self.probe_lease_expiry_attr
         if record.opened_at is not None:
             update_expression += ", #opened_at = :opened_at REMOVE #half_open_owner, #probe_lease_expiry"
-            expression_attr_names["#opened_at"] = self.opened_at_attr
-            expression_attr_names["#half_open_owner"] = self.half_open_owner_attr
-            expression_attr_names["#probe_lease_expiry"] = self.probe_lease_expiry_attr
-            expression_attr_values[":opened_at"] = {"N": str(record.opened_at)}
+            expression_attr_values[":opened_at"] = self._n(record.opened_at)
         else:
             update_expression += " REMOVE #opened_at, #half_open_owner, #probe_lease_expiry"
-            expression_attr_names["#opened_at"] = self.opened_at_attr
-            expression_attr_names["#half_open_owner"] = self.half_open_owner_attr
-            expression_attr_names["#probe_lease_expiry"] = self.probe_lease_expiry_attr
 
-        self.client.update_item(
-            TableName=self.table_name,
-            Key={self.key_attr: {"S": record.name}},
-            UpdateExpression=update_expression,
-            ExpressionAttributeNames=expression_attr_names,
-            ExpressionAttributeValues=expression_attr_values,
-        )
+        return {
+            "TableName": self.table_name,
+            "Key": {self.key_attr: self._s(record.name)},
+            "UpdateExpression": update_expression,
+            "ExpressionAttributeNames": expression_attr_names,
+            "ExpressionAttributeValues": expression_attr_values,
+        }
+
+    def _update_record(self, record: CircuitStateRecord) -> None:
+        self.client.update_item(**self._build_update_query(record))
