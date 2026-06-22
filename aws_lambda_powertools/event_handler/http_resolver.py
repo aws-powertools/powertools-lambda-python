@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import warnings
 from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import parse_qs
 
@@ -162,20 +161,15 @@ class MockLambdaContext:
 
 class HttpResolverLocal(ApiGatewayResolver):
     """
-    ASGI-compatible HTTP resolver for local development and testing.
+    ASGI-compatible HTTP resolver.
 
-    This resolver is designed specifically for local development workflows.
-    It allows you to run your Powertools application locally with any ASGI server
+    It allows you to run your Powertools application with any ASGI server
     (uvicorn, hypercorn, daphne, etc.) while maintaining full compatibility with Lambda.
 
     The same code works in both environments - locally via ASGI and in Lambda via the handler.
+    If your Lambda is behind Lambda Web Adapter or any other HTTP proxy, it works seamlessly.
 
     Supports both sync and async route handlers.
-
-    WARNING
-    -------
-    This is intended for local development and testing only.
-    The API may change in future releases. Do not use in production environments.
 
     Example
     -------
@@ -210,11 +204,6 @@ class HttpResolverLocal(ApiGatewayResolver):
         strip_prefixes: list[str | Any] | None = None,
         enable_validation: bool = False,
     ):
-        warnings.warn(
-            "HttpResolverLocal is intended for local development and testing only. "
-            "The API may change in future releases. Do not use in production environments.",
-            stacklevel=2,
-        )
         super().__init__(
             proxy_type=ProxyEventType.APIGatewayProxyEvent,  # Use REST API format internally
             cors=cors,
@@ -351,3 +340,6 @@ class HttpResolverLocal(ApiGatewayResolver):
                 "body": body_bytes,
             },
         )
+
+
+HttpResolver = HttpResolverLocal
