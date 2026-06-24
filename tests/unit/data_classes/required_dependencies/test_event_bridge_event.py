@@ -20,8 +20,12 @@ def test_event_bridge_event():
     assert parsed_event.replay_name == "replay_archive"
 
 
-def test_event_bridge_event_base():
-    raw_event = load_event("eventBridgeEventBase.json")
+def test_event_bridge_event_with_minimum_info():
+    """Testing a custom event with minimum required information.
+
+    ref: https://docs.aws.amazon.com/eventbridge/latest/ref/events-structure.html#eb-custom-event
+    """
+    raw_event = load_event("eventBridgeEventMinInfo.json")
     parsed_event = EventBridgeEvent(raw_event)
 
     assert parsed_event.source == raw_event["source"]

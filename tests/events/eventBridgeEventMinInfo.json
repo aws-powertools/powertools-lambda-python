@@ -1,0 +1,7 @@
+{
+  "detail-type": "My custom event",
+  "source": "my-custom-source",
+  "detail": {
+    "custom_field": "cool"
+  }
+}
