@@ -5,15 +5,48 @@
 # Unreleased
 
 
+<a name="v3.30.0"></a>
+## [v3.30.0] - 2026-06-24
+## Maintenance
+
+* version bump
+* **deps-dev:** bump aws-cdk-lib from 2.259.0 to 2.260.0 ([#8294](https://github.com/aws-powertools/powertools-lambda-python/issues/8294))
+
+
 <a name="v3.29.0"></a>
 ## [v3.29.0] - 2026-05-04
 ## Bug Fixes
 
 * **event_handler:** prevent deadlock when async middleware raises before calling next() ([#8196](https://github.com/aws-powertools/powertools-lambda-python/issues/8196))
+* **event_handler:** fix ALB resolver returns when response body is None ([#8194](https://github.com/aws-powertools/powertools-lambda-python/issues/8194))
+* **idempotency:** resolve tech debt issues with falsy responses and Redis persistency ([#8176](https://github.com/aws-powertools/powertools-lambda-python/issues/8176))
+* **parser:** type hints should reflect primitive types support ([#8175](https://github.com/aws-powertools/powertools-lambda-python/issues/8175))
+
+## Code Refactoring
+
+* **event_handler:** extract async logic to a separated file ([#8138](https://github.com/aws-powertools/powertools-lambda-python/issues/8138))
+
+## Documentation
+
+* add lambda templates content ([#8159](https://github.com/aws-powertools/powertools-lambda-python/issues/8159))
+
+## Features
+
+* add AsyncMiddlewareFrame support ([#8158](https://github.com/aws-powertools/powertools-lambda-python/issues/8158))
+* **event-handler:** add _registered_api_adapter_async() internal building block ([#8157](https://github.com/aws-powertools/powertools-lambda-python/issues/8157))
+* **event_handler:** adding resolve async public API ([#8171](https://github.com/aws-powertools/powertools-lambda-python/issues/8171))
+* **event_handler:** adding resolve async internal ([#8170](https://github.com/aws-powertools/powertools-lambda-python/issues/8170))
+* **openapi:** add compute_field support ([#8188](https://github.com/aws-powertools/powertools-lambda-python/issues/8188))
 
 ## Maintenance
 
 * version bump
+* update aws-encryption-sdk allowed versions ([#8191](https://github.com/aws-powertools/powertools-lambda-python/issues/8191))
+* **deps:** batch dependency updates ([#8184](https://github.com/aws-powertools/powertools-lambda-python/issues/8184))
+* **deps:** bump gitpython from 3.1.44 to 3.1.47 in /docs ([#8172](https://github.com/aws-powertools/powertools-lambda-python/issues/8172))
+* **deps:** batch update dependencies ([#8168](https://github.com/aws-powertools/powertools-lambda-python/issues/8168))
+* **deps:** update requests requirement from >=2.32.0 to >=2.33.1 in /examples/event_handler_graphql/src ([#8189](https://github.com/aws-powertools/powertools-lambda-python/issues/8189))
+* **deps-dev:** bump gitpython from 3.1.44 to 3.1.47 ([#8173](https://github.com/aws-powertools/powertools-lambda-python/issues/8173))
 
 
 <a name="v3.28.0"></a>
@@ -7666,7 +7699,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...HEAD
+[v3.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...v3.30.0
 [v3.29.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.28.0...v3.29.0
 [v3.28.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.27.0...v3.28.0
 [v3.27.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.26.0...v3.27.0
