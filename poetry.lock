@@ -285,14 +285,14 @@ typeguard = "2.13.3"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.259.0"
+version = "2.260.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "aws_cdk_lib-2.259.0-py3-none-any.whl", hash = "sha256:4ea916f3673bd372d5e5a7bf84eb5bfb20c171b74a02c14ec8af2620441457a3"},
-    {file = "aws_cdk_lib-2.259.0.tar.gz", hash = "sha256:5481f23b51dd771146c747d54e5d442f25a346a78c60077bd21b7d968af898e7"},
+    {file = "aws_cdk_lib-2.260.0-py3-none-any.whl", hash = "sha256:41363a6fd72261ce64055b6c90538cf9b9ee2854faca7d2c56316656214f56ea"},
+    {file = "aws_cdk_lib-2.260.0.tar.gz", hash = "sha256:94412d6539b543e898aa3a408a39c4d68be06c992938f8191d12f6ab44e546df"},
 ]
 
 [package.dependencies]
@@ -4837,9 +4837,10 @@ typing-extensions = ">=4.12.0"
 name = "ujson"
 version = "5.13.0"
 description = "Ultra fast JSON encoder and decoder for Python"
-optional = false
+optional = true
 python-versions = ">=3.10"
 groups = ["main"]
+markers = "extra == \"datadog\""
 files = [
     {file = "ujson-5.13.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:770643b4752266c5a466149848b78c3874940926a4ecef304f518b2b6cdb432f"},
     {file = "ujson-5.13.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a8e8c1203cb1a27720debc334f840a9170da741503522f86999710cb4738fbe3"},
