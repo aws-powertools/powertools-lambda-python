@@ -14,41 +14,41 @@ class EventBridgeEvent(DictWrapper):
     """
 
     @property
-    def get_id(self) -> str | None:
+    def get_id(self) -> str:
         """A unique value is generated for every event. This can be helpful in tracing events as
         they move through rules to targets, and are processed."""
         # Note: this name conflicts with existing python builtins
-        return self.get("id")
+        return self["id"]
 
     @property
-    def version(self) -> str | None:
+    def version(self) -> str:
         """By default, this is set to 0 (zero) in all events."""
-        return self.get("version")
+        return self["version"]
 
     @property
-    def account(self) -> str | None:
+    def account(self) -> str:
         """The 12-digit number identifying an AWS account."""
-        return self.get("account")
+        return self["account"]
 
     @property
-    def time(self) -> str | None:
+    def time(self) -> str:
         """The event timestamp, which can be specified by the service originating the event.
 
         If the event spans a time interval, the service might choose to report the start time, so
         this value can be noticeably before the time the event is actually received.
         """
-        return self.get("time")
+        return self["time"]
 
     @property
-    def region(self) -> str | None:
+    def region(self) -> str:
         """Identifies the AWS region where the event originated."""
-        return self.get("region")
+        return self["region"]
 
     @property
-    def resources(self) -> list[str] | None:
+    def resources(self) -> list[str]:
         """This JSON array contains ARNs that identify resources that are involved in the event.
         Inclusion of these ARNs is at the discretion of the service."""
-        return self.get("resources")
+        return self["resources"]
 
     @property
     def source(self) -> str:

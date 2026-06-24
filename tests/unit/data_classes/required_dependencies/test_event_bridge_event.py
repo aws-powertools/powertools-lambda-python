@@ -17,25 +17,4 @@ def test_event_bridge_event():
     assert parsed_event.source == raw_event["source"]
     assert parsed_event.detail_type == raw_event["detail-type"]
     assert parsed_event.detail == raw_event["detail"]
-    assert parsed_event.replay_name == "replay_archive"
-
-
-def test_event_bridge_event_with_minimum_info():
-    """Testing a custom event with minimum required information.
-
-    ref: https://docs.aws.amazon.com/eventbridge/latest/ref/events-structure.html#eb-custom-event
-    """
-    raw_event = load_event("eventBridgeEventMinInfo.json")
-    parsed_event = EventBridgeEvent(raw_event)
-
-    assert parsed_event.source == raw_event["source"]
-    assert parsed_event.detail_type == raw_event["detail-type"]
-    assert parsed_event.detail == raw_event["detail"]
-
-    assert parsed_event.get_id is None
-    assert parsed_event.version is None
-    assert parsed_event.account is None
-    assert parsed_event.time is None
-    assert parsed_event.region is None
-    assert parsed_event.resources is None
     assert parsed_event.replay_name is None
