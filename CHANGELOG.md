@@ -5,12 +5,72 @@
 # Unreleased
 
 
-<a name="v3.30.0"></a>
-## [v3.30.0] - 2026-06-24
+<a name="v3.31.0"></a>
+## [v3.31.0] - 2026-06-29
+## Features
+
+* **event_handler:** support any Pydantic Field annotation in parameter ([#8305](https://github.com/aws-powertools/powertools-lambda-python/issues/8305))
+
 ## Maintenance
 
 * version bump
+
+
+<a name="v3.30.0"></a>
+## [v3.30.0] - 2026-06-24
+## Bug Fixes
+
+* **batch:** add optional logger injection for BatchProcessors ([#7553](https://github.com/aws-powertools/powertools-lambda-python/issues/7553)) ([#8272](https://github.com/aws-powertools/powertools-lambda-python/issues/8272))
+* **docs:** update broken AWS Lambda Metadata Endpoint link ([#8209](https://github.com/aws-powertools/powertools-lambda-python/issues/8209))
+* **event-handler:** handle CORS preflight OPTIONS in HttpResolverLocal ([#8268](https://github.com/aws-powertools/powertools-lambda-python/issues/8268))
+* **event-handler:** fix ruff lint violations in event_handler module ([#8208](https://github.com/aws-powertools/powertools-lambda-python/issues/8208))
+
+## Code Refactoring
+
+* **event_handler:** promote HttpResolver to stable ([#8289](https://github.com/aws-powertools/powertools-lambda-python/issues/8289))
+
+## Documentation
+
+* **event-handler:** add import path gotcha for dependency_overrides testing ([#8269](https://github.com/aws-powertools/powertools-lambda-python/issues/8269))
+* **metadata:** fix broken Lambda Metadata Endpoint link ([#8212](https://github.com/aws-powertools/powertools-lambda-python/issues/8212))
+
+## Features
+
+* **event_handler:** allow custom serializer on BedrockAgentResolver ([#8271](https://github.com/aws-powertools/powertools-lambda-python/issues/8271))
+
+## Maintenance
+
+* version bump
+* fix minor typos and grammar in docs and comments ([#8245](https://github.com/aws-powertools/powertools-lambda-python/issues/8245))
+* **deps:** bump the github-actions group across 1 directory with 5 updates ([#8256](https://github.com/aws-powertools/powertools-lambda-python/issues/8256))
+* **deps:** bump ujson from 5.12.1 to 5.13.0 ([#8298](https://github.com/aws-powertools/powertools-lambda-python/issues/8298))
+* **deps:** bump pydantic-settings from 2.14.1 to 2.14.2 ([#8299](https://github.com/aws-powertools/powertools-lambda-python/issues/8299))
+* **deps:** bump cryptography from 46.0.7 to 48.0.1 ([#8286](https://github.com/aws-powertools/powertools-lambda-python/issues/8286))
+* **deps:** consolidate Dependabot dependency updates ([#8285](https://github.com/aws-powertools/powertools-lambda-python/issues/8285))
+* **deps:** batch dependency updates ([#8207](https://github.com/aws-powertools/powertools-lambda-python/issues/8207))
+* **deps:** bump gitpython from 3.1.47 to 3.1.50 in /docs ([#8213](https://github.com/aws-powertools/powertools-lambda-python/issues/8213))
+* **deps:** bump urllib3 from 2.6.3 to 2.7.0 in /docs ([#8216](https://github.com/aws-powertools/powertools-lambda-python/issues/8216))
+* **deps:** consolidate dependabot updates (13052026) ([#8228](https://github.com/aws-powertools/powertools-lambda-python/issues/8228))
+* **deps:** bump the github-actions group with 3 updates ([#8221](https://github.com/aws-powertools/powertools-lambda-python/issues/8221))
+* **deps:** bump codecov/codecov-action from 6.0.1 to 7.0.0 in the github-actions group ([#8260](https://github.com/aws-powertools/powertools-lambda-python/issues/8260))
+* **deps:** consolidate all open Dependabot updates ([#8241](https://github.com/aws-powertools/powertools-lambda-python/issues/8241))
+* **deps:** bump the github-actions group with 2 updates ([#8292](https://github.com/aws-powertools/powertools-lambda-python/issues/8292))
+* **deps:** bump pydantic from 2.12.5 to 2.13.4 ([#8252](https://github.com/aws-powertools/powertools-lambda-python/issues/8252))
+* **deps:** update requests requirement from >=2.33.1 to >=2.34.2 in /examples/event_handler_graphql/src ([#8254](https://github.com/aws-powertools/powertools-lambda-python/issues/8254))
+* **deps-dev:** bump aws-cdk from 2.1127.0 to 2.1128.1 in the aws-cdk group ([#8290](https://github.com/aws-powertools/powertools-lambda-python/issues/8290))
+* **deps-dev:** bump the dev-dependencies group across 1 directory with 2 updates ([#8242](https://github.com/aws-powertools/powertools-lambda-python/issues/8242))
+* **deps-dev:** bump aws-cdk from 2.1122.0 to 2.1124.1 in the aws-cdk group across 1 directory ([#8234](https://github.com/aws-powertools/powertools-lambda-python/issues/8234))
+* **deps-dev:** bump boto3-stubs from 1.43.3 to 1.43.24 ([#8265](https://github.com/aws-powertools/powertools-lambda-python/issues/8265))
+* **deps-dev:** bump aws-cdk from 2.1124.1 to 2.1126.0 in the aws-cdk group across 1 directory ([#8255](https://github.com/aws-powertools/powertools-lambda-python/issues/8255))
+* **deps-dev:** bump the dev-dependencies group with 3 updates ([#8261](https://github.com/aws-powertools/powertools-lambda-python/issues/8261))
+* **deps-dev:** bump urllib3 from 2.6.3 to 2.7.0 in /layer_v3 ([#8218](https://github.com/aws-powertools/powertools-lambda-python/issues/8218))
+* **deps-dev:** bump urllib3 from 2.6.3 to 2.7.0 ([#8217](https://github.com/aws-powertools/powertools-lambda-python/issues/8217))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.251.0a0 to 2.259.0a0 ([#8262](https://github.com/aws-powertools/powertools-lambda-python/issues/8262))
+* **deps-dev:** bump sentry-sdk from 2.57.0 to 2.62.0 ([#8263](https://github.com/aws-powertools/powertools-lambda-python/issues/8263))
+* **deps-dev:** bump gitpython from 3.1.47 to 3.1.50 ([#8214](https://github.com/aws-powertools/powertools-lambda-python/issues/8214))
+* **deps-dev:** bump the dev-dependencies group across 1 directory with 2 updates ([#8276](https://github.com/aws-powertools/powertools-lambda-python/issues/8276))
 * **deps-dev:** bump aws-cdk-lib from 2.259.0 to 2.260.0 ([#8294](https://github.com/aws-powertools/powertools-lambda-python/issues/8294))
+* **deps-dev:** bump the dev-dependencies group across 1 directory with 3 updates ([#8293](https://github.com/aws-powertools/powertools-lambda-python/issues/8293))
 
 
 <a name="v3.29.0"></a>
@@ -7699,7 +7759,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...HEAD
+[v3.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...v3.31.0
 [v3.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...v3.30.0
 [v3.29.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.28.0...v3.29.0
 [v3.28.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.27.0...v3.28.0
