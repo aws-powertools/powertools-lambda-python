@@ -6,13 +6,14 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
 from typing import TYPE_CHECKING
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
 from botocore.exceptions import ClientError
 
-from aws_lambda_powertools.shared import user_agent
+from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
@@ -41,6 +42,13 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         Name of the DynamoDB table that stores circuit state.
     key_attr : str
         Partition key attribute holding the circuit name. Defaults to ``"id"``.
+    static_pk_value : str, optional
+        Partition key value used when ``sort_key_attr`` is set, so the circuit name
+        moves to the sort key. Defaults to ``"circuit_breaker#<function-name>"``.
+    sort_key_attr : str, optional
+        Sort key attribute holding the circuit name. When set, the table is treated as
+        composite: ``static_pk_value`` is written to the partition key and the circuit
+        name to the sort key. Omit it for the default partition-key-only behavior.
     state_attr : str
         Attribute holding the circuit state. Defaults to ``"state"``.
     failure_count_attr : str
@@ -75,6 +83,8 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         self,
         table_name: str,
         key_attr: str = "id",
+        static_pk_value: str | None = None,
+        sort_key_attr: str | None = None,
         state_attr: str = "state",
         failure_count_attr: str = "failure_count",
         opened_at_attr: str = "opened_at",
@@ -92,8 +102,16 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
 
         user_agent.register_feature_to_client(client=self.client, feature="circuit_breaker")
 
+        if sort_key_attr == key_attr:
+            raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
+
+        if static_pk_value is None:
+            static_pk_value = f"circuit_breaker#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"
+
         self.table_name = table_name
         self.key_attr = key_attr
+        self.static_pk_value = static_pk_value
+        self.sort_key_attr = sort_key_attr
         self.state_attr = state_attr
         self.failure_count_attr = failure_count_attr
         self.opened_at_attr = opened_at_attr
@@ -111,7 +129,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         opened_at = data.get(self.opened_at_attr)
         probe_lease_expiry = data.get(self.probe_lease_expiry_attr)
         return CircuitStateRecord(
-            name=data[self.key_attr],
+            name=data[self.sort_key_attr] if self.sort_key_attr else data[self.key_attr],
             state=CircuitState(data[self.state_attr]),
             failure_count=int(data.get(self.failure_count_attr, 0)),
             opened_at=int(opened_at) if opened_at is not None else None,
@@ -130,10 +148,21 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         """Wrap a value as a DynamoDB string attribute."""
         return {"S": value}
 
+    def _get_key(self, name: str) -> dict:
+        """Build the simple or composite primary key for a circuit.
+
+        When ``sort_key_attr`` is set the key is composite: ``static_pk_value`` in the
+        partition and the circuit name in the sort key. Otherwise the name is the
+        partition key.
+        """
+        if self.sort_key_attr:
+            return {self.key_attr: self._s(self.static_pk_value), self.sort_key_attr: self._s(name)}
+        return {self.key_attr: self._s(name)}
+
     def _record_to_item(self, record: CircuitStateRecord) -> dict:
         """Translate a :class:`CircuitStateRecord` into a DynamoDB item."""
         item: dict = {
-            self.key_attr: self._s(record.name),
+            **self._get_key(record.name),
             self.state_attr: self._s(str(record.state)),
             self.failure_count_attr: self._n(record.failure_count),
         }
@@ -152,7 +181,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         # and halves the read cost on the hot path.
         response = self.client.get_item(
             TableName=self.table_name,
-            Key={self.key_attr: self._s(name)},
+            Key=self._get_key(name),
             ConsistentRead=False,
         )
         item = response.get("Item")
@@ -242,7 +271,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
 
         return {
             "TableName": self.table_name,
-            "Key": {self.key_attr: self._s(record.name)},
+            "Key": self._get_key(record.name),
             "UpdateExpression": update_expression,
             "ExpressionAttributeNames": expression_attr_names,
             "ExpressionAttributeValues": expression_attr_values,

@@ -268,3 +268,119 @@ def test_build_half_open_condition_with_expected_opened_at(persistence):
     assert "#opened_at = :expected_opened_at" in result["ConditionExpression"]
     assert result["ExpressionAttributeNames"]["#opened_at"] == "opened_at"
     assert result["ExpressionAttributeValues"][":expected_opened_at"] == {"N": "5000"}
+
+
+# --------------------------------------------------------------------------- composite (single-table) key
+
+
+COMPOSITE_KEY = {"PK": {"S": "CIRCUIT_BREAKER"}, "SK": {"S": "payment"}}
+
+
+@pytest.fixture
+def composite_persistence():
+    client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
+    layer = CircuitBreakerDynamoDBPersistence(
+        table_name=TABLE_NAME,
+        boto3_client=client,
+        key_attr="PK",
+        sort_key_attr="SK",
+        static_pk_value="CIRCUIT_BREAKER",
+    )
+    layer.configure(CircuitBreakerConfig(local_cache_max_age=0), circuit_name="payment")
+    return layer
+
+
+def test_composite_get_state_reads_composite_key(composite_persistence):
+    stubber = Stubber(composite_persistence.client)
+    stubber.add_response(
+        "get_item",
+        {},
+        {"TableName": TABLE_NAME, "Key": COMPOSITE_KEY, "ConsistentRead": False},
+    )
+    with stubber:
+        record = composite_persistence.get_state("payment")
+    assert record.state == CircuitState.CLOSED
+
+
+def test_composite_save_open_writes_composite_key(composite_persistence):
+    captured, restore = _capture_put_item(composite_persistence)
+    try:
+        composite_persistence.save_open("payment", failure_count=5, opened_at=1000)
+    finally:
+        restore()
+
+    item = captured["Item"]
+    assert item["PK"] == {"S": "CIRCUIT_BREAKER"}
+    assert item["SK"] == {"S": "payment"}
+    assert "id" not in item
+    assert item["state"] == {"S": "OPEN"}
+
+
+def test_composite_try_acquire_half_open_writes_composite_key(composite_persistence):
+    captured, restore = _capture_put_item(composite_persistence)
+    try:
+        assert composite_persistence.try_acquire_half_open("payment", "env-a", 1000) is True
+    finally:
+        restore()
+
+    item = captured["Item"]
+    assert item["PK"] == {"S": "CIRCUIT_BREAKER"}
+    assert item["SK"] == {"S": "payment"}
+    assert item["state"] == {"S": "HALF_OPEN"}
+    # The conditional election is still emitted in composite mode (condition is key-independent).
+    assert "#state = :open AND attribute_not_exists(#half_open_owner)" in captured["ConditionExpression"]
+    assert "#probe_lease_expiry <= :now" in captured["ConditionExpression"]
+
+
+def test_composite_try_acquire_half_open_loses_on_conditional_failure(composite_persistence):
+    stubber = Stubber(composite_persistence.client)
+    stubber.add_client_error("put_item", service_error_code="ConditionalCheckFailedException")
+    with stubber:
+        assert composite_persistence.try_acquire_half_open("payment", "env-b", 1000) is False
+
+
+def test_composite_save_closed_updates_composite_key(composite_persistence):
+    captured = {}
+    original_update = composite_persistence.client.update_item
+
+    def capturing_update(**kwargs):
+        captured.update(kwargs)
+        return {}
+
+    composite_persistence.client.update_item = capturing_update
+    try:
+        composite_persistence.save_closed("payment")
+    finally:
+        composite_persistence.client.update_item = original_update
+
+    assert captured["Key"] == COMPOSITE_KEY
+
+
+def test_composite_item_to_record_reads_name_from_sort_key(composite_persistence):
+    item = {
+        "PK": {"S": "CIRCUIT_BREAKER"},
+        "SK": {"S": "payment"},
+        "state": {"S": "OPEN"},
+        "failure_count": {"N": "2"},
+    }
+    record = composite_persistence._item_to_record(item)
+    assert record.name == "payment"
+    assert record.state == CircuitState.OPEN
+
+
+def test_sort_key_equal_to_key_attr_raises():
+    client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
+    with pytest.raises(ValueError, match="cannot be the same"):
+        CircuitBreakerDynamoDBPersistence(
+            table_name=TABLE_NAME,
+            boto3_client=client,
+            key_attr="PK",
+            sort_key_attr="PK",
+        )
+
+
+def test_default_static_pk_value_namespaces_function_name(monkeypatch):
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "orders-fn")
+    client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
+    layer = CircuitBreakerDynamoDBPersistence(table_name=TABLE_NAME, boto3_client=client, sort_key_attr="SK")
+    assert layer.static_pk_value == "circuit_breaker#orders-fn"
