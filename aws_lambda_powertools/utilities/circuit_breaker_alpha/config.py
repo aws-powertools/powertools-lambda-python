@@ -73,8 +73,9 @@ class CircuitBreakerConfig:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.success_threshold = success_threshold
-        self.handled_exceptions = handled_exceptions
-        self.ignored_exceptions = ignored_exceptions
+        # Normalize to tuple so isinstance() works correctly
+        self.handled_exceptions = tuple(handled_exceptions) if handled_exceptions is not None else None
+        self.ignored_exceptions = tuple(ignored_exceptions) if ignored_exceptions is not None else None
         self.local_cache_max_age = local_cache_max_age
 
     @staticmethod
