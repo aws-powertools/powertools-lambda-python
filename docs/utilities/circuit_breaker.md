@@ -227,7 +227,7 @@ When enabled, the circuit name is saved in the sort key instead, and the partiti
 Set `static_pk_value` to a fixed value (as below) when you instead want **multiple functions to share the same circuit** — for example, every function guarding the same downstream dependency should trip together.
 
 ```python hl_lines="12-14"
---8<-- "examples/circuit_breaker_alpha/src/working_with_composite_key.py"
+--8<-- "examples/circuit_breaker_alpha/src/working_with_composite_primary_key.py"
 ```
 
 ??? note "Click to expand and learn how table items would look like"
