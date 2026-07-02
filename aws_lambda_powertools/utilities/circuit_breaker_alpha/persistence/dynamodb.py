@@ -7,6 +7,7 @@ from __future__ import annotations
 import datetime
 import logging
 import os
+import warnings
 from typing import TYPE_CHECKING
 
 import boto3
@@ -20,6 +21,7 @@ from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base impo
 )
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from botocore.config import Config
@@ -104,6 +106,13 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
 
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
+
+        if static_pk_value is not None and sort_key_attr is None:
+            warnings.warn(
+                "static_pk_value is ignored unless sort_key_attr is also set.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
 
         if static_pk_value is None:
             static_pk_value = f"circuit_breaker#{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, '')}"

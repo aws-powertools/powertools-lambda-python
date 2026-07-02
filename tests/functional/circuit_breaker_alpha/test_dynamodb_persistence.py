@@ -10,6 +10,7 @@ from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 TABLE_NAME = "CircuitBreakerState"
 
@@ -384,3 +385,13 @@ def test_default_static_pk_value_namespaces_function_name(monkeypatch):
     client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
     layer = CircuitBreakerDynamoDBPersistence(table_name=TABLE_NAME, boto3_client=client, sort_key_attr="SK")
     assert layer.static_pk_value == "circuit_breaker#orders-fn"
+
+
+def test_static_pk_value_without_sort_key_attr_warns():
+    client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
+    with pytest.warns(PowertoolsUserWarning, match="static_pk_value is ignored unless sort_key_attr"):
+        CircuitBreakerDynamoDBPersistence(
+            table_name=TABLE_NAME,
+            boto3_client=client,
+            static_pk_value="CIRCUIT_BREAKER",
+        )
