@@ -20,6 +20,7 @@ The circuit breaker utility stops sending traffic to an unhealthy downstream dep
 * Hands rejected requests to an `on_circuit_open` callback so you decide what happens next (buffer, drop, return a cached value)
 * Tests recovery with an explicit half-open probe rather than blindly retrying everything at once
 * Shares circuit state across execution environments via Amazon DynamoDB
+* Safe under concurrency: one half-open probe across all threads and execution environments, and synchronized failure counting
 * Keeps the healthy path write-free: failures are counted in memory and only persisted on a state transition
 
 ## Terminology
@@ -181,6 +182,16 @@ Passing both raises `CircuitBreakerConfigError`. An exception that doesn't count
 ### How recovery works
 
 After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a **single** execution environment (via a conditional DynamoDB write) to run a probe. If `success_threshold` consecutive probes succeed, the circuit closes; a single failing probe reopens it. This stops a thundering herd of every environment hammering a recovering backend at once.
+
+!!! note "Thread safety"
+    The utility is safe to share across threads: within a multi-threaded environment the probe election picks a single
+    thread, so the single-prober guarantee spans threads as well as environments, and the in-memory failure counter is
+    synchronized. Single-threaded functions (the normal Lambda model) are unaffected. `on_circuit_open` and
+    `on_transition` hooks may run concurrently from multiple threads.
+
+    Probe ownership belongs to the thread that won the election. If that thread never runs the circuit again (for
+    example, a thread-per-request worker pool), recovery waits for the probe lease to expire before another thread or
+    environment takes over.
 
 ### State coordination across environments
 

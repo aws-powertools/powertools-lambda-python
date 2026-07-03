@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import datetime
 import logging
+import threading
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
@@ -32,6 +33,17 @@ LOCAL_CACHE_MAX_ITEMS = 1024
 PERSISTED_STATE_TTL_BUFFER = 3600
 
 
+class _CircuitSettings(NamedTuple):
+    """Per-circuit tunables the layer captures from :meth:`configure`."""
+
+    local_cache_max_age: int
+    recovery_timeout: int
+
+
+# Fallback for direct layer use before configure() has run; mirrors CircuitBreakerConfig defaults.
+_DEFAULT_SETTINGS = _CircuitSettings(local_cache_max_age=5, recovery_timeout=30)
+
+
 class CircuitBreakerExistingLockError(Exception):
     """Internal signal that a conditional half-open probe write lost the race."""
 
@@ -50,19 +62,26 @@ class CircuitBreakerPersistenceLayer(ABC):
 
     def __init__(self) -> None:
         """Initialize defaults; real configuration happens in :meth:`configure`."""
-        self.circuit_name: str = ""
-        self.local_cache_max_age: int = 5
-        self.recovery_timeout: int = 30
+        # Per-circuit tunables, keyed by circuit name. One persistence instance is shared
+        # by every circuit (and thread) using the same store, so these must never live in
+        # plain instance attributes: circuits with different configs would stamp each
+        # other's TTL and probe lease. A plain dict, not an LRUDict: evicting a live
+        # circuit's settings would silently swap in the defaults (wrong lease and TTL),
+        # whereas evicting a cache entry below only costs a store re-read.
+        self._settings: dict[str, _CircuitSettings] = {}
         # Maps circuit name -> the unix timestamp the locally cached record goes stale.
         # Kept separate from the record's durable ``expiry_timestamp`` (the store TTL) so
         # the short in-memory freshness window is never mistaken for the long store TTL.
         self._cache: LRUDict = LRUDict(max_items=LOCAL_CACHE_MAX_ITEMS)
+        # One lock for both maps: LRUDict reorders entries even on reads, so unguarded
+        # concurrent access can corrupt it or raise.
+        self._lock = threading.Lock()
 
     def configure(self, config: CircuitBreakerConfig, circuit_name: str) -> None:
         """
-        Bind the layer to a circuit and its configuration.
+        Bind a circuit's configuration to the layer.
 
-        Called once per invocation by the handler; the assignments are cheap and the
+        Called once per invocation by the handler; the assignment is cheap and the
         same persistence instance is reused across invocations within an environment.
 
         Parameters
@@ -70,43 +89,54 @@ class CircuitBreakerPersistenceLayer(ABC):
         config : CircuitBreakerConfig
             Configuration providing the local cache TTL and recovery timeout.
         circuit_name : str
-            The circuit this layer instance serves.
+            The circuit these settings apply to.
         """
-        self.circuit_name = circuit_name
-        self.local_cache_max_age = config.local_cache_max_age
-        self.recovery_timeout = config.recovery_timeout
+        with self._lock:
+            self._settings[circuit_name] = _CircuitSettings(
+                local_cache_max_age=config.local_cache_max_age,
+                recovery_timeout=config.recovery_timeout,
+            )
+
+    def _settings_for(self, name: str) -> _CircuitSettings:
+        """Return a circuit's configured settings, or the defaults if never configured."""
+        with self._lock:
+            return self._settings.get(name) or _DEFAULT_SETTINGS
 
     # ------------------------------------------------------------------ cache
 
     def _cache_key(self, name: str) -> str:
         return name
 
-    def _durable_ttl(self) -> int:
+    def _durable_ttl(self, name: str) -> int:
         """
         Compute the store TTL stamped on a persisted record.
 
         Sized to outlive a full recovery window so a live circuit is never reaped
         mid-cycle, while an abandoned circuit (no further writes) self-cleans soon after.
         """
-        return int(datetime.datetime.now().timestamp()) + self.recovery_timeout + PERSISTED_STATE_TTL_BUFFER
+        now = int(datetime.datetime.now().timestamp())
+        return now + self._settings_for(name).recovery_timeout + PERSISTED_STATE_TTL_BUFFER
 
     def _save_to_cache(self, record: CircuitStateRecord) -> None:
         """Cache a record locally with a short in-memory freshness window."""
-        local_expiry = int(datetime.datetime.now().timestamp()) + self.local_cache_max_age
-        self._cache[self._cache_key(record.name)] = (local_expiry, record)
+        local_expiry = int(datetime.datetime.now().timestamp()) + self._settings_for(record.name).local_cache_max_age
+        with self._lock:
+            self._cache[self._cache_key(record.name)] = (local_expiry, record)
 
     def _retrieve_from_cache(self, name: str) -> CircuitStateRecord | None:
         """Return a cached record if present and still within its local freshness window."""
-        cached = self._cache.get(self._cache_key(name))
-        if cached is None:
-            return None
+        with self._lock:
+            cached = self._cache.get(self._cache_key(name))
+            if cached is None:
+                return None
 
-        local_expiry, record = cached
-        if int(datetime.datetime.now().timestamp()) >= local_expiry:
-            del self._cache[self._cache_key(name)]
-            return None
+            local_expiry, record = cached
+            if int(datetime.datetime.now().timestamp()) >= local_expiry:
+                # pop, not del: this must never raise into the protected call.
+                self._cache.pop(self._cache_key(name), None)
+                return None
 
-        return record
+            return record
 
     # ------------------------------------------------------------- public API
 
@@ -175,19 +205,19 @@ class CircuitBreakerPersistenceLayer(ABC):
             state=CircuitState.OPEN,
             failure_count=failure_count,
             opened_at=opened_at,
-            expiry_timestamp=self._durable_ttl(),
+            expiry_timestamp=self._durable_ttl(name),
         )
         self._put_record(record)
         self._save_to_cache(record)
 
     def try_acquire_half_open(self, name: str, owner: str, opened_at: int) -> bool:
         """
-        Atomically elect a single environment to run the half-open probe.
+        Atomically elect a single worker to run the half-open probe.
 
         The conditional write succeeds only when the circuit is OPEN with no existing
         lock owner AND the ``opened_at`` matches what the caller observed (guards against
         stale eventually-consistent reads). A lease expiry is stamped so that if the
-        winning environment is recycled before completing the probe, others can take over
+        winning worker is recycled before completing the probe, others can take over
         once the lease lapses.
 
         Parameters
@@ -195,25 +225,26 @@ class CircuitBreakerPersistenceLayer(ABC):
         name : str
             Circuit name.
         owner : str
-            Identifier of the environment attempting the probe.
+            Identifier of the worker (one thread in one execution environment)
+            attempting the probe.
         opened_at : int
             The ``opened_at`` the caller observed, kept stable across the transition.
 
         Returns
         -------
         bool
-            ``True`` if this environment won the probe lock, ``False`` if another
-            environment already holds it.
+            ``True`` if this worker won the probe lock, ``False`` if another
+            worker already holds it.
         """
         # Lease = recovery_timeout gives the probe a full cycle to complete.
-        probe_lease_expiry = int(datetime.datetime.now().timestamp()) + self.recovery_timeout
+        probe_lease_expiry = int(datetime.datetime.now().timestamp()) + self._settings_for(name).recovery_timeout
         record = CircuitStateRecord(
             name=name,
             state=CircuitState.HALF_OPEN,
             opened_at=opened_at,
             half_open_owner=owner,
             probe_lease_expiry=probe_lease_expiry,
-            expiry_timestamp=self._durable_ttl(),
+            expiry_timestamp=self._durable_ttl(name),
         )
         try:
             self._put_record(record, condition="half_open", expected_opened_at=opened_at)
@@ -228,7 +259,7 @@ class CircuitBreakerPersistenceLayer(ABC):
             name=name,
             state=CircuitState.CLOSED,
             failure_count=0,
-            expiry_timestamp=self._durable_ttl(),
+            expiry_timestamp=self._durable_ttl(name),
         )
         self._update_record(record)
         self._save_to_cache(record)
@@ -245,7 +276,7 @@ class CircuitBreakerPersistenceLayer(ABC):
             name=name,
             state=CircuitState.OPEN,
             opened_at=opened_at,
-            expiry_timestamp=self._durable_ttl(),
+            expiry_timestamp=self._durable_ttl(name),
         )
         self._update_record(record)
         self._save_to_cache(record)
