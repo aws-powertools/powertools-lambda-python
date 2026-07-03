@@ -141,7 +141,8 @@ class CircuitBreakerConfig:
             raise CircuitBreakerConfigError(invalid)
 
         if isinstance(value, type):
-            exceptions: tuple[type[Exception], ...] = (value,)
+            # ty (unlike mypy) does not narrow the union here, so it needs the ignore.
+            exceptions: tuple[type[Exception], ...] = (value,)  # ty: ignore[invalid-assignment]
         else:
             try:
                 exceptions = tuple(value)
