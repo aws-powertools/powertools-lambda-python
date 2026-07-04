@@ -530,6 +530,40 @@ def test_half_open_non_owner_with_active_lease_is_rejected(store, now):
         call()
 
 
+def test_half_open_expired_lease_lost_takeover_returns_open_response(store, now):
+    """Losing the takeover election must NOT probe: another thread/environment won
+    the conditional write between our expiry check and our acquire, so the call
+    has to get the open-circuit response — electing every candidate is exactly
+    the multi-prober bug the per-thread owner id exists to prevent."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    # A stranded probe with an expired lease, owned by someone else.
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 200,
+        half_open_owner="dead-env",
+        probe_lease_expiry=now - 10,  # expired — takeover will be attempted
+    )
+
+    # The race's loser: the conditional election fails.
+    def lost_election(name, owner_id, opened_at):
+        return False
+
+    store.try_acquire_half_open = lost_election
+
+    protected_ran = {"value": False}
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        protected_ran["value"] = True
+        return "must not probe"
+
+    with pytest.raises(CircuitBreakerOpenError):
+        call()
+    assert protected_ran["value"] is False
+
+
 def test_open_lost_election_returns_open_response(store, now):
     """Branch: try_acquire_half_open returns False (another env won the race)."""
     config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
