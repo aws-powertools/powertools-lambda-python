@@ -186,12 +186,15 @@ After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a 
 !!! note "Thread safety"
     The utility is safe to share across threads: within a multi-threaded environment the probe election picks a single
     thread, so the single-prober guarantee spans threads as well as environments, and the in-memory failure counter is
-    synchronized. Single-threaded functions (the normal Lambda model) are unaffected. `on_circuit_open` and
-    `on_transition` hooks may run concurrently from multiple threads.
+    synchronized. Single-threaded functions (the normal Lambda model) are unaffected.
 
     Probe ownership belongs to the thread that won the election. If that thread never runs the circuit again (for
     example, a thread-per-request worker pool), recovery waits for the probe lease to expire before another thread or
     environment takes over.
+
+!!! warning "Make your hooks thread-safe"
+    If your function runs multiple threads, `on_circuit_open` and `on_transition` callbacks can run concurrently
+    for the same circuit. Make them thread-safe.
 
 ### State coordination across environments
 

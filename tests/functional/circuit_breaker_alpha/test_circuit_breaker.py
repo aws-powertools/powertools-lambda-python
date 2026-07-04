@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import threading
+import time
 import warnings
 
 import pytest
@@ -680,8 +681,26 @@ def test_threads_elect_a_single_prober_on_recovery(store, now):
     assert store.db["c"].half_open_owner is not None
 
 
-def test_threads_trip_at_exactly_the_failure_threshold(store):
+class _RacyCounters(dict):
+    """Counter dict that yields between the read and the write of an increment.
+
+    Without this, the GIL makes the unlocked read-modify-write effectively atomic
+    (the interpreter rarely switches threads inside those few bytecodes), so a
+    missing lock would still pass. Holding every reader mid-increment long enough
+    for its siblings to read the same stale value makes the lost update
+    deterministic: unlocked, all threads write back the same count and the
+    threshold is never reached.
+    """
+
+    def get(self, key, default=None):
+        value = super().get(key, default)
+        time.sleep(0.005)  # park mid-increment so sibling threads read the same stale value
+        return value
+
+
+def test_threads_trip_at_exactly_the_failure_threshold(store, monkeypatch):
     """Racing increments must neither lose updates (tripping late) nor persist the trip twice."""
+    monkeypatch.setattr(base_module, "_LOCAL_FAILURES", _RacyCounters())
     threads_count, threshold = 8, 5
     config = CircuitBreakerConfig(failure_threshold=threshold, local_cache_max_age=0)
     barrier = threading.Barrier(threads_count)

@@ -100,7 +100,7 @@ class CircuitBreakerPersistenceLayer(ABC):
     def _settings_for(self, name: str) -> _CircuitSettings:
         """Return a circuit's configured settings, or the defaults if never configured."""
         with self._lock:
-            return self._settings.get(name) or _DEFAULT_SETTINGS
+            return self._settings.get(name, _DEFAULT_SETTINGS)
 
     # ------------------------------------------------------------------ cache
 
