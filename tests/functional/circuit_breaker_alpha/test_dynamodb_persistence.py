@@ -6,6 +6,7 @@ from botocore.config import Config
 from botocore.stub import Stubber
 
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
+from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerConfigError
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
@@ -371,7 +372,7 @@ def test_composite_item_to_record_reads_name_from_sort_key(composite_persistence
 
 def test_sort_key_equal_to_key_attr_raises():
     client = boto3.client("dynamodb", config=Config(region_name="us-east-1"))
-    with pytest.raises(ValueError, match="cannot be the same"):
+    with pytest.raises(CircuitBreakerConfigError, match="cannot be the same"):
         CircuitBreakerDynamoDBPersistence(
             table_name=TABLE_NAME,
             boto3_client=client,
