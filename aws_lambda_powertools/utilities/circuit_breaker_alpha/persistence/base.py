@@ -132,8 +132,13 @@ class CircuitBreakerPersistenceLayer(ABC):
 
             local_expiry, record = cached
             if int(datetime.datetime.now().timestamp()) >= local_expiry:
-                # pop, not del: this must never raise into the protected call.
-                self._cache.pop(self._cache_key(name), None)
+                # Guarded del, not pop: on Python 3.10 OrderedDict.pop re-enters the
+                # subclass __getitem__ after detaching the node, so LRUDict.pop raises
+                # KeyError for a *present* key and corrupts the dict (fixed in 3.11).
+                try:
+                    del self._cache[self._cache_key(name)]
+                except KeyError:
+                    pass
                 return None
 
             return record
