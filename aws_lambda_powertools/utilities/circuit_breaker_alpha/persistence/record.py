@@ -30,7 +30,8 @@ class CircuitStateRecord:
         Unix timestamp (seconds) the circuit opened. Anchors the recovery timeout;
         ``None`` while closed.
     half_open_owner : str | None
-        Identifier of the execution environment that won the half-open probe lock, if any.
+        Identifier of the worker (one thread in one execution environment) that won the
+        half-open probe lock, if any.
     expiry_timestamp : int | None
         Unix timestamp (seconds) for the store's TTL attribute.
     """

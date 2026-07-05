@@ -138,7 +138,6 @@ def test_save_open_item_contains_expiration_attribute(persistence):
     # the documented self-cleaning of abandoned circuits never happens. Capture the
     # actual PutItem params rather than asserting an exact (time-dependent) value.
     captured = {}
-    persistence.local_cache_max_age = 5
 
     original_put = persistence.client.put_item
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import threading
+import time
 import warnings
 
 import pytest
@@ -529,6 +531,40 @@ def test_half_open_non_owner_with_active_lease_is_rejected(store, now):
         call()
 
 
+def test_half_open_expired_lease_lost_takeover_returns_open_response(store, now):
+    """Losing the takeover election must NOT probe: another thread/environment won
+    the conditional write between our expiry check and our acquire, so the call
+    has to get the open-circuit response — electing every candidate is exactly
+    the multi-prober bug the per-thread owner id exists to prevent."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    # A stranded probe with an expired lease, owned by someone else.
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 200,
+        half_open_owner="dead-env",
+        probe_lease_expiry=now - 10,  # expired — takeover will be attempted
+    )
+
+    # The race's loser: the conditional election fails.
+    def lost_election(name, owner_id, opened_at):
+        return False
+
+    store.try_acquire_half_open = lost_election
+
+    protected_ran = {"value": False}
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        protected_ran["value"] = True
+        return "must not probe"
+
+    with pytest.raises(CircuitBreakerOpenError):
+        call()
+    assert protected_ran["value"] is False
+
+
 def test_open_lost_election_returns_open_response(store, now):
     """Branch: try_acquire_half_open returns False (another env won the race)."""
     config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
@@ -602,3 +638,199 @@ def test_error_with_details_formatting():
     """Covers exceptions.py line 28 — __str__ with details."""
     err = CircuitBreakerError("main message", "extra detail")
     assert str(err) == "main message - (extra detail)"
+
+
+# --------------------------------------------------------------------------- thread safety (#8320)
+
+
+def _run_in_threads(worker, count):
+    threads = [threading.Thread(target=worker) for _ in range(count)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+
+def test_threads_elect_a_single_prober_on_recovery(store, now):
+    """Regression for #8320: after one thread wins the election, siblings must not also probe."""
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    # success_threshold=2 keeps the circuit HALF_OPEN after the winning probe, so a
+    # late-reading loser can never legitimately run the function through a closed circuit.
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=2, local_cache_max_age=0)
+    probes = []
+    open_responses = []
+    barrier = threading.Barrier(8)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        probes.append(threading.current_thread().name)
+        return "ok"
+
+    def worker():
+        barrier.wait(timeout=10)
+        try:
+            call()
+        except CircuitBreakerOpenError:
+            open_responses.append(threading.current_thread().name)
+
+    _run_in_threads(worker, 8)
+
+    assert len(probes) == 1, "exactly one thread must probe per recovery window"
+    assert len(open_responses) == 7, "every other thread must get the open response"
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert store.db["c"].half_open_owner is not None
+
+
+class _RacyCounters(dict):
+    """Counter dict that yields between the read and the write of an increment.
+
+    Without this, the GIL makes the unlocked read-modify-write effectively atomic
+    (the interpreter rarely switches threads inside those few bytecodes), so a
+    missing lock would still pass. Holding every reader mid-increment long enough
+    for its siblings to read the same stale value makes the lost update
+    deterministic: unlocked, all threads write back the same count and the
+    threshold is never reached.
+    """
+
+    def get(self, key, default=None):
+        value = super().get(key, default)
+        time.sleep(0.005)  # park mid-increment so sibling threads read the same stale value
+        return value
+
+
+def test_threads_trip_at_exactly_the_failure_threshold(store, monkeypatch):
+    """Racing increments must neither lose updates (tripping late) nor persist the trip twice."""
+    monkeypatch.setattr(base_module, "_LOCAL_FAILURES", _RacyCounters())
+    threads_count, threshold = 8, 5
+    config = CircuitBreakerConfig(failure_threshold=threshold, local_cache_max_age=0)
+    barrier = threading.Barrier(threads_count)
+    siblings_done = threading.Event()
+    done_lock = threading.Lock()
+    finished = []
+    save_open_counts = []
+    original_save_open = store.save_open
+
+    def blocking_save_open(name, failure_count, opened_at):
+        save_open_counts.append(failure_count)
+        if len(save_open_counts) > 1:
+            # A second persist is the bug itself; unblock immediately so it fails fast.
+            siblings_done.set()
+        # Park the tripping thread mid-persist until every sibling has recorded its
+        # failure. Code that resets the counter only after persisting lets the
+        # remaining threads cross the threshold too and persist the trip again.
+        siblings_done.wait(timeout=10)
+        original_save_open(name, failure_count=failure_count, opened_at=opened_at)
+
+    store.save_open = blocking_save_open
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        # Hold every thread inside the protected call so all pass the CLOSED check
+        # before any failure is recorded, forcing the increments to race.
+        barrier.wait(timeout=10)
+        raise ConnectionError("downstream down")
+
+    raised = []
+
+    def worker():
+        try:
+            call()
+        except ConnectionError:
+            raised.append(threading.current_thread().name)
+        finally:
+            with done_lock:
+                finished.append(threading.current_thread().name)
+                if len(finished) == threads_count - 1:
+                    # Only the tripping thread is still parked in the persist spy.
+                    siblings_done.set()
+
+    _run_in_threads(worker, threads_count)
+
+    assert save_open_counts == [threshold], "the trip must be persisted exactly once, at the threshold"
+    assert store.db["c"].state == CircuitState.OPEN
+    assert len(raised) == threads_count
+    assert base_module._LOCAL_FAILURES["c"] == threads_count - threshold, "post-trip failures restart the streak"
+
+
+def test_probe_ownership_is_per_thread_and_stable_across_invocations(store, now):
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=2, local_cache_max_age=0)
+    calls = []
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        calls.append(threading.current_thread().name)
+        return "ok"
+
+    # This thread wins the election; one more probe success is needed to close.
+    assert call() == "ok"
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+
+    # A sibling thread must not inherit ownership (it did when the id was per-process).
+    sibling_outcome = []
+
+    def sibling():
+        try:
+            sibling_outcome.append(call())
+        except CircuitBreakerOpenError:
+            sibling_outcome.append("rejected")
+
+    _run_in_threads(sibling, 1)
+    assert sibling_outcome == ["rejected"]
+
+    # The owner's identity must survive across invocations so it can finish the recovery;
+    # a per-handler or per-invocation id would strand the circuit until the lease expired.
+    assert call() == "ok"
+    assert store.db["c"].state == CircuitState.CLOSED
+    assert len(calls) == 2
+
+
+def test_single_probe_spans_environments_and_threads(store, now):
+    """The same election covers threads in one process and separate environments."""
+    other_env = type(store)()
+    other_env.db = store.db
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=2, local_cache_max_age=0)
+    probes = []
+    open_responses = []
+    barrier = threading.Barrier(8)
+
+    def protect(persistence):
+        @circuit_breaker(name="c", persistence_store=persistence, config=config)
+        def call():
+            probes.append(threading.current_thread().name)
+            return "ok"
+
+        return call
+
+    calls = [protect(store), protect(other_env)]
+
+    def worker(index):
+        env_call = calls[index % 2]
+        barrier.wait(timeout=10)
+        try:
+            env_call()
+        except CircuitBreakerOpenError:
+            open_responses.append(threading.current_thread().name)
+
+    threads = [threading.Thread(target=worker, args=(index,)) for index in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert len(probes) == 1, "one probe across all threads of all environments"
+    assert len(open_responses) == 7
+
+
+def test_settings_are_kept_per_circuit_on_a_shared_layer(store, now):
+    """Configuring another circuit on the same layer must not stamp this one's probe lease."""
+    store.configure(CircuitBreakerConfig(recovery_timeout=30, local_cache_max_age=0), circuit_name="a")
+    store.configure(CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0), circuit_name="b")
+    store.db["a"] = CircuitStateRecord(name="a", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+
+    assert store.try_acquire_half_open("a", "owner-1", now - 60)
+
+    lease = store.db["a"].probe_lease_expiry
+    assert lease is not None
+    assert lease <= now + 30 + 2, "the lease must derive from circuit 'a' recovery_timeout, not 'b'"
