@@ -15,6 +15,7 @@ from boto3.dynamodb.types import TypeDeserializer
 from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.shared import constants, user_agent
+from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerConfigError
 from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
@@ -105,7 +106,9 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         user_agent.register_feature_to_client(client=self.client, feature="circuit_breaker")
 
         if sort_key_attr == key_attr:
-            raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
+            raise CircuitBreakerConfigError(
+                f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!",
+            )
 
         if static_pk_value is not None and sort_key_attr is None:
             warnings.warn(

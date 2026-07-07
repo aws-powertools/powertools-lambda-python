@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import datetime
 import logging
+import os
+import threading
 import uuid
 from typing import TYPE_CHECKING, Any
 
@@ -37,8 +39,31 @@ _LOCAL_SUCCESSES: dict[str, int] = {}
 # recovered), so stale local failure streaks can be invalidated.
 _LAST_OBSERVED_STATE: dict[str, CircuitState] = {}
 
-# Stable per-environment identifier used to claim the half-open probe lock.
-_ENVIRONMENT_ID = uuid.uuid4().hex
+# Guards the three dicts above. Increments are read-modify-write and a threshold
+# crossing must be observed by exactly one thread, so every access goes through this
+# lock. Held only while mutating the dicts, never across persistence writes or user
+# callbacks.
+_COUNTERS_LOCK = threading.Lock()
+
+# Identifier used to claim the half-open probe lock, unique per thread so the store's
+# conditional election picks a single prober across threads as well as processes.
+_PROBE_OWNER = threading.local()
+
+
+def _probe_owner_id() -> str:
+    """
+    Return this thread's stable probe-owner identifier, minting it on first use.
+
+    A uuid in thread-local storage rather than ``threading.get_ident()``: the OS reuses
+    thread ids, and a recycled id would let an unrelated thread pass the owner check and
+    probe alongside the real owner. The pid check re-mints the id in forked children,
+    which inherit the forking thread's local storage.
+    """
+    pid = os.getpid()
+    if getattr(_PROBE_OWNER, "pid", None) != pid:
+        _PROBE_OWNER.id = f"{pid}#{uuid.uuid4().hex}"
+        _PROBE_OWNER.pid = pid
+    return _PROBE_OWNER.id
 
 
 class CircuitBreakerHandler:
@@ -111,32 +136,35 @@ class CircuitBreakerHandler:
             # If we previously observed a non-CLOSED state and the circuit is now back to
             # CLOSED, another environment completed the recovery cycle. Reset local counters
             # so a stale partial failure streak doesn't immediately re-trip the circuit.
-            prev = _LAST_OBSERVED_STATE.get(self.name)
-            if prev is not None and prev != CircuitState.CLOSED:
-                _LOCAL_FAILURES[self.name] = 0
-            _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
+            with _COUNTERS_LOCK:
+                prev = _LAST_OBSERVED_STATE.get(self.name)
+                if prev is not None and prev != CircuitState.CLOSED:
+                    _LOCAL_FAILURES[self.name] = 0
+                _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
             return self._call_closed()
 
         if record.state == CircuitState.OPEN:
-            _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
+            with _COUNTERS_LOCK:
+                _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
             # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
             opened_at = record.opened_at if record.opened_at is not None else self._now()
             if self._now() >= opened_at + self.config.recovery_timeout:
                 # Recovery window elapsed: try to become the single prober.
-                if self.persistence_store.try_acquire_half_open(self.name, _ENVIRONMENT_ID, opened_at):
+                if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
                     self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
                     return self._call_probe()
             return self._open_response(record.to_circuit_info())
 
-        # HALF_OPEN: only the environment that owns the probe lock runs.
-        _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
-        if record.half_open_owner == _ENVIRONMENT_ID:
+        # HALF_OPEN: only the thread that owns the probe lock runs.
+        with _COUNTERS_LOCK:
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
+        if record.half_open_owner == _probe_owner_id():
             return self._call_probe()
 
         # If the probe lease has expired (owner recycled mid-probe), take over.
         if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
             logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
-            if self.persistence_store.try_acquire_half_open(self.name, _ENVIRONMENT_ID, record.opened_at or 0):
+            if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), record.opened_at or 0):
                 return self._call_probe()
 
         return self._open_response(record.to_circuit_info())
@@ -148,9 +176,14 @@ class CircuitBreakerHandler:
         except Exception as exc:
             if not self.config.counts_as_failure(exc):
                 raise
-            failures = _LOCAL_FAILURES.get(self.name, 0) + 1
-            _LOCAL_FAILURES[self.name] = failures
-            if failures >= self.config.failure_threshold:
+            # Increment and reset atomically so exactly one thread observes the threshold
+            # crossing; racing threads would otherwise lose increments (tripping late) or
+            # each persist the same transition.
+            with _COUNTERS_LOCK:
+                failures = _LOCAL_FAILURES.get(self.name, 0) + 1
+                tripped = failures >= self.config.failure_threshold
+                _LOCAL_FAILURES[self.name] = 0 if tripped else failures
+            if tripped:
                 logger.debug("Circuit '%s' tripping CLOSED to OPEN after %d failures.", self.name, failures)
                 opened_at = self._now()
                 self._safe_persist(
@@ -159,11 +192,11 @@ class CircuitBreakerHandler:
                     failure_count=failures,
                     opened_at=opened_at,
                 )
-                _LOCAL_FAILURES[self.name] = 0
                 self._notify(CircuitState.CLOSED, CircuitState.OPEN, opened_at=opened_at)
             raise
         else:
-            _LOCAL_FAILURES[self.name] = 0
+            with _COUNTERS_LOCK:
+                _LOCAL_FAILURES[self.name] = 0
             return result
 
     def _call_probe(self) -> Any:
@@ -176,17 +209,20 @@ class CircuitBreakerHandler:
             logger.debug("Circuit '%s' probe failed; reopening.", self.name)
             opened_at = self._now()
             self._safe_persist(self.persistence_store.save_reopen, self.name, opened_at=opened_at)
-            _LOCAL_SUCCESSES[self.name] = 0
+            with _COUNTERS_LOCK:
+                _LOCAL_SUCCESSES[self.name] = 0
             self._notify(CircuitState.HALF_OPEN, CircuitState.OPEN, opened_at=opened_at)
             raise
         else:
-            successes = _LOCAL_SUCCESSES.get(self.name, 0) + 1
-            _LOCAL_SUCCESSES[self.name] = successes
-            if successes >= self.config.success_threshold:
+            with _COUNTERS_LOCK:
+                successes = _LOCAL_SUCCESSES.get(self.name, 0) + 1
+                closed = successes >= self.config.success_threshold
+                _LOCAL_SUCCESSES[self.name] = 0 if closed else successes
+                if closed:
+                    _LOCAL_FAILURES[self.name] = 0
+            if closed:
                 logger.debug("Circuit '%s' closing after %d probe successes.", self.name, successes)
                 self._safe_persist(self.persistence_store.save_closed, self.name)
-                _LOCAL_SUCCESSES[self.name] = 0
-                _LOCAL_FAILURES[self.name] = 0
                 self._notify(CircuitState.HALF_OPEN, CircuitState.CLOSED)
             return result
 

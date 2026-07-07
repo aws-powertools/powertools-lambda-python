@@ -72,6 +72,51 @@ def test_counts_as_failure_denylist():
     assert config.counts_as_failure(KeyError()) is True
 
 
+def test_config_normalizes_handled_exceptions_list_to_tuple():
+    config = CircuitBreakerConfig(handled_exceptions=[TimeoutError, ConnectionError])
+    assert config.handled_exceptions == (TimeoutError, ConnectionError)
+    # The reported bug: a list must not break counts_as_failure when the circuit evaluates a failure.
+    assert config.counts_as_failure(TimeoutError()) is True
+    assert config.counts_as_failure(ValueError()) is False
+
+
+def test_config_normalizes_single_exception_type_to_tuple():
+    config = CircuitBreakerConfig(handled_exceptions=ValueError)
+    assert config.handled_exceptions == (ValueError,)
+    assert config.counts_as_failure(ValueError()) is True
+
+
+def test_config_normalizes_ignored_exceptions_list_to_tuple():
+    config = CircuitBreakerConfig(ignored_exceptions=[ValueError])
+    assert config.ignored_exceptions == (ValueError,)
+    assert config.counts_as_failure(ValueError()) is False
+    assert config.counts_as_failure(KeyError()) is True
+
+
+def test_config_normalizes_iterator_of_exceptions():
+    config = CircuitBreakerConfig(handled_exceptions=iter((TimeoutError, KeyError)))
+    assert config.handled_exceptions == (TimeoutError, KeyError)
+
+
+@pytest.mark.parametrize("field", ["handled_exceptions", "ignored_exceptions"])
+def test_config_rejects_non_exception_type_in_list(field):
+    with pytest.raises(CircuitBreakerConfigError, match="only exception types"):
+        CircuitBreakerConfig(**{field: ["not-an-exception"]})
+
+
+@pytest.mark.parametrize("field", ["handled_exceptions", "ignored_exceptions"])
+@pytest.mark.parametrize("value", [5, "ValueError"])
+def test_config_rejects_non_iterable_or_str_exceptions(field, value):
+    with pytest.raises(CircuitBreakerConfigError, match="iterable of exception types"):
+        CircuitBreakerConfig(**{field: value})
+
+
+@pytest.mark.parametrize("field", ["handled_exceptions", "ignored_exceptions"])
+def test_config_rejects_empty_exceptions(field):
+    with pytest.raises(CircuitBreakerConfigError, match="at least one exception type"):
+        CircuitBreakerConfig(**{field: []})
+
+
 def test_open_error_carries_circuit_info():
     info = CircuitInfo(name="payment", state=CircuitState.OPEN, failure_count=5, opened_at=123)
     error = CircuitBreakerOpenError("open", circuit=info)
