@@ -45,7 +45,7 @@ def test_handle_eventbridge_trigger_event_no_envelope():
     assert parsed_event.resources == raw_event["resources"]
     assert parsed_event.source == raw_event["source"]
     assert parsed_event.detail_type == raw_event["detail-type"]
-    assert parsed_event.replay_name == raw_event["replay-name"]
+    assert parsed_event.replay_name is None
 
 
 def test_handle_invalid_event_with_eventbridge_envelope():

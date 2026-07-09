@@ -41,6 +41,10 @@ lint.ignore = [
     "A005",
     "TC006", # https://docs.astral.sh/ruff/rules/runtime-cast-value/
     "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP045",
 ]
 
 # Exclude files and directories
@@ -62,7 +66,7 @@ exclude = [
 # Maximum line length
 line-length = 120
 
-target-version = "py38"
+target-version = "py310"
 
 fix = true
 lint.fixable = ["I", "COM812", "W"]
