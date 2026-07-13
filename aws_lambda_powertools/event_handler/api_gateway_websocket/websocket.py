@@ -6,7 +6,9 @@ import warnings
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any
 
+from aws_lambda_powertools.event_handler.api_gateway import MiddlewareFrame
 from aws_lambda_powertools.event_handler.api_gateway_websocket.router import Router
+from aws_lambda_powertools.event_handler.api_gateway_websocket.types import WebSocketRoute
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.data_classes.api_gateway_websocket_event import APIGatewayWebSocketEvent
@@ -18,6 +20,20 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 
 logger = logging.getLogger(__name__)
+
+
+def _registered_route_adapter(app: APIGatewayWebSocketResolver, next_middleware: Callable[..., Any]) -> Any:
+    """Terminal middleware frame: calls the registered route handler (no arguments) and returns its raw value.
+
+    Response normalization happens once, after the whole middleware chain returns, so middlewares
+    may short-circuit with any of the same shapes route handlers can return.
+    """
+    return next_middleware()
+
+
+def _route_not_found() -> tuple[None, int]:
+    """Stand-in handler for unmatched route keys, so global middlewares still run around the 400."""
+    return None, HTTPStatus.BAD_REQUEST.value
 
 
 class APIGatewayWebSocketResolver(Router):
@@ -70,6 +86,7 @@ class APIGatewayWebSocketResolver(Router):
     def __init__(self):
         super().__init__()
         self.exception_handler_manager = ExceptionHandlerManager()
+        self.processed_stack_frames: list[str] = []  # used by MiddlewareFrame for debug traces
 
     def __call__(
         self,
@@ -110,6 +127,7 @@ class APIGatewayWebSocketResolver(Router):
         >>>     return app.resolve(event, context)
         """
         try:
+            self.processed_stack_frames.clear()
             self._setup_context(event, context)
             return self._resolve_route()
         except Exception as exc:
@@ -149,7 +167,7 @@ class APIGatewayWebSocketResolver(Router):
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
     def _resolve_route(self) -> dict[str, Any]:
-        """Dispatch the current event to its route handler and normalize the response."""
+        """Dispatch the current event through the middleware chain to its route handler and normalize the response."""
         route_key = self.current_event.request_context.route_key
         route = self._route_registry.find_route(route_key)
         if route is None:
@@ -158,10 +176,26 @@ class APIGatewayWebSocketResolver(Router):
                 stacklevel=2,
                 category=PowertoolsUserWarning,
             )
-            return {"statusCode": HTTPStatus.BAD_REQUEST.value}
+            # global middlewares still run around the 400, as REST does for not-found routes
+            route = WebSocketRoute(func=_route_not_found, middlewares=[])
 
         logger.debug(f"Dispatching route key `{route_key}` to `{route['func'].__name__}`")
-        return self._to_response(route["func"]())
+        middleware_stack = self._build_middleware_stack(route)
+        return self._to_response(middleware_stack(self))
+
+    def _build_middleware_stack(self, route: WebSocketRoute) -> Callable:
+        """Wrap the route handler in middleware frames: global (`use`) first, then route-level, then
+        the terminal adapter that calls the handler. Frames are wrapped in reverse so middlewares
+        run in the order they were added."""
+        stack: Callable = route["func"]
+        all_middlewares = [*self._router_middlewares, *route["middlewares"], _registered_route_adapter]
+        for middleware in reversed(all_middlewares):
+            stack = MiddlewareFrame(current_middleware=middleware, next_middleware=stack)
+        return stack
+
+    def _push_processed_stack_frame(self, frame: str) -> None:
+        """Record a processed middleware frame; MiddlewareFrame calls this for debug traces."""
+        self.processed_stack_frames.append(frame)
 
     def _handle_exception(self, exc: Exception) -> dict[str, Any]:
         """Resolve an exception to a response via registered handlers, or a bare 500.

@@ -55,6 +55,7 @@ class Router(BaseRouter):
         self.context = {}  # early init as customers might add context before event resolution
         self._route_registry = RouteRegistry()
         self._exception_handlers: dict[type[Exception], Callable] = {}
+        self._router_middlewares: list[Callable] = []
 
     def route(
         self,
@@ -188,6 +189,33 @@ class Router(BaseRouter):
         >>>     return {"echo": app.current_event.body}
         """
         return self.route(route_key=ROUTE_KEY_DEFAULT, middlewares=middlewares)
+
+    def use(self, middlewares: list[Callable]) -> None:
+        """
+        Add one or more global middlewares that run before route-specific middlewares.
+
+        Middlewares run in insertion order: global middlewares first, then route-level
+        `middlewares=[...]`, then the route handler.
+
+        Parameters
+        ----------
+        middlewares : list[Callable]
+            List of middlewares to run on every event, including unmatched route keys
+
+        Examples
+        --------
+        >>> from aws_lambda_powertools.event_handler import APIGatewayWebSocketResolver
+        >>> from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
+        >>>
+        >>> app = APIGatewayWebSocketResolver()
+        >>>
+        >>> def log_route(app: APIGatewayWebSocketResolver, next_middleware: NextMiddleware):
+        >>>     print(f"dispatching {app.current_event.request_context.route_key}")
+        >>>     return next_middleware(app)
+        >>>
+        >>> app.use(middlewares=[log_route])
+        """
+        self._router_middlewares.extend(middlewares)
 
     def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]) -> Callable:
         """

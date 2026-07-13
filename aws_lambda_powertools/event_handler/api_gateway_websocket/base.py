@@ -43,6 +43,10 @@ class BaseRouter(ABC):
     ) -> Callable:
         raise NotImplementedError
 
+    @abstractmethod
+    def use(self, middlewares: list[Callable]) -> None:
+        raise NotImplementedError
+
     def append_context(self, **additional_context) -> None:
         """
         Appends context information available under any route.

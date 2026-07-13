@@ -453,3 +453,226 @@ def test_system_route_key_registrable_via_route_primitive(disconnect_event, lamb
     # THEN it dispatches identically to the sugar decorator
     assert result == {"statusCode": 200}
     assert dispatched == ["$disconnect"]
+
+
+def test_route_middleware_runs_before_and_after_handler(connect_event, lambda_context):
+    # GIVEN a route-level middleware capturing execution order around the handler
+    app = APIGatewayWebSocketResolver()
+    order = []
+
+    def middleware(app_, next_middleware):
+        order.append("before")
+        result = next_middleware(app_)
+        order.append("after")
+        return result
+
+    @app.on_connect(middlewares=[middleware])
+    def connect():
+        order.append("handler")
+
+    # WHEN the event is resolved
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the middleware wraps the handler and the response is normalized
+    assert order == ["before", "handler", "after"]
+    assert result == {"statusCode": 200}
+
+
+def test_global_middleware_runs_before_route_middleware(connect_event, lambda_context):
+    # GIVEN a global middleware (use) and a route-level middleware
+    app = APIGatewayWebSocketResolver()
+    order = []
+
+    def global_middleware(app_, next_middleware):
+        order.append("global_before")
+        result = next_middleware(app_)
+        order.append("global_after")
+        return result
+
+    def route_middleware(app_, next_middleware):
+        order.append("route_before")
+        result = next_middleware(app_)
+        order.append("route_after")
+        return result
+
+    app.use(middlewares=[global_middleware])
+
+    @app.on_connect(middlewares=[route_middleware])
+    def connect():
+        order.append("handler")
+
+    # WHEN the event is resolved
+    app.resolve(connect_event, lambda_context)
+
+    # THEN the full order is global -> route -> handler -> route -> global
+    assert order == ["global_before", "route_before", "handler", "route_after", "global_after"]
+
+
+def test_middleware_short_circuit_skips_handler(connect_event, lambda_context):
+    # GIVEN a $connect middleware rejecting without calling next_middleware
+    app = APIGatewayWebSocketResolver()
+    handler_invoked = []
+
+    def authenticate(app_, next_middleware):
+        if "Authorization" not in app_.current_event.headers:
+            return None, 401
+        return next_middleware(app_)
+
+    @app.on_connect(middlewares=[authenticate])
+    def connect():
+        handler_invoked.append(True)
+
+    # WHEN an event without an Authorization header is resolved
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the middleware's return value is normalized and the handler never runs
+    assert result == {"statusCode": 401}
+    assert handler_invoked == []
+
+
+def test_middleware_append_context_visible_in_handler(connect_event, lambda_context):
+    # GIVEN a middleware sharing data through append_context
+    app = APIGatewayWebSocketResolver()
+    captured = {}
+
+    def inject_user(app_, next_middleware):
+        app_.append_context(user="alice")
+        return next_middleware(app_)
+
+    @app.on_connect(middlewares=[inject_user])
+    def connect():
+        captured["user"] = app.context.get("user")
+
+    # WHEN the event is resolved
+    app.resolve(connect_event, lambda_context)
+
+    # THEN the handler sees the context value and context is cleared after resolve
+    assert captured["user"] == "alice"
+    assert app.context == {}
+
+
+def test_middleware_exception_uses_exception_handling_path(connect_event, lambda_context):
+    # GIVEN a middleware that raises and a registered exception handler
+    app = APIGatewayWebSocketResolver()
+
+    @app.exception_handler(PermissionError)
+    def handle_permission_error(exc: PermissionError):
+        return {"error": str(exc)}, 403
+
+    def broken_middleware(app_, next_middleware):
+        raise PermissionError("not allowed")
+
+    @app.on_connect(middlewares=[broken_middleware])
+    def connect():
+        return None
+
+    # WHEN the event is resolved
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the middleware exception goes through the same exception-handling path
+    assert result == {"statusCode": 403, "body": '{"error":"not allowed"}'}
+
+
+def test_middleware_unhandled_exception_returns_bare_500(connect_event, lambda_context):
+    # GIVEN a middleware raising an exception with no registered handler
+    app = APIGatewayWebSocketResolver()
+
+    def broken_middleware(app_, next_middleware):
+        raise RuntimeError("middleware secret detail")
+
+    @app.on_connect(middlewares=[broken_middleware])
+    def connect():
+        return None
+
+    # WHEN the event is resolved
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN a bare 500 is returned with no exception details
+    assert result == {"statusCode": 500}
+    assert "middleware secret detail" not in json.dumps(result)
+
+
+def test_class_based_middleware_from_shared_framework(connect_event, lambda_context):
+    # GIVEN a middleware built on the shared BaseMiddlewareHandler framework
+    from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
+
+    order = []
+
+    class TrackingMiddleware(BaseMiddlewareHandler):
+        def handler(self, app_, next_middleware):
+            order.append("class_before")
+            result = next_middleware(app_)
+            order.append("class_after")
+            return result
+
+    app = APIGatewayWebSocketResolver()
+
+    @app.on_connect(middlewares=[TrackingMiddleware()])
+    def connect():
+        order.append("handler")
+
+    # WHEN the event is resolved
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the class-based middleware runs around the handler
+    assert order == ["class_before", "handler", "class_after"]
+    assert result == {"statusCode": 200}
+
+
+def test_global_middleware_runs_for_unknown_route_key(message_event, lambda_context):
+    # GIVEN a global middleware and no handler registered for the event's route key
+    app = APIGatewayWebSocketResolver()
+    observed = []
+
+    def observe(app_, next_middleware):
+        observed.append(app_.current_event.request_context.route_key)
+        return next_middleware(app_)
+
+    app.use(middlewares=[observe])
+
+    @app.on_connect()
+    def connect(): ...
+
+    # WHEN the event is resolved
+    with pytest.warns(PowertoolsUserWarning, match="No route handler registered"):
+        result = app.resolve(message_event, lambda_context)
+
+    # THEN the global middleware observes the miss and the 400 is still returned
+    assert result == {"statusCode": 400}
+    assert observed == ["chat"]
+
+
+def test_route_middleware_isolation_across_routes(connect_event, message_event, lambda_context):
+    # GIVEN a global middleware, route A with a route-level middleware, and route B without
+    event_a = deepcopy(message_event)
+    event_a["requestContext"]["routeKey"] = "routeA"
+    event_b = deepcopy(message_event)
+    event_b["requestContext"]["routeKey"] = "routeB"
+
+    app = APIGatewayWebSocketResolver()
+    order = []
+
+    def global_middleware(app_, next_middleware):
+        order.append(f"global:{app_.current_event.request_context.route_key}")
+        return next_middleware(app_)
+
+    def route_a_middleware(app_, next_middleware):
+        order.append(f"route_a_mw:{app_.current_event.request_context.route_key}")
+        return next_middleware(app_)
+
+    app.use(middlewares=[global_middleware])
+
+    @app.route("routeA", middlewares=[route_a_middleware])
+    def route_a():
+        order.append("handler_a")
+
+    @app.route("routeB")
+    def route_b():
+        order.append("handler_b")
+
+    # WHEN both routes are resolved
+    app.resolve(event_a, lambda_context)
+    app.resolve(event_b, lambda_context)
+
+    # THEN the global middleware runs on both routes; the route-level middleware runs only on route A
+    assert order == ["global:routeA", "route_a_mw:routeA", "handler_a", "global:routeB", "handler_b"]

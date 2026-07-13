@@ -99,6 +99,56 @@ The status code has different effects depending on the route:
 
 ## Advanced
 
+### Middleware
+
+The resolver reuses the same middleware framework as the REST resolver. A middleware is a callable receiving the resolver instance and the next handler in the chain; it runs code before and/or after the route handler, and its return value goes through the same [response normalization](#response-format) as handler returns.
+
+Execution order is: global middlewares (`app.use`), then route-level `middlewares=[...]`, then the route handler. Return without calling `next_middleware(app)` to short-circuit the chain; exceptions raised in middlewares follow the same [exception handling](#exception-handling) flow as handlers.
+
+=== "working_with_middleware.py"
+
+    ```python hl_lines="9 11 17 21 24"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_middleware.py"
+    ```
+
+    1. Middlewares receive the resolver instance and the next handler in the chain.
+    2. Call `next_middleware(app)` to continue the chain; its return value is the route response.
+    3. Short-circuit: the handler never runs and this value becomes the response.
+    4. Global middlewares run on every event — including unmatched route keys — before route-level ones.
+    5. Route-level middlewares run for this route only.
+
+### Authentication patterns
+
+`$connect` is the only route where credentials exist: headers and cookies are present on the WebSocket handshake only, and later messages carry nothing but the connection ID. There are two ways to bridge that gap.
+
+#### Lambda authorizer
+
+Prefer a Lambda authorizer on `$connect` when you can run a separate authorizer function. API Gateway persists the authorizer's output with the connection and injects it into `request_context.authorizer` on **every** invocation for that connection — a managed connection-to-identity store, no code needed in your handlers beyond reading it.
+
+=== "working_with_lambda_authorizer.py"
+
+    ```python hl_lines="9 14-15"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_lambda_authorizer.py"
+    ```
+
+    1. Injected by API Gateway on every route for this connection — message routes, `$default`, and `$disconnect` included.
+    2. Authorizer context values arrive stringified (a numeric `1` arrives as `"1"`).
+
+#### Authenticating with middleware
+
+Without a Lambda authorizer, authenticate on `$connect` with a middleware and persist identity against the connection ID in your own store; a second middleware resolves it on message routes and shares it via `app.append_context`.
+
+=== "working_with_middleware_authentication.py"
+
+    ```python hl_lines="6 13-14 16 25 29 39"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_middleware_authentication.py"
+    ```
+
+    1. Bring your own connection store. The in-memory dictionary keeps this example short — real invocations for one connection can hit different Lambda environments, so use an external store such as DynamoDB with a TTL.
+    2. Headers only exist on `$connect`.
+    3. Returning without calling `next_middleware` short-circuits the chain — the handler never runs and the connection is rejected.
+    4. Handlers and later middlewares read it from `app.context`.
+
 ### Exception handling
 
 Register handlers for specific exception types with `@app.exception_handler`; it also accepts a list of types, and lookup respects inheritance. The handler receives the exception, and its return value goes through the same [response normalization](#response-format).
