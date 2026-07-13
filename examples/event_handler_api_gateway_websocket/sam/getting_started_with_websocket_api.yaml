@@ -18,6 +18,18 @@ Resources:
     Properties:
       Handler: app.lambda_handler
       CodeUri: websocket_handler
+      LoggingConfig:
+        LogGroup: !Ref WebSocketHandlerLogs
+
+  WebSocketHandlerLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+
+  WebSocketAccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
 
   WebSocketApi:
     Type: AWS::ApiGatewayV2::Api
@@ -85,6 +97,9 @@ Resources:
       ApiId: !Ref WebSocketApi
       StageName: prod
       AutoDeploy: true
+      AccessLogSettings:
+        DestinationArn: !GetAtt WebSocketAccessLogs.Arn
+        Format: '{"requestId":"$context.requestId","routeKey":"$context.routeKey","status":"$context.status","connectionId":"$context.connectionId"}'
 
   WebSocketInvokePermission:
     Type: AWS::Lambda::Permission

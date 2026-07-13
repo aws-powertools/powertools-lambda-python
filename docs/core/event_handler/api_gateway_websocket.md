@@ -65,7 +65,7 @@ You need an API Gateway WebSocket API with its routes integrated with your Lambd
 
 === "getting_started_with_websocket_api.yaml"
 
-    ```yaml hl_lines="27 50-80"
+    ```yaml hl_lines="39 62-92"
     --8<-- "examples/event_handler_api_gateway_websocket/sam/getting_started_with_websocket_api.yaml"
     ```
 
@@ -243,7 +243,7 @@ A stale connection ID raises `GoneException` — the client is no longer connect
 
 === "working_with_post_to_connection.py"
 
-    ```python hl_lines="2 16 28 35 41"
+    ```python hl_lines="2 18 30 37 44"
     --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_post_to_connection.py"
     ```
 
@@ -254,7 +254,7 @@ A stale connection ID raises `GoneException` — the client is no longer connect
 
 === "working_with_post_to_connection_report_ready.py"
 
-    ```python hl_lines="18 23"
+    ```python hl_lines="24 29"
     --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_post_to_connection_report_ready.py"
     ```
 

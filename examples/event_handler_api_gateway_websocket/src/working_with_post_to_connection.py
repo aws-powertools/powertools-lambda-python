@@ -1,9 +1,11 @@
 import boto3
 import my_connection_store  # (1)!
+from botocore.config import Config
 
 from aws_lambda_powertools.event_handler import APIGatewayWebSocketResolver
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
+boto_config = Config(connect_timeout=3, read_timeout=5, retries={"total_max_attempts": 2})
 app = APIGatewayWebSocketResolver()
 
 
@@ -33,6 +35,7 @@ def broadcast():
     client = boto3.client(
         "apigatewaymanagementapi",
         endpoint_url=app.current_event.request_context.callback_url,  # (4)!
+        config=boto_config,
     )
     message: str = app.current_event.json_body["message"]
     for connection_id in my_connection_store.all_connection_ids():
