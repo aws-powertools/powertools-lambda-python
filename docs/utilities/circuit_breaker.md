@@ -20,6 +20,7 @@ The circuit breaker utility stops sending traffic to an unhealthy downstream dep
 * Hands rejected requests to an `on_circuit_open` callback so you decide what happens next (buffer, drop, return a cached value)
 * Tests recovery with an explicit half-open probe rather than blindly retrying everything at once
 * Shares circuit state across execution environments via Amazon DynamoDB
+* Safe under concurrency: one half-open probe across all threads and execution environments, and synchronized failure counting
 * Keeps the healthy path write-free: failures are counted in memory and only persisted on a state transition
 
 ## Terminology
@@ -91,7 +92,7 @@ Unless you're looking to [customize each attribute](#customizing-the-dynamodb-ta
 | Partition key      | `id`         | Holds the circuit name                                       |
 | TTL attribute name | `expiration` | Using AWS Console? This is configurable after table creation |
 
-You **can** use a single DynamoDB table for all your circuits.
+You **can** use a single DynamoDB table for all your circuits. Already have a single-table (composite key) design you want to reuse? See [Using a composite primary key](#using-a-composite-primary-key).
 
 ##### DynamoDB IaC example
 
@@ -182,6 +183,19 @@ Passing both raises `CircuitBreakerConfigError`. An exception that doesn't count
 
 After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a **single** execution environment (via a conditional DynamoDB write) to run a probe. If `success_threshold` consecutive probes succeed, the circuit closes; a single failing probe reopens it. This stops a thundering herd of every environment hammering a recovering backend at once.
 
+!!! note "Thread safety"
+    The utility is safe to share across threads: within a multi-threaded environment the probe election picks a single
+    thread, so the single-prober guarantee spans threads as well as environments, and the in-memory failure counter is
+    synchronized. Single-threaded functions (the normal Lambda model) are unaffected.
+
+    Probe ownership belongs to the thread that won the election. If that thread never runs the circuit again (for
+    example, a thread-per-request worker pool), recovery waits for the probe lease to expire before another thread or
+    environment takes over.
+
+!!! warning "Make your hooks thread-safe"
+    If your function runs multiple threads, `on_circuit_open` and `on_transition` callbacks can run concurrently
+    for the same circuit. Make them thread-safe.
+
 ### State coordination across environments
 
 The consecutive-failure counter lives in memory per execution environment, so a healthy circuit performs **no writes**. Only when an environment reaches `failure_threshold` does it persist `OPEN`. The shared state is cached locally for `local_cache_max_age` seconds to avoid a read per invocation. A cache miss (cold start or expired entry) forces a read-through before routing.
@@ -217,6 +231,28 @@ Set **`POWERTOOLS_CIRCUIT_BREAKER_DISABLED`**{: .copyMe} to a truthy value to by
 ### Customizing the DynamoDB table
 
 `CircuitBreakerDynamoDBPersistence` accepts attribute-name overrides (`key_attr`, `state_attr`, `failure_count_attr`, `opened_at_attr`, `half_open_owner_attr`, `expiry_attr`) and the usual boto3 escape hatches (`boto3_session`, `boto3_client`, `boto_config`) for reusing an existing table layout or client.
+
+#### Using a composite primary key
+
+Use the `sort_key_attr` parameter when your table is configured with a composite primary key _(hash+range key)_, as in a single-table design.
+
+When enabled, the circuit name is saved in the sort key instead, and the partition key defaults to `circuit_breaker#{LAMBDA_FUNCTION_NAME}` — this **namespaces circuits per function** so two functions can use the same circuit name without sharing state. (Without `sort_key_attr`, the default remains partition-key-only with the circuit name as the partition key.)
+
+Set `static_pk_value` to a fixed value (as below) when you instead want **multiple functions to share the same circuit** — for example, every function guarding the same downstream dependency should trip together.
+
+```python hl_lines="12-14"
+--8<-- "examples/circuit_breaker_alpha/src/working_with_composite_primary_key.py"
+```
+
+??? note "Click to expand and learn how table items would look like"
+
+    The circuit name is stored in the sort key, so several circuits share one partition. Attributes that don't apply to a state are simply absent.
+
+    | PK              | SK              | state     | failure_count | opened_at  | half_open_owner | probe_lease_expiry | expiration |
+    | --------------- | --------------- | --------- | ------------- | ---------- | --------------- | ------------------ | ---------- |
+    | CIRCUIT_BREAKER | payment-backend | OPEN      | 5             | 1699999999 |                 |                    | 1700003599 |
+    | CIRCUIT_BREAKER | inventory-api   | HALF_OPEN | 5             | 1699999999 | 9f3c1a2b-env    | 1700000030         | 1700003599 |
+    | CIRCUIT_BREAKER | email-service   | CLOSED    | 0             |            |                 |                    |            |
 
 ## Testing your code
 

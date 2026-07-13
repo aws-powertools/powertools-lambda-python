@@ -175,7 +175,8 @@ class ResponseContext(BaseModel):
         description="The version of the Lambda executed",
         examples=["$LATEST"],
     )
-    function_error: str = Field(
+    function_error: Optional[str] = Field(
+        default=None,
         description="",
         examples=["Unhandled"],
     )

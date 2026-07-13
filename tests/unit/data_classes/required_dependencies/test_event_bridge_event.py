@@ -17,4 +17,4 @@ def test_event_bridge_event():
     assert parsed_event.source == raw_event["source"]
     assert parsed_event.detail_type == raw_event["detail-type"]
     assert parsed_event.detail == raw_event["detail"]
-    assert parsed_event.replay_name == "replay_archive"
+    assert parsed_event.replay_name is None
