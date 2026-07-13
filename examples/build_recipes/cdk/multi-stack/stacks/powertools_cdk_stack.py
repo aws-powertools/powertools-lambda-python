@@ -47,7 +47,7 @@ class PowertoolsStack(Stack):
         return _lambda.LayerVersion.from_layer_version_arn(
             self,
             "PowertoolsLayer",
-            layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:35",
+            layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:36",
         )
 
     def _create_dynamodb_table(self) -> dynamodb.Table:
