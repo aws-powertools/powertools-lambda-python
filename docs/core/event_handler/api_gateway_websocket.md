@@ -6,6 +6,32 @@ status: new
 
 Event Handler for Amazon API Gateway WebSocket APIs.
 
+```mermaid
+stateDiagram-v2
+    direction LR
+    EventSource: WebSocket client
+    Gateway: Amazon API Gateway
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on route key
+    YourLogic: Run your registered route handler
+    EventHandlerResolverBuilder: Normalize response (statusCode/body)
+    LambdaResponse: Lambda response
+
+    EventSource --> Gateway: $connect, messages, $disconnect
+    Gateway --> LambdaInit: Route selection
+
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+    }
+
+    EventHandler --> LambdaResponse
+```
+
 ## Key Features
 
 * Route WebSocket events by route key with dedicated `$connect`, `$disconnect`, and `$default` decorators
@@ -184,6 +210,109 @@ Register handlers for specific exception types with `@app.exception_handler`; it
 
 ???+ note "Unhandled exceptions never reach the client"
     An exception with no registered handler is logged and becomes a bare `{"statusCode": 500}`. If it propagated to the Lambda runtime instead, the runtime's error response — exception type, message, and stack trace — would be delivered to the connected client.
+
+### Accessing the event and Lambda context
+
+Inside handlers and middlewares, `app.current_event` is the current `APIGatewayWebSocketEvent` ([Event Source Data Classes](../../utilities/data_classes.md){target="_blank"} utility) and `app.lambda_context` is the Lambda context.
+
+Use `app.append_context` / `app.context` to share data between middlewares and handlers within a single invocation — the context is cleared after each `resolve`.
+
+=== "accessing_websocket_event_and_context.py"
+
+    ```python hl_lines="9 13 14"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/accessing_websocket_event_and_context.py"
+    ```
+
+    1. Route, connection, and identity details live in `request_context`.
+    2. `json_body` parses the message body; `body` and `decoded_body` are also available.
+    3. The standard Lambda context object.
+
+### Sending messages to connected clients
+
+Returned bodies only reply to the **calling** client, on routes with a route response. To push a message to a client at any time — including after the invocation that received the request has long finished — call the API Gateway Management API's `PostToConnection` with the connection ID, against the endpoint the `callback_url` property gives you.
+
+Capture `connection_id` and `callback_url` together at `$connect` and persist them: that record is everything **any** process needs to push to that client later.
+
+The example shows both sending situations. Inside the resolver, `broadcast` pushes to every stored connection from the same invocation, building the client from the current event.
+
+Outside it, `submitReport` acknowledges a long-running request immediately, and a **separate Lambda function** — for example the final state of a Step Functions workflow — pushes the finished result to the one client that asked, using the stored `callback_url`. Progress updates are that same call made mid-work.
+
+A stale connection ID raises `GoneException` — the client is no longer connected, so treat it as a signal to remove that connection from your store. The posting function also needs the `execute-api:ManageConnections` IAM permission on `arn:aws:execute-api:{region}:{account}:{api-id}/{stage}/POST/@connections/*`.
+
+=== "working_with_post_to_connection.py"
+
+    ```python hl_lines="2 16 28 35 41"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_post_to_connection.py"
+    ```
+
+    1. The only thing the WebSocket resolver and the pushing function share.
+    2. Captured at `$connect`: the only moment you get for free, and all anyone needs to post to this client later.
+    3. Acknowledge immediately; the result is pushed by another function when it is ready. For the ack to reach the client, configure a route response on `submitReport`.
+    4. Sending from inside the resolver: the current event provides the endpoint directly.
+
+=== "working_with_post_to_connection_report_ready.py"
+
+    ```python hl_lines="18 23"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_post_to_connection_report_ready.py"
+    ```
+
+    1. The stored `callback_url` rebuilds the Management API client in any execution environment.
+    2. The client disconnected before the result was ready — remove it from the store.
+
+=== "my_connection_store.py"
+
+    ```python
+    --8<-- "examples/event_handler_api_gateway_websocket/src/my_connection_store.py"
+    ```
+
+???+ note "Custom domain names"
+    `callback_url` is built from the event's domain name. When clients connect through a custom domain whose API mapping path differs from the stage name, construct the endpoint yourself instead: `https://{api_id}.execute-api.{region}.amazonaws.com/{stage}`.
+
+## Event Handler workflow
+
+### Connection lifecycle
+
+Connection accepted, message exchanged, connection closed.
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client as WebSocket client
+    participant Gateway as Amazon API Gateway
+    participant Lambda as Lambda (Event Handler)
+    Client->>Gateway: Upgrade request (wss://)
+    Gateway->>Lambda: $connect event
+    Lambda-->>Gateway: {"statusCode": 200}
+    Gateway-->>Client: 101 Switching Protocols
+    Client->>Gateway: {"action": "orderUpdate", ...}
+    Gateway->>Lambda: orderUpdate event (route selection expression)
+    Lambda-->>Gateway: {"statusCode": 200, "body": "..."}
+    Gateway-->>Client: body (only with a route response configured)
+    Client->>Gateway: Close frame
+    Gateway->>Lambda: $disconnect event (best effort)
+    Lambda-->>Gateway: {"statusCode": 200}
+```
+</center>
+
+### Rejected connection
+
+Connection rejected by the `$connect` handler.
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client as WebSocket client
+    participant Gateway as Amazon API Gateway
+    participant Lambda as Lambda (Event Handler)
+    Client->>Gateway: Upgrade request (wss://)
+    Gateway->>Lambda: $connect event
+    Lambda-->>Gateway: {"statusCode": 401}
+    Gateway-->>Client: HTTP 401 (upgrade refused)
+    Note over Gateway,Lambda: $disconnect may still be delivered for this connection
+    Gateway->>Lambda: $disconnect event
+    Lambda-->>Gateway: {"statusCode": 200}
+```
+</center>
 
 ## Testing your code
 
