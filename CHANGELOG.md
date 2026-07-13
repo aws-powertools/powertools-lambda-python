@@ -5,15 +5,27 @@
 # Unreleased
 
 
+<a name="v3.31.1"></a>
+## [v3.31.1] - 2026-07-13
+## Maintenance
+
+* version bump
+* **data-masking:** bump encryption sdk version ([#8335](https://github.com/aws-powertools/powertools-lambda-python/issues/8335))
+
+
 <a name="v3.31.0"></a>
 ## [v3.31.0] - 2026-06-29
 ## Features
 
+* adding circuit breaker feature ([#8266](https://github.com/aws-powertools/powertools-lambda-python/issues/8266))
 * **event_handler:** support any Pydantic Field annotation in parameter ([#8305](https://github.com/aws-powertools/powertools-lambda-python/issues/8305))
 
 ## Maintenance
 
 * version bump
+* **deps:** bump redis from 7.4.0 to 8.0.1 ([#8297](https://github.com/aws-powertools/powertools-lambda-python/issues/8297))
+* **deps-dev:** bump sentry-sdk from 2.62.0 to 2.63.0 ([#8296](https://github.com/aws-powertools/powertools-lambda-python/issues/8296))
+* **deps-dev:** bump boto3-stubs from 1.43.29 to 1.43.36 ([#8295](https://github.com/aws-powertools/powertools-lambda-python/issues/8295))
 
 
 <a name="v3.30.0"></a>
@@ -7759,7 +7771,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.1...HEAD
+[v3.31.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...v3.31.1
 [v3.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...v3.31.0
 [v3.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...v3.30.0
 [v3.29.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.28.0...v3.29.0
