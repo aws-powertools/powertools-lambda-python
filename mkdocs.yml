@@ -24,6 +24,7 @@ nav:
               - core/event_handler/openapi.md
               - core/event_handler/appsync.md
               - core/event_handler/appsync_events.md
+              - core/event_handler/api_gateway_websocket.md
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
           - utilities/batch.md
@@ -245,6 +246,7 @@ plugins:
           - core/event_handler/api_gateway.md
           - core/event_handler/appsync.md
           - core/event_handler/appsync_events.md
+          - core/event_handler/api_gateway_websocket.md
           - core/event_handler/bedrock_agents.md
         Utilities:
           - utilities/parameters.md
