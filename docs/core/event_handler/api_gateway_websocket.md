@@ -149,6 +149,26 @@ Without a Lambda authorizer, authenticate on `$connect` with a middleware and pe
     3. Returning without calling `next_middleware` short-circuits the chain — the handler never runs and the connection is rejected.
     4. Handlers and later middlewares read it from `app.context`.
 
+### Split routes with Router
+
+As your API grows, group related route keys in separate files with `Router`, then include them in the resolver. `include_router` merges the router's routes, global middlewares (`use`), exception handlers, and context into the app. Inside a router file, access the request through the router instance — `router.current_event`, `router.lambda_context`, and `router.context`.
+
+=== "working_with_router_orders.py"
+
+    ```python hl_lines="3 8"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_router_orders.py"
+    ```
+
+    1. Use the router instance to access the current event inside router files.
+
+=== "working_with_router.py"
+
+    ```python hl_lines="1 7"
+    --8<-- "examples/event_handler_api_gateway_websocket/src/working_with_router.py"
+    ```
+
+    1. Registers every route, middleware, and exception handler defined on the router.
+
 ### Exception handling
 
 Register handlers for specific exception types with `@app.exception_handler`; it also accepts a list of types, and lookup respects inheritance. The handler receives the exception, and its return value goes through the same [response normalization](#response-format).

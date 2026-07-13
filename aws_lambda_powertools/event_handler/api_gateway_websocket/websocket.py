@@ -166,6 +166,43 @@ class APIGatewayWebSocketResolver(Router):
         """
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
+    def include_router(self, router: Router) -> None:
+        """
+        Add all routes, middlewares, exception handlers, and context defined in a router.
+
+        Parameters
+        ----------
+        router : Router
+            A router containing routes to include, typically defined in a separate module
+
+        Examples
+        --------
+        >>> # orders.py
+        >>> from aws_lambda_powertools.event_handler.api_gateway_websocket import Router
+        >>>
+        >>> router = Router()
+        >>>
+        >>> @router.route("orderUpdate")
+        >>> def order_update():
+        >>>     return {"orderId": router.current_event.json_body["orderId"]}
+        >>>
+        >>> # app.py
+        >>> import orders
+        >>> from aws_lambda_powertools.event_handler import APIGatewayWebSocketResolver
+        >>>
+        >>> app = APIGatewayWebSocketResolver()
+        >>> app.include_router(orders.router)
+        """
+        logger.debug("Merging router and app context")
+        self.context.update(**router.context)
+        # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
+        router.context = self.context
+
+        logger.debug("Merging router routes, middlewares, and exception handlers")
+        self._router_middlewares.extend(router._router_middlewares)
+        self._route_registry.merge(router._route_registry)
+        self.exception_handler_manager.update_exception_handlers(router._exception_handlers)
+
     def _resolve_route(self) -> dict[str, Any]:
         """Dispatch the current event through the middleware chain to its route handler and normalize the response."""
         route_key = self.current_event.request_context.route_key

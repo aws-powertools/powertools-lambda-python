@@ -676,3 +676,152 @@ def test_route_middleware_isolation_across_routes(connect_event, message_event, 
 
     # THEN the global middleware runs on both routes; the route-level middleware runs only on route A
     assert order == ["global:routeA", "route_a_mw:routeA", "handler_a", "global:routeB", "handler_b"]
+
+
+def test_included_router_routes_are_dispatched(message_event, lambda_context):
+    # GIVEN routes registered on a standalone Router
+    event = deepcopy(message_event)
+    event["requestContext"]["routeKey"] = "orderUpdate"
+
+    router = Router()
+
+    @router.route("orderUpdate")
+    def order_update():
+        return "router handled it"
+
+    # WHEN the router is included and the event resolved
+    app = APIGatewayWebSocketResolver()
+    app.include_router(router)
+    result = app.resolve(event, lambda_context)
+
+    # THEN the router-registered handler is dispatched
+    assert result == {"statusCode": 200, "body": "router handled it"}
+
+
+def test_router_current_event_and_lambda_context_in_handler(message_event, lambda_context):
+    # GIVEN a router handler accessing the event and context through the router instance
+    event = deepcopy(message_event)
+    event["requestContext"]["routeKey"] = "orderUpdate"
+
+    router = Router()
+    captured = {}
+
+    @router.route("orderUpdate")
+    def order_update():
+        captured["event"] = router.current_event
+        captured["context"] = router.lambda_context
+
+    app = APIGatewayWebSocketResolver()
+    app.include_router(router)
+
+    # WHEN the event is resolved through the app
+    app.resolve(event, lambda_context)
+
+    # THEN the router sees the same event and context as the app (class-attribute mechanism)
+    assert isinstance(captured["event"], APIGatewayWebSocketEvent)
+    assert captured["event"].request_context.route_key == "orderUpdate"
+    assert captured["context"] is lambda_context
+
+
+def test_include_router_merges_and_shares_context(connect_event, lambda_context):
+    # GIVEN context appended to a router before inclusion
+    router = Router()
+    router.append_context(source="router")
+    captured = {}
+
+    @router.route("$connect")
+    def connect():
+        captured["source"] = router.context.get("source")
+        captured["app_added"] = router.context.get("app_added")
+
+    app = APIGatewayWebSocketResolver()
+    app.include_router(router)
+
+    # THEN the router context is merged into the app and the pointer is shared
+    assert app.context["source"] == "router"
+    assert router.context is app.context
+
+    # WHEN the app appends more context and the event is resolved
+    app.append_context(app_added=True)
+    app.resolve(connect_event, lambda_context)
+
+    # THEN the handler saw both values and clear_context cleared the shared dict
+    assert captured == {"source": "router", "app_added": True}
+    assert app.context == {}
+    assert router.context == {}
+
+
+def test_router_level_use_middlewares_are_merged(connect_event, lambda_context):
+    # GIVEN global middlewares on both the app and a router, and a route-level middleware on the router route
+    app = APIGatewayWebSocketResolver()
+    router = Router()
+    order = []
+
+    def app_middleware(app_, next_middleware):
+        order.append("app")
+        return next_middleware(app_)
+
+    def router_middleware(app_, next_middleware):
+        order.append("router")
+        return next_middleware(app_)
+
+    def route_middleware(app_, next_middleware):
+        order.append("route_mw")
+        return next_middleware(app_)
+
+    app.use(middlewares=[app_middleware])
+    router.use(middlewares=[router_middleware])
+
+    @router.route("$connect", middlewares=[route_middleware])
+    def connect():
+        order.append("handler")
+
+    # WHEN the router is included and the event resolved
+    app.include_router(router)
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN globals run in merge order (app then router), then the route-level middleware, then the handler
+    assert result == {"statusCode": 200}
+    assert order == ["app", "router", "route_mw", "handler"]
+
+
+def test_router_exception_handlers_are_merged(connect_event, lambda_context):
+    # GIVEN an exception handler registered on a router
+    router = Router()
+
+    @router.exception_handler(ValueError)
+    def handle_value_error(exc: ValueError):
+        return {"error": str(exc)}, 400
+
+    @router.route("$connect")
+    def connect():
+        raise ValueError("router boom")
+
+    # WHEN the router is included and the event resolved
+    app = APIGatewayWebSocketResolver()
+    app.include_router(router)
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the router-registered exception handler is used
+    assert result == {"statusCode": 400, "body": '{"error":"router boom"}'}
+
+
+def test_included_router_route_wins_over_app_route(connect_event, lambda_context):
+    # GIVEN the app and a router both registering the same route key
+    app = APIGatewayWebSocketResolver()
+    router = Router()
+
+    @app.on_connect()
+    def app_connect():
+        return "from app"
+
+    @router.route("$connect")
+    def router_connect():
+        return "from router"
+
+    # WHEN the router is included and the event resolved
+    app.include_router(router)
+    result = app.resolve(connect_event, lambda_context)
+
+    # THEN the router-registered handler takes precedence (last-wins merge semantics)
+    assert result == {"statusCode": 200, "body": "from router"}
