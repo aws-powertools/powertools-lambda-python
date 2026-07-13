@@ -121,7 +121,9 @@ A returned dict is always body content — it is never inspected for a `statusCo
 The status code has different effects depending on the route:
 
 * **`$connect`**: the status code decides the connection — 2xx accepts the WebSocket upgrade, anything else rejects it.
-* **All other routes**: the body is delivered back to the client only when the route has a route response configured, and a non-2xx status code does **not** drop the connection.
+* **All other routes**: the body is delivered back to the client only on routes with a [route response](#terminology), and a non-2xx status code does **not** drop the connection.
+
+An event whose route key has no registered handler emits a `PowertoolsUserWarning` and returns `{"statusCode": 400}` — on `$connect`, that rejects the connection.
 
 ## Advanced
 
@@ -145,7 +147,7 @@ Execution order is: global middlewares (`app.use`), then route-level `middleware
 
 ### Authentication patterns
 
-`$connect` is the only route where credentials exist: headers and cookies are present on the WebSocket handshake only, and later messages carry nothing but the connection ID. There are two ways to bridge that gap.
+`$connect` is the only route where credentials exist: headers and cookies are present on the WebSocket handshake only, and later messages carry nothing from the client but the connection ID. There are two ways to bridge that gap.
 
 #### Lambda authorizer
 
@@ -229,7 +231,7 @@ Use `app.append_context` / `app.context` to share data between middlewares and h
 
 ### Sending messages to connected clients
 
-Returned bodies only reply to the **calling** client, on routes with a route response. To push a message to a client at any time — including after the invocation that received the request has long finished — call the API Gateway Management API's `PostToConnection` with the connection ID, against the endpoint the `callback_url` property gives you.
+Returned bodies only reply to the **calling** client. To push a message to a client at any time — including after the invocation that received the request has long finished — call the API Gateway Management API's `PostToConnection` with the connection ID, against the endpoint the `callback_url` property gives you.
 
 Capture `connection_id` and `callback_url` together at `$connect` and persist them: that record is everything **any** process needs to push to that client later.
 

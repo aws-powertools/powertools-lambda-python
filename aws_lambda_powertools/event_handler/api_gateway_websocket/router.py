@@ -24,7 +24,7 @@ class Router(BaseRouter):
     Registers route handlers for WebSocket route keys so they can be split across
     files and later included in an `APIGatewayWebSocketResolver` via `include_router`.
 
-    Parameters
+    Attributes
     ----------
     context : dict
         Dictionary to store context information accessible across route handlers

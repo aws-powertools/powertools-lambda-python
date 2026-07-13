@@ -52,7 +52,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | [Tracer](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions |
 | [Logger](./core/logger.md) | Structured logging made easier, and target to enrich structured logging with key Lambda context details |
 | [Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
-| [Event Handler](./core/event_handler/api_gateway.md) | Event handler for API Gateway, ALB, Lambda Function URL, VPC Lattice, AppSync, and Bedrock Agents |
+| [Event Handler](./core/event_handler/api_gateway.md) | Event handler for API Gateway, ALB, Lambda Function URL, VPC Lattice, API Gateway WebSocket, AppSync, and Bedrock Agents |
 | [Parameters](./utilities/parameters.md) | Retrieve and cache parameter values from Parameter Store, Secrets Manager, AppConfig, or DynamoDB |
 | [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic |
 | [Batch Processing](./utilities/batch.md) | Handle partial failures for SQS, Kinesis Data Streams, and DynamoDB Streams |

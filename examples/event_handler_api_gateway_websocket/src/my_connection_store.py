@@ -1,6 +1,7 @@
 # Illustrative connection store. In production, back these functions with a durable store
 # such as a DynamoDB table: the WebSocket resolver and the functions that push results run
-# in different Lambda execution environments and cannot share process memory.
+# in different Lambda execution environments and cannot share process memory. Use a TTL —
+# $disconnect delivery is best-effort, so missed disconnects would leak entries forever.
 
 _connections: dict[str, str] = {}
 
