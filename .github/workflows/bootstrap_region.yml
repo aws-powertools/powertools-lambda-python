@@ -44,18 +44,18 @@ jobs:
     environment: layer-${{ inputs.environment }}
     steps:
       - name: checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ github.sha }}
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
       - name: Setup dependencies
         uses: aws-powertools/actions/.github/actions/cached-node-modules@4bf64a4072489399fbf39b78f558eeeed6767189
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d
         with:
           aws-region: ${{ inputs.region }}
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
@@ -96,14 +96,14 @@ jobs:
     steps:
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
+        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
           mask-aws-account-id: true
       - id: go-setup
         name: Setup Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '>=1.23.0'
       - id: go-env
