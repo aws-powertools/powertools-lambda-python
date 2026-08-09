@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerConfigError
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerConfigError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

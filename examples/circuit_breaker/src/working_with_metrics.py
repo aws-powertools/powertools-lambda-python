@@ -1,11 +1,11 @@
 import os
 
 from aws_lambda_powertools.metrics import MetricUnit, single_metric
-from aws_lambda_powertools.utilities.circuit_breaker_alpha import (
+from aws_lambda_powertools.utilities.circuit_breaker import (
     CircuitTransition,
     circuit_breaker,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
