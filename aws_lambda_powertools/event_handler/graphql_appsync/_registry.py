@@ -64,7 +64,7 @@ class ResolverRegistry:
             Field name
         Return
         ----------
-        Optional[Dict]
+        dict | None
             A dictionary with the resolver and if raise exception on error
         """
         logger.debug(f"Looking for resolver for type={type_name}, field={field_name}.")

@@ -321,7 +321,7 @@ class AppSyncEventsResolver(Router):
                     if isinstance(ret, Exception)
                     else {"id": e.get("id"), "payload": ret}
                 )
-                for e, ret in zip(self.current_event.events, results)
+                for e, ret in zip(self.current_event.events, results, strict=True)
             ],
         )
 

@@ -89,7 +89,7 @@ jobs:
           RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -124,7 +124,7 @@ jobs:
       contents: read
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -140,7 +140,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
           cache: "poetry"
@@ -165,7 +165,7 @@ jobs:
       attestation_hashes: ${{ steps.encoded_hash.outputs.attestation_hashes }}
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -178,7 +178,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
           cache: "poetry"
@@ -234,7 +234,7 @@ jobs:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
       # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -246,12 +246,12 @@ jobs:
 
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+        uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
 
       # PyPi test maintenance affected us numerous times, leaving for history purposes
       # - name: Upload to PyPi test
       #   if: ${{ !inputs.skip_pypi }}
-      #   uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+      #   uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
@@ -268,7 +268,7 @@ jobs:
       contents: write
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -312,7 +312,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -368,7 +368,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
       - name: Restore sealed source code

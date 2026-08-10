@@ -30,7 +30,7 @@ from aws_lambda_powertools.event_handler import (
     VPCLatticeV2Resolver,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Query
+from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Path, Query
 from tests.functional.utils import load_event
 
 
@@ -2652,6 +2652,77 @@ def test_field_discriminator_validation(gw_event):
 
     result = app(gw_event, {})
     assert result["statusCode"] == 422
+
+
+def test_field_annotation_with_all_param_types(gw_event):
+    """A reusable Annotated type carrying a Pydantic Field works with every parameter location."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # Reusable annotated type, the same kind you'd use inside a model
+    str_field = Annotated[str, Field()]
+
+    @app.get("/header")
+    def get_header(h: Annotated[str_field, Header()]):
+        return {"value": h}
+
+    @app.get("/path/<p>")
+    def get_path(p: Annotated[str_field, Path()]):
+        return {"value": p}
+
+    @app.get("/query")
+    def get_query(q: Annotated[str_field, Query()]):
+        return {"value": q}
+
+    @app.post("/body")
+    def post_body(b: Annotated[str_field, Body()]):
+        return {"value": b}
+
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
+
+    # Header
+    gw_event["path"] = "/header"
+    gw_event["httpMethod"] = "GET"
+    gw_event["headers"] = {"h": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Path
+    gw_event["path"] = "/path/test"
+    gw_event["pathParameters"] = {"p": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Query
+    gw_event["path"] = "/query"
+    gw_event["pathParameters"] = None
+    gw_event["queryStringParameters"] = {"q": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Body
+    gw_event["path"] = "/body"
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"]["content-type"] = "application/json"
+    gw_event["body"] = '"test"'
+    assert app(gw_event, {})["statusCode"] == 200
+
+
+def test_field_constraints_apply_with_param_type(gw_event):
+    """Constraints declared on a Field are enforced when paired with a location marker."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/items")
+    def get_items(quantity: Annotated[int, Field(gt=0), Query()]):
+        return {"quantity": quantity}
+
+    gw_event["path"] = "/items"
+    gw_event["httpMethod"] = "GET"
+
+    # Passes the gt=0 constraint
+    gw_event["queryStringParameters"] = {"quantity": "5"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Violates gt=0
+    gw_event["queryStringParameters"] = {"quantity": "-1"}
+    assert app(gw_event, {})["statusCode"] == 422
 
 
 def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event):

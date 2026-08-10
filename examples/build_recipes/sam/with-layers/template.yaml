@@ -31,7 +31,7 @@ Resources:
       CodeUri: src/app/
       Handler: app_sam_layer.lambda_handler
       Layers:
-        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:33
+        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:36
         - !Ref DependenciesLayer
       Events:
         ApiEvent:
@@ -50,7 +50,7 @@ Resources:
       CodeUri: src/worker/
       Handler: worker_sam_layer.lambda_handler
       Layers:
-        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:33
+        - arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:36
         - !Ref DependenciesLayer
       Events:
         SQSEvent:
