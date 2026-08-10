@@ -15,13 +15,13 @@ from boto3.dynamodb.types import TypeDeserializer
 from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.shared import constants, user_agent
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerConfigError
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerConfigError
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitState
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
@@ -75,7 +75,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
     -------
     **Create a DynamoDB-backed circuit breaker store**
 
-        from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+        from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
             CircuitBreakerDynamoDBPersistence,
         )
 

@@ -3,8 +3,8 @@ import os
 
 import boto3
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha import CircuitInfo, circuit_breaker
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+from aws_lambda_powertools.utilities.circuit_breaker import CircuitInfo, circuit_breaker
+from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext

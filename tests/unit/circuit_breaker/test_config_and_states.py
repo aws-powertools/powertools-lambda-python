@@ -4,13 +4,13 @@ import dataclasses
 
 import pytest
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import (
+from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import (
     CircuitBreakerConfigError,
     CircuitBreakerOpenError,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitInfo, CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo, CircuitState
 
 
 def test_circuit_state_serializes_to_plain_string():
