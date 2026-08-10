@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitInfo
+    from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo
 
 
 class CircuitBreakerError(Exception):

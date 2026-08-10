@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import pytest
 from pydantic import BaseModel, Field
@@ -915,6 +915,24 @@ def test_openapi_mixed_body_media_types():
     assert "application/json" in request_body.content
 
 
+def test_openapi_excludes_content_type_header_parameter():
+    """Content-Type is described by requestBody content, not an OpenAPI header parameter."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.patch("/json-patch")
+    def json_patch(
+        operations: Annotated[list[dict], Body(media_type="application/json-patch+json")],
+        content_type: Annotated[Literal["application/json-patch+json"], Header(alias="Content-Type")],
+    ):
+        return {"status": "updated"}
+
+    schema = app.get_openapi_schema()
+    patch_op = schema.paths["/json-patch"].patch
+
+    assert "application/json-patch+json" in patch_op.requestBody.content
+    assert all(parameter.name.lower() != "content-type" for parameter in patch_op.parameters or [])
+
+
 def test_openapi_form_parameter_edge_cases():
     """Test Form parameters with various edge cases."""
 
@@ -986,7 +1004,7 @@ def test_openapi_pydantic_query_with_constraints():
 
 
 def test_openapi_pydantic_header_with_alias():
-    """Test that Pydantic field aliases work correctly in Header parameters"""
+    """Test that Pydantic header aliases are emitted, except Content-Type."""
     app = APIGatewayRestResolver()
 
     class HeaderParams(BaseModel):
@@ -1003,7 +1021,7 @@ def test_openapi_pydantic_header_with_alias():
 
     # Check that aliases are used as parameter names
     param_names = [param.name for param in get_operation.parameters]
-    assert "content-type" in param_names
+    assert "content-type" not in param_names
     assert "user-agent" in param_names
     assert "content_type" not in param_names  # Original field name should not be used
     assert "user_agent" not in param_names

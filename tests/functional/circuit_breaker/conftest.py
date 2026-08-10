@@ -4,14 +4,14 @@ import threading
 
 import pytest
 
-import aws_lambda_powertools.utilities.circuit_breaker_alpha.base as base_module
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.base import CircuitBreakerHandler
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
+import aws_lambda_powertools.utilities.circuit_breaker.base as base_module
+from aws_lambda_powertools.utilities.circuit_breaker.base import CircuitBreakerHandler
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
     CircuitBreakerExistingLockError,
     CircuitBreakerPersistenceLayer,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitState
 
 
 class FakePersistence(CircuitBreakerPersistenceLayer):

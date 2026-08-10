@@ -1,13 +1,18 @@
 import os
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha import circuit_breaker
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+from aws_lambda_powertools.utilities.circuit_breaker import circuit_breaker
+from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 table = os.getenv("CIRCUIT_BREAKER_TABLE", "")
-persistence = CircuitBreakerDynamoDBPersistence(table_name=table)
+persistence = CircuitBreakerDynamoDBPersistence(
+    table_name=table,
+    key_attr="PK",
+    sort_key_attr="SK",
+    static_pk_value="CIRCUIT_BREAKER",
+)
 
 
 class PaymentBackend:
@@ -23,7 +28,4 @@ def charge(order: dict) -> dict:
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-    # Circuit closed -> charge() runs and returns the backend response.
-    # Circuit open    -> charge() is skipped and CircuitBreakerOpenError is raised,
-    #                    because no on_circuit_open callback is registered.
     return charge(event)

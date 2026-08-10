@@ -5,12 +5,12 @@ import pytest
 from botocore.config import Config
 from botocore.stub import Stubber
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerConfigError
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerConfigError
+from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
     CircuitBreakerDynamoDBPersistence,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitState
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 TABLE_NAME = "CircuitBreakerState"
@@ -196,7 +196,7 @@ def test_item_to_record_minimal_item(persistence):
 
 def test_record_to_item_full_record(persistence):
     """Cover _record_to_item with all fields set (lines 124-139)."""
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
 
     record = CircuitStateRecord(
         name="payment",
@@ -219,7 +219,7 @@ def test_record_to_item_full_record(persistence):
 
 def test_record_to_item_minimal_record(persistence):
     """Cover _record_to_item with optional fields as None (branch misses on lines 131-137)."""
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
 
     record = CircuitStateRecord(name="payment", state=CircuitState.CLOSED)
     item = persistence._record_to_item(record)

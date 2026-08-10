@@ -12,14 +12,14 @@ from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import strtobool
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.base import CircuitBreakerHandler
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
+from aws_lambda_powertools.utilities.circuit_breaker.base import CircuitBreakerHandler
+from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
         CircuitBreakerPersistenceLayer,
     )
 
@@ -73,8 +73,8 @@ def circuit_breaker(
     -------
     **Protect a payment backend, buffering rejected requests**
 
-        from aws_lambda_powertools.utilities.circuit_breaker_alpha import circuit_breaker, CircuitInfo
-        from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence import (
+        from aws_lambda_powertools.utilities.circuit_breaker import circuit_breaker, CircuitInfo
+        from aws_lambda_powertools.utilities.circuit_breaker.persistence import (
             CircuitBreakerDynamoDBPersistence,
         )
 

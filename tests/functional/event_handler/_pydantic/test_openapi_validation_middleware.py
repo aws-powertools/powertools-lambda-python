@@ -59,6 +59,27 @@ def test_validate_scalars(gw_event):
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
+def test_content_type_header_validation_remains_enabled(gw_event):
+    """Content-Type header validation remains available when it is omitted from the OpenAPI schema."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.patch("/json-patch")
+    def json_patch(
+        operations: Annotated[list[dict], Body(media_type="application/json-patch+json")],
+        content_type: Annotated[Literal["application/json-patch+json"], Header(alias="Content-Type")],
+    ):
+        return {"status": "updated"}
+
+    gw_event["httpMethod"] = "PATCH"
+    gw_event["path"] = "/json-patch"
+    gw_event["headers"]["Content-Type"] = "application/json"
+    gw_event["body"] = '[{"op": "replace"}]'
+
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 422
+
+
 def test_validate_pydantic_query_params(gw_event):
     """Test that Pydantic models in Query parameters are validated correctly"""
 

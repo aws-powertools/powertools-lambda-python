@@ -174,9 +174,15 @@ def _build_operation_parameters(
             continue
 
         if _is_pydantic_model_param(field_info):
-            parameters.extend(_expand_pydantic_model_parameters(field_info))
+            generated_parameters = _expand_pydantic_model_parameters(field_info)
         else:
-            parameters.append(_create_regular_parameter(param, model_name_map, field_mapping))
+            generated_parameters = [_create_regular_parameter(param, model_name_map, field_mapping)]
+
+        parameters.extend(
+            parameter
+            for parameter in generated_parameters
+            if not (parameter["in"] == "header" and parameter["name"].lower() == "content-type")
+        )
 
     return parameters
 

@@ -15,11 +15,11 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, NamedTuple
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitState
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
+    from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
 
 logger = logging.getLogger(__name__)
 
