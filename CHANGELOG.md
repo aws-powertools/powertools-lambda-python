@@ -5,12 +5,44 @@
 # Unreleased
 
 
+<a name="v3.34.0"></a>
+## [v3.34.0] - 2026-08-10
+## Bug Fixes
+
+* **event_handler:** omit Content-Type header from OpenAPI ([#8374](https://github.com/aws-powertools/powertools-lambda-python/issues/8374))
+
+## Maintenance
+
+* version bump
+
+
 <a name="v3.31.1"></a>
 ## [v3.31.1] - 2026-07-13
+## Bug Fixes
+
+* EventBridgeEvent data class ([#8301](https://github.com/aws-powertools/powertools-lambda-python/issues/8301))
+* **circuit_breaker:** make probe election per-thread and synchronize local counters ([#8323](https://github.com/aws-powertools/powertools-lambda-python/issues/8323))
+* **circuit_breaker:** normalize handled/ignored exceptions to a validated tuple at construction ([#8319](https://github.com/aws-powertools/powertools-lambda-python/issues/8319))
+* **event_handler:** resolve dependency injection failure with arbitrary return types ([#8334](https://github.com/aws-powertools/powertools-lambda-python/issues/8334))
+* **event_source:** mypy strict mode compliance ([#8332](https://github.com/aws-powertools/powertools-lambda-python/issues/8332))
+* **parser:** fix DynamoDB Stream Lambda invocation record model ([#8321](https://github.com/aws-powertools/powertools-lambda-python/issues/8321))
+
+## Features
+
+* **circuit_breaker:** support composite primary key in DynamoDB persistence ([#8316](https://github.com/aws-powertools/powertools-lambda-python/issues/8316))
+
 ## Maintenance
 
 * version bump
 * **data-masking:** bump encryption sdk version ([#8335](https://github.com/aws-powertools/powertools-lambda-python/issues/8335))
+* **deps:** bump soupsieve from 2.7 to 2.8.4 in /docs ([#8328](https://github.com/aws-powertools/powertools-lambda-python/issues/8328))
+* **deps:** bump the github-actions group across 1 directory with 8 updates ([#8327](https://github.com/aws-powertools/powertools-lambda-python/issues/8327))
+* **deps:** bump protobuf from 7.34.1 to 7.35.1 ([#8312](https://github.com/aws-powertools/powertools-lambda-python/issues/8312))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20260508 to 2.9.0.20260518 ([#8311](https://github.com/aws-powertools/powertools-lambda-python/issues/8311))
+* **deps-dev:** bump aws-cdk from 2.1128.1 to 2.1129.0 in the aws-cdk group ([#8324](https://github.com/aws-powertools/powertools-lambda-python/issues/8324))
+* **deps-dev:** bump soupsieve from 2.7 to 2.8.4 ([#8329](https://github.com/aws-powertools/powertools-lambda-python/issues/8329))
+* **deps-dev:** bump requests from 2.33.1 to 2.34.2 ([#8313](https://github.com/aws-powertools/powertools-lambda-python/issues/8313))
+* **deps-dev:** bump filelock from 3.29.0 to 3.29.7 ([#8314](https://github.com/aws-powertools/powertools-lambda-python/issues/8314))
 
 
 <a name="v3.31.0"></a>
@@ -7771,7 +7803,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.34.0...HEAD
+[v3.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.1...v3.34.0
 [v3.31.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...v3.31.1
 [v3.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...v3.31.0
 [v3.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.29.0...v3.30.0
