@@ -5,13 +5,6 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-!!! warning "Alpha / experimental"
-    This utility ships under the **`circuit_breaker_alpha`** namespace while we collect
-    feedback. The public API may change in a backwards-incompatible way before it is
-    promoted to GA, at which point the import path becomes `circuit_breaker`. Pin your
-    Powertools version and follow the tracking discussion before relying on it in
-    production.
-
 The circuit breaker utility stops sending traffic to an unhealthy downstream dependency, giving it room to recover while you decide what happens to the rejected requests.
 
 ## Key features
@@ -99,7 +92,7 @@ You **can** use a single DynamoDB table for all your circuits. Already have a si
 === "AWS Serverless Application Model (SAM) example"
 
     ```yaml hl_lines="3-15 24-29 32-33"
-    --8<-- "examples/circuit_breaker_alpha/templates/sam.yaml"
+    --8<-- "examples/circuit_breaker/templates/sam.yaml"
     ```
 
 ### Circuit breaker in action
@@ -109,7 +102,7 @@ The common case is the `@circuit_breaker` decorator wrapping the function that m
 === "getting_started_with_circuit_breaker.py"
 
     ```python hl_lines="3-6 9 19 27"
-    --8<-- "examples/circuit_breaker_alpha/src/getting_started_with_circuit_breaker.py"
+    --8<-- "examples/circuit_breaker/src/getting_started_with_circuit_breaker.py"
     ```
 
 !!! note "Wrap the downstream call, not the whole handler"
@@ -137,7 +130,7 @@ Register an `on_circuit_open` callback to decide what happens to a rejected requ
 === "working_with_callback.py"
 
     ```python hl_lines="6 24-28 31-35"
-    --8<-- "examples/circuit_breaker_alpha/src/working_with_callback.py"
+    --8<-- "examples/circuit_breaker/src/working_with_callback.py"
     ```
 
 !!! info "Why a callback instead of built-in S3/SQS sinks?"
@@ -152,7 +145,7 @@ If you don't register a callback, an open circuit raises `CircuitBreakerOpenErro
 === "working_without_callback.py"
 
     ```python hl_lines="5 16-22 38-43"
-    --8<-- "examples/circuit_breaker_alpha/src/working_without_callback.py"
+    --8<-- "examples/circuit_breaker/src/working_without_callback.py"
     ```
 
 ## Configuration
@@ -211,7 +204,7 @@ Register an `on_transition` hook to be notified whenever the circuit changes sta
 === "working_with_metrics.py"
 
     ```python hl_lines="3 12-21 26"
-    --8<-- "examples/circuit_breaker_alpha/src/working_with_metrics.py"
+    --8<-- "examples/circuit_breaker/src/working_with_metrics.py"
     ```
 
 Any exception raised inside the hook is swallowed and logged, so a misbehaving metric call can never break the protected request.
@@ -234,14 +227,14 @@ Set **`POWERTOOLS_CIRCUIT_BREAKER_DISABLED`**{: .copyMe} to a truthy value to by
 
 #### Using a composite primary key
 
-Use the `sort_key_attr` parameter when your table is configured with a composite primary key _(hash+range key)_, as in a single-table design.
+Use the `sort_key_attr` parameter when your table is configured with a composite primary key *(hash+range key)*, as in a single-table design.
 
 When enabled, the circuit name is saved in the sort key instead, and the partition key defaults to `circuit_breaker#{LAMBDA_FUNCTION_NAME}` — this **namespaces circuits per function** so two functions can use the same circuit name without sharing state. (Without `sort_key_attr`, the default remains partition-key-only with the circuit name as the partition key.)
 
 Set `static_pk_value` to a fixed value (as below) when you instead want **multiple functions to share the same circuit** — for example, every function guarding the same downstream dependency should trip together.
 
 ```python hl_lines="12-14"
---8<-- "examples/circuit_breaker_alpha/src/working_with_composite_primary_key.py"
+--8<-- "examples/circuit_breaker/src/working_with_composite_primary_key.py"
 ```
 
 ??? note "Click to expand and learn how table items would look like"

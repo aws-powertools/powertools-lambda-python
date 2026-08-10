@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitInfo, CircuitState
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo, CircuitState
 
 
 @dataclass
