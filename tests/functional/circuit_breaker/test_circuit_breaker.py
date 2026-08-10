@@ -6,16 +6,16 @@ import warnings
 
 import pytest
 
-import aws_lambda_powertools.utilities.circuit_breaker_alpha.base as base_module
-from aws_lambda_powertools.utilities.circuit_breaker_alpha import (
+import aws_lambda_powertools.utilities.circuit_breaker.base as base_module
+from aws_lambda_powertools.utilities.circuit_breaker import (
     CircuitBreakerConfig,
     CircuitBreakerOpenError,
     CircuitState,
     CircuitTransition,
     circuit_breaker,
 )
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerError
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerError
+from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
 
 # All tests disable the local read cache (max_age=0) so each call re-reads the fake store.
 

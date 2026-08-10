@@ -15,17 +15,17 @@ import threading
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.exceptions import CircuitBreakerOpenError
-from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitState, CircuitTransition
+from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerOpenError
+from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitState, CircuitTransition
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.config import CircuitBreakerConfig
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.persistence.base import (
+    from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
         CircuitBreakerPersistenceLayer,
     )
-    from aws_lambda_powertools.utilities.circuit_breaker_alpha.states import CircuitInfo
+    from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo
 
 logger = logging.getLogger(__name__)
 
