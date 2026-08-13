@@ -67,6 +67,23 @@ def avro_encoded_key(avro_key_schema):
     return base64.b64encode(bytes_writer.getvalue()).decode("utf-8")
 
 
+SCHEMA_ID_PREFIX = b"\x00\x00\x00\x00\x01"
+
+
+def _prepend_prefix_to_base64(encoded: str, prefix: bytes = SCHEMA_ID_PREFIX) -> str:
+    return base64.b64encode(prefix + base64.b64decode(encoded)).decode("utf-8")
+
+
+@pytest.fixture
+def avro_encoded_value_with_prefix(avro_encoded_value):
+    return _prepend_prefix_to_base64(avro_encoded_value)
+
+
+@pytest.fixture
+def avro_encoded_key_with_prefix(avro_encoded_key):
+    return _prepend_prefix_to_base64(avro_encoded_key)
+
+
 @pytest.fixture
 def kafka_event_with_avro_data(avro_encoded_value, avro_encoded_key):
     return {
@@ -310,6 +327,97 @@ def test_kafka_consumer_without_avro_key_schema():
 
     # Verify the error message mentions 'key_schema'
     assert "key_schema" in str(excinfo.value)
+
+
+def test_kafka_consumer_avro_produces_wrong_output_without_prefix_length_setting(
+    kafka_event_with_avro_data,
+    avro_encoded_value_with_prefix,
+    avro_value_schema,
+    lambda_context,
+):
+    # GIVEN An Avro payload that has been serialized by a Confluent-style producer,
+    # so it carries a 5-byte "magic byte + schema ID" prefix in front of the Avro body
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["value"] = avro_encoded_value_with_prefix
+
+    # AND a SchemaConfig without the new offset parameter (today's behaviour)
+    schema_config = SchemaConfig(value_schema_type="AVRO", value_schema=avro_value_schema)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    # WHEN/THEN The deserializer cannot know it should skip the leading bytes.
+    # Depending on the prefix content, this either raises or silently returns corrupted data.
+    # Both outcomes are broken; the fix must let callers opt into skipping the prefix.
+    try:
+        result = handler(event, lambda_context)
+    except KafkaConsumerDeserializationError:
+        return
+
+    assert result != {"name": "John Doe", "age": 30}
+
+
+def test_kafka_consumer_avro_with_value_schema_id_prefix_length(
+    kafka_event_with_avro_data,
+    avro_encoded_value_with_prefix,
+    avro_value_schema,
+    lambda_context,
+):
+    # GIVEN An Avro payload with a 5-byte magic-byte + schema-ID prefix
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["value"] = avro_encoded_value_with_prefix
+
+    # AND a SchemaConfig instructed to skip the first 5 bytes before Avro decoding
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        value_schema_id_prefix_length=5,
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    # WHEN The handler processes the event
+    result = handler(event, lambda_context)
+
+    # THEN The Avro body should be decoded correctly after the prefix is stripped
+    assert result["name"] == "John Doe"
+    assert result["age"] == 30
+
+
+def test_kafka_consumer_avro_with_key_schema_id_prefix_length(
+    kafka_event_with_avro_data,
+    avro_encoded_key_with_prefix,
+    avro_value_schema,
+    avro_key_schema,
+    lambda_context,
+):
+    # GIVEN A Kafka event whose key is Avro data behind a 5-byte prefix
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["key"] = avro_encoded_key_with_prefix
+
+    # AND a SchemaConfig that only strips the prefix on the key side
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        key_schema_type="AVRO",
+        key_schema=avro_key_schema,
+        key_schema_id_prefix_length=5,
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        record = next(event.records)
+        return {"key": record.key, "value": record.value}
+
+    # WHEN The handler processes the event
+    result = handler(event, lambda_context)
+
+    # THEN Both key (prefixed, offset applied) and value (plain) deserialize correctly
+    assert result["key"] == {"user_id": "user-123"}
+    assert result["value"] == {"name": "John Doe", "age": 30}
 
 
 def test_kafka_consumer_avro_with_wrong_json_schema(

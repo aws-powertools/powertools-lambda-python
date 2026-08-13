@@ -13,7 +13,12 @@ if TYPE_CHECKING:
 _deserializer_cache: dict[str, DeserializerBase] = {}
 
 
-def _get_cache_key(schema_type: str | object, schema_value: Any, field_metadata: dict[str, Any]) -> str:
+def _get_cache_key(
+    schema_type: str | object,
+    schema_value: Any,
+    field_metadata: dict[str, Any],
+    schema_id_prefix_length: int = 0,
+) -> str:
     schema_metadata = None
 
     if field_metadata:
@@ -30,10 +35,15 @@ def _get_cache_key(schema_type: str | object, schema_value: Any, field_metadata:
         # For objects like Protobuf, use the object id
         schema_hash = f"{str(id(schema_value))}_{schema_metadata}"
 
-    return f"{schema_type}_{schema_hash}"
+    return f"{schema_type}_{schema_hash}_{schema_id_prefix_length}"
 
 
-def get_deserializer(schema_type: str | object, schema_value: Any, field_metadata: Any) -> DeserializerBase:
+def get_deserializer(
+    schema_type: str | object,
+    schema_value: Any,
+    field_metadata: Any,
+    schema_id_prefix_length: int = 0,
+) -> DeserializerBase:
     """
     Factory function to get the appropriate deserializer based on schema type.
 
@@ -81,7 +91,7 @@ def get_deserializer(schema_type: str | object, schema_value: Any, field_metadat
     """
 
     # Generate a cache key based on schema type and value
-    cache_key = _get_cache_key(schema_type, schema_value, field_metadata)
+    cache_key = _get_cache_key(schema_type, schema_value, field_metadata, schema_id_prefix_length)
 
     # Check if we already have this deserializer in cache
     if cache_key in _deserializer_cache:
@@ -93,7 +103,11 @@ def get_deserializer(schema_type: str | object, schema_value: Any, field_metadat
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka.deserializer.avro import AvroDeserializer
 
-        deserializer = AvroDeserializer(schema_str=schema_value, field_metadata=field_metadata)
+        deserializer = AvroDeserializer(
+            schema_str=schema_value,
+            field_metadata=field_metadata,
+            schema_id_prefix_length=schema_id_prefix_length,
+        )
     elif schema_type == "PROTOBUF":
         # Import here to avoid dependency if not used
         from aws_lambda_powertools.utilities.kafka.deserializer.protobuf import ProtobufDeserializer

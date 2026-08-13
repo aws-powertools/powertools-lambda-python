@@ -25,11 +25,17 @@ class AvroDeserializer(DeserializerBase):
     a provided Avro schema definition.
     """
 
-    def __init__(self, schema_str: str, field_metadata: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        schema_str: str,
+        field_metadata: dict[str, Any] | None = None,
+        schema_id_prefix_length: int = 0,
+    ):
         try:
             self.parsed_schema = parse_schema(schema_str)
             self.reader = DatumReader(self.parsed_schema)
             self.field_metatada = field_metadata
+            self.schema_id_prefix_length = schema_id_prefix_length
         except Exception as e:
             raise KafkaConsumerAvroSchemaParserError(
                 f"Invalid Avro schema. Please ensure the provided avro schema is valid: {type(e).__name__}: {str(e)}",
@@ -75,6 +81,8 @@ class AvroDeserializer(DeserializerBase):
 
         try:
             value = self._decode_input(data)
+            if self.schema_id_prefix_length:
+                value = value[self.schema_id_prefix_length :]
             bytes_reader = io.BytesIO(value)
             decoder = BinaryDecoder(bytes_reader)
             return self.reader.read(decoder)
