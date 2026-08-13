@@ -29,6 +29,7 @@ flowchart LR
 * Support for key and value deserialization
 * Support for custom output serializers (e.g., dataclasses, Pydantic models)
 * Support for ESM with and without Schema Registry integration
+* Support for offline Avro schemas with schema-registry wire-format prefixes
 * Proper error handling for deserialization issues
 
 ## Terminology
@@ -254,6 +255,49 @@ Each Kafka record contains important metadata that you can access alongside the 
 | `original_key` | Base64-encoded original message key | Debugging or custom deserialization |
 | `value_schema_metadata` | Metadata about the value schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
 | `key_schema_metadata` | Metadata about the key schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
+
+### Using an offline Avro schema with a schema-registry wire-format prefix
+
+When your Kafka producer serializes messages with a schema-registry-aware Avro serializer (e.g. Confluent's `KafkaAvroSerializer` or the AWS Glue Avro serializer), each payload carries a short wire-format prefix in front of the Avro body:
+
+* **Confluent**: `1-byte magic byte (0x00) + 4-byte big-endian schema ID` — 5 bytes total.
+* **AWS Glue**: `1-byte header version + 1-byte compression + 16-byte UUID schema-version ID` — 18 bytes total.
+
+When you enable the ESM Schema Registry integration, Lambda strips those bytes for you and populates `value_schema_metadata.schemaId`. But when you rely on an **offline Avro schema** (checked into your Lambda) and do **not** use the ESM Schema Registry integration, those prefix bytes reach your function and would otherwise corrupt Avro deserialization.
+
+Use `value_schema_id_prefix_length` (and/or `key_schema_id_prefix_length`) on `SchemaConfig` to tell Powertools how many leading bytes to skip after base64 decoding, before running the Avro decoder.
+
+???+ info "When do I need this?"
+    Only when you are supplying the Avro schema yourself **and** the producer prepended a schema-registry wire-format wrapper. If the ESM Schema Registry integration is on, leave these parameters at their default (`0`).
+
+=== "Offline Avro schema with a Confluent-style prefix"
+
+    ```python hl_lines="10"
+    from aws_lambda_powertools.utilities.kafka import SchemaConfig, kafka_consumer
+    from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    AVRO_SCHEMA = open("user.avsc").read()
+
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=AVRO_SCHEMA,
+        value_schema_id_prefix_length=5,  # 1-byte magic byte + 4-byte schema ID
+    )
+
+
+    @kafka_consumer(schema_config=schema_config)
+    def lambda_handler(event: ConsumerRecords, context: LambdaContext):
+        for record in event.records:
+            # record.value is the fully-deserialized Avro payload
+            # with the 5-byte wire-format prefix transparently stripped.
+            ...
+    ```
+
+The offset is applied symmetrically for keys — set `key_schema_id_prefix_length` when a schema-registry-aware serializer was used for record keys too.
+
+???+ warning "Scope"
+    `value_schema_id_prefix_length` / `key_schema_id_prefix_length` only affect the **Avro** deserializer. Protobuf already infers the wire-format from `value_schema_metadata.schemaId` when the ESM Schema Registry integration is on, and JSON-with-registry is not supported today.
 
 ### Custom output serializers
 
