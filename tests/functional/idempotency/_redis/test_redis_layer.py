@@ -198,6 +198,18 @@ def valid_record():
     )
 
 
+@pytest.fixture
+def in_progress_record_missing_expiry():
+    # Simulates a record created via idempotent_function without register_lambda_context()
+    # having been called: in_progress_expiry_timestamp was never set. This record represents
+    # a genuinely still-running invocation, NOT an orphan.
+    return DataRecord(
+        idempotency_key="test_orphan_key",
+        status=STATUS_CONSTANTS["INPROGRESS"],
+        in_progress_expiry_timestamp=None,
+    )
+
+
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
 def test_redis_connection_standalone():
     # when RedisCachePersistenceLayer is init with the following params
@@ -301,6 +313,28 @@ def test_redis_orphan_record_lock(orphan_record, valid_record):
         layer._get_record(valid_record.idempotency_key).in_progress_expiry_timestamp
         == orphan_record.in_progress_expiry_timestamp
     )
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_in_progress_record_missing_expiry_is_not_treated_as_orphan(in_progress_record_missing_expiry):
+    """Regression test: an INPROGRESS record whose in_progress_expiry_timestamp is None (e.g. because
+    idempotent_function was used without register_lambda_context()) must NOT be reclaimed as an orphan.
+    Doing so lets a second concurrent invocation execute the underlying function while the first is
+    still genuinely running, defeating idempotency (e.g. double-charging a customer).
+    """
+    layer = RedisCachePersistenceLayer(host="host")
+    # Given a genuinely still-running in-progress record with no expiry info
+    layer._put_in_progress_record(in_progress_record_missing_expiry)
+
+    # When a second, concurrent invocation tries to claim the same idempotency key
+    # Then it must be rejected as "already in progress", not treated as an orphan and overwritten
+    with pytest.raises(IdempotencyItemAlreadyExistsError):
+        layer._put_in_progress_record(in_progress_record_missing_expiry)
+
+    # And the original record must remain untouched
+    assert layer._get_record(in_progress_record_missing_expiry.idempotency_key).status == STATUS_CONSTANTS[
+        "INPROGRESS"
+    ]
 
 
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
