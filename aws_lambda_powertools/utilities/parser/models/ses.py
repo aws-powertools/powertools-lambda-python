@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import List, Literal
 
 from pydantic import BaseModel, Field
 from pydantic.types import PositiveInt
@@ -34,10 +34,10 @@ class SesMailHeaders(BaseModel):
 class SesMailCommonHeaders(BaseModel):
     header_from: List[str] = Field(..., alias="from")
     to: List[str]
-    cc: Optional[List[str]] = None
-    bcc: Optional[List[str]] = None
-    sender: Optional[List[str]] = None
-    reply_to: Optional[List[str]] = Field(None, alias="reply-to")
+    cc: List[str] | None = None
+    bcc: List[str] | None = None
+    sender: List[str] | None = None
+    reply_to: List[str] | None = Field(None, alias="reply-to")
     returnPath: str
     messageId: str
     date: str

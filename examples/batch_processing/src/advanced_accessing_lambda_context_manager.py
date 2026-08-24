@@ -1,5 +1,3 @@
-from typing import Optional
-
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -11,7 +9,7 @@ logger = Logger()
 
 
 @tracer.capture_method
-def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
+def record_handler(record: SQSRecord, lambda_context: LambdaContext | None = None):
     if lambda_context is not None:
         remaining_time = lambda_context.get_remaining_time_in_millis()
         logger.info(remaining_time)

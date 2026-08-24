@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, List
 
 import boto3
 from botocore.paginate import PageIterator
@@ -17,10 +17,10 @@ class TraceSubsegment(BaseModel):
     name: str
     start_time: float
     end_time: float
-    aws: Optional[dict] = None
-    subsegments: Optional[List["TraceSubsegment"]] = None
-    annotations: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Dict[str, Any]]] = None
+    aws: dict | None = None
+    subsegments: List["TraceSubsegment"] | None = None
+    annotations: Dict[str, Any] | None = None
+    metadata: Dict[str, Dict[str, Any]] | None = None
 
 
 class TraceDocument(BaseModel):
@@ -29,10 +29,10 @@ class TraceDocument(BaseModel):
     start_time: float
     end_time: float
     trace_id: str
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     aws: Dict
     origin: str
-    subsegments: Optional[List[TraceSubsegment]] = None
+    subsegments: List[TraceSubsegment] | None = None
 
 
 class TraceFetcher:
@@ -42,11 +42,11 @@ class TraceFetcher:
         self,
         filter_expression: str,
         start_date: datetime,
-        end_date: Optional[datetime] = None,
-        xray_client: Optional[XRayClient] = None,
-        exclude_segment_name: Optional[List[str]] = None,
-        resource_name: Optional[List[str]] = None,
-        origin: Optional[List[str]] = None,
+        end_date: datetime | None = None,
+        xray_client: XRayClient | None = None,
+        exclude_segment_name: List[str] | None = None,
+        resource_name: List[str] | None = None,
+        origin: List[str] | None = None,
         minimum_traces: int = 1,
     ):
         """Fetch and expose traces from X-Ray based on parameters
@@ -67,15 +67,15 @@ class TraceFetcher:
             see: https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html
         start_date : datetime
             Start date range to filter traces
-        end_date : Optional[datetime], optional
+        end_date : datetime | None, optional
             End date range to filter traces, by default 5 minutes past start_date
-        xray_client : Optional[XRayClient], optional
+        xray_client : XRayClient | None, optional
             AWS X-Ray SDK Client, by default boto3.client('xray')
-        exclude_segment_name : Optional[List[str]], optional
+        exclude_segment_name : List[str] | None, optional
             Name of segments to exclude, by default ["Initialization", "Invocation", "Overhead"]
-        resource_name : Optional[List[str]], optional
+        resource_name : List[str] | None, optional
             Name of resource to filter traces (e.g., function name), by default None
-        origin : Optional[List[str]], optional
+        origin : List[str] | None, optional
             Trace origin name to filter traces, by default ["AWS::Lambda::Function"]
         minimum_traces : int
             Minimum number of traces to be retrieved before exhausting retry attempts
@@ -106,7 +106,7 @@ class TraceFetcher:
         self.trace_documents = self._get_trace_documents(trace_ids)
         self.subsegments = self._get_subsegments()
 
-    def get_annotation(self, key: str, value: Optional[any] = None) -> List:
+    def get_annotation(self, key: str, value: any | None = None) -> List:
         return [
             annotation
             for annotation in self.annotations
@@ -223,11 +223,11 @@ class TraceFetcher:
 def get_traces(
     filter_expression: str,
     start_date: datetime,
-    end_date: Optional[datetime] = None,
-    xray_client: Optional[XRayClient] = None,
-    exclude_segment_name: Optional[List[str]] = None,
-    resource_name: Optional[List[str]] = None,
-    origin: Optional[List[str]] = None,
+    end_date: datetime | None = None,
+    xray_client: XRayClient | None = None,
+    exclude_segment_name: List[str] | None = None,
+    resource_name: List[str] | None = None,
+    origin: List[str] | None = None,
     minimum_traces: int = 1,
 ) -> TraceFetcher:
     """Fetch traces from AWS X-Ray
@@ -239,15 +239,15 @@ def get_traces(
         see: https://docs.aws.amazon.com/xray/latest/devguide/xray-console-filters.html
     start_date : datetime
         Start date range to filter traces
-    end_date : Optional[datetime], optional
+    end_date : datetime | None, optional
         End date range to filter traces, by default 5 minutes past start_date
-    xray_client : Optional[XRayClient], optional
+    xray_client : XRayClient | None, optional
         AWS X-Ray SDK Client, by default boto3.client('xray')
-    exclude_segment_name : Optional[List[str]], optional
+    exclude_segment_name : List[str] | None, optional
         Name of segments to exclude, by default ["Initialization", "Invocation", "Overhead"]
-    resource_name : Optional[List[str]], optional
+    resource_name : List[str] | None, optional
         Name of resource to filter traces (e.g., function name), by default None
-    origin : Optional[List[str]], optional
+    origin : List[str] | None, optional
         Trace origin name to filter traces, by default ["AWS::Lambda::Function"]
     minimum_traces : int
         Minimum number of traces to be retrieved before exhausting retry attempts

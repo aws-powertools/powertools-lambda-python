@@ -2,7 +2,7 @@ import copy
 import dataclasses
 import datetime
 import warnings
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, Mock
 
 import jmespath
@@ -2086,7 +2086,7 @@ def test_idempotent_function_serialization_dataclass_with_optional_return(output
         config=config,
         output_serializer=output_serializer,
     )
-    def collect_payment(payment: PaymentInput) -> Optional[PaymentOutput]:
+    def collect_payment(payment: PaymentInput) -> PaymentOutput | None:
         return PaymentOutput(**dataclasses.asdict(payment))
 
     # WHEN

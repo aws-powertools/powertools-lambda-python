@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Union
 
 import boto3
 from mypy_boto3_logs.client import CloudWatchLogsClient
@@ -14,12 +14,12 @@ class Log(BaseModel, extra="allow"):
     message: Union[dict, str]
     timestamp: str
     service: str
-    cold_start: Optional[bool] = None
-    function_name: Optional[str] = None
-    function_memory_size: Optional[str] = None
-    function_arn: Optional[str] = None
-    function_request_id: Optional[str] = None
-    xray_trace_id: Optional[str] = None
+    cold_start: bool | None = None
+    function_name: str | None = None
+    function_memory_size: str | None = None
+    function_arn: str | None = None
+    function_request_id: str | None = None
+    xray_trace_id: str | None = None
 
 
 class LogFetcher:
@@ -27,8 +27,8 @@ class LogFetcher:
         self,
         function_name: str,
         start_time: datetime,
-        log_client: Optional[CloudWatchLogsClient] = None,
-        filter_expression: Optional[str] = None,
+        log_client: CloudWatchLogsClient | None = None,
+        filter_expression: str | None = None,
         minimum_log_entries: int = 1,
     ):
         """Fetch and expose Powertools for AWS Lambda (Python) Logger logs from CloudWatch Logs
@@ -39,9 +39,9 @@ class LogFetcher:
             Name of Lambda function to fetch logs for
         start_time : datetime
             Start date range to filter traces
-        log_client : Optional[CloudWatchLogsClient], optional
+        log_client : CloudWatchLogsClient | None, optional
             Amazon CloudWatch Logs Client, by default boto3.client('logs)
-        filter_expression : Optional[str], optional
+        filter_expression : str | None, optional
             CloudWatch Logs Filter Pattern expression, by default "message"
         minimum_log_entries: int
             Minimum number of log entries to be retrieved before exhausting retry attempts
@@ -54,14 +54,14 @@ class LogFetcher:
         self.minimum_log_entries = minimum_log_entries
         self.logs: List[Log] = self._get_logs()
 
-    def get_log(self, key: str, value: Optional[any] = None) -> List[Log]:
+    def get_log(self, key: str, value: any | None = None) -> List[Log]:
         """Get logs based on key or key and value
 
         Parameters
         ----------
         key : str
             Log key name
-        value : Optional[any], optional
+        value : any | None, optional
             Log value, by default None
 
         Returns
@@ -132,8 +132,8 @@ def get_logs(
     function_name: str,
     start_time: datetime,
     minimum_log_entries: int = 1,
-    filter_expression: Optional[str] = None,
-    log_client: Optional[CloudWatchLogsClient] = None,
+    filter_expression: str | None = None,
+    log_client: CloudWatchLogsClient | None = None,
 ) -> LogFetcher:
     """_summary_
 
@@ -145,9 +145,9 @@ def get_logs(
         Start date range to filter traces
     minimum_log_entries : int
         Minimum number of log entries to be retrieved before exhausting retry attempts
-    log_client : Optional[CloudWatchLogsClient], optional
+    log_client : CloudWatchLogsClient | None, optional
         Amazon CloudWatch Logs Client, by default boto3.client('logs)
-    filter_expression : Optional[str], optional
+    filter_expression : str | None, optional
         CloudWatch Logs Filter Pattern expression, by default "message"
 
     Returns
