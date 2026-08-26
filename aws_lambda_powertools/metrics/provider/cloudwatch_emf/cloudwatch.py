@@ -317,7 +317,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
             return
 
-        if name in self.dimension_set or name in self.default_dimensions:
+        if name in self.dimension_set and self.dimension_set[name] != value:
             warnings.warn(
                 f"Dimension '{name}' has already been added. The previous value will be overwritten.",
                 category=PowertoolsUserWarning,
