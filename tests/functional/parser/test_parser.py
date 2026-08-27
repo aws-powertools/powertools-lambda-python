@@ -308,3 +308,30 @@ def test_parser_with_model_type_model_and_envelope():
         assert parsed_event[0].version == "version"
 
     handler(event, LambdaContext())
+
+
+def test_parser_import_does_not_eagerly_load_envelopes():
+    """Importing parse from parser __init__ must not eagerly load all envelope modules.
+
+    Envelopes are only needed when envelope= is passed to parse()/event_parser().
+    Eager loading all 16 envelopes adds ~900ms to Lambda cold start for functions
+    that only use parse() without an envelope.
+    """
+    import sys
+
+    # Remove any previously cached parser modules to simulate a fresh import
+    parser_modules = [key for key in sys.modules if "aws_lambda_powertools.utilities.parser.envelopes" in key]
+    for mod in parser_modules:
+        del sys.modules[mod]
+
+    # Also remove the parser __init__ itself so __getattr__ is exercised
+    sys.modules.pop("aws_lambda_powertools.utilities.parser", None)
+
+    # Re-import — only parse is needed, envelopes should NOT be loaded
+    from aws_lambda_powertools.utilities.parser import parse  # noqa: F401
+
+    envelope_modules_loaded = [key for key in sys.modules if "aws_lambda_powertools.utilities.parser.envelopes" in key]
+    assert not envelope_modules_loaded, (
+        f"Envelope modules were eagerly loaded on parser import: {envelope_modules_loaded}. "
+        "This adds significant Lambda cold start latency for functions not using envelopes."
+    )
