@@ -100,7 +100,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
 
-        self.dimension_set.update(**self.default_dimensions)
+        for name, value in self.default_dimensions.items():
+            self.add_dimension(name, value)
 
     def add_metric(
         self,
@@ -306,7 +307,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                 f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}.",
             )
 
-        value = value if isinstance(value, str) else str(value)
+        value = str(value)
 
         if not name.strip() or not value.strip():
             warnings.warn(
@@ -317,7 +318,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
             return
 
-        if name in self.dimension_set or name in self.default_dimensions:
+        if name in self.dimension_set:
             warnings.warn(
                 f"Dimension '{name}' has already been added. The previous value will be overwritten.",
                 category=PowertoolsUserWarning,
@@ -415,12 +416,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         logger.debug(f"Adding metadata: {key}:{value}")
 
         # Cast key to str according to EMF spec
-        # Majority of keys are expected to be string already, so
-        # checking before casting improves performance in most cases
-        if isinstance(key, str):
-            self.metadata_set[key] = value
-        else:
-            self.metadata_set[str(key)] = value
+        # Majority of keys are expected to be string already
+        self.metadata_set[str(key)] = value
 
     def set_timestamp(self, timestamp: int | datetime.datetime):
         """
@@ -453,8 +450,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.dimension_set.clear()
         self.dimension_sets.clear()
         self.metadata_set.clear()
-        # Initialize dimension_set as in __init__
-        self.dimension_set.update(**self.default_dimensions)
+        for name, value in self.default_dimensions.items():
+            self.add_dimension(name, value)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """Manually flushes the metrics. This is normally not necessary,
