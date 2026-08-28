@@ -426,13 +426,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             # a valid in-progress record. This indicates that another process is currently handling the request, and
             # to maintain idempotency, we raise an error to prevent concurrent processing of the same request.
             #
-            # If the record is INPROGRESS but in_progress_expiry_timestamp was never set (e.g. the caller never
-            # invoked config.register_lambda_context(), so remaining_time_in_millis was None when the record was
-            # created), we cannot determine whether the in-progress invocation has actually timed out. Fail closed
-            # and treat it as still in progress, rather than reclaiming it as an "orphan" below -- otherwise a
-            # second concurrent invocation would wrongly conclude the first one has expired and execute the
-            # function a second time. This mirrors the DynamoDB persistence layer, which requires
-            # attribute_exists(#in_progress_expiry) before allowing an expired-in-progress reclaim.
+            # Without an in-progress expiry, we cannot safely distinguish an active invocation from a timed-out one.
+            # Fail closed until the record TTL expires, consistent with the DynamoDB persistence layer.
             if idempotency_record.status == STATUS_CONSTANTS["INPROGRESS"] and (
                 idempotency_record.in_progress_expiry_timestamp is None
                 or idempotency_record.in_progress_expiry_timestamp > int(now.timestamp() * 1000)
