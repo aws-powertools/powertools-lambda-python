@@ -45,7 +45,6 @@ lint.ignore = [
     "UP006",
     "UP007",
     "UP035",
-    "UP045",
 ]
 
 # Exclude files and directories
