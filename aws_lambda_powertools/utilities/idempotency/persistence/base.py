@@ -132,10 +132,7 @@ class BasePersistenceLayer(ABC):
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
         if isinstance(data, dict):
-            # Iterating a dict directly walks its keys, not its values, so a dict of
-            # {"user": None, "order": None} (e.g. from a JMESPath multi-select expression
-            # over fields that are all absent from the event) would otherwise be treated
-            # as present just because its keys are non-None strings.
+            # JMESPath multi-select dicts retain their keys when all selected values are missing.
             return all(x is None for x in data.values())
         elif isinstance(data, (tuple, list)):
             return all(x is None for x in data)
