@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Tuple
 
 import pytest
 from pydantic import BaseModel, Field
@@ -34,7 +34,7 @@ def test_openapi_pydantic_query_params():
     class QueryParams(BaseModel):
         limit: int = Field(default=10, ge=1, le=100, description="Number of items to return")
         offset: int = Field(default=0, ge=0, description="Number of items to skip")
-        search: Optional[str] = Field(default=None, description="Search term")
+        search: str | None = Field(default=None, description="Search term")
 
     @app.get("/search")
     def search_handler(params: Annotated[QueryParams, Query()]):
@@ -82,7 +82,7 @@ def test_openapi_pydantic_header_params():
     class HeaderParams(BaseModel):
         authorization: str = Field(description="Authorization token")
         user_agent: str = Field(default="PowerTools/1.0", description="User agent")
-        language: Optional[str] = Field(default=None, alias="accept-language", description="Language preference")
+        language: str | None = Field(default=None, alias="accept-language", description="Language preference")
 
     @app.get("/protected")
     def protected_handler(headers: Annotated[HeaderParams, Header()]):
@@ -941,7 +941,7 @@ def test_openapi_form_parameter_edge_cases():
     @app.post("/form-edge-cases")
     def form_edge_cases(
         required_field: Annotated[str, Form(description="Required field")],
-        optional_field: Annotated[Optional[str], Form(description="Optional field")] = None,
+        optional_field: Annotated[str | None, Form(description="Optional field")] = None,
         field_with_default: Annotated[str, Form(description="Field with default")] = "default_value",
     ):
         return {"required": required_field, "optional": optional_field, "default": field_with_default}
@@ -1034,7 +1034,7 @@ def test_openapi_pydantic_required_vs_optional():
     class QueryParams(BaseModel):
         required_field: str = Field(description="Required field")
         optional_with_default: str = Field(default="default", description="Optional with default")
-        optional_nullable: Optional[str] = Field(default=None, description="Optional nullable")
+        optional_nullable: str | None = Field(default=None, description="Optional nullable")
 
     @app.get("/test")
     def test_handler(params: Annotated[QueryParams, Query()]):

@@ -2,7 +2,7 @@ import functools
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import boto3
 import requests
@@ -18,8 +18,8 @@ GetLambdaResponse = Tuple[InvocationResponseTypeDef, datetime]
 
 class GetLambdaResponseOptions(BaseModel):
     lambda_arn: str
-    payload: Optional[str] = None
-    client: Optional[LambdaClient] = None
+    payload: str | None = None
+    client: LambdaClient | None = None
     raise_on_error: bool = True
 
     model_config = ConfigDict(
@@ -29,8 +29,8 @@ class GetLambdaResponseOptions(BaseModel):
 
 def get_lambda_response(
     lambda_arn: str,
-    payload: Optional[str] = None,
-    client: Optional[LambdaClient] = None,
+    payload: str | None = None,
+    client: LambdaClient | None = None,
     raise_on_error: bool = True,
 ) -> GetLambdaResponse:
     """Invoke function synchronously
@@ -39,9 +39,9 @@ def get_lambda_response(
     ----------
     lambda_arn : str
         Lambda function ARN to invoke
-    payload : Optional[str], optional
+    payload : str | None, optional
         JSON payload for Lambda invocation, by default None
-    client : Optional[LambdaClient], optional
+    client : LambdaClient | None, optional
         Boto3 Lambda SDK client, by default None
     raise_on_error : bool, optional
         Whether to raise exception upon invocation error, by default True
