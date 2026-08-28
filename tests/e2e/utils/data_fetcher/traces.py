@@ -106,7 +106,7 @@ class TraceFetcher:
         self.trace_documents = self._get_trace_documents(trace_ids)
         self.subsegments = self._get_subsegments()
 
-    def get_annotation(self, key: str, value: any | None = None) -> List:
+    def get_annotation(self, key: str, value: Any | None = None) -> List:
         return [
             annotation
             for annotation in self.annotations

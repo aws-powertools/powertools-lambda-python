@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List, Union
+from typing import Any, List, Union
 
 import boto3
 from mypy_boto3_logs.client import CloudWatchLogsClient
@@ -54,14 +54,14 @@ class LogFetcher:
         self.minimum_log_entries = minimum_log_entries
         self.logs: List[Log] = self._get_logs()
 
-    def get_log(self, key: str, value: any | None = None) -> List[Log]:
+    def get_log(self, key: str, value: Any | None = None) -> List[Log]:
         """Get logs based on key or key and value
 
         Parameters
         ----------
         key : str
             Log key name
-        value : any | None, optional
+        value : Any | None, optional
             Log value, by default None
 
         Returns
