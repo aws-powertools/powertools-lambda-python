@@ -1193,6 +1193,31 @@ def test_log_metrics_with_default_dimensions_no_warning_across_invocations(names
     assert not [warning for warning in w if "has already been added" in str(warning.message)]
 
 
+def test_provider_keeps_provided_default_dimensions_dict(namespace):
+    # GIVEN a provider constructed with an empty default dimensions dict e.g., the one Metrics shares
+    shared_default_dimensions: dict = {}
+    my_provider = AmazonCloudWatchEMFProvider(namespace=namespace, default_dimensions=shared_default_dimensions)
+
+    # WHEN default dimensions are set through the provider
+    my_provider.set_default_dimensions(environment="test")
+
+    # THEN the provided dict remains in use and receives the update
+    assert my_provider.default_dimensions is shared_default_dimensions
+    assert shared_default_dimensions == {"environment": "test"}
+
+
+def test_metrics_shares_default_dimensions_with_provider(namespace):
+    # GIVEN a Metrics instance with the default provider
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN default dimensions are set
+    my_metrics.set_default_dimensions(environment="test")
+
+    # THEN Metrics and the provider hold the same dict, both with the update
+    assert my_metrics.default_dimensions is my_metrics.provider.default_dimensions
+    assert my_metrics.default_dimensions == {"environment": "test"}
+
+
 def test_add_dimension_no_warning_when_value_unchanged(namespace):
     # GIVEN a Metrics instance with a dimension added
     my_metrics = Metrics(namespace=namespace)
