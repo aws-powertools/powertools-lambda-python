@@ -1046,6 +1046,10 @@ def test_is_missing_idempotency_key():
     assert BasePersistenceLayer.is_missing_idempotency_key((None, None))
     # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
+    # GIVEN a dict with all-None values THEN is_missing_idempotency_key is True
+    assert BasePersistenceLayer.is_missing_idempotency_key({"user": None, "order": None})
+    # GIVEN a dict with a non-None value THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key({"user": "abc"}) is False
 
     # GIVEN True THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(True) is False
@@ -1112,6 +1116,19 @@ def test_raise_on_no_idempotency_key(
 
     # THEN raise IdempotencyKeyError error
     assert "No data found to create a hashed idempotency_key" in str(excinfo.value)
+
+
+def test_raise_on_no_idempotency_key_for_dict_jmespath(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a dict multi-select expression whose values are missing
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath="{user: headers.user_id, order: body.order_id}",
+        raise_on_no_idempotency_key=True,
+    )
+    persistence_store.configure(idempotency_config)
+
+    # WHEN extracting the idempotency key THEN raise IdempotencyKeyError
+    with pytest.raises(IdempotencyKeyError, match="No data found to create a hashed idempotency_key"):
+        persistence_store._get_hashed_idempotency_key({"headers": {}, "body": {}})
 
 
 @pytest.mark.parametrize(

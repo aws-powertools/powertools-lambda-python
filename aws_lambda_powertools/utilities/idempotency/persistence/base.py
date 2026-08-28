@@ -131,7 +131,10 @@ class BasePersistenceLayer(ABC):
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
-        if isinstance(data, (tuple, list, dict)):
+        if isinstance(data, dict):
+            # JMESPath multi-select dicts retain their keys when all selected values are missing.
+            return all(x is None for x in data.values())
+        elif isinstance(data, (tuple, list)):
             return all(x is None for x in data)
         elif isinstance(data, (int, float, bool)):
             return False
