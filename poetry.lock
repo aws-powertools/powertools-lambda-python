@@ -4975,42 +4975,42 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "valkey-glide"
-version = "2.5.0"
+version = "2.5.1"
 description = "Valkey GLIDE Async client. Supports Valkey and Redis OSS."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"valkey\""
 files = [
-    {file = "valkey_glide-2.5.0-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:10bd8e942f7bd462cca4e8578f67c4e32d246cf42a736da89c5b6e55c1198e27"},
-    {file = "valkey_glide-2.5.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:d207e8d3ebaa7f434a73b4f29b46296c44d4277c93c6e0ce2db0c0a4037f4715"},
-    {file = "valkey_glide-2.5.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e8a04a8f00ccbaea1d43c933dacfaefc0779608e0f306053b7bc2c9a6ec71a22"},
-    {file = "valkey_glide-2.5.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2ee93ffd52845e5620774a65f43d751c9076505c9e29ea51263fcbc512893af1"},
-    {file = "valkey_glide-2.5.0-cp311-cp311-macosx_10_7_x86_64.whl", hash = "sha256:df59c58ac08d66c4e730e7bab9f7e37c9cf30ca0e5b3ffa80f7e68abb0bfcc7b"},
-    {file = "valkey_glide-2.5.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:40d67ea9bef44065809432e2a34193ada5a2a64b959f1f7b7572c5a055bdcb2d"},
-    {file = "valkey_glide-2.5.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1c4231e4290e06405729fd2b0c94febd6db861fe1a88e205627353d70e799473"},
-    {file = "valkey_glide-2.5.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:284439b63dae97bc5dfa5266e39e9ba0868db9235932778599daa90b56fba2b2"},
-    {file = "valkey_glide-2.5.0-cp312-cp312-macosx_10_7_x86_64.whl", hash = "sha256:95bc800473d5795e3db5eb9f64892cc0c4b79a4580320d51c90799f05ca815b9"},
-    {file = "valkey_glide-2.5.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ea98b2b44bbfdfdc4fa6149b16136f67c59dd46e51f4e45c29136307c3177a3a"},
-    {file = "valkey_glide-2.5.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f9db2235a3190ec0b5bf3997c518a6c642f5e44c3a3c1ed70817ce5fc48815e6"},
-    {file = "valkey_glide-2.5.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7893d63a3424ea43f9e2ab7ce2e31d628dea765f0ada09ab1b50b426f55d3863"},
-    {file = "valkey_glide-2.5.0-cp313-cp313-macosx_10_7_x86_64.whl", hash = "sha256:cc6146d78545a85da2757ba0ac9d636b90fabdb45cc1a864f1c808381de942c5"},
-    {file = "valkey_glide-2.5.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:d8feb2a5ace38d1d88ba5c650b10273c5d862a55b0b5006d227aadd91e7c31e7"},
-    {file = "valkey_glide-2.5.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2bc80db5b2c191550ed716d28018520c7decc7853a2c2104c2d3654da3cd920e"},
-    {file = "valkey_glide-2.5.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:afecb53f774e7e376a757cda124bc08734b072cfdfcf703111b26afab5c24d2d"},
-    {file = "valkey_glide-2.5.0-cp314-cp314-macosx_10_7_x86_64.whl", hash = "sha256:4a86f8451c5f8aa69f822782ba0ab64c77d8f6267844e2479b3267853dd076a5"},
-    {file = "valkey_glide-2.5.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:97b1d1bde85abf9783952e65b134368d0a575b5978b73c60fdde1d69d6bc6a69"},
-    {file = "valkey_glide-2.5.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e2d442a9aa0a2685023850950d76acaa689df1581f3028468c965e71b9009a83"},
-    {file = "valkey_glide-2.5.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c90d9bb9c49059f0ddd8b50b1e84e924c7a8bd261be82376ab09cefbbf2b233"},
-    {file = "valkey_glide-2.5.0-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:eca2618c59301ffd093108714ef09e69d67b4f8745ad65b7fd5514d378d3b6be"},
-    {file = "valkey_glide-2.5.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:19ccc9654f3e2da628fc7c6c15377a8f54046c73ab064530823649108a72fdef"},
-    {file = "valkey_glide-2.5.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5dc0a0fe39b1cadf81b15b91051f6101913bdb4b78d986d20a4dace152921f3c"},
-    {file = "valkey_glide-2.5.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:60315782ada98d4d49ae842535d5045b6e2d40366c05be3d49c9c4563f9012cf"},
-    {file = "valkey_glide-2.5.0-pp311-pypy311_pp73-macosx_10_7_x86_64.whl", hash = "sha256:1bc0913efd997ed94136aac04d89fa73bb40525292a0182493c8c47bf24839b9"},
-    {file = "valkey_glide-2.5.0-pp311-pypy311_pp73-macosx_11_0_arm64.whl", hash = "sha256:7d6c8127a6661d866c7fabb1830e6d8943536921e9f80033c6f095fdcec0ba28"},
-    {file = "valkey_glide-2.5.0-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:19a54a25fefa9e5839d0237625bf23e5f84df6a50eadac06181a9a99fb02e6c2"},
-    {file = "valkey_glide-2.5.0-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:47663a0432097746c3fc13f2e890280c003bfff7924f48f4f65c416750f4f368"},
-    {file = "valkey_glide-2.5.0.tar.gz", hash = "sha256:21a9c037107af5ba3cdb27ed126abc02c75f9690dd6e82272f2a91042f4b8a2e"},
+    {file = "valkey_glide-2.5.1-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:d66f47bbc5cea7155b0b3ca002043bfd950c09a9ac08e10923a6bcb0a3aa0a1c"},
+    {file = "valkey_glide-2.5.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:47a666862faa47766d4c4814203c3b9f9a8cb466200fd5f71e330eef6ed0d8f1"},
+    {file = "valkey_glide-2.5.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4cecd82dab35f30d96785b1405ebe3a6931dd858c8f26a0b7a12b46609e75212"},
+    {file = "valkey_glide-2.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:44435ed9fdb6322a4b167c9f56fdc0145a1fab4736dd2659165bbb5358d3a68f"},
+    {file = "valkey_glide-2.5.1-cp311-cp311-macosx_10_7_x86_64.whl", hash = "sha256:d9bbf26f9ea2b72ef0b8541dfefa479a82a69bdec77fce917192a262893edfda"},
+    {file = "valkey_glide-2.5.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:94256d3335f4c31f19ad1ff02447d9eecd94b8c9e8d51c7b77811277c957e807"},
+    {file = "valkey_glide-2.5.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d46a9903acb1204deefad88162ac77404f052c7d51ab9d5851d2335ed2fda1e8"},
+    {file = "valkey_glide-2.5.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0e5c17169d07564f0cc23b78c4904c8e03063c8750d8ccf413d229ce9a3092d5"},
+    {file = "valkey_glide-2.5.1-cp312-cp312-macosx_10_7_x86_64.whl", hash = "sha256:75da4cb54fe6a0e03a78681237545aa0638dd5a6dd0ff51af6ff4cacf9f99443"},
+    {file = "valkey_glide-2.5.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:787010bbce1b8f270ae5d74ca8af15bca3bbc625e1a5467fb01025864bc4e792"},
+    {file = "valkey_glide-2.5.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:de2e202a8376c6b67735bd589ce0e46683f8a782fcb1745b0b44cce768e13856"},
+    {file = "valkey_glide-2.5.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9ab1c7ce52b098fcb0ee6223136a024fc90a8ae1c600db298c30c044d1b47ee2"},
+    {file = "valkey_glide-2.5.1-cp313-cp313-macosx_10_7_x86_64.whl", hash = "sha256:55c87ecc3146480adaddf42d659b688089ca417596208ca9df5c2249c8f9e6fe"},
+    {file = "valkey_glide-2.5.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:ae6b0cedd3d2aafdc53c460bdfe4d0319d10301fd2128a56d41486e49de88dfe"},
+    {file = "valkey_glide-2.5.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e8a3c5298899ea18fc7e40438643e2f8ee15955fe9bba66ce5daf3dfd29462f2"},
+    {file = "valkey_glide-2.5.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bb5e0094d576ce99a2453c9fdd923f70732db6f4b59a722c27c420343d96b75d"},
+    {file = "valkey_glide-2.5.1-cp314-cp314-macosx_10_7_x86_64.whl", hash = "sha256:1bc5d0e0241aa5b78c398b981fe19801e36c09572c1dac69286a9a3c817e0b35"},
+    {file = "valkey_glide-2.5.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:ec658ed7770c05f3ea431ca1301e47d0a24cf27c4c23ca30eb030f7e0ac7488d"},
+    {file = "valkey_glide-2.5.1-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e2cdb26952b650e25af4a14360f65364b8015e49e2967779ba850c9e62c1f237"},
+    {file = "valkey_glide-2.5.1-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:696635581f0692f640b94021b4cfbc2ec01108f6ae02f25dfea3cfdaa98331de"},
+    {file = "valkey_glide-2.5.1-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:f5e733adc4718b93c5b228de7e543a6641e231d5839202ce7b22487e079059e7"},
+    {file = "valkey_glide-2.5.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:3ffd8f0fdb6ef982161a2350ad1562e5e345bea263b81304c7282f3385deac20"},
+    {file = "valkey_glide-2.5.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d6b81727c4d7a3b49f10172787296c87d6ef8d729fb958de358b278d5a6c563f"},
+    {file = "valkey_glide-2.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:12fff287f02caa9302d7c64d0520c3cee86e0f952ec55a537a4f9378889265d7"},
+    {file = "valkey_glide-2.5.1-pp311-pypy311_pp73-macosx_10_7_x86_64.whl", hash = "sha256:f656ef6e722d6ab4a28bc66e36ef616dff28622bc712c41f4172ac1e7c4826d8"},
+    {file = "valkey_glide-2.5.1-pp311-pypy311_pp73-macosx_11_0_arm64.whl", hash = "sha256:65b2add9f19a2e48080130ee968af45dc14e8457b5db20262703a4604afc478b"},
+    {file = "valkey_glide-2.5.1-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0c9b725afe94f0515e296003942d6c96c5090a956f2217f6305dc87fa14dfa51"},
+    {file = "valkey_glide-2.5.1-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a131c08951b865f753f1bd42f7db19c6a96e7c4faf9dc78718f8909fc95eb8b4"},
+    {file = "valkey_glide-2.5.1.tar.gz", hash = "sha256:b2efb23c987a995ad6ce2a72616996638137dd2504ac262bdd6c045378394090"},
 ]
 
 [package.dependencies]
