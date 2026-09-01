@@ -1,0 +1,394 @@
+# Partition Layer Balancer
+# ---
+# This workflow copies a contiguous range of one Lambda layer from the commercial partition
+# into China or GovCloud while preserving layer version numbers.
+
+name: Layer Balancer (Partitions)
+run-name: Layer Balancer (${{ inputs.partition }}) - ${{ inputs.environment }} / ${{ inputs.python_version }} / ${{ inputs.start_version }}-${{ inputs.end_version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: choice
+        options:
+          - Gamma
+          - Prod
+        required: true
+      partition:
+        description: Partition to balance
+        type: choice
+        options:
+          - China
+          - GovCloud
+        required: true
+      python_version:
+        description: Python layer suffix without a period, for example python314
+        type: string
+        required: true
+      start_version:
+        description: First commercial layer version to copy
+        type: string
+        required: true
+      end_version:
+        description: Last commercial layer version to copy
+        type: string
+        required: true
+      architecture:
+        description: Layer architecture to balance
+        type: choice
+        options:
+          - both
+          - arm64
+          - x86_64
+        default: both
+        required: true
+      dry_run:
+        description: Validate source artifacts and target position without publishing
+        type: boolean
+        default: true
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: layer-balancer-${{ inputs.partition }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      regions: ${{ format('{0}{1}', steps.regions_china.outputs.regions, steps.regions_govcloud.outputs.regions) }}
+      partition: ${{ format('{0}{1}', steps.regions_china.outputs.partition, steps.regions_govcloud.outputs.partition) }}
+      audience: ${{ format('{0}{1}', steps.regions_china.outputs.audience, steps.regions_govcloud.outputs.audience) }}
+      layer: ${{ steps.inputs.outputs.layer }}
+      start_version: ${{ steps.inputs.outputs.start_version }}
+      end_version: ${{ steps.inputs.outputs.end_version }}
+      architectures: ${{ steps.inputs.outputs.architectures }}
+    steps:
+      - id: inputs
+        name: Validate inputs
+        env:
+          ARCHITECTURE: ${{ inputs.architecture }}
+          END_VERSION: ${{ inputs.end_version }}
+          PYTHON_VERSION: ${{ inputs.python_version }}
+          START_VERSION: ${{ inputs.start_version }}
+        run: |
+          if [[ ! "$PYTHON_VERSION" =~ ^python[0-9]+$ ]]; then
+            echo "python_version must match python followed by digits, for example python314"
+            exit 1
+          fi
+
+          if [[ ! "$START_VERSION" =~ ^[1-9][0-9]*$ ]] || [[ ! "$END_VERSION" =~ ^[1-9][0-9]*$ ]]; then
+            echo "start_version and end_version must be positive integers"
+            exit 1
+          fi
+
+          if (( START_VERSION > END_VERSION )); then
+            echo "start_version must not be greater than end_version"
+            exit 1
+          fi
+
+          if (( END_VERSION - START_VERSION >= 50 )); then
+            echo "A single balance run cannot contain more than 50 versions"
+            exit 1
+          fi
+
+          echo "layer=AWSLambdaPowertoolsPythonV3-${PYTHON_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "start_version=$START_VERSION" >> "$GITHUB_OUTPUT"
+          echo "end_version=$END_VERSION" >> "$GITHUB_OUTPUT"
+
+          case "$ARCHITECTURE" in
+            both) echo 'architectures=["arm64","x86_64"]' >> "$GITHUB_OUTPUT" ;;
+            arm64) echo 'architectures=["arm64"]' >> "$GITHUB_OUTPUT" ;;
+            x86_64) echo 'architectures=["x86_64"]' >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unsupported architecture: $ARCHITECTURE"; exit 1 ;;
+          esac
+      - id: regions_china
+        name: Partition (China)
+        if: ${{ inputs.partition == 'China' }}
+        run: |
+          echo 'regions=["cn-north-1"]' >> "$GITHUB_OUTPUT"
+          echo 'partition=aws-cn' >> "$GITHUB_OUTPUT"
+          echo 'audience=sts.amazonaws.com.cn' >> "$GITHUB_OUTPUT"
+      - id: regions_govcloud
+        name: Partition (GovCloud)
+        if: ${{ inputs.partition == 'GovCloud' }}
+        run: |
+          echo 'regions=["us-gov-east-1","us-gov-west-1"]' >> "$GITHUB_OUTPUT"
+          echo 'partition=aws-us-gov' >> "$GITHUB_OUTPUT"
+          echo 'audience=sts.amazonaws.com' >> "$GITHUB_OUTPUT"
+
+  download:
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: Prod (Readonly)
+    env:
+      AWS_MAX_ATTEMPTS: "10"
+      AWS_RETRY_MODE: standard
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: ${{ fromJson(needs.setup.outputs.architectures) }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          aws-region: us-east-1
+          mask-aws-account-id: true
+      - name: Download commercial layer versions
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+          END_VERSION: ${{ needs.setup.outputs.end_version }}
+          LAYER: ${{ needs.setup.outputs.layer }}
+          START_VERSION: ${{ needs.setup.outputs.start_version }}
+        run: |
+          mkdir -p source
+
+          for (( VERSION=START_VERSION; VERSION<=END_VERSION; VERSION++ )); do
+            NAME="${LAYER}-${ARCHITECTURE}"
+            METADATA="source/${VERSION}.json"
+            ZIP="source/${VERSION}.zip"
+
+            aws --region us-east-1 lambda get-layer-version-by-arn \
+              --arn "arn:aws:lambda:us-east-1:017000801446:layer:${NAME}:${VERSION}" > "$METADATA"
+
+            LOCATION=$(jq -r '.Content.Location' "$METADATA")
+            curl --fail --location --retry 3 --retry-delay 2 --output "$ZIP" "$LOCATION"
+
+            EXPECTED_SHA=$(jq -r '.Content.CodeSha256' "$METADATA")
+            ACTUAL_SHA=$(openssl dgst -sha256 -binary "$ZIP" | openssl enc -base64)
+            if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+              echo "SHA mismatch for ${NAME}:${VERSION}: expected ${EXPECTED_SHA}, received ${ACTUAL_SHA}"
+              exit 1
+            fi
+          done
+      - name: Store commercial layer versions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ needs.setup.outputs.layer }}-${{ matrix.architecture }}-${{ needs.setup.outputs.start_version }}-${{ needs.setup.outputs.end_version }}
+          path: source
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+          overwrite: true
+
+  balance:
+    needs:
+      - setup
+      - download
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.partition }} ${{ inputs.environment }}
+    env:
+      AWS_MAX_ATTEMPTS: "10"
+      AWS_RETRY_MODE: standard
+    strategy:
+      fail-fast: false
+      matrix:
+        region: ${{ fromJson(needs.setup.outputs.regions) }}
+        architecture: ${{ fromJson(needs.setup.outputs.architectures) }}
+    steps:
+      - name: Download commercial layer versions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.setup.outputs.layer }}-${{ matrix.architecture }}-${{ needs.setup.outputs.start_version }}-${{ needs.setup.outputs.end_version }}
+          path: source
+      - id: region
+        name: Normalize region
+        env:
+          REGION: ${{ matrix.region }}
+        run: |
+          NORMALIZED_REGION=${REGION^^}
+          echo "value=${NORMALIZED_REGION//-/_}" >> "$GITHUB_OUTPUT"
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets[format('IAM_ROLE_{0}', steps.region.outputs.value)] }}
+          aws-region: ${{ matrix.region }}
+          mask-aws-account-id: true
+          audience: ${{ needs.setup.outputs.audience }}
+      - name: Validate target account
+        env:
+          AWS_ACCOUNT: ${{ secrets[format('AWS_ACCOUNT_{0}', steps.region.outputs.value)] }}
+          PARTITION: ${{ needs.setup.outputs.partition }}
+          REGION: ${{ matrix.region }}
+        run: |
+          if [[ ! "$AWS_ACCOUNT" =~ ^[0-9]{12}$ ]]; then
+            echo "AWS account secret for ${REGION} is missing or invalid"
+            exit 1
+          fi
+
+          CALLER_ACCOUNT=$(aws --region "$REGION" sts get-caller-identity --query Account --output text)
+          CALLER_ARN=$(aws --region "$REGION" sts get-caller-identity --query Arn --output text)
+
+          if [[ "$CALLER_ACCOUNT" != "$AWS_ACCOUNT" ]] || [[ "$CALLER_ARN" != "arn:${PARTITION}:"* ]]; then
+            echo "Assumed role does not match the expected account and partition for ${REGION}"
+            exit 1
+          fi
+      - name: Balance layer versions
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+          AWS_ACCOUNT: ${{ secrets[format('AWS_ACCOUNT_{0}', steps.region.outputs.value)] }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          END_VERSION: ${{ needs.setup.outputs.end_version }}
+          LAYER: ${{ needs.setup.outputs.layer }}
+          PARTITION: ${{ needs.setup.outputs.partition }}
+          REGION: ${{ matrix.region }}
+          START_VERSION: ${{ needs.setup.outputs.start_version }}
+        run: |
+          NAME="${LAYER}-${ARCHITECTURE}"
+          mkdir -p scratch
+          mkdir -p target
+
+          has_public_permission() {
+            jq -e '
+              (.Policy | if type == "string" then fromjson else . end)
+              | any(.Statement[]?;
+                  .Sid == "PublicLayer"
+                  and .Effect == "Allow"
+                  and ((.Action | if type == "array" then . else [.] end) | index("lambda:GetLayerVersion") != null)
+                  and (((.Principal | if type == "object" then .AWS // "" else . end) | if type == "array" then . else [.] end) | index("*") != null)
+                )
+            ' "$1" > /dev/null
+          }
+
+          if ! aws --region "$REGION" lambda list-layer-versions \
+            --layer-name "$NAME" \
+            --output json > scratch/versions.json 2> scratch/list-error.txt; then
+            if grep -q ResourceNotFoundException scratch/list-error.txt; then
+              echo '{"LayerVersions":[]}' > scratch/versions.json
+            else
+              cat scratch/list-error.txt
+              exit 1
+            fi
+          fi
+
+          CURRENT_POSITION=$(jq -r '[.LayerVersions[]?.Version] | max // 0' scratch/versions.json)
+
+          for (( VERSION=START_VERSION; VERSION<=END_VERSION; VERSION++ )); do
+            METADATA="source/${VERSION}.json"
+            ZIP="source/${VERSION}.zip"
+            TARGET_METADATA="target/${VERSION}.json"
+            TARGET_ARN="arn:${PARTITION}:lambda:${REGION}:${AWS_ACCOUNT}:layer:${NAME}:${VERSION}"
+
+            EXPECTED_SHA=$(jq -r '.Content.CodeSha256' "$METADATA")
+            ACTUAL_SHA=$(openssl dgst -sha256 -binary "$ZIP" | openssl enc -base64)
+            if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+              echo "SHA mismatch for ${NAME}:${VERSION}: expected ${EXPECTED_SHA}, received ${ACTUAL_SHA}"
+              exit 1
+            fi
+
+            VERSION_EXISTS=false
+            if aws --region "$REGION" lambda get-layer-version-by-arn \
+              --arn "$TARGET_ARN" > "$TARGET_METADATA" 2> scratch/get-error.txt; then
+              VERSION_EXISTS=true
+              TARGET_SHA=$(jq -r '.Content.CodeSha256' "$TARGET_METADATA")
+              if [[ "$TARGET_SHA" != "$EXPECTED_SHA" ]]; then
+                echo "Existing ${NAME}:${VERSION} in ${REGION} has SHA ${TARGET_SHA}, expected ${EXPECTED_SHA}"
+                exit 1
+              fi
+            elif ! grep -q ResourceNotFoundException scratch/get-error.txt; then
+              cat scratch/get-error.txt
+              exit 1
+            fi
+
+            HAS_PUBLIC_PERMISSION=false
+            if aws --region "$REGION" lambda get-layer-version-policy \
+              --layer-name "$NAME" \
+              --version-number "$VERSION" > scratch/policy.json 2> scratch/policy-error.txt; then
+              if has_public_permission scratch/policy.json; then
+                HAS_PUBLIC_PERMISSION=true
+              fi
+            elif ! grep -q ResourceNotFoundException scratch/policy-error.txt; then
+              cat scratch/policy-error.txt
+              exit 1
+            fi
+
+            if [[ "$VERSION_EXISTS" == "true" ]]; then
+              echo "${NAME}:${VERSION} already exists in ${REGION} with the expected SHA"
+            else
+              EXPECTED_POSITION=$((VERSION - 1))
+              if (( CURRENT_POSITION != EXPECTED_POSITION )); then
+                echo "Cannot publish ${NAME}:${VERSION} in ${REGION}: latest version is ${CURRENT_POSITION}, expected ${EXPECTED_POSITION}"
+                exit 1
+              fi
+            fi
+
+            if [[ "$DRY_RUN" != "false" ]]; then
+              if [[ "$VERSION_EXISTS" == "false" ]]; then
+                echo "Would publish ${NAME}:${VERSION} to ${REGION}"
+                CURRENT_POSITION=$VERSION
+              elif [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
+                echo "Would add public permission to ${NAME}:${VERSION} in ${REGION}"
+              fi
+              continue
+            fi
+
+            if [[ "$VERSION_EXISTS" == "false" ]]; then
+              jq --arg layer_name "$NAME" \
+                '{LayerName: $layer_name, Description: .Description, CompatibleRuntimes: .CompatibleRuntimes, CompatibleArchitectures: .CompatibleArchitectures, LicenseInfo: .LicenseInfo} | with_entries(select(.value != null))' \
+                "$METADATA" > input.json
+
+              PUBLISHED_VERSION=$(aws --region "$REGION" lambda publish-layer-version \
+                --zip-file "fileb://${ZIP}" \
+                --cli-input-json file://input.json \
+                --query 'Version' \
+                --output text)
+
+              if (( PUBLISHED_VERSION != VERSION )); then
+                echo "Expected ${NAME} to publish as version ${VERSION}, received ${PUBLISHED_VERSION}"
+                exit 1
+              fi
+
+              CURRENT_POSITION=$PUBLISHED_VERSION
+            fi
+
+            if [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
+              if ! aws --region "$REGION" lambda add-layer-version-permission \
+                --layer-name "$NAME" \
+                --statement-id PublicLayer \
+                --action lambda:GetLayerVersion \
+                --principal '*' \
+                --version-number "$VERSION" 2> scratch/permission-error.txt; then
+                if ! grep -q ResourceConflictException scratch/permission-error.txt; then
+                  cat scratch/permission-error.txt
+                  exit 1
+                fi
+              fi
+            fi
+
+            aws --region "$REGION" lambda get-layer-version-by-arn \
+              --arn "$TARGET_ARN" > "$TARGET_METADATA"
+
+            TARGET_SHA=$(jq -r '.Content.CodeSha256' "$TARGET_METADATA")
+            if [[ "$TARGET_SHA" != "$EXPECTED_SHA" ]]; then
+              echo "Published ${NAME}:${VERSION} in ${REGION} has SHA ${TARGET_SHA}, expected ${EXPECTED_SHA}"
+              exit 1
+            fi
+
+            aws --region "$REGION" lambda get-layer-version-policy \
+              --layer-name "$NAME" \
+              --version-number "$VERSION" > scratch/policy.json
+            if ! has_public_permission scratch/policy.json; then
+              echo "${NAME}:${VERSION} in ${REGION} is missing the expected public permission"
+              exit 1
+            fi
+          done
+      - name: Store partition layer metadata
+        if: ${{ !inputs.dry_run && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ needs.setup.outputs.layer }}-${{ matrix.architecture }}-${{ matrix.region }}-${{ needs.setup.outputs.start_version }}-${{ needs.setup.outputs.end_version }}
+          path: target
+          retention-days: 1
+          if-no-files-found: warn
+          overwrite: true
