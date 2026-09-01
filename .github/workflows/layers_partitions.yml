@@ -159,7 +159,7 @@ jobs:
       - name: Create Layer
         id: create-layer
         run: |
-          cat '${{ matrix.layer }}-${{ matrix.arch }}.json' | jq '{"LayerName": "${{ matrix.layer }}-${{ matrix.arch }}", "Description": .Description, "CompatibleRuntimes": .CompatibleRuntimes, "CompatibleArchitectures": .CompatibleArchitectures, "LicenseInfo": .LicenseInfo}' > input.json
+          jq '{"LayerName": "${{ matrix.layer }}-${{ matrix.arch }}", "Description": .Description, "CompatibleRuntimes": .CompatibleRuntimes, "CompatibleArchitectures": .CompatibleArchitectures, "LicenseInfo": .LicenseInfo} | with_entries(select(.value != null))' '${{ matrix.layer }}-${{ matrix.arch }}.json' > input.json
 
           LAYER_VERSION=$(aws --region ${{ matrix.region}} lambda publish-layer-version \
             --zip-file 'fileb://./${{ matrix.layer }}-${{ matrix.arch }}.zip' \
