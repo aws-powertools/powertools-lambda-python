@@ -39,6 +39,10 @@ run-name: Layer Deployment (GovCloud) - ${{ inputs.environment }}
 permissions:
   contents: read
 
+concurrency:
+  group: layer-balancer-GovCloud-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   download:
     runs-on: ubuntu-latest
