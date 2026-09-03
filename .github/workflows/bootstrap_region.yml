@@ -55,7 +55,7 @@ jobs:
         uses: aws-powertools/actions/.github/actions/cached-node-modules@4bf64a4072489399fbf39b78f558eeeed6767189
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c
         with:
           aws-region: ${{ inputs.region }}
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
@@ -96,7 +96,7 @@ jobs:
     steps:
       - id: credentials
         name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.REGION_IAM_ROLE }}
