@@ -115,7 +115,7 @@ class FeatureFlags:
             return False
 
         for condition in conditions:
-            context_value = context.get(condition.get(schema.CONDITION_KEY, ""))
+            cond_key = condition.get(schema.CONDITION_KEY, "")
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
 
@@ -125,7 +125,17 @@ class FeatureFlags:
                 schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
                 schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
             ):
-                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME
+                context_value = cond_key  # e.g., CURRENT_TIME
+            elif cond_key not in context:
+                # A key absent from the context never satisfies a condition. Without this guard, `None`
+                # would be compared as a regular value and negative actions (NOT_EQUALS, NOT_IN, ...) would match.
+                self.logger.debug(
+                    f"rule did not match, context key not found, rule_name={rule_name}, "
+                    f"rule_value={rule_match_value}, name={feature_name}, key={cond_key}",
+                )
+                return False
+            else:
+                context_value = context[cond_key]
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
