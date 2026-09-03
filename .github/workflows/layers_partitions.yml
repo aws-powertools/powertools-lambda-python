@@ -189,6 +189,7 @@ jobs:
               )
           ' '${{ matrix.layer }}-${{ matrix.arch }}.policy.json' > /dev/null; then
             echo 'public=true' >> "$GITHUB_OUTPUT"
+            echo 'Commercial source layer is public'
           else
             RESULT=$?
             if (( RESULT > 1 )); then
@@ -196,6 +197,7 @@ jobs:
               exit 1
             fi
             echo 'public=false' >> "$GITHUB_OUTPUT"
+            echo 'Commercial source layer is private'
           fi
       - id: transform
         run: |
@@ -229,6 +231,7 @@ jobs:
         id: create-layer
         env:
           SOURCE_IS_PUBLIC: ${{ steps.source_policy.outputs.public }}
+          VERSION: ${{ inputs.version }}
         run: |
           jq '{"LayerName": "${{ matrix.layer }}-${{ matrix.arch }}", "Description": .Description, "CompatibleRuntimes": .CompatibleRuntimes, "CompatibleArchitectures": .CompatibleArchitectures, "LicenseInfo": .LicenseInfo} | with_entries(select(.value != null))' '${{ matrix.layer }}-${{ matrix.arch }}.json' > input.json
 
@@ -237,6 +240,11 @@ jobs:
             --cli-input-json file://./input.json \
             --query 'Version' \
             --output text)
+
+          if (( LAYER_VERSION != VERSION )); then
+            echo "Expected to publish as version ${VERSION}, received ${LAYER_VERSION}"
+            exit 1
+          fi
 
           echo "LAYER_VERSION=$LAYER_VERSION" >> "$GITHUB_OUTPUT"
 
