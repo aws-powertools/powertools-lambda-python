@@ -9,5 +9,5 @@ CONDITION_VALUE = "value"
 CONDITION_ACTION = "action"
 FEATURE_DEFAULT_VAL_TYPE_KEY = "boolean_type"
 TIME_RANGE_FORMAT = "%H:%M"  # hour:min 24 hours clock
-TIME_RANGE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour clock
+TIME_RANGE_PATTERN = re.compile(r"^(?:2[0-3]|[01]\d):[0-5]\d$")  # 24 hour clock, exactly HH:MM
 HOUR_MIN_SEPARATOR = ":"

@@ -175,6 +175,50 @@ def test_time_based_utc_in_between_time_range_between_days_rule_no_match(mocker)
     )
 
 
+def test_time_based_utc_in_between_time_range_same_hour_between_days_rule_match(mocker):
+    # GIVEN a range whose END is earlier than START but within the same hour (23:30 -> 23:00)
+    # WHEN the current time is 10:00, which lies inside the range after crossing midnight
+    # THEN the rule matches
+    assert evaluate_mocked_schema(
+        mocker=mocker,
+        rules={
+            "lambda time is between UTC 23:30-23:00": {
+                RULE_MATCH_VALUE: True,
+                CONDITIONS_KEY: [
+                    {
+                        CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
+                        CONDITION_KEY: TimeKeys.CURRENT_TIME.value,
+                        CONDITION_VALUE: {TimeValues.START.value: "23:30", TimeValues.END.value: "23:00"},
+                    },
+                ],
+            },
+        },
+        mocked_time=(2022, 2, 15, 10, 0, 0, datetime.timezone.utc),  # rule match 10:00 am
+    )
+
+
+def test_time_based_utc_in_between_time_range_same_hour_between_days_rule_no_match(mocker):
+    # GIVEN a range whose END is earlier than START but within the same hour (23:30 -> 23:00)
+    # WHEN the current time is 23:15, the only 30-minute gap not covered by the range
+    # THEN the rule does not match
+    assert not evaluate_mocked_schema(
+        mocker=mocker,
+        rules={
+            "lambda time is between UTC 23:30-23:00": {
+                RULE_MATCH_VALUE: True,
+                CONDITIONS_KEY: [
+                    {
+                        CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
+                        CONDITION_KEY: TimeKeys.CURRENT_TIME.value,
+                        CONDITION_VALUE: {TimeValues.START.value: "23:30", TimeValues.END.value: "23:00"},
+                    },
+                ],
+            },
+        },
+        mocked_time=(2022, 2, 15, 23, 15, 0, datetime.timezone.utc),  # rule no match 23:15
+    )
+
+
 def test_time_based_between_time_range_rule_timezone_match(mocker):
     timezone_name = "Europe/Copenhagen"
 
