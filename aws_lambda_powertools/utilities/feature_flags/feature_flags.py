@@ -82,10 +82,26 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
         self._exception_handlers: dict[Exception, Callable] = {}
 
-    def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
+    def _match_by_action(
+        self,
+        action: str,
+        condition_value: Any,
+        context_value: Any,
+        context_key_present: bool = True,
+    ) -> bool:
         try:
             func = RULE_ACTION_MAPPING.get(action, lambda a, b: False)
-            return func(context_value, condition_value)
+            matched = func(context_value, condition_value)
+
+            if not context_key_present:
+                # A key absent from the context never satisfies a condition. Without this, `None` would be
+                # compared as a regular value and negative actions (NOT_EQUALS, NOT_IN, ...) would match.
+                # We still run the comparator first so that any exception it raises (e.g. ANY_IN_VALUE on a
+                # non-list) reaches registered validation exception handlers exactly as it did before.
+                self.logger.debug(f"context key not present, condition does not match: action={action}")
+                return False
+
+            return matched
         except Exception as exc:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
 
@@ -118,6 +134,7 @@ class FeatureFlags:
             cond_key = condition.get(schema.CONDITION_KEY, "")
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
+            context_key_present = True
 
             # time based rule actions have no user context. the context is the condition key
             if cond_action in (
@@ -126,18 +143,16 @@ class FeatureFlags:
                 schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
             ):
                 context_value = cond_key  # e.g., CURRENT_TIME
-            elif cond_key not in context:
-                # A key absent from the context never satisfies a condition. Without this guard, `None`
-                # would be compared as a regular value and negative actions (NOT_EQUALS, NOT_IN, ...) would match.
-                self.logger.debug(
-                    f"rule did not match, context key not found, rule_name={rule_name}, "
-                    f"rule_value={rule_match_value}, name={feature_name}, key={cond_key}",
-                )
-                return False
             else:
-                context_value = context[cond_key]
+                context_key_present = cond_key in context
+                context_value = context.get(cond_key)
 
-            if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
+            if not self._match_by_action(
+                action=cond_action,
+                condition_value=cond_value,
+                context_value=context_value,
+                context_key_present=context_key_present,
+            ):
                 self.logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
                     f"name={feature_name}, context_value={str(context_value)} ",
