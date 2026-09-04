@@ -160,6 +160,8 @@ jobs:
           - arm64
           - x86_64
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Download Zip
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -179,23 +181,11 @@ jobs:
       - id: source_policy
         name: Source Layer Visibility
         run: |
-          if jq -e '
-            (.Policy | if type == "string" then fromjson else . end)
-            | any(.Statement[]?;
-                .Effect == "Allow"
-                and ((.Action // [] | if type == "array" then . else [.] end) | any(. == "*" or . == "lambda:*" or . == "lambda:GetLayerVersion"))
-                and (((.Principal | if type == "object" then .AWS // "" else . end) | if type == "array" then . else [.] end) | index("*") != null)
-                and ((.Condition // {}) | length == 0)
-              )
-          ' '${{ matrix.layer }}-${{ matrix.arch }}.policy.json' > /dev/null; then
+          VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh '${{ matrix.layer }}-${{ matrix.arch }}.policy.json')
+          if [[ "$VISIBILITY" == "public" ]]; then
             echo 'public=true' >> "$GITHUB_OUTPUT"
             echo 'Commercial source layer is public'
           else
-            RESULT=$?
-            if (( RESULT > 1 )); then
-              echo "Unable to evaluate source layer policy (jq exit ${RESULT})"
-              exit 1
-            fi
             echo 'public=false' >> "$GITHUB_OUTPUT"
             echo 'Commercial source layer is private'
           fi
@@ -220,8 +210,8 @@ jobs:
             exit 1
           fi
 
-          CALLER_ACCOUNT=$(aws --region "$REGION" sts get-caller-identity --query Account --output text)
-          CALLER_ARN=$(aws --region "$REGION" sts get-caller-identity --query Arn --output text)
+          IDENTITY=$(aws --region "$REGION" sts get-caller-identity --query '[Account, Arn]' --output text)
+          read -r CALLER_ACCOUNT CALLER_ARN <<< "$IDENTITY"
 
           if [[ "$CALLER_ACCOUNT" != "$AWS_ACCOUNT" ]] || [[ "$CALLER_ARN" != "arn:${PARTITION}:"* ]]; then
             echo "Assumed role does not match the expected account and partition for ${REGION}"
@@ -280,22 +270,9 @@ jobs:
           fi
 
           TARGET_IS_PUBLIC=false
-          if jq -e '
-            (.Policy | if type == "string" then fromjson else . end)
-            | any(.Statement[]?;
-                .Effect == "Allow"
-                and ((.Action // [] | if type == "array" then . else [.] end) | any(. == "*" or . == "lambda:*" or . == "lambda:GetLayerVersion"))
-                and (((.Principal | if type == "object" then .AWS // "" else . end) | if type == "array" then . else [.] end) | index("*") != null)
-                and ((.Condition // {}) | length == 0)
-              )
-          ' target-policy.json > /dev/null; then
+          TARGET_VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh target-policy.json)
+          if [[ "$TARGET_VISIBILITY" == "public" ]]; then
             TARGET_IS_PUBLIC=true
-          else
-            RESULT=$?
-            if (( RESULT > 1 )); then
-              echo "Unable to evaluate target layer policy (jq exit ${RESULT})"
-              exit 1
-            fi
           fi
 
           if [[ "$TARGET_IS_PUBLIC" != "$SOURCE_IS_PUBLIC" ]]; then
