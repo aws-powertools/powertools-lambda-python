@@ -154,6 +154,7 @@ jobs:
           for (( VERSION=START_VERSION; VERSION<=END_VERSION; VERSION++ )); do
             NAME="${LAYER}-${ARCHITECTURE}"
             METADATA="source/${VERSION}.json"
+            POLICY="source/${VERSION}.policy.json"
             ZIP="source/${VERSION}.zip"
 
             aws --region us-east-1 lambda get-layer-version-by-arn \
@@ -161,6 +162,17 @@ jobs:
 
             LOCATION=$(jq -r '.Content.Location' "$METADATA")
             curl --fail --location --retry 3 --retry-delay 2 --output "$ZIP" "$LOCATION"
+
+            if ! aws --region us-east-1 lambda get-layer-version-policy \
+              --layer-name "arn:aws:lambda:us-east-1:017000801446:layer:${NAME}" \
+              --version-number "$VERSION" > "$POLICY" 2> policy-error.txt; then
+              if grep -q ResourceNotFoundException policy-error.txt; then
+                echo '{"Policy":null}' > "$POLICY"
+              else
+                cat policy-error.txt
+                exit 1
+              fi
+            fi
 
             EXPECTED_SHA=$(jq -r '.Content.CodeSha256' "$METADATA")
             ACTUAL_SHA=$(openssl dgst -sha256 -binary "$ZIP" | openssl enc -base64)
@@ -197,6 +209,8 @@ jobs:
         region: ${{ fromJson(needs.setup.outputs.regions) }}
         architecture: ${{ fromJson(needs.setup.outputs.architectures) }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Download commercial layer versions
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -227,8 +241,8 @@ jobs:
             exit 1
           fi
 
-          CALLER_ACCOUNT=$(aws --region "$REGION" sts get-caller-identity --query Account --output text)
-          CALLER_ARN=$(aws --region "$REGION" sts get-caller-identity --query Arn --output text)
+          IDENTITY=$(aws --region "$REGION" sts get-caller-identity --query '[Account, Arn]' --output text)
+          read -r CALLER_ACCOUNT CALLER_ARN <<< "$IDENTITY"
 
           if [[ "$CALLER_ACCOUNT" != "$AWS_ACCOUNT" ]] || [[ "$CALLER_ARN" != "arn:${PARTITION}:"* ]]; then
             echo "Assumed role does not match the expected account and partition for ${REGION}"
@@ -249,18 +263,6 @@ jobs:
           mkdir -p scratch
           mkdir -p target
 
-          has_public_permission() {
-            jq -e '
-              (.Policy | if type == "string" then fromjson else . end)
-              | any(.Statement[]?;
-                  .Sid == "PublicLayer"
-                  and .Effect == "Allow"
-                  and ((.Action | if type == "array" then . else [.] end) | index("lambda:GetLayerVersion") != null)
-                  and (((.Principal | if type == "object" then .AWS // "" else . end) | if type == "array" then . else [.] end) | index("*") != null)
-                )
-            ' "$1" > /dev/null
-          }
-
           if ! aws --region "$REGION" lambda list-layer-versions \
             --layer-name "$NAME" \
             --output json > scratch/versions.json 2> scratch/list-error.txt; then
@@ -276,6 +278,7 @@ jobs:
 
           for (( VERSION=START_VERSION; VERSION<=END_VERSION; VERSION++ )); do
             METADATA="source/${VERSION}.json"
+            SOURCE_POLICY="source/${VERSION}.policy.json"
             ZIP="source/${VERSION}.zip"
             TARGET_METADATA="target/${VERSION}.json"
             TARGET_ARN="arn:${PARTITION}:lambda:${REGION}:${AWS_ACCOUNT}:layer:${NAME}:${VERSION}"
@@ -302,16 +305,28 @@ jobs:
             fi
 
             HAS_PUBLIC_PERMISSION=false
-            if aws --region "$REGION" lambda get-layer-version-policy \
+            if ! aws --region "$REGION" lambda get-layer-version-policy \
               --layer-name "$NAME" \
               --version-number "$VERSION" > scratch/policy.json 2> scratch/policy-error.txt; then
-              if has_public_permission scratch/policy.json; then
-                HAS_PUBLIC_PERMISSION=true
+              if grep -q ResourceNotFoundException scratch/policy-error.txt; then
+                echo '{"Policy":null}' > scratch/policy.json
+              else
+                cat scratch/policy-error.txt
+                exit 1
               fi
-            elif ! grep -q ResourceNotFoundException scratch/policy-error.txt; then
-              cat scratch/policy-error.txt
-              exit 1
             fi
+
+            TARGET_VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh scratch/policy.json)
+            if [[ "$TARGET_VISIBILITY" == "public" ]]; then
+              HAS_PUBLIC_PERMISSION=true
+            fi
+
+            SOURCE_IS_PUBLIC=false
+            SOURCE_VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh "$SOURCE_POLICY")
+            if [[ "$SOURCE_VISIBILITY" == "public" ]]; then
+              SOURCE_IS_PUBLIC=true
+            fi
+            echo "Commercial source ${NAME}:${VERSION} public: ${SOURCE_IS_PUBLIC}"
 
             if [[ "$VERSION_EXISTS" == "true" ]]; then
               echo "${NAME}:${VERSION} already exists in ${REGION} with the expected SHA"
@@ -323,12 +338,20 @@ jobs:
               fi
             fi
 
+            if [[ "$SOURCE_IS_PUBLIC" == "false" ]] && [[ "$HAS_PUBLIC_PERMISSION" == "true" ]]; then
+              echo "${NAME}:${VERSION} in ${REGION} is public but its commercial source is private"
+              exit 1
+            fi
+
             if [[ "$DRY_RUN" != "false" ]]; then
               if [[ "$VERSION_EXISTS" == "false" ]]; then
                 echo "Would publish ${NAME}:${VERSION} to ${REGION}"
                 CURRENT_POSITION=$VERSION
-              elif [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
+              elif [[ "$SOURCE_IS_PUBLIC" == "true" ]] && [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
                 echo "Would add public permission to ${NAME}:${VERSION} in ${REGION}"
+              fi
+              if [[ "$SOURCE_IS_PUBLIC" == "false" ]]; then
+                echo "Would keep ${NAME}:${VERSION} private in ${REGION}"
               fi
               continue
             fi
@@ -352,7 +375,7 @@ jobs:
               CURRENT_POSITION=$PUBLISHED_VERSION
             fi
 
-            if [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
+            if [[ "$SOURCE_IS_PUBLIC" == "true" ]] && [[ "$HAS_PUBLIC_PERMISSION" == "false" ]]; then
               if ! aws --region "$REGION" lambda add-layer-version-permission \
                 --layer-name "$NAME" \
                 --statement-id PublicLayer \
@@ -375,11 +398,25 @@ jobs:
               exit 1
             fi
 
-            aws --region "$REGION" lambda get-layer-version-policy \
+            if ! aws --region "$REGION" lambda get-layer-version-policy \
               --layer-name "$NAME" \
-              --version-number "$VERSION" > scratch/policy.json
-            if ! has_public_permission scratch/policy.json; then
-              echo "${NAME}:${VERSION} in ${REGION} is missing the expected public permission"
+              --version-number "$VERSION" > scratch/policy.json 2> scratch/policy-error.txt; then
+              if grep -q ResourceNotFoundException scratch/policy-error.txt; then
+                echo '{"Policy":null}' > scratch/policy.json
+              else
+                cat scratch/policy-error.txt
+                exit 1
+              fi
+            fi
+
+            TARGET_IS_PUBLIC=false
+            TARGET_VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh scratch/policy.json)
+            if [[ "$TARGET_VISIBILITY" == "public" ]]; then
+              TARGET_IS_PUBLIC=true
+            fi
+
+            if [[ "$TARGET_IS_PUBLIC" != "$SOURCE_IS_PUBLIC" ]]; then
+              echo "${NAME}:${VERSION} in ${REGION} does not match its commercial source visibility"
               exit 1
             fi
           done

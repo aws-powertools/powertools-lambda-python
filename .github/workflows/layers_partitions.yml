@@ -98,6 +98,21 @@ jobs:
         run: |
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} --query 'Content.Location' | xargs curl -L -o ${{ matrix.layer }}-${{ matrix.arch }}.zip
           aws --region us-east-1 lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }} > ${{ matrix.layer }}-${{ matrix.arch }}.json
+      - name: Grab Policy
+        env:
+          LAYER_NAME: ${{ matrix.layer }}-${{ matrix.arch }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! aws --region us-east-1 lambda get-layer-version-policy \
+            --layer-name "arn:aws:lambda:us-east-1:017000801446:layer:${LAYER_NAME}" \
+            --version-number "$VERSION" > "${LAYER_NAME}.policy.json" 2> policy-error.txt; then
+            if grep -q ResourceNotFoundException policy-error.txt; then
+              echo '{"Policy":null}' > "${LAYER_NAME}.policy.json"
+            else
+              cat policy-error.txt
+              exit 1
+            fi
+          fi
       - name: Store Zip
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -110,6 +125,13 @@ jobs:
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.json
           path: ${{ matrix.layer }}-${{ matrix.arch }}.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Store Policy
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.layer }}-${{ matrix.arch }}.policy.json
+          path: ${{ matrix.layer }}-${{ matrix.arch }}.policy.json
           retention-days: 1
           if-no-files-found: error
 
@@ -138,6 +160,8 @@ jobs:
           - arm64
           - x86_64
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Download Zip
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -146,10 +170,25 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ${{ matrix.layer }}-${{ matrix.arch }}.json
+      - name: Download Policy
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ matrix.layer }}-${{ matrix.arch }}.policy.json
       - name: Verify Layer Signature
         run: |
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}-${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}-${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
+      - id: source_policy
+        name: Source Layer Visibility
+        run: |
+          VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh '${{ matrix.layer }}-${{ matrix.arch }}.policy.json')
+          if [[ "$VISIBILITY" == "public" ]]; then
+            echo 'public=true' >> "$GITHUB_OUTPUT"
+            echo 'Commercial source layer is public'
+          else
+            echo 'public=false' >> "$GITHUB_OUTPUT"
+            echo 'Commercial source layer is private'
+          fi
       - id: transform
         run: |
           echo 'CONVERTED_REGION=${{ matrix.region }}' | tr 'a-z\-' 'A-Z_' >> "$GITHUB_OUTPUT"
@@ -160,8 +199,29 @@ jobs:
           aws-region: ${{ matrix.region}}
           mask-aws-account-id: true
           audience: ${{ needs.setup.outputs.aud }}
+      - name: Validate target account
+        env:
+          AWS_ACCOUNT: ${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}
+          PARTITION: ${{ needs.setup.outputs.partition }}
+          REGION: ${{ matrix.region }}
+        run: |
+          if [[ ! "$AWS_ACCOUNT" =~ ^[0-9]{12}$ ]]; then
+            echo "AWS account secret for ${REGION} is missing or invalid"
+            exit 1
+          fi
+
+          IDENTITY=$(aws --region "$REGION" sts get-caller-identity --query '[Account, Arn]' --output text)
+          read -r CALLER_ACCOUNT CALLER_ARN <<< "$IDENTITY"
+
+          if [[ "$CALLER_ACCOUNT" != "$AWS_ACCOUNT" ]] || [[ "$CALLER_ARN" != "arn:${PARTITION}:"* ]]; then
+            echo "Assumed role does not match the expected account and partition for ${REGION}"
+            exit 1
+          fi
       - name: Create Layer
         id: create-layer
+        env:
+          SOURCE_IS_PUBLIC: ${{ steps.source_policy.outputs.public }}
+          VERSION: ${{ inputs.version }}
         run: |
           jq '{"LayerName": "${{ matrix.layer }}-${{ matrix.arch }}", "Description": .Description, "CompatibleRuntimes": .CompatibleRuntimes, "CompatibleArchitectures": .CompatibleArchitectures, "LicenseInfo": .LicenseInfo} | with_entries(select(.value != null))' '${{ matrix.layer }}-${{ matrix.arch }}.json' > input.json
 
@@ -171,17 +231,25 @@ jobs:
             --query 'Version' \
             --output text)
 
+          if (( LAYER_VERSION != VERSION )); then
+            echo "Expected to publish as version ${VERSION}, received ${LAYER_VERSION}"
+            exit 1
+          fi
+
           echo "LAYER_VERSION=$LAYER_VERSION" >> "$GITHUB_OUTPUT"
 
-          aws --region ${{ matrix.region}} lambda add-layer-version-permission \
-            --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
-            --statement-id 'PublicLayer' \
-            --action lambda:GetLayerVersion \
-            --principal '*' \
-            --version-number "$LAYER_VERSION"
+          if [[ "$SOURCE_IS_PUBLIC" == "true" ]]; then
+            aws --region ${{ matrix.region}} lambda add-layer-version-permission \
+              --layer-name ${{ matrix.layer }}-${{ matrix.arch }} \
+              --statement-id 'PublicLayer' \
+              --action lambda:GetLayerVersion \
+              --principal '*' \
+              --version-number "$LAYER_VERSION"
+          fi
       - name: Verify Layer
         env:
           LAYER_VERSION: ${{ steps.create-layer.outputs.LAYER_VERSION }}
+          SOURCE_IS_PUBLIC: ${{ steps.source_policy.outputs.public }}
         run: |
           export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
           aws --region ${{ matrix.region}} lambda get-layer-version-by-arn --arn 'arn:${{ needs.setup.outputs.partition }}:lambda:${{ matrix.region}}:${{ secrets[format('AWS_ACCOUNT_{0}', steps.transform.outputs.CONVERTED_REGION)] }}:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ env.LAYER_VERSION }}' > $layer_output
@@ -189,6 +257,28 @@ jobs:
           LOCAL_SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}-${{ matrix.arch }}.json')
           test "$REMOTE_SHA" == "$LOCAL_SHA" && echo "SHA OK: ${LOCAL_SHA}" || exit 1
           jq -s -r '["Layer Arn", "Runtimes", "Version", "Description", "SHA256"], ([.[0], .[1]] | .[] | [.LayerArn, (.CompatibleRuntimes | join("/")), .Version, .Description, .Content.CodeSha256]) |@tsv' '${{ matrix.layer }}-${{ matrix.arch }}.json' $layer_output | column -t -s $'\t'
+
+          if ! aws --region ${{ matrix.region}} lambda get-layer-version-policy \
+            --layer-name '${{ matrix.layer }}-${{ matrix.arch }}' \
+            --version-number "$LAYER_VERSION" > target-policy.json 2> policy-error.txt; then
+            if grep -q ResourceNotFoundException policy-error.txt; then
+              echo '{"Policy":null}' > target-policy.json
+            else
+              cat policy-error.txt
+              exit 1
+            fi
+          fi
+
+          TARGET_IS_PUBLIC=false
+          TARGET_VISIBILITY=$(bash .github/scripts/layer_policy_visibility.sh target-policy.json)
+          if [[ "$TARGET_VISIBILITY" == "public" ]]; then
+            TARGET_IS_PUBLIC=true
+          fi
+
+          if [[ "$TARGET_IS_PUBLIC" != "$SOURCE_IS_PUBLIC" ]]; then
+            echo "Published layer visibility does not match its commercial source"
+            exit 1
+          fi
 
       - name: Store Metadata - ${{ matrix.region }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
