@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 import logging
-from typing import Any
+from typing import Any, Literal
 
 from avro.io import BinaryDecoder, DatumReader
 from avro.schema import parse as parse_schema
@@ -25,11 +25,17 @@ class AvroDeserializer(DeserializerBase):
     a provided Avro schema definition.
     """
 
-    def __init__(self, schema_str: str, field_metadata: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        schema_str: str,
+        field_metadata: dict[str, Any] | None = None,
+        value_schema_wire_format: Literal["CONFLUENT"] | None = None,
+    ):
         try:
             self.parsed_schema = parse_schema(schema_str)
             self.reader = DatumReader(self.parsed_schema)
             self.field_metatada = field_metadata
+            self.value_schema_wire_format = value_schema_wire_format
         except Exception as e:
             raise KafkaConsumerAvroSchemaParserError(
                 f"Invalid Avro schema. Please ensure the provided avro schema is valid: {type(e).__name__}: {str(e)}",
@@ -75,6 +81,11 @@ class AvroDeserializer(DeserializerBase):
 
         try:
             value = self._decode_input(data)
+            if self.value_schema_wire_format == "CONFLUENT":
+                # removing the first 5 bytes from payload:
+                # 1B magic byte 0x00
+                # 4B big-endian schema ID
+                value = value[5:]
             bytes_reader = io.BytesIO(value)
             decoder = BinaryDecoder(bytes_reader)
             return self.reader.read(decoder)

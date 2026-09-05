@@ -20,6 +20,10 @@ class SchemaConfig:
         Schema definition for message values. Required when value_schema_type is 'AVRO' or 'PROTOBUF'.
     value_output_serializer : Any, optional
         Custom output serializer for message values. Supports Pydantic classes, Dataclasses and Custom Class
+    value_schema_wire_format : {'CONFLUENT', None}, default=None
+        Set this when the payload was produced by a Confluent's schema-registry-aware serializer (KafkaAvroSerializer)
+        but you are supplying the Avro schema offline rather than relying on the ESM Schema Registry integration.
+        Only applied for AVRO values.
     key_schema_type : {'AVRO', 'PROTOBUF', 'JSON', None}, default=None
         Schema type for message keys.
     key_schema : str, optional
@@ -60,6 +64,7 @@ class SchemaConfig:
         value_schema_type: Literal["AVRO", "PROTOBUF", "JSON"] | None = None,
         value_schema: str | None = None,
         value_output_serializer: Any | None = None,
+        value_schema_wire_format: Literal["CONFLUENT"] | None = None,
         key_schema_type: Literal["AVRO", "PROTOBUF", "JSON"] | None = None,
         key_schema: str | None = None,
         key_output_serializer: Any | None = None,
@@ -67,6 +72,7 @@ class SchemaConfig:
         # Validate schema requirements
         self._validate_schema_requirements(value_schema_type, value_schema, "value")
         self._validate_schema_requirements(key_schema_type, key_schema, "key")
+        self._validate_wire_format(value_schema_wire_format, value_schema_type)
 
         self.value_schema_type = value_schema_type
         self.value_schema = value_schema
@@ -74,6 +80,7 @@ class SchemaConfig:
         self.key_schema_type = key_schema_type
         self.key_schema = key_schema
         self.key_output_serializer = key_output_serializer
+        self.value_schema_wire_format = value_schema_wire_format
 
     def _validate_schema_requirements(self, schema_type: str | None, schema: str | None, prefix: str) -> None:
         """Validate that schema is provided when required by schema_type."""
@@ -81,3 +88,17 @@ class SchemaConfig:
             raise KafkaConsumerMissingSchemaError(
                 f"{prefix}_schema must be provided when {prefix}_schema_type is {schema_type}",
             )
+
+    def _validate_wire_format(self, wire_format: str | None, schema_type: str | None) -> None:
+        """Validate the wire format for value payload."""
+
+        if wire_format is None:
+            return
+
+        if wire_format != "CONFLUENT":
+            raise ValueError("Only 'CONFLUENT' wire format is supported.")
+
+        if schema_type != "AVRO":
+            raise ValueError("Wire format is supported for only for 'AVRO' schema.")
+
+        return None

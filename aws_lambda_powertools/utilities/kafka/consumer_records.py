@@ -69,6 +69,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
         schema_type = None
         schema_value = None
         output_serializer = None
+        value_schema_wire_format = None
 
         logger.debug("Deserializing value field")
 
@@ -76,12 +77,14 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
             schema_type = self.schema_config.value_schema_type
             schema_value = self.schema_config.value_schema
             output_serializer = self.schema_config.value_output_serializer
+            value_schema_wire_format = self.schema_config.value_schema_wire_format
 
         # Always use get_deserializer if None it will default to DEFAULT
         deserializer = get_deserializer(
             schema_type=schema_type,
             schema_value=schema_value,
             field_metadata=self.value_schema_metadata,
+            wire_format=value_schema_wire_format,
         )
         deserialized_value = deserializer.deserialize(value)
 

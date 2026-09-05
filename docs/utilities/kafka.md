@@ -29,6 +29,7 @@ flowchart LR
 * Support for key and value deserialization
 * Support for custom output serializers (e.g., dataclasses, Pydantic models)
 * Support for ESM with and without Schema Registry integration
+* Support for offline Avro schemas with schema-registry wire-format prefixes (Confluent only)
 * Proper error handling for deserialization issues
 
 ## Terminology
@@ -254,6 +255,45 @@ Each Kafka record contains important metadata that you can access alongside the 
 | `original_key` | Base64-encoded original message key | Debugging or custom deserialization |
 | `value_schema_metadata` | Metadata about the value schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
 | `key_schema_metadata` | Metadata about the key schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
+
+### Using an offline Avro schema with a schema-registry wire-format prefix
+
+When Confluent serializes messages with its schema-registry-aware Avro serializer (i.e. `KafkaAvroSerializer`), each payload carries a short wire-format prefix in front of the Avro body.
+Said prefix is 5 bytes long, consisting of 1B magic byte (0x00) and 4B big-endian schema ID.
+
+When the ESM Schema Registry integration is enabled, Lambda strips those bytes automatically and populates `value_schema_metadata.schemaId`. But when an **offline Avro schema** is used (checked into your Lambda) and do **not** use the ESM Schema Registry integration, those prefix bytes reach the function and would otherwise corrupt Avro deserialization.
+
+By setting the `value_schema_id_wire_format` argument on `SchemaConfig` to `"CONFLUENT"`, Powertools with strip the leading 5 bytes of the payload before running the Avro decoder.
+
+???+ info "When do I need this?"
+    Only when you are supplying the Avro schema yourself **and** the producer is Confluent. If the ESM Schema Registry integration is on, leave this parameter at its default (`None`).
+
+=== "Offline Avro schema with a Confluent prefix"
+
+    ```python hl_lines="10"
+    from aws_lambda_powertools.utilities.kafka import SchemaConfig, kafka_consumer
+    from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    AVRO_SCHEMA = open("user.avsc").read()
+
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=AVRO_SCHEMA,
+        value_schema_wire_format="CONFLUENT"
+    )
+
+
+    @kafka_consumer(schema_config=schema_config)
+    def lambda_handler(event: ConsumerRecords, context: LambdaContext):
+        for record in event.records:
+            # record.value is the fully-deserialized Avro payload
+            # with the 5-byte wire-format **prefix** stripped.
+            ...
+    ```
+
+???+ warning "Scope"
+    `value_schema_id_wire_format` only affects the **Avro** deserializer, just for value payloads. This implementation is easily extensible to key payloads as well if there is demand.
 
 ### Custom output serializers
 
