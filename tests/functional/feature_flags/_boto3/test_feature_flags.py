@@ -1702,3 +1702,70 @@ def test_exception_handler(mocker, config):
             context={"tenant_id": "not a list value"},
             default=False,
         )
+
+
+# Test schema validation is performed once per fetched document (#8426)
+def test_schema_validated_once_for_cached_document(mocker, config):
+    # GIVEN a store that serves the same document object on every call (e.g. a Parameters cache hit)
+    mocked_app_config_schema = {"my_feature": {"default": True}}
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    validate = mocker.spy(schema.SchemaValidator, "validate")
+
+    # WHEN evaluating several flags in the same invocation
+    for _ in range(5):
+        assert feature_flags.evaluate(name="my_feature", context={}, default=False) is True
+    feature_flags.get_enabled_features(context={})
+
+    # THEN the schema is validated only once
+    assert validate.call_count == 1
+
+
+def test_schema_revalidated_when_store_returns_new_document(mocker, config):
+    # GIVEN a store that returns a fresh document object on each call (e.g. after cache expiry)
+    first = {"my_feature": {"default": True}}
+    second = {"my_feature": {"default": False}}
+    store = init_fetcher_side_effect(mocker, config, side_effect=[first, second, second])
+    feature_flags = FeatureFlags(store=store)
+    validate = mocker.spy(schema.SchemaValidator, "validate")
+
+    # WHEN evaluating across a document change, then again on the same document
+    assert feature_flags.evaluate(name="my_feature", context={}, default=False) is True
+    assert feature_flags.evaluate(name="my_feature", context={}, default=False) is False
+    assert feature_flags.evaluate(name="my_feature", context={}, default=False) is False
+
+    # THEN each distinct document is validated exactly once
+    assert validate.call_count == 2
+
+
+def test_schema_invalid_document_is_never_cached_as_validated(mocker, config):
+    # GIVEN a store that first returns an invalid document, then a valid one
+    invalid = {"my_feature": {"default": "not a bool"}}
+    valid = {"my_feature": {"default": True}}
+    store = init_fetcher_side_effect(mocker, config, side_effect=[invalid, invalid, valid])
+    feature_flags = FeatureFlags(store=store)
+
+    # WHEN the invalid document is served twice
+    # THEN validation fails both times rather than being skipped after the first failure
+    with pytest.raises(schema.SchemaValidationError):
+        feature_flags.evaluate(name="my_feature", context={}, default=False)
+    with pytest.raises(schema.SchemaValidationError):
+        feature_flags.evaluate(name="my_feature", context={}, default=False)
+
+    # AND a subsequent valid document is validated and evaluated normally
+    assert feature_flags.evaluate(name="my_feature", context={}, default=False) is True
+
+
+def test_envelope_extraction_reused_for_cached_document(mocker, config):
+    # GIVEN a store with an envelope, served from cache
+    mocked_app_config_schema = {"app": {"features": {"my_feature": {"default": True}}}}
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config, envelope="app.features")
+    validate = mocker.spy(schema.SchemaValidator, "validate")
+
+    # WHEN evaluating several times
+    first = feature_flags.get_configuration()
+    for _ in range(3):
+        assert feature_flags.evaluate(name="my_feature", context={}, default=False) is True
+
+    # THEN the extracted document is the same object each time and validated only once
+    assert feature_flags.get_configuration() is first
+    assert validate.call_count == 1
