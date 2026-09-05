@@ -77,6 +77,7 @@ jobs:
     strategy:
       matrix:
         layer:
+          # Python 3.9 remains here to verify its final layer version.
           - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
@@ -94,9 +95,11 @@ jobs:
           aws-region: us-east-1
           mask-aws-account-id: true
       - name: Output ${{ matrix.layer }}-${{ matrix.arch }}
+        env:
+          VERSION: ${{ matrix.layer == 'AWSLambdaPowertoolsPythonV3-python39' && '27' || inputs.version }}
         # fetch the specific layer version information from the us-east-1 commercial region
         run: |
-          aws --region us-east-1 lambda get-layer-version-by-arn --arn 'arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${{ inputs.version }}' > '${{ matrix.layer }}-${{ matrix.arch }}.json'
+          aws --region us-east-1 lambda get-layer-version-by-arn --arn "arn:aws:lambda:us-east-1:017000801446:layer:${{ matrix.layer }}-${{ matrix.arch }}:${VERSION}" > '${{ matrix.layer }}-${{ matrix.arch }}.json'
       - name: Store Metadata
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -120,6 +123,7 @@ jobs:
       matrix:
         region: ${{ fromJson(needs.setup.outputs.regions) }}
         layer:
+          # Python 3.9 remains here to verify its final layer version.
           - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
@@ -146,8 +150,10 @@ jobs:
           audience: ${{ needs.setup.outputs.aud }}
       - id: partition_version
         name: Partition Layer Version
+        env:
+          VERSION: ${{ matrix.layer == 'AWSLambdaPowertoolsPythonV3-python39' && '27' || inputs.partition_version || inputs.version }}
         run: |
-          echo 'partition_version=$([[ -n "${{ inputs.partition_version}}" ]] && echo ${{ inputs.partition_version}} || echo ${{ inputs.version }} )' >> "$GITHUB_OUTPUT"
+          echo "partition_version=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Verify Layer
         run: |
           export layer_output='${{ matrix.layer }}-${{ matrix.arch }}-${{matrix.region}}.json'
