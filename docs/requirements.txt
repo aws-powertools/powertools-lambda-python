@@ -128,9 +128,7 @@ click==8.1.8 \
 colorama==0.4.6 \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
     --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
-    # via
-    #   griffe
-    #   mkdocs-material
+    # via mkdocs-material
 ghp-import==2.1.0 \
     --hash=sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619 \
     --hash=sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343
@@ -143,9 +141,9 @@ gitpython==3.1.58 \
     --hash=sha256:621416df10ef3fd0e19fabf9172ddeed0fa704d353d04f194eec56a625a95b22 \
     --hash=sha256:d331e722577f0fd7fc1f857419b3ecc07af66282b933d2a4d95f84a042fdd50f
     # via mkdocs-git-revision-date-plugin
-griffe==1.13.0 \
-    --hash=sha256:246ea436a5e78f7fbf5f24ca8a727bb4d2a4b442a2959052eea3d0bfe9a076e0 \
-    --hash=sha256:470fde5b735625ac0a36296cd194617f039e9e83e301fcbd493e2b58382d0559
+griffelib==2.2.0 \
+    --hash=sha256:d71c3bc2bbed9f958488634fe788b843a9f705d6d2838ca32cd6c25eeb64dfc4 \
+    --hash=sha256:e1bc36fe9cd21d4b6b659b456346755e4cfdc5676c0a5214083126ee12612b3c
     # via mkdocstrings-python
 idna==3.15 \
     --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 \
@@ -300,9 +298,9 @@ mkdocstrings==0.30.0 \
     --hash=sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444 \
     --hash=sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2
     # via mkdocstrings-python
-mkdocstrings-python==1.19.0 \
-    --hash=sha256:395c1032af8f005234170575cc0c5d4d20980846623b623b35594281be4a3059 \
-    --hash=sha256:917aac66cf121243c11db5b89f66b0ded6c53ec0de5318ff5e22424eb2f2e57c
+mkdocstrings-python==2.0.7 \
+    --hash=sha256:1fce5fbfe4ffa6e8136a35351cdc97c3bf55219c7efbd3f92a82260f93235d60 \
+    --hash=sha256:8c49faf66d243072d7590a1b5dea028d9d7425fac191f54f096123a4a9c1a783
     # via -r docs/requirements.in
 packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
