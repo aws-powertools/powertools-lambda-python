@@ -883,6 +883,71 @@ def test_flags_not_equal_match(mocker, config):
     assert toggle == expected_value
 
 
+@pytest.mark.parametrize(
+    "action, value",
+    [
+        (RuleAction.NOT_EQUALS.value, "premium"),
+        (RuleAction.NOT_IN.value, ["premium", "enterprise"]),
+        (RuleAction.KEY_NOT_IN_VALUE.value, ["premium", "enterprise"]),
+        (RuleAction.VALUE_NOT_IN_KEY.value, "premium"),
+    ],
+)
+def test_flags_negative_action_no_match_when_context_key_missing(mocker, config, action, value):
+    # GIVEN a rule with a negative action on key "tier"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "non premium users": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": action,
+                            "key": "tier",
+                            "value": value,
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    # WHEN evaluating with a context that doesn't carry "tier" at all
+    toggle = feature_flags.evaluate(name="my_feature", context={"username": "a"}, default=False)
+
+    # THEN the rule must not match; a missing key never satisfies a condition
+    assert toggle is False
+
+
+def test_flags_not_equal_match_when_context_key_is_none(mocker, config):
+    # GIVEN a NOT_EQUALS rule on key "tier"
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "non premium users": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NOT_EQUALS.value,
+                            "key": "tier",
+                            "value": "premium",
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    # WHEN the key is present but explicitly set to None
+    toggle = feature_flags.evaluate(name="my_feature", context={"tier": None}, default=False)
+
+    # THEN the value is still compared as usual (None != "premium"), so the rule matches
+    assert toggle is True
+
+
 # Test less than
 def test_flags_less_than_no_match_1(mocker, config):
     expected_value = False
@@ -1702,3 +1767,67 @@ def test_exception_handler(mocker, config):
             context={"tenant_id": "not a list value"},
             default=False,
         )
+
+
+def test_flags_missing_context_key_still_invokes_validation_exception_handler(mocker, config):
+    # GIVEN an ANY_IN_VALUE rule and a handler registered for the ValueError the comparator raises
+    # when the context value is not a list
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Akua", "John", "Maria", "Pat"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    handled = []
+
+    @feature_flags.validation_exception_handler(ValueError)
+    def handle_invalid_context(exc):
+        handled.append(exc)
+        return True
+
+    # WHEN the context does not carry the key at all
+    toggle = feature_flags.evaluate(name="my_feature", context={}, default=False)
+
+    # THEN the handler is still called and its result is honoured, as it was before missing keys were guarded
+    assert len(handled) == 1
+    assert toggle is True
+
+
+def test_flags_missing_context_key_no_match_without_handler_for_raising_action(mocker, config):
+    # GIVEN an ANY_IN_VALUE rule and no exception handler registered
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": True,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Akua", "John", "Maria", "Pat"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    # WHEN the context does not carry the key at all
+    toggle = feature_flags.evaluate(name="my_feature", context={}, default=False)
+
+    # THEN the rule does not match
+    assert toggle is False
