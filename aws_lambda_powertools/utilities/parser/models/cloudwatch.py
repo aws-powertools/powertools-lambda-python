@@ -3,7 +3,7 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List, Optional, Type, Union
+from typing import List, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -47,7 +47,7 @@ class CloudWatchLogsDecode(BaseModel):
         description="Array of log events included in the message.",
         examples=[[{"id": "eventId1", "timestamp": 1673779200000, "message": "Sample log line"}]],
     )
-    policyLevel: Optional[str] = Field(
+    policyLevel: str | None = Field(
         default=None,
         description="Optional field specifying the policy level applied to the subscription filter, if present.",
         examples=["ACCOUNT", "LOG_GROUP"],

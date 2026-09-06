@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -21,8 +21,8 @@ class MyDynamoBusiness(BaseModel):
 
 
 class MyDynamoScheme(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[MyDynamoBusiness] = None
-    OldImage: Optional[MyDynamoBusiness] = None
+    NewImage: MyDynamoBusiness | None = None
+    OldImage: MyDynamoBusiness | None = None
 
 
 class MyDynamoDBStreamRecordModel(DynamoDBStreamRecordModel):

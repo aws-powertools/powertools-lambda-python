@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Type, Union
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -40,7 +40,7 @@ class KafkaRecordModel(BaseModel):
         description="The type of timestamp (CREATE_TIME or LOG_APPEND_TIME).",
         examples=["CREATE_TIME", "LOG_APPEND_TIME"],
     )
-    key: Optional[bytes] = Field(
+    key: bytes | None = Field(
         default=None,
         description="The message key, base64-encoded. Can be null for messages without keys.",
         examples=["cmVjb3JkS2V5", "dXNlci0xMjM=", "b3JkZXItNDU2", None],
@@ -61,12 +61,12 @@ class KafkaRecordModel(BaseModel):
             [],
         ],
     )
-    keySchemaMetadata: Optional[KafkaRecordSchemaMetadata] = Field(
+    keySchemaMetadata: KafkaRecordSchemaMetadata | None = Field(
         default=None,
         description="Schema metadata for the message key when using schema registry.",
         examples=[{"dataFormat": "AVRO", "schemaId": "1234"}, None],
     )
-    valueSchemaMetadata: Optional[KafkaRecordSchemaMetadata] = Field(
+    valueSchemaMetadata: KafkaRecordSchemaMetadata | None = Field(
         default=None,
         description="Schema metadata for the message value when using schema registry.",
         examples=[{"dataFormat": "AVRO", "schemaId": "1234"}, None],

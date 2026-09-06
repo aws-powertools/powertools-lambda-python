@@ -84,12 +84,12 @@ We publish `prerelease` versions to PyPi for early feedback on unstable releases
 
 [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that contains pre-packaged dependencies. We compile and optimize all dependencies for both x86_64 and ARM architectures.
 
-Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version}` without the period (e.g., `python313` for Python 3.13).
+Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version}` with a currently supported runtime: `python310`, `python311`, `python312`, `python313`, or `python314`. Python 3.9 layers stopped at layer version 27.
 
 | Architecture | Layer ARN |
 | ------------ | --------- |
-| x86_64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:27` |
-| ARM64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:27` |
+| x86_64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:37` |
+| ARM64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:37` |
 
 ### All regional Layer ARNs
 
@@ -101,7 +101,7 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 ??? tip "Want to inspect the Layer contents?"
     ```bash
-    aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:27 --region eu-west-1
+    aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:37 --region eu-west-1
     ```
     The pre-signed URL will be in the `Location` key.
 
@@ -167,8 +167,8 @@ We publish Layer ARNs to SSM Parameter Store for easier automation:
 
 | Region | Architecture | Layer ARN |
 | ------ | ------------ | --------- |
-| cn-north-1 | x86_64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:27` |
-| cn-north-1 | ARM64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:27` |
+| cn-north-1 | x86_64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:37` |
+| cn-north-1 | ARM64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:37` |
 
 ### AWS GovCloud regions
 

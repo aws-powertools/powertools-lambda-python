@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal
 
 from pydantic import BaseModel, Field
 
@@ -51,7 +51,7 @@ class AppSyncEventsEventModel(BaseModel):
 
 
 class AppSyncEventsModel(BaseModel):
-    identity: Optional[AppSyncIdentity] = Field(
+    identity: AppSyncIdentity | None = Field(
         default=None,
         description="Information about the caller identity (authenticated user or API key).",
     )
@@ -59,17 +59,17 @@ class AppSyncEventsModel(BaseModel):
     info: AppSyncEventsInfoModel = Field(
         description="Information about the AppSync Events operation including channel details.",
     )
-    prev: Optional[str] = Field(
+    prev: str | None = Field(
         default=None,
         description="Results from the previous operation in a pipeline resolver.",
         examples=["previous-result-data"],
     )
-    outErrors: Optional[List[str]] = Field(
+    outErrors: List[str] | None = Field(
         default=None,
         description="List of output errors that occurred during event processing.",
         examples=[["Error message 1", "Error message 2"]],
     )
-    stash: Optional[Dict[str, Any]] = Field(
+    stash: Dict[str, Any] | None = Field(
         default=None,
         description=(
             "The stash is a map that is made available inside each resolver and function mapping template. "
@@ -77,7 +77,7 @@ class AppSyncEventsModel(BaseModel):
         ),
         examples=[{"customData": "value", "userId": "123"}],
     )
-    events: Optional[List[AppSyncEventsEventModel]] = Field(
+    events: List[AppSyncEventsEventModel] | None = Field(
         default=None,
         description="List of events being published or subscribed to in the AppSync Events operation.",
         examples=[

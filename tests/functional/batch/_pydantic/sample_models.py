@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional
+from typing import Dict
 
 from pydantic import field_validator
 
@@ -44,8 +44,8 @@ class OrderDynamoDB(BaseModel):
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[OrderDynamoDB] = None
-    OldImage: Optional[OrderDynamoDB] = None
+    NewImage: OrderDynamoDB | None = None
+    OldImage: OrderDynamoDB | None = None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):

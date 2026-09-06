@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional
+from typing import Dict
 
 from typing_extensions import Literal
 
@@ -32,8 +32,8 @@ class OrderDynamoDB(BaseModel):
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):  # type: ignore[override]
-    NewImage: Optional[OrderDynamoDB]
-    OldImage: Optional[OrderDynamoDB]
+    NewImage: OrderDynamoDB | None
+    OldImage: OrderDynamoDB | None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):  # type: ignore[override]

@@ -1,6 +1,6 @@
 import json
 from functools import partial
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import pytest
 from typing_extensions import Annotated
@@ -192,7 +192,7 @@ def test_openapi_schema_for_pydanticv2(openapi30_schema):
 
     # WHEN we have a simple handler
     @app.get("/", description="Testing")
-    def handler() -> Optional[Dict]:
+    def handler() -> Dict | None:
         pass
 
     # WHEN we get the schema
@@ -336,7 +336,7 @@ def test_bedrock_resolver_with_openapi_extensions():
 
     # WHEN we have a simple handler with openapi extension
     @app.get("/", description="Testing", openapi_extensions={"x-requireConfirmation": "ENABLED"})
-    def handler() -> Optional[Dict]:
+    def handler() -> Dict | None:
         pass
 
     # WHEN we get the schema

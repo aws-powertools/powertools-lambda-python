@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Union
 from typing import Type as TypingType
 
 from pydantic import BaseModel, Field, model_validator
@@ -18,7 +18,7 @@ class SnsMsgAttributeModel(BaseModel):
 
 
 class SnsNotificationModel(BaseModel):
-    Subject: Optional[str] = Field(
+    Subject: str | None = Field(
         default=None,
         description="The subject parameter provided when the notification was published to the topic.",
         examples=["TestInvoke", "Alert: System maintenance", "Order Confirmation", None],
@@ -48,7 +48,7 @@ class SnsNotificationModel(BaseModel):
         description="The type of message. For Lambda triggers, this is always 'Notification'.",
         examples=["Notification"],
     )
-    MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]] = Field(
+    MessageAttributes: Dict[str, SnsMsgAttributeModel] | None = Field(
         default=None,
         description="User-defined message attributes as key-value pairs with type information.",
         examples=[
@@ -73,7 +73,7 @@ class SnsNotificationModel(BaseModel):
             "f3c8d4e2-1a2b-4c5d-9e8f-7g6h5i4j3k2l",
         ],
     )
-    SigningCertUrl: Optional[HttpUrl] = Field(
+    SigningCertUrl: HttpUrl | None = Field(
         default=None,
         description=(
             "The URL to the certificate that was used to sign the message. "
@@ -85,7 +85,7 @@ class SnsNotificationModel(BaseModel):
             None,
         ],
     )  # NOTE: FIFO opt-in removes attribute
-    Signature: Optional[str] = Field(
+    Signature: str | None = Field(
         default=None,
         description=(
             "Base64-encoded SHA1withRSA signature of the message. "
@@ -105,7 +105,7 @@ class SnsNotificationModel(BaseModel):
             "2023-12-25T18:45:30.123Z",
         ],
     )
-    SignatureVersion: Optional[str] = Field(
+    SignatureVersion: str | None = Field(
         default=None,
         description=(
             "Version of the Amazon SNS signature used. Not present for FIFO topics with content-based deduplication."

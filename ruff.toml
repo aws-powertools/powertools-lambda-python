@@ -33,6 +33,7 @@ lint.select = [
 lint.ignore = [
     "W291",    # https://beta.ruff.rs/docs/rules/trailing-whitespace/
     "PLR0913", # https://beta.ruff.rs/docs/rules/too-many-arguments/
+    "PLR0917", # https://docs.astral.sh/ruff/rules/too-many-positional-arguments/
     "PLR2004", #https://beta.ruff.rs/docs/rules/magic-value-comparison/
     "PLW0603", #https://beta.ruff.rs/docs/rules/global-statement/
     "B904",    # raise-without-from-inside-except - disabled temporarily
@@ -44,7 +45,6 @@ lint.ignore = [
     "UP006",
     "UP007",
     "UP035",
-    "UP045",
 ]
 
 # Exclude files and directories
