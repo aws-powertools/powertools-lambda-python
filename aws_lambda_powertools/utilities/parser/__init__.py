@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
@@ -15,13 +16,14 @@ if TYPE_CHECKING:
 
 def __getattr__(name: str) -> object:
     if name == "envelopes":
-        from aws_lambda_powertools.utilities.parser import envelopes as _envelopes  # noqa: PLC0415
-
+        _envelopes = importlib.import_module(f"{__name__}.envelopes")
+        globals()[name] = _envelopes
         return _envelopes
     if name == "BaseEnvelope":
-        from aws_lambda_powertools.utilities.parser.envelopes import BaseEnvelope as _BaseEnvelope  # noqa: PLC0415
-
-        return _BaseEnvelope
+        _envelopes_module = importlib.import_module(f"{__name__}.envelopes")
+        _base_envelope = _envelopes_module.BaseEnvelope
+        globals()[name] = _base_envelope
+        return _base_envelope
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

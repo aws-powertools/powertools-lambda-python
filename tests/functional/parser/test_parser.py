@@ -316,22 +316,73 @@ def test_parser_import_does_not_eagerly_load_envelopes():
     Envelopes are only needed when envelope= is passed to parse()/event_parser().
     Eager loading all 16 envelopes adds ~900ms to Lambda cold start for functions
     that only use parse() without an envelope.
+
+    This test runs in a fresh subprocess to ensure reliable isolation from any
+    modules already loaded by conftest or other tests.
     """
+    import subprocess
     import sys
 
-    # Remove any previously cached parser modules to simulate a fresh import
-    parser_modules = [key for key in sys.modules if "aws_lambda_powertools.utilities.parser.envelopes" in key]
-    for mod in parser_modules:
-        del sys.modules[mod]
+    # Test 1: importing parse alone should NOT load envelopes
+    script_parse_only = """
+import sys
+from aws_lambda_powertools.utilities.parser import parse
+envelope_modules = [key for key in sys.modules if "aws_lambda_powertools.utilities.parser.envelopes" in key]
+assert not envelope_modules, f"Envelope modules loaded on parse import: {envelope_modules}"
+print("PASS: parse import does not load envelopes")
+"""
 
-    # Also remove the parser __init__ itself so __getattr__ is exercised
-    sys.modules.pop("aws_lambda_powertools.utilities.parser", None)
+    result = subprocess.run([sys.executable, "-c", script_parse_only], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, f"parse import test failed:\n{result.stderr}\n{result.stdout}"
 
-    # Re-import — only parse is needed, envelopes should NOT be loaded
-    from aws_lambda_powertools.utilities.parser import parse  # noqa: F401
+    # Test 2: importing envelopes explicitly SHOULD load envelopes
+    script_envelopes_import = """
+import sys
+from aws_lambda_powertools.utilities.parser import envelopes
+assert "aws_lambda_powertools.utilities.parser.envelopes" in sys.modules, "envelopes module not loaded"
+assert hasattr(envelopes, "SqsEnvelope"), "envelopes.SqsEnvelope not accessible"
+print("PASS: envelopes import works correctly")
+"""
 
-    envelope_modules_loaded = [key for key in sys.modules if "aws_lambda_powertools.utilities.parser.envelopes" in key]
-    assert not envelope_modules_loaded, (
-        f"Envelope modules were eagerly loaded on parser import: {envelope_modules_loaded}. "
-        "This adds significant Lambda cold start latency for functions not using envelopes."
+    result = subprocess.run(
+        [sys.executable, "-c", script_envelopes_import],
+        capture_output=True,
+        text=True,
+        check=False,
     )
+    assert result.returncode == 0, f"envelopes import test failed:\n{result.stderr}\n{result.stdout}"
+
+    # Test 3: importing BaseEnvelope explicitly SHOULD load envelopes
+    script_base_envelope_import = """
+import sys
+from aws_lambda_powertools.utilities.parser import BaseEnvelope
+assert "aws_lambda_powertools.utilities.parser.envelopes" in sys.modules, "envelopes module not loaded"
+assert BaseEnvelope.__name__ == "BaseEnvelope", "BaseEnvelope not correctly imported"
+print("PASS: BaseEnvelope import works correctly")
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-c", script_base_envelope_import],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"BaseEnvelope import test failed:\n{result.stderr}\n{result.stdout}"
+
+    # Test 4: from parser import * should work and load all public exports
+    script_import_star = """
+from aws_lambda_powertools.utilities.parser import *
+assert 'parse' in dir(), "parse not available after import *"
+assert 'event_parser' in dir(), "event_parser not available after import *"
+assert 'envelopes' in dir(), "envelopes not available after import *"
+assert 'BaseEnvelope' in dir(), "BaseEnvelope not available after import *"
+print("PASS: import * works correctly")
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-c", script_import_star],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"import * test failed:\n{result.stderr}\n{result.stdout}"
