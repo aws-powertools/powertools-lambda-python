@@ -520,8 +520,11 @@ class APIGatewayAuthorizerResponse:
         """Adds a route to the internal lists of allowed or denied routes. Each object in
         the internal list contains a resource ARN and a condition statement. The condition
         statement can be null."""
-        if http_method != "*" and http_method not in HttpVerb.__members__:
-            allowed_values = [verb.value for verb in HttpVerb]
+        allowed_values = [verb.value for verb in HttpVerb]
+        if http_method in HttpVerb.__members__:
+            http_method = HttpVerb[http_method].value
+
+        if http_method not in allowed_values:
             raise ValueError(f"Invalid HTTP verb: '{http_method}'. Use either '{allowed_values}'")
 
         if not self._resource_pattern.match(resource):
