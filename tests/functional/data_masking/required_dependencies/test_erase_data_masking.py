@@ -7,10 +7,10 @@ import pytest
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities.data_masking.exceptions import (
+    DataMaskingError,
     DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
 )
-from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 @pytest.fixture
@@ -316,6 +316,17 @@ def test_no_matches_for_masking_rule(data_masker):
     masking_rules = {"$.missing_field": {"dynamic_mask": True}}
 
     # WHEN applying the masking rule
+    with pytest.raises(DataMaskingFieldNotFoundError, match=r"Field or expression .* not found"):
+        data_masker.erase(data=data, masking_rules=masking_rules)
+
+
+def test_no_matches_for_masking_rule_warning():
+    # GIVEN a dictionary without the expected field
+    data_masker = DataMasking(raise_on_missing_field=False)
+    data = {"name": "Ana"}
+    masking_rules = {"$.missing_field": {"dynamic_mask": True}}
+
+    # WHEN applying the masking rule
     with pytest.warns(UserWarning, match=r"No matches found *"):
         result = data_masker.erase(data=data, masking_rules=masking_rules)
 
@@ -323,7 +334,7 @@ def test_no_matches_for_masking_rule(data_masker):
     assert result == data
 
 
-def test_warning_during_masking_value(data_masker):
+def test_error_during_masking_value(data_masker):
     # GIVEN data and a masking rule
     data = {"value": "test"}
 
@@ -335,11 +346,11 @@ def test_warning_during_masking_value(data_masker):
     data_masker.provider = MockProvider()
 
     # WHEN erase is called
-    with pytest.warns(expected_warning=PowertoolsUserWarning, match="Error masking value for path value: Mock error"):
-        masked_data = data_masker.erase(data, masking_rules={"value": {"rule": "value"}})
+    with pytest.raises(DataMaskingError, match="Failed to mask field at path: value") as exc_info:
+        data_masker.erase(data, masking_rules={"value": {"rule": "value"}})
 
-    # THEN the original data should remain unchanged
-    assert masked_data["value"] == "test"
+    # THEN the provider error is preserved
+    assert isinstance(exc_info.value.__cause__, ValueError)
 
 
 def test_mask_nested_field_success(data_masker):
@@ -456,14 +467,12 @@ def test_erase_handles_invalid_regex_pattern(data_masker):
     data = "test123"
 
     # WHEN masking with invalid regex
-    result = data_masker.erase(
-        data,
-        regex_pattern="[",
-        mask_format="X",  # Invalid regex pattern that will raise re.error
-    )
-
-    # THEN original data should be returned
-    assert result == "test123"
+    with pytest.raises(DataMaskingError, match="Invalid regex pattern"):
+        data_masker.erase(
+            data,
+            regex_pattern="[",
+            mask_format="X",  # Invalid regex pattern that will raise re.error
+        )
 
 
 def test_erase_handles_empty_string_with_dynamic_mask(data_masker):
@@ -485,6 +494,5 @@ def test_erase_dictionary_with_masking_rules_wrong_field(data_masker):
     masking_rules = {"user.ssn...": {"custom_mask": "XXX-XX-XXXX"}, "user.address.zip": {"custom_mask": "00000"}}
 
     # WHEN erase is called with wrong masking rules
-    # We must have a warning
-    with pytest.warns(expected_warning=PowertoolsUserWarning, match="Error processing path*"):
+    with pytest.raises(DataMaskingError, match="Invalid masking path"):
         data_masker.erase(data, masking_rules=masking_rules)
