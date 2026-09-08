@@ -78,7 +78,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
           - AWSLambdaPowertoolsPythonV3-python312
@@ -150,7 +149,6 @@ jobs:
       matrix:
         region: ${{ fromJson(needs.setup.outputs.regions) }}
         layer:
-          - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
           - AWSLambdaPowertoolsPythonV3-python312
