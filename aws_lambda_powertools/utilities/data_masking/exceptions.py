@@ -1,34 +1,40 @@
-class DataMaskingUnsupportedTypeError(Exception):
+class DataMaskingError(Exception):
+    """
+    Base exception for data masking failures.
+    """
+
+
+class DataMaskingUnsupportedTypeError(DataMaskingError):
     """
     UnsupportedType Error
     """
 
 
-class DataMaskingDecryptKeyError(Exception):
+class DataMaskingDecryptKeyError(DataMaskingError):
     """
     Decrypting with an invalid AWS KMS Key ARN.
     """
 
 
-class DataMaskingEncryptKeyError(Exception):
+class DataMaskingEncryptKeyError(DataMaskingError):
     """
     Encrypting with an invalid AWS KMS Key ARN.
     """
 
 
-class DataMaskingDecryptValueError(Exception):
+class DataMaskingDecryptValueError(DataMaskingError):
     """
     Decrypting an invalid field.
     """
 
 
-class DataMaskingContextMismatchError(Exception):
+class DataMaskingContextMismatchError(DataMaskingError):
     """
     Decrypting with the incorrect encryption context.
     """
 
 
-class DataMaskingFieldNotFoundError(Exception):
+class DataMaskingFieldNotFoundError(DataMaskingError):
     """
     Field not found.
     """
