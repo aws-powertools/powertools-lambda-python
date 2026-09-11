@@ -106,7 +106,7 @@ def get_deserializer(
         deserializer = AvroDeserializer(
             schema_str=schema_value,
             field_metadata=field_metadata,
-            value_schema_wire_format=wire_format,
+            wire_format=wire_format,
         )
     elif schema_type == "PROTOBUF":
         # Import here to avoid dependency if not used

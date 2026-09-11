@@ -16,6 +16,9 @@ from aws_lambda_powertools.utilities.kafka.exceptions import (
 
 logger = logging.getLogger(__name__)
 
+_CONFLUENT_HEADER_SIZE = 5
+_CONFLUENT_MAGIC_BYTE = 0x00
+
 
 class AvroDeserializer(DeserializerBase):
     """
@@ -29,17 +32,38 @@ class AvroDeserializer(DeserializerBase):
         self,
         schema_str: str,
         field_metadata: dict[str, Any] | None = None,
-        value_schema_wire_format: Literal["CONFLUENT"] | None = None,
+        wire_format: Literal["CONFLUENT"] | None = None,
     ):
         try:
             self.parsed_schema = parse_schema(schema_str)
             self.reader = DatumReader(self.parsed_schema)
             self.field_metatada = field_metadata
-            self.value_schema_wire_format = value_schema_wire_format
+            self.wire_format = wire_format
         except Exception as e:
             raise KafkaConsumerAvroSchemaParserError(
                 f"Invalid Avro schema. Please ensure the provided avro schema is valid: {type(e).__name__}: {str(e)}",
             ) from e
+
+    def _strip_wire_format_header(self, value: bytes) -> bytes:
+        if self.wire_format is None:
+            return value
+
+        if self.wire_format != "CONFLUENT":
+            raise KafkaConsumerDeserializationError(f"Unsupported Avro wire format: {self.wire_format}")
+
+        if len(value) < _CONFLUENT_HEADER_SIZE:
+            raise KafkaConsumerDeserializationError(
+                "Invalid Confluent wire format: payload must contain a 5-byte header",
+            )
+
+        if value[0] != _CONFLUENT_MAGIC_BYTE:
+            raise KafkaConsumerDeserializationError(
+                "Invalid Confluent wire format: expected magic byte 0x00",
+            )
+
+        schema_id = int.from_bytes(value[1:_CONFLUENT_HEADER_SIZE], byteorder="big")
+        logger.debug("Deserializing Confluent payload with schema ID %s", schema_id)
+        return value[_CONFLUENT_HEADER_SIZE:]
 
     def deserialize(self, data: bytes | str) -> object:
         """
@@ -81,14 +105,12 @@ class AvroDeserializer(DeserializerBase):
 
         try:
             value = self._decode_input(data)
-            if self.value_schema_wire_format == "CONFLUENT":
-                # removing the first 5 bytes from payload:
-                # 1B magic byte 0x00
-                # 4B big-endian schema ID
-                value = value[5:]
+            value = self._strip_wire_format_header(value)
             bytes_reader = io.BytesIO(value)
             decoder = BinaryDecoder(bytes_reader)
             return self.reader.read(decoder)
+        except KafkaConsumerDeserializationError:
+            raise
         except Exception as e:
             raise KafkaConsumerDeserializationError(
                 f"Error trying to deserialize avro data - {type(e).__name__}: {str(e)}",
