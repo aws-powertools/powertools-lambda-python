@@ -444,6 +444,8 @@ The `action` configuration can have the following values, where the expressions 
 ???+ info
     The `key` and `value` will be compared to the input from the `context` parameter.
 
+    If a condition's `key` is not present in `context`, the condition never matches, regardless of the action. For example, a `NOT_EQUALS` rule on `tier` will not match a request that carries no `tier` at all.
+
 ???+ "Time based keys"
 
     For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
