@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 
 import pytest
@@ -39,6 +40,44 @@ def test_empty_features_not_fail():
     validator.validate()
 
 
+def test_empty_features_emits_warning(caplog):
+    # GIVEN an empty top-level document, e.g. the result of an envelope query that matched nothing
+    validator = SchemaValidator(schema={})
+
+    # WHEN validating
+    with caplog.at_level(logging.WARNING):
+        validator.validate()
+
+    # THEN a warning is emitted and nothing is raised
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelno == logging.WARNING
+    assert "schema is empty" in caplog.records[0].getMessage()
+
+
+def test_features_not_empty_no_warning(caplog):
+    # GIVEN a well-formed document with rules
+    schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+            RULES_KEY: {
+                "tenant match": {
+                    RULE_MATCH_VALUE: True,
+                    CONDITIONS_KEY: [
+                        {CONDITION_ACTION: RuleAction.EQUALS.value, CONDITION_KEY: "tenant_id", CONDITION_VALUE: "6"},
+                    ],
+                },
+            },
+        },
+    }
+
+    # WHEN validating
+    with caplog.at_level(logging.WARNING):
+        SchemaValidator(schema).validate()
+
+    # THEN no warning is emitted
+    assert not caplog.records
+
+
 @pytest.mark.parametrize(
     "schema",
     [
@@ -65,6 +104,49 @@ def test_valid_feature_dict():
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
     validator = SchemaValidator(schema)
     validator.validate()
+
+
+@pytest.mark.parametrize(
+    "rules, expected_message",
+    [
+        pytest.param({}, "Feature has 'rules' but it is empty, feature=my_feature", id="empty_dict"),
+        pytest.param(None, "Feature has 'rules' but it is empty, feature=my_feature", id="none"),
+        pytest.param(
+            [],
+            "Feature 'rules' should be a dictionary but is an empty list, feature=my_feature",
+            id="empty_list",
+        ),
+        pytest.param(
+            "",
+            "Feature 'rules' should be a dictionary but is an empty str, feature=my_feature",
+            id="empty_str",
+        ),
+    ],
+)
+def test_feature_with_empty_rules_emits_warning(caplog, rules, expected_message):
+    # GIVEN a feature whose 'rules' key is present but falsy
+    schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: rules}}
+
+    # WHEN validating
+    with caplog.at_level(logging.WARNING):
+        SchemaValidator(schema).validate()
+
+    # THEN a warning naming the feature is emitted and nothing is raised
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelno == logging.WARNING
+    assert caplog.records[0].getMessage() == expected_message
+
+
+def test_feature_without_rules_key_no_warning(caplog):
+    # GIVEN a feature that simply omits 'rules'
+    schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
+
+    # WHEN validating
+    with caplog.at_level(logging.WARNING):
+        SchemaValidator(schema).validate()
+
+    # THEN no warning is emitted; omitting rules is the documented way to declare a static flag
+    assert not caplog.records
 
 
 def test_invalid_feature_default_value_is_not_boolean():
