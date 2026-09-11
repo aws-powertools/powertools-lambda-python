@@ -22,6 +22,7 @@ nav:
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/openapi.md
+              - core/event_handler/api_gateway_websocket.md
               - core/event_handler/appsync.md
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md
@@ -243,6 +244,7 @@ plugins:
           - core/metrics.md
           - core/metrics/datadog.md
           - core/event_handler/api_gateway.md
+          - core/event_handler/api_gateway_websocket.md
           - core/event_handler/appsync.md
           - core/event_handler/appsync_events.md
           - core/event_handler/bedrock_agents.md

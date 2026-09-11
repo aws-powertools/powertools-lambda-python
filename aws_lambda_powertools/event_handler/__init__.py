@@ -10,6 +10,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     CORSConfig,
     Response,
 )
+from aws_lambda_powertools.event_handler.api_gateway_websocket.websocket import APIGatewayWebSocketResolver
 from aws_lambda_powertools.event_handler.appsync import AppSyncResolver
 from aws_lambda_powertools.event_handler.bedrock_agent import BedrockAgentResolver, BedrockResponse
 from aws_lambda_powertools.event_handler.bedrock_agent_function import (
@@ -30,6 +31,7 @@ __all__ = [
     "AppSyncEventsResolver",
     "APIGatewayRestResolver",
     "APIGatewayHttpResolver",
+    "APIGatewayWebSocketResolver",
     "ALBResolver",
     "ApiGatewayResolver",
     "BedrockAgentResolver",
