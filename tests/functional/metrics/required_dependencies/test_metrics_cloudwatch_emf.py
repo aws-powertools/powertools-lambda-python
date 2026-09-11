@@ -1133,6 +1133,105 @@ def test_clear_default_dimensions(namespace):
     assert not my_metrics.default_dimensions
 
 
+def test_set_default_dimensions_no_warning_on_first_call(namespace):
+    # GIVEN a Metrics instance with no dimensions set
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN we persist default dimensions for the first time
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # THEN no overwrite warning should be emitted
+    assert not [warning for warning in w if "has already been added" in str(warning.message)]
+
+
+def test_set_default_dimensions_no_warning_when_unchanged(namespace):
+    # GIVEN a Metrics instance with default dimensions persisted
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN we persist the same default dimensions again e.g., on a warm invocation
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # THEN no overwrite warning should be emitted
+    assert not [warning for warning in w if "has already been added" in str(warning.message)]
+
+
+def test_set_default_dimensions_warns_when_value_changes(namespace):
+    # GIVEN a Metrics instance with a default dimension persisted
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test")
+
+    # WHEN we persist the same default dimension with a different value
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        my_metrics.set_default_dimensions(environment="prod")
+
+    # THEN a single overwrite warning should be emitted
+    assert len([warning for warning in w if "has already been added" in str(warning.message)]) == 1
+
+
+def test_log_metrics_with_default_dimensions_no_warning_across_invocations(namespace, metric, capsys):
+    # GIVEN a Metrics instance with default dimensions persisted
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+
+    # WHEN metrics are flushed across multiple invocations
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler({}, {})
+        lambda_handler({}, {})
+
+    # THEN no overwrite warning should be emitted
+    assert not [warning for warning in w if "has already been added" in str(warning.message)]
+
+
+def test_provider_keeps_provided_default_dimensions_dict(namespace):
+    # GIVEN a provider constructed with an empty default dimensions dict e.g., the one Metrics shares
+    shared_default_dimensions: dict = {}
+    my_provider = AmazonCloudWatchEMFProvider(namespace=namespace, default_dimensions=shared_default_dimensions)
+
+    # WHEN default dimensions are set through the provider
+    my_provider.set_default_dimensions(environment="test")
+
+    # THEN the provided dict remains in use and receives the update
+    assert my_provider.default_dimensions is shared_default_dimensions
+    assert shared_default_dimensions == {"environment": "test"}
+
+
+def test_metrics_shares_default_dimensions_with_provider(namespace):
+    # GIVEN a Metrics instance with the default provider
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN default dimensions are set
+    my_metrics.set_default_dimensions(environment="test")
+
+    # THEN Metrics and the provider hold the same dict, both with the update
+    assert my_metrics.default_dimensions is my_metrics.provider.default_dimensions
+    assert my_metrics.default_dimensions == {"environment": "test"}
+
+
+def test_add_dimension_no_warning_when_value_unchanged(namespace):
+    # GIVEN a Metrics instance with a dimension added
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_dimension("environment", "test")
+
+    # WHEN the same dimension is added again with the same value
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        my_metrics.add_dimension("environment", "test")
+
+    # THEN no overwrite warning should be emitted
+    assert not [warning for warning in w if "has already been added" in str(warning.message)]
+
+
 def test_add_dimensions_with_empty_value(namespace, capsys, metric):
     # GIVEN Metrics is initialized
     my_metrics = Metrics(namespace=namespace)

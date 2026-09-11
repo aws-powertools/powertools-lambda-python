@@ -87,7 +87,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
-        self.default_dimensions = default_dimensions or {}
+        self.default_dimensions = default_dimensions if default_dimensions is not None else {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.function_name = function_name
@@ -317,7 +317,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
             return
 
-        if name in self.dimension_set or name in self.default_dimensions:
+        if name in self.dimension_set and self.dimension_set[name] != value:
             warnings.warn(
                 f"Dimension '{name}' has already been added. The previous value will be overwritten.",
                 category=PowertoolsUserWarning,

@@ -174,7 +174,6 @@ class Metrics:
         )
 
     def set_default_dimensions(self, **dimensions) -> None:
-        self.provider.set_default_dimensions(**dimensions)
         """Persist dimensions across Lambda invocations
 
         Parameters
@@ -195,9 +194,7 @@ class Metrics:
             def lambda_handler():
                 return True
         """
-        for name, value in dimensions.items():
-            self.add_dimension(name, value)
-
+        self.provider.set_default_dimensions(**dimensions)
         self.default_dimensions.update(**dimensions)
 
     def clear_default_dimensions(self) -> None:
