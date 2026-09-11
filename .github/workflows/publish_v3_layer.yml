@@ -284,7 +284,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "docs/index.md docs/includes/_layer_homepage_arm64.md docs/includes/_layer_homepage_x86.md examples CHANGELOG.md"
+          files: "docs/index.md docs/getting-started/install.md docs/includes/_layer_homepage_arm64.md docs/includes/_layer_homepage_x86.md examples CHANGELOG.md"
           temp_branch_prefix: "ci-layer-docs"
           pull_request_title: "chore(ci): layer docs update"
           github_token: ${{ secrets.GITHUB_TOKEN }}
