@@ -169,10 +169,16 @@ class _S3SeekableIO(IO[bytes]):
         return self._closed
 
     def __next__(self):
-        return self.raw_stream.__next__()
+        # Route through readline() (not raw_stream.__next__()) so self._position is kept in sync with
+        # bytes actually consumed. Without this, a seek() following iteration computes offsets relative
+        # to a stale self._position, causing subsequent reads to silently return the wrong byte range.
+        line = self.readline()
+        if not line:
+            raise StopIteration
+        return line
 
     def __iter__(self):
-        return self.raw_stream.__iter__()
+        return self
 
     def __enter__(self):
         return self

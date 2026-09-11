@@ -163,6 +163,65 @@ def test_next(s3_seekable_obj, s3_client_stub):
         next(s3_seekable_obj)
 
 
+def test_next_advances_position(s3_seekable_obj, s3_client_stub):
+    payload = b"hello world\nworld hello"
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": streaming_body},
+        {"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+    )
+
+    assert next(s3_seekable_obj) == b"hello world\n"
+    # Regression: __next__ must advance self._position the same way read()/readline() do.
+    # Before the fix, __next__ delegated straight to raw_stream.__next__(), leaving
+    # self._position stuck at 0 -- so tell() (and any seek() relative to it) would be wrong.
+    assert s3_seekable_obj.tell() == len(b"hello world\n")
+
+    assert next(s3_seekable_obj) == b"world hello"
+    assert s3_seekable_obj.tell() == len(payload)
+
+    with pytest.raises(StopIteration):
+        next(s3_seekable_obj)
+
+
+def test_iter_returns_self(s3_seekable_obj):
+    # Standard Python iterator protocol: __iter__ must return the object itself, not a
+    # separate iterator over the underlying raw stream (which would bypass position tracking).
+    assert iter(s3_seekable_obj) is s3_seekable_obj
+
+
+def test_seek_after_iteration_uses_correct_range(s3_seekable_obj, s3_client_stub):
+    payload = b"hello world\nworld hello"
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": streaming_body},
+        {"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+    )
+
+    # Consume the stream via the iterator protocol (e.g. "for line in s3_object: ...")
+    consumed = list(s3_seekable_obj)
+    total_consumed = sum(len(line) for line in consumed)
+
+    # Seeking forward by 5 bytes from here must compute against the TRUE current position
+    # (total_consumed + 5), not a stale position left over from before iteration began.
+    s3_seekable_obj.seek(5, io.SEEK_CUR)
+
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": ""},
+        {
+            "Bucket": s3_seekable_obj.bucket,
+            "Key": s3_seekable_obj.key,
+            "Range": f"bytes={total_consumed + 5}-",
+        },
+    )
+    assert s3_seekable_obj.raw_stream is not None
+
+
 def test_context_manager(s3_seekable_obj, s3_client_stub):
     payload = b"test"
     streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
