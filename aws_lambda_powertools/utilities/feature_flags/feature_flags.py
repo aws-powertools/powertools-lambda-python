@@ -81,6 +81,9 @@ class FeatureFlags:
         self.store = store
         self.logger = logger or logging.getLogger(__name__)
         self._exception_handlers: dict[Exception, Callable] = {}
+        # Last document that passed schema validation. We keep a strong reference so its id() can't be
+        # recycled by a different object, which lets us safely skip re-validation on store cache hits.
+        self._last_validated_config: dict | None = None
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         try:
@@ -210,8 +213,17 @@ class FeatureFlags:
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: dict = self.store.get_configuration()
+
+        # Stores that serve from cache (e.g. AppConfigStore via Parameters) return the same dict object until
+        # expiry, so identity is a reliable signal that we've already validated this exact document.
+        # A store that applies an envelope returns a fresh object each time and will still be validated.
+        if config is self._last_validated_config:
+            self.logger.debug("Schema already validated, skipping validation")
+            return config
+
         validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
+        self._last_validated_config = config
 
         return config
 
