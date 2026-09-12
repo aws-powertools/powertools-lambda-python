@@ -365,3 +365,85 @@ def test_openapi_schema_includes_validation_errors():
     # THEN schema includes 422 response
     post_operation = schema.paths["/users"].post
     assert 422 in post_operation.responses
+
+
+async def _post_concurrent_request(app, name: str | None):
+    payload = {} if name is None else {"name": name, "age": 30}
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/concurrent",
+        "headers": [(b"content-type", b"application/json"), (b"x-request-name", (name or "invalid").encode())],
+        "query_string": b"",
+    }
+    send, captured = make_asgi_send()
+    await asyncio.wait_for(app(scope, make_asgi_receive(json.dumps(payload).encode()), send), timeout=5)
+    return captured["status_code"], json.loads(captured["body"])
+
+
+def test_concurrent_asgi_validation_preserves_each_request_body():
+    # GIVEN one local application using native request validation
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.post("/concurrent")
+    async def echo(user: UserModel) -> dict:
+        await asyncio.sleep(0)
+        return {"name": user.name}
+
+    async def scenario():
+        # WHEN distinct bodies are submitted concurrently
+        return await asyncio.gather(*(_post_concurrent_request(app, str(i)) for i in range(6)))
+
+    # THEN each caller receives its own input
+    assert asyncio.run(scenario()) == [(200, {"name": str(i)}) for i in range(6)]
+
+
+@pytest.mark.parametrize("interruption", ["invalid", "cancelled"])
+def test_interrupted_asgi_request_does_not_clear_another_requests_state(interruption):
+    async def scenario():
+        # GIVEN an active request that reads its context after awaiting I/O
+        app = HttpResolverLocal(enable_validation=True)
+        entered = {name: asyncio.Event() for name in ("first", "second", "later")}
+        release = {name: asyncio.Event() for name in entered}
+        pending = []
+
+        @app.post("/concurrent")
+        async def echo(user: UserModel) -> dict:
+            app.append_context(name=user.name)
+            entered[user.name].set()
+            await release[user.name].wait()
+            return {"name": app.context["name"], "header": app.current_event.headers["x-request-name"]}
+
+        async def start(name):
+            task = asyncio.create_task(_post_concurrent_request(app, name))
+            pending.append(task)
+            await asyncio.wait_for(entered[name].wait(), timeout=5)
+            return task
+
+        try:
+            first = await start("first")
+            # WHEN another request fails validation or an overlapping request is cancelled
+            if interruption == "invalid":
+                status, _ = await _post_concurrent_request(app, None)
+                assert status == 422
+                survivor, name = first, "first"
+            else:
+                survivor, name = await start("second"), "second"
+                first.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await first
+
+            # THEN the surviving request retains both context and headers
+            release[name].set()
+            assert await survivor == (200, {"name": name, "header": name})
+            release["later"].set()
+            assert await _post_concurrent_request(app, "later") == (200, {"name": "later", "header": "later"})
+        finally:
+            for event in release.values():
+                event.set()
+            for task in pending:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
+
+    asyncio.run(scenario())
