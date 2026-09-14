@@ -478,7 +478,7 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'START' and 'END' must be a non empty string, rule={rule_name}")
 
         # Using a regex instead of strptime because it's several orders of magnitude faster
-        if not TIME_RANGE_PATTERN.match(start_time) or not TIME_RANGE_PATTERN.match(end_time):
+        if not TIME_RANGE_PATTERN.fullmatch(start_time) or not TIME_RANGE_PATTERN.fullmatch(end_time):
             raise SchemaValidationError(
                 f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}",
             )

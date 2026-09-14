@@ -169,10 +169,12 @@ class _S3SeekableIO(IO[bytes]):
         return self._closed
 
     def __next__(self):
-        return self.raw_stream.__next__()
+        chunk = next(self.raw_stream)
+        self._position += len(chunk)
+        return chunk
 
     def __iter__(self):
-        return self.raw_stream.__iter__()
+        return self
 
     def __enter__(self):
         return self
