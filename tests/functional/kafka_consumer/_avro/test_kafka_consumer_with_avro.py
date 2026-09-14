@@ -8,6 +8,8 @@ from avro.io import BinaryEncoder, DatumWriter
 from avro.schema import parse as parse_schema
 
 from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+from aws_lambda_powertools.utilities.kafka.deserializer import deserializer as deserializer_factory
+from aws_lambda_powertools.utilities.kafka.deserializer.avro import AvroDeserializer
 from aws_lambda_powertools.utilities.kafka.exceptions import (
     KafkaConsumerAvroSchemaParserError,
     KafkaConsumerDeserializationError,
@@ -65,6 +67,23 @@ def avro_encoded_key(avro_key_schema):
     encoder = BinaryEncoder(bytes_writer)
     writer.write({"user_id": "user-123"}, encoder)
     return base64.b64encode(bytes_writer.getvalue()).decode("utf-8")
+
+
+SCHEMA_ID_PREFIX = b"\x00\x00\x00\x00\x01"
+
+
+def _prepend_prefix_to_base64(encoded: str, prefix: bytes = SCHEMA_ID_PREFIX) -> str:
+    return base64.b64encode(prefix + base64.b64decode(encoded)).decode("utf-8")
+
+
+@pytest.fixture
+def avro_encoded_value_with_prefix(avro_encoded_value):
+    return _prepend_prefix_to_base64(avro_encoded_value)
+
+
+@pytest.fixture
+def avro_encoded_key_with_prefix(avro_encoded_key):
+    return _prepend_prefix_to_base64(avro_encoded_key)
 
 
 @pytest.fixture
@@ -310,6 +329,178 @@ def test_kafka_consumer_without_avro_key_schema():
 
     # Verify the error message mentions 'key_schema'
     assert "key_schema" in str(excinfo.value)
+
+
+def test_kafka_consumer_avro_with_value_wire_format(
+    kafka_event_with_avro_data,
+    avro_encoded_value_with_prefix,
+    avro_value_schema,
+    lambda_context,
+):
+    # GIVEN An Avro payload with a 5-byte magic-byte + schema-ID prefix
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["value"] = avro_encoded_value_with_prefix
+
+    # AND a SchemaConfig instructed to validate and remove the Confluent header
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        value_schema_wire_format="CONFLUENT",
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    # WHEN The handler processes the event
+    result = handler(event, lambda_context)
+
+    # THEN The Avro body should be decoded correctly after the prefix is stripped
+    assert result["name"] == "John Doe"
+    assert result["age"] == 30
+
+
+def test_kafka_consumer_avro_with_key_and_value_wire_format(
+    kafka_event_with_avro_data,
+    avro_encoded_key_with_prefix,
+    avro_encoded_value_with_prefix,
+    avro_key_schema,
+    avro_value_schema,
+    lambda_context,
+):
+    # GIVEN Confluent-framed Avro key and value payloads
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["key"] = avro_encoded_key_with_prefix
+    event["records"]["my-topic-1"][0]["value"] = avro_encoded_value_with_prefix
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        key_schema_type="AVRO",
+        key_schema=avro_key_schema,
+        value_schema_wire_format="CONFLUENT",
+        key_schema_wire_format="CONFLUENT",
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        record = event.record
+        return record.key, record.value
+
+    # WHEN the handler processes both payloads
+    key, value = handler(event, lambda_context)
+
+    # THEN both headers are removed before Avro deserialization
+    assert key == {"user_id": "user-123"}
+    assert value == {"name": "John Doe", "age": 30}
+
+
+def test_kafka_consumer_rejects_short_confluent_header(
+    kafka_event_with_avro_data,
+    avro_value_schema,
+    lambda_context,
+):
+    event = deepcopy(kafka_event_with_avro_data)
+    event["records"]["my-topic-1"][0]["value"] = base64.b64encode(b"\x00\x00\x00\x00").decode("utf-8")
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        value_schema_wire_format="CONFLUENT",
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    with pytest.raises(KafkaConsumerDeserializationError, match="payload must contain a 5-byte header"):
+        handler(event, lambda_context)
+
+
+def test_kafka_consumer_rejects_invalid_confluent_magic_byte(
+    kafka_event_with_avro_data,
+    avro_encoded_value,
+    avro_value_schema,
+    lambda_context,
+):
+    event = deepcopy(kafka_event_with_avro_data)
+    invalid_prefix = b"\x01\x00\x00\x00\x01"
+    event["records"]["my-topic-1"][0]["value"] = _prepend_prefix_to_base64(
+        avro_encoded_value,
+        prefix=invalid_prefix,
+    )
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=avro_value_schema,
+        value_schema_wire_format="CONFLUENT",
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    with pytest.raises(KafkaConsumerDeserializationError, match="expected magic byte 0x00"):
+        handler(event, lambda_context)
+
+
+def test_schema_config_preserves_existing_positional_arguments(avro_value_schema, avro_key_schema):
+    config = SchemaConfig("AVRO", avro_value_schema, None, "AVRO", avro_key_schema, None)
+
+    assert config.value_schema_type == "AVRO"
+    assert config.value_schema == avro_value_schema
+    assert config.key_schema_type == "AVRO"
+    assert config.key_schema == avro_key_schema
+    assert config.value_schema_wire_format is None
+    assert config.key_schema_wire_format is None
+
+
+@pytest.mark.parametrize("prefix", ["value", "key"])
+def test_schema_config_rejects_wire_format_for_non_avro_schema(prefix):
+    kwargs = {
+        f"{prefix}_schema_type": "JSON",
+        f"{prefix}_schema_wire_format": "CONFLUENT",
+    }
+
+    with pytest.raises(ValueError, match=rf"{prefix}_schema_wire_format is supported only"):
+        SchemaConfig(**kwargs)
+
+
+def test_schema_config_rejects_unknown_wire_format(avro_value_schema):
+    with pytest.raises(ValueError, match="value_schema_wire_format must be 'CONFLUENT'"):
+        SchemaConfig(
+            value_schema_type="AVRO",
+            value_schema=avro_value_schema,
+            value_schema_wire_format="GLUE",  # type: ignore[arg-type]
+        )
+
+
+def test_avro_deserializer_rejects_unknown_wire_format(avro_value_schema, avro_encoded_value):
+    deserializer = AvroDeserializer(
+        avro_value_schema,
+        wire_format="GLUE",  # type: ignore[arg-type]
+    )
+
+    with pytest.raises(KafkaConsumerDeserializationError, match="Unsupported Avro wire format: GLUE"):
+        deserializer.deserialize(avro_encoded_value)
+
+
+def test_avro_deserializer_cache_includes_wire_format(monkeypatch, avro_value_schema):
+    monkeypatch.setattr(deserializer_factory, "_deserializer_cache", {})
+
+    plain = deserializer_factory.get_deserializer("AVRO", avro_value_schema, {})
+    confluent = deserializer_factory.get_deserializer(
+        "AVRO",
+        avro_value_schema,
+        {},
+        wire_format="CONFLUENT",
+    )
+
+    assert plain is not confluent
+    assert plain is deserializer_factory.get_deserializer("AVRO", avro_value_schema, {})
+    assert confluent is deserializer_factory.get_deserializer(
+        "AVRO",
+        avro_value_schema,
+        {},
+        wire_format="CONFLUENT",
+    )
 
 
 def test_kafka_consumer_avro_with_wrong_json_schema(
