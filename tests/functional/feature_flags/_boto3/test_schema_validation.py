@@ -526,6 +526,7 @@ def test_validate_time_condition_between_time_range_invalid_condition_value_inva
         {TimeValues.START.value: "10:00abc", TimeValues.END.value: "23:59"},  # trailing garbage
         {TimeValues.START.value: "abc10:00", TimeValues.END.value: "23:59"},  # leading garbage
         {TimeValues.START.value: "110:00", TimeValues.END.value: "23:59"},  # extra leading digit
+        {TimeValues.START.value: "10:00\n", TimeValues.END.value: "23:59"},  # trailing newline
     ],
 )
 def test_validate_time_condition_between_time_range_invalid_condition_value_invalid_start_time_value(cond_value):
@@ -554,6 +555,7 @@ def test_validate_time_condition_between_time_range_invalid_condition_value_inva
         {TimeValues.START.value: "10:11", TimeValues.END.value: "999:59"},
         {TimeValues.START.value: "10:11", TimeValues.END.value: "12:00abc"},  # trailing garbage
         {TimeValues.START.value: "10:11", TimeValues.END.value: "12:000"},  # extra trailing digit
+        {TimeValues.START.value: "10:11", TimeValues.END.value: "12:00\n"},  # trailing newline
     ],
 )
 def test_validate_time_condition_between_time_range_invalid_condition_value_invalid_end_time_value(cond_value):
