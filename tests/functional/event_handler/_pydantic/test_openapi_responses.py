@@ -456,3 +456,40 @@ def test_openapi_custom_status_code_all_methods():
     assert 204 in schema.paths["/items"].put.responses
     assert 204 in schema.paths["/items"].delete.responses
     assert 202 in schema.paths["/items"].patch.responses
+
+
+def test_openapi_custom_response_with_generic_alias_models():
+    # GIVEN routes whose custom response models are generic aliases
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Item(BaseModel):
+        id: int
+
+    @app.get(
+        "/items",
+        responses={200: {"description": "List of items", "content": {"application/json": {"model": list[Item]}}}},
+    )
+    def list_items() -> list[Item]:
+        return []
+
+    @app.get(
+        "/items/by-name",
+        responses={200: {"description": "Items by name", "content": {"application/json": {"model": dict[str, Item]}}}},
+    )
+    def items_by_name() -> dict[str, Item]:
+        return {}
+
+    # WHEN we retrieve the OpenAPI schema
+    schema = app.get_openapi_schema()
+
+    # THEN the list model should produce an array schema
+    list_response = schema.paths["/items"].get.responses[200]
+    assert list_response.description == "List of items"
+    list_schema = list_response.content["application/json"].schema_
+    assert list_schema.type == "array"
+    assert list_schema.items.ref == "#/components/schemas/Item"
+
+    # AND the dict model should produce an object schema
+    dict_schema = schema.paths["/items/by-name"].get.responses[200].content["application/json"].schema_
+    assert dict_schema.type == "object"
+    assert dict_schema.additionalProperties.ref == "#/components/schemas/Item"
