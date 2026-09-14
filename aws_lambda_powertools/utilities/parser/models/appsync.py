@@ -1,16 +1,16 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, Field
 
 
 class AppSyncIamIdentity(BaseModel):
     accountId: str = Field(description="The AWS account ID of the caller.", examples=["123456789012"])
-    cognitoIdentityPoolId: Optional[str] = Field(
+    cognitoIdentityPoolId: str | None = Field(
         default=None,
         description="The Amazon Cognito identity pool ID associated with the caller.",
         examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
     )
-    cognitoIdentityId: Optional[str] = Field(
+    cognitoIdentityId: str | None = Field(
         default=None,
         description="The Amazon Cognito identity ID of the caller.",
         examples=["us-east-1:12345678-1234-1234-1234-123456789012"],
@@ -29,12 +29,12 @@ class AppSyncIamIdentity(BaseModel):
         description="The Amazon Resource Name (ARN) of the IAM user.",
         examples=["arn:aws:iam::123456789012:user/appsync", "arn:aws:iam::123456789012:user/service-user"],
     )
-    cognitoIdentityAuthType: Optional[str] = Field(
+    cognitoIdentityAuthType: str | None = Field(
         default=None,
         description="Either authenticated or unauthenticated based on the identity type.",
         examples=["authenticated", "unauthenticated"],
     )
-    cognitoIdentityAuthProvider: Optional[str] = Field(
+    cognitoIdentityAuthProvider: str | None = Field(
         default=None,
         description=(
             "A comma-separated list of external identity provider information "
@@ -74,7 +74,7 @@ class AppSyncCognitoIdentity(BaseModel):
         description="The default authorization strategy for this caller (ALLOW or DENY).",
         examples=["ALLOW", "DENY"],
     )
-    groups: Optional[List[str]] = Field(
+    groups: List[str] | None = Field(
         default=None,
         description="The Cognito User Pool groups that the user belongs to.",
         examples=[["admin", "users"], ["developers"]],
@@ -115,7 +115,7 @@ AppSyncIdentity = Union[
 
 
 class AppSyncRequestModel(BaseModel):
-    domainName: Optional[str] = Field(
+    domainName: str | None = Field(
         default=None,
         description=(
             "The custom domain name used to access the GraphQL endpoint. "
@@ -190,11 +190,11 @@ class AppSyncResolverEventModel(BaseModel):
             {"page": 2, "size": 1, "name": "value"},
         ],
     )
-    identity: Optional[AppSyncIdentity] = Field(
+    identity: AppSyncIdentity | None = Field(
         default=None,
         description="Information about the caller identity (authenticated user or API key).",
     )
-    source: Optional[Dict[str, Any]] = Field(
+    source: Dict[str, Any] | None = Field(
         default=None,
         description="The parent object for the field. For top-level fields, this will be null.",
         examples=[
@@ -208,7 +208,7 @@ class AppSyncResolverEventModel(BaseModel):
     info: AppSyncInfoModel = Field(
         description="Information about the GraphQL request including selection set and field details.",
     )
-    prev: Optional[AppSyncPrevModel] = Field(
+    prev: AppSyncPrevModel | None = Field(
         default=None,
         description="Results from the previous resolver in a pipeline resolver.",
     )

@@ -1,5 +1,5 @@
 from secrets import randbelow
-from typing import Optional, Union
+from typing import Union
 
 from pydantic import BaseModel
 
@@ -325,7 +325,7 @@ def test_openapi_response_examples_preserved_with_model():
     class UserResponse(BaseModel):
         id: int
         name: str
-        email: Optional[str] = None
+        email: str | None = None
 
     @app.get(
         "/",

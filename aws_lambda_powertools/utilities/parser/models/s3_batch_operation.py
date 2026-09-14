@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal
 
 from pydantic import BaseModel, model_validator
 
@@ -6,9 +6,9 @@ from pydantic import BaseModel, model_validator
 class S3BatchOperationTaskModel(BaseModel):
     taskId: str
     s3Key: str
-    s3VersionId: Optional[str] = None
-    s3BucketArn: Optional[str] = None
-    s3Bucket: Optional[str] = None
+    s3VersionId: str | None = None
+    s3BucketArn: str | None = None
+    s3Bucket: str | None = None
 
     @model_validator(mode="before")
     def validate_s3bucket(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -20,7 +20,7 @@ class S3BatchOperationTaskModel(BaseModel):
 
 class S3BatchOperationJobModel(BaseModel):
     id: str
-    userArguments: Optional[Dict[str, Any]] = None
+    userArguments: Dict[str, Any] | None = None
 
 
 class S3BatchOperationModel(BaseModel):

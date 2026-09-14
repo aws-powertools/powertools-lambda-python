@@ -39,6 +39,10 @@ run-name: Layer Deployment (GovCloud) - ${{ inputs.environment }}
 permissions:
   contents: read
 
+concurrency:
+  group: layer-balancer-GovCloud-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   download:
     runs-on: ubuntu-latest
@@ -48,7 +52,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
           - AWSLambdaPowertoolsPythonV3-python312
@@ -60,7 +63,7 @@ jobs:
     environment: Prod (Readonly)
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
@@ -94,7 +97,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
           - AWSLambdaPowertoolsPythonV3-python312
@@ -118,7 +120,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-east-1
@@ -163,7 +165,6 @@ jobs:
     strategy:
       matrix:
         layer:
-          - AWSLambdaPowertoolsPythonV3-python39
           - AWSLambdaPowertoolsPythonV3-python310
           - AWSLambdaPowertoolsPythonV3-python311
           - AWSLambdaPowertoolsPythonV3-python312
@@ -188,7 +189,7 @@ jobs:
           SHA=$(jq -r '.Content.CodeSha256' '${{ matrix.layer }}_${{ matrix.arch }}.json')
           test "$(openssl dgst -sha256 -binary ${{ matrix.layer }}_${{ matrix.arch }}.zip | openssl enc -base64)" == "$SHA" && echo "SHA OK: ${SHA}" || exit 1
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-gov-west-1
