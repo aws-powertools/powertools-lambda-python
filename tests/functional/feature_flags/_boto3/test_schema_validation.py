@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import warnings
 
 import pytest
 
@@ -24,6 +25,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 EMPTY_SCHEMA = {"": ""}
 
@@ -34,9 +36,33 @@ def test_invalid_features_dict():
         validator.validate()
 
 
-def test_empty_features_not_fail():
+def test_empty_features_emits_warning():
     validator = SchemaValidator(schema={})
-    validator.validate()
+
+    with pytest.warns(PowertoolsUserWarning, match="Feature flags schema is empty"):
+        validator.validate()
+
+
+def test_features_not_empty_no_warning():
+    # GIVEN a well-formed document with rules
+    schema = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+            RULES_KEY: {
+                "tenant match": {
+                    RULE_MATCH_VALUE: True,
+                    CONDITIONS_KEY: [
+                        {CONDITION_ACTION: RuleAction.EQUALS.value, CONDITION_KEY: "tenant_id", CONDITION_VALUE: "6"},
+                    ],
+                },
+            },
+        },
+    }
+
+    # WHEN validating, THEN no warning is emitted
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
+        SchemaValidator(schema).validate()
 
 
 @pytest.mark.parametrize(
@@ -59,12 +85,49 @@ def test_valid_feature_dict():
     # empty rules list
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: []}}
     validator = SchemaValidator(schema)
-    validator.validate()
+    with pytest.warns(PowertoolsUserWarning, match="empty list"):
+        validator.validate()
 
     # no rules list at all
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
     validator = SchemaValidator(schema)
     validator.validate()
+
+
+@pytest.mark.parametrize(
+    "rules, expected_message",
+    [
+        pytest.param({}, "Feature has 'rules' but it is empty, feature=my_feature", id="empty_dict"),
+        pytest.param(None, "Feature has 'rules' but it is empty, feature=my_feature", id="none"),
+        pytest.param(
+            [],
+            "Feature 'rules' should be a dictionary but is an empty list, feature=my_feature",
+            id="empty_list",
+        ),
+        pytest.param(
+            "",
+            "Feature 'rules' should be a dictionary but is an empty str, feature=my_feature",
+            id="empty_str",
+        ),
+    ],
+)
+def test_feature_with_empty_rules_emits_warning(rules, expected_message):
+    # GIVEN a feature whose 'rules' key is present but falsy
+    schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: rules}}
+
+    # WHEN validating, THEN a warning naming the feature is emitted and nothing is raised
+    with pytest.warns(PowertoolsUserWarning, match=re.escape(expected_message)):
+        SchemaValidator(schema).validate()
+
+
+def test_feature_without_rules_key_no_warning():
+    # GIVEN a feature that simply omits 'rules'
+    schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
+
+    # WHEN validating, THEN no warning is emitted; omitting rules is the documented way to declare a static flag
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
+        SchemaValidator(schema).validate()
 
 
 def test_invalid_feature_default_value_is_not_boolean():
@@ -87,7 +150,10 @@ def test_invalid_rule():
         },
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(SchemaValidationError):
+    with pytest.raises(
+        SchemaValidationError,
+        match="Feature rules must be a dictionary, feature=my_feature",
+    ):
         validator.validate()
 
     # rules RULE_MATCH_VALUE is not bool

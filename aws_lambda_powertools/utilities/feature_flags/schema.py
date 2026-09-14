@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache
@@ -10,6 +11,7 @@ from dateutil import tz
 
 from aws_lambda_powertools.utilities.feature_flags.base import BaseValidator
 from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging import Logger
@@ -212,6 +214,16 @@ class SchemaValidator(BaseValidator):
         if not isinstance(self.schema, dict):
             raise SchemaValidationError(f"Features must be a dictionary, schema={str(self.schema)}")
 
+        if not self.schema:
+            # Often the result of an envelope query that matched nothing (e.g. a typo'd feature name).
+            # Harmless for evaluation, so warn rather than raise.
+            warnings.warn(
+                "Feature flags schema is empty, no features to validate",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
+
         features = FeaturesValidator(schema=self.schema, logger=self.logger)
         features.validate()
 
@@ -232,7 +244,12 @@ class FeaturesValidator(BaseValidator):
         for name, feature in self.schema.items():
             self.logger.debug(f"Attempting to validate feature '{name}'")
             boolean_feature: bool = self.validate_feature(name, feature)
-            rules = RulesValidator(feature=feature, boolean_feature=boolean_feature, logger=self.logger)
+            rules = RulesValidator(
+                feature=feature,
+                boolean_feature=boolean_feature,
+                logger=self.logger,
+                feature_name=name,
+            )
             rules.validate()
 
     # returns True in case the feature is a regular feature flag with a  boolean default value
@@ -260,16 +277,35 @@ class RulesValidator(BaseValidator):
         feature: dict[str, Any],
         boolean_feature: bool,
         logger: logging.Logger | Logger | None = None,
+        feature_name: str | None = None,
     ):
         self.feature = feature
-        self.feature_name = next(iter(self.feature))
+        self.feature_name = feature_name if feature_name is not None else next(iter(self.feature))
         self.rules: dict | None = self.feature.get(RULES_KEY)
         self.logger = logger or LOGGER
         self.boolean_feature = boolean_feature
 
     def validate(self):
         if not self.rules:
-            self.logger.debug("Rules are empty, ignoring validation")
+            if RULES_KEY in self.feature:
+                # 'rules' was authored but is empty (e.g. {}, [], None). Evaluation falls back to 'default',
+                # so this is harmless, but it likely signals a mistake. A non-dict type is called out separately
+                # because a non-empty value of that type would be rejected below.
+                if isinstance(self.rules, dict) or self.rules is None:
+                    warnings.warn(
+                        f"Feature has 'rules' but it is empty, feature={self.feature_name}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
+                    )
+                else:
+                    warnings.warn(
+                        f"Feature 'rules' should be a dictionary but is an empty {type(self.rules).__name__}, "
+                        f"feature={self.feature_name}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
+                    )
+            else:
+                self.logger.debug("Rules are empty, ignoring validation")
             return
 
         if not isinstance(self.rules, dict):
