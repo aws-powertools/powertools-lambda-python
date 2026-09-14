@@ -5,7 +5,7 @@ import warnings
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Tuple, Union
 
 import pytest
 from pydantic import (
@@ -88,7 +88,7 @@ def test_validate_pydantic_query_params(gw_event):
 
     class QueryParams(BaseModel):
         limit: int = Field(default=10, ge=1, le=100, description="Number of items")
-        search: Optional[str] = Field(default=None, description="Search term")
+        search: str | None = Field(default=None, description="Search term")
 
     @app.get("/search")
     def search_handler(params: Annotated[QueryParams, Query()]):
@@ -1777,7 +1777,7 @@ def test_none_returned_for_optional_type(gw_event):
         age: int
 
     @app.get("/none_allowed")
-    def handler_none_allowed() -> Optional[Model]:
+    def handler_none_allowed() -> Model | None:
         return None
 
     # WHEN returning None for an Optional type
@@ -3123,15 +3123,15 @@ def _post_json(app, path, payload):
     return result["statusCode"], json.loads(result["body"])
 
 
-# ---------- Optional[List[Model]] ----------
+# ---------- List[Model] | None ----------
 
 
 def test_optional_list_body_with_list():
-    """Optional[List[Model]] must preserve the full list."""
+    """List[Model] | None must preserve the full list."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[List[_Item]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[List[_Item] | None, Body()]) -> Dict[str, Any]:
         assert isinstance(items, list)
         return {"count": len(items)}
 
@@ -3141,11 +3141,11 @@ def test_optional_list_body_with_list():
 
 
 def test_optional_list_body_with_none():
-    """Optional[List[Model]] must accept a null body gracefully."""
+    """List[Model] | None must accept a null body gracefully."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[List[_Item]], Body()] = None) -> Dict[str, Any]:
+    def handler(items: Annotated[List[_Item] | None, Body()] = None) -> Dict[str, Any]:
         return {"received_none": items is None}
 
     status, body = _post_json(app, "/items", None)
@@ -3153,15 +3153,15 @@ def test_optional_list_body_with_none():
     assert body["received_none"] is True
 
 
-# ---------- Optional[Union[Model, List[Model]]] ----------
+# ---------- Union[Model, List[Model]] | None ----------
 
 
 def test_optional_union_model_or_list_with_list():
-    """Optional[Union[Model, List[Model]]] — send list, get full list."""
+    """Union[Model, List[Model]] | None — send list, get full list."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()]) -> Dict[str, Any]:
         assert isinstance(items, list)
         return {"count": len(items)}
 
@@ -3171,11 +3171,11 @@ def test_optional_union_model_or_list_with_list():
 
 
 def test_optional_union_model_or_list_with_single():
-    """Optional[Union[Model, List[Model]]] — send single obj, get single obj."""
+    """Union[Model, List[Model]] | None — send single obj, get single obj."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()]) -> Dict[str, Any]:
         assert not isinstance(items, list)
         return {"name": items.name}
 
@@ -3185,11 +3185,11 @@ def test_optional_union_model_or_list_with_single():
 
 
 def test_optional_union_model_or_list_with_none():
-    """Optional[Union[Model, List[Model]]] — send null, get None."""
+    """Union[Model, List[Model]] | None — send null, get None."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()] = None) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()] = None) -> Dict[str, Any]:
         return {"is_none": items is None}
 
     status, body = _post_json(app, "/items", None)
@@ -3288,11 +3288,11 @@ def test_union_str_or_list_dict():
 
 
 def test_optional_rootmodel_list_body():
-    """Optional[RootModel[List[Model]]] — list must not be truncated."""
+    """RootModel[List[Model]] | None — list must not be truncated."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[_ItemCollection], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[_ItemCollection | None, Body()]) -> Dict[str, Any]:
         return {"count": len(items.root)}
 
     status, body = _post_json(app, "/items", _THREE_ITEMS)

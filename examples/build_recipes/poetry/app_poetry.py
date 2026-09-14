@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 from aws_lambda_powertools import Logger, Metrics, Tracer
@@ -16,7 +14,7 @@ app = APIGatewayRestResolver()
 class UserModel(BaseModel):
     name: str
     email: str
-    age: Optional[int] = None
+    age: int | None = None
 
 
 @app.post("/users")
