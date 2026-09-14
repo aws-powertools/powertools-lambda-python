@@ -10,6 +10,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.event_handler import HttpResolverLocal
+from aws_lambda_powertools.event_handler.api_gateway import Router
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 from aws_lambda_powertools.event_handler.openapi.params import Query
 
@@ -396,6 +397,44 @@ def test_concurrent_asgi_validation_preserves_each_request_body():
 
     # THEN each caller receives its own input
     assert asyncio.run(scenario()) == [(200, {"name": str(i)}) for i in range(6)]
+
+
+def _make_included_router_app():
+    app = HttpResolverLocal(enable_validation=True)
+    router = Router()
+
+    @router.post("/concurrent")
+    async def echo(user: UserModel) -> dict:
+        app.append_context(name=user.name)
+        await asyncio.sleep(0)
+        return {
+            "name": router.context["name"],
+            "header": router.current_event.headers["x-request-name"],
+            "request_id": router.lambda_context.aws_request_id,
+        }
+
+    app.include_router(router)
+    return app
+
+
+def test_asgi_included_router_uses_request_state():
+    app = _make_included_router_app()
+
+    assert asyncio.run(_post_concurrent_request(app, "one")) == (
+        200,
+        {"name": "one", "header": "one", "request_id": "local-request-id"},
+    )
+
+
+def test_concurrent_asgi_included_router_preserves_request_state():
+    app = _make_included_router_app()
+
+    async def scenario():
+        return await asyncio.gather(*(_post_concurrent_request(app, str(i)) for i in range(6)))
+
+    assert asyncio.run(scenario()) == [
+        (200, {"name": str(i), "header": str(i), "request_id": "local-request-id"}) for i in range(6)
+    ]
 
 
 @pytest.mark.parametrize("interruption", ["invalid", "cancelled"])
