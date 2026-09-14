@@ -286,9 +286,8 @@ class MetricManager:
                 f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}.",
             )
         # Cast value to str according to EMF spec
-        # Majority of values are expected to be string already, so
-        # checking before casting improves performance in most cases
-        self.dimension_set[name] = value if isinstance(value, str) else str(value)
+        # Majority of values are expected to be string already
+        self.dimension_set[name] = str(value)
 
     def add_metadata(self, key: str, value: Any) -> None:
         """Adds high cardinal metadata for metrics object
@@ -315,12 +314,8 @@ class MetricManager:
         logger.debug(f"Adding metadata: {key}:{value}")
 
         # Cast key to str according to EMF spec
-        # Majority of keys are expected to be string already, so
-        # checking before casting improves performance in most cases
-        if isinstance(key, str):
-            self.metadata_set[key] = value
-        else:
-            self.metadata_set[str(key)] = value
+        # Majority of keys are expected to be string already
+        self.metadata_set[str(key)] = value
 
     def set_timestamp(self, timestamp: int | datetime.datetime):
         """

@@ -1221,6 +1221,28 @@ def test_log_metrics_with_default_dimensions(capsys, metrics, dimensions, namesp
     assert "environment" in second_invocation
 
 
+def test_flush_metrics_with_default_dimensions(capsys, metrics, dimensions, namespace):
+    # GIVEN a Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN we add_metric and flush_metrics
+    # THEN we should have no warnings
+    with warnings.catch_warnings(record=True) as w:
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+        assert not w
+
+    with warnings.catch_warnings(record=True) as w:
+        my_metrics.flush_metrics()
+        assert not w
+
+    # THEN we should have default dimensions in output
+    output = capture_metrics_output(capsys)
+    assert "environment" in output
+    assert "log_group" in output
+
+
 def test_metrics_reuse_dimension_set(metric, dimension, namespace):
     # GIVEN Metrics is initialized with a metric and dimension
     my_metrics = Metrics(namespace=namespace)
