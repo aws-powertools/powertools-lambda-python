@@ -3035,20 +3035,17 @@ class ApiGatewayResolver(BaseRouter):
             An optional prefix to be added to the originally defined rule
         """
 
-        # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
-        router.api_resolver = self
-
         logger.debug("Merging App context with Router context")
         self.context.update(**router.context)
+
+        # Delegate request state to the resolver after preserving the router context.
+        router.api_resolver = self
 
         logger.debug("Appending Router middlewares into App middlewares.")
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
         logger.debug("Appending Router exception_handler into App exception_handler.")
         self.exception_handler_manager.update_exception_handlers(router._exception_handlers)
-
-        # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
-        router.context = self.context
 
         # Iterate through the routes defined in the router to configure and apply middlewares for each route
         for route, func in router._routes.items():
@@ -3112,8 +3109,47 @@ class Router(BaseRouter):
         self._routes: dict[tuple, Callable] = {}
         self._routes_with_middleware: dict[tuple, list[Callable]] = {}
         self.api_resolver: BaseRouter | None = None
-        self.context = {}  # early init as customers might add context before event resolution
+        self._context: dict = {}  # early init as customers might add context before event resolution
         self._exception_handlers: dict[type, Callable] = {}
+
+    @property
+    def current_event(self) -> BaseProxyEvent:
+        if self.api_resolver is not None:
+            return self.api_resolver.current_event
+        return BaseRouter.current_event
+
+    @current_event.setter
+    def current_event(self, value: BaseProxyEvent) -> None:
+        if self.api_resolver is not None:
+            self.api_resolver.current_event = value
+        else:
+            BaseRouter.current_event = value
+
+    @property
+    def lambda_context(self) -> LambdaContext:
+        if self.api_resolver is not None:
+            return self.api_resolver.lambda_context
+        return BaseRouter.lambda_context
+
+    @lambda_context.setter
+    def lambda_context(self, value: LambdaContext) -> None:
+        if self.api_resolver is not None:
+            self.api_resolver.lambda_context = value
+        else:
+            BaseRouter.lambda_context = value
+
+    @property
+    def context(self) -> dict:
+        if self.api_resolver is not None:
+            return self.api_resolver.context
+        return self._context
+
+    @context.setter
+    def context(self, value: dict) -> None:
+        if self.api_resolver is not None:
+            self.api_resolver.context = value
+        else:
+            self._context = value
 
     def route(
         self,
