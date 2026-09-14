@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import logging
 import re
+import warnings
 
 import pytest
 
@@ -25,6 +25,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 EMPTY_SCHEMA = {"": ""}
 
@@ -35,26 +36,14 @@ def test_invalid_features_dict():
         validator.validate()
 
 
-def test_empty_features_not_fail():
-    validator = SchemaValidator(schema={})
-    validator.validate()
-
-
-def test_empty_features_emits_warning(caplog):
-    # GIVEN an empty top-level document, e.g. the result of an envelope query that matched nothing
+def test_empty_features_emits_warning():
     validator = SchemaValidator(schema={})
 
-    # WHEN validating
-    with caplog.at_level(logging.WARNING):
+    with pytest.warns(PowertoolsUserWarning, match="Feature flags schema is empty"):
         validator.validate()
 
-    # THEN a warning is emitted and nothing is raised
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelno == logging.WARNING
-    assert "schema is empty" in caplog.records[0].getMessage()
 
-
-def test_features_not_empty_no_warning(caplog):
+def test_features_not_empty_no_warning():
     # GIVEN a well-formed document with rules
     schema = {
         "my_feature": {
@@ -70,12 +59,10 @@ def test_features_not_empty_no_warning(caplog):
         },
     }
 
-    # WHEN validating
-    with caplog.at_level(logging.WARNING):
+    # WHEN validating, THEN no warning is emitted
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
         SchemaValidator(schema).validate()
-
-    # THEN no warning is emitted
-    assert not caplog.records
 
 
 @pytest.mark.parametrize(
@@ -98,7 +85,8 @@ def test_valid_feature_dict():
     # empty rules list
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: []}}
     validator = SchemaValidator(schema)
-    validator.validate()
+    with pytest.warns(PowertoolsUserWarning, match="empty list"):
+        validator.validate()
 
     # no rules list at all
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
@@ -123,30 +111,23 @@ def test_valid_feature_dict():
         ),
     ],
 )
-def test_feature_with_empty_rules_emits_warning(caplog, rules, expected_message):
+def test_feature_with_empty_rules_emits_warning(rules, expected_message):
     # GIVEN a feature whose 'rules' key is present but falsy
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False, RULES_KEY: rules}}
 
-    # WHEN validating
-    with caplog.at_level(logging.WARNING):
+    # WHEN validating, THEN a warning naming the feature is emitted and nothing is raised
+    with pytest.warns(PowertoolsUserWarning, match=re.escape(expected_message)):
         SchemaValidator(schema).validate()
 
-    # THEN a warning naming the feature is emitted and nothing is raised
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelno == logging.WARNING
-    assert caplog.records[0].getMessage() == expected_message
 
-
-def test_feature_without_rules_key_no_warning(caplog):
+def test_feature_without_rules_key_no_warning():
     # GIVEN a feature that simply omits 'rules'
     schema = {"my_feature": {FEATURE_DEFAULT_VAL_KEY: False}}
 
-    # WHEN validating
-    with caplog.at_level(logging.WARNING):
+    # WHEN validating, THEN no warning is emitted; omitting rules is the documented way to declare a static flag
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
         SchemaValidator(schema).validate()
-
-    # THEN no warning is emitted; omitting rules is the documented way to declare a static flag
-    assert not caplog.records
 
 
 def test_invalid_feature_default_value_is_not_boolean():
@@ -169,7 +150,10 @@ def test_invalid_rule():
         },
     }
     validator = SchemaValidator(schema)
-    with pytest.raises(SchemaValidationError):
+    with pytest.raises(
+        SchemaValidationError,
+        match="Feature rules must be a dictionary, feature=my_feature",
+    ):
         validator.validate()
 
     # rules RULE_MATCH_VALUE is not bool

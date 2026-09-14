@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from datetime import datetime
 from enum import Enum
 from functools import lru_cache
@@ -10,6 +11,7 @@ from dateutil import tz
 
 from aws_lambda_powertools.utilities.feature_flags.base import BaseValidator
 from aws_lambda_powertools.utilities.feature_flags.exceptions import SchemaValidationError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.logging import Logger
@@ -215,7 +217,11 @@ class SchemaValidator(BaseValidator):
         if not self.schema:
             # Often the result of an envelope query that matched nothing (e.g. a typo'd feature name).
             # Harmless for evaluation, so warn rather than raise.
-            self.logger.warning("Feature flags schema is empty, no features to validate")
+            warnings.warn(
+                "Feature flags schema is empty, no features to validate",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
             return
 
         features = FeaturesValidator(schema=self.schema, logger=self.logger)
@@ -286,11 +292,17 @@ class RulesValidator(BaseValidator):
                 # so this is harmless, but it likely signals a mistake. A non-dict type is called out separately
                 # because a non-empty value of that type would be rejected below.
                 if isinstance(self.rules, dict) or self.rules is None:
-                    self.logger.warning(f"Feature has 'rules' but it is empty, feature={self.feature_name}")
+                    warnings.warn(
+                        f"Feature has 'rules' but it is empty, feature={self.feature_name}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
+                    )
                 else:
-                    self.logger.warning(
+                    warnings.warn(
                         f"Feature 'rules' should be a dictionary but is an empty {type(self.rules).__name__}, "
                         f"feature={self.feature_name}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
                     )
             else:
                 self.logger.debug("Rules are empty, ignoring validation")
