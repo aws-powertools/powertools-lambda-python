@@ -145,14 +145,14 @@ markers = {main = "extra == \"valkey\" or extra == \"all\" or extra == \"datamas
 
 [[package]]
 name = "avro"
-version = "1.12.1"
+version = "1.12.2"
 description = "Avro is a serialization and RPC framework."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "avro-1.12.1-py2.py3-none-any.whl", hash = "sha256:970475dd6457924533966fe761be607c759d5a48390cc8fbed472f7c9a8868f2"},
-    {file = "avro-1.12.1.tar.gz", hash = "sha256:c5b8dd2dd4c10816f0dc127cc29cfd43b5e405cf7e6840e89460a024bf3d098d"},
+    {file = "avro-1.12.2-py3-none-any.whl", hash = "sha256:bcbed5da65d298cb4ceb1e61f1a61b5b9fb180049c904f4045022338a95bf686"},
+    {file = "avro-1.12.2.tar.gz", hash = "sha256:e900e7b59a4781f63d9e935e88f6ec50c4d60be3f4adf9c63b51ed39d578fe08"},
 ]
 markers = {main = "extra == \"kafka-consumer-avro\""}
 
