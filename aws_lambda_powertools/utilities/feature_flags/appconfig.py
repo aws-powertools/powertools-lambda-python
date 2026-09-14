@@ -86,6 +86,10 @@ class AppConfigStore(StoreProvider):
             boto3_client=boto3_client,
             boto3_session=boto3_session,
         )
+        # Memoised envelope extraction: (raw document, extracted config). The Parameters cache hands back the
+        # same raw dict until expiry, so we can reuse the extracted result rather than re-running the JMESPath
+        # query and producing a new object on every call.
+        self._last_extracted: tuple[dict[str, Any], dict[str, Any]] | None = None
 
         # Override the user agent to use "feature_flags" instead of "parameters"
         self._register_feature_flags_user_agent()
@@ -140,11 +144,17 @@ class AppConfigStore(StoreProvider):
         config = self.get_raw_configuration
 
         if self.envelope:
+            if self._last_extracted is not None and self._last_extracted[0] is config:
+                self.logger.debug("Envelope enabled; reusing previously extracted config for cached document")
+                return self._last_extracted[1]
+
             self.logger.debug("Envelope enabled; extracting data from config", extra={"envelope": self.envelope})
-            config = jmespath_utils.query(
+            extracted = jmespath_utils.query(
                 data=config,
                 envelope=self.envelope,
                 jmespath_options=self.jmespath_options,
             )
+            self._last_extracted = (config, extracted)
+            return extracted
 
         return config
