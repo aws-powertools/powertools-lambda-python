@@ -10,7 +10,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.event_handler import HttpResolverLocal
-from aws_lambda_powertools.event_handler.api_gateway import Router
+from aws_lambda_powertools.event_handler.api_gateway import BaseRouter, Router
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 from aws_lambda_powertools.event_handler.openapi.params import Query
 
@@ -435,6 +435,60 @@ def test_concurrent_asgi_included_router_preserves_request_state():
     assert asyncio.run(scenario()) == [
         (200, {"name": str(i), "header": str(i), "request_id": "local-request-id"}) for i in range(6)
     ]
+
+
+def test_router_state_before_inclusion(monkeypatch):
+    app = HttpResolverLocal()
+    router = Router()
+    event = app._to_proxy_event(
+        {
+            "httpMethod": "GET",
+            "path": "/router",
+            "headers": {},
+            "queryStringParameters": {},
+            "multiValueQueryStringParameters": {},
+            "body": None,
+        },
+    )
+    context = MockLambdaContext()
+
+    monkeypatch.setattr(BaseRouter, "current_event", None, raising=False)
+    monkeypatch.setattr(BaseRouter, "lambda_context", None, raising=False)
+
+    router.current_event = event
+    router.lambda_context = context
+    router.context = {"source": "router"}
+
+    assert router.current_event is event
+    assert router.lambda_context is context
+    assert router.context == {"source": "router"}
+
+
+def test_included_router_delegates_state_writes():
+    app = HttpResolverLocal()
+    router = Router()
+    router.context = {"before": "include"}
+    app.include_router(router)
+
+    event = app._to_proxy_event(
+        {
+            "httpMethod": "GET",
+            "path": "/router",
+            "headers": {},
+            "queryStringParameters": {},
+            "multiValueQueryStringParameters": {},
+            "body": None,
+        },
+    )
+    context = MockLambdaContext()
+
+    router.current_event = event
+    router.lambda_context = context
+    router.context = {"source": "resolver"}
+
+    assert app.current_event is event
+    assert app.lambda_context is context
+    assert app.context == {"source": "resolver"}
 
 
 @pytest.mark.parametrize("interruption", ["invalid", "cancelled"])
