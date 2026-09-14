@@ -177,8 +177,10 @@ def test_abs_lambda_path_w_filename_envvar(default_lambda_path):
     # Given Env is set and relative_path provided
     relative_path = "cert/pub.cert"
     os.environ["LAMBDA_TASK_ROOT"] = default_lambda_path
-    # Then path = env + relative_path
-    assert abs_lambda_path(relative_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relative_path))
+    # Then path = env + relative_path, joined with POSIX separators on every platform because the
+    # Lambda runtime is Linux. Building the expectation with Path() would hide a native-separator
+    # rewrite, since both sides would be rewritten the same way.
+    assert abs_lambda_path(relative_path=relative_path) == f"{default_lambda_path}/{relative_path}"
 
 
 def test_sanitize_xray_segment_name():

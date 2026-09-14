@@ -7,7 +7,7 @@ import os
 import re
 import warnings
 from binascii import Error as BinAsciiError
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 from aws_lambda_powertools.shared import constants
@@ -280,10 +280,17 @@ def abs_lambda_path(relative_path: str = "") -> str:
         Otherwise, it will use the current working directory.
         If the path is empty, it will return the current working directory.
     """
-    # Retrieve the LAMBDA_TASK_ROOT environment variable or default to an empty string
-    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "") or str(Path.cwd())
+    # The Lambda runtime is Linux, so LAMBDA_TASK_ROOT is always a POSIX path. Joining it with
+    # pathlib.Path rewrites it with the separators of whatever platform this code runs on, so a
+    # developer running the suite on Windows would get "\var\task" instead of "/var/task".
+    # PurePosixPath keeps the value the runtime gave us intact on every platform.
+    lambda_task_root = os.environ.get("LAMBDA_TASK_ROOT", "")
+    if lambda_task_root:
+        return str(PurePosixPath(lambda_task_root, relative_path))
 
-    return str(Path(current_working_directory, relative_path))
+    # Off Lambda there is no task root, so fall back to the current working directory and let
+    # pathlib use the local platform's separators.
+    return str(Path(Path.cwd(), relative_path))
 
 
 def sanitize_xray_segment_name(name: str) -> str:
