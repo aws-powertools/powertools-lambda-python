@@ -145,14 +145,14 @@ markers = {main = "extra == \"valkey\" or extra == \"all\" or extra == \"datamas
 
 [[package]]
 name = "avro"
-version = "1.12.1"
+version = "1.12.2"
 description = "Avro is a serialization and RPC framework."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "avro-1.12.1-py2.py3-none-any.whl", hash = "sha256:970475dd6457924533966fe761be607c759d5a48390cc8fbed472f7c9a8868f2"},
-    {file = "avro-1.12.1.tar.gz", hash = "sha256:c5b8dd2dd4c10816f0dc127cc29cfd43b5e405cf7e6840e89460a024bf3d098d"},
+    {file = "avro-1.12.2-py3-none-any.whl", hash = "sha256:bcbed5da65d298cb4ceb1e61f1a61b5b9fb180049c904f4045022338a95bf686"},
+    {file = "avro-1.12.2.tar.gz", hash = "sha256:e900e7b59a4781f63d9e935e88f6ec50c4d60be3f4adf9c63b51ed39d578fe08"},
 ]
 markers = {main = "extra == \"kafka-consumer-avro\""}
 
@@ -327,15 +327,15 @@ publication = ">=0.0.3"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "4.0.6"
+version = "4.0.7"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"datamasking\""
 files = [
-    {file = "aws_encryption_sdk-4.0.6-py2.py3-none-any.whl", hash = "sha256:35f62f775a8d4a6cb677a4a8927bb19acb3da35308405213f668396ee6298ad4"},
-    {file = "aws_encryption_sdk-4.0.6.tar.gz", hash = "sha256:ec03bfa2df64ef21417bd6ff749bb63e84149586a4f7fbe528ec6b443326ea9e"},
+    {file = "aws_encryption_sdk-4.0.7-py2.py3-none-any.whl", hash = "sha256:5cf36bd8ecfa35cc87dfaba91910bd999bb211588172c3fcc8273f9cb54cf776"},
+    {file = "aws_encryption_sdk-4.0.7.tar.gz", hash = "sha256:3fa7d2e799f34e841e31aed3d725054bdcdda7b1578066d0a9b7c65bd192e594"},
 ]
 
 [package.dependencies]
@@ -345,7 +345,7 @@ cryptography = ">=3.4.6"
 wrapt = ">=1.10.11"
 
 [package.extras]
-mpl = ["aws-cryptographic-material-providers (>=1.7.4,<=1.11.2)"]
+mpl = ["aws-cryptographic-material-providers (>=1.7.4,<=1.11.3)"]
 
 [[package]]
 name = "aws-requests-auth"
@@ -4898,14 +4898,14 @@ types-cffi = "*"
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.9.0.20260518"
+version = "2.9.0.20260807"
 description = "Typing stubs for python-dateutil"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_python_dateutil-2.9.0.20260518-py3-none-any.whl", hash = "sha256:d6a9c5bd0de61460c8fdef8ab2b400f956a1a1075cce08d4e2b4434e478c50b8"},
-    {file = "types_python_dateutil-2.9.0.20260518.tar.gz", hash = "sha256:51f02dc03b61c7f6a07df45797d4dfe8a1aa47f0b7db9ad89f6fd3a1a70e1b51"},
+    {file = "types_python_dateutil-2.9.0.20260807-py3-none-any.whl", hash = "sha256:54aa3707350ed7a9cc0776fd2f6739679d6967d11b40150985e81edcb86df4db"},
+    {file = "types_python_dateutil-2.9.0.20260807.tar.gz", hash = "sha256:e0b8a90d464c8684c66b7b8e4556d9074afdddcc56ca45323f0987134f9e7034"},
 ]
 
 [[package]]
