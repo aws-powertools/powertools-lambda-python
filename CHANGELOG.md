@@ -5,15 +5,44 @@
 # Unreleased
 
 
+<a name="v3.35.0"></a>
+## [v3.35.0] - 2026-09-15
+## Maintenance
+
+* version bump
+* **deps:** bump valkey-glide from 2.5.1 to 2.5.2 ([#8459](https://github.com/aws-powertools/powertools-lambda-python/issues/8459))
+
+
 <a name="v3.34.0"></a>
 ## [v3.34.0] - 2026-08-10
 ## Bug Fixes
 
 * **event_handler:** omit Content-Type header from OpenAPI ([#8374](https://github.com/aws-powertools/powertools-lambda-python/issues/8374))
+* **tracer:** declare in_subsegment_async as an async context manager ([#8367](https://github.com/aws-powertools/powertools-lambda-python/issues/8367))
+
+## Features
+
+* promote circuit breaker to GA ([#8373](https://github.com/aws-powertools/powertools-lambda-python/issues/8373))
 
 ## Maintenance
 
 * version bump
+* **deps:** bump aws-cdk-lib from 2.223.0 to 2.253.0 in /layer_v3 ([#8360](https://github.com/aws-powertools/powertools-lambda-python/issues/8360))
+* **deps:** bump pymdown-extensions from 11.0 to 11.0.1 in /docs ([#8370](https://github.com/aws-powertools/powertools-lambda-python/issues/8370))
+* **deps:** bump gitpython from 3.1.50 to 3.1.57 in /docs ([#8362](https://github.com/aws-powertools/powertools-lambda-python/issues/8362))
+* **deps:** bump cryptography from 48.0.1 to 50.0.0 ([#8364](https://github.com/aws-powertools/powertools-lambda-python/issues/8364))
+* **deps:** bump valkey-glide from 2.4.1 to 2.5.0 ([#8345](https://github.com/aws-powertools/powertools-lambda-python/issues/8345))
+* **deps:** bump mkdocstrings-python from 1.19.0 to 2.0.5 ([#8344](https://github.com/aws-powertools/powertools-lambda-python/issues/8344))
+* **deps:** bump gitpython from 3.1.57 to 3.1.58 in /docs ([#8368](https://github.com/aws-powertools/powertools-lambda-python/issues/8368))
+* **deps:** bump aws-encryption-sdk from 4.0.5 to 4.0.6 ([#8346](https://github.com/aws-powertools/powertools-lambda-python/issues/8346))
+* **deps:** bump the github-actions group across 1 directory with 9 updates ([#8357](https://github.com/aws-powertools/powertools-lambda-python/issues/8357))
+* **deps:** bump pymdown-extensions from 10.21.3 to 11.0 in /docs ([#8358](https://github.com/aws-powertools/powertools-lambda-python/issues/8358))
+* **deps-dev:** bump gitpython from 3.1.50 to 3.1.57 ([#8363](https://github.com/aws-powertools/powertools-lambda-python/issues/8363))
+* **deps-dev:** bump aws-cdk from 2.1129.0 to 2.1130.0 in the aws-cdk group ([#8339](https://github.com/aws-powertools/powertools-lambda-python/issues/8339))
+* **deps-dev:** bump types-requests from 2.33.0.20260518 to 2.33.0.20260712 ([#8343](https://github.com/aws-powertools/powertools-lambda-python/issues/8343))
+* **deps-dev:** bump pymdown-extensions from 10.21.3 to 11.0 ([#8359](https://github.com/aws-powertools/powertools-lambda-python/issues/8359))
+* **deps-dev:** bump pymdown-extensions from 11.0 to 11.0.1 ([#8371](https://github.com/aws-powertools/powertools-lambda-python/issues/8371))
+* **deps-dev:** bump gitpython from 3.1.57 to 3.1.58 ([#8369](https://github.com/aws-powertools/powertools-lambda-python/issues/8369))
 
 
 <a name="v3.31.1"></a>
@@ -7803,7 +7832,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.34.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.35.0...HEAD
+[v3.35.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.34.0...v3.35.0
 [v3.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.1...v3.34.0
 [v3.31.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...v3.31.1
 [v3.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.30.0...v3.31.0
