@@ -101,7 +101,7 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 ??? tip "Want to inspect the Layer contents?"
     ```bash
-    aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:37 --region eu-west-1
+    aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:38 --region eu-west-1
     ```
     The pre-signed URL will be in the `Location` key.
 
