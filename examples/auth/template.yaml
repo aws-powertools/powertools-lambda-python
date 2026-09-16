@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: JWT authorizers for REST and HTTP APIs with result caching disabled
+
+Parameters:
+  IssuerUrl:
+    Type: String
+    Description: HTTPS issuer issuing RS256 access tokens
+  ResourceUrl:
+    Type: String
+    Description: Expected access token audience
+
+Globals:
+  Function:
+    Runtime: python3.12
+    CodeUri: src/
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        ISSUER_URL: !Ref IssuerUrl
+        RESOURCE_URL: !Ref ResourceUrl
+
+Resources:
+  RestAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: authorizer.iam_handler
+
+  HttpAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: authorizer.simple_handler
+
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: JwtAuthorizer
+        Authorizers:
+          JwtAuthorizer:
+            FunctionArn: !GetAtt RestAuthorizer.Arn
+            FunctionPayloadType: REQUEST
+            Identity:
+              Headers:
+                - Authorization
+              ReauthorizeEvery: 0
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        DefaultAuthorizer: JwtAuthorizer
+        Authorizers:
+          JwtAuthorizer:
+            FunctionArn: !GetAtt HttpAuthorizer.Arn
+            AuthorizerPayloadFormatVersion: "2.0"
+            EnableSimpleResponses: true
+            EnableFunctionDefaultPermissions: true
+            Identity:
+              Headers:
+                - Authorization
+              ReauthorizeEvery: 0
+
+  RestBackend:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend.lambda_handler
+      Events:
+        Orders:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /orders
+            Method: GET
+
+  HttpBackend:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend.lambda_handler
+      Events:
+        Orders:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /orders
+            Method: GET
