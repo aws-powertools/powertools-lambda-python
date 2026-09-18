@@ -1,12 +1,15 @@
 import io
 import json
 import time
+import weakref
 from collections import deque
 
 import jwt
 import pytest
 import urllib3
 from cryptography.hazmat.primitives.asymmetric import rsa
+
+from aws_lambda_powertools.utilities.auth import _jwks
 
 
 @pytest.fixture(scope="session")
@@ -33,19 +36,19 @@ def claims():
 
 @pytest.fixture
 def issue_token(signing_key, claims):
-    def issue(payload=None, *, key=None, kid="key-1", algorithm="RS256"):
+    def issue(payload=None, *, key=None, kid="key-1", algorithm="RS256", headers=None):
         return jwt.encode(
             claims if payload is None else payload,
             signing_key if key is None else key,
             algorithm=algorithm,
-            headers={"kid": kid},
+            headers={"kid": kid, **(headers or {})},
         )
 
     return issue
 
 
 class FakeHTTP:
-    """In-memory token and JWKS endpoints at the HTTP transport boundary."""
+    """In-memory JWKS endpoints at the HTTP transport boundary."""
 
     def __init__(self):
         self.responses = {}
@@ -73,6 +76,9 @@ class FakeHTTP:
 
 @pytest.fixture
 def http(monkeypatch):
+    # Each fake provider belongs to one test. Error tracebacks can keep a
+    # previous verifier alive; retain sharing only within the current test.
+    monkeypatch.setattr(_jwks, "_caches", weakref.WeakValueDictionary())
     transport = FakeHTTP()
     monkeypatch.setattr(urllib3, "PoolManager", lambda **kwargs: transport)
     return transport

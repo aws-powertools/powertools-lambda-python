@@ -18,19 +18,7 @@ class BlockImports(importlib.abc.MetaPathFinder):
 
 scenario = sys.argv[1]
 
-if scenario == "oauth":
-    sys.meta_path.insert(0, BlockImports("jwt", "cryptography"))
-
-    from aws_lambda_powertools.utilities.auth import OAuth2Client
-
-    client = OAuth2Client(
-        token_url="https://idp.example.com/token",
-        client_id="test-client",
-        client_secret="test-secret",
-    )
-    assert "jwt" not in sys.modules
-    assert "cryptography" not in sys.modules
-elif scenario == "static":
+if scenario == "static":
     sys.meta_path.insert(0, BlockImports("urllib3"))
 
     from aws_lambda_powertools.utilities.auth import JWTVerifier
@@ -67,7 +55,7 @@ elif scenario == "remote":
 elif scenario == "exports":
     auth = importlib.import_module("aws_lambda_powertools.utilities.auth")
 
-    assert {"JWTVerifier", "OAuth2Client"} <= set(dir(auth))
+    assert {"JWTVerifier", "AuthFailureReason", "AuthErrorContext"} <= set(dir(auth))
     assert not {"jwt", "cryptography", "urllib3"} & sys.modules.keys()
     try:
         _ = auth.unknown_attribute
@@ -79,10 +67,11 @@ elif scenario == "exports":
 
     members = dict(inspect.getmembers(auth))
     assert members["JWTVerifier"] is auth.JWTVerifier
-    assert members["OAuth2Client"] is auth.OAuth2Client
+    assert members["AuthFailureReason"] is auth.AuthFailureReason
+    assert members["AuthErrorContext"] is auth.AuthErrorContext
 elif scenario == "star":
     from aws_lambda_powertools.utilities.auth import *  # noqa: E402,F403
 
-    assert {"JWTVerifier", "OAuth2Client"} <= globals().keys()
+    assert {"JWTVerifier", "AuthFailureReason", "AuthErrorContext"} <= globals().keys()
 else:
     raise ValueError(f"Unknown scenario: {scenario}")

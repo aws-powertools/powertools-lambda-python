@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.parametrize("scenario", ["oauth", "static", "remote", "exports", "star"])
+@pytest.mark.parametrize("scenario", ["static", "remote", "exports", "star"])
 def test_auth_imports_in_clean_interpreter(scenario, jwks, claims, issue_token):
     project_root = Path(__file__).parents[3]
     probe = Path(__file__).with_name("_auth_import_probe.py")

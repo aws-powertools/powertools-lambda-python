@@ -12,11 +12,13 @@ from aws_lambda_powertools.utilities.auth._authorization import (
     required_scopes,
 )
 from aws_lambda_powertools.utilities.auth._validation import string_list
-from aws_lambda_powertools.utilities.auth.exceptions import InvalidClaimsError, InvalidTokenError
+from aws_lambda_powertools.utilities.auth.exceptions import AuthError, InvalidClaimsError, InvalidTokenError
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import APIGatewayAuthorizerResponseV2
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from aws_lambda_powertools.utilities.auth._base import Verifier
 
 _ARN = re.compile(r"arn:[a-z0-9-]+:execute-api:[a-z0-9-]+:\d{12}:[a-z0-9]+/[^/]+/[A-Z]+/.*")
@@ -28,6 +30,7 @@ def authorize_event(
     scopes: list[str] | None,
     response_format: Literal["iam", "simple"],
     context_claims: list[str] | None,
+    on_error: Callable[[AuthError], None] | None,
 ) -> dict[str, Any]:
     raw = event.raw_event if isinstance(event, DictWrapper) else event
     _validate_event(raw, response_format)
@@ -36,7 +39,7 @@ def authorize_event(
     selected = string_list(context_claims if context_claims is not None else [])
     if "claims" in selected:
         raise ValueError("claims is reserved in API Gateway authorizer context")
-    claims = _verified_claims(verifier, raw, expected, require_principal=response_format == "iam")
+    claims = _verified_claims(verifier, raw, expected, on_error, require_principal=response_format == "iam")
     context = _context(claims, selected) if claims is not None else {}
     if response_format == "simple":
         return APIGatewayAuthorizerResponseV2(authorize=claims is not None, context=context).asdict()
@@ -56,6 +59,7 @@ def _verified_claims(
     verifier: Verifier,
     raw: dict[str, Any],
     expected: tuple[str, ...],
+    on_error: Callable[[AuthError], None] | None,
     *,
     require_principal: bool,
 ) -> dict[str, Any] | None:
@@ -65,8 +69,16 @@ def _verified_claims(
         if require_principal:
             _validate_principal(candidate)
         return candidate
-    except (InvalidTokenError, ForbiddenError):
-        return None
+    except AuthError as error:
+        # The callback observes a public, sanitized error, including failures
+        # raised while the caller is already handling another exception.
+        error.__context__ = None
+        error.__cause__ = None
+        if on_error is not None:
+            on_error(error)
+        if isinstance(error, (InvalidTokenError, ForbiddenError)):
+            return None
+        raise
 
 
 def _token(raw: dict[str, Any]) -> str:

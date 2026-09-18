@@ -4,19 +4,30 @@ from collections.abc import Mapping
 from typing import Any
 
 from aws_lambda_powertools.utilities.auth._validation import string_list
-from aws_lambda_powertools.utilities.auth.exceptions import AuthError, InvalidClaimsError, InvalidTokenError
+from aws_lambda_powertools.utilities.auth.exceptions import (
+    AuthError,
+    AuthFailureReason,
+    InvalidClaimsError,
+    InvalidTokenError,
+)
 
 
 class MissingTokenError(InvalidTokenError):
     """No authorization header was supplied."""
 
+    reason = AuthFailureReason.MISSING_TOKEN
+
 
 class ForbiddenError(AuthError):
     """A verified caller does not have permission for this operation."""
 
+    reason = AuthFailureReason.FORBIDDEN
+
 
 class InsufficientScopeError(ForbiddenError):
     """A verified caller is missing a required scope."""
+
+    reason = AuthFailureReason.INSUFFICIENT_SCOPE
 
 
 def bearer_token(value: Any) -> str:

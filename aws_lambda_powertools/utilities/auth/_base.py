@@ -3,11 +3,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Literal
 
+from aws_lambda_powertools.utilities.auth._errors import sanitize_errors
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from aws_lambda_powertools.event_handler import Response
     from aws_lambda_powertools.utilities.auth._middleware import AuthErrorContext, AuthMiddleware
+    from aws_lambda_powertools.utilities.auth.exceptions import AuthError
     from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
@@ -45,7 +48,8 @@ class Verifier(ABC):
         authorize : Callable, optional
             Additional policy receiving verified claims; must return True.
         on_error : Callable, optional
-            Receives status_code and headers and returns an Event Handler Response.
+            Receives status_code, headers, a fixed reason, and retryable, and
+            returns an Event Handler Response. No automatic logging is performed.
 
         Examples
         --------
@@ -59,6 +63,7 @@ class Verifier(ABC):
 
         return AuthMiddleware(self, scopes, authorize, on_error)
 
+    @sanitize_errors
     def authorize(
         self,
         event: dict[str, Any] | DictWrapper,
@@ -66,6 +71,7 @@ class Verifier(ABC):
         scopes: list[str] | None = None,
         response_format: Literal["iam", "simple"] = "iam",
         context_claims: list[str] | None = None,
+        on_error: Callable[[AuthError], None] | None = None,
     ) -> dict[str, Any]:
         """Return an API Gateway authorizer response for the current request.
 
@@ -84,6 +90,11 @@ class Verifier(ABC):
             Response format configured in Gateway, by default iam.
         context_claims : list[str], optional
             Selected scalar claims to include; no claims are copied by default.
+        on_error : Callable, optional
+            Records a failure using the error's fixed reason and retryable fields.
+            Its return value is ignored: invalid credentials still deny access,
+            and unavailable keys still raise JWKSFetchError. Callback exceptions
+            fail the invocation. No automatic logging is performed.
 
         Examples
         --------
@@ -95,4 +106,4 @@ class Verifier(ABC):
         """
         from aws_lambda_powertools.utilities.auth._authorizer import authorize_event
 
-        return authorize_event(self, event, scopes, response_format, context_claims)
+        return authorize_event(self, event, scopes, response_format, context_claims, on_error)

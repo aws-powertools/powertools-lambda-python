@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import re
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jwt
 
@@ -11,13 +11,22 @@ from aws_lambda_powertools.utilities.auth._base import Verifier
 from aws_lambda_powertools.utilities.auth._deadline import Deadline
 from aws_lambda_powertools.utilities.auth._errors import sanitize_errors
 from aws_lambda_powertools.utilities.auth._jwks import copy_key_set, shared_cache, signing_key
-from aws_lambda_powertools.utilities.auth._validation import finite_seconds, https_url, is_nonempty_string, string_list
+from aws_lambda_powertools.utilities.auth._validation import (
+    finite_seconds,
+    https_url,
+    is_nonempty_string,
+    string_list,
+    string_mapping,
+)
 from aws_lambda_powertools.utilities.auth.exceptions import (
     InvalidClaimsError,
     InvalidSignatureError,
     InvalidTokenError,
     TokenExpiredError,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _ASYMMETRIC_ALGORITHMS = frozenset(
     {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "ES256K", "EdDSA"},
@@ -42,6 +51,12 @@ class JWTVerifier(Verifier):
         discover keys from the configured issuer.
     required_claims : list[str], optional
         Claims required in addition to ``iss``, ``aud``, and ``exp``.
+    expected_claims : Mapping[str, str], optional
+        Exact, case-sensitive string values required in verified claims,
+        for example ``{"token_use": "access"}``. Missing values are rejected.
+    expected_headers : Mapping[str, str], optional
+        Exact string values required in the signed header, for example
+        ``{"typ": "at+jwt"}``. These checks cannot weaken signature validation.
     clock_skew_seconds : float
         Nonnegative allowance for temporal claims, by default 60.
     timeout_seconds : float
@@ -78,6 +93,8 @@ class JWTVerifier(Verifier):
         jwks: dict[str, Any] | None = None,
         jwks_uri: str | None = None,
         required_claims: list[str] | None = None,
+        expected_claims: Mapping[str, str] | None = None,
+        expected_headers: Mapping[str, str] | None = None,
         clock_skew_seconds: float = 60,
         timeout_seconds: float = 3,
         jwks_max_age_seconds: float = 300,
@@ -98,6 +115,8 @@ class JWTVerifier(Verifier):
         self._cache = shared_cache(self._issuer, self._jwks_uri, max_age, cooldown) if jwks is None else None
         additional_claims = string_list(required_claims if required_claims is not None else [])
         self._required_claims = sorted({"iss", "aud", "exp"} | set(additional_claims))
+        self._expected_claims = string_mapping(expected_claims)
+        self._expected_headers = string_mapping(expected_headers)
         self._clock_skew = finite_seconds(clock_skew_seconds)
         self._cognito_client_id: str | None = None
 
@@ -245,10 +264,16 @@ class JWTVerifier(Verifier):
         except (jwt.PyJWTError, TypeError, ValueError, OverflowError, RecursionError):
             raise InvalidClaimsError() from None
         self._validate_times(claims)
+        self._validate_profile(claims, header)
         if self._cognito_client_id is not None:
             if claims.get("token_use") != "access" or claims.get("client_id") != self._cognito_client_id:
                 raise InvalidClaimsError()
         return claims
+
+    def _validate_profile(self, claims: dict[str, Any], header: dict[str, Any]) -> None:
+        for values, expected in ((claims, self._expected_claims), (header, self._expected_headers)):
+            if any(values.get(name) != value for name, value in expected.items()):
+                raise InvalidClaimsError()
 
     def _header(self, token: str) -> dict[str, Any]:
         if not isinstance(token, str) or not token:

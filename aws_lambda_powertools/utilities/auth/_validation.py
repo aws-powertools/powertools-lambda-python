@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -55,3 +56,14 @@ def string_list(values: list[str] | tuple[str, ...], *, nonempty: bool = False) 
 
 def is_nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def string_mapping(values: Mapping[str, str] | None) -> dict[str, str]:
+    """Copy exact token-profile constraints without exposing their contents."""
+    if values is None:
+        return {}
+    if not isinstance(values, Mapping) or not all(
+        is_nonempty_string(name) and is_nonempty_string(value) for name, value in values.items()
+    ):
+        raise ValueError("Expected claims and headers must map nonempty strings to nonempty strings")
+    return dict(values)

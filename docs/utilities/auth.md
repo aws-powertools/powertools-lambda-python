@@ -1,9 +1,9 @@
 ---
 title: Auth
-description: JWT access-token verification and OAuth client credentials for Lambda
+description: JWT access-token verification for Lambda
 ---
 
-Auth verifies incoming JWT access tokens and obtains separate OAuth bearer tokens for downstream APIs.
+Auth verifies incoming JWT access tokens.
 Use it inside a Lambda function or a Lambda authorizer. Prefer an API Gateway managed JWT authorizer when it meets your token profile and deployment requirements.
 
 ## Key features
@@ -12,7 +12,6 @@ Use it inside a Lambda function or a Lambda authorizer. Prefer an API Gateway ma
 * Coordinate discovery and signing-key refresh across threads with bounded key freshness.
 * Protect Event Handler routes and create API Gateway IAM or simple authorizer responses.
 * Validate resource-bound Cognito access tokens and combine explicitly trusted issuers.
-* Acquire and cache resource-specific client-credentials tokens, including rotating client secrets.
 * Adapt verification to the MCP Python SDK without a Powertools dependency on MCP.
 
 ## Getting started
@@ -25,6 +24,8 @@ pip install "aws-lambda-powertools[auth]"
 
 The optional `auth` extra includes PyJWT, cryptography, and urllib3. It adds no dependencies to the base installation.
 Build cryptography dependencies for your Lambda Python version and architecture; see [cross-platform builds](../build_recipes/cross-platform.md).
+The Powertools Layer retains urllib3 from the declared dependency range instead of relying on the runtime's copy.
+Applications pinning a different AWS SDK must validate that SDK's urllib3 requirements against the Layer or bundle a compatible dependency set.
 
 ### Protect an HTTP route
 
@@ -67,19 +68,6 @@ verifier = JWTVerifier(
 Absent an explicit `jwks_uri` or static `jwks`, discovery uses the configured issuer's `/.well-known/openid-configuration`.
 Discovery must advertise that exact issuer and an HTTPS JWKS URL. URLs supplied by token headers are never used for discovery.
 
-### Call a downstream API
-
-Create one `OAuth2Client` per downstream resource. This example loads a client secret from Secrets Manager and requests a distinct Inventory access token.
-The Lambda role needs permission to read the configured secret.
-
-```python title="outbound.py"
---8<-- "examples/auth/src/outbound.py"
-```
-
-Use `auth_headers()` to integrate with an application-owned HTTP client. Pass only trusted destination URLs.
-`request()` requires HTTPS, rejects another Authorization header, and disables redirects and downstream retries.
-It returns a urllib3 response with `.status`, `.data`, and `.json()`; check the downstream status before using the body.
-
 ## Advanced
 
 ### Token profiles and scope checks
@@ -90,7 +78,23 @@ Supported algorithms are RS256/384/512, PS256/384/512, ES256/384/512, ES256K, an
 Keys must have a matching `kid`, compatible algorithm and key type, and signing/verification metadata when supplied.
 
 Applications must select access tokens for their resource; the generic profile cannot infer a provider's token purpose.
-Require and validate provider-specific claims when an issuer can mint other token types with the same audience.
+Configure `expected_claims` and/or `expected_headers` when an issuer can mint other token types with the same audience:
+
+```python
+verifier = JWTVerifier(
+    issuer="https://idp.example.com/",
+    audience="https://orders.example.com",
+    algorithms=["RS256"],
+    expected_claims={"token_use": "access"},
+    expected_headers={"typ": "at+jwt"},
+)
+```
+
+Use the values defined by your provider; not every provider uses both fields.
+These mappings require exact, case-sensitive, nonempty string values. Missing or different values raise `InvalidClaimsError`.
+They are copied during construction and checked after signature, issuer, audience, and time validation.
+The constraints apply to direct verification, middleware, authorizers, and issuer groups and cannot disable any baseline check.
+`required_claims` checks presence only.
 Local JWT verification does not check individual-token revocation.
 
 Scopes come from the first present claim in this order: `scope`, `scp`, `scopes`.
@@ -106,8 +110,33 @@ middleware = verifier.require(
 )
 ```
 
-An `on_error` callback receives an object with `status_code` and `headers` and must return an Event Handler `Response`.
-Preserve those fields when customizing the body. This callback replaces the error response; it does not invoke the protected handler.
+An `on_error` callback receives `AuthErrorContext` with `status_code`, `headers`, `reason`, and `retryable`.
+It must return an Event Handler `Response`. Preserve the status and challenge headers when customizing the body.
+The reason is an `AuthFailureReason` string enum; `retryable` is true for unavailable JWKS infrastructure and false for credential/policy failures.
+The utility does not log failures automatically or add diagnostics to default responses. Applications choose logging, metrics, and sampling:
+
+```python
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.event_handler import Response
+from aws_lambda_powertools.utilities.auth import AuthErrorContext
+
+logger = Logger()
+
+
+def on_error(error: AuthErrorContext) -> Response:
+    logger.warning("Authorization failed", reason=error.reason.value, retryable=error.retryable)
+    return Response(
+        status_code=error.status_code,
+        content_type="application/json",
+        body={"message": "Access denied"},
+        headers=error.headers,
+    )
+
+
+middleware = verifier.require(on_error=on_error)
+```
+
+The callback replaces the error response; it never invokes the protected handler. Callback exceptions propagate to the application.
 
 ### Key freshness, rotation, and outages
 
@@ -125,7 +154,10 @@ A failed refresh backs off for 1, 2, 4, 8, 16, then 30 seconds. During that inte
 Expired keys are never used after a failed refresh. Unknown keys during a cooldown are rejected, so a newly published key may take time to become usable.
 Choose freshness and cooldown settings together with your provider's key rotation policy.
 
-`prefetch()` fetches absent or expired keys during initialization. Later rotation, expiration, and outages can still cause network I/O.
+Construction performs no network I/O. By default the first verification fetches the keys, adding latency to that invocation.
+Calling `prefetch()` at module level moves the first fetch into Lambda INIT, but an identity-provider outage can then fail the cold start.
+Prefetch is an explicit option, not a default recommendation; choose based on your latency and availability requirements.
+Later rotation, expiration, and outages can still cause network I/O.
 Static `jwks` is copied when constructing the verifier and performs no discovery or refresh:
 
 ```python
@@ -166,7 +198,7 @@ The combined verifier supports `verify()`, `prefetch()`, `require()`, and `autho
 ### Lambda authorizers
 
 ```python title="authorizer.py"
---8<-- "examples/auth/src/authorizer.py"
+--8<-- "examples/auth/src/authorizer/authorizer.py"
 ```
 
 The helper accepts raw dictionaries or the corresponding Powertools authorizer Data Classes.
@@ -182,6 +214,13 @@ IAM allows require a nonempty string `sub` as principal and cover only the suppl
 Wildcard, missing, or malformed ARNs raise `ValueError`; the helper cannot construct a request-specific IAM policy without a valid ARN.
 Other routes need their own decision.
 Invalid tokens and insufficient scopes produce a Deny or `isAuthorized=False`; unavailable signing keys raise `JWKSFetchError`.
+For an outage, middleware returns HTTP 503 directly. A Lambda authorizer fails its invocation instead, and API Gateway normally returns a 5xx response.
+API callers should treat this as an availability failure rather than repeatedly obtaining new credentials; configure retries and alarms accordingly.
+
+Pass `on_error` to `authorize()` to record a rejection or unavailable keys, as shown in the example above.
+It receives an `AuthError` with the same fixed `reason` and `retryable` attributes exposed by middleware.
+Its return value is ignored: invalid credentials still deny access, and `JWKSFetchError` still propagates after the callback.
+A callback exception fails the invocation. Successful authorizations do not call it. The default response includes neither diagnostic field.
 
 No claims are copied to context by default. `context_claims` copies only selected scalar values, omitting arrays, objects, and nulls.
 The name `claims` is reserved in authorizer context.
@@ -190,10 +229,13 @@ The name `claims` is reserved in authorizer context.
 
 Disable authorizer-result caching to verify each request. This SAM example sets `ReauthorizeEvery: 0` for both REST and HTTP authorizers;
 the underlying API Gateway setting is `AuthorizerResultTtlInSeconds: 0`.
+The template is under `examples/auth/templates/`; its `CodeUri` values are relative to that directory.
+Authorizer functions build from `src/authorizer/` with the Auth extra. Backends build independently from `src/backend/` with base Powertools only,
+so PyJWT and cryptography are not included in the backend artifacts.
 HTTP simple responses also require payload version 2.0 and `EnableSimpleResponses: true`.
 
-```yaml title="template.yaml"
---8<-- "examples/auth/template.yaml"
+```yaml title="templates/sam.yaml"
+--8<-- "examples/auth/templates/sam.yaml"
 ```
 
 If you enable result caching later, a cached decision can outlive the JWT's expiration or a signing key's removal.
@@ -201,28 +243,12 @@ The verifier's key-cache settings do not control Gateway's result cache.
 HTTP simple responses can apply to multiple routes sharing an identity cache key; include `$context.routeKey` for route-specific decisions.
 Route-aware keys still do not recheck an expired token. Cached IAM policies must cover exactly the routes they authorize; this helper deliberately returns one concrete resource.
 
-### OAuth client credentials
-
-Only `client_secret_basic` is supported. Client ID and secret are individually form-encoded before constructing HTTP Basic credentials.
-They are never added to the request body. `audience` and RFC 8707 `resource` are optional, mutually exclusive request fields; choose the one your provider supports.
-Scopes and resource selection are fixed per client, and separate instances never share tokens.
-
-Tokens are cached until 30 seconds before their advertised expiration, measured conservatively from request start using a monotonic clock.
-Tokens with 30 seconds or less remaining, or no `expires_in`, are returned without caching. Already elapsed lifetimes and malformed responses are rejected.
-Concurrent acquisition shares one exchange, including short-lived tokens for callers already waiting on that exchange.
-
-A secret callable is invoked on each exchange attempt. Existing access tokens remain usable until their own refresh boundary.
-In the Parameters example, the provider's `max_age=300` can delay observation of a changed secret by five minutes.
-
-`timeout_seconds` defaults to 3 for acquisition, including at most two retries with backoff for network failures, HTTP 429, and HTTP 5xx.
-Other error responses and malformed successful responses are not retried. The `request(timeout=5)` budget is separate and applies to the downstream operation.
-Synchronous OS name resolution and application-provided secret callables cannot be forcibly interrupted; configure secret-provider timeouts accordingly.
-
 ### MCP Python SDK adapter
 
 The following adapter targets the `MCPServer` interface in MCP Python SDK 2.2.0 (`mcp==2.2.0`),
 following the [MCP authorization tutorial](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization).
-Install that SDK separately. This example maps Keycloak-style `azp`, `sub`, and `scope` claims; other providers require their own mapping.
+Install that SDK separately. This example requires the Keycloak access-token claim `typ="Bearer"` and maps `azp`, `sub`, and `scope`.
+Adapt the expected purpose and claim mapping to your provider and token configuration.
 
 ```python
 import asyncio
@@ -232,9 +258,11 @@ from mcp.server.auth.provider import AccessToken, TokenVerifier
 from mcp.server.auth.settings import AuthSettings
 from pydantic import AnyHttpUrl
 
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.auth.exceptions import InvalidTokenError, JWKSFetchError
 
+logger = Logger()
 RESOURCE_URL = "https://mcp.example.com"
 ISSUER_URL = "https://keycloak.example.com/realms/mcp"
 verifier = JWTVerifier(
@@ -242,6 +270,7 @@ verifier = JWTVerifier(
     audience=RESOURCE_URL,
     algorithms=["RS256"],
     required_claims=["azp", "sub", "scope"],
+    expected_claims={"typ": "Bearer"},
 )
 
 
@@ -249,7 +278,10 @@ class PowertoolsTokenVerifier(TokenVerifier):
     async def verify_token(self, token: str) -> AccessToken | None:
         try:
             claims = await asyncio.to_thread(verifier.verify, token)
-        except (InvalidTokenError, JWKSFetchError):
+        except JWKSFetchError as error:
+            logger.error("Verification keys unavailable", reason=error.reason.value, retryable=error.retryable)
+            return None
+        except InvalidTokenError:
             return None
         if not all(isinstance(claims[name], str) for name in ("azp", "sub", "scope")):
             return None
@@ -278,7 +310,8 @@ mcp = MCPServer(
 ```
 
 The SDK owns transport, Protected Resource Metadata, and authentication challenges. This adapter maps both invalid tokens and unavailable keys to failed authentication.
-A distinct availability response requires integration at the SDK transport boundary.
+The adapter records unavailable keys separately for Lambda-owner alarms and metrics before returning `None`.
+A distinct availability response to the API caller requires integration at the SDK transport boundary.
 `asyncio.to_thread()` keeps synchronous key fetches off the event loop; cancelling the await does not terminate a running request.
 
 Tools can enforce permissions using the verified SDK access token:
@@ -294,27 +327,6 @@ def require_scope(scope: str):
 ```
 
 Use the targeted SDK's supported tool-error handling for permission failures. Raising `PermissionError` alone does not implement an HTTP challenge or a scope-upgrade flow.
-For downstream calls, use a separate `OAuth2Client` and offload its synchronous operation:
-
-```python
-from urllib.parse import quote
-
-
-@mcp.tool()
-async def check_stock(sku: str) -> dict:
-    require_scope("inventory:read")
-    response = await asyncio.to_thread(
-        inventory_api.request,
-        "GET",
-        f"https://inventory.example.com/stock/{quote(sku, safe='')}",
-        timeout=5,
-    )
-    if response.status != 200:
-        raise RuntimeError("Inventory lookup failed")
-    return response.json()
-```
-
-Configure `inventory_api` as in the outbound example. Never forward the incoming MCP bearer token to another resource.
 API Gateway authorizers in front of an MCP server also require deployment-specific metadata routes and discovery/challenge behavior;
 an authorizer Deny response alone does not implement MCP authorization.
 
@@ -322,13 +334,26 @@ an authorizer Deny response alone does not implement MCP authorization.
 
 `AuthError` is the base error. `InvalidTokenError` includes `InvalidClaimsError`, `TokenExpiredError`, and `InvalidSignatureError`.
 `JWKSFetchError` is separate from invalid-token errors so applications can distinguish unavailable verification infrastructure.
-`TokenExchangeError` covers unsuccessful token acquisition.
+Every error exposes `reason: AuthFailureReason` and `retryable: bool`. `AuthFailureReason` uses `str, Enum` for Python 3.10 compatibility.
+Use `.value` for log fields and metric dimensions; do not parse exception messages.
 
-Errors have fixed credential-free messages. Public verification, prefetch, and OAuth operations detach underlying exception causes and contexts,
-including errors raised by secret loaders. Utility representations omit tokens and secrets.
-Do not log token dictionaries, request headers, secret-provider errors, or token-endpoint response bodies in application code.
+| Reason | Retryable |
+| ------ | --------- |
+| `missing_token` | false |
+| `invalid_token` | false |
+| `invalid_claims` | false |
+| `token_expired` | false |
+| `invalid_signature` | false |
+| `insufficient_scope` | false |
+| `forbidden` | false |
+| `jwks_unavailable` | true |
 
-Opaque-token introspection, delegated token exchange, interactive grants, SigV4, additional OAuth client-authentication methods, and native async clients are outside this utility.
+Retryability identifies failures where retrying after the provider recovers may help; it does not bypass cache backoff or guarantee success.
+Reasons and messages are fixed and never contain token data, claims, key IDs, URLs, or provider responses.
+Public verification, prefetch, and authorizer operations detach underlying exception causes and contexts.
+Log only the fixed diagnostic fields; do not log token dictionaries, request headers, or provider errors.
+
+Outbound token acquisition, opaque-token introspection, delegated token exchange, interactive grants, SigV4, and native async clients are outside this PR.
 
 ## Testing your code
 

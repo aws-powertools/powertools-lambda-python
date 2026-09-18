@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.auth._authorization import (
     header_token,
     required_scopes,
 )
-from aws_lambda_powertools.utilities.auth.exceptions import AuthError, InvalidTokenError
+from aws_lambda_powertools.utilities.auth.exceptions import AuthError, AuthFailureReason, InvalidTokenError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -29,6 +29,8 @@ class AuthErrorContext:
 
     status_code: int
     headers: dict[str, str]
+    reason: AuthFailureReason
+    retryable: bool
 
 
 class AuthMiddleware(BaseMiddlewareHandler[ApiGatewayResolver]):
@@ -64,19 +66,17 @@ class AuthMiddleware(BaseMiddlewareHandler[ApiGatewayResolver]):
 
     def _failure(self, error: AuthError) -> Response:
         if isinstance(error, MissingTokenError):
-            context = AuthErrorContext(401, {"WWW-Authenticate": "Bearer"})
+            status, headers = 401, {"WWW-Authenticate": "Bearer"}
         elif isinstance(error, InvalidTokenError):
-            context = AuthErrorContext(401, {"WWW-Authenticate": 'Bearer error="invalid_token"'})
+            status, headers = 401, {"WWW-Authenticate": 'Bearer error="invalid_token"'}
         elif isinstance(error, InsufficientScopeError):
             scopes = " ".join(self._scopes)
-            context = AuthErrorContext(
-                403,
-                {"WWW-Authenticate": f'Bearer error="insufficient_scope", scope="{scopes}"'},
-            )
+            status, headers = 403, {"WWW-Authenticate": f'Bearer error="insufficient_scope", scope="{scopes}"'}
         elif isinstance(error, ForbiddenError):
-            context = AuthErrorContext(403, {})
+            status, headers = 403, {}
         else:
-            context = AuthErrorContext(503, {})
+            status, headers = 503, {}
+        context = AuthErrorContext(status, headers, error.reason, error.retryable)
         if self._on_error is not None:
             return self._on_error(context)
         messages = {401: "Unauthorized", 403: "Forbidden", 503: "Service Unavailable"}

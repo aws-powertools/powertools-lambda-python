@@ -13,7 +13,6 @@ Parameters:
 Globals:
   Function:
     Runtime: python3.12
-    CodeUri: src/
     Timeout: 10
     MemorySize: 256
     Environment:
@@ -26,11 +25,13 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: authorizer.iam_handler
+      CodeUri: ../src/authorizer/
 
   HttpAuthorizer:
     Type: AWS::Serverless::Function
     Properties:
       Handler: authorizer.simple_handler
+      CodeUri: ../src/authorizer/
 
   RestApi:
     Type: AWS::Serverless::Api
@@ -67,6 +68,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.lambda_handler
+      CodeUri: ../src/backend/
       Events:
         Orders:
           Type: Api
@@ -79,6 +81,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: backend.lambda_handler
+      CodeUri: ../src/backend/
       Events:
         Orders:
           Type: HttpApi

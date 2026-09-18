@@ -8,18 +8,15 @@ import pytest
 import urllib3
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.auth import JWTVerifier, OAuth2Client
+from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.auth.exceptions import (
-    AuthError,
     InvalidClaimsError,
     InvalidSignatureError,
     InvalidTokenError,
     JWKSFetchError,
-    TokenExchangeError,
 )
 
 ISSUER = "https://idp.example.com/"
-TOKEN_URL = ISSUER + "token"
 RESOURCE_URL = "https://api.example.com"
 PRIVATE_DATA = "test-only-sensitive-provider-data"
 
@@ -41,19 +38,6 @@ def assert_sanitized(operation, expected_error):
     log = json.loads(stream.getvalue())
     assert log["exception_name"] == expected_error.__name__
     assert PRIVATE_DATA not in stream.getvalue()
-
-
-@pytest.mark.parametrize("method", ["auth_headers", "request"])
-def test_secret_loader_errors_have_no_chain_even_inside_a_callers_exception_handler(method):
-    def load_secret():
-        raise RuntimeError(PRIVATE_DATA)
-
-    client = OAuth2Client(token_url=TOKEN_URL, client_id="orders", client_secret=load_secret)
-    operation = client.auth_headers if method == "auth_headers" else lambda: client.request("GET", RESOURCE_URL)
-    try:
-        raise LookupError(PRIVATE_DATA)
-    except LookupError:
-        assert_sanitized(operation, TokenExchangeError)
 
 
 @pytest.mark.parametrize("method", ["verify", "prefetch", "group_verify", "group_prefetch", "authorize"])
@@ -94,21 +78,3 @@ def test_verification_errors_detach_parser_and_crypto_exceptions(jwks, issue_tok
         encoded, _ = issue_token().rsplit(".", 1)
         token, expected_error = encoded + ".AAAA", InvalidSignatureError
     assert_sanitized(lambda: subject.verify(token), expected_error)
-
-
-@pytest.mark.parametrize("failure", ["transport", "json", "expires_in", "downstream"])
-def test_oauth_errors_detach_transport_and_response_exceptions(http, failure):
-    client = OAuth2Client(token_url=TOKEN_URL, client_id="orders", client_secret="test-secret")
-    payload = {"access_token": "test-token", "token_type": "Bearer", "expires_in": 600}
-    if failure == "transport":
-        response = urllib3.exceptions.SSLError(PRIVATE_DATA)
-    elif failure == "json":
-        response = PRIVATE_DATA.encode()
-    elif failure == "expires_in":
-        response = {**payload, "expires_in": PRIVATE_DATA}
-    else:
-        response = payload
-    http.serve(TOKEN_URL, response, method="POST")
-    http.serve(RESOURCE_URL, urllib3.exceptions.SSLError(PRIVATE_DATA))
-    operation = (lambda: client.request("GET", RESOURCE_URL)) if failure == "downstream" else client.auth_headers
-    assert_sanitized(operation, AuthError if failure == "downstream" else TokenExchangeError)

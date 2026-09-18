@@ -10,6 +10,8 @@ verifier = JWTVerifier(
     audience=os.environ["RESOURCE_URL"],
     algorithms=["RS256"],
     required_claims=["sub"],
+    # Adapt this constraint to your provider's access-token profile.
+    expected_claims={"token_use": "access"},
 )
 
 
