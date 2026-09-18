@@ -114,3 +114,31 @@ def test_any_of_rejects_ambiguous_issuer_configuration(jwks):
 
     with pytest.raises(ValueError):
         JWTVerifier.any_of(verifier, verifier)
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"user_pool_id": "invalid"},
+        {"user_pool_id": None},
+        {"client_id": " "},
+        {"client_id": None},
+        {"issuer": "https://untrusted.example.com"},
+        {"algorithms": ["HS256"]},
+        {"jwks_uri": "https://untrusted.example.com/keys"},
+    ],
+)
+def test_cognito_rejects_invalid_or_overridden_trust_configuration(options):
+    config = {
+        "user_pool_id": "us-east-1_pool",
+        "client_id": "desktop-client",
+        "audience": "https://api.example.com",
+    }
+    with pytest.raises(ValueError):
+        JWTVerifier.cognito(**{**config, **options})
+
+
+@pytest.mark.parametrize("verifiers", [(), (None,), ("https://idp.example.com",)])
+def test_issuer_groups_require_explicit_verifier_instances(verifiers):
+    with pytest.raises(ValueError):
+        JWTVerifier.any_of(*verifiers)

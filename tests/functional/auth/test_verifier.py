@@ -65,6 +65,7 @@ def test_expired_token_is_rejected(jwks, claims, issue_token):
         ("exp", float("inf")),
         ("exp", float("nan")),
         ("exp", True),
+        ("exp", 10**400),
         ("nbf", "0"),
         ("nbf", 9999999999),
     ],
@@ -88,6 +89,9 @@ def test_invalid_claim_values_are_rejected(jwks, claims, issue_token, claim, val
         ("issuer", "http://idp.example.com"),
         ("issuer", "https://user:secret@idp.example.com"),
         ("issuer", "https://idp.example.com/#fragment"),
+        ("issuer", "https://idp.example.com:invalid"),
+        ("issuer", "https://[invalid"),
+        ("issuer", 42),
         ("audience", ""),
         ("audience", []),
         ("algorithms", []),
@@ -96,6 +100,8 @@ def test_invalid_claim_values_are_rejected(jwks, claims, issue_token, claim, val
         ("algorithms", ["RS256", "HS256"]),
         ("clock_skew_seconds", -1),
         ("clock_skew_seconds", float("inf")),
+        ("clock_skew_seconds", 10**400),
+        ("jwks_uri", "https://idp.example.com/keys"),
         ("required_claims", ""),
     ],
 )
@@ -112,8 +118,9 @@ def test_invalid_verifier_configuration_is_rejected(jwks, option, value):
         JWTVerifier(**options)
 
 
+@pytest.mark.parametrize("issuer_group", [False, True])
 @pytest.mark.parametrize("token", ["", "not-a-jwt", "a.b.c", None, 42])
-def test_malformed_tokens_raise_redacted_errors(jwks, token):
+def test_malformed_tokens_raise_redacted_errors(jwks, token, issuer_group):
     verifier = JWTVerifier(
         issuer="https://idp.example.com/",
         audience="https://api.example.com",
@@ -121,6 +128,8 @@ def test_malformed_tokens_raise_redacted_errors(jwks, token):
         jwks=jwks,
     )
 
+    if issuer_group:
+        verifier = JWTVerifier.any_of(verifier)
     with pytest.raises(InvalidTokenError) as error:
         verifier.verify(token)
     assert str(error.value) == "Invalid access token"

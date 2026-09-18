@@ -5389,4 +5389,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0.0"
-content-hash = "b1ad2045da51e106fb390b6192c34e60cf52601fb9de45c40a6270689a059ea6"
+content-hash = "d1be888618d485c538c744c46441d09297f7dab01353fb5b1054d1c46d1bb523"

@@ -87,7 +87,7 @@ kafka-consumer-avro = ["avro"]
 kafka-consumer-protobuf = ["protobuf"]
 
 [tool.poetry.group.dev.dependencies]
-coverage = { extras = ["toml"], version = "^7.6" }
+coverage = { extras = ["toml"], version = "^7.10.6" }
 pytest = ">=8.3.4,<10.0.0"
 boto3 = "^1.26.164"
 isort = ">=5.13.2,<10.0.0"
@@ -148,6 +148,8 @@ omit = [
   "aws_lambda_powertools/metrics/metric.py"  # barrel import (export-only)
 ]
 branch = true
+# pytest-cov 7 delegates subprocess measurement to coverage.py.
+patch = ["subprocess"]
 
 [tool.coverage.html]
 directory = "test_report"

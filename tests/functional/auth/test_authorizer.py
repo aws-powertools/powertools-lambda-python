@@ -190,3 +190,35 @@ def test_invalid_request_arns_raise_instead_of_returning_an_invalid_policy(jwks,
     event["methodArn"] = arn
     with pytest.raises(ValueError, match="concrete API Gateway"):
         verifier(jwks).authorize(event)
+
+
+@pytest.mark.parametrize("malformed", [False, True])
+@pytest.mark.parametrize("field", ["headers", "multiValueHeaders"])
+def test_authorizer_denies_malformed_or_ambiguous_header_maps(jwks, issue_token, malformed, field):
+    token = "Bearer " + issue_token()
+    value = [token] if field == "multiValueHeaders" else token
+    headers = [("Authorization", value)] if malformed else {"Authorization": value, "authorization": value}
+    event = {"type": "REQUEST", "methodArn": ARN, field: headers}
+    response = verifier(jwks).authorize(event)
+    assert response["principalId"] == "unauthorized"
+    assert response["policyDocument"]["Statement"][0]["Effect"] == "Deny"
+    assert "context" not in response
+
+
+@pytest.mark.parametrize("event", [None, [], {}, {"type": "OTHER"}])
+def test_authorizer_rejects_unsupported_events(jwks, event):
+    with pytest.raises(ValueError, match="TOKEN or REQUEST"):
+        verifier(jwks).authorize(event)
+
+
+@pytest.mark.parametrize(
+    "options,message",
+    [
+        ({"response_format": "unsupported"}, "response_format"),
+        ({"context_claims": ["claims"]}, "claims is reserved"),
+    ],
+)
+def test_authorizer_rejects_invalid_response_configuration(jwks, issue_token, options, message):
+    event = {"type": "TOKEN", "methodArn": ARN, "authorizationToken": "Bearer " + issue_token()}
+    with pytest.raises(ValueError, match=message):
+        verifier(jwks).authorize(event, **options)

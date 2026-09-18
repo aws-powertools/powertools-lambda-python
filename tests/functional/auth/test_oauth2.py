@@ -230,6 +230,9 @@ def test_secret_loader_errors_and_representations_are_redacted(http):
     "options",
     [
         {"audience": "one", "resource": "two"},
+        {"audience": " "},
+        {"resource": ""},
+        {"resource": 42},
         {"token_url": "http://idp.example.com/token"},
         {"token_url": "https://user:secret@idp.example.com/token"},
         {"client_id": ""},
@@ -273,6 +276,7 @@ def test_request_attaches_resource_token_without_forwarding_client_credentials(h
         ("https://api.example.com/orders", {"redirect": True}),
         ("https://api.example.com/orders", {"retries": 3}),
         ("https://api.example.com/orders", {"timeout": 0}),
+        ("https://api.example.com/orders", {"headers": [("Accept", "application/json")]}),
     ],
 )
 def test_request_rejects_unsafe_overrides_before_acquiring_credentials(http, url, options):
@@ -290,3 +294,107 @@ def test_request_does_not_follow_redirects_or_retry_downstream_failures(http):
     http.serve("https://api.example.com/orders", {}, status=503)
     assert subject.request("GET", "https://api.example.com/orders").status == 503
     assert len(http.requests) == 3
+
+
+@pytest.mark.parametrize("method", [None, "", "GET /", "GET\r\nInjected"])
+def test_invalid_http_methods_are_rejected_before_loading_credentials(http, method):
+    calls = []
+
+    def load_secret():
+        calls.append(True)
+        return "test-secret"
+
+    with pytest.raises(ValueError, match="HTTP method"):
+        client(client_secret=load_secret).request(method, "https://api.example.com/orders")
+    assert calls == []
+    assert http.requests == []
+
+
+@pytest.mark.parametrize("secret", [None, "", 42])
+def test_invalid_secret_loader_results_are_rejected_before_sending_credentials(http, secret):
+    with pytest.raises(TokenExchangeError) as error:
+        client(client_secret=lambda: secret).auth_headers()
+    assert error.value.__context__ is None
+    assert http.requests == []
+
+
+def test_retry_stops_when_the_backoff_exceeds_the_remaining_budget(http, clock, monkeypatch):
+    sleeps = []
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    http.serve(TOKEN_URL, {}, status=503, method="POST")
+
+    with pytest.raises(TokenExchangeError):
+        client(timeout_seconds=0.05).auth_headers()
+    assert sleeps == []
+    assert len(http.requests) == 1
+
+
+def test_waiting_callers_share_a_failed_exchange_and_can_recover(http, monkeypatch):
+    entered = threading.Event()
+    release = threading.Event()
+    joined = threading.Event()
+
+    def exchange():
+        entered.set()
+        assert release.wait(5)
+        return {"error": "invalid_client"}
+
+    http.serve(TOKEN_URL, exchange, status=401, method="POST")
+    subject = client()
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        owner = executor.submit(subject.auth_headers)
+        try:
+            assert entered.wait(5)
+            flight = subject._flight
+            assert flight is not None
+            wait = flight.done.wait
+
+            def observe_wait(timeout):
+                joined.set()
+                return wait(timeout)
+
+            # Keep the real Event; observe it so the provider is released only
+            # after the second caller has joined the active exchange.
+            monkeypatch.setattr(flight.done, "wait", observe_wait)
+            waiter = executor.submit(subject.auth_headers)
+            assert joined.wait(5)
+        finally:
+            release.set()
+        for result in (owner, waiter):
+            with pytest.raises(TokenExchangeError) as error:
+                result.result(timeout=5)
+            assert error.value.__context__ is None
+    assert len(http.requests) == 1
+
+    http.serve(TOKEN_URL, {"access_token": "recovered", "token_type": "Bearer", "expires_in": 100}, method="POST")
+    assert subject.auth_headers() == {"Authorization": "Bearer recovered"}
+    assert len(http.requests) == 2
+
+
+def test_waiting_callers_timeout_without_returning_the_late_token(http):
+    entered = threading.Event()
+    release = threading.Event()
+
+    def exchange():
+        entered.set()
+        assert release.wait(5)
+        return {"access_token": "too-late", "token_type": "Bearer", "expires_in": 100}
+
+    http.serve(TOKEN_URL, exchange, method="POST")
+    subject = client(timeout_seconds=0.1)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        owner = executor.submit(subject.auth_headers)
+        try:
+            assert entered.wait(5)
+            with pytest.raises(TokenExchangeError):
+                subject.auth_headers()
+            assert not owner.done()
+            assert len(http.requests) == 1
+        finally:
+            release.set()
+        with pytest.raises(TokenExchangeError):
+            owner.result(timeout=5)
+
+    http.serve(TOKEN_URL, {"access_token": "recovered", "token_type": "Bearer", "expires_in": 100}, method="POST")
+    assert subject.auth_headers() == {"Authorization": "Bearer recovered"}
+    assert len(http.requests) == 2

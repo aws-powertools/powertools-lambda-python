@@ -127,7 +127,10 @@ def test_invalid_discovery_never_falls_back_or_fetches_untrusted_keys(http, issu
     assert len(http.requests) == 1
 
 
-@pytest.mark.parametrize("body", [{}, {"keys": None}, {"keys": ["bad-key"]}, b"not json", b"x" * (1024 * 1024 + 1)])
+@pytest.mark.parametrize(
+    "body",
+    [{}, {"keys": None}, {"keys": ["bad-key"]}, [], None, b"not json", b"x" * (1024 * 1024 + 1)],
+)
 def test_malformed_key_sets_fail_closed(http, issue_token, body):
     http.serve(JWKS_URL, body)
 
@@ -213,3 +216,32 @@ def test_failed_unknown_key_refresh_preserves_only_still_fresh_keys(http, jwks, 
     clock.advance(299)
     with pytest.raises(JWKSFetchError):
         subject.verify(issue_token())
+
+
+def test_waiting_verifier_timeout_does_not_cancel_the_shared_key_fetch(http, jwks, issue_token):
+    entered = threading.Event()
+    release = threading.Event()
+
+    def fetch():
+        entered.set()
+        assert release.wait(5)
+        return jwks
+
+    http.serve(JWKS_URL, fetch)
+    owner = verifier(jwks_uri=JWKS_URL, timeout_seconds=5)
+    waiter = verifier(jwks_uri=JWKS_URL, timeout_seconds=0.1)
+    token = issue_token()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        result = executor.submit(owner.verify, token)
+        try:
+            assert entered.wait(5)
+            with pytest.raises(JWKSFetchError) as error:
+                waiter.verify(token)
+            assert error.value.__context__ is None
+            assert not result.done()
+        finally:
+            release.set()
+        assert result.result(timeout=5)["sub"] == "user-123"
+
+    assert waiter.verify(token)["sub"] == "user-123"
+    assert len(http.requests) == 1

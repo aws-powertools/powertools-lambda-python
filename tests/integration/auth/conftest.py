@@ -70,12 +70,19 @@ def tls_files(tmp_path_factory):
     return certificate_path, key_path
 
 
-@pytest.fixture
-def https_server(tls_files, monkeypatch):
+@pytest.fixture(params=[False, True], ids=["connection-close", "keep-alive"])
+def https_server(tls_files, monkeypatch, request):
     endpoint = LocalHTTPS()
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
+
+        def handle(self):
+            try:
+                super().handle()
+            except (ConnectionResetError, ssl.SSLEOFError):
+                # The client may reject a response without draining its body.
+                self.close_connection = True
 
         def do_GET(self):  # noqa: N802
             self.respond()
@@ -90,7 +97,7 @@ def https_server(tls_files, monkeypatch):
             self.send_response(reply.status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(reply.body)))
-            self.send_header("Connection", "close")
+            self.send_header("Connection", "keep-alive" if request.param else "close")
             for name, value in reply.headers.items():
                 self.send_header(name, value)
             self.end_headers()
@@ -109,7 +116,7 @@ def https_server(tls_files, monkeypatch):
                 # Timeout and oversized-body tests deliberately close early.
                 pass
             finally:
-                self.close_connection = True
+                self.close_connection = not request.param
 
         def log_message(self, format, *args):  # noqa: A002
             pass
