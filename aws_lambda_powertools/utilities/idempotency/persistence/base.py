@@ -157,7 +157,10 @@ class BasePersistenceLayer(ABC):
         """
         if not self.payload_validation_enabled:
             return ""
-        data = self.validation_key_jmespath.search(data)
+        data = self.validation_key_jmespath.search(
+            data,
+            options=jmespath.Options(**(self.jmespath_options or {})),
+        )
         return self._generate_hash(data=data)
 
     def _generate_hash(self, data: Any) -> str:
