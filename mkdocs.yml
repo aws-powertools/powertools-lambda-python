@@ -33,6 +33,7 @@ nav:
           - utilities/data_classes.md
           - utilities/parser.md
           - utilities/idempotency.md
+          - utilities/circuit_breaker.md
           - utilities/data_masking.md
           - utilities/feature_flags.md
           - utilities/metadata.md
@@ -105,6 +106,12 @@ nav:
           - Exceptions: api_doc/feature_flags/exceptions.md
           - Feature flags: api_doc/feature_flags/feature_flags.md
           - Schema: api_doc/feature_flags/schema.md
+      - Circuit Breaker (alpha):
+          - Circuit Breaker: api_doc/circuit_breaker_alpha/circuit_breaker.md
+          - Config: api_doc/circuit_breaker_alpha/config.md
+          - States: api_doc/circuit_breaker_alpha/states.md
+          - Exceptions: api_doc/circuit_breaker_alpha/exceptions.md
+          - Persistence: api_doc/circuit_breaker_alpha/persistence.md
       - Idempotency:
           - Base: api_doc/idempotency/base.md
           - Config: api_doc/idempotency/config.md
@@ -248,6 +255,7 @@ plugins:
           - utilities/data_classes.md
           - utilities/parser.md
           - utilities/idempotency.md
+          - utilities/circuit_breaker.md
           - utilities/data_masking.md
           - utilities/feature_flags.md
           - utilities/metadata.md

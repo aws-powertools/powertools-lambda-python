@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyAddress
@@ -9,7 +9,7 @@ class TransferFamilyAuthorizer(BaseModel):
         description="The username of the user attempting to authenticate.",
         examples=["bobusa", "john.doe", "sftp-user-123", "data-transfer-user"],
     )
-    password: Optional[str] = Field(
+    password: str | None = Field(
         default=None,
         description="The password for authentication.",
         examples=["<password>", "<user-password>", None],

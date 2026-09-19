@@ -3,6 +3,7 @@ import copy
 import datetime
 import json
 import time as t
+from threading import Event, Lock as ThreadLock, Thread
 from unittest import mock
 
 import pytest
@@ -26,6 +27,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     STATUS_CONSTANTS,
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.cache import CachePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
     RedisCachePersistenceLayer,
 )
@@ -198,6 +200,16 @@ def valid_record():
     )
 
 
+@pytest.fixture
+def in_progress_record_missing_expiry():
+    return DataRecord(
+        idempotency_key="test_orphan_key",
+        status=STATUS_CONSTANTS["INPROGRESS"],
+        expiry_timestamp=int(datetime.datetime.now().timestamp()) + 60,
+        in_progress_expiry_timestamp=None,
+    )
+
+
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
 def test_redis_connection_standalone():
     # when RedisCachePersistenceLayer is init with the following params
@@ -301,6 +313,73 @@ def test_redis_orphan_record_lock(orphan_record, valid_record):
         layer._get_record(valid_record.idempotency_key).in_progress_expiry_timestamp
         == orphan_record.in_progress_expiry_timestamp
     )
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_in_progress_record_missing_expiry_is_not_treated_as_orphan(in_progress_record_missing_expiry):
+    layer = RedisCachePersistenceLayer(host="host")
+    layer._put_in_progress_record(in_progress_record_missing_expiry)
+
+    contender = DataRecord(
+        idempotency_key=in_progress_record_missing_expiry.idempotency_key,
+        status=STATUS_CONSTANTS["INPROGRESS"],
+        expiry_timestamp=in_progress_record_missing_expiry.expiry_timestamp + 60,
+        in_progress_expiry_timestamp=None,
+    )
+
+    with pytest.raises(IdempotencyItemAlreadyExistsError):
+        layer._put_in_progress_record(contender)
+
+    stored_record = layer._get_record(in_progress_record_missing_expiry.idempotency_key)
+    assert stored_record.status == STATUS_CONSTANTS["INPROGRESS"]
+    assert stored_record.expiry_timestamp == in_progress_record_missing_expiry.expiry_timestamp
+
+
+@pytest.mark.filterwarnings("ignore:Couldn't determine the remaining time left")
+def test_idempotent_function_blocks_concurrent_invocation_without_lambda_context():
+    layer = CachePersistenceLayer(client=MockRedis(host="localhost"))
+    first_invocation_started = Event()
+    release_first_invocation = Event()
+    execution_lock = ThreadLock()
+    execution_count = 0
+    first_result = []
+    first_errors = []
+
+    @idempotent_function(data_keyword_argument="record", persistence_store=layer)
+    def process(record):
+        nonlocal execution_count
+        with execution_lock:
+            execution_count += 1
+            current_execution = execution_count
+
+        if current_execution == 1:
+            first_invocation_started.set()
+            if not release_first_invocation.wait(timeout=5):
+                raise TimeoutError("Timed out waiting to release the first invocation")
+
+        return {"execution": current_execution}
+
+    def invoke_first():
+        try:
+            first_result.append(process(record={"id": "same"}))
+        except Exception as exc:
+            first_errors.append(exc)
+
+    first_invocation = Thread(target=invoke_first)
+    first_invocation.start()
+    assert first_invocation_started.wait(timeout=2)
+
+    try:
+        with pytest.raises(IdempotencyAlreadyInProgressError):
+            process(record={"id": "same"})
+    finally:
+        release_first_invocation.set()
+        first_invocation.join(timeout=5)
+
+    assert not first_invocation.is_alive()
+    assert first_errors == []
+    assert first_result == [{"execution": 1}]
+    assert execution_count == 1
 
 
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())

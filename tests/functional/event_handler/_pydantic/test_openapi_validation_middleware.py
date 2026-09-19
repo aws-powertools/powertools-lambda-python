@@ -5,7 +5,7 @@ import warnings
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Tuple, Union
 
 import pytest
 from pydantic import (
@@ -30,7 +30,7 @@ from aws_lambda_powertools.event_handler import (
     VPCLatticeV2Resolver,
 )
 from aws_lambda_powertools.event_handler.openapi.exceptions import ResponseValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Query
+from aws_lambda_powertools.event_handler.openapi.params import Body, Form, Header, Path, Query
 from tests.functional.utils import load_event
 
 
@@ -59,6 +59,27 @@ def test_validate_scalars(gw_event):
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
+def test_content_type_header_validation_remains_enabled(gw_event):
+    """Content-Type header validation remains available when it is omitted from the OpenAPI schema."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.patch("/json-patch")
+    def json_patch(
+        operations: Annotated[list[dict], Body(media_type="application/json-patch+json")],
+        content_type: Annotated[Literal["application/json-patch+json"], Header(alias="Content-Type")],
+    ):
+        return {"status": "updated"}
+
+    gw_event["httpMethod"] = "PATCH"
+    gw_event["path"] = "/json-patch"
+    gw_event["headers"]["Content-Type"] = "application/json"
+    gw_event["body"] = '[{"op": "replace"}]'
+
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 422
+
+
 def test_validate_pydantic_query_params(gw_event):
     """Test that Pydantic models in Query parameters are validated correctly"""
 
@@ -67,7 +88,7 @@ def test_validate_pydantic_query_params(gw_event):
 
     class QueryParams(BaseModel):
         limit: int = Field(default=10, ge=1, le=100, description="Number of items")
-        search: Optional[str] = Field(default=None, description="Search term")
+        search: str | None = Field(default=None, description="Search term")
 
     @app.get("/search")
     def search_handler(params: Annotated[QueryParams, Query()]):
@@ -1756,7 +1777,7 @@ def test_none_returned_for_optional_type(gw_event):
         age: int
 
     @app.get("/none_allowed")
-    def handler_none_allowed() -> Optional[Model]:
+    def handler_none_allowed() -> Model | None:
         return None
 
     # WHEN returning None for an Optional type
@@ -2654,6 +2675,77 @@ def test_field_discriminator_validation(gw_event):
     assert result["statusCode"] == 422
 
 
+def test_field_annotation_with_all_param_types(gw_event):
+    """A reusable Annotated type carrying a Pydantic Field works with every parameter location."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # Reusable annotated type, the same kind you'd use inside a model
+    str_field = Annotated[str, Field()]
+
+    @app.get("/header")
+    def get_header(h: Annotated[str_field, Header()]):
+        return {"value": h}
+
+    @app.get("/path/<p>")
+    def get_path(p: Annotated[str_field, Path()]):
+        return {"value": p}
+
+    @app.get("/query")
+    def get_query(q: Annotated[str_field, Query()]):
+        return {"value": q}
+
+    @app.post("/body")
+    def post_body(b: Annotated[str_field, Body()]):
+        return {"value": b}
+
+    del gw_event["multiValueHeaders"]
+    del gw_event["multiValueQueryStringParameters"]
+
+    # Header
+    gw_event["path"] = "/header"
+    gw_event["httpMethod"] = "GET"
+    gw_event["headers"] = {"h": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Path
+    gw_event["path"] = "/path/test"
+    gw_event["pathParameters"] = {"p": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Query
+    gw_event["path"] = "/query"
+    gw_event["pathParameters"] = None
+    gw_event["queryStringParameters"] = {"q": "test"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Body
+    gw_event["path"] = "/body"
+    gw_event["httpMethod"] = "POST"
+    gw_event["headers"]["content-type"] = "application/json"
+    gw_event["body"] = '"test"'
+    assert app(gw_event, {})["statusCode"] == 200
+
+
+def test_field_constraints_apply_with_param_type(gw_event):
+    """Constraints declared on a Field are enforced when paired with a location marker."""
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/items")
+    def get_items(quantity: Annotated[int, Field(gt=0), Query()]):
+        return {"quantity": quantity}
+
+    gw_event["path"] = "/items"
+    gw_event["httpMethod"] = "GET"
+
+    # Passes the gt=0 constraint
+    gw_event["queryStringParameters"] = {"quantity": "5"}
+    assert app(gw_event, {})["statusCode"] == 200
+
+    # Violates gt=0
+    gw_event["queryStringParameters"] = {"quantity": "-1"}
+    assert app(gw_event, {})["statusCode"] == 422
+
+
 def test_validate_pydantic_query_params_with_config_dict_and_validators(gw_event):
     """Test that Pydantic models with ConfigDict, aliases, and validators work correctly"""
 
@@ -3031,15 +3123,15 @@ def _post_json(app, path, payload):
     return result["statusCode"], json.loads(result["body"])
 
 
-# ---------- Optional[List[Model]] ----------
+# ---------- List[Model] | None ----------
 
 
 def test_optional_list_body_with_list():
-    """Optional[List[Model]] must preserve the full list."""
+    """List[Model] | None must preserve the full list."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[List[_Item]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[List[_Item] | None, Body()]) -> Dict[str, Any]:
         assert isinstance(items, list)
         return {"count": len(items)}
 
@@ -3049,11 +3141,11 @@ def test_optional_list_body_with_list():
 
 
 def test_optional_list_body_with_none():
-    """Optional[List[Model]] must accept a null body gracefully."""
+    """List[Model] | None must accept a null body gracefully."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[List[_Item]], Body()] = None) -> Dict[str, Any]:
+    def handler(items: Annotated[List[_Item] | None, Body()] = None) -> Dict[str, Any]:
         return {"received_none": items is None}
 
     status, body = _post_json(app, "/items", None)
@@ -3061,15 +3153,15 @@ def test_optional_list_body_with_none():
     assert body["received_none"] is True
 
 
-# ---------- Optional[Union[Model, List[Model]]] ----------
+# ---------- Union[Model, List[Model]] | None ----------
 
 
 def test_optional_union_model_or_list_with_list():
-    """Optional[Union[Model, List[Model]]] — send list, get full list."""
+    """Union[Model, List[Model]] | None — send list, get full list."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()]) -> Dict[str, Any]:
         assert isinstance(items, list)
         return {"count": len(items)}
 
@@ -3079,11 +3171,11 @@ def test_optional_union_model_or_list_with_list():
 
 
 def test_optional_union_model_or_list_with_single():
-    """Optional[Union[Model, List[Model]]] — send single obj, get single obj."""
+    """Union[Model, List[Model]] | None — send single obj, get single obj."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()]) -> Dict[str, Any]:
         assert not isinstance(items, list)
         return {"name": items.name}
 
@@ -3093,11 +3185,11 @@ def test_optional_union_model_or_list_with_single():
 
 
 def test_optional_union_model_or_list_with_none():
-    """Optional[Union[Model, List[Model]]] — send null, get None."""
+    """Union[Model, List[Model]] | None — send null, get None."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[Union[_Item, List[_Item]]], Body()] = None) -> Dict[str, Any]:
+    def handler(items: Annotated[Union[_Item, List[_Item]] | None, Body()] = None) -> Dict[str, Any]:
         return {"is_none": items is None}
 
     status, body = _post_json(app, "/items", None)
@@ -3196,11 +3288,11 @@ def test_union_str_or_list_dict():
 
 
 def test_optional_rootmodel_list_body():
-    """Optional[RootModel[List[Model]]] — list must not be truncated."""
+    """RootModel[List[Model]] | None — list must not be truncated."""
     app = APIGatewayRestResolver(enable_validation=True)
 
     @app.post("/items")
-    def handler(items: Annotated[Optional[_ItemCollection], Body()]) -> Dict[str, Any]:
+    def handler(items: Annotated[_ItemCollection | None, Body()]) -> Dict[str, Any]:
         return {"count": len(items.root)}
 
     status, body = _post_json(app, "/items", _THREE_ITEMS)

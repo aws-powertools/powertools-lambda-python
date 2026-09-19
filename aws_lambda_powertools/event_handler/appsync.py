@@ -392,7 +392,7 @@ class AppSyncResolver(Router):
         ----------
         type_name : str, optional
             GraphQL type e.g., Query, Mutation, by default "*" meaning any
-        field_name : Optional[str], optional
+        field_name : str | None, optional
             GraphQL field e.g., getTodo, createTodo, by default None
 
         Returns
@@ -447,7 +447,7 @@ class AppSyncResolver(Router):
         ----------
         type_name : str, optional
             GraphQL type e.g., Query, Mutation, by default "*" meaning any
-        field_name : Optional[str], optional
+        field_name : str | None, optional
             GraphQL field e.g., getTodo, createTodo, by default None
         raise_on_error : bool, optional
             Whether to fail entire batch upon error, or handle errors gracefully (None), by default False

@@ -10,12 +10,9 @@ import pytest
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.event_handler import HttpResolverLocal
+from aws_lambda_powertools.event_handler.api_gateway import BaseRouter, Router
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
 from aws_lambda_powertools.event_handler.openapi.params import Query
-
-# Suppress warning for all tests
-pytestmark = pytest.mark.filterwarnings("ignore:HttpResolverLocal is intended for local development")
-
 
 # =============================================================================
 # ASGI Test Helpers
@@ -369,3 +366,177 @@ def test_openapi_schema_includes_validation_errors():
     # THEN schema includes 422 response
     post_operation = schema.paths["/users"].post
     assert 422 in post_operation.responses
+
+
+async def _post_concurrent_request(app, name: str | None):
+    payload = {} if name is None else {"name": name, "age": 30}
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/concurrent",
+        "headers": [(b"content-type", b"application/json"), (b"x-request-name", (name or "invalid").encode())],
+        "query_string": b"",
+    }
+    send, captured = make_asgi_send()
+    await asyncio.wait_for(app(scope, make_asgi_receive(json.dumps(payload).encode()), send), timeout=5)
+    return captured["status_code"], json.loads(captured["body"])
+
+
+def test_concurrent_asgi_validation_preserves_each_request_body():
+    # GIVEN one local application using native request validation
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.post("/concurrent")
+    async def echo(user: UserModel) -> dict:
+        await asyncio.sleep(0)
+        return {"name": user.name}
+
+    async def scenario():
+        # WHEN distinct bodies are submitted concurrently
+        return await asyncio.gather(*(_post_concurrent_request(app, str(i)) for i in range(6)))
+
+    # THEN each caller receives its own input
+    assert asyncio.run(scenario()) == [(200, {"name": str(i)}) for i in range(6)]
+
+
+def _make_included_router_app():
+    app = HttpResolverLocal(enable_validation=True)
+    router = Router()
+
+    @router.post("/concurrent")
+    async def echo(user: UserModel) -> dict:
+        app.append_context(name=user.name)
+        await asyncio.sleep(0)
+        return {
+            "name": router.context["name"],
+            "header": router.current_event.headers["x-request-name"],
+            "request_id": router.lambda_context.aws_request_id,
+        }
+
+    app.include_router(router)
+    return app
+
+
+def test_asgi_included_router_uses_request_state():
+    app = _make_included_router_app()
+
+    assert asyncio.run(_post_concurrent_request(app, "one")) == (
+        200,
+        {"name": "one", "header": "one", "request_id": "local-request-id"},
+    )
+
+
+def test_concurrent_asgi_included_router_preserves_request_state():
+    app = _make_included_router_app()
+
+    async def scenario():
+        return await asyncio.gather(*(_post_concurrent_request(app, str(i)) for i in range(6)))
+
+    assert asyncio.run(scenario()) == [
+        (200, {"name": str(i), "header": str(i), "request_id": "local-request-id"}) for i in range(6)
+    ]
+
+
+def test_router_state_before_inclusion(monkeypatch):
+    app = HttpResolverLocal()
+    router = Router()
+    event = app._to_proxy_event(
+        {
+            "httpMethod": "GET",
+            "path": "/router",
+            "headers": {},
+            "queryStringParameters": {},
+            "multiValueQueryStringParameters": {},
+            "body": None,
+        },
+    )
+    context = MockLambdaContext()
+
+    monkeypatch.setattr(BaseRouter, "current_event", None, raising=False)
+    monkeypatch.setattr(BaseRouter, "lambda_context", None, raising=False)
+
+    router.current_event = event
+    router.lambda_context = context
+    router.context = {"source": "router"}
+
+    assert router.current_event is event
+    assert router.lambda_context is context
+    assert router.context == {"source": "router"}
+
+
+def test_included_router_delegates_state_writes():
+    app = HttpResolverLocal()
+    router = Router()
+    router.context = {"before": "include"}
+    app.include_router(router)
+
+    event = app._to_proxy_event(
+        {
+            "httpMethod": "GET",
+            "path": "/router",
+            "headers": {},
+            "queryStringParameters": {},
+            "multiValueQueryStringParameters": {},
+            "body": None,
+        },
+    )
+    context = MockLambdaContext()
+
+    router.current_event = event
+    router.lambda_context = context
+    router.context = {"source": "resolver"}
+
+    assert app.current_event is event
+    assert app.lambda_context is context
+    assert app.context == {"source": "resolver"}
+
+
+@pytest.mark.parametrize("interruption", ["invalid", "cancelled"])
+def test_interrupted_asgi_request_does_not_clear_another_requests_state(interruption):
+    async def scenario():
+        # GIVEN an active request that reads its context after awaiting I/O
+        app = HttpResolverLocal(enable_validation=True)
+        entered = {name: asyncio.Event() for name in ("first", "second", "later")}
+        release = {name: asyncio.Event() for name in entered}
+        pending = []
+
+        @app.post("/concurrent")
+        async def echo(user: UserModel) -> dict:
+            app.append_context(name=user.name)
+            entered[user.name].set()
+            await release[user.name].wait()
+            return {"name": app.context["name"], "header": app.current_event.headers["x-request-name"]}
+
+        async def start(name):
+            task = asyncio.create_task(_post_concurrent_request(app, name))
+            pending.append(task)
+            await asyncio.wait_for(entered[name].wait(), timeout=5)
+            return task
+
+        try:
+            first = await start("first")
+            # WHEN another request fails validation or an overlapping request is cancelled
+            if interruption == "invalid":
+                status, _ = await _post_concurrent_request(app, None)
+                assert status == 422
+                survivor, name = first, "first"
+            else:
+                survivor, name = await start("second"), "second"
+                first.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await first
+
+            # THEN the surviving request retains both context and headers
+            release[name].set()
+            assert await survivor == (200, {"name": name, "header": name})
+            release["later"].set()
+            assert await _post_concurrent_request(app, "later") == (200, {"name": "later", "header": "later"})
+        finally:
+            for event in release.values():
+                event.set()
+            for task in pending:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*pending, return_exceptions=True)
+
+    asyncio.run(scenario())

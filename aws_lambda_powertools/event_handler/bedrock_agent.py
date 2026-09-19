@@ -99,12 +99,17 @@ class BedrockAgentResolver(ApiGatewayResolver):
 
     current_event: BedrockAgentEvent
 
-    def __init__(self, debug: bool = False, enable_validation: bool = True):
+    def __init__(
+        self,
+        debug: bool = False,
+        enable_validation: bool = True,
+        serializer: Callable[[dict], str] | None = None,
+    ):
         super().__init__(
             proxy_type=ProxyEventType.BedrockAgentEvent,
             cors=None,
             debug=debug,
-            serializer=None,
+            serializer=serializer,
             strip_prefixes=None,
             enable_validation=enable_validation,
             json_body_deserializer=None,

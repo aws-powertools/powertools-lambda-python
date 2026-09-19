@@ -9,11 +9,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @event_source(data_class=KinesisFirehoseEvent)
-def lambda_handler(event: dict, context: LambdaContext):
-    firehose_event = KinesisFirehoseEvent(event)
+def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
     result = KinesisFirehoseDataTransformationResponse()
 
-    for record in firehose_event.records:
+    for record in event.records:
         try:
             payload = record.data_as_text  # base64 decoded data as str
 

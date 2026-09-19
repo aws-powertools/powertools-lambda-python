@@ -1,7 +1,7 @@
 import json
 import uuid
 from random import randint
-from typing import Any, Awaitable, Callable, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict
 
 import pytest
 from pydantic import BaseModel, field_validator
@@ -311,8 +311,8 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB] = None
-        OldImage: Optional[OrderDynamoDB] = None
+        NewImage: OrderDynamoDB | None = None
+        OldImage: OrderDynamoDB | None = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
@@ -355,8 +355,8 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
             return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB] = None
-        OldImage: Optional[OrderDynamoDB] = None
+        NewImage: OrderDynamoDB | None = None
+        OldImage: OrderDynamoDB | None = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord

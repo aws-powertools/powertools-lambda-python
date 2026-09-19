@@ -70,6 +70,7 @@ class SqsFifoPartialProcessor(BatchProcessor):
         self,
         model: BatchSqsTypeModel | None = None,
         skip_group_on_error: bool = False,
+        logger: logging.Logger | None = None,
         raise_on_entire_batch_failure: bool = True,
     ):
         """
@@ -82,6 +83,8 @@ class SqsFifoPartialProcessor(BatchProcessor):
         skip_group_on_error: bool
             Determines whether to exclusively skip messages from the MessageGroupID that encountered processing failures
             Default is False.
+        logger: logging.Logger | None
+            Optional Logger instance to output warnings with tracebacks for failed records.
         raise_on_entire_batch_failure: bool
             Raise an exception when the entire batch has failed processing.
             When set to False, partial failures are reported in the response.
@@ -90,7 +93,12 @@ class SqsFifoPartialProcessor(BatchProcessor):
         self._skip_group_on_error: bool = skip_group_on_error
         self._current_group_id = None
         self._failed_group_ids: set[str] = set()
-        super().__init__(EventType.SQS, model, raise_on_entire_batch_failure)
+        super().__init__(
+            EventType.SQS,
+            model,
+            raise_on_entire_batch_failure=raise_on_entire_batch_failure,
+            logger=logger,
+        )
 
     def _process_record(self, record):
         self._current_group_id = record.get("attributes", {}).get("MessageGroupId")

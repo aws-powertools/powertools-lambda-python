@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
@@ -86,8 +88,26 @@ def test_validate_event_does_not_conform_with_model():
         parse(event=raw_event, model=MyDynamoBusiness, envelope=envelopes.DynamoDBStreamEnvelope)
 
 
-def test_dynamo_db_stream_lambda_invocation_event():
+@pytest.mark.parametrize(
+    "response_context",
+    [
+        pytest.param(
+            {"statusCode": 200, "executedVersion": "$LATEST"},
+            id="without function error",
+        ),
+        pytest.param(
+            {"statusCode": 200, "executedVersion": "$LATEST", "functionError": None},
+            id="with null function error",
+        ),
+        pytest.param(
+            {"statusCode": 200, "executedVersion": "$LATEST", "functionError": "Unhandled"},
+            id="with function error",
+        ),
+    ],
+)
+def test_dynamo_db_stream_lambda_invocation_event(response_context: dict[str, Any]):
     raw_event = load_event("dynamoStreamLambdaInvocationEvent.json")
+    raw_event["responseContext"] = response_context
     parsed_event: DynamoDBStreamLambdaOnFailureDestinationModel = parse(
         event=raw_event,
         model=DynamoDBStreamLambdaOnFailureDestinationModel,
@@ -111,6 +131,8 @@ def test_dynamo_db_stream_lambda_invocation_event():
     )
     assert parsed_event.ddb_stream_batch_info.stream_arn == raw_event["DDBStreamBatchInfo"]["streamArn"]
     assert parsed_event.request_context.model_dump(by_alias=True) == raw_event["requestContext"]
-    assert parsed_event.response_context.model_dump(by_alias=True) == raw_event["responseContext"]
+    assert parsed_event.response_context.status_code == response_context["statusCode"]
+    assert parsed_event.response_context.executed_version == response_context["executedVersion"]
+    assert parsed_event.response_context.function_error == response_context.get("functionError")
     assert parsed_event.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ") == raw_event["timestamp"]
     assert parsed_event.version == raw_event["version"]

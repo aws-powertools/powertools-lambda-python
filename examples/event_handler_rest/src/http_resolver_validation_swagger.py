@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler import HttpResolverLocal
+from aws_lambda_powertools.event_handler import HttpResolver
 
 
 class User(BaseModel):
@@ -8,7 +8,7 @@ class User(BaseModel):
     age: int
 
 
-app = HttpResolverLocal(enable_validation=True)
+app = HttpResolver(enable_validation=True)
 
 app.enable_swagger(
     title="My API",
