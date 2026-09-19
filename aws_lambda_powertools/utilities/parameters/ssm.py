@@ -504,7 +504,7 @@ class SSMProvider(BaseProvider):
         # NOTE: We need to find out whether all parameters must be decrypted or not to know which API to use
         ## Logic:
         ##
-        ## GetParameters API -> When decrypt is used for all parameters in the the batch
+        ## GetParameters API -> When decrypt is used for all parameters in the batch
         ## GetParameter  API -> When decrypt is used for one or more in the batch
 
         if len(decrypt_params) != len(parameters):
@@ -654,7 +654,12 @@ class SSMProvider(BaseProvider):
 
             # NOTE: If transform is set, we do it before caching to reduce number of operations
             if transform:
-                value = transform_value(value=value, transform=transform, raise_on_transform_error=raise_on_error)  # type: ignore[assignment]
+                value = transform_value(
+                    value=value,
+                    transform=transform,
+                    raise_on_transform_error=raise_on_error,
+                    key=name,
+                )  # type: ignore[assignment]
 
             _cache_key = (name, transform)
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])

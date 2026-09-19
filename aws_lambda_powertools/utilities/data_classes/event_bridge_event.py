@@ -68,4 +68,4 @@ class EventBridgeEvent(DictWrapper):
     @property
     def replay_name(self) -> str | None:
         """Identifies whether the event is being replayed and what is the name of the replay."""
-        return self["replay-name"]
+        return self.get("replay-name")

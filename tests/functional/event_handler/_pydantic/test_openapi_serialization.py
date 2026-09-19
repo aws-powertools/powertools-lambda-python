@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Dict, Optional, Set
+from typing import Dict, Set
 
 import pytest
 from pydantic import BaseModel
@@ -81,7 +81,7 @@ def test_valid_model_returned_for_optional_type(gw_event):
         age: int
 
     @app.get("/valid_optional")
-    def handler_valid_optional() -> Optional[Model]:
+    def handler_valid_optional() -> Model | None:
         return Model(name="John", age=30)
 
     # WHEN returning a valid model for an Optional type

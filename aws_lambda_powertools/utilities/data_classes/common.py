@@ -163,8 +163,8 @@ class DictWrapper(Mapping):
     def _properties(self) -> list[str]:
         return [p for p in dir(self.__class__) if isinstance(getattr(self.__class__, p), property)]
 
-    def get(self, key: str, default: Any | None = None) -> Any | None:
-        return self._data.get(key, default)
+    def get(self, key: object, default: Any | None = None) -> Any | None:  # type: ignore[override]
+        return self._data.get(str(key), default)
 
     @property
     def raw_event(self) -> dict[str, Any]:

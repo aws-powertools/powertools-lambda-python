@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -34,8 +34,8 @@ class BedrockAgentEventModel(BaseModel):
     session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
     prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")
     agent: BedrockAgentModel
-    parameters: Optional[List[BedrockAgentPropertyModel]] = None
-    request_body: Optional[BedrockAgentRequestBodyModel] = Field(None, alias="requestBody")
+    parameters: List[BedrockAgentPropertyModel] | None = None
+    request_body: BedrockAgentRequestBodyModel | None = Field(None, alias="requestBody")
 
 
 class BedrockAgentFunctionEventModel(BaseModel):
@@ -51,6 +51,6 @@ class BedrockAgentFunctionEventModel(BaseModel):
     session_id: str = Field(..., alias="sessionId")
     action_group: str = Field(..., alias="actionGroup")
     function: str
-    parameters: Optional[List[BedrockAgentPropertyModel]] = None
+    parameters: List[BedrockAgentPropertyModel] | None = None
     session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
     prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     import numbers
     import traceback
     from collections.abc import Generator, Sequence
+    from contextlib import AbstractAsyncContextManager
 
 
 class BaseSegment(abc.ABC):
@@ -99,8 +100,7 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    @contextmanager
-    def in_subsegment_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
+    def in_subsegment_async(self, name=None, **kwargs) -> AbstractAsyncContextManager[BaseSegment]:
         """Return a subsegment async context manger.
 
         Parameters

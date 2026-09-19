@@ -1,6 +1,6 @@
-from aws_lambda_powertools.event_handler import HttpResolverLocal
+from aws_lambda_powertools.event_handler import HttpResolver
 
-app = HttpResolverLocal()
+app = HttpResolver()
 
 
 @app.get("/hello/<name>")

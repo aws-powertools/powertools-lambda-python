@@ -33,6 +33,7 @@ lint.select = [
 lint.ignore = [
     "W291",    # https://beta.ruff.rs/docs/rules/trailing-whitespace/
     "PLR0913", # https://beta.ruff.rs/docs/rules/too-many-arguments/
+    "PLR0917", # https://docs.astral.sh/ruff/rules/too-many-positional-arguments/
     "PLR2004", #https://beta.ruff.rs/docs/rules/magic-value-comparison/
     "PLW0603", #https://beta.ruff.rs/docs/rules/global-statement/
     "B904",    # raise-without-from-inside-except - disabled temporarily
@@ -41,6 +42,9 @@ lint.ignore = [
     "A005",
     "TC006", # https://docs.astral.sh/ruff/rules/runtime-cast-value/
     "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
+    "UP006",
+    "UP007",
+    "UP035",
 ]
 
 # Exclude files and directories
@@ -62,7 +66,7 @@ exclude = [
 # Maximum line length
 line-length = 120
 
-target-version = "py38"
+target-version = "py310"
 
 fix = true
 lint.fixable = ["I", "COM812", "W"]

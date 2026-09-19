@@ -214,3 +214,82 @@ def test_depends_with_regular_params_and_validation():
     result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"message": "hello, Lambda!"}
+
+
+class ArbitraryClient:
+    """Stand-in for an arbitrary non-Pydantic type such as a boto3 client."""
+
+    def __init__(self, name: str = "default"):
+        self.name = name
+
+
+def test_depends_with_arbitrary_return_type_and_validation():
+    """A dependency returning a non-Pydantic type must not crash under enable_validation (#8330)."""
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    def get_client() -> ArbitraryClient:
+        return ArbitraryClient(name="orders")
+
+    @app.get("/items")
+    def handler(client: Annotated[ArbitraryClient, Depends(get_client)]):
+        return {"client": client.name}
+
+    event = {**API_GW_V2_EVENT}
+    event["rawPath"] = "/items"
+    event["requestContext"] = {
+        **event["requestContext"],
+        "http": {"method": "GET", "path": "/items"},
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"client": "orders"}
+
+
+def test_depends_nested_arbitrary_return_types_and_validation():
+    """A nested dependency chain of non-Pydantic return types must resolve (#8330).
+
+    Mirrors the reported chain: botocore session -> boto3 session -> dynamodb client.
+    """
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    def get_session() -> ArbitraryClient:
+        return ArbitraryClient(name="session")
+
+    def get_client(session: Annotated[ArbitraryClient, Depends(get_session)]) -> ArbitraryClient:
+        return ArbitraryClient(name=f"client-of-{session.name}")
+
+    @app.get("/items")
+    def handler(client: Annotated[ArbitraryClient, Depends(get_client)]):
+        return {"client": client.name}
+
+    event = {**API_GW_V2_EVENT}
+    event["rawPath"] = "/items"
+    event["requestContext"] = {
+        **event["requestContext"],
+        "http": {"method": "GET", "path": "/items"},
+    }
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"client": "client-of-session"}
+
+
+def test_depends_arbitrary_return_type_excluded_from_openapi_schema():
+    """A non-Pydantic dependency return type must not appear in (or break) the OpenAPI schema (#8330)."""
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    def get_client() -> ArbitraryClient:
+        return ArbitraryClient()
+
+    @app.get("/items")
+    def handler(client: Annotated[ArbitraryClient, Depends(get_client)]):
+        return {"ok": True}
+
+    # Schema generation itself must not raise, and the dependency must not leak into params/body.
+    schema = app.get_openapi_schema()
+    get_op = schema.paths["/items"].get
+    param_names = [p.name for p in (get_op.parameters or [])]
+
+    assert "client" not in param_names
+    assert get_op.requestBody is None

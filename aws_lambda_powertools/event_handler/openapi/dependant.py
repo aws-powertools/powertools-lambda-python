@@ -156,6 +156,7 @@ def get_dependant(
     call: Callable[..., Any],
     name: str | None = None,
     responses: dict[int, OpenAPIResponse] | None = None,
+    is_dependency: bool = False,
 ) -> Dependant:
     """
     Returns a dependant model for a handler function. A dependant model is a model that contains
@@ -200,6 +201,7 @@ def get_dependant(
             sub_dependant = get_dependant(
                 path=path,
                 call=depends_instance.dependency,
+                is_dependency=True,
             )
             dependant.dependencies.append(
                 DependencyParam(
@@ -229,7 +231,12 @@ def get_dependant(
         else:
             add_param_to_fields(field=param_field, dependant=dependant)
 
-    _add_return_annotation(dependant, endpoint_signature)
+    # A dependency's return value is injected directly into the handler, never serialized as a
+    # response body nor validated as an OpenAPI parameter — so building a Pydantic schema for it is
+    # both unused (no reader consumes a sub-dependency's return_param) and actively harmful: it crashes
+    # for arbitrary return types (e.g. boto3/botocore clients). Only the top-level handler needs it.
+    if not is_dependency:
+        _add_return_annotation(dependant, endpoint_signature)
     _add_extra_responses(dependant, responses)
 
     return dependant

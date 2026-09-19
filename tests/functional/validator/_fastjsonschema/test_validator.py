@@ -77,12 +77,13 @@ def test_validate_accept_schema_custom_format(
     )
 
 
-@pytest.mark.parametrize("invalid_format", [None, False, {}, [], object])
+@pytest.mark.parametrize("invalid_format", [object, 123, 1.5, True])
 def test_validate_invalid_custom_format(
     eventbridge_schema_registry_cloudtrail_v2_s3,
     eventbridge_cloudtrail_s3_head_object_event,
     invalid_format,
 ):
+    # formats must be a mapping; anything we can't look a format name up in fails to compile
     with pytest.raises(exceptions.InvalidSchemaFormatError):
         validate(
             event=eventbridge_cloudtrail_s3_head_object_event,

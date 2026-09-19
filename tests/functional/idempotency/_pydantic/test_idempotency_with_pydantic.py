@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 from pydantic import BaseModel
 
@@ -252,7 +250,7 @@ def test_idempotent_function_serialization_pydantic_with_optional_return(output_
         config=config,
         output_serializer=output_serializer,
     )
-    def collect_payment(payment: PaymentInput) -> Optional[PaymentOutput]:
+    def collect_payment(payment: PaymentInput) -> PaymentOutput | None:
         return PaymentOutput(**payment.dict())
 
     # WHEN

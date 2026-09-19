@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import base64
-import inspect
-import warnings
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import parse_qs
 
@@ -10,14 +10,13 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     BaseRouter,
     ProxyEventType,
-    Response,
-    Route,
 )
-from aws_lambda_powertools.event_handler.middlewares.async_utils import wrap_middleware_async
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, MutableMapping
+
     from aws_lambda_powertools.shared.cookies import Cookie
 
 
@@ -100,7 +99,7 @@ class HttpProxyEvent(BaseProxyEvent):
         return instance
 
     @classmethod
-    def from_asgi(cls, scope: dict[str, Any], body: bytes | None = None) -> HttpProxyEvent:
+    def from_asgi(cls, scope: Mapping[str, Any], body: bytes | None = None) -> HttpProxyEvent:
         """
         Create an HttpProxyEvent from an ASGI scope dict.
 
@@ -164,22 +163,25 @@ class MockLambdaContext:
         return 300000  # 5 minutes
 
 
+@dataclass
+class _RequestState:
+    event: BaseProxyEvent | None = None
+    lambda_context: Any = None
+    context: dict = field(default_factory=dict)
+    processed_stack_frames: list[str] = field(default_factory=list)
+
+
 class HttpResolverLocal(ApiGatewayResolver):
     """
-    ASGI-compatible HTTP resolver for local development and testing.
+    ASGI-compatible HTTP resolver.
 
-    This resolver is designed specifically for local development workflows.
-    It allows you to run your Powertools application locally with any ASGI server
+    It allows you to run your Powertools application with any ASGI server
     (uvicorn, hypercorn, daphne, etc.) while maintaining full compatibility with Lambda.
 
     The same code works in both environments - locally via ASGI and in Lambda via the handler.
+    If your Lambda is behind Lambda Web Adapter or any other HTTP proxy, it works seamlessly.
 
     Supports both sync and async route handlers.
-
-    WARNING
-    -------
-    This is intended for local development and testing only.
-    The API may change in future releases. Do not use in production environments.
 
     Example
     -------
@@ -214,11 +216,8 @@ class HttpResolverLocal(ApiGatewayResolver):
         strip_prefixes: list[str | Any] | None = None,
         enable_validation: bool = False,
     ):
-        warnings.warn(
-            "HttpResolverLocal is intended for local development and testing only. "
-            "The API may change in future releases. Do not use in production environments.",
-            stacklevel=2,
-        )
+        self._startup_state = _RequestState()
+        self._request_state: ContextVar[_RequestState | None] = ContextVar("local_http_request", default=None)
         super().__init__(
             proxy_type=ProxyEventType.APIGatewayProxyEvent,  # Use REST API format internally
             cors=cors,
@@ -227,7 +226,46 @@ class HttpResolverLocal(ApiGatewayResolver):
             strip_prefixes=strip_prefixes,
             enable_validation=enable_validation,
         )
-        self._is_async_mode = False
+
+    @property
+    def _state(self) -> _RequestState:
+        return self._request_state.get() or self._startup_state
+
+    # Powertools declares these as mutable attributes. Properties preserve that
+    # interface while directing each task to its own state. asyncio.to_thread
+    # propagates the ContextVar, so middleware sees the same request dictionary.
+    @property
+    def current_event(self) -> BaseProxyEvent:
+        # Preserve the inherited synchronous resolve() path outside ASGI calls.
+        return self._state.event or BaseRouter.current_event
+
+    @current_event.setter
+    def current_event(self, value: BaseProxyEvent) -> None:
+        self._state.event = value
+
+    @property
+    def lambda_context(self) -> Any:
+        return self._state.lambda_context or BaseRouter.lambda_context
+
+    @lambda_context.setter
+    def lambda_context(self, value: Any) -> None:
+        self._state.lambda_context = value
+
+    @property
+    def context(self) -> dict:
+        return self._state.context
+
+    @context.setter
+    def context(self, value: dict) -> None:
+        self._state.context = value
+
+    @property
+    def processed_stack_frames(self) -> list[str]:
+        return self._state.processed_stack_frames
+
+    @processed_stack_frames.setter
+    def processed_stack_frames(self, value: list[str]) -> None:
+        self._state.processed_stack_frames = value
 
     def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
         """Convert event dict to HttpProxyEvent."""
@@ -240,116 +278,16 @@ class HttpResolverLocal(ApiGatewayResolver):
         return ""
 
     async def _resolve_async(self) -> dict:  # type: ignore[override]
-        """Async version of resolve that supports async handlers."""
-        method = self.current_event.http_method.upper()
-        path = self._remove_prefix(self.current_event.path)
+        """Thin async resolver: delegates entirely to the parent and serializes to dict.
 
-        registered_routes = self._static_routes + self._dynamic_routes
-
-        for route in registered_routes:
-            if method != route.method:
-                continue
-            match_results = route.rule.match(path)
-            if match_results:
-                self.append_context(_route=route, _path=path)
-                route_keys = self._convert_matches_into_route_keys(match_results)
-                return await self._call_route_async(route, route_keys)
-
-        # Handle not found
-        return await self._handle_not_found_async()
-
-    async def _call_route_async(self, route: Route, route_arguments: dict[str, str]) -> dict:  # type: ignore[override]
-        """Call route handler, supporting both sync and async handlers."""
-        from aws_lambda_powertools.event_handler.api_gateway import ResponseBuilder
-
-        try:
-            self._reset_processed_stack()
-
-            # Get the route args (may be modified by validation middleware)
-            self.append_context(_route_args=route_arguments)
-
-            # Run middleware chain (sync for now, handlers can be async)
-            response = await self._run_middleware_chain_async(route)
-
-            response_builder: ResponseBuilder = ResponseBuilder(
-                response=response,
-                serializer=self._serializer,
-                route=route,
-            )
-
-            return response_builder.build(self.current_event, self._cors)
-
-        except Exception as exc:
-            exc_response_builder = self._call_exception_handler(exc, route)
-            if exc_response_builder:
-                return exc_response_builder.build(self.current_event, self._cors)
-            raise
-
-    async def _run_middleware_chain_async(self, route: Route) -> Response:
-        """Run the middleware chain, awaiting async handlers."""
-        # Build middleware list
-        all_middlewares: list[Callable[..., Any]] = []
-
-        # Determine if validation should be enabled for this route
-        # If route has explicit enable_validation setting, use it; otherwise, use resolver's global setting
-        route_validation_enabled = (
-            route.enable_validation if route.enable_validation is not None else self._enable_validation
-        )
-
-        if route_validation_enabled and hasattr(self, "_request_validation_middleware"):
-            all_middlewares.append(self._request_validation_middleware)
-
-        all_middlewares.extend(self._router_middlewares + route.middlewares)
-
-        if route_validation_enabled and hasattr(self, "_response_validation_middleware"):
-            all_middlewares.append(self._response_validation_middleware)
-
-        # Create the final handler that calls the route function
-        async def final_handler(app):
-            route_args = app.context.get("_route_args", {})
-            result = route.func(**route_args)
-
-            # Await if coroutine
-            if inspect.iscoroutine(result):
-                result = await result
-
-            return self._to_response(result)
-
-        # Build middleware chain from end to start
-        next_handler = final_handler
-
-        for middleware in reversed(all_middlewares):
-            next_handler = wrap_middleware_async(middleware, next_handler)
-
-        return await next_handler(self)
-
-    async def _handle_not_found_async(self, method: str = "", path: str = "") -> dict:  # type: ignore[override]
-        """Handle 404 responses, using custom not_found handler if registered."""
-        from http import HTTPStatus
-
-        from aws_lambda_powertools.event_handler.api_gateway import ResponseBuilder
-        from aws_lambda_powertools.event_handler.exceptions import NotFoundError
-
-        # Check for custom not_found handler
-        custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
-        if custom_not_found_handler:
-            response = custom_not_found_handler(NotFoundError())
-        else:
-            response = Response(
-                status_code=HTTPStatus.NOT_FOUND.value,
-                content_type="application/json",
-                body={"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"},
-            )
-
-        response_builder: ResponseBuilder = ResponseBuilder(
-            response=response,
-            serializer=self._serializer,
-            route=None,
-        )
-
+        The parent's _resolve_async handles route matching, CORS preflight, not-found
+        logic, and exception handling. The only adaptation needed here is converting
+        the returned ResponseBuilder into the dict format that asgi_handler expects.
+        """
+        response_builder = await super()._resolve_async()
         return response_builder.build(self.current_event, self._cors)
 
-    async def asgi_handler(self, scope: dict, receive: Callable, send: Callable) -> None:
+    async def asgi_handler(self, scope: MutableMapping[str, Any], receive: Callable, send: Callable) -> None:
         """
         ASGI interface - allows running with uvicorn/hypercorn/etc.
 
@@ -389,25 +327,27 @@ class HttpResolverLocal(ApiGatewayResolver):
         # Create mock Lambda context
         context: Any = MockLambdaContext()
 
-        # Set up resolver state (similar to resolve())
-        BaseRouter.current_event = self._to_proxy_event(event._data)
-        BaseRouter.lambda_context = context
-
-        self._is_async_mode = True
-
+        # Never write BaseRouter's class attributes: another ASGI request may
+        # enter while validation or the handler is awaiting I/O.
+        state = _RequestState(
+            event=self._to_proxy_event(event._data),
+            lambda_context=context,
+            context=self._startup_state.context.copy(),
+        )
+        token = self._request_state.set(state)
         try:
-            # Use async resolve
             response = await self._resolve_async()
         finally:
-            self._is_async_mode = False
-            self.clear_context()
+            # Reset only this task's binding. Middleware threads may still be
+            # unwinding after cancellation and retain their request's state.
+            self._request_state.reset(token)
 
         # Send HTTP response
         await self._send_response(send, response)
 
     async def __call__(  # type: ignore[override]
         self,
-        scope: dict,
+        scope: MutableMapping[str, Any],
         receive: Callable,
         send: Callable,
     ) -> None:
@@ -455,3 +395,6 @@ class HttpResolverLocal(ApiGatewayResolver):
                 "body": body_bytes,
             },
         )
+
+
+HttpResolver = HttpResolverLocal

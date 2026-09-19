@@ -2,8 +2,9 @@
 
 # This script is run during the publish_v3_layer.yml CI job,
 # and it is responsible for replacing the layer ARN in our documentation.
-# Our pipeline must generate the same layer number for all commercial regions + gov cloud
-# If this doesn't happens, we have an error and we must fix it in the deployment.
+# Our pipeline must generate the same layer number for all commercial regions.
+# China mirrors that version, and its documentation PR is merged after deployment.
+# GovCloud layer versions are updated independently.
 #
 # see .github/workflows/reusable_deploy_v3_layer_stack.yml
 
@@ -29,16 +30,12 @@ find ./docs ./examples -type f \( -name "*.md" -o -name "*.py" -o -name "*.yaml"
     # The regex matches the layer name and replaces only the version number at the end
     
     # Commercial AWS (arn:aws:lambda)
-    sed -i -E "s/(AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
-    sed -i -E "s/(AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
-    
+    sed -i -E "s/(arn:aws:lambda:[^[:space:]]*:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(arn:aws:lambda:[^[:space:]]*:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+
     # AWS China (arn:aws-cn:lambda)
-    sed -i -E "s/(arn:aws-cn:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
-    sed -i -E "s/(arn:aws-cn:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
-    
-    # AWS GovCloud (arn:aws-us-gov:lambda)
-    sed -i -E "s/(arn:aws-us-gov:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
-    sed -i -E "s/(arn:aws-us-gov:lambda:[^:]+:[^:]+:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(arn:aws-cn:lambda:[^[:space:]]*:layer:AWSLambdaPowertoolsPythonV3-python[0-9]+-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
+    sed -i -E "s/(arn:aws-cn:lambda:[^[:space:]]*:layer:AWSLambdaPowertoolsPythonV3-{python_version}-((arm64)|(x86_64)):)[0-9]+/\1$new_version/g" "$file"
     
     if [ $? -eq 0 ]; then
         echo "Updated $file successfully"

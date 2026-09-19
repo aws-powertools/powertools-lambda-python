@@ -505,11 +505,11 @@ def _is_or_contains_sequence(annotation: Any) -> bool:
 
     This function handles complex type annotations like:
     - List[Model] - direct sequence
-    - Union[Model, List[Model]] - checks if any Union member is a sequence
-    - Optional[List[Model]] - Union[List[Model], None]
-    - RootModel[List[Model]] - checks if the RootModel wraps a sequence
-    - Optional[RootModel[List[Model]]] - Union member that is a RootModel
-    - RootModel[Union[Model, List[Model]]] - RootModel wrapping a Union with a sequence
+    - Union[Model, list[Model]] - checks if any Union member is a sequence
+    - list[Model] | None - Union[list[Model], None]
+    - RootModel[list[Model]] - checks if the RootModel wraps a sequence
+    - RootModel[list[Model]] | None - Union member that is a RootModel
+    - RootModel[Union[Model, list[Model]]] - RootModel wrapping a Union with a sequence
     """
     # Direct sequence check
     if field_annotation_is_sequence(annotation):
