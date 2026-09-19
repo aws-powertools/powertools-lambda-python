@@ -48,9 +48,10 @@ def test_cognito_rejects_wrong_token_profile(jwks, claims, issue_token, override
     claims.update(override)
     if missing:
         del claims[missing]
+    token = issue_token(claims)
 
     with pytest.raises(InvalidClaimsError):
-        verifier.verify(issue_token(claims))
+        verifier.verify(token)
 
 
 def test_cognito_derives_china_partition_endpoint(http, jwks, claims, issue_token):
@@ -86,8 +87,9 @@ def test_any_of_never_uses_another_issuers_keys(jwks, signing_key, claims, issue
     assert verifier.verify(issue_token())["iss"] == "https://idp.example.com/"
     claims["iss"] = "https://other.example.com/"
     assert verifier.verify(issue_token(claims, key=other_key))["iss"] == "https://other.example.com/"
+    wrong_key_token = issue_token(claims, key=signing_key)
     with pytest.raises(InvalidSignatureError):
-        verifier.verify(issue_token(claims, key=signing_key))
+        verifier.verify(wrong_key_token)
 
 
 def test_any_of_rejects_unknown_issuers_without_network_requests(http, claims, issue_token):
@@ -98,9 +100,10 @@ def test_any_of_rejects_unknown_issuers_without_network_requests(http, claims, i
             algorithms=["RS256"],
         ),
     )
+    token = issue_token(claims)
 
     with pytest.raises(InvalidTokenError):
-        verifier.verify(issue_token(claims))
+        verifier.verify(token)
     assert http.requests == []
 
 

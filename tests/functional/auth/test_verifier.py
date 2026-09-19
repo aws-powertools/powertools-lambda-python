@@ -34,9 +34,10 @@ def test_required_claims_are_additive(jwks, claims, issue_token, missing):
         required_claims=["sub"],
     )
     del claims[missing]
+    token = issue_token(claims)
 
     with pytest.raises(InvalidClaimsError):
-        verifier.verify(issue_token(claims))
+        verifier.verify(token)
 
 
 def test_expired_token_is_rejected(jwks, claims, issue_token):
@@ -48,9 +49,10 @@ def test_expired_token_is_rejected(jwks, claims, issue_token):
         clock_skew_seconds=0,
     )
     claims["exp"] = int(time.time()) - 1
+    token = issue_token(claims)
 
     with pytest.raises(TokenExpiredError):
-        verifier.verify(issue_token(claims))
+        verifier.verify(token)
 
 
 @pytest.mark.parametrize(
@@ -78,9 +80,10 @@ def test_invalid_claim_values_are_rejected(jwks, claims, issue_token, claim, val
         jwks=jwks,
     )
     claims[claim] = value
+    token = issue_token(claims)
 
     with pytest.raises(InvalidClaimsError):
-        verifier.verify(issue_token(claims))
+        verifier.verify(token)
 
 
 @pytest.mark.parametrize(
@@ -144,9 +147,10 @@ def test_signing_key_metadata_is_enforced(jwks, issue_token, key_change):
         algorithms=["RS256"],
         jwks=jwks,
     )
+    token = issue_token()
 
     with pytest.raises(InvalidTokenError):
-        verifier.verify(issue_token())
+        verifier.verify(token)
 
 
 def test_disallowed_token_algorithm_is_rejected(jwks, claims):
@@ -203,9 +207,10 @@ def test_private_jwk_is_rejected_without_exposing_key(signing_key, claims, issue
         algorithms=["RS256"],
         jwks={"keys": [{**private_jwk, "kid": "key-1"}]},
     )
+    token = issue_token()
 
     with pytest.raises(InvalidTokenError) as error:
-        verifier.verify(issue_token())
+        verifier.verify(token)
     assert private_jwk["d"] not in str(error.value)
 
 
@@ -220,9 +225,10 @@ def test_invalid_signature_has_stable_error(jwks, claims, signing_key, issue_tok
         algorithms=["RS256"],
         jwks=jwks,
     )
+    tampered_token = ".".join(token)
 
     with pytest.raises(InvalidSignatureError) as error:
-        verifier.verify(".".join(token))
+        verifier.verify(tampered_token)
     assert str(error.value) == "Invalid access token signature"
 
 
@@ -235,8 +241,10 @@ def test_malformed_key_material_fails_closed(jwks, issue_token, key_change):
         algorithms=["RS256"],
         jwks=jwks,
     )
+    token = issue_token()
+
     with pytest.raises(InvalidTokenError):
-        verifier.verify(issue_token())
+        verifier.verify(token)
 
 
 def test_ec_curve_must_match_algorithm(claims, issue_token):

@@ -95,9 +95,10 @@ def test_simple_responses_require_payload_version_two(jwks, issue_token):
         "methodArn": ARN,
         "headers": {"authorization": "Bearer " + issue_token()},
     }
+    subject = verifier(jwks)
 
     with pytest.raises(ValueError):
-        verifier(jwks).authorize(event, response_format="simple")
+        subject.authorize(event, response_format="simple")
 
 
 def test_context_is_opt_in_and_copies_only_selected_scalar_claims(jwks, claims, issue_token):
@@ -188,8 +189,10 @@ def test_invalid_request_arns_raise_instead_of_returning_an_invalid_policy(jwks,
     event = copy.deepcopy(load_event("apiGatewayAuthorizerTokenEvent.json"))
     event["authorizationToken"] = "Bearer " + issue_token()
     event["methodArn"] = arn
+    subject = verifier(jwks)
+
     with pytest.raises(ValueError, match="concrete API Gateway"):
-        verifier(jwks).authorize(event)
+        subject.authorize(event)
 
 
 @pytest.mark.parametrize("malformed", [False, True])
@@ -207,8 +210,10 @@ def test_authorizer_denies_malformed_or_ambiguous_header_maps(jwks, issue_token,
 
 @pytest.mark.parametrize("event", [None, [], {}, {"type": "OTHER"}])
 def test_authorizer_rejects_unsupported_events(jwks, event):
+    subject = verifier(jwks)
+
     with pytest.raises(ValueError, match="TOKEN or REQUEST"):
-        verifier(jwks).authorize(event)
+        subject.authorize(event)
 
 
 @pytest.mark.parametrize(
@@ -220,5 +225,7 @@ def test_authorizer_rejects_unsupported_events(jwks, event):
 )
 def test_authorizer_rejects_invalid_response_configuration(jwks, issue_token, options, message):
     event = {"type": "TOKEN", "methodArn": ARN, "authorizationToken": "Bearer " + issue_token()}
+    subject = verifier(jwks)
+
     with pytest.raises(ValueError, match=message):
-        verifier(jwks).authorize(event, **options)
+        subject.authorize(event, **options)

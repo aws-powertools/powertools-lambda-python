@@ -35,9 +35,10 @@ def test_known_keys_are_removed_after_the_key_set_expires(http, jwks, issue_toke
     subject.verify(issue_token())
     http.serve(JWKS_URL, {"keys": []})
     clock.advance(300)
+    token = issue_token()
 
     with pytest.raises(InvalidTokenError):
-        subject.verify(issue_token())
+        subject.verify(token)
     assert len(http.requests) == 2
 
 
@@ -49,8 +50,9 @@ def test_refresh_failure_cannot_extend_key_trust_and_uses_backoff(http, jwks, is
     http.serve(JWKS_URL, {"error": "unavailable"}, status=503)
 
     for _ in range(3):
+        token = issue_token()
         with pytest.raises(JWKSFetchError):
-            subject.verify(issue_token())
+            subject.verify(token)
     assert len(http.requests) == 2
 
     clock.advance(1)
@@ -63,16 +65,18 @@ def test_unknown_key_refresh_is_rate_limited_separately_from_freshness(http, jwk
     http.serve(JWKS_URL, jwks)
     subject = verifier(jwks_uri=JWKS_URL, jwks_max_age_seconds=3000, unknown_kid_cooldown_seconds=5)
     subject.verify(issue_token())
+    unknown_key_token = issue_token(kid="new-key")
 
     with pytest.raises(InvalidTokenError):
-        subject.verify(issue_token(kid="new-key"))
+        subject.verify(unknown_key_token)
     assert len(http.requests) == 1
 
     clock.advance(5)
     http.serve(JWKS_URL, {"keys": [{**jwks["keys"][0], "kid": "new-key"}]})
     assert subject.verify(issue_token(kid="new-key"))["sub"] == "user-123"
+    previous_key_token = issue_token()
     with pytest.raises(InvalidTokenError):
-        subject.verify(issue_token())
+        subject.verify(previous_key_token)
     assert len(http.requests) == 2
 
 
@@ -82,9 +86,10 @@ def test_unknown_key_cooldown_does_not_prevent_age_required_refresh(http, jwks, 
     subject.verify(issue_token())
     clock.advance(2)
     http.serve(JWKS_URL, {"keys": []})
+    token = issue_token()
 
     with pytest.raises(InvalidTokenError):
-        subject.verify(issue_token())
+        subject.verify(token)
     assert len(http.requests) == 2
 
 
@@ -96,9 +101,10 @@ def test_prefetch_does_not_reset_key_age_without_a_fetch(http, jwks, issue_token
     subject.prefetch()
     http.serve(JWKS_URL, {"keys": []})
     clock.advance(1)
+    token = issue_token()
 
     with pytest.raises(InvalidTokenError):
-        subject.verify(issue_token())
+        subject.verify(token)
     assert len(http.requests) == 2
 
 
@@ -121,9 +127,11 @@ def test_discovery_validates_issuer_before_retrieving_keys(http, jwks, issue_tok
 )
 def test_invalid_discovery_never_falls_back_or_fetches_untrusted_keys(http, issue_token, metadata):
     http.serve(ISSUER + ".well-known/openid-configuration", metadata)
+    subject = verifier()
+    token = issue_token()
 
     with pytest.raises(JWKSFetchError):
-        verifier().verify(issue_token())
+        subject.verify(token)
     assert len(http.requests) == 1
 
 
@@ -133,9 +141,11 @@ def test_invalid_discovery_never_falls_back_or_fetches_untrusted_keys(http, issu
 )
 def test_malformed_key_sets_fail_closed(http, issue_token, body):
     http.serve(JWKS_URL, body)
+    subject = verifier(jwks_uri=JWKS_URL)
+    token = issue_token()
 
     with pytest.raises(JWKSFetchError):
-        verifier(jwks_uri=JWKS_URL).verify(issue_token())
+        subject.verify(token)
 
 
 def test_concurrent_requests_share_one_key_fetch(http, jwks, issue_token):
@@ -207,15 +217,17 @@ def test_failed_unknown_key_refresh_preserves_only_still_fresh_keys(http, jwks, 
     subject.prefetch()
     clock.advance(1)
     http.serve(JWKS_URL, {}, status=503)
+    unknown_key_token = issue_token(kid="new-key")
 
     with pytest.raises(JWKSFetchError):
-        subject.verify(issue_token(kid="new-key"))
+        subject.verify(unknown_key_token)
     assert subject.verify(issue_token())["sub"] == "user-123"
     assert len(http.requests) == 2
 
     clock.advance(299)
+    token = issue_token()
     with pytest.raises(JWKSFetchError):
-        subject.verify(issue_token())
+        subject.verify(token)
 
 
 def test_waiting_verifier_timeout_does_not_cancel_the_shared_key_fetch(http, jwks, issue_token):
