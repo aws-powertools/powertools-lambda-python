@@ -42,6 +42,7 @@ Some features require additional dependencies. Install them as needed:
 | [Tracer](../core/tracer.md) | `pip install "aws-lambda-powertools[tracer]"` | `aws-xray-sdk` |
 | [Validation](../utilities/validation.md) | `pip install "aws-lambda-powertools[validation]"` | `fastjsonschema` |
 | [Parser](../utilities/parser.md) | `pip install "aws-lambda-powertools[parser]"` | `pydantic` |
+| [Auth](../utilities/auth.md) | `pip install "aws-lambda-powertools[auth]"` | `PyJWT`, `cryptography`, `urllib3` |
 | [Data Masking](../utilities/data_masking.md) | `pip install "aws-lambda-powertools[datamasking]"` | `aws-encryption-sdk`, `jsonpath-ng` |
 | [Datadog Metrics](../core/metrics/datadog.md) | `pip install "aws-lambda-powertools[datadog]"` | `datadog-lambda` |
 | [Kafka (Avro)](../utilities/kafka.md) | `pip install "aws-lambda-powertools[kafka-consumer-avro]"` | `avro` |

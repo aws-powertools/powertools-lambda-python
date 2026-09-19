@@ -54,6 +54,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | [Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
 | [Event Handler](./core/event_handler/api_gateway.md) | Event handler for API Gateway, ALB, Lambda Function URL, VPC Lattice, AppSync, and Bedrock Agents |
 | [Parameters](./utilities/parameters.md) | Retrieve and cache parameter values from Parameter Store, Secrets Manager, AppConfig, or DynamoDB |
+| [Auth](./utilities/auth.md) | Verify JWT access tokens, protect Lambda routes, and acquire OAuth client-credentials tokens |
 | [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic |
 | [Batch Processing](./utilities/batch.md) | Handle partial failures for SQS, Kinesis Data Streams, and DynamoDB Streams |
 | [Idempotency](./utilities/idempotency.md) | Make your Lambda functions idempotent and prevent duplicate execution |

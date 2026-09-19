@@ -225,3 +225,13 @@ def test_with_protobuf_required_package(session: nox.Session):
         ],
         extras="kafka-consumer-protobuf",
     )
+
+
+@nox.session()
+def test_with_auth_required_packages(session: nox.Session):
+    """Verify the Auth utility using only its declared optional dependencies."""
+    build_and_run_test(
+        session,
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth/"],
+        extras="auth",
+    )
