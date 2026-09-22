@@ -1,4 +1,4 @@
-"""Authentication and authorization utilities for AWS Lambda."""
+"""JWT access-token verification."""
 
 from __future__ import annotations
 
@@ -6,15 +6,19 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.auth.jwt import AuthErrorContext as AuthErrorContext
-    from aws_lambda_powertools.utilities.auth.jwt import AuthFailureReason as AuthFailureReason
-    from aws_lambda_powertools.utilities.auth.jwt import JWTVerifier as JWTVerifier
+    from aws_lambda_powertools.utilities.auth.jwt.exceptions import AuthFailureReason as AuthFailureReason
+    from aws_lambda_powertools.utilities.auth.jwt.integrations.event_handler import AuthErrorContext as AuthErrorContext
+    from aws_lambda_powertools.utilities.auth.jwt.verifier import JWTVerifier as JWTVerifier
 
 __all__ = ["AuthErrorContext", "AuthFailureReason", "JWTVerifier"]
 
 
 def __getattr__(name: str) -> object:
-    modules = {"AuthErrorContext": "jwt", "AuthFailureReason": "jwt", "JWTVerifier": "jwt"}
+    modules = {
+        "AuthErrorContext": "integrations.event_handler",
+        "AuthFailureReason": "exceptions",
+        "JWTVerifier": "verifier",
+    }
     if name in modules:
         value = getattr(importlib.import_module(f"{__name__}.{modules[name]}"), name)
         globals()[name] = value

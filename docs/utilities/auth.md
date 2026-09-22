@@ -19,10 +19,10 @@ Use it inside a Lambda function or a Lambda authorizer. Prefer an API Gateway ma
 ### Install
 
 ```shell
-pip install "aws-lambda-powertools[auth]"
+pip install "aws-lambda-powertools[jwt]"
 ```
 
-The optional `auth` extra includes PyJWT, cryptography, and urllib3. It adds no dependencies to the base installation.
+The optional `jwt` extra includes PyJWT, cryptography, and urllib3. It adds no dependencies to the base installation.
 Build cryptography dependencies for your Lambda Python version and architecture; see [cross-platform builds](../build_recipes/cross-platform.md).
 The Powertools Layer retains urllib3 from the declared dependency range instead of relying on the runtime's copy.
 Applications pinning a different AWS SDK must validate that SDK's urllib3 requirements against the Layer or bundle a compatible dependency set.
@@ -33,7 +33,7 @@ Create a verifier outside the handler so warm invocations reuse its key cache. C
 Set `ISSUER_URL` and `RESOURCE_URL` to your provider's exact issuer and this API's identifier.
 
 ```python title="middleware.py"
---8<-- "examples/auth/src/middleware.py"
+--8<-- "examples/auth/jwt/src/middleware.py"
 ```
 
 `require()` validates the Bearer token and all requested scopes before executing the route. Verified claims are available through `app.context["claims"]`.
@@ -198,7 +198,7 @@ The combined verifier supports `verify()`, `prefetch()`, `require()`, and `autho
 ### Lambda authorizers
 
 ```python title="authorizer.py"
---8<-- "examples/auth/src/authorizer/authorizer.py"
+--8<-- "examples/auth/jwt/src/authorizer/authorizer.py"
 ```
 
 The helper accepts raw dictionaries or the corresponding Powertools authorizer Data Classes.
@@ -229,13 +229,13 @@ The name `claims` is reserved in authorizer context.
 
 Disable authorizer-result caching to verify each request. This SAM example sets `ReauthorizeEvery: 0` for both REST and HTTP authorizers;
 the underlying API Gateway setting is `AuthorizerResultTtlInSeconds: 0`.
-The template is under `examples/auth/templates/`; its `CodeUri` values are relative to that directory.
-Authorizer functions build from `src/authorizer/` with the Auth extra. Backends build independently from `src/backend/` with base Powertools only,
+The template is under `examples/auth/jwt/templates/`; its `CodeUri` values are relative to that directory.
+Authorizer functions build from `src/authorizer/` with the JWT extra. Backends build independently from `src/backend/` with base Powertools only,
 so PyJWT and cryptography are not included in the backend artifacts.
 HTTP simple responses also require payload version 2.0 and `EnableSimpleResponses: true`.
 
 ```yaml title="templates/sam.yaml"
---8<-- "examples/auth/templates/sam.yaml"
+--8<-- "examples/auth/jwt/templates/sam.yaml"
 ```
 
 If you enable result caching later, a cached decision can outlive the JWT's expiration or a signing key's removal.
@@ -260,7 +260,7 @@ from pydantic import AnyHttpUrl
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.auth import JWTVerifier
-from aws_lambda_powertools.utilities.auth.exceptions import InvalidTokenError, JWKSFetchError
+from aws_lambda_powertools.utilities.auth.jwt.exceptions import InvalidTokenError, JWKSFetchError
 
 logger = Logger()
 RESOURCE_URL = "https://mcp.example.com"
@@ -360,7 +360,7 @@ Outbound token acquisition, opaque-token introspection, delegated token exchange
 Use `mock_claims` to test route behavior without cryptography or network calls. Supply an Authorization header so the middleware still exercises credential extraction.
 
 ```python
-from aws_lambda_powertools.utilities.auth.testing import mock_claims
+from aws_lambda_powertools.utilities.auth.jwt.testing import mock_claims
 
 from middleware import app, verifier
 

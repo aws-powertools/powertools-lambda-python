@@ -18,7 +18,7 @@ Taking into consideration Powertools for AWS dependencies and common Python pack
 |---------|----------|------------|--------|-------------------|
 | **pydantic** | Rust | Core validation engine | High - Core functionality affected | ✅ Core dependency |
 | **aws-encryption-sdk** | C | Encryption/decryption | High - Data masking fails | ✅ Optional (datamasking extra) |
-| **cryptography** | Rust/C | Asymmetric signature verification | High - JWT verification fails | ✅ Optional (auth extra) |
+| **cryptography** | Rust/C | Asymmetric signature verification | High - JWT verification fails | ✅ Optional (jwt extra) |
 | **protobuf** | C++ | Protocol buffer serialization | High - Message parsing fails | ✅ Optional (kafka-consumer-protobuf) |
 | **redis** | C | Redis client with hiredis | Medium - Falls back to pure Python | ✅ Optional (redis extra) |
 | **valkey-glide** | Rust | High-performance Redis client | High - Client completely broken | ✅ Optional (valkey extra) |
@@ -45,7 +45,7 @@ Different Powertools for AWS extras dependencies have varying levels of architec
 
     ```txt title="requirements.txt - Requires Linux builds"
     # These extras include compiled dependencies
-    aws-lambda-powertools[auth]                    # cryptography (Rust/C)
+    aws-lambda-powertools[jwt]                    # cryptography (Rust/C)
     aws-lambda-powertools[parser]==3.18.0           # pydantic (Rust)
     aws-lambda-powertools[validation]==3.18.0       # fastjsonschema (C)
     aws-lambda-powertools[datamasking]==3.18.0      # aws-encryption-sdk (C)

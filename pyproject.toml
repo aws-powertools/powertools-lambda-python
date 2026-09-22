@@ -67,7 +67,7 @@ validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
 redis = ["redis"]
 valkey = ["valkey-glide"]
-auth = ["pyjwt", "cryptography", "urllib3"]
+jwt = ["pyjwt", "cryptography", "urllib3"]
 all = [
   "pydantic",
   "pydantic-settings",
