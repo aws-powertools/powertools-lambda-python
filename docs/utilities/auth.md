@@ -36,7 +36,7 @@ pip install "aws-lambda-powertools[jwt]"
 
 The `jwt` extra installs PyJWT, cryptography, and urllib3. Build dependencies for the same Python version and architecture as your Lambda function. See [cross-platform builds](../build_recipes/cross-platform.md).
 
-### Verify a JWT
+### Create a verifier
 
 Create the verifier outside the Lambda handler so warm invocations reuse its signing-key cache. Configure the trusted issuer, this workload's audience, and the algorithms accepted from that issuer.
 
@@ -45,6 +45,18 @@ Create the verifier outside the Lambda handler so warm invocations reuse its sig
 ```
 
 Replace `token_use` with the access-token marker used by your identity provider. This prevents another JWT type from being accepted only because it has the same audience.
+
+`JWTVerifier` provides the following operations:
+
+| Method | Use when |
+| ------ | -------- |
+| `verify(token)` | You already have the encoded JWT |
+| `verify_authorization_header(value)` | You have a complete HTTP `Authorization` header |
+| `require(...)` | You use Powertools Event Handler and want to protect a route |
+| `authorize(event, ...)` | The Lambda function is an API Gateway authorizer |
+| `prefetch()` | You want to fetch signing keys during Lambda INIT |
+
+### Verify a JWT
 
 `verify()` accepts an encoded JWT without the `Bearer` prefix. It returns verified claims or raises `InvalidTokenError`. If discovery or the JWKS endpoint is unavailable, it raises `JWKSFetchError` instead. Your Lambda decides how those failures map to its event source.
 
