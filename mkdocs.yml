@@ -26,7 +26,7 @@ nav:
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
-          - utilities/auth.md
+          - Auth (alpha): utilities/auth.md
           - utilities/batch.md
           - utilities/kafka.md
           - utilities/typing.md
@@ -86,7 +86,7 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
-      - Auth: api_doc/auth.md
+      - Auth (alpha): api_doc/auth_alpha.md
       - Batch Processing:
           - Base: api_doc/batch/base.md
           - Decorators: api_doc/batch/decorators.md
