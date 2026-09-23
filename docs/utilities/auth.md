@@ -66,71 +66,25 @@ Configure public routes and CORS preflight separately.
 
 Use `verify()` when you are not using Event Handler middleware or when your application already owns request parsing. It accepts the encoded JWT without the `Bearer` prefix. It does not read headers or create an HTTP response. On success it returns verified claims; on failure it raises a typed exception.
 
-```python
-from aws_lambda_powertools.utilities.auth.jwt.exceptions import InvalidTokenError, JWKSFetchError
-
-try:
-    claims = verifier.verify(token)
-except InvalidTokenError:
-    # Reject the credential, for example with HTTP 401.
-    raise
-except JWKSFetchError:
-    # Verification keys are unavailable, for example return HTTP 503.
-    raise
+```python title="direct.py"
+--8<-- "examples/auth/jwt/src/direct.py"
 ```
 
 The middleware created by `require()` uses this same method internally and maps these failures to HTTP responses for you. `verify()` always checks `iss`, `aud`, and `exp`; `required_claims` adds more required claims.
 
 ## Advanced
 
-### Token profile and authorization
+### Customize route authorization
 
-The verifier accepts asymmetric algorithms and requires `iss`, `aud`, and `exp`. Configure `expected_claims` or `expected_headers` when your provider uses a claim to distinguish access tokens from other token types:
+This complete Lambda adds provider-specific token checks, a required scope, a tenant authorization rule, and custom error handling:
 
-```python
-verifier = JWTVerifier(
-    issuer="https://idp.example.com/",
-    audience="https://orders.example.com",
-    algorithms=["RS256"],
-    expected_claims={"token_use": "access"},
-)
+```python title="custom_authorization.py"
+--8<-- "examples/auth/jwt/src/custom_authorization.py"
 ```
 
-Use the values documented by your identity provider. Local verification does not check individual-token revocation.
+`expected_claims` must match the access-token profile documented by your identity provider. `authorize` runs only after token verification and scope checks succeed. `on_error` can change the error response and emit logs or metrics, but it never invokes the protected route.
 
-`require(scopes=[...])` reads scopes from `scope`, `scp`, or `scopes`. All requested scopes must be present. Add an `authorize` callback for application-specific checks:
-
-```python
-middleware = verifier.require(
-    scopes=["orders:read"],
-    authorize=lambda claims: claims.get("tenant") == "example",
-)
-```
-
-Use `on_error` to customize the middleware response or emit logs and metrics. The callback receives only stable diagnostic fields, not token data:
-
-```python
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler import Response
-from aws_lambda_powertools.utilities.auth import AuthErrorContext
-
-logger = Logger()
-
-
-def on_error(error: AuthErrorContext) -> Response:
-    logger.warning("Authorization failed", reason=error.reason.value, retryable=error.retryable)
-    return Response(
-        status_code=error.status_code,
-        content_type="application/json",
-        body={"message": "Access denied"},
-        headers=error.headers,
-    )
-
-
-middleware = verifier.require(on_error=on_error)
-```
-
-The callback replaces the default error response and never invokes the protected handler.
+The callback receives stable `reason` and `retryable` fields without token data. Preserve `error.status_code` and `error.headers` unless you intentionally want to change the HTTP contract.
 
 ### Key freshness and Lambda timeouts
 
@@ -149,21 +103,17 @@ Calling `prefetch()` during module initialization moves the initial network requ
 
 Static `jwks` avoids network access. Recreate the verifier or execution environment when the configured keys change.
 
-### Cognito and multiple issuers
+### Cognito
 
-```python
-cognito = JWTVerifier.cognito(
-    user_pool_id="us-east-1_abc123",
-    client_id="orders-client",
-    audience="https://orders.example.com",
-)
-combined = JWTVerifier.any_of(verifier, cognito)
+Use the Cognito profile for resource-bound Cognito access tokens:
+
+```python title="cognito.py"
+--8<-- "examples/auth/jwt/src/cognito.py"
 ```
 
-The Cognito profile requires RS256, `token_use="access"`, the configured `client_id`, and the resource `aud`.
-The client must request resource binding. ID tokens and Cognito access tokens without `aud` are rejected.
+This profile checks RS256, `token_use="access"`, the configured app client ID, and the resource audience. Cognito ID tokens and access tokens without the configured resource audience are rejected.
 
-`any_of()` selects one of the configured verifiers using the token issuer. It rejects unknown issuers and duplicate issuer configurations. The returned verifier supports the same `verify()`, `prefetch()`, `require()`, and `authorize()` methods.
+Use `JWTVerifier.any_of()` when the same Lambda trusts access tokens from multiple configured issuers. Unknown issuers are rejected without discovery.
 
 ### Lambda authorizers
 
@@ -206,20 +156,6 @@ Use `reason.value` for log fields and metric dimensions. Do not parse exception 
 
 ## Testing your code
 
-Use `mock_claims` to test route behavior without cryptography or network calls. Supply an Authorization header so the middleware still exercises credential extraction.
+Use `mock_claims` to replace `verifier.verify()` while testing route behavior without cryptography or network calls. Wrap the call to `app.resolve()` in `mock_claims(verifier, claims)` and include an Authorization header so the middleware still exercises credential extraction.
 
-```python
-from aws_lambda_powertools.utilities.auth.jwt.testing import mock_claims
-
-from middleware import app, verifier
-
-
-def test_orders(http_api_event, lambda_context):
-    http_api_event["headers"]["authorization"] = "Bearer application-test"
-    with mock_claims(verifier, {"sub": "test-user", "scope": "orders:read"}):
-        response = app.resolve(http_api_event, lambda_context)
-    assert response["statusCode"] == 200
-```
-
-The helper restores `verify()` on exit and returns independent copies of the supplied claims.
-It deliberately bypasses signature and claim validation. Keep separate tests for real verification, key rotation, and authorization policy.
+`mock_claims` restores the verifier when the context manager exits and returns an independent copy of the supplied claims. It bypasses signature and claim validation, so keep separate verification tests for the token profiles your application accepts.
