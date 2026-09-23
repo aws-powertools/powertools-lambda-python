@@ -168,7 +168,7 @@ The example template disables API Gateway authorizer-result caching so every req
 --8<-- "examples/auth_alpha/jwt/templates/sam.yaml"
 ```
 
-If you enable Gateway caching, include all request attributes used by authorization in its identity sources. A cached allow can otherwise apply to another route or outlive the token expiration. This cache is independent of the verifier JWKS cache.
+If you enable Gateway caching, include all request attributes used by authorization in its identity sources to prevent decisions from being reused across different authorization inputs. Even with a complete cache key, a cached allow can outlive the JWT expiration until the cache TTL expires. Keep result caching disabled when every request must respect token expiration. This cache is independent of the verifier JWKS cache.
 
 ### Errors and diagnostics
 

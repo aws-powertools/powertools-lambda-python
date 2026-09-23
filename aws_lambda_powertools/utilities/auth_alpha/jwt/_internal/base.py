@@ -24,6 +24,7 @@ class Verifier(ABC):
     def verify(self, token: str) -> dict[str, Any]:
         """Return verified claims or raise an Auth utility error."""
 
+    @sanitize_errors
     def verify_authorization_header(self, value: str | None) -> dict[str, Any]:
         """Verify the JWT carried by an HTTP Authorization header.
 

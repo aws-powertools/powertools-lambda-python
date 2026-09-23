@@ -78,3 +78,23 @@ def test_verification_errors_detach_parser_and_crypto_exceptions(jwks, issue_tok
         encoded, _ = issue_token().rsplit(".", 1)
         token, expected_error = encoded + ".AAAA", InvalidSignatureError
     assert_sanitized(lambda: subject.verify(token), expected_error)
+
+
+@pytest.mark.parametrize("group", [False, True])
+@pytest.mark.parametrize("header", [None, "Basic credential"])
+def test_authorization_header_errors_detach_active_exception(jwks, group, header):
+    subject = JWTVerifier(issuer=ISSUER, audience=RESOURCE_URL, algorithms=["RS256"], jwks=jwks)
+    if group:
+        subject = JWTVerifier.any_of(subject)
+
+    try:
+        raise ValueError(PRIVATE_DATA)
+    except ValueError:
+        with pytest.raises(InvalidTokenError) as error:
+            subject.verify_authorization_header(header)
+
+    assert error.value.__context__ is None
+    assert error.value.__cause__ is None
+    assert PRIVATE_DATA not in "".join(
+        traceback.format_exception(type(error.value), error.value, error.value.__traceback__),
+    )
