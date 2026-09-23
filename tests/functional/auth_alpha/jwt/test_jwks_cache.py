@@ -138,6 +138,7 @@ def test_invalid_discovery_never_falls_back_or_fetches_untrusted_keys(http, issu
 @pytest.mark.parametrize(
     "body",
     [{}, {"keys": None}, {"keys": ["bad-key"]}, [], None, b"not json", b"x" * (1024 * 1024 + 1)],
+    ids=["missing-keys", "null-keys", "malformed-key", "array", "null", "invalid-json", "oversized"],
 )
 def test_malformed_key_sets_fail_closed(http, issue_token, body):
     http.serve(JWKS_URL, body)
