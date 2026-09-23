@@ -189,6 +189,10 @@ Use `reason.value` for log fields and metric dimensions. Do not parse exception 
 
 ## Testing your code
 
-Use `mock_claims` to replace `verifier.verify()` while testing route behavior without cryptography or network calls. Wrap the call to `app.resolve()` in `mock_claims(verifier, claims)` and include an Authorization header so the middleware still exercises credential extraction.
+Use `mock_claims` to test the complete middleware Lambda without cryptography or network calls:
 
-`mock_claims` restores the verifier when the context manager exits and returns an independent copy of the supplied claims. It bypasses signature and claim validation, so keep separate verification tests for the token profiles your application accepts.
+```python title="test_middleware.py"
+--8<-- "examples/auth_alpha/jwt/tests/test_middleware.py"
+```
+
+The test still sends an HTTP API event, extracts the Bearer token, and checks the required scope before invoking the route. `mock_claims` replaces only token verification and restores the verifier when the context manager exits. Keep separate verification tests for the token profiles your application accepts.
