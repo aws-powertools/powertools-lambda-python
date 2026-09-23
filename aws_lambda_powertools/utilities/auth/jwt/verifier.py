@@ -279,6 +279,7 @@ class JWTVerifier(Verifier):
         if not isinstance(token, str) or not token:
             raise InvalidTokenError()
         try:
+            # The untrusted header only selects a trusted JWKS key; jwt.decode below verifies the same token.
             header = jwt.get_unverified_header(token)
         except (jwt.InvalidTokenError, ValueError, TypeError):
             raise InvalidTokenError() from None
@@ -328,8 +329,8 @@ class _IssuerVerifier(Verifier):
         if not isinstance(token, str) or not token:
             raise InvalidTokenError()
         try:
-            # This payload selects a configured verifier. No unverified claim
-            # is returned to callers or used to discover another provider.
+            # The untrusted issuer only selects a preconfigured verifier. The selected verifier
+            # validates the same token's signature, issuer, audience, and claims below.
             payload = jwt.decode(token, options={"verify_signature": False})
             issuer = payload.get("iss")
         except (jwt.PyJWTError, ValueError, TypeError, RecursionError):
