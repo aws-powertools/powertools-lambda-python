@@ -9,6 +9,7 @@ import jmespath
 import pytest
 from botocore import stub
 from botocore.config import Config
+from jmespath import functions
 from pytest import FixtureRequest
 from pytest_mock import MockerFixture
 
@@ -1177,6 +1178,28 @@ def test_custom_jmespath_function_overrides_builtin_functions(
         persistence_store._get_hashed_idempotency_key({})
 
 
+def test_payload_validation_jmespath_with_custom_jmespath_options(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN custom jmespath_options
+    # AND a payload_validation_jmespath using one of its custom functions
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["string"]})
+        def _func_to_upper(self, value):
+            return value.upper()
+
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath="order_id",
+        payload_validation_jmespath="to_upper(currency)",
+        jmespath_options={"custom_functions": CustomFunctions()},
+    )
+    persistence_store.configure(idempotency_config)
+
+    # WHEN calling _get_hashed_payload
+    result = persistence_store._get_hashed_payload({"order_id": "1", "currency": "eur"})
+
+    # THEN the hashed payload should match the custom function result generated hash
+    assert result == persistence_store._generate_hash("EUR")
+
+
 def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
     # GIVEN a miss configured persistence layer
     # like no table was created for the idempotency persistence layer
@@ -1931,6 +1954,54 @@ def test_idempotency_cache_with_payload_tampering(
 
     # THEN we should not cache a transaction that failed validation
     assert cache_spy.call_count == 0
+
+
+def test_idempotency_payload_validation_with_powertools_json(
+    persistence_store: DynamoDBPersistenceLayer,
+    timestamp_future,
+    lambda_context,
+    request: FixtureRequest,
+):
+    # GIVEN an idempotency config where both the idempotency key and the payload validation key
+    # read a JSON string body with the powertools_json built-in function
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath="powertools_json(body).order_id",
+        payload_validation_jmespath="powertools_json(body).amount",
+        use_local_cache=False,
+    )
+
+    # AND a previous order already processed in the persistent store
+    order = {"order_id": "ffd11882-d476-4598-bbf1-643f2be5addf", "amount": 100}
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = build_idempotency_put_item_response_stub(
+        data=order,
+        expiration=timestamp_future,
+        status="COMPLETED",
+        request=request,
+        validation_data=order["amount"],
+    )
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return event
+
+    # WHEN the same order is sent again
+    # THEN we should return the stored response
+    assert lambda_handler({"body": json_serialize(order)}, lambda_context) == order
+
+    # WHEN the same order is sent again with a tampered amount
+    # THEN we should raise
+    tampered_order = {**order, "amount": 1}
+    with pytest.raises(IdempotencyValidationError):
+        lambda_handler({"body": json_serialize(tampered_order)}, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
