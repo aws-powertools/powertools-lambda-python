@@ -1,10 +1,32 @@
 ---
 title: Auth
 description: JWT access-token verification for Lambda
+status: new
 ---
 
 Auth verifies incoming JWT access tokens.
 Use it inside a Lambda function or a Lambda authorizer. Prefer an API Gateway managed JWT authorizer when it meets your token profile and deployment requirements.
+
+```mermaid
+flowchart LR
+    Request["Bearer token"] --> Integration{"Integration"}
+    Integration --> Middleware["Event Handler middleware"]
+    Integration --> Authorizer["Lambda authorizer"]
+    Integration --> Direct["verify()"]
+    Middleware --> Verifier["JWTVerifier"]
+    Authorizer --> Verifier
+    Direct --> Verifier
+    Verifier --> Keys{"Fresh signing keys?"}
+    Keys -->|Yes| Validate["Verify signature and claims"]
+    Keys -->|No| Provider["Issuer discovery or JWKS endpoint"]
+    Provider -->|Success| Cache["Replace key cache"]
+    Cache --> Validate
+    Provider -->|Unavailable| ServiceFailure["JWKSFetchError, 503, or authorizer 5xx"]
+    Validate -->|Invalid| Reject["InvalidTokenError, 401, or Deny"]
+    Validate -->|Valid| Policy["Scopes and authorization policy"]
+    Policy -->|Denied| Forbidden["ForbiddenError, 403, or Deny"]
+    Policy -->|Allowed| Allow["Verified claims or Allow"]
+```
 
 ## Key features
 
@@ -13,6 +35,27 @@ Use it inside a Lambda function or a Lambda authorizer. Prefer an API Gateway ma
 * Protect Event Handler routes and create API Gateway IAM or simple authorizer responses.
 * Validate resource-bound Cognito access tokens and combine explicitly trusted issuers.
 * Adapt verification to the MCP Python SDK without a Powertools dependency on MCP.
+
+## Terminology
+
+**Access token** is a token issued to authorize calls to a protected resource. An ID token describes authentication to a client application and is not a resource access token.
+
+**Issuer (`iss`)** identifies the trusted authorization server that created the token. Configure its exact HTTPS value.
+
+**Resource audience (`aud`)** identifies the API intended to accept the token. Verifying it prevents a token issued for one resource from being reused at another.
+
+**JSON Web Key Set (JWKS)** contains the public keys used to verify token signatures. Powertools can use a static set, fetch a configured JWKS endpoint, or discover one from the issuer.
+
+**Key ID (`kid`)** identifies a signing key in the JWKS. It is untrusted token input and only selects a key from the configured or discovered trusted key set.
+
+## Choosing an integration
+
+| Integration | Use when | Failure behavior |
+| ----------- | -------- | ---------------- |
+| API Gateway managed JWT authorizer | Its issuer, audience, scope, and claim features satisfy the API requirements. Powertools Auth is not required. | API Gateway validates the token before invoking Lambda. |
+| Event Handler middleware | A Lambda route needs scope checks, custom authorization, or direct control of HTTP responses. | Returns 401, 403, or 503 without running the protected handler. |
+| Lambda authorizer | Authorization must run before the backend or be shared by multiple API integrations. | Returns Deny or `isAuthorized=false` for credential and policy failures; JWKS failures surface as an authorizer 5xx. |
+| Direct `verify()` | The application owns event parsing and response handling, or the event does not use Event Handler. | Returns verified claims or raises a typed `AuthError`. |
 
 ## Getting started
 
@@ -26,6 +69,14 @@ The optional `jwt` extra includes PyJWT, cryptography, and urllib3. It adds no d
 Build cryptography dependencies for your Lambda Python version and architecture; see [cross-platform builds](../build_recipes/cross-platform.md).
 The Powertools Layer retains urllib3 from the declared dependency range instead of relying on the runtime's copy.
 Applications pinning a different AWS SDK must validate that SDK's urllib3 requirements against the Layer or bundle a compatible dependency set.
+
+### Required resources
+
+Auth requires no additional AWS IAM permissions to verify a token. Remote discovery and JWKS retrieval require DNS resolution and outbound HTTPS connectivity from the Lambda function to the configured identity provider. Static `jwks` performs no network request, but the application owns key rotation.
+
+!!! warning "Lambda functions connected to a VPC"
+    A function in private subnets needs a route to its identity provider, such as a NAT gateway for a public endpoint or private network connectivity for an internal endpoint.
+    Without it, the first verification and later key refreshes fail with `JWKSFetchError`. See [Connecting outbound traffic to the internet](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc-internet.html){target="_blank"}.
 
 ### Protect an HTTP route
 
@@ -55,18 +106,32 @@ Configure CORS preflight and public routes separately.
 It always requires `iss`, `aud`, and `exp`. `required_claims` adds requirements without replacing these baseline checks.
 
 ```python
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.auth import JWTVerifier
+from aws_lambda_powertools.utilities.auth.jwt.exceptions import InvalidTokenError, JWKSFetchError
 
+logger = Logger()
 verifier = JWTVerifier(
     issuer="https://idp.example.com/",
     audience="https://orders.example.com",
     algorithms=["RS256"],
     required_claims=["sub"],
 )
+
+
+def authenticate(token: str) -> dict:
+    try:
+        return verifier.verify(token)
+    except JWKSFetchError as error:
+        logger.error("Verification keys unavailable", reason=error.reason.value, retryable=error.retryable)
+        raise  # Map to an availability failure, for example HTTP 503.
+    except InvalidTokenError:
+        raise  # Reject the credential, for example HTTP 401.
 ```
 
 Absent an explicit `jwks_uri` or static `jwks`, discovery uses the configured issuer's `/.well-known/openid-configuration`.
 Discovery must advertise that exact issuer and an HTTPS JWKS URL. URLs supplied by token headers are never used for discovery.
+`InvalidTokenError` is a credential failure and retrying the same token will not help. `JWKSFetchError` is a retryable infrastructure failure. Handle it separately so an identity-provider outage does not look like an invalid credential.
 
 ## Advanced
 
@@ -145,6 +210,9 @@ The callback replaces the error response; it never invokes the protected handler
 | `timeout_seconds` | 3 | Budget for discovery, JWKS requests, and waiting for another refresh |
 | `jwks_max_age_seconds` | 300 | Maximum age of a successfully fetched key set |
 | `unknown_kid_cooldown_seconds` | 300 | Minimum interval between fetches triggered by unknown key IDs |
+
+!!! warning "Leave time for Lambda to return an authentication error"
+    Set `timeout_seconds` lower than the Lambda function timeout, leaving headroom for initialization and application code. A new Lambda function and the verifier both default to three seconds; using both defaults can cause the runtime to terminate the invocation before `JWKSFetchError` reaches your handler. The included SAM example gives the function a ten-second timeout.
 
 Compatible verifiers in one process share a key-set cache; distinct issuers or cache policies are isolated.
 Concurrent misses share a refresh. Expiration requires a fresh key set even when the unknown-key cooldown has not elapsed.
@@ -243,6 +311,31 @@ The verifier's key-cache settings do not control Gateway's result cache.
 HTTP simple responses can apply to multiple routes sharing an identity cache key; include `$context.routeKey` for route-specific decisions.
 Route-aware keys still do not recheck an expired token. Cached IAM policies must cover exactly the routes they authorize; this helper deliberately returns one concrete resource.
 
+### Errors and diagnostics
+
+`AuthError` is the base error. `InvalidTokenError` includes `InvalidClaimsError`, `TokenExpiredError`, and `InvalidSignatureError`.
+`JWKSFetchError` is separate from invalid-token errors so applications can distinguish unavailable verification infrastructure.
+Every error exposes `reason: AuthFailureReason` and `retryable: bool`. `AuthFailureReason` uses `str, Enum` for Python 3.10 compatibility.
+Use `.value` for log fields and metric dimensions; do not parse exception messages.
+
+| Reason | Retryable |
+| ------ | --------- |
+| `missing_token` | false |
+| `invalid_token` | false |
+| `invalid_claims` | false |
+| `token_expired` | false |
+| `invalid_signature` | false |
+| `insufficient_scope` | false |
+| `forbidden` | false |
+| `jwks_unavailable` | true |
+
+Retryability identifies failures where retrying after the provider recovers may help; it does not bypass cache backoff or guarantee success.
+Reasons and messages are fixed and never contain token data, claims, key IDs, URLs, or provider responses.
+Public verification, prefetch, and authorizer operations detach underlying exception causes and contexts.
+Log only the fixed diagnostic fields; do not log token dictionaries, request headers, or provider errors.
+
+Outbound token acquisition, opaque-token introspection, delegated token exchange, interactive grants, SigV4, and native async clients are outside this PR.
+
 ### MCP Python SDK adapter
 
 The following adapter targets the `MCPServer` interface in MCP Python SDK 2.2.0 (`mcp==2.2.0`),
@@ -329,31 +422,6 @@ def require_scope(scope: str):
 Use the targeted SDK's supported tool-error handling for permission failures. Raising `PermissionError` alone does not implement an HTTP challenge or a scope-upgrade flow.
 API Gateway authorizers in front of an MCP server also require deployment-specific metadata routes and discovery/challenge behavior;
 an authorizer Deny response alone does not implement MCP authorization.
-
-### Errors and diagnostics
-
-`AuthError` is the base error. `InvalidTokenError` includes `InvalidClaimsError`, `TokenExpiredError`, and `InvalidSignatureError`.
-`JWKSFetchError` is separate from invalid-token errors so applications can distinguish unavailable verification infrastructure.
-Every error exposes `reason: AuthFailureReason` and `retryable: bool`. `AuthFailureReason` uses `str, Enum` for Python 3.10 compatibility.
-Use `.value` for log fields and metric dimensions; do not parse exception messages.
-
-| Reason | Retryable |
-| ------ | --------- |
-| `missing_token` | false |
-| `invalid_token` | false |
-| `invalid_claims` | false |
-| `token_expired` | false |
-| `invalid_signature` | false |
-| `insufficient_scope` | false |
-| `forbidden` | false |
-| `jwks_unavailable` | true |
-
-Retryability identifies failures where retrying after the provider recovers may help; it does not bypass cache backoff or guarantee success.
-Reasons and messages are fixed and never contain token data, claims, key IDs, URLs, or provider responses.
-Public verification, prefetch, and authorizer operations detach underlying exception causes and contexts.
-Log only the fixed diagnostic fields; do not log token dictionaries, request headers, or provider errors.
-
-Outbound token acquisition, opaque-token introspection, delegated token exchange, interactive grants, SigV4, and native async clients are outside this PR.
 
 ## Testing your code
 
