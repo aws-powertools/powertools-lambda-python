@@ -420,6 +420,10 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     --8<-- "examples/feature_flags/src/conditions.json"
     ```
 
+If a comparator raises an exception, such as comparing a string with a number, a warning identifies the feature, rule, key, action, and exception type.
+The warning excludes operand values and exception messages. The condition still evaluates as a non-match unless a registered validation exception handler returns a different result.
+Missing context keys and ordinary non-matches do not produce warnings.
+
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
 | Action                              | Equivalent expression                                    |

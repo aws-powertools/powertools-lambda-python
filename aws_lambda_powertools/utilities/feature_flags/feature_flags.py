@@ -91,6 +91,10 @@ class FeatureFlags:
         condition_value: Any,
         context_value: Any,
         context_key_present: bool = True,
+        *,
+        feature_name: str | None = None,
+        rule_name: str | None = None,
+        context_key: str | None = None,
     ) -> bool:
         try:
             func = RULE_ACTION_MAPPING.get(action, lambda a, b: False)
@@ -107,6 +111,13 @@ class FeatureFlags:
             return matched
         except Exception as exc:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
+            if context_key_present:
+                # Missing keys are ordinary non-matches. For invalid operands, identify the condition
+                # without logging values or exception messages that might contain customer data.
+                self.logger.warning(
+                    f"Failed to evaluate feature flag condition: feature={feature_name}, rule={rule_name}, "
+                    f"key={context_key}, action={action}, exception_type={type(exc).__name__}",
+                )
 
             handler = self._lookup_exception_handler(exc)
             if handler:
@@ -155,6 +166,9 @@ class FeatureFlags:
                 condition_value=cond_value,
                 context_value=context_value,
                 context_key_present=context_key_present,
+                feature_name=feature_name,
+                rule_name=rule_name,
+                context_key=cond_key,
             ):
                 self.logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
