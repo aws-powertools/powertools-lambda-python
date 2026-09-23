@@ -34,6 +34,22 @@ class AuthErrorContext:
 
 
 class AuthMiddleware(BaseMiddlewareHandler[ApiGatewayResolver]):
+    """Event Handler middleware that verifies JWTs before invoking a route.
+
+    Create this middleware with ``Verifier.require()``.
+
+    Parameters
+    ----------
+    verifier : Verifier
+        Verifier used for incoming bearer tokens.
+    scopes : list[str] | None
+        Scopes required by the protected route.
+    authorize : Callable | None
+        Additional policy receiving verified claims.
+    on_error : Callable | None
+        Callback that maps a safe error context to an Event Handler response.
+    """
+
     def __init__(
         self,
         verifier: Verifier,
@@ -47,6 +63,21 @@ class AuthMiddleware(BaseMiddlewareHandler[ApiGatewayResolver]):
         self._on_error = on_error
 
     def handler(self, app: ApiGatewayResolver, next_middleware: NextMiddleware) -> Response:
+        """Verify the request and expose claims while downstream code executes.
+
+        Parameters
+        ----------
+        app : ApiGatewayResolver
+            Resolver handling the current request.
+        next_middleware : NextMiddleware
+            Next middleware or route handler in the chain.
+
+        Returns
+        -------
+        Response
+            Downstream response or an authentication failure response.
+        """
+
         try:
             raw = app.current_event.raw_event
             token = header_token(raw.get("headers"), raw.get("multiValueHeaders"))

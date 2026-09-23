@@ -30,6 +30,30 @@ class Verifier(ABC):
 
         The scheme is case-insensitive. Missing headers, malformed values, and
         schemes other than Bearer raise ``InvalidTokenError``.
+
+        Parameters
+        ----------
+        value : str | None
+            Raw HTTP Authorization header value.
+
+        Returns
+        -------
+        dict[str, Any]
+            Claims after token verification.
+
+        Raises
+        ------
+        InvalidTokenError
+            Header or token is missing, malformed, or invalid.
+        JWKSFetchError
+            Current trusted signing keys could not be obtained.
+
+        Examples
+        --------
+        ```python
+        authorization = event.get("headers", {}).get("authorization")
+        claims = verifier.verify_authorization_header(authorization)
+        ```
         """
         from aws_lambda_powertools.utilities.auth_alpha.jwt._internal.authorization import bearer_token
 

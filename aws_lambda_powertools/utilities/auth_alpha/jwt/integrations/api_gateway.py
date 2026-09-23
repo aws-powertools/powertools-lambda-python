@@ -32,6 +32,36 @@ def authorize_event(
     context_claims: list[str] | None,
     on_error: Callable[[AuthError], None] | None,
 ) -> dict[str, Any]:
+    """Build an API Gateway authorizer response after verifying its bearer token.
+
+    Parameters
+    ----------
+    verifier : Verifier
+        Verifier used for the request token.
+    event : dict[str, Any] | DictWrapper
+        API Gateway TOKEN or REQUEST authorizer event.
+    scopes : list[str] | None
+        Scopes required for an Allow response.
+    response_format : Literal["iam", "simple"]
+        IAM policy or HTTP API 2.0 simple response.
+    context_claims : list[str] | None
+        Verified scalar claims copied into authorizer context.
+    on_error : Callable | None
+        Callback notified with a sanitized authentication error.
+
+    Returns
+    -------
+    dict[str, Any]
+        Deny/Allow IAM policy or simple authorization response.
+
+    Raises
+    ------
+    ValueError
+        Event or response configuration is invalid.
+    JWKSFetchError
+        Current trusted signing keys could not be obtained.
+    """
+
     raw = event.raw_event if isinstance(event, DictWrapper) else event
     _validate_event(raw, response_format)
     arn = _request_arn(raw) if response_format == "iam" else None
