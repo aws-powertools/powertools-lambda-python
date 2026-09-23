@@ -232,6 +232,6 @@ def test_with_auth_required_packages(session: nox.Session):
     """Verify the Auth utility using only its declared optional dependencies."""
     build_and_run_test(
         session,
-        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth/"],
-        extras="auth",
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth_alpha/"],
+        extras="jwt",
     )
