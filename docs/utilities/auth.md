@@ -9,6 +9,8 @@ status: new
 
 Auth verifies JWT access tokens in any Lambda workload. Use `verify()` directly, create Event Handler middleware with `require()`, or build a Lambda authorizer response with `authorize()`.
 
+For client-credentials tokens used to call a downstream API, see [OAuth2 client (alpha)](oauth2.md).
+
 ```mermaid
 flowchart LR
     Token["JWT access token"] --> Verify["JWTVerifier.verify()"]
@@ -168,7 +170,8 @@ The example template disables API Gateway authorizer-result caching so every req
 --8<-- "examples/auth_alpha/jwt/templates/sam.yaml"
 ```
 
-If you enable Gateway caching, include all request attributes used by authorization in its identity sources to prevent decisions from being reused across different authorization inputs. Even with a complete cache key, a cached allow can outlive the JWT expiration until the cache TTL expires. Keep result caching disabled when every request must respect token expiration. This cache is independent of the verifier JWKS cache.
+If you enable Gateway caching, include all request attributes used by authorization in its identity sources to prevent decisions from being reused across different authorization inputs.
+Even with a complete cache key, a cached allow can outlive the JWT expiration until the cache TTL expires. Keep result caching disabled when every request must respect token expiration. This cache is independent of the verifier JWKS cache.
 
 ### Errors and diagnostics
 

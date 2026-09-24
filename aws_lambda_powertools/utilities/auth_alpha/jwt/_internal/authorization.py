@@ -3,13 +3,15 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from aws_lambda_powertools.utilities.auth_alpha._internal.validation import string_list
+from aws_lambda_powertools.utilities.auth_alpha._internal.scopes import required_scopes, valid_scope
 from aws_lambda_powertools.utilities.auth_alpha.jwt.exceptions import (
     AuthError,
     AuthFailureReason,
     InvalidClaimsError,
     InvalidTokenError,
 )
+
+__all__ = ["required_scopes"]
 
 
 class MissingTokenError(InvalidTokenError):
@@ -62,17 +64,6 @@ def _authorization_values(headers: Any) -> list[Any]:
     values = [value for name, value in headers.items() if isinstance(name, str) and name.lower() == "authorization"]
     if len(values) > 1:
         raise InvalidTokenError()
-    return values
-
-
-def valid_scope(value: str) -> bool:
-    return bool(value) and all(33 <= ord(character) <= 126 and character not in {'"', "\\"} for character in value)
-
-
-def required_scopes(scopes: list[str] | None) -> tuple[str, ...]:
-    values = string_list(scopes if scopes is not None else [])
-    if not all(valid_scope(value) for value in values):
-        raise ValueError("Scopes must be valid OAuth scope tokens")
     return values
 
 

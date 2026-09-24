@@ -22,6 +22,49 @@ class Reply:
     headers: dict = field(default_factory=dict)
     interval: float = 0
     stall: bool = False
+    header_interval: float = 0
+    chunked: bool = False
+    chunk_size_interval: float = 0
+    trailer_interval: float = 0
+
+
+def _write_bytes(stream, payload, stop, interval=0):
+    if not interval:
+        stream.write(payload)
+        return True
+    for value in payload:
+        if stop.wait(interval):
+            return False
+        stream.write(bytes([value]))
+        stream.flush()
+    return True
+
+
+def _write_body(stream, reply, stop):
+    if reply.stall:
+        stop.wait(5)
+        return
+    parts = [(reply.body, reply.interval)]
+    if reply.chunked:
+        parts = []
+        if reply.body:
+            parts.extend(
+                [
+                    (f"{len(reply.body):x};padding=".encode() + b"x" * 32 + b"\r\n", reply.chunk_size_interval),
+                    (reply.body, reply.interval),
+                    (b"\r\n", 0),
+                ],
+            )
+        parts.extend(
+            [
+                (b"0\r\n", 0),
+                (b"X-Trailer: " + b"x" * 32 + b"\r\n", reply.trailer_interval),
+                (b"\r\n", 0),
+            ],
+        )
+    for payload, interval in parts:
+        if not _write_bytes(stream, payload, stop, interval):
+            return
 
 
 class LocalHTTPS:
@@ -31,9 +74,32 @@ class LocalHTTPS:
         self.stop = threading.Event()
         self.url = ""
 
-    def serve(self, path, payload, *, status=200, headers=None, interval=0, stall=False):
+    def serve(
+        self,
+        path,
+        payload,
+        *,
+        status=200,
+        headers=None,
+        interval=0,
+        stall=False,
+        header_interval=0,
+        chunked=False,
+        chunk_size_interval=0,
+        trailer_interval=0,
+    ):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
-        self.routes[path] = Reply(body, status, headers or {}, interval, stall)
+        self.routes[path] = Reply(
+            body=body,
+            status=status,
+            headers=headers or {},
+            interval=interval,
+            stall=stall,
+            header_interval=header_interval,
+            chunked=chunked,
+            chunk_size_interval=chunk_size_interval,
+            trailer_interval=trailer_interval,
+        )
 
 
 @pytest.fixture(scope="session")
@@ -96,22 +162,25 @@ def https_server(tls_files, monkeypatch, request):
             reply = endpoint.routes.get(self.path, Reply(b"{}", status=404))
             self.send_response(reply.status)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(reply.body)))
+            if reply.chunked:
+                self.send_header("Transfer-Encoding", "chunked")
+            else:
+                self.send_header("Content-Length", str(len(reply.body)))
             self.send_header("Connection", "keep-alive" if request.param else "close")
             for name, value in reply.headers.items():
                 self.send_header(name, value)
-            self.end_headers()
             try:
-                if reply.stall:
-                    endpoint.stop.wait(5)
-                elif reply.interval:
-                    for value in reply.body:
-                        if endpoint.stop.wait(reply.interval):
-                            break
-                        self.wfile.write(bytes([value]))
-                        self.wfile.flush()
-                else:
-                    self.wfile.write(reply.body)
+                if reply.header_interval:
+                    self.flush_headers()
+                    if not _write_bytes(
+                        self.wfile,
+                        b"X-Slow: " + b"x" * 32 + b"\r\n",
+                        endpoint.stop,
+                        reply.header_interval,
+                    ):
+                        return
+                self.end_headers()
+                _write_body(self.wfile, reply, endpoint.stop)
             except (OSError, ssl.SSLError):
                 # Timeout and oversized-body tests deliberately close early.
                 pass

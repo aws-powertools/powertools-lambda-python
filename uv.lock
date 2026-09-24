@@ -333,6 +333,9 @@ kafka-consumer-avro = [
 kafka-consumer-protobuf = [
     { name = "protobuf" },
 ]
+oauth2 = [
+    { name = "urllib3" },
+]
 parser = [
     { name = "pydantic" },
 ]
@@ -431,9 +434,10 @@ requires-dist = [
     { name = "typing-extensions", specifier = ">=4.11.0,<5.0.0" },
     { name = "urllib3", marker = "extra == 'all'", specifier = ">=2.8.0,<3.0.0" },
     { name = "urllib3", marker = "extra == 'jwt'", specifier = ">=2.8.0,<3.0.0" },
+    { name = "urllib3", marker = "extra == 'oauth2'", specifier = ">=2.8.0,<3.0.0" },
     { name = "valkey-glide", marker = "extra == 'valkey'", specifier = ">=1.3.5,<3.0" },
 ]
-provides-extras = ["parser", "validation", "tracer", "redis", "valkey", "jwt", "all", "aws-sdk", "datadog", "datamasking", "kafka-consumer-avro", "kafka-consumer-protobuf"]
+provides-extras = ["parser", "validation", "tracer", "redis", "valkey", "jwt", "oauth2", "all", "aws-sdk", "datadog", "datamasking", "kafka-consumer-avro", "kafka-consumer-protobuf"]
 
 [package.metadata.requires-dev]
 dev = [
