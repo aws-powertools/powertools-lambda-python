@@ -24,6 +24,7 @@ files = [
     {file = "anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494"},
     {file = "anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f"},
 ]
+markers = {main = "extra == \"valkey\""}
 
 [package.dependencies]
 exceptiongroup = {version = ">=1.0.2", markers = "python_version < \"3.11\""}
@@ -140,7 +141,7 @@ files = [
     {file = "attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373"},
     {file = "attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11"},
 ]
-markers = {main = "extra == \"all\" or extra == \"datamasking\" or extra == \"valkey\""}
+markers = {main = "extra == \"valkey\" or extra == \"all\" or extra == \"datamasking\""}
 
 [[package]]
 name = "avro"
@@ -1203,7 +1204,7 @@ files = [
     {file = "cffi-2.0.0-cp39-cp39-win_amd64.whl", hash = "sha256:b882b3df248017dba09d6b16defe9b5c407fe32fc7c65a9c69798e6175601be9"},
     {file = "cffi-2.0.0.tar.gz", hash = "sha256:44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529"},
 ]
-markers = {main = "(extra == \"all\" or extra == \"datamasking\" or extra == \"auth\") and platform_python_implementation != \"PyPy\" or extra == \"valkey\"", dev = "platform_python_implementation != \"PyPy\""}
+markers = {main = "(extra == \"all\" or extra == \"datamasking\" or extra == \"jwt\") and platform_python_implementation != \"PyPy\" or extra == \"valkey\"", dev = "platform_python_implementation != \"PyPy\""}
 
 [package.dependencies]
 pycparser = {version = "*", markers = "implementation_name != \"PyPy\""}
@@ -1613,7 +1614,7 @@ files = [
     {file = "cryptography-50.0.1-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:693c99b49bd37d0d096e4334c10232c77248c415b98d35236094cdf96d57258b"},
     {file = "cryptography-50.0.1.tar.gz", hash = "sha256:5dd9bda1c12b4162f6ff568eeb5e0ff956c28d14406e875cfe8a63a2d414ff20"},
 ]
-markers = {main = "extra == \"all\" or extra == \"datamasking\" or extra == \"auth\""}
+markers = {main = "extra == \"all\" or extra == \"datamasking\" or extra == \"jwt\""}
 
 [package.dependencies]
 cffi = {version = ">=2.0.0", markers = "platform_python_implementation != \"PyPy\""}
@@ -1882,11 +1883,11 @@ description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev"]
-markers = "python_version == \"3.10\""
 files = [
     {file = "exceptiongroup-1.3.1-py3-none-any.whl", hash = "sha256:a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598"},
     {file = "exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219"},
 ]
+markers = {main = "extra == \"valkey\" and python_version == \"3.10\"", dev = "python_version == \"3.10\""}
 
 [package.dependencies]
 typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
@@ -2107,6 +2108,7 @@ files = [
     {file = "idna-3.15-py3-none-any.whl", hash = "sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8"},
     {file = "idna-3.15.tar.gz", hash = "sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"},
 ]
+markers = {main = "extra == \"valkey\" or extra == \"datadog\""}
 
 [package.extras]
 all = ["mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
@@ -3534,7 +3536,7 @@ files = [
     {file = "pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"},
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
 ]
-markers = {main = "((extra == \"all\" or extra == \"datamasking\" or extra == \"auth\") and platform_python_implementation != \"PyPy\" or extra == \"valkey\") and implementation_name != \"PyPy\"", dev = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""}
+markers = {main = "((extra == \"all\" or extra == \"datamasking\" or extra == \"jwt\") and platform_python_implementation != \"PyPy\" or extra == \"valkey\") and implementation_name != \"PyPy\"", dev = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""}
 
 [[package]]
 name = "pydantic"
@@ -3740,7 +3742,7 @@ description = "JSON Web Token implementation in Python"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"auth\" or extra == \"all\""
+markers = "extra == \"jwt\" or extra == \"all\""
 files = [
     {file = "pyjwt-2.14.0-py3-none-any.whl", hash = "sha256:ad0cef71c756a56e74863c2919cf0985f72decbcfcb550ee2f422e7c62b5eedc"},
     {file = "pyjwt-2.14.0.tar.gz", hash = "sha256:77283c83fb56ecf566a886c757a714bc83668e38156de2cce8263302f42e0b86"},
@@ -5123,7 +5125,7 @@ files = [
     {file = "urllib3-2.8.0-py3-none-any.whl", hash = "sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"},
     {file = "urllib3-2.8.0.tar.gz", hash = "sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"},
 ]
-markers = {main = "extra == \"tracer\" or extra == \"all\" or extra == \"aws-sdk\" or extra == \"datamasking\" or extra == \"datadog\" or extra == \"auth\""}
+markers = {main = "extra == \"tracer\" or extra == \"all\" or extra == \"aws-sdk\" or extra == \"datamasking\" or extra == \"datadog\" or extra == \"jwt\" or extra == \"oauth2\""}
 
 [package.extras]
 brotli = ["brotli (>=1.2.0) ; platform_python_implementation == \"CPython\"", "brotlicffi (>=1.2.0.0) ; platform_python_implementation != \"CPython\""]
@@ -5372,12 +5374,13 @@ type = ["pytest-mypy"]
 
 [extras]
 all = ["aws-encryption-sdk", "aws-xray-sdk", "cryptography", "fastjsonschema", "jsonpath-ng", "pydantic", "pydantic-settings", "pyjwt", "urllib3"]
-jwt = ["cryptography", "pyjwt", "urllib3"]
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
 datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
+jwt = ["cryptography", "pyjwt", "urllib3"]
 kafka-consumer-avro = ["avro"]
 kafka-consumer-protobuf = ["protobuf"]
+oauth2 = ["urllib3"]
 parser = ["pydantic"]
 redis = ["redis"]
 tracer = ["aws-xray-sdk"]
@@ -5387,4 +5390,4 @@ valkey = ["valkey-glide"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0.0"
-content-hash = "906b66b0cba452e7bed8de1a7557359fd454b60525c1873964c3ca25a299887b"
+content-hash = "2d3adcc97137c392a7631148323a1be812b5beaba36b266b7b753beb382d8358"

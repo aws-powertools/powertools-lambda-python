@@ -68,6 +68,7 @@ tracer = ["aws-xray-sdk"]
 redis = ["redis"]
 valkey = ["valkey-glide"]
 jwt = ["pyjwt", "cryptography", "urllib3"]
+oauth2 = ["urllib3"]
 all = [
   "pydantic",
   "pydantic-settings",
