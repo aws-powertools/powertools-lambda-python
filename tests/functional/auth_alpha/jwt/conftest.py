@@ -1,12 +1,8 @@
-import io
-import json
 import time
 import weakref
-from collections import deque
 
 import jwt
 import pytest
-import urllib3
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from aws_lambda_powertools.utilities.auth_alpha.jwt._internal import jwks as jwks_module
@@ -47,54 +43,7 @@ def issue_token(signing_key, claims):
     return issue
 
 
-class FakeHTTP:
-    """In-memory JWKS endpoints at the HTTP transport boundary."""
-
-    def __init__(self):
-        self.responses = {}
-        self.requests = []
-
-    def serve(self, url, body, *, status=200, method="GET"):
-        self.responses[(method, url)] = deque([(status, body)])
-
-    def request(self, method, url, **kwargs):
-        self.requests.append((method, url, kwargs))
-        responses = self.responses[(method, url)]
-        status, body = responses[0] if len(responses) == 1 else responses.popleft()
-        if callable(body):
-            body = body()
-        if isinstance(body, Exception):
-            raise body
-        payload = body if isinstance(body, bytes) else json.dumps(body).encode()
-        return urllib3.HTTPResponse(
-            body=io.BytesIO(payload),
-            headers={"content-type": "application/json"},
-            status=status,
-            preload_content=False,
-        )
-
-
-@pytest.fixture
-def http(monkeypatch):
-    # Each fake provider belongs to one test. Error tracebacks can keep a
-    # previous verifier alive; retain sharing only within the current test.
+@pytest.fixture(autouse=True)
+def isolated_jwks_caches(monkeypatch):
+    # Each test's fake provider owns its cache, independent of retained tracebacks.
     monkeypatch.setattr(jwks_module, "_caches", weakref.WeakValueDictionary())
-    transport = FakeHTTP()
-    monkeypatch.setattr(urllib3, "PoolManager", lambda **kwargs: transport)
-    return transport
-
-
-@pytest.fixture
-def clock(monkeypatch):
-    class Clock:
-        now = 1000.0
-
-        def __call__(self):
-            return self.now
-
-        def advance(self, seconds):
-            self.now += seconds
-
-    clock = Clock()
-    monkeypatch.setattr(time, "monotonic", clock)
-    return clock

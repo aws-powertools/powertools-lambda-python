@@ -43,6 +43,7 @@ Some features require additional dependencies. Install them as needed:
 | [Validation](../utilities/validation.md) | `pip install "aws-lambda-powertools[validation]"` | `fastjsonschema` |
 | [Parser](../utilities/parser.md) | `pip install "aws-lambda-powertools[parser]"` | `pydantic` |
 | [JWT verification (alpha)](../utilities/auth.md) | `pip install "aws-lambda-powertools[jwt]"` | `PyJWT`, `cryptography`, `urllib3` |
+| [OAuth2 client (alpha)](../utilities/oauth2.md) | `pip install "aws-lambda-powertools[oauth2]"` | `urllib3` |
 | [Data Masking](../utilities/data_masking.md) | `pip install "aws-lambda-powertools[datamasking]"` | `aws-encryption-sdk`, `jsonpath-ng` |
 | [Datadog Metrics](../core/metrics/datadog.md) | `pip install "aws-lambda-powertools[datadog]"` | `datadog-lambda` |
 | [Kafka (Avro)](../utilities/kafka.md) | `pip install "aws-lambda-powertools[kafka-consumer-avro]"` | `avro` |

@@ -1,30 +1,16 @@
-"""Credential-free errors raised by the Auth utility."""
+"""Credential-free errors raised by JWT verification."""
 
-from enum import Enum
+from aws_lambda_powertools.utilities.auth_alpha.exceptions import AuthError, AuthFailureReason
 
-
-class AuthFailureReason(str, Enum):
-    """Stable, credential-free reasons suitable for application logs and metrics."""
-
-    MISSING_TOKEN = "missing_token"  # nosec B105
-    INVALID_TOKEN = "invalid_token"  # nosec B105
-    INVALID_CLAIMS = "invalid_claims"
-    TOKEN_EXPIRED = "token_expired"  # nosec B105
-    INVALID_SIGNATURE = "invalid_signature"
-    INSUFFICIENT_SCOPE = "insufficient_scope"
-    FORBIDDEN = "forbidden"
-    JWKS_UNAVAILABLE = "jwks_unavailable"
-
-
-class AuthError(Exception):
-    """Base error with a fixed message that never includes credential material."""
-
-    message = "Authentication failed"
-    reason = AuthFailureReason.INVALID_TOKEN
-    retryable = False
-
-    def __init__(self) -> None:
-        super().__init__(self.message)
+__all__ = [
+    "AuthError",
+    "AuthFailureReason",
+    "InvalidTokenError",
+    "InvalidClaimsError",
+    "TokenExpiredError",
+    "InvalidSignatureError",
+    "JWKSFetchError",
+]
 
 
 class InvalidTokenError(AuthError):
