@@ -565,6 +565,14 @@ def test_invalid_configuration_encoding_is_rejected(field):
         "https://inventory.example.com/stock item",
         "https://inventory.example.com/%invalid",
         "https://[invalid",
+        "1inventory:stock",
+        "urn%3Ainventory",
+        "urn:inventory%",
+        "urn:inventory%2",
+        "urn:inventory%2G",
+        "urn:inventory%G2",
+        "urn:inventory%%20",
+        "urn:inventorý",
     ],
 )
 def test_resource_must_be_an_absolute_uri_without_a_fragment(resource):
@@ -578,6 +586,9 @@ def test_resource_must_be_an_absolute_uri_without_a_fragment(resource):
         {"resource": "urn:example:inventory"},
         {"resource": "https://inventory.example.com/stock?region=eu&category=%23parts"},
         {"resource": "http://inventory.example.com"},
+        {"resource": "URN:example:inventory"},
+        {"resource": "inventory+v1.2-test:stock%2fitems%20eu?category=%23"},
+        {"resource": "https://[::1]/caf%C3%A9?encoded=%00%ff"},
         {"audience": "inventory"},
     ],
 )
@@ -592,6 +603,22 @@ def test_valid_resource_identifiers_and_provider_audiences_are_preserved(http, s
     assert fields[name] == [value]
     other = "audience" if name == "resource" else "resource"
     assert other not in fields
+
+
+@pytest.mark.parametrize("suffix", ["%", "%4", "%4G", "#"])
+def test_long_resources_with_invalid_suffixes_are_rejected_before_loading_credentials(http, suffix):
+    secrets = []
+
+    def load_secret():
+        secrets.append("test-secret")
+        return secrets[-1]
+
+    resource = "urn:inventory:" + "a%41" * 25_000 + suffix
+    with pytest.raises(ValueError, match="absolute URI without a fragment"):
+        client(resource=resource, client_secret=load_secret)
+
+    assert secrets == []
+    assert http.requests == []
 
 
 def test_secret_lookup_does_not_expire_a_new_short_lived_token(http, clock):

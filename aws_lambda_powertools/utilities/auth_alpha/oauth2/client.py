@@ -6,6 +6,7 @@ import threading
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from string import ascii_letters, digits, hexdigits
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote_plus, urlencode, urlsplit
 
@@ -27,7 +28,20 @@ if TYPE_CHECKING:
 
 _BEARER_TOKEN = re.compile(r"[-A-Za-z0-9._~+/]+=*")
 _HEADER_NAME = re.compile(r"[-!#$%&'*+.^_`|~0-9A-Za-z]+")
-_RESOURCE_URI = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:(?:[A-Za-z0-9._~:/?\[\]@!$&'()*+,;=-]|%[0-9A-Fa-f]{2})*")
+_RESOURCE_CHARACTERS = frozenset(ascii_letters + digits + "-._~:/?[]@!$&'()*+,;=")
+_HEX_DIGITS = frozenset(hexdigits)
+
+
+def _valid_resource_characters(resource: str) -> bool:
+    """Scan once, accepting URI characters and complete percent escapes, but no fragment."""
+    characters = iter(resource)
+    for character in characters:
+        if character == "%":
+            if next(characters, "") not in _HEX_DIGITS or next(characters, "") not in _HEX_DIGITS:
+                return False
+        elif character not in _RESOURCE_CHARACTERS:
+            return False
+    return True
 
 
 @dataclass(frozen=True)
@@ -138,7 +152,9 @@ class OAuth2Client:
     @staticmethod
     def _validate_resource(resource: str) -> None:
         try:
-            valid = bool(_RESOURCE_URI.fullmatch(resource)) and bool(urlsplit(resource).scheme)
+            scheme = urlsplit(resource).scheme
+            # Older urlsplit versions also recognize schemes starting with a digit.
+            valid = scheme[:1].isalpha() and _valid_resource_characters(resource)
         except ValueError:
             valid = False
         if not valid:
