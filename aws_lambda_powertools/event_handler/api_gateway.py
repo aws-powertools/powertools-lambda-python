@@ -810,6 +810,11 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
+        # A response without a body, such as 204 No Content or 304 Not Modified, has nothing to compress
+        if self.response.body is None:
+            logger.debug("Response has no body; skipping compression")
+            return
+
         self.response.headers["Content-Encoding"] = "gzip"
         if isinstance(self.response.body, str):
             logger.debug("Converting string response to bytes before compressing it")
