@@ -79,6 +79,16 @@ def test_cookie_with_max_age_negative():
     assert str(cookie) == "powertools=test; Path=/; Max-Age=0; Secure"
 
 
+def test_cookie_with_max_age_zero():
+    # GIVEN a cookie with a zero max age
+    cookie = Cookie(name="powertools", value="test", path="/", max_age=0)
+
+    # WHEN getting the cookie's attributes
+    # THEN Max-Age must be 0 so the browser deletes the cookie
+    assert cookie.max_age == 0
+    assert str(cookie) == "powertools=test; Path=/; Max-Age=0; Secure"
+
+
 def test_cookie_with_http_only():
     # GIVEN a cookie with http_only
     cookie = Cookie(name="powertools", value="test", path="/", http_only=True)
