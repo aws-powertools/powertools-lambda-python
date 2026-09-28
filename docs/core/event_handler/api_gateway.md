@@ -151,6 +151,22 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 --8<-- "examples/event_handler_rest/src/getting_started_alb_api_resolver.py"
 ```
 
+##### Validate response size
+
+ALB limits the complete response JSON returned by Lambda to [1 MB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"}. An oversized response can produce a 502 error even when the Lambda handler finishes successfully.
+
+Set `enable_response_size_validation=True` to check the response against the 1,048,576-byte limit before returning it to ALB. This option is disabled by default and applies only to `ALBResolver`, through both `resolve()` and `resolve_async()`.
+
+The check includes the JSON envelope, serialized body, headers, and cookies after compression and base64 encoding. It follows the Lambda Python runtime's JSON encoding, including escaping and UTF-8 byte lengths.
+
+When the limit is exceeded, `ResponseSizeExceededError` exposes `actual_size` and `max_size`, both in bytes. Without a registered exception handler, the exception propagates and fails the invocation. You can register a handler to log the sizes and return a small 500 response:
+
+```python hl_lines="7 10-22" title="Validate ALB response size"
+--8<-- "examples/event_handler_rest/src/alb_response_size_validation.py"
+```
+
+The handler's response is also validated. If it exceeds the limit, the exception propagates without invoking the handler again.
+
 #### Lambda Function URL
 
 When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html){target="_blank"}, you can use `LambdaFunctionUrlResolver`.
