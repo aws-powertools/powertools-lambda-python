@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.utilities.feature_flags import schema
@@ -14,6 +15,7 @@ from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_time_range,
 )
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -113,11 +115,17 @@ class FeatureFlags:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
             if context_key_present:
                 # Missing keys are ordinary non-matches. For invalid operands, identify the condition
-                # without logging values or exception messages that might contain customer data.
-                self.logger.warning(
-                    f"Failed to evaluate feature flag condition: feature={feature_name}, rule={rule_name}, "
-                    f"key={context_key}, action={action}, exception_type={type(exc).__name__}",
-                )
+                # without exposing values or exception messages that might contain customer data.
+                try:
+                    warnings.warn(
+                        f"Failed to evaluate feature flag condition: feature={feature_name}, rule={rule_name}, "
+                        f"key={context_key}, action={action}, exception_type={type(exc).__name__}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
+                    )
+                except PowertoolsUserWarning:
+                    # Preserve evaluation and exception handlers when warnings are treated as errors.
+                    pass
 
             handler = self._lookup_exception_handler(exc)
             if handler:
