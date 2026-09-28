@@ -3,6 +3,25 @@ from __future__ import annotations
 from http import HTTPStatus
 
 
+class ResponseSizeExceededError(Exception):
+    """The serialized Lambda response exceeds the integration's size limit."""
+
+    def __init__(self, *, actual_size: int, max_size: int):
+        """
+        Parameters
+        ----------
+        actual_size: int
+            Size of the complete serialized response in bytes.
+        max_size: int
+            Maximum allowed serialized response size in bytes.
+        """
+        self.actual_size = actual_size
+        self.max_size = max_size
+        super().__init__(
+            f"Serialized response size ({actual_size} bytes) exceeds the maximum allowed size ({max_size} bytes)",
+        )
+
+
 class ServiceError(Exception):
     """Powertools class HTTP Service Error"""
 

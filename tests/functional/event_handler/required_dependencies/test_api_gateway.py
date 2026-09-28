@@ -606,6 +606,72 @@ def test_compress_no_accept_encoding_null_headers():
     assert result["body"] == expected_value
 
 
+@pytest.mark.parametrize("status_code", [204, 304])
+def test_compress_route_with_body_less_response(status_code: int):
+    # GIVEN a function with compress=True returning a Response without a body
+    # AND an event with an "Accept-Encoding" that includes gzip
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+
+    @app.get("/my/path", compress=True)
+    def no_content() -> Response:
+        return Response(status_code=status_code)
+
+    # WHEN calling the event handler
+    result = app(mock_event, None)
+
+    # THEN don't perform any gzip compression
+    assert result["statusCode"] == status_code
+    assert result["body"] is None
+    assert result["isBase64Encoded"] is False
+    assert "Content-Encoding" not in result["multiValueHeaders"]
+
+
+def test_compress_response_with_body_less_response():
+    # GIVEN a function returning a Response with compress=True and no body
+    # AND an event with an "Accept-Encoding" that includes gzip
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+
+    @app.get("/my/path")
+    def no_content() -> Response:
+        return Response(status_code=204, compress=True)
+
+    # WHEN calling the event handler
+    result = app(mock_event, None)
+
+    # THEN don't perform any gzip compression
+    assert result["statusCode"] == 204
+    assert result["body"] is None
+    assert result["isBase64Encoded"] is False
+    assert "Content-Encoding" not in result["multiValueHeaders"]
+
+
+def test_compress_exception_handler_with_body_less_response():
+    # GIVEN a function with compress=True whose exception handler returns a Response without a body
+    # AND an event with an "Accept-Encoding" that includes gzip
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        return Response(status_code=410)
+
+    @app.get("/my/path", compress=True)
+    def raise_value_error() -> Response:
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(mock_event, None)
+
+    # THEN call the exception_handler and don't perform any gzip compression
+    assert result["statusCode"] == 410
+    assert result["body"] is None
+    assert result["isBase64Encoded"] is False
+    assert "Content-Encoding" not in result["multiValueHeaders"]
+
+
 def test_cache_control_200():
     # GIVEN a function with cache_control set
     app = ApiGatewayResolver()
