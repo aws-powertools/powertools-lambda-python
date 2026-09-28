@@ -96,7 +96,12 @@ class Metrics:
         self.default_dimensions = self._default_dimensions
         self.dimension_set = self._dimensions
 
-        self.dimension_set.update(**self._default_dimensions)
+        self.dimension_set.update(
+            **{
+                name: value if isinstance(value, str) else str(value)
+                for name, value in self._default_dimensions.items()
+            },
+        )
 
         if provider is None:
             self.provider = AmazonCloudWatchEMFProvider(

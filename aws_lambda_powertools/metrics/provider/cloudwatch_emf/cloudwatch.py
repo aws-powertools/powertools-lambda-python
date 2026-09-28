@@ -100,7 +100,11 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
 
-        self.dimension_set.update(**self.default_dimensions)
+        self.dimension_set.update(
+            **{
+                name: value if isinstance(value, str) else str(value) for name, value in self.default_dimensions.items()
+            },
+        )
 
     def add_metric(
         self,
