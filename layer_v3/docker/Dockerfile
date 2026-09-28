@@ -35,8 +35,8 @@ RUN CFLAGS="-Os -g0 -s" pip install -t /asset/python "aws-lambda-powertools${PAC
 RUN cd /asset/python && \
   # remove boto3 and botocore (already available in Lambda Runtime)
   rm -rf boto* && \
-  # remove boto3 dependencies
-  rm -rf s3transfer* *dateutil* urllib3* six* jmespath* && \
+  # retain urllib3: Auth requires its declared version, independently of the runtime SDK
+  rm -rf s3transfer* *dateutil* six* jmespath* && \
   # remove debugging symbols
   find . -name '*.so' -type f -exec strip "{}" \; && \
   # remove tests

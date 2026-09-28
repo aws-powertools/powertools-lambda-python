@@ -420,6 +420,11 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     --8<-- "examples/feature_flags/src/conditions.json"
     ```
 
+If a comparator raises an exception, such as comparing a string with a number, a Python `PowertoolsUserWarning` identifies the feature, rule, key, action, and exception type without requiring a logger.
+The warning excludes operand values and exception messages. The condition still evaluates as a non-match unless a registered validation exception handler returns a different result.
+Missing context keys and ordinary non-matches do not produce warnings.
+Python warning filters control how often the warning appears. If a filter promotes this comparator warning to an error, it is suppressed so evaluation and registered exception handlers continue to work.
+
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
 | Action                              | Equivalent expression                                    |
