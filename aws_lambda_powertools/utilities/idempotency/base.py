@@ -9,7 +9,10 @@ from __future__ import annotations
 import datetime
 import logging
 from copy import deepcopy
+from enum import Enum
+from pathlib import PurePath
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -45,6 +48,32 @@ MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
 
 
+def _to_json_safe(value: Any) -> Any:
+    """Convert UUID, date, datetime, time, Enum and path values in a dataclass dict to JSON safe values.
+
+    Values json already encodes are returned untouched, so idempotency keys that worked before don't change.
+    """
+    if isinstance(value, dict):
+        return {key: _to_json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return list(map(_to_json_safe, value))
+    # tuples stay tuples so jmespath results don't change
+    if isinstance(value, tuple):
+        return tuple(map(_to_json_safe, value))
+    return _json_safe_scalar(value)
+
+
+def _json_safe_scalar(value: Any) -> Any:
+    # json already encodes these, including str and int based enums
+    if isinstance(value, (str, int, float)):
+        return value
+    if isinstance(value, Enum):
+        return _to_json_safe(value.value)
+    if isinstance(value, (datetime.date, datetime.time)):
+        return value.isoformat()
+    return str(value) if isinstance(value, (UUID, PurePath)) else value
+
+
 def _prepare_data(data: Any) -> Any:
     """Prepare data for json serialization.
 
@@ -56,7 +85,7 @@ def _prepare_data(data: Any) -> Any:
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
 
-        return dataclasses.asdict(data)
+        return _to_json_safe(dataclasses.asdict(data))
 
     # Convert from Pydantic model
     if callable(getattr(data, "model_dump", None)):

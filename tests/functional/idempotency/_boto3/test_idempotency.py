@@ -2,8 +2,12 @@ import copy
 import dataclasses
 import datetime
 import warnings
+from decimal import Decimal
+from enum import Enum
+from pathlib import PurePosixPath
 from typing import Any
 from unittest.mock import MagicMock, Mock
+from uuid import UUID
 
 import jmespath
 import pytest
@@ -1770,6 +1774,57 @@ def test_idempotent_function_dataclass_with_jmespath():
 
     # THEN idempotency key assertion happens at MockPersistenceLayer
     assert result == payment.transaction_id
+
+
+def test_idempotent_function_dataclass_with_non_json_types():
+    # GIVEN a dataclass with UUID, datetime, date, time, Enum and path values, some inside a list or tuple
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {
+        "order_id": "12345678-1234-5678-1234-567812345678",
+        "created_at": "2024-03-20T14:30:00",
+        "ship_date": "2024-03-22",
+        "delivery_window": ["09:00:00", "12:00:00"],
+        "item_ids": ["87654321-4321-8765-4321-876543218765"],
+        "status": "paid",
+        "receipt": "/receipts/ord-001.pdf",
+        "amount": "199.99",
+    }
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_dataclass_with_non_json_types.<locals>.process_order#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class OrderStatus(Enum):
+        PAID = "paid"
+
+    @dataclasses.dataclass
+    class Order:
+        order_id: UUID
+        created_at: datetime.datetime
+        ship_date: datetime.date
+        delivery_window: tuple[datetime.time, datetime.time]
+        item_ids: list[UUID]
+        status: OrderStatus
+        receipt: PurePosixPath
+        amount: Decimal
+
+    @idempotent_function(data_keyword_argument="order", persistence_store=persistence_layer, config=config)
+    def process_order(order: Order) -> dict:
+        return {"status": "ok"}
+
+    # WHEN
+    order = Order(
+        order_id=UUID("12345678-1234-5678-1234-567812345678"),
+        created_at=datetime.datetime(2024, 3, 20, 14, 30, 0),
+        ship_date=datetime.date(2024, 3, 22),
+        delivery_window=(datetime.time(9, 0), datetime.time(12, 0)),
+        item_ids=[UUID("87654321-4321-8765-4321-876543218765")],
+        status=OrderStatus.PAID,
+        receipt=PurePosixPath("/receipts/ord-001.pdf"),
+        amount=Decimal("199.99"),
+    )
+    result = process_order(order=order)
+
+    # THEN the key is hashed from the JSON version of the order, asserted at MockPersistenceLayer
+    assert result == {"status": "ok"}
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
