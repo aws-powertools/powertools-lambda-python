@@ -491,5 +491,5 @@ class FeatureFlags:
         # of an exception
         for cls in type(exc).__mro__:
             if cls in self._exception_handlers:
-                return self._exception_handlers[cls]  # type: ignore[index]  # ty: ignore[invalid-argument-type]
+                return self._exception_handlers[cls]  # type: ignore[index]
         return None
