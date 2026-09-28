@@ -30,7 +30,8 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
-            f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
+            # Auth's declared urllib3 dependency must survive Layer cleanup.
+            f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/six* && "
             f"rm -rf {self.target_dir}/jmespath* && "
             f"find {self.target_dir} -name '*.so' -type f -exec strip '{{}}' \\; && "
             f"find {self.target_dir} -wholename '*/tests/*' -type f -delete && "

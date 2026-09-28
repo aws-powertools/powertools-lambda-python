@@ -163,6 +163,62 @@ def test_next(s3_seekable_obj, s3_client_stub):
         next(s3_seekable_obj)
 
 
+def test_next_advances_position_without_changing_chunk_size(s3_seekable_obj, s3_client_stub):
+    payload = b"a" * 1024 + b"b" * 481
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": streaming_body},
+        {"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+    )
+
+    assert next(s3_seekable_obj) == payload[:1024]
+    assert s3_seekable_obj.tell() == 1024
+
+    assert next(s3_seekable_obj) == payload[1024:]
+    assert s3_seekable_obj.tell() == len(payload)
+
+    with pytest.raises(StopIteration):
+        next(s3_seekable_obj)
+
+
+def test_iter_returns_self(s3_seekable_obj):
+    assert iter(s3_seekable_obj) is s3_seekable_obj
+
+
+def test_seek_after_partial_iteration_reads_from_correct_position(s3_seekable_obj, s3_client_stub):
+    payload = bytes(range(256)) * 8
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": streaming_body},
+        {"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+    )
+
+    assert next(s3_seekable_obj) == payload[:1024]
+    assert s3_seekable_obj.seek(5, io.SEEK_CUR) == 1029
+
+    remaining_payload = payload[1029:]
+    resumed_streaming_body = PowertoolsStreamingBody(
+        raw_stream=io.BytesIO(remaining_payload),
+        content_length=len(remaining_payload),
+    )
+    s3_client_stub.add_response(
+        "get_object",
+        {"Body": resumed_streaming_body},
+        {
+            "Bucket": s3_seekable_obj.bucket,
+            "Key": s3_seekable_obj.key,
+            "Range": "bytes=1029-",
+        },
+    )
+
+    assert s3_seekable_obj.read(7) == payload[1029:1036]
+    assert s3_seekable_obj.tell() == 1036
+
+
 def test_context_manager(s3_seekable_obj, s3_client_stub):
     payload = b"test"
     streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))

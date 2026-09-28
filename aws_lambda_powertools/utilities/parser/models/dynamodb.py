@@ -1,6 +1,6 @@
 # ruff: noqa: FA100
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional, Type, Union
+from typing import Any, Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
@@ -11,18 +11,18 @@ _DESERIALIZER = TypeDeserializer()
 
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
-    ApproximateCreationDateTime: Optional[datetime] = Field(  # AWS sends this as Unix epoch float
+    ApproximateCreationDateTime: datetime | None = Field(  # AWS sends this as Unix epoch float
         default=None,
         description="The approximate date and time when the stream record was created (Unix epoch time).",
         examples=[1693997155.0],
     )
     Keys: Dict[str, Any] = Field(description="Primary key attributes for the item.", examples=[{"Id": {"N": "101"}}])
-    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = Field(
+    NewImage: Union[Dict[str, Any], Type[BaseModel], BaseModel] | None = Field(
         default=None,
         description="The item after modifications, in DynamoDB attribute-value format.",
         examples=[{"Message": {"S": "New item!"}, "Id": {"N": "101"}}],
     )
-    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = Field(
+    OldImage: Union[Dict[str, Any], Type[BaseModel], BaseModel] | None = Field(
         default=None,
         description="The item before modifications, in DynamoDB attribute-value format.",
         examples=[{"Message": {"S": "Old item!"}, "Id": {"N": "100"}}],
@@ -80,7 +80,7 @@ class DynamoDBStreamRecordModel(BaseModel):
             },
         ],
     )
-    userIdentity: Optional[UserIdentity] = Field(
+    userIdentity: UserIdentity | None = Field(
         default=None,
         description="Information about the identity that made the request.",
         examples=[{"type": "Service", "principalId": "dynamodb.amazonaws.com"}],
@@ -175,7 +175,7 @@ class ResponseContext(BaseModel):
         description="The version of the Lambda executed",
         examples=["$LATEST"],
     )
-    function_error: Optional[str] = Field(
+    function_error: str | None = Field(
         default=None,
         description="",
         examples=["Unhandled"],

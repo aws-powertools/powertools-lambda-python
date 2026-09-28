@@ -1,5 +1,3 @@
-from typing import Optional
-
 import requests
 from pydantic import BaseModel
 
@@ -17,7 +15,7 @@ app = APIGatewayRestResolver()
 class UserModel(BaseModel):
     name: str
     email: str
-    age: Optional[int] = None
+    age: int | None = None
 
 
 @app.get("/health")

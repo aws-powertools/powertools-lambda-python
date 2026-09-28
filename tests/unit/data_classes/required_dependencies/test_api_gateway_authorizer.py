@@ -130,6 +130,24 @@ def test_authorizer_response_deny_route(builder: APIGatewayAuthorizerResponse):
     }
 
 
+def test_authorizer_response_deny_route_all_methods(builder: APIGatewayAuthorizerResponse):
+    builder.allow_all_routes()
+    builder.deny_route(http_method="ALL", resource="/admin/*")
+
+    assert builder.asdict()["policyDocument"]["Statement"] == [
+        {
+            "Action": "execute-api:Invoke",
+            "Effect": "Allow",
+            "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/*"],
+        },
+        {
+            "Action": "execute-api:Invoke",
+            "Effect": "Deny",
+            "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/admin/*"],
+        },
+    ]
+
+
 def test_authorizer_response_allow_route_with_conditions(builder: APIGatewayAuthorizerResponse):
     condition = {"StringEquals": {"method.request.header.Content-Type": "text/html"}}
     builder.allow_route(

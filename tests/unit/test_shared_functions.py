@@ -162,7 +162,7 @@ def test_abs_lambda_path_empty_envvar(default_lambda_path):
     # Given Env is set
     os.environ["LAMBDA_TASK_ROOT"] = default_lambda_path
     # Then path = Env/
-    assert abs_lambda_path() == default_lambda_path
+    assert abs_lambda_path() == str(Path(default_lambda_path))
 
 
 def test_abs_lambda_path_w_filename():

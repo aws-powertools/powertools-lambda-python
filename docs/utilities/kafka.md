@@ -29,6 +29,7 @@ flowchart LR
 * Support for key and value deserialization
 * Support for custom output serializers (e.g., dataclasses, Pydantic models)
 * Support for ESM with and without Schema Registry integration
+* Support for offline Avro schemas with schema-registry wire-format prefixes (Confluent only)
 * Proper error handling for deserialization issues
 
 ## Terminology
@@ -254,6 +255,45 @@ Each Kafka record contains important metadata that you can access alongside the 
 | `original_key` | Base64-encoded original message key | Debugging or custom deserialization |
 | `value_schema_metadata` | Metadata about the value schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
 | `key_schema_metadata` | Metadata about the key schema like `schemaId` and `dataFormat` | Data format and schemaId propagated when integrating with Schema Registry |
+
+### Using an offline Avro schema with a schema-registry wire-format prefix
+
+When Confluent serializes messages with its schema-registry-aware Avro serializer (for example, `KafkaAvroSerializer`), each payload carries a wire-format header before the Avro body.
+The header is 5 bytes long: 1-byte magic byte (`0x00`) followed by a 4-byte big-endian schema ID.
+
+When the ESM Schema Registry integration is enabled, Lambda strips those bytes and populates the record's schema metadata. When you use an **offline Avro schema** without the ESM Schema Registry integration, the header reaches the function and prevents plain Avro deserialization.
+
+Set `value_schema_wire_format` or `key_schema_wire_format` on `SchemaConfig` to `"CONFLUENT"`. Powertools validates the magic byte and strips the 5-byte header before running the Avro decoder.
+
+???+ info "When do I need this?"
+    Use this option when you supply the Avro schema and the producer uses the Confluent wire format. If ESM Schema Registry integration has already removed the header, leave the option as `None`.
+
+=== "Offline Avro schema with a Confluent prefix"
+
+    ```python hl_lines="10"
+    from aws_lambda_powertools.utilities.kafka import SchemaConfig, kafka_consumer
+    from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+
+    AVRO_SCHEMA = open("user.avsc").read()
+
+    schema_config = SchemaConfig(
+        value_schema_type="AVRO",
+        value_schema=AVRO_SCHEMA,
+        value_schema_wire_format="CONFLUENT",
+    )
+
+
+    @kafka_consumer(schema_config=schema_config)
+    def lambda_handler(event: ConsumerRecords, context: LambdaContext):
+        for record in event.records:
+            # record.value is the deserialized Avro payload
+            # with the validated 5-byte wire-format header removed.
+            ...
+    ```
+
+???+ warning "Scope"
+    `value_schema_wire_format` and `key_schema_wire_format` apply only to **Avro** payloads. Leave them as `None` when ESM Schema Registry integration has already removed the wire-format header.
 
 ### Custom output serializers
 

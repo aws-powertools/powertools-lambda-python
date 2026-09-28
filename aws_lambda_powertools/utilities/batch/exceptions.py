@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import traceback
 from types import TracebackType
-from typing import Optional, Tuple, Type
+from typing import Tuple, Type
 
-ExceptionInfo = Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]]
+ExceptionInfo = Tuple[Type[BaseException] | None, BaseException | None, TracebackType | None]
 
 
 class BaseBatchProcessingError(Exception):

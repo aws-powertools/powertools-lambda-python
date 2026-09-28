@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
@@ -18,7 +18,7 @@ class PostRelatedNotFound(Exception): ...
 
 
 @app.batch_resolver(type_name="Query", field_name="relatedPosts", raise_on_error=True)  # (1)!
-def related_posts(event: AppSyncResolverEvent, post_id: str) -> Optional[Dict]:
+def related_posts(event: AppSyncResolverEvent, post_id: str) -> Dict | None:
     post_found = posts_related.get(post_id, None)
 
     if not post_found:

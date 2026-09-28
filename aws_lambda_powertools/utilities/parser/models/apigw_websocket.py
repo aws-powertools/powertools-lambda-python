@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Type, Union
+from typing import Dict, List, Literal, Type, Union
 
 from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyNetwork
@@ -7,7 +7,7 @@ from pydantic.networks import IPvAnyNetwork
 
 class APIGatewayWebSocketEventIdentity(BaseModel):
     source_ip: IPvAnyNetwork = Field(alias="sourceIp")
-    user_agent: Optional[str] = Field(None, alias="userAgent")
+    user_agent: str | None = Field(None, alias="userAgent")
 
 
 class APIGatewayWebSocketEventRequestContextBase(BaseModel):
@@ -61,4 +61,4 @@ class APIGatewayWebSocketDisconnectEventModel(BaseModel):
 class APIGatewayWebSocketMessageEventModel(BaseModel):
     request_context: APIGatewayWebSocketMessageEventRequestContext = Field(alias="requestContext")
     is_base64_encoded: bool = Field(alias="isBase64Encoded")
-    body: Optional[Union[str, Type[BaseModel]]] = Field(None, alias="body")
+    body: Union[str, Type[BaseModel]] | None = Field(None, alias="body")

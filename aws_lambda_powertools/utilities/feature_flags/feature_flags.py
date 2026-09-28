@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.utilities.feature_flags import schema
@@ -14,6 +15,7 @@ from aws_lambda_powertools.utilities.feature_flags.comparators import (
     compare_time_range,
 )
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -81,13 +83,49 @@ class FeatureFlags:
         self.store = store
         self.logger = logger or logging.getLogger(__name__)
         self._exception_handlers: dict[Exception, Callable] = {}
+        # Last document that passed schema validation. We keep a strong reference so its id() can't be
+        # recycled by a different object, which lets us safely skip re-validation on store cache hits.
+        self._last_validated_config: dict | None = None
 
-    def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
+    def _match_by_action(
+        self,
+        action: str,
+        condition_value: Any,
+        context_value: Any,
+        context_key_present: bool = True,
+        *,
+        feature_name: str | None = None,
+        rule_name: str | None = None,
+        context_key: str | None = None,
+    ) -> bool:
         try:
             func = RULE_ACTION_MAPPING.get(action, lambda a, b: False)
-            return func(context_value, condition_value)
+            matched = func(context_value, condition_value)
+
+            if not context_key_present:
+                # A key absent from the context never satisfies a condition. Without this, `None` would be
+                # compared as a regular value and negative actions (NOT_EQUALS, NOT_IN, ...) would match.
+                # We still run the comparator first so that any exception it raises (e.g. ANY_IN_VALUE on a
+                # non-list) reaches registered validation exception handlers exactly as it did before.
+                self.logger.debug(f"context key not present, condition does not match: action={action}")
+                return False
+
+            return matched
         except Exception as exc:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
+            if context_key_present:
+                # Missing keys are ordinary non-matches. For invalid operands, identify the condition
+                # without exposing values or exception messages that might contain customer data.
+                try:
+                    warnings.warn(
+                        f"Failed to evaluate feature flag condition: feature={feature_name}, rule={rule_name}, "
+                        f"key={context_key}, action={action}, exception_type={type(exc).__name__}",
+                        category=PowertoolsUserWarning,
+                        stacklevel=2,
+                    )
+                except PowertoolsUserWarning:
+                    # Preserve evaluation and exception handlers when warnings are treated as errors.
+                    pass
 
             handler = self._lookup_exception_handler(exc)
             if handler:
@@ -115,9 +153,10 @@ class FeatureFlags:
             return False
 
         for condition in conditions:
-            context_value = context.get(condition.get(schema.CONDITION_KEY, ""))
+            cond_key = condition.get(schema.CONDITION_KEY, "")
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
+            context_key_present = True
 
             # time based rule actions have no user context. the context is the condition key
             if cond_action in (
@@ -125,9 +164,20 @@ class FeatureFlags:
                 schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
                 schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
             ):
-                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME
+                context_value = cond_key  # e.g., CURRENT_TIME
+            else:
+                context_key_present = cond_key in context
+                context_value = context.get(cond_key)
 
-            if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
+            if not self._match_by_action(
+                action=cond_action,
+                condition_value=cond_value,
+                context_value=context_value,
+                context_key_present=context_key_present,
+                feature_name=feature_name,
+                rule_name=rule_name,
+                context_key=cond_key,
+            ):
                 self.logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
                     f"name={feature_name}, context_value={str(context_value)} ",
@@ -210,8 +260,17 @@ class FeatureFlags:
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: dict = self.store.get_configuration()
+
+        # Stores that serve from cache (e.g. AppConfigStore via Parameters) return the same dict object until
+        # expiry, so identity is a reliable signal that we've already validated this exact document.
+        # A store that applies an envelope returns a fresh object each time and will still be validated.
+        if config is self._last_validated_config:
+            self.logger.debug("Schema already validated, skipping validation")
+            return config
+
         validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
+        self._last_validated_config = config
 
         return config
 

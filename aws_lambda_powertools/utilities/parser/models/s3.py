@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Union
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
@@ -130,12 +130,12 @@ class S3Object(BaseModel):
             "logs/2023/01/15/app.log",
         ],
     )
-    size: Optional[NonNegativeFloat] = Field(
+    size: NonNegativeFloat | None = Field(
         default=None,
         description="The size of the object in bytes.",
         examples=[1024, 2048576, 0],
     )
-    eTag: Optional[str] = Field(
+    eTag: str | None = Field(
         default=None,
         description="The entity tag (ETag) of the object.",
         examples=[
@@ -143,7 +143,7 @@ class S3Object(BaseModel):
             "098f6bcd4621d373cade4e832627b4f6",
         ],
     )
-    sequencer: Optional[str] = Field(
+    sequencer: str | None = Field(
         default=None,
         description="A string representation of a hexadecimal value used to determine event sequence.",
         examples=[
@@ -151,7 +151,7 @@ class S3Object(BaseModel):
             "005B21C13A6F24045E",
         ],
     )
-    versionId: Optional[str] = Field(
+    versionId: str | None = Field(
         default=None,
         description="The version ID of the object (if versioning is enabled).",
         examples=[
@@ -188,7 +188,7 @@ class S3Message(BaseModel):
             },
         ],
     )
-    object: Optional[S3Object] = Field(
+    object: S3Object | None = Field(
         default=None,
         description="The S3 object object. Used by most S3 event types.",
         examples=[
@@ -200,7 +200,7 @@ class S3Message(BaseModel):
             },
         ],
     )  # noqa: A003
-    get_object: Optional[S3Object] = Field(
+    get_object: S3Object | None = Field(
         default=None,
         alias="get_object",
         description="The S3 object object. Used by IntelligentTiering events instead of 'object'.",
@@ -225,7 +225,7 @@ class S3EventNotificationObjectModel(BaseModel):
             "logs/2023/01/15/app.log",
         ],
     )
-    size: Optional[NonNegativeFloat] = Field(
+    size: NonNegativeFloat | None = Field(
         default=None,
         description="The size of the object in bytes.",
         examples=[1024, 2048576, 0],
@@ -238,7 +238,7 @@ class S3EventNotificationObjectModel(BaseModel):
             "098f6bcd4621d373cade4e832627b4f6",
         ],
     )
-    version_id: Optional[str] = Field(
+    version_id: str | None = Field(
         default=None,
         alias="version-id",
         description="The version ID of the object (if versioning is enabled).",
@@ -247,7 +247,7 @@ class S3EventNotificationObjectModel(BaseModel):
             "null",
         ],
     )
-    sequencer: Optional[str] = Field(
+    sequencer: str | None = Field(
         default=None,
         description="A string representation of a hexadecimal value used to determine event sequence.",
         examples=[
@@ -307,7 +307,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
             "123456789012",
         ],
     )
-    source_ip_address: Optional[str] = Field(
+    source_ip_address: str | None = Field(
         None,
         alias="source-ip-address",
         description="Source IP address of S3 request. Only present for events triggered by an S3 request.",
@@ -315,7 +315,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
             "255.255.255.255",
         ],
     )
-    reason: Optional[str] = Field(
+    reason: str | None = Field(
         default=None,
         description="For 'Object Created' events, the S3 API used to create the object: PutObject, POST Object, "
         "CopyObject, or CompleteMultipartUpload. For 'Object Deleted' events, this is set to 'DeleteObject' "
@@ -327,7 +327,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
             "DeleteObject",
         ],
     )
-    deletion_type: Optional[str] = Field(
+    deletion_type: str | None = Field(
         default=None,
         alias="deletion-type",
         description="For 'Object Deleted' events, when an unversioned object is deleted, or a versioned object is "
@@ -336,28 +336,28 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
         "see https://docs.aws.amazon.com/AmazonS3/latest/userguide/DeletingObjectVersions.html",
         examples=["Delete Marker Created", "Permanently Deleted"],
     )
-    restore_expiry_time: Optional[str] = Field(
+    restore_expiry_time: str | None = Field(
         default=None,
         alias="restore-expiry-time",
         description="For 'Object Restore Completed' events, the time when the temporary copy of the object will be "
         "deleted from S3. For more information, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/archived-objects.html.",
         examples=["2021-11-13T00:00:00Z"],
     )
-    source_storage_class: Optional[str] = Field(
+    source_storage_class: str | None = Field(
         default=None,
         alias="source-storage-class",
         description="For 'Object Restore Initiated' and 'Object Restore Completed' events, the storage class of the "
         "object being restored. For more information, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/archived-objects.html.",
         examples=["GLACIER", "STANDARD", "STANDARD_IA"],
     )
-    destination_storage_class: Optional[str] = Field(
+    destination_storage_class: str | None = Field(
         default=None,
         alias="destination-storage-class",
         description="For 'Object Storage Class Changed' events, the new storage class of the object. For more "
         "information, see https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html.",
         examples=["INTELLIGENT_TIERING", "STANDARD", "STANDARD_IA"],
     )
-    destination_access_tier: Optional[str] = Field(
+    destination_access_tier: str | None = Field(
         default=None,
         alias="destination-access-tier",
         description="For 'Object Access Tier Changed' events, the new access tier of the object. For more information, "
@@ -462,7 +462,7 @@ class S3RecordModel(BaseModel):
             },
         ],
     )
-    glacierEventData: Optional[S3EventRecordGlacierEventData] = Field(
+    glacierEventData: S3EventRecordGlacierEventData | None = Field(
         default=None,
         description="The Glacier event data object.",
         examples=[
@@ -474,7 +474,7 @@ class S3RecordModel(BaseModel):
             },
         ],
     )
-    intelligentTieringEventData: Optional[S3EventRecordIntelligentTieringEventData] = Field(
+    intelligentTieringEventData: S3EventRecordIntelligentTieringEventData | None = Field(
         default=None,
         description="The Intelligent-Tiering event data object.",
         examples=[

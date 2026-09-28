@@ -538,7 +538,7 @@ def _resolve_response_payload(
     model_payload_typed = cast(OpenAPIResponseContentModel, payload)
     return_field = next(
         filter(
-            lambda model: model.type_ is model_payload_typed["model"],
+            lambda model: model.type_ == model_payload_typed["model"],
             dependant.response_extra_models,
         ),
     )

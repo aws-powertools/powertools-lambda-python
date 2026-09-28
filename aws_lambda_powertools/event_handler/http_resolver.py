@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import parse_qs
 
@@ -13,6 +15,8 @@ from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerialize
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, MutableMapping
+
     from aws_lambda_powertools.shared.cookies import Cookie
 
 
@@ -95,7 +99,7 @@ class HttpProxyEvent(BaseProxyEvent):
         return instance
 
     @classmethod
-    def from_asgi(cls, scope: dict[str, Any], body: bytes | None = None) -> HttpProxyEvent:
+    def from_asgi(cls, scope: Mapping[str, Any], body: bytes | None = None) -> HttpProxyEvent:
         """
         Create an HttpProxyEvent from an ASGI scope dict.
 
@@ -159,6 +163,14 @@ class MockLambdaContext:
         return 300000  # 5 minutes
 
 
+@dataclass
+class _RequestState:
+    event: BaseProxyEvent | None = None
+    lambda_context: Any = None
+    context: dict = field(default_factory=dict)
+    processed_stack_frames: list[str] = field(default_factory=list)
+
+
 class HttpResolverLocal(ApiGatewayResolver):
     """
     ASGI-compatible HTTP resolver.
@@ -204,6 +216,8 @@ class HttpResolverLocal(ApiGatewayResolver):
         strip_prefixes: list[str | Any] | None = None,
         enable_validation: bool = False,
     ):
+        self._startup_state = _RequestState()
+        self._request_state: ContextVar[_RequestState | None] = ContextVar("local_http_request", default=None)
         super().__init__(
             proxy_type=ProxyEventType.APIGatewayProxyEvent,  # Use REST API format internally
             cors=cors,
@@ -212,7 +226,46 @@ class HttpResolverLocal(ApiGatewayResolver):
             strip_prefixes=strip_prefixes,
             enable_validation=enable_validation,
         )
-        self._is_async_mode = False
+
+    @property
+    def _state(self) -> _RequestState:
+        return self._request_state.get() or self._startup_state
+
+    # Powertools declares these as mutable attributes. Properties preserve that
+    # interface while directing each task to its own state. asyncio.to_thread
+    # propagates the ContextVar, so middleware sees the same request dictionary.
+    @property
+    def current_event(self) -> BaseProxyEvent:
+        # Preserve the inherited synchronous resolve() path outside ASGI calls.
+        return self._state.event or BaseRouter.current_event
+
+    @current_event.setter
+    def current_event(self, value: BaseProxyEvent) -> None:
+        self._state.event = value
+
+    @property
+    def lambda_context(self) -> Any:
+        return self._state.lambda_context or BaseRouter.lambda_context
+
+    @lambda_context.setter
+    def lambda_context(self, value: Any) -> None:
+        self._state.lambda_context = value
+
+    @property
+    def context(self) -> dict:
+        return self._state.context
+
+    @context.setter
+    def context(self, value: dict) -> None:
+        self._state.context = value
+
+    @property
+    def processed_stack_frames(self) -> list[str]:
+        return self._state.processed_stack_frames
+
+    @processed_stack_frames.setter
+    def processed_stack_frames(self, value: list[str]) -> None:
+        self._state.processed_stack_frames = value
 
     def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
         """Convert event dict to HttpProxyEvent."""
@@ -234,7 +287,7 @@ class HttpResolverLocal(ApiGatewayResolver):
         response_builder = await super()._resolve_async()
         return response_builder.build(self.current_event, self._cors)
 
-    async def asgi_handler(self, scope: dict, receive: Callable, send: Callable) -> None:
+    async def asgi_handler(self, scope: MutableMapping[str, Any], receive: Callable, send: Callable) -> None:
         """
         ASGI interface - allows running with uvicorn/hypercorn/etc.
 
@@ -274,25 +327,27 @@ class HttpResolverLocal(ApiGatewayResolver):
         # Create mock Lambda context
         context: Any = MockLambdaContext()
 
-        # Set up resolver state (similar to resolve())
-        BaseRouter.current_event = self._to_proxy_event(event._data)
-        BaseRouter.lambda_context = context
-
-        self._is_async_mode = True
-
+        # Never write BaseRouter's class attributes: another ASGI request may
+        # enter while validation or the handler is awaiting I/O.
+        state = _RequestState(
+            event=self._to_proxy_event(event._data),
+            lambda_context=context,
+            context=self._startup_state.context.copy(),
+        )
+        token = self._request_state.set(state)
         try:
-            # Use async resolve
             response = await self._resolve_async()
         finally:
-            self._is_async_mode = False
-            self.clear_context()
+            # Reset only this task's binding. Middleware threads may still be
+            # unwinding after cancellation and retain their request's state.
+            self._request_state.reset(token)
 
         # Send HTTP response
         await self._send_response(send, response)
 
     async def __call__(  # type: ignore[override]
         self,
-        scope: dict,
+        scope: MutableMapping[str, Any],
         receive: Callable,
         send: Callable,
     ) -> None:

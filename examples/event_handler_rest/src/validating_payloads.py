@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import requests
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ app = APIGatewayRestResolver(enable_validation=True)  # (1)!
 
 class Todo(BaseModel):  # (2)!
     userId: int
-    id_: Optional[int] = Field(alias="id", default=None)
+    id_: int | None = Field(alias="id", default=None)
     title: str
     completed: bool
 

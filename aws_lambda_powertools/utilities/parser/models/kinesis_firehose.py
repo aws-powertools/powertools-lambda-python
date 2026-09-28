@@ -1,4 +1,4 @@
-from typing import List, Optional, Type, Union
+from typing import List, Type, Union
 
 from pydantic import BaseModel, Field, PositiveInt, field_validator
 
@@ -45,7 +45,7 @@ class KinesisFirehoseRecord(BaseModel):
         (Unix timestamp in milliseconds).",
         examples=[1428537600000, 1609459200500],
     )
-    kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata] = Field(
+    kinesisRecordMetadata: KinesisFirehoseRecordMetadata | None = Field(
         None,
         description="Metadata about the original Kinesis stream record \
         (only present when the delivery stream source is a Kinesis stream).",
@@ -69,7 +69,7 @@ class KinesisFirehoseModel(BaseModel):
         description="The AWS region where the delivery stream is located.",
         examples=["us-east-1", "us-west-2", "eu-west-1"],
     )
-    sourceKinesisStreamArn: Optional[str] = Field(
+    sourceKinesisStreamArn: str | None = Field(
         None,
         description="The ARN of the source Kinesis stream \
         (only present when the delivery stream source is a Kinesis stream).",

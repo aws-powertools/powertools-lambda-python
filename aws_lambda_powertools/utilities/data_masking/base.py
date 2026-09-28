@@ -16,11 +16,11 @@ from typing import TYPE_CHECKING, Any
 from jsonpath_ng.ext import parse
 
 from aws_lambda_powertools.utilities.data_masking.exceptions import (
+    DataMaskingError,
     DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
-from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -395,10 +395,10 @@ class DataMasking:
             if not result_parse:
                 if self.raise_on_missing_field:
                     # If the data for the field is not found, raise an exception.
-                    raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
+                    raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found")
                 else:
                     # If the data for the field is not found, warning.
-                    warnings.warn(f"Field or expression {field_parse} not found in {data_parsed}", stacklevel=2)
+                    warnings.warn(f"Field or expression {field_parse} not found", stacklevel=2)
 
             # For in-place updates, json_parse accepts a callback function
             # that receives 3 args: field_value, fields, field_name
@@ -427,30 +427,29 @@ class DataMasking:
         for path, rule in masking_rules.items():
             try:
                 jsonpath_expr = parse(f"$.{path}")
-                matches = jsonpath_expr.find(result)
+            except Exception as exc:
+                raise DataMaskingError(f"Invalid masking path: {path}") from exc
 
-                if not matches:
-                    warnings.warn(f"No matches found for path: {path}", stacklevel=2)
+            matches = jsonpath_expr.find(result)
+            if not matches:
+                if self.raise_on_missing_field:
+                    raise DataMaskingFieldNotFoundError(f"Field or expression {path} not found")
+
+                warnings.warn(f"No matches found for path: {path}", stacklevel=2)
+                continue
+
+            for match in matches:
+                value = match.value
+                if value is None:
                     continue
 
-                for match in matches:
-                    try:
-                        value = match.value
-                        if value is not None:
-                            masked_value = self.provider.erase(str(value), **rule)
-                            match.full_path.update(result, masked_value)
-
-                    except Exception as e:
-                        warnings.warn(
-                            f"Error masking value for path {path}: {str(e)}",
-                            category=PowertoolsUserWarning,
-                            stacklevel=2,
-                        )
-                        continue
-
-            except Exception as e:
-                warnings.warn(f"Error processing path {path}: {str(e)}", category=PowertoolsUserWarning, stacklevel=2)
-                continue
+                try:
+                    masked_value = self.provider.erase(str(value), **rule)
+                    match.full_path.update(result, masked_value)
+                except DataMaskingError:
+                    raise
+                except Exception as exc:
+                    raise DataMaskingError(f"Failed to mask field at path: {path}") from exc
 
         return result
 

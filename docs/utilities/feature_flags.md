@@ -369,6 +369,9 @@ You can override `max_age` parameter when instantiating the store.
 
 You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
 
+???+ warning
+    Treat the returned configuration as read-only. If you need to modify it, create a deep copy first.
+
 === "getting_stored_features.py"
 
     ```python hl_lines="9"
@@ -417,6 +420,11 @@ The `conditions` block is a list of conditions that contain `action`, `key`, and
     --8<-- "examples/feature_flags/src/conditions.json"
     ```
 
+If a comparator raises an exception, such as comparing a string with a number, a Python `PowertoolsUserWarning` identifies the feature, rule, key, action, and exception type without requiring a logger.
+The warning excludes operand values and exception messages. The condition still evaluates as a non-match unless a registered validation exception handler returns a different result.
+Missing context keys and ordinary non-matches do not produce warnings.
+Python warning filters control how often the warning appears. If a filter promotes this comparator warning to an error, it is suppressed so evaluation and registered exception handlers continue to work.
+
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
 | Action                              | Equivalent expression                                    |
@@ -443,6 +451,8 @@ The `action` configuration can have the following values, where the expressions 
 
 ???+ info
     The `key` and `value` will be compared to the input from the `context` parameter.
+
+    If a condition's `key` is not present in `context`, the condition never matches, regardless of the action. For example, a `NOT_EQUALS` rule on `tier` will not match a request that carries no `tier` at all.
 
 ???+ "Time based keys"
 
@@ -554,6 +564,10 @@ You can create your own custom FeatureFlags store provider by inheriting the `St
 
 * **`get_raw_configuration()`** – get the raw configuration from the store provider and return the parsed JSON dictionary
 * **`get_configuration()`** – get the configuration from the store provider, parsing it as a JSON dictionary. If an envelope is set, extract the envelope data
+
+Feature Flags can reuse a previously validated configuration when a store returns the same dictionary. Custom store
+providers must return a new dictionary when the configuration changes instead of modifying a previously returned
+dictionary in place.
 
 Here are an example of implementing a custom store provider using Amazon S3, a popular object storage.
 

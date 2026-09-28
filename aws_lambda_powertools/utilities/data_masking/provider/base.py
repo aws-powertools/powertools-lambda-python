@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.exceptions import DataMaskingError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -183,8 +184,8 @@ class BaseProvider:
             if regex_pattern not in _regex_cache:
                 _regex_cache[regex_pattern] = re.compile(regex_pattern)
             return _regex_cache[regex_pattern].sub(mask_format, data)
-        except re.error:
-            return data
+        except re.error as exc:
+            raise DataMaskingError("Invalid regex pattern") from exc
 
     def _custom_erase(self, data: str) -> str:
         if not data:

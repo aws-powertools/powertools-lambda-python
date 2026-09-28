@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import requests
 from requests import Response
@@ -18,13 +18,13 @@ app = APIGatewayRestResolver()
 def get_todos():
     todo_id: str = app.current_event.query_string_parameters["id"]
     # alternatively
-    _: Optional[str] = app.current_event.query_string_parameters.get("id")
+    _: str | None = app.current_event.query_string_parameters.get("id")
 
     # or multi-value query string parameters; ?category="red"&?category="blue"
     _: List[str] = app.current_event.multi_value_query_string_parameters["category"]
 
     # Payload
-    _: Optional[str] = app.current_event.body  # raw str | None
+    _: str | None = app.current_event.body  # raw str | None
 
     endpoint = "https://jsonplaceholder.typicode.com/todos"
     if todo_id:

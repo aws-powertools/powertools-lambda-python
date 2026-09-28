@@ -91,14 +91,26 @@ class Metrics:
         provider: AmazonCloudWatchEMFProvider | None = None,
         function_name: str | None = None,
     ):
+        self.metric_set = self._metrics
+        self.metadata_set = self._metadata
+        self.default_dimensions = self._default_dimensions
+        self.dimension_set = self._dimensions
+
+        self.dimension_set.update(
+            **{
+                name: value if isinstance(value, str) else str(value)
+                for name, value in self._default_dimensions.items()
+            },
+        )
+
         if provider is None:
             self.provider = AmazonCloudWatchEMFProvider(
                 namespace=namespace,
                 service=service,
-                metric_set=Metrics._metrics,
-                dimension_set=Metrics._dimensions,
-                metadata_set=Metrics._metadata,
-                default_dimensions=Metrics._default_dimensions,
+                metric_set=self.metric_set,
+                dimension_set=self.dimension_set,
+                metadata_set=self.metadata_set,
+                default_dimensions=self._default_dimensions,
                 function_name=function_name,
             )
         else:
@@ -188,9 +200,11 @@ class Metrics:
                 return True
         """
         self.provider.set_default_dimensions(**dimensions)
+        self.default_dimensions.update(**dimensions)
 
     def clear_default_dimensions(self) -> None:
         self.provider.default_dimensions.clear()
+        self.default_dimensions.clear()
 
     def clear_metrics(self) -> None:
         self.provider.clear_metrics()
@@ -214,22 +228,6 @@ class Metrics:
     @service.setter
     def service(self, service):
         self.provider.service = service
-
-    @property
-    def metric_set(self):
-        return self.provider.metric_set
-
-    @property
-    def dimension_set(self):
-        return self.provider.dimension_set
-
-    @property
-    def metadata_set(self):
-        return self.provider.metadata_set
-
-    @property
-    def default_dimensions(self):
-        return self.provider.default_dimensions
 
 
 # Maintenance: until v3, we can't afford to break customers.

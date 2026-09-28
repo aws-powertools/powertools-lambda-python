@@ -1,5 +1,9 @@
 import json
+import os
+import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, Literal, Union
 
 import pydantic
@@ -308,3 +312,22 @@ def test_parser_with_model_type_model_and_envelope():
         assert parsed_event[0].version == "version"
 
     handler(event, LambdaContext())
+
+
+@pytest.mark.parametrize("scenario", ["lazy", "star"])
+def test_parser_imports_in_clean_interpreter(scenario):
+    project_root = Path(__file__).parents[3]
+    probe = Path(__file__).with_name("_parser_import_probe.py")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(project_root)
+
+    result = subprocess.run(
+        [sys.executable, str(probe), scenario],
+        cwd=project_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr

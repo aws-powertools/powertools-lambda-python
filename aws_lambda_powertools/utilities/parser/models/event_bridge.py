@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -50,7 +50,7 @@ class EventBridgeModel(BaseModel):
     detail: RawDictOrModel = Field(
         description="A JSON object, whose content is at the discretion of the service originating the event.",
     )
-    replay_name: Optional[str] = Field(
+    replay_name: str | None = Field(
         None,
         alias="replay-name",
         description="Identifies whether the event is being replayed and what is the name of the replay.",
