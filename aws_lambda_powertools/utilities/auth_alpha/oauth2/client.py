@@ -308,17 +308,15 @@ class OAuth2Client:
                 flight.done.set()
 
     def _exchange(self, deadline: Deadline) -> _AccessToken:
-        for attempt in range(3):
+        retry_delays = iter((0.1, 0.2))
+        while True:
             try:
                 return self._exchange_once(deadline)
             except RequestError as error:
-                if not error.retryable or attempt == 2:
-                    raise TokenExchangeError(retryable=error.retryable) from None
-                delay = 0.1 * 2**attempt
-                if deadline.remaining() <= delay:
+                delay = next(retry_delays, None)
+                if not error.retryable or delay is None or deadline.remaining() <= delay:
                     raise TokenExchangeError(retryable=error.retryable) from None
                 time.sleep(delay)
-        raise TokenExchangeError()
 
     def _credentials(self) -> str:
         try:
