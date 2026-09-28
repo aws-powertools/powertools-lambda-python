@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import os
 import re
 import traceback
 import warnings
@@ -18,7 +19,7 @@ from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
-from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ResponseSizeExceededError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
 from aws_lambda_powertools.event_handler.openapi.constants import (
     DEFAULT_API_VERSION,
@@ -72,6 +73,7 @@ _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
 _JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
+_ALB_MAX_RESPONSE_SIZE = 1024 * 1024
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
 ResponseT = TypeVar("ResponseT")
@@ -2558,7 +2560,7 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
         BaseRouter.lambda_context = context
 
-        response = self._resolve().build(self.current_event, self._cors)
+        response = self._build_response(self._resolve())
 
         # Debug print Processed Middlewares
         if self._debug:
@@ -2619,7 +2621,7 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
         BaseRouter.lambda_context = context
 
-        response = (await self._resolve_async()).build(self.current_event, self._cors)
+        response = self._build_response(await self._resolve_async())
 
         if self._debug:
             print("\nProcessed Middlewares:")
@@ -2630,6 +2632,10 @@ class ApiGatewayResolver(BaseRouter):
         self.clear_context()
 
         return response
+
+    def _build_response(self, response_builder: ResponseBuilder) -> dict[str, Any]:
+        """Build the final integration response after route and middleware processing."""
+        return response_builder.build(self.current_event, self._cors)
 
     async def _resolve_async(self) -> ResponseBuilder:
         method = self.current_event.http_method.upper()
@@ -3342,6 +3348,7 @@ class ALBResolver(ApiGatewayResolver):
         response_validation_error_http_code: HTTPStatus | int | None = None,
         json_body_deserializer: Callable[[str], dict] | None = None,
         decode_query_parameters: bool = False,
+        enable_response_size_validation: bool = False,
     ):
         """Amazon Application Load Balancer (ALB) resolver
 
@@ -3368,6 +3375,10 @@ class ALBResolver(ApiGatewayResolver):
             by default json.loads when integrating with EventSource data class
         decode_query_parameters: bool | None
             Enables URL-decoding of query parameters (both keys and values), by default False.
+        enable_response_size_validation: bool
+            Validate the complete serialized response against ALB's 1 MB limit, by default False.
+            Raises ResponseSizeExceededError when the limit is exceeded. Registered exception handlers
+            can return a smaller response, which is also validated.
         """
         super().__init__(
             cors=cors,
@@ -3379,6 +3390,42 @@ class ALBResolver(ApiGatewayResolver):
             json_body_deserializer=json_body_deserializer,
         )
         self.decode_query_parameters = decode_query_parameters
+        self._enable_response_size_validation = enable_response_size_validation
+
+    @override
+    def _build_response(self, response_builder: ResponseBuilder) -> dict[str, Any]:
+        response = super()._build_response(response_builder)
+        if not self._enable_response_size_validation:
+            return response
+
+        try:
+            self._validate_response_size(response)
+        except ResponseSizeExceededError as exc:
+            try:
+                # Resolved responses retain their route, including not-found and preflight responses.
+                handled_response = self._call_exception_handler(exc, cast(Route, response_builder.route))
+                if handled_response is None:
+                    raise
+
+                handled_response.response = cast(Response, self._to_response(handled_response.response))
+                response = super()._build_response(handled_response)
+                # Validate once more without invoking an exception handler recursively.
+                self._validate_response_size(response)
+            except Exception:
+                self.clear_context()
+                raise
+
+        return response
+
+    @staticmethod
+    def _validate_response_size(response: dict[str, Any]) -> None:
+        # Match the Lambda Python runtime's outer JSON encoding, including its default separators.
+        # Managed Python 3.12+ runtimes return Unicode directly; older/custom runtimes escape it.
+        runtime = re.fullmatch(r"AWS_Lambda_python3\.(\d+)", os.getenv("AWS_EXECUTION_ENV", ""))
+        ensure_ascii = runtime is None or int(runtime[1]) < 12
+        actual_size = len(json.dumps(response, ensure_ascii=ensure_ascii).encode("utf-8"))
+        if actual_size > _ALB_MAX_RESPONSE_SIZE:
+            raise ResponseSizeExceededError(actual_size=actual_size, max_size=_ALB_MAX_RESPONSE_SIZE)
 
     def _get_base_path(self) -> str:
         # ALB doesn't have a stage variable, so we just return an empty string
