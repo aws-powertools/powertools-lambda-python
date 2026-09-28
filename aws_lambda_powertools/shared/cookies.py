@@ -99,7 +99,7 @@ class Cookie:
         if self.expires:
             payload.write(f"; Expires={_format_date(self.expires)}")
 
-        if self.max_age:
+        if self.max_age is not None:
             if self.max_age > 0:
                 payload.write(f"; Max-Age={self.max_age}")
             else:
