@@ -2004,6 +2004,64 @@ def test_idempotency_payload_validation_with_powertools_json(
     stubber.deactivate()
 
 
+@pytest.mark.parametrize(
+    "stored_validation_value,should_match",
+    [
+        pytest.param(2, False, id="record-created-with-native-function"),
+        pytest.param(3, True, id="record-created-with-custom-function"),
+    ],
+)
+def test_idempotency_payload_validation_with_overridden_builtin_function(
+    persistence_store: DynamoDBPersistenceLayer,
+    timestamp_future,
+    lambda_context,
+    stored_validation_value,
+    should_match,
+):
+    # GIVEN a custom function that overrides the native JMESPath length function
+    class CustomFunctions(functions.Functions):
+        @functions.signature({"types": ["array"]})
+        def _func_length(self, value):
+            return len(value) + 1
+
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath="order_id",
+        payload_validation_jmespath="length(items)",
+        jmespath_options={"custom_functions": CustomFunctions()},
+        use_local_cache=False,
+    )
+    order = {"order_id": "order-1", "items": ["a", "b"]}
+    stored_response = {"status": "completed"}
+
+    # AND a completed record whose validation hash was created before or after options were honored
+    ddb_response = {
+        "Item": {
+            "id": {"S": f"orders#{hash_idempotency_key(order['order_id'])}"},
+            "expiration": {"N": timestamp_future},
+            "status": {"S": "COMPLETED"},
+            "data": {"S": json_serialize(stored_response)},
+            "validation": {"S": hash_idempotency_key(stored_validation_value)},
+        },
+    }
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store, key_prefix="orders")
+    def lambda_handler(event, context):
+        pytest.fail("A completed request must not execute the handler again")
+
+    with stub.Stubber(persistence_store.client) as stubber:
+        stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+
+        # WHEN the identical order is replayed, THEN honor the configured override
+        if should_match:
+            assert lambda_handler(order, lambda_context) == stored_response
+        else:
+            # Records created with the native function have a different hash even for unchanged input.
+            with pytest.raises(IdempotencyValidationError, match="Payload does not match stored record"):
+                lambda_handler(order, lambda_context)
+
+        stubber.assert_no_pending_responses()
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_responsehook_lambda_first_execution(
     idempotency_config: IdempotencyConfig,
