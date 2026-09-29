@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from aws_lambda_powertools.utilities.kafka.serialization.base import OutputSerializerBase
 
@@ -23,4 +23,6 @@ class CustomDictOutputSerializer(OutputSerializerBase):
 
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
         logger.debug("Serializing output data with CustomDictOutputSerializer")
-        return data if output is None else output(data)  # type: ignore[call-arg]
+        if output is None:
+            return data
+        return cast("Callable[[dict[str, Any]], T]", output)(data)
