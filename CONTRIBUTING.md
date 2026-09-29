@@ -100,7 +100,9 @@ timeline
 
 Firstly, [fork the repository](https://github.com/aws-powertools/powertools-lambda-python/fork).
 
-You can use `make dev` within your local virtual environment to setup your development environment.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run `make dev`.
+This creates a `.venv` with the locked development dependencies and installs the Git hooks.
+Run tools with `uv run --locked`, or activate `.venv` when working in your editor.
 
 To send us a pull request, please follow these steps:
 
@@ -176,7 +178,7 @@ This happens when:
 - You did not install the local dev environment yet
     - You can install dev deps with `make dev` command
 - The code in the repository is raising an exception while the `pdoc` is scanning the codebase
-    - Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
+    - Unfortunately, this exception is not shown to you, but if you run, `uv run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
     - Once resolved the documentation should load correctly again
 
 ## Licensing

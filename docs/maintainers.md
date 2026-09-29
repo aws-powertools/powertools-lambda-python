@@ -164,6 +164,10 @@ Releasing a new version is a multi-step process that takes up to 2 hours to comp
 
 **Prerequisites**: Ensure the commit history in the `develop` branch is up to date, commit messages are semantic, and include their respective area (e.g., `feat(logger): <change>`, `chore(ci): ...`).
 
+Both release workflows update `pyproject.toml`, `aws_lambda_powertools/shared/version.py`, and `uv.lock`
+before sealing the source. The version PR includes all three files.
+The bump uses shell replacements, preserves locked dependencies, and does not install the development environment.
+
 <!-- markdownlint-disable MD013 -->
 **Release Steps**:
 

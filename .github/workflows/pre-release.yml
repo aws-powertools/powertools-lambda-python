@@ -65,20 +65,22 @@ jobs:
 
       - name: Set release version
         id: release_version
-        run: echo "RELEASE_VERSION=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-
-      - name: Verify pre-release version semantics
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-b][0-9]+$ ]]; then
-            echo "Version ${{ inputs.version }} doesn't look like a pre-release version (e.g., 3.24.0a0); aborting"
+          VERSION_PART='(0|[1-9][0-9]*)'
+          if [[ ! "$RELEASE_VERSION" =~ ^${VERSION_PART}\.${VERSION_PART}\.${VERSION_PART}(a|b|rc)${VERSION_PART}$ ]]; then
+            echo "Invalid pre-release version: $RELEASE_VERSION"
             exit 1
           fi
-
-      - name: Update version in pyproject.toml
-        run: sed -i 's/^version = ".*"/version = "${{ inputs.version }}"/' pyproject.toml
-
-      - name: Update version in version.py
-        run: sed -i 's/^VERSION = ".*"/VERSION = "${{ inputs.version }}"/' aws_lambda_powertools/shared/version.py
+          sed -i "/^\[project\]$/,/^\[/s/^version = \".*\"/version = \"${RELEASE_VERSION}\"/" pyproject.toml
+          sed -i "s/^VERSION = \".*\"/VERSION = \"${RELEASE_VERSION}\"/" aws_lambda_powertools/shared/version.py
+          sed -i "/^name = \"aws-lambda-powertools\"$/{n;s/^version = \".*\"/version = \"${RELEASE_VERSION}\"/;}" uv.lock
+          # Stop before sealing if a field was missing or its format changed.
+          test "$(sed -n '/^\[project\]$/,/^\[/p' pyproject.toml | grep '^version = ')" = "version = \"${RELEASE_VERSION}\""
+          test "$(grep '^VERSION = ' aws_lambda_powertools/shared/version.py)" = "VERSION = \"${RELEASE_VERSION}\""
+          test "$(sed -n '/^name = "aws-lambda-powertools"$/{n;p;}' uv.lock)" = "version = \"${RELEASE_VERSION}\""
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Seal and upload
         id: seal_source_code
@@ -112,13 +114,15 @@ jobs:
       - name: Debug cache restore
         run: cat pyproject.toml
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-          cache: "poetry"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
@@ -150,16 +154,18 @@ jobs:
           integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
           artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-          cache: "poetry"
 
       - name: Build python package and wheel
-        run: poetry build
+        run: uv build --no-sources
 
       - name: Seal and upload
         id: seal_build
@@ -258,7 +264,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml aws_lambda_powertools/shared/version.py provenance/"
+          files: "pyproject.toml uv.lock aws_lambda_powertools/shared/version.py provenance/"
           temp_branch_prefix: "ci-bump"
           pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -21,8 +21,16 @@ on:
       - "tests/**"
       - "examples/**"
       - "pyproject.toml"
-      - "poetry.lock"
+      - "uv.lock"
       - "mypy.ini"
+      - "Makefile"
+      - "noxfile.py"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/quality_check.yml"
+      - ".github/workflows/release-v3.yml"
+      - ".github/workflows/pre-release.yml"
+      - ".github/actions/seal/**"
+      - ".github/actions/seal-restore/**"
     branches:
       - develop
   push:
@@ -31,8 +39,16 @@ on:
       - "tests/**"
       - "examples/**"
       - "pyproject.toml"
-      - "poetry.lock"
+      - "uv.lock"
       - "mypy.ini"
+      - "Makefile"
+      - "noxfile.py"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/quality_check.yml"
+      - ".github/workflows/release-v3.yml"
+      - ".github/workflows/pre-release.yml"
+      - ".github/actions/seal/**"
+      - ".github/actions/seal-restore/**"
     branches:
       - develop
 
@@ -53,8 +69,11 @@ jobs:
       contents: read # checkout code only
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:

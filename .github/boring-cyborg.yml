@@ -85,7 +85,7 @@ labelPRBasedOnFilePath:
 
   dependencies:
     - pyproject.toml
-    - poetry.lock
+    - uv.lock
 
   tests:
     - tests/*
