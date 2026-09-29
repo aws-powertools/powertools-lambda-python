@@ -1776,9 +1776,9 @@ def test_idempotent_function_dataclass_with_jmespath():
     assert result == payment.transaction_id
 
 
-def test_idempotent_function_dataclass_with_non_json_types():
+def test_idempotent_function_dataclass_with_non_json_types(lambda_context):
     # GIVEN a dataclass with UUID, datetime, date, time, Enum and path values, some inside a list or tuple
-    config = IdempotencyConfig(use_local_cache=True)
+    config = IdempotencyConfig(use_local_cache=True, lambda_context=lambda_context)
     mock_event = {
         "order_id": "12345678-1234-5678-1234-567812345678",
         "created_at": "2024-03-20T14:30:00",
@@ -1806,8 +1806,11 @@ def test_idempotent_function_dataclass_with_non_json_types():
         receipt: PurePosixPath
         amount: Decimal
 
+    executions = []
+
     @idempotent_function(data_keyword_argument="order", persistence_store=persistence_layer, config=config)
     def process_order(order: Order) -> dict:
+        executions.append(order)
         return {"status": "ok"}
 
     # WHEN
@@ -1825,6 +1828,8 @@ def test_idempotent_function_dataclass_with_non_json_types():
 
     # THEN the key is hashed from the JSON version of the order, asserted at MockPersistenceLayer
     assert result == {"status": "ok"}
+    assert process_order(order=order) == result
+    assert executions == [order]
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)

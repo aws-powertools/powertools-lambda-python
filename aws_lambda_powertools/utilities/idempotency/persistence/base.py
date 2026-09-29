@@ -11,7 +11,10 @@ import logging
 import os
 import warnings
 from abc import ABC, abstractmethod
+from enum import Enum
+from pathlib import PurePath
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 import jmespath
 
@@ -33,6 +36,23 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 
 logger = logging.getLogger(__name__)
+
+
+class _IdempotencyKeyEncoder(Encoder):
+    """Extend hash serialization while preserving values the existing encoder supports."""
+
+    def default(self, obj: Any) -> Any:
+        try:
+            # Preserve existing encodings, including Decimal subclasses mixed with Enum.
+            return super().default(obj)
+        except TypeError:
+            if isinstance(obj, Enum):
+                return obj.value
+            if isinstance(obj, (datetime.date, datetime.time)):
+                return obj.isoformat()
+            if isinstance(obj, (UUID, PurePath)):
+                return str(obj)
+            raise
 
 
 class BasePersistenceLayer(ABC):
@@ -178,7 +198,7 @@ class BasePersistenceLayer(ABC):
             Hashed representation of the provided data
 
         """
-        hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
+        hashed_data = self.hash_function(json.dumps(data, cls=_IdempotencyKeyEncoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 
     def _validate_payload(
