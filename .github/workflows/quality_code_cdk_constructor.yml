@@ -16,11 +16,17 @@ on:
   pull_request:
     paths:
       - "layer_v3/layer_constructors/**"
+      - "layer_v3/pyproject.toml"
+      - "layer_v3/uv.lock"
+      - ".github/workflows/quality_code_cdk_constructor.yml"
     branches:
       - develop
   push:
     paths:
         - "layer_v3/layer_constructors/**"
+        - "layer_v3/pyproject.toml"
+        - "layer_v3/uv.lock"
+        - ".github/workflows/quality_code_cdk_constructor.yml"
     branches:
       - develop
 
@@ -43,13 +49,15 @@ jobs:
         working-directory: ./layer_v3/layer_constructors
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
@@ -62,10 +70,8 @@ jobs:
           driver: docker
           platforms: linux/amd64,linux/arm64
       - name: Install dependencies
-        run: |
-            pip install --upgrade pip pre-commit poetry
-            poetry install
+        run: uv sync --locked --no-build
       - name: Test with pytest
-        run: poetry run pytest tests
+        run: uv run --locked --no-build pytest tests
         env:
           BUILDX_BUILDER: ${{ steps.builder.outputs.name }}

@@ -1,12 +1,14 @@
 # Run nox tests
 #
 # usage:
-#   poetry run nox --error-on-external-run --reuse-venv=yes --non-interactive
+#   uv run --locked nox --error-on-external-run --reuse-venv=yes --non-interactive
 #
 # If you want to target a specific Python version, add -p parameter
 from __future__ import annotations
 
 import nox
+
+nox.options.default_venv_backend = "uv"
 
 PREFIX_TESTS_FUNCTIONAL = "tests/functional"
 PREFIX_TESTS_UNIT = "tests/unit"
@@ -33,7 +35,8 @@ def build_and_run_test(session: nox.Session, folders: list, extras: str = "") ->
     """
 
     # Required install to execute any test
-    session.install("poetry", "pytest", "pytest-mock", "pytest_socket", "pytest-asyncio")
+    # Shared fixtures use JSON Schema validation; previously Poetry installed it transitively.
+    session.install("pytest", "pytest-mock", "pytest_socket", "pytest-asyncio", "fastjsonschema")
 
     # Powertools project folder is in the root
     if extras:
@@ -190,7 +193,7 @@ def test_with_redis_and_boto3_sdk_as_required_package(session: nox.Session):
     # Idempotency - Redis backend
 
     # Our Redis tests requires multiprocess library to simulate Race Condition
-    session.run("pip", "install", "multiprocess")
+    session.install("multiprocess")
 
     build_and_run_test(
         session,

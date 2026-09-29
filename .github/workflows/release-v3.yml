@@ -86,22 +86,28 @@ jobs:
         id: release_version
         # transform tag format `v<version` to `<version>`
         run: |
-          RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
+          RELEASE_VERSION="${RELEASE_TAG_VERSION#v}"
+          VERSION_PART='(0|[1-9][0-9]*)'
+          if [[ ! "$RELEASE_VERSION" =~ ^${VERSION_PART}\.${VERSION_PART}\.${VERSION_PART}((a|b|rc)${VERSION_PART})?$ ]]; then
+            echo "Invalid release version: $RELEASE_VERSION"
+            exit 1
+          fi
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
-      # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@348de6f247222e2953d649932426e63492e0a6bf # v0.3.3
-
       - name: Bump package version
         id: versioning
-        run: poetry version "${RELEASE_VERSION}"
+        run: |
+          sed -i "/^\[project\]$/,/^\[/s/^version = \".*\"/version = \"${RELEASE_VERSION}\"/" pyproject.toml
+          sed -i "s/^VERSION = \".*\"/VERSION = \"${RELEASE_VERSION}\"/" aws_lambda_powertools/shared/version.py
+          sed -i "/^name = \"aws-lambda-powertools\"$/{n;s/^version = \".*\"/version = \"${RELEASE_VERSION}\"/;}" uv.lock
+          # Stop before sealing if a field was missing or its format changed.
+          test "$(sed -n '/^\[project\]$/,/^\[/p' pyproject.toml | grep '^version = ')" = "version = \"${RELEASE_VERSION}\""
+          test "$(grep '^VERSION = ' aws_lambda_powertools/shared/version.py)" = "VERSION = \"${RELEASE_VERSION}\""
+          test "$(sed -n '/^name = "aws-lambda-powertools"$/{n;p;}' uv.lock)" = "version = \"${RELEASE_VERSION}\""
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
 
@@ -137,13 +143,15 @@ jobs:
       - name: Debug cache restore
         run: cat pyproject.toml
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-          cache: "poetry"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
@@ -175,16 +183,18 @@ jobs:
           integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
           artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
-      - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-          cache: "poetry"
 
       - name: Build python package and wheel
-        run: poetry build
+        run: uv build --no-sources
 
       - name: Seal and upload
         id: seal_build
@@ -287,7 +297,7 @@ jobs:
 
       - name: Create Git Tag
         run: |
-          git add pyproject.toml aws_lambda_powertools/shared/version.py
+          git add pyproject.toml uv.lock aws_lambda_powertools/shared/version.py
           git commit -m "chore: version bump"
           git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
           git push origin v"${RELEASE_VERSION}"
@@ -326,7 +336,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml aws_lambda_powertools/shared/version.py"
+          files: "pyproject.toml uv.lock aws_lambda_powertools/shared/version.py"
           temp_branch_prefix: "ci-bump"
           pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}

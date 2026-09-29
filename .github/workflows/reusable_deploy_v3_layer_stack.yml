@@ -152,10 +152,11 @@ jobs:
           integrity_hash: ${{ inputs.source_code_integrity_hash }}
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
@@ -170,20 +171,13 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Resolve and install project dependencies
-        # CDK spawns system python when compiling stack
-        # therefore it ignores both activated virtual env and cached interpreter by GH
-        run: |
-          poetry export --format requirements.txt --output requirements.txt
-          pip install --require-hashes -r requirements.txt
+      - name: Install dependencies
+        run: uv sync --locked --no-build
       - name: install cdk and deps
         working-directory: ./
         run: |
           npm ci
           npx cdk --version
-      - name: install deps
-        run: poetry install
       - name: Download artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -199,7 +193,7 @@ jobs:
           LAYER_VERSION=${{ matrix.region }}-$PYTHON_VERSION-layer-version.txt
           echo "LAYER_VERSION=${LAYER_VERSION}" >> "$GITHUB_OUTPUT"
       - name: CDK Deploy Layer
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV3Stack-python${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
+        run: uv run --locked --no-build npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} "LayerV3Stack-python${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose --outputs-file cdk-outputs.json
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
@@ -216,4 +210,4 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} "CanaryV3Stack-python${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose
+        run: uv run --locked --no-build npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} "CanaryV3Stack-python${{steps.constants.outputs.PYTHON_VERSION}}" --require-approval never --verbose

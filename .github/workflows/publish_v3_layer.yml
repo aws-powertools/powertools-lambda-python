@@ -118,10 +118,11 @@ jobs:
           integrity_hash: ${{ inputs.source_code_integrity_hash }}
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
-      - name: Install poetry
-        run: |
-          pipx install git+https://github.com/python-poetry/poetry@bd500dd3bdfaec3de6894144c9cedb3a9358be84 # v2.0.1
-          pipx inject poetry git+https://github.com/python-poetry/poetry-plugin-export@8c83d26603ca94f2e203bfded7b6d7f530960e06 # v1.8.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -130,13 +131,8 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Resolve and install project dependencies
-        # CDK spawns system python when compiling stack
-        # therefore it ignores both activated virtual env and cached interpreter by GH
-        run: |
-          poetry export --format requirements.txt --output requirements.txt
-          pip install --require-hashes -r requirements.txt
+      - name: Install dependencies
+        run: uv sync --locked --no-build
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
@@ -163,9 +159,14 @@ jobs:
         run: sleep 60
 
       - name: CDK build
-        run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" --context pythonVersion="python${{ matrix.python-version }}" -o cdk.out
+        run: >-
+          uv run --locked --no-build npx cdk synth --verbose
+          --context "version=${LAYER_PACKAGE_VERSION}"
+          --context "pythonVersion=python${PYTHON_RUNTIME}" -o cdk.out
         env:
           BUILDX_BUILDER: ${{ steps.builder.outputs.name }}
+          LAYER_PACKAGE_VERSION: ${{ inputs.latest_published_version }}
+          PYTHON_RUNTIME: ${{ matrix.python-version }}
       - name: zip output
         run: zip -r cdk.py${{ matrix.python-version }}.out.zip cdk.out
       - name: Archive CDK artifacts
