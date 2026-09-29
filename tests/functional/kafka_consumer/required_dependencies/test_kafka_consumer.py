@@ -12,6 +12,7 @@ from aws_lambda_powertools.utilities.kafka.exceptions import (
 )
 from aws_lambda_powertools.utilities.kafka.kafka_consumer import kafka_consumer
 from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
+from aws_lambda_powertools.utilities.kafka.serialization.serialization import serialize_to_output_type
 
 
 @pytest.fixture
@@ -105,6 +106,47 @@ def test_kafka_consumer_with_json_and_dataclass(kafka_event_with_json_data, lamb
     assert isinstance(result, UserValueDataClass)
     assert result.name == "John Doe"
     assert result.age == 30
+
+
+@pytest.mark.parametrize("serializer_type", ["function", "class", "callable_instance"])
+def test_kafka_consumer_with_json_and_custom_serializer(
+    kafka_event_with_json_data,
+    lambda_context,
+    serializer_type,
+):
+    class User:
+        def __init__(self, data):
+            self.name = data["name"].upper()
+            self.age = data["age"]
+
+    def transform(data):
+        return User(data)
+
+    class UserSerializer:
+        def __call__(self, data):
+            return User(data)
+
+    serializers = {"function": transform, "class": User, "callable_instance": UserSerializer()}
+    schema_config = SchemaConfig(
+        value_schema_type="JSON",
+        value_output_serializer=serializers[serializer_type],
+    )
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return event.record.value
+
+    result = handler(kafka_event_with_json_data, lambda_context)
+
+    assert isinstance(result, User)
+    assert result.name == "JOHN DOE"
+    assert result.age == 30
+
+
+def test_custom_serializer_without_output_returns_original_data():
+    data = {"name": "John Doe", "age": 30}
+
+    assert serialize_to_output_type(data) is data
 
 
 def test_kafka_consumer_with_invalid_json_data(kafka_event_with_json_data, lambda_context):
