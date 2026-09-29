@@ -192,6 +192,10 @@ When using this decorator, you **must** call your decorated function using keywo
 
 You can use `data_keyword_argument` to tell us the argument to extract an idempotency key.  We support JSON serializable data, [Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, Pydantic Models, and [Event Source Data Classes](./data_classes.md){target="_blank"}
 
+When hashing dataclass or dictionary inputs, UUID and path values are encoded as strings, `datetime`, `date`, and `time` values use ISO 8601 strings, and enums use their values unless the existing encoder already supports the enum type. Existing encodings, including `Decimal` and enums based on strings, integers, floats, or `Decimal`, are preserved.
+
+These conversions happen after evaluating `event_key_jmespath` and `payload_validation_jmespath`, so their expressions and custom functions receive the original field types. They apply to key and validation hashing; function results continue to use the [output serialization](#output-serialization) configuration.
+
 === "Using Dataclasses"
 
     ```python title="working_with_idempotent_function_dataclass.py" hl_lines="4-8 12 28 41"
