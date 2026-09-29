@@ -1,20 +1,23 @@
-[tool.poetry]
+[project]
 name = "aws-lambda-powertools-python-layer"
 version = "3.0.0"
 description = "Powertools for AWS Lambda (Python) Lambda Layers"
-authors = ["Powertools for AWS Maintainers <aws-powertools-maintainers@amazon.com>"]
-package-mode = false
+requires-python = ">=3.10,<4.0"
+authors = [{name = "Powertools for AWS Maintainers", email = "aws-powertools-maintainers@amazon.com"}]
+dependencies = [
+    "aws-cdk-lib (>=2.223.0,<3.0.0)",
+]
 
-license = "MIT"
-[tool.poetry.dependencies]
-python = "^3.10"
-aws-cdk-lib = "^2.223.0"
+[project.license]
+text = "MIT"
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=7.1.2,<10.0.0"
-boto3 = "^1.24.46"
-urllib3 = ">=1.25.4,!=2.2.0,<3"
+[dependency-groups]
+dev = [
+    "pytest (>=7.1.2,<10.0.0)",
+    "boto3 (>=1.24.46,<2.0.0)",
+    "urllib3 (>=1.25.4,!=2.2.0,<3)",
+]
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+
+[tool.uv]
+package = false

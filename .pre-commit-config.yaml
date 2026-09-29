@@ -1,4 +1,4 @@
-# We use poetry to run formatting and linting before commit/push
+# We use uv to run formatting and linting before commit/push
 # Longer checks such as tests, security and complexity baseline
 # are run as part of CI to prevent slower feedback loop
 # All checks can be run locally via `make pr`
@@ -14,12 +14,12 @@ repos:
     hooks:
       - id: ruff
         name: formatting::ruff
-        entry: poetry run ruff format
+        entry: uv run --locked ruff format
         language: system
         types: [python]
       - id: ruff
         name: linting::ruff
-        entry: poetry run ruff check
+        entry: uv run --locked ruff check
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: cloudformation
         name: linting::cloudformation
-        entry: poetry run cfn-lint
+        entry: uv run --locked cfn-lint
         language: system
         types: [yaml]
         exclude: examples/build_recipes/*

@@ -59,6 +59,10 @@ Whether you're new contributor or a pro, we compiled a list of the common contri
 
 ## Sending a pull request
 
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run `make dev`.
+This creates `.venv` with the locked development dependencies and installs the Git hooks.
+Use `uv run --locked` to run tools in that environment.
+
 !!! note "First time creating a Pull Request? Keep [this document handy.](https://help.github.com/articles/creating-a-pull-request/){target='blank' rel='nofollow'}"
 
 Before sending us a pull request, please ensure that:
@@ -100,5 +104,5 @@ This happens when:
 * You did not install the local dev environment yet
     * You can install dev deps with `make dev` command
 * The code in the repository is raising an exception while the `pdoc` is scanning the codebase
-    * Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
+    * Unfortunately, this exception is not shown to you, but if you run, `uv run --locked pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
     * Once resolved the documentation should load correctly again
