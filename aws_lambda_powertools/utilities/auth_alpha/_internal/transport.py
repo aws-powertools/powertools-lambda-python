@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING
 
 from urllib3.connection import HTTPSConnection
 from urllib3.connectionpool import HTTPSConnectionPool
+from urllib3.exceptions import HeaderParsingError
+from urllib3.util.response import assert_header_parsing
+
+from aws_lambda_powertools.utilities.auth_alpha._internal.deadline import RequestError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -76,6 +80,15 @@ class _DeadlineResponse(HTTPResponse):
         # chunk-size lines, delimiters and trailers before returning to our loop.
         # The stream owns the socket reference even for Connection: close.
         self.fp = BufferedReader(_DeadlineReader(self.fp, sock, deadline), buffer_size=8192)
+
+    def begin(self) -> None:
+        super().begin()
+        try:
+            # urllib3 otherwise logs malformed headers, including provider data,
+            # before the public Auth operation can sanitize the failure.
+            assert_header_parsing(self.msg)
+        except (HeaderParsingError, TypeError):
+            raise RequestError() from None
 
 
 class _DeadlineHTTPSConnection(HTTPSConnection):

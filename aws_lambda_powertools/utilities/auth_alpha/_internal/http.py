@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from typing import TYPE_CHECKING, Any, cast
 
 import urllib3
@@ -109,7 +110,7 @@ class HTTPClient:
             )
             content = self._read_body(response, deadline)
             return urllib3.HTTPResponse(
-                body=content,
+                body=BytesIO(content),
                 status=response.status,
                 headers=response.headers,
                 reason=response.reason,

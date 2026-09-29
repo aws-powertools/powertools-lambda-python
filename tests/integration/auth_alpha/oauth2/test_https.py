@@ -1,6 +1,7 @@
 import base64
 import threading
 import time
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import parse_qs
 
@@ -223,3 +224,58 @@ def test_downstream_gzip_response_remains_readable(https_server, chunked):
 
     response = subject.request("GET", https_server.url + "/inventory")
     assert response.json() == {"items": [123]}
+
+
+@pytest.mark.parametrize(("method", "status"), [("GET", 200), ("GET", 204), ("GET", 304), ("HEAD", 200)])
+def test_empty_downstream_responses_preserve_bytes_and_status(https_server, method, status):
+    https_server.serve("/token", TOKEN_RESPONSE)
+    https_server.serve("/inventory", b"not sent for HEAD" if method == "HEAD" else b"", status=status)
+    subject = client(https_server)
+
+    response = subject.request(method, https_server.url + "/inventory")
+
+    assert response.status == status
+    assert response.data == b""
+    assert response.data.decode() == ""
+    assert [request[1] for request in https_server.requests] == ["/token", "/inventory"]
+
+
+@pytest.mark.parametrize("endpoint", ["token", "inventory"])
+def test_malformed_response_headers_fail_without_logging_credentials(https_server, caplog, endpoint):
+    private_data = "Bearer local-test-private-token"
+    https_server.serve("/token", TOKEN_RESPONSE)
+    https_server.serve("/inventory", {"items": [123]})
+    payload = TOKEN_RESPONSE if endpoint == "token" else {"items": [123]}
+    https_server.serve(f"/{endpoint}", payload, headers={"Broken header": private_data})
+    subject = client(https_server)
+    expected = TokenExchangeError if endpoint == "token" else DownstreamRequestError
+
+    with pytest.raises(expected) as error:
+        subject.request("GET", https_server.url + "/inventory")
+
+    assert not error.value.retryable
+    assert error.value.__context__ is None
+    assert error.value.__cause__ is None
+    assert private_data not in "".join(traceback.format_exception(error.value))
+    assert private_data not in caplog.text
+    assert not [record for record in caplog.records if record.name == "urllib3.connection"]
+    expected_paths = ["/token"] if endpoint == "token" else ["/token", "/inventory"]
+    assert [request[1] for request in https_server.requests] == expected_paths
+
+    https_server.serve(f"/{endpoint}", payload)
+    assert subject.request("GET", https_server.url + "/inventory").json() == {"items": [123]}
+
+
+def test_valid_extended_header_values_are_sent_over_tls(https_server):
+    https_server.serve("/token", TOKEN_RESPONSE)
+    https_server.serve("/inventory", {"items": [123]})
+    value = "caf\xe9\t\x80\xff"
+
+    response = client(https_server).request(
+        "GET",
+        https_server.url + "/inventory",
+        headers={"X-Trace": value},
+    )
+
+    assert response.status == 200
+    assert https_server.requests[-1][2]["X-Trace"] == value

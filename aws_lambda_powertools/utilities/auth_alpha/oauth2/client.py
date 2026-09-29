@@ -28,6 +28,8 @@ if TYPE_CHECKING:
 
 _BEARER_TOKEN = re.compile(r"[-A-Za-z0-9._~+/]+=*")
 _HEADER_NAME = re.compile(r"[-!#$%&'*+.^_`|~0-9A-Za-z]+")
+# HTTP field values allow horizontal tabs, visible ASCII, and extended Latin-1 bytes.
+_HEADER_VALUE = re.compile(r"[\t\x20-\x7e\x80-\xff]*")
 _RESOURCE_CHARACTERS = frozenset(ascii_letters + digits + "-._~:/?[]@!$&'()*+,;=")
 _HEX_DIGITS = frozenset(hexdigits)
 
@@ -265,7 +267,7 @@ class OAuth2Client:
                 or not isinstance(value, str)
                 or not _HEADER_NAME.fullmatch(name)
                 or name.lower() == "authorization"
-                or any(character in value for character in ("\r", "\n"))
+                or not _HEADER_VALUE.fullmatch(value)
             ):
                 raise ValueError("Request headers must be valid and must not include Authorization")
         return dict(headers)

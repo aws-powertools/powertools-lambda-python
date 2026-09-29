@@ -704,11 +704,31 @@ def test_invalid_header_names_are_rejected_before_token_acquisition(http, name):
     assert http.requests == []
 
 
-def test_http_token_punctuation_is_allowed_in_header_names(http):
+@pytest.mark.parametrize("value", ["\x00", "\x01", "\x1f", "\x7f", "東京", "\ud800"])
+def test_invalid_header_values_are_rejected_before_token_acquisition(http, value):
+    secrets = []
+
+    def load_secret():
+        secrets.append("test-secret")
+        return secrets[-1]
+
+    http.serve(TOKEN_URL, {"access_token": "token", "token_type": "Bearer", "expires_in": 100}, method="POST")
+    http.serve("https://api.example.com/orders", {"orders": []})
+    subject = client(client_secret=load_secret)
+
+    with pytest.raises(ValueError, match="Request headers"):
+        subject.request("GET", "https://api.example.com/orders", headers={"X-Trace": f"trace{value}value"})
+
+    assert secrets == []
+    assert http.requests == []
+
+
+@pytest.mark.parametrize("value", ["", "trace-id", "trace\tvalue", "\x80", "\xff", "caf\xe9"])
+def test_valid_header_names_and_values_are_preserved(http, value):
     http.serve(TOKEN_URL, {"access_token": "token", "token_type": "Bearer", "expires_in": 100}, method="POST")
     http.serve("https://api.example.com/orders", {"orders": []})
     subject = client()
-    headers = {"X-Trace!#$%&'*+.^_`|~09": "trace-id"}
+    headers = {"X-Trace!#$%&'*+.^_`|~09": value}
 
     response = subject.request("GET", "https://api.example.com/orders", headers=headers)
 

@@ -106,6 +106,8 @@ The helper requires HTTPS, rejects an existing Authorization header, and never f
 
 Header names must use HTTP token syntax: letters, digits, and the permitted token punctuation. Empty names, whitespace (including trailing spaces or tabs), and delimiters such as colons are rejected before token acquisition. Authorization is rejected regardless of casing.
 
+Header values must fit Latin-1 and cannot contain ASCII control characters other than horizontal tabs. Invalid names and values are rejected before loading the client secret.
+
 !!! warning "Use trusted destination URLs"
     `request()` does not derive or restrict destinations from the configured audience or resource. Supply trusted URLs from application configuration; never pass a caller-controlled destination. A token intended for one API must not be sent to another.
 

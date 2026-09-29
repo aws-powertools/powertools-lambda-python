@@ -156,6 +156,9 @@ def https_server(tls_files, monkeypatch, request):
         def do_POST(self):  # noqa: N802
             self.respond()
 
+        def do_HEAD(self):  # noqa: N802
+            self.respond()
+
         def respond(self):
             body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
             endpoint.requests.append((self.command, self.path, dict(self.headers), body))
@@ -180,7 +183,8 @@ def https_server(tls_files, monkeypatch, request):
                     ):
                         return
                 self.end_headers()
-                _write_body(self.wfile, reply, endpoint.stop)
+                if self.command != "HEAD":
+                    _write_body(self.wfile, reply, endpoint.stop)
             except (OSError, ssl.SSLError):
                 # Timeout and oversized-body tests deliberately close early.
                 pass
