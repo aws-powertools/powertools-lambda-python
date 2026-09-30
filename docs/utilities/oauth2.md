@@ -40,7 +40,30 @@ pip install "aws-lambda-powertools[oauth2]"
 
 The `oauth2` extra installs urllib3. It does not require PyJWT or cryptography. The client is available from both `aws_lambda_powertools.utilities.auth_alpha` and `aws_lambda_powertools.utilities.auth_alpha.oauth2`.
 
-The Parameters example below also uses the AWS SDK. For local development or runtimes without boto3, install `aws-lambda-powertools[oauth2,aws-sdk]`.
+#### Compatibility with boto3
+
+The `oauth2` extra depends on urllib3. Boto3 also uses urllib3 through botocore.
+If the same function uses boto3, directly or through a utility such as Parameters, resolve and install the SDK together with OAuth:
+
+```shell
+pip install "aws-lambda-powertools[oauth2,aws-sdk]"
+```
+
+This applies to Lambda deployments as well as local development. The Parameters example below uses this combination.
+Package the resolved boto3, botocore, and urllib3 dependencies together with your function or layer.
+Your packaged urllib3 takes precedence over the runtime copy, so relying on the runtime's boto3 can combine incompatible versions.
+See the [AWS guidance on runtime dependencies](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-dependencies).
+
+Resolve all of your function's dependencies together and keep the resolved versions in a lockfile.
+Conflicting requirements, such as an old botocore pin that excludes the urllib3 version required by OAuth, must be resolved before deployment.
+In the build environment used to produce the deployment package, run:
+
+```shell
+python -m pip check
+```
+
+Make a nonzero exit status fail the build. This checks installed dependency requirements; it does not inspect packages provided only by the Lambda runtime or by separately built layers.
+Powertools cannot enforce the version of a runtime-provided SDK. Packaging and validating the complete dependency set gives your build control over these versions.
 
 ### Configure your identity provider
 
