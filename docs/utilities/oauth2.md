@@ -7,8 +7,8 @@ status: new
 !!! warning "Alpha / experimental"
     This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
 
-`OAuth2Client` obtains bearer tokens for a Lambda function calling an OAuth2-protected API on its own behalf. Each client owns its resource configuration and token cache.
-It supports the client-credentials grant with `client_secret_basic` (default) or explicit `client_secret_post` authentication.
+`OAuth2Client` obtains bearer tokens for a Lambda function calling an API on its own behalf.
+It uses the client-credentials grant with `client_secret_basic` (default) or explicit `client_secret_post` authentication.
 
 Use [JWT verification](auth.md) to authenticate incoming requests. The OAuth client obtains separate credentials for outgoing requests; it does not forward an incoming caller's token.
 
@@ -38,38 +38,26 @@ flowchart LR
 pip install "aws-lambda-powertools[oauth2]"
 ```
 
-The `oauth2` extra installs urllib3. It does not require PyJWT or cryptography. The client is available from both `aws_lambda_powertools.utilities.auth_alpha` and `aws_lambda_powertools.utilities.auth_alpha.oauth2`.
+The `oauth2` extra installs urllib3; PyJWT and cryptography are not required.
 
 #### Compatibility with boto3
 
-The `oauth2` extra depends on urllib3. Boto3 also uses urllib3 through botocore.
-If the same function uses boto3, directly or through a utility such as Parameters, resolve and install the SDK together with OAuth:
+If the function also uses boto3, including through Parameters, install and validate the SDK together with OAuth:
 
 ```shell
 pip install "aws-lambda-powertools[oauth2,aws-sdk]"
-```
-
-This applies to Lambda deployments as well as local development. The Parameters example below uses this combination.
-Package the resolved boto3, botocore, and urllib3 dependencies together with your function or layer.
-Your packaged urllib3 takes precedence over the runtime copy, so relying on the runtime's boto3 can combine incompatible versions.
-See the [AWS guidance on runtime dependencies](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-dependencies).
-
-Resolve all of your function's dependencies together and keep the resolved versions in a lockfile.
-Conflicting requirements, such as an old botocore pin that excludes the urllib3 version required by OAuth, must be resolved before deployment.
-In the build environment used to produce the deployment package, run:
-
-```shell
 python -m pip check
 ```
 
-Make a nonzero exit status fail the build. This checks installed dependency requirements; it does not inspect packages provided only by the Lambda runtime or by separately built layers.
-Powertools cannot enforce the version of a runtime-provided SDK. Packaging and validating the complete dependency set gives your build control over these versions.
+Resolve all function dependencies together, lock their versions, and package boto3, botocore, and urllib3 together. Make a failed `pip check` fail the build.
+
+Packaged urllib3 overrides the runtime copy and can conflict with the runtime's SDK.
+Build checks cannot validate dependencies supplied only by the runtime or separate layers. See [AWS packaging guidance](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-dependencies).
 
 ### Configure your identity provider
 
-Register an application that can use the client-credentials grant and grant it access to the downstream API.
-Obtain its client ID, client secret, and HTTPS token endpoint. Configure the scopes and API identifier required by that provider.
-`OAuth2Client` does not register applications, discover token endpoints, or grant permissions.
+Register a client-credentials application with access to your API. Obtain its client ID, secret, HTTPS token endpoint, and required scopes or API identifier.
+`OAuth2Client` does not register applications or discover endpoints.
 
 ### Call a downstream API
 
@@ -92,22 +80,18 @@ Configure these environment variables:
 | `AUDIENCE` | Provider-dependent | API identifier required by your provider; omit when unused |
 | `RESOURCE` | Provider-dependent | RFC 8707 resource URI; omit when unused |
 
-Set at most one of `AUDIENCE` and `RESOURCE`. They are independent of `INVENTORY_URL`; an API's identifier need not match its request URL.
-See [provider configuration](#choose-the-resource) before choosing these values.
+Set at most one of `AUDIENCE` and `RESOURCE`; neither is derived from `INVENTORY_URL`. See [provider configuration](#choose-the-resource).
 
-Invoke the example with an event such as `{"sku": "item/123"}`. The handler encodes the SKU as one URL path component.
+Invoke with `{"sku": "item/123"}`; the handler URL-encodes the SKU.
 
-The example allows five seconds for token acquisition and five seconds for the API request. Set the Lambda timeout above their sum, with time left for application work and error handling.
-These example settings do not change the client's three-second acquisition default. See [timeouts and cold starts](#timeouts-and-cold-starts) when tuning your function.
+The example allows five seconds for acquisition plus five for the API request. Set the Lambda timeout higher; see [timeouts and cold starts](#timeouts-and-cold-starts).
 
 ### Required resources
 
-The Parameters example needs `secretsmanager:GetSecretValue` on its secret and `kms:Decrypt` when the secret uses a customer-managed KMS key.
-It also needs connectivity to Secrets Manager. Token exchange itself uses the registered OAuth credentials, without additional IAM permissions.
-For local execution, configure AWS credentials and a region for the SDK.
+Parameters needs Secrets Manager connectivity, `secretsmanager:GetSecretValue`, and `kms:Decrypt` for a customer-managed key.
+Local execution also needs SDK credentials and a region. OAuth token exchange itself requires no additional IAM permissions.
 
-The function needs outbound HTTPS access to the token endpoint and downstream API.
-A Lambda function in private subnets may need a NAT gateway for public endpoints or suitable private connectivity.
+Allow outbound HTTPS to the token endpoint and API. Private subnets may require NAT or private connectivity.
 
 ### Choose the client authentication method
 
@@ -116,11 +100,9 @@ A Lambda function in private subnets may need a NAT gateway for public endpoints
 | `client_secret_basic` (default) | Form-encoded client ID and secret in HTTP Basic authentication; neither is in the form body |
 | `client_secret_post` | `client_id` and `client_secret` in the form body, without an Authorization header |
 
-Select the method configured for your application at the provider. The client never switches methods automatically after a rejection.
-Both methods resolve the current secret for every exchange attempt and share the same token-cache behavior.
-Calls made through `request()` use the acquired bearer token regardless of the client authentication method.
+Select your provider's method; there is no automatic fallback. API requests always use the acquired bearer token.
 
-This POST example uses `CLIENT_SECRET` instead of `CLIENT_SECRET_NAME`, and calls `INVENTORY_URL` directly. The other deployment settings are the same:
+This example uses `CLIENT_SECRET` instead of `CLIENT_SECRET_NAME` and calls `INVENTORY_URL` directly:
 
 ```python title="client_secret_post.py"
 --8<-- "examples/auth_alpha/oauth2/src/client_secret_post.py"
@@ -137,7 +119,7 @@ You can also pass the Parameters `load_secret` function from the first example a
 | `auth_headers()` | You want an Authorization header for an application-owned HTTP client |
 | `request(method, url, ...)` | You want the utility to send an authenticated HTTPS request |
 
-Both methods acquire a token only when one is needed. Constructing `OAuth2Client` does not fetch a secret or token.
+Both acquire tokens on demand; construction fetches no secret or token.
 
 ### Choose the resource
 
@@ -146,13 +128,12 @@ Both methods acquire a token only when one is needed. Constructing `OAuth2Client
 | `audience` | `audience=<value>` | Provider-specific API selection, such as an Auth0 API identifier |
 | `resource` | `resource=<value>` | One resource indicator for providers supporting RFC 8707 |
 
-These parameters are mutually exclusive and are not interchangeable. Configure the parameter supported by your provider. If neither is supplied, the provider must select the intended API through its client configuration or scope conventions; scopes alone do not universally identify a resource.
+Use at most one parameter, as required by your provider. If omitted, API selection depends on the provider's client configuration or scope conventions.
 
-`resource` must be an absolute URI without a fragment, such as `https://inventory.example.com` or `urn:example:inventory`. Query parameters and percent-encoded characters are preserved. Relative paths and malformed URI characters are rejected during construction. `audience` remains a provider-specific, nonempty string.
+`resource` must be an absolute URI without a fragment, such as `https://inventory.example.com` or `urn:example:inventory`.
+`audience` accepts a provider-specific, nonempty string. Both are validated during construction.
 
-Use a separate client for each API. The eventual request URL does not change the token's audience, and clients do not share token caches. Changing the requested resource requires creating a new client.
-
-Common provider configurations are shown below. They still require an application with the appropriate permissions at that provider.
+Common provider configurations:
 
 | Provider | Token endpoint path | API selection |
 | -------- | ------------------- | ------------- |
@@ -164,42 +145,40 @@ Common provider configurations are shown below. They still require an applicatio
 
 Okta's organization authorization server [requires `private_key_jwt` for service apps](https://developer.okta.com/docs/guides/implement-oauth-for-okta-serviceapp/main/) requesting Okta management scopes. That authentication method is outside this client's scope.
 
-For multiple identity providers, construct one client per provider and resource, with each client's trusted endpoint, credentials, and scopes.
-The application chooses which client to use. There is no automatic provider routing or failover.
+Create one client per provider and resource. The request URL does not change token selection; changing the resource requires a new client.
+Your application selects the client; routing and failover are not automatic.
 
 ### Use your own HTTP client
 
-`auth_headers()` returns a new dictionary containing `Authorization: Bearer <token>`. You can pass it to urllib3, requests, httpx, or another HTTP client:
+Pass the fresh `Authorization: Bearer <token>` dictionary from `auth_headers()` to your HTTP client:
 
 ```python title="headers.py"
 --8<-- "examples/auth_alpha/oauth2/src/headers.py"
 ```
 
-The example validates that `INVENTORY_URL` uses HTTPS before obtaining any credentials or sending requests. It uses an environment-provided secret; the Parameters loader from the first example also works here. With your own HTTP client, enforce HTTPS and configure its timeouts, redirects, and retries yourself. Never log the returned headers or forward them to an untrusted destination.
+This example validates HTTPS before acquiring credentials. Configure your HTTP client's timeouts, redirects, and retries yourself.
+Never log the returned headers or send them to an untrusted destination.
 
 ## Advanced
 
 ### Lambda execution environments and token lifetimes
 
-The token cache is local to one client in one Lambda execution environment. A new environment acquires its own token.
-Warm invocations may reuse a cached token, but correctness does not depend on a previous invocation.
-Scaling to multiple environments can cause multiple simultaneous exchanges with the provider; there is no shared cache across functions or environments.
+Each client caches tokens within one Lambda execution environment. Warm invocations may reuse them; new environments acquire their own tokens and can exchange concurrently.
 
-Tokens are cached while more than 30 seconds of their positive `expires_in` remain. On demand, the client reacquires a token when 30 seconds or less remain. This performs a new client-credentials exchange; it does not use an OAuth refresh token.
+Cached tokens are reused while more than 30 seconds remain. After that, the next call performs a new client-credentials exchange, not a refresh-token grant.
+Tokens with missing or at most 30 seconds of advertised lifetime are returned uncached. Invalid lifetimes and tokens that expire during acquisition are rejected.
 
-Tokens with an advertised lifetime of 30 seconds or less, or without `expires_in`, are returned without caching. A call does not loop trying to obtain a longer-lived token. Invalid lifetimes and tokens that expire during acquisition are rejected.
-Lifetime accounting uses a monotonic clock starting immediately before the token request, after secret lookup. Secret lookup consumes the acquisition budget but does not shorten the newly issued token's lifetime.
+Lifetime accounting starts immediately before the token request. Secret lookup consumes the acquisition budget without shortening the token's lifetime.
 
-Concurrent callers share one in-progress exchange, including short-lived tokens and failures. A waiting caller has its own acquisition deadline. Separate clients and Lambda execution environments have separate caches.
+Concurrent callers on one client share an exchange, including short-lived tokens and failures. Each waiting caller keeps its own acquisition deadline.
 
 ### Secret rotation
 
-`client_secret` accepts a nonempty string or a callable returning one. A callable runs for each exchange attempt, including retries. The client does not cache the callable's returned secret separately.
+`client_secret` accepts a nonempty string or a callable, invoked for each exchange attempt including retries. The client does not cache the callable's result.
 
-An already cached access token can remain usable after a secret changes. Parameters also has its own cache: the first example's `max_age=300` can delay observation of a changed secret by five minutes.
-Configure secret-provider timeouts independently; the client cannot interrupt an application-supplied callable.
+Cached access tokens may remain usable after rotation. Parameters' `max_age=300` can delay reading an updated secret by five minutes.
 
-The environment-variable examples illustrate a static secret. Reading `os.environ` through a callable does not fetch updated credentials from Secrets Manager or another external store.
+Environment-variable secrets are static; a callable reading `os.environ` does not fetch external updates.
 
 ### Timeouts and cold starts
 
@@ -209,53 +188,47 @@ The environment-variable examples illustrate a static secret. Reading `os.enviro
 | `request(..., timeout=...)` | 5 seconds | The downstream request after token acquisition, including reading its response |
 | Secret-provider SDK timeouts | Provider-specific | Each secret lookup; configure independently |
 
-The acquisition and downstream budgets are sequential. Set the Lambda timeout above their sum and leave room for application work and error handling.
-Otherwise, Lambda may terminate the invocation before the client can raise an exception that your handler can process.
+These budgets are sequential. Set the Lambda timeout above their sum, leaving time for application work and error handling.
 
-The first token acquisition requires a secret lookup and a token exchange. SDK initialization can also add latency if it happens inside the secret loader.
-Measure cold starts as well as cached requests at your configured Lambda memory and network settings.
-The three-second default may be too short when acquisition includes the first Secrets Manager access.
+Measure cold starts at your chosen memory and network settings: initial secret lookup and SDK setup can exceed the three-second default.
+The Parameters example initializes the SDK outside the handler, uses one-second connect/two-second read timeouts with one SDK attempt, and allows five seconds for acquisition. Tune these values for your workload.
 
-The Parameters example constructs its SDK client outside the handler and configures one-second connect and two-second read timeouts, with one SDK attempt per lookup.
-It explicitly allows five seconds for token acquisition. Treat these as example values to tune for your workload, not a guarantee that every cold start finishes within that budget.
-
-The remaining budget is enforced while reading response headers and bodies, including chunked response framing.
-This is not a universal wall-clock limit: synchronous DNS resolution, application-provided secret loaders, and upload producers cannot be interrupted. Their elapsed time still consumes the budget. Configure their timeouts separately where supported, and leave room in the Lambda invocation timeout.
+HTTP header and body reads use the remaining budget. DNS resolution, secret loaders, and upload producers cannot always be interrupted, although their elapsed time still counts.
+Configure their own timeouts where supported.
 
 ### Retries and downstream responses
 
-Transport failures, HTTP 429, and HTTP 5xx responses from the token endpoint allow at most two retries within the acquisition budget.
-Backoff starts at 100 milliseconds, then 200 milliseconds. Other HTTP failures, malformed token responses, and secret-loader failures are not retried.
+Token-endpoint transport failures, HTTP 429, and HTTP 5xx allow at most two retries, with 100 ms then 200 ms backoff within the acquisition budget.
+Other HTTP errors, malformed token responses, and secret-loader failures are not retried.
 
 `request()` returns an urllib3 HTTP response with `.status`, `.headers`, `.data`, and `.json()`.
-Non-success HTTP responses are returned for your application to interpret. A downstream 401 or 403 does not automatically invalidate the cached token or trigger another exchange.
-The client does not replay downstream operations after a failure.
+Handle HTTP statuses in your application: even 401/403 does not invalidate the cached token or trigger another exchange. Downstream operations are never automatically replayed.
 
-The helper buffers the entire downstream response in memory. For large downloads or streaming, use `auth_headers()` with an HTTP client configured for streaming.
-The examples expect HTTP 200 with a JSON body; handle other success statuses and empty bodies according to your API's contract.
+Responses are fully buffered in memory; use `auth_headers()` and a streaming client for large downloads.
+The examples expect HTTP 200 with JSON. Handle other statuses or empty bodies according to your API.
 
 ### Destination safety
 
-The helper requires HTTPS, rejects an existing Authorization header, and never follows redirects or automatically retries downstream requests. It forwards only `body`, `fields`, `json`, `encode_multipart`, and `multipart_boundary` options to urllib3. Use `auth_headers()` with your own client for streaming responses or other transport options.
+`request()` requires HTTPS, disables redirects, and forwards only `body`, `fields`, `json`, `encode_multipart`, and `multipart_boundary` options to urllib3.
+Use `auth_headers()` for other transport options.
 
-Header names must use HTTP token syntax: letters, digits, and the permitted token punctuation. Empty names, whitespace (including trailing spaces or tabs), and delimiters such as colons are rejected before token acquisition. Authorization is rejected regardless of casing.
-
-Header values must fit Latin-1 and cannot contain ASCII control characters other than horizontal tabs. Invalid names and values are rejected before loading the client secret.
+Header names must follow HTTP token syntax; values must fit Latin-1 without ASCII controls other than tabs.
+Invalid headers and case-insensitive Authorization overrides are rejected before secret lookup.
 
 !!! warning "Use trusted destination URLs"
-    `request()` does not derive or restrict destinations from the configured audience or resource. Supply trusted URLs from application configuration; never pass a caller-controlled destination. A token intended for one API must not be sent to another.
+    Use configured, trusted URLs, never caller-controlled destinations. `request()` does not restrict URLs using the configured audience or resource.
 
 ### Errors and diagnostics
 
-OAuth errors inherit from the common `AuthError` in `auth_alpha.exceptions`. Existing JWT exception imports continue to work.
+OAuth errors inherit from `AuthError` in `auth_alpha.exceptions`.
 
 | Exception | Reason | Retryable |
 | --------- | ------ | --------- |
 | `TokenExchangeError` | `token_exchange_failed` | True for transient endpoint failures or acquisition timeouts; otherwise false |
 | `DownstreamRequestError` | `downstream_request_failed` | False: the server may already have performed the operation |
 
-Invalid client configuration and invalid method, URL, timeout, headers, or unsupported request-option names raise `ValueError` before token acquisition.
-`retryable=true` means a later attempt might succeed; it is not a guarantee and does not authorize replaying a downstream operation.
+Invalid client configuration, method, URL, timeout, headers, or option names raise `ValueError` before token acquisition.
+`retryable=true` means a later acquisition might succeed.
 
 Use the fixed `reason.value` and `retryable` fields for logs and metrics:
 
@@ -263,22 +236,19 @@ Use the fixed `reason.value` and `retryable` fields for logs and metrics:
 --8<-- "examples/auth_alpha/oauth2/src/diagnostics.py"
 ```
 
-This HTTP handler returns a proxy-style response on both success and failure. It uses the same deployment settings as the other environment-secret examples.
+This handler returns proxy-style responses and uses the environment-secret deployment settings.
 
-The utility performs no automatic logging. It removes provider exception chains before exposing an auth error.
-Never log client secrets, access tokens, Authorization headers, token-request bodies, or full provider responses.
+The client emits no logs and removes provider exception chains. Never log secrets, tokens, request headers/bodies, or provider responses.
 
 ### Supported scope
 
-The client acquires bearer access tokens with the client-credentials grant. Tokens may be opaque strings or JWTs; the client does not decode or verify their claims.
-The downstream API validates and authorizes the token.
+The client treats bearer tokens, including JWTs, as opaque strings. The downstream API validates and authorizes them.
 
-Interactive login, authorization code/PKCE, refresh-token grants, token exchange, introspection, revocation, JWT client authentication, mTLS, and DPoP are not implemented.
-The client is synchronous; use your application's threading strategy when calling it from async code.
+Other grants, introspection, revocation, JWT client authentication, mTLS, and DPoP are not supported. Calls are synchronous.
 
 ### Calling downstream APIs from an MCP tool
 
-An MCP server can use the same client after authorizing the incoming caller. Obtain a separate token for the downstream API instead of forwarding the caller's bearer token. In an async tool, offload this synchronous client to a worker thread:
+After authorizing the MCP caller, use `asyncio.to_thread()` to call the downstream API with separate client credentials:
 
 ```python
 import asyncio
@@ -303,10 +273,8 @@ async def check_stock(sku: str) -> dict:
     return response.json()
 ```
 
-Package `client_credentials.py` alongside this tool and register `check_stock` with your MCP server.
-Configure the server's incoming authentication separately; the context lookup above requires an authenticated caller established by the MCP SDK.
-The SDK owns transport authentication and protocol error responses; adapt the permission error to your SDK's handling.
-Cancelling the awaiting task does not stop an in-progress worker thread, so network timeouts still apply. No MCP dependency is added to Powertools.
+Package `client_credentials.py` alongside the tool and register `check_stock` with an authenticated MCP server. The SDK owns transport authentication and error responses.
+Cancelling the task does not stop the worker's request; timeouts still apply. Install the MCP SDK separately.
 
 ## Testing your code
 
