@@ -252,6 +252,7 @@ plugins:
           - core/event_handler/bedrock_agents.md
         Utilities:
           - utilities/auth.md
+          - utilities/oauth2.md
           - utilities/parameters.md
           - utilities/batch.md
           - utilities/typing.md

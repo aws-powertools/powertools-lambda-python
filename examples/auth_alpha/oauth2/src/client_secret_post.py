@@ -10,7 +10,10 @@ inventory_api = OAuth2Client(
     client_id=os.environ["CLIENT_ID"],
     client_secret=os.environ["CLIENT_SECRET"],
     auth_method="client_secret_post",
-    scopes=["inventory:read"],
+    scopes=os.environ.get("SCOPES", "").split(),
+    audience=os.environ.get("AUDIENCE"),
+    resource=os.environ.get("RESOURCE"),
+    timeout_seconds=5,
 )
 INVENTORY_URL = os.environ["INVENTORY_URL"]
 

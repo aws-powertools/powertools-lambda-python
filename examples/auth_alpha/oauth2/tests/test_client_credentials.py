@@ -1,11 +1,12 @@
 import urllib3
 
 
-def test_inventory_lookup(monkeypatch):
+def test_inventory_lookup(monkeypatch, mocker):
     monkeypatch.setenv("TOKEN_URL", "https://idp.example.com/token")
     monkeypatch.setenv("CLIENT_ID", "orders")
     monkeypatch.setenv("CLIENT_SECRET_NAME", "orders/oauth-secret")
     monkeypatch.setenv("INVENTORY_URL", "https://inventory.example.com")
+    mocker.patch("aws_lambda_powertools.utilities.parameters.SecretsProvider")
 
     from client_credentials import inventory_api, lambda_handler
 

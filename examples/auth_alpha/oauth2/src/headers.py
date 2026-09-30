@@ -21,8 +21,10 @@ inventory_api = OAuth2Client(
     token_url=os.environ["TOKEN_URL"],
     client_id=os.environ["CLIENT_ID"],
     client_secret=lambda: os.environ["CLIENT_SECRET"],
-    scopes=["inventory:read"],
-    resource=INVENTORY_URL,
+    scopes=os.environ.get("SCOPES", "").split(),
+    audience=os.environ.get("AUDIENCE"),
+    resource=os.environ.get("RESOURCE"),
+    timeout_seconds=5,
 )
 http = urllib3.PoolManager()
 

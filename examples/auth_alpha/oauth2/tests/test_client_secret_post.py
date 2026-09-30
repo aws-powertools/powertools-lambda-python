@@ -11,6 +11,9 @@ def test_post_credentials_are_sent_only_to_the_token_endpoint(monkeypatch):
     monkeypatch.setenv("CLIENT_ID", "orders")
     monkeypatch.setenv("CLIENT_SECRET", "test-only-secret")
     monkeypatch.setenv("INVENTORY_URL", "https://inventory.example.com")
+    monkeypatch.setenv("SCOPES", "inventory:read")
+    monkeypatch.delenv("AUDIENCE", raising=False)
+    monkeypatch.delenv("RESOURCE", raising=False)
     calls = []
 
     def request(self, method, url, **options):

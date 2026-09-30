@@ -1,3 +1,4 @@
+import json
 import os
 from urllib.parse import quote
 
@@ -12,18 +13,20 @@ inventory_api = OAuth2Client(
     token_url=os.environ["TOKEN_URL"],
     client_id=os.environ["CLIENT_ID"],
     client_secret=lambda: os.environ["CLIENT_SECRET"],
-    scopes=["inventory:read"],
-    audience=INVENTORY_URL,
+    scopes=os.environ.get("SCOPES", "").split(),
+    audience=os.environ.get("AUDIENCE"),
+    resource=os.environ.get("RESOURCE"),
+    timeout_seconds=5,
 )
 
 
 def lambda_handler(event: dict, context: LambdaContext):
     sku = quote(event["sku"], safe="")
     try:
-        response = inventory_api.request("GET", f"{INVENTORY_URL}/stock/{sku}")
+        response = inventory_api.request("GET", f"{INVENTORY_URL}/stock/{sku}", timeout=5)
     except (TokenExchangeError, DownstreamRequestError) as error:
         logger.warning("Inventory request unavailable", reason=error.reason.value, retryable=error.retryable)
         return {"statusCode": 502, "body": "Inventory request unavailable"}
     if response.status != 200:
         return {"statusCode": 502, "body": "Inventory request unavailable"}
-    return response.json()
+    return {"statusCode": 200, "body": json.dumps(response.json())}
