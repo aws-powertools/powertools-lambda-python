@@ -14,6 +14,11 @@ from aws_lambda_powertools.utilities.auth_alpha.oauth2.exceptions import TokenEx
 TOKEN_URL = "https://idp.example.com/oauth/token"
 
 
+@pytest.fixture(params=["client_secret_basic", "client_secret_post"])
+def auth_method(request):
+    return request.param
+
+
 def client(**options):
     config = {
         "token_url": TOKEN_URL,
@@ -57,7 +62,7 @@ def test_basic_auth_encodes_each_credential_before_base64(http):
     assert "client_secret" not in parse_qs(request["body"].decode())
 
 
-def test_token_is_reacquired_before_expiry_using_the_current_secret(http, clock):
+def test_token_is_reacquired_before_expiry_using_the_current_secret(http, clock, auth_method):
     secret = ["initial-secret"]
     observed = []
 
@@ -66,7 +71,7 @@ def test_token_is_reacquired_before_expiry_using_the_current_secret(http, clock)
         return secret[0]
 
     http.serve(TOKEN_URL, {"access_token": "first", "token_type": "Bearer", "expires_in": 100}, method="POST")
-    subject = client(client_secret=load_secret)
+    subject = client(client_secret=load_secret, auth_method=auth_method)
     assert subject.auth_headers()["Authorization"] == "Bearer first"
     clock.advance(69)
     assert subject.auth_headers()["Authorization"] == "Bearer first"
@@ -152,7 +157,7 @@ def test_permanent_exchange_errors_are_not_retried(http, status):
     assert len(http.requests) == 1
 
 
-def test_transient_exchange_errors_have_at_most_two_retries(http, clock, monkeypatch):
+def test_transient_exchange_errors_have_at_most_two_retries(http, clock, monkeypatch, auth_method):
     http.serve(TOKEN_URL, b"temporarily unavailable", status=503, method="POST")
     monkeypatch.setattr(time, "sleep", clock.advance)
     secrets = []
@@ -161,7 +166,7 @@ def test_transient_exchange_errors_have_at_most_two_retries(http, clock, monkeyp
         secrets.append("secret")
         return secrets[-1]
 
-    subject = client(client_secret=load_secret)
+    subject = client(client_secret=load_secret, auth_method=auth_method)
     with pytest.raises(TokenExchangeError):
         subject.auth_headers()
     assert len(http.requests) == 3
@@ -201,7 +206,7 @@ def test_exchange_cannot_return_a_token_that_expired_during_the_request(http, cl
         subject.auth_headers()
 
 
-def test_concurrent_requests_share_one_token_exchange(http):
+def test_concurrent_requests_share_one_token_exchange(http, auth_method):
     entered = threading.Event()
     release = threading.Event()
 
@@ -211,7 +216,7 @@ def test_concurrent_requests_share_one_token_exchange(http):
         return {"access_token": "shared-token", "token_type": "Bearer", "expires_in": 100}
 
     http.serve(TOKEN_URL, exchange, method="POST")
-    subject = client()
+    subject = client(auth_method=auth_method)
     with ThreadPoolExecutor(max_workers=8) as executor:
         results = [executor.submit(subject.auth_headers) for _ in range(8)]
         assert entered.wait(2)
@@ -382,8 +387,8 @@ def test_invalid_http_methods_are_rejected_before_loading_credentials(http, meth
 
 
 @pytest.mark.parametrize("secret", [None, "", 42])
-def test_invalid_secret_loader_results_are_rejected_before_sending_credentials(http, secret):
-    subject = client(client_secret=lambda: secret)
+def test_invalid_secret_loader_results_are_rejected_before_sending_credentials(http, secret, auth_method):
+    subject = client(client_secret=lambda: secret, auth_method=auth_method)
     with pytest.raises(TokenExchangeError) as error:
         subject.auth_headers()
     assert error.value.__context__ is None
@@ -534,8 +539,8 @@ def test_concurrent_callers_share_an_uncacheable_token(http, monkeypatch, lifeti
     assert len(http.requests) == 2
 
 
-def test_invalid_unicode_from_a_secret_loader_is_sanitized(http):
-    subject = client(client_secret=lambda: "private-secret-\ud800")
+def test_invalid_unicode_from_a_secret_loader_is_sanitized(http, auth_method):
+    subject = client(client_secret=lambda: "private-secret-\ud800", auth_method=auth_method)
     with pytest.raises(TokenExchangeError) as error:
         subject.auth_headers()
     assert error.value.__context__ is None
@@ -621,26 +626,26 @@ def test_long_resources_with_invalid_suffixes_are_rejected_before_loading_creden
     assert http.requests == []
 
 
-def test_secret_lookup_does_not_expire_a_new_short_lived_token(http, clock):
+def test_secret_lookup_does_not_expire_a_new_short_lived_token(http, clock, auth_method):
     def load_secret():
         clock.advance(2)
         return "test-secret"
 
     http.serve(TOKEN_URL, {"access_token": "fresh", "token_type": "Bearer", "expires_in": 1}, method="POST")
-    subject = client(client_secret=load_secret, timeout_seconds=3)
+    subject = client(client_secret=load_secret, timeout_seconds=3, auth_method=auth_method)
 
     assert subject.auth_headers() == {"Authorization": "Bearer fresh"}
     assert subject.auth_headers() == {"Authorization": "Bearer fresh"}
     assert len(http.requests) == 2
 
 
-def test_secret_lookup_does_not_move_the_cached_tokens_refresh_boundary(http, clock):
+def test_secret_lookup_does_not_move_the_cached_tokens_refresh_boundary(http, clock, auth_method):
     def load_secret():
         clock.advance(2)
         return "test-secret"
 
     http.serve(TOKEN_URL, {"access_token": "first", "token_type": "Bearer", "expires_in": 100}, method="POST")
-    subject = client(client_secret=load_secret)
+    subject = client(client_secret=load_secret, auth_method=auth_method)
     assert subject.auth_headers() == {"Authorization": "Bearer first"}
     clock.advance(69)
     assert subject.auth_headers() == {"Authorization": "Bearer first"}
@@ -652,12 +657,12 @@ def test_secret_lookup_does_not_move_the_cached_tokens_refresh_boundary(http, cl
     assert len(http.requests) == 2
 
 
-def test_secret_lookup_still_consumes_the_acquisition_budget(http, clock):
+def test_secret_lookup_still_consumes_the_acquisition_budget(http, clock, auth_method):
     def load_secret():
         clock.advance(4)
         return "test-secret"
 
-    subject = client(client_secret=load_secret, timeout_seconds=3)
+    subject = client(client_secret=load_secret, timeout_seconds=3, auth_method=auth_method)
     with pytest.raises(TokenExchangeError) as error:
         subject.auth_headers()
 

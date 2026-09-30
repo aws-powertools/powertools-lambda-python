@@ -7,7 +7,8 @@ status: new
 !!! warning "Alpha / experimental"
     This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
 
-`OAuth2Client` obtains bearer tokens for a Lambda function calling an OAuth2-protected API. Each client owns its resource configuration and token cache. It supports the client-credentials grant with `client_secret_basic` authentication.
+`OAuth2Client` obtains bearer tokens for a Lambda function calling an OAuth2-protected API. Each client owns its resource configuration and token cache.
+It supports the client-credentials grant with `client_secret_basic` (default) or explicit `client_secret_post` authentication.
 
 Use [JWT verification](auth.md) to authenticate incoming requests. The OAuth client obtains separate credentials for outgoing requests; it does not forward an incoming caller's token.
 
@@ -16,6 +17,7 @@ Use [JWT verification](auth.md) to authenticate incoming requests. The OAuth cli
 * Cache access tokens across warm Lambda invocations and reacquire them before expiration.
 * Coordinate concurrent token requests within one client.
 * Resolve a client secret for each exchange attempt.
+* Authenticate using HTTP Basic or form-body credentials, as required by your provider.
 * Select a downstream API using a provider-specific audience or an RFC 8707 resource indicator.
 * Obtain headers for your HTTP client or send a synchronous authenticated request.
 * Report fixed failure reasons without exposing credentials or provider responses.
@@ -89,7 +91,17 @@ Concurrent callers share one in-progress exchange, including short-lived tokens 
 
 An already cached access token can remain usable after a secret changes. Parameters also has its own cache: the first example's `max_age=300` can delay observation of a changed secret by five minutes. Configure secret-provider timeouts independently; the client cannot interrupt an application-supplied callable.
 
-The token endpoint receives form-encoded client identifiers and secrets through HTTP Basic authentication. They are not included in the form body. Providers requiring `client_secret_post`, private-key JWT, mTLS, or interactive grants need a different client.
+By default, `auth_method="client_secret_basic"` sends the form-encoded client identifier and secret through HTTP Basic authentication. Credentials are not included in the form body.
+
+If your provider requires `client_secret_post`, select it explicitly. This sends `client_id` and `client_secret` as form fields, without an Authorization header:
+
+```python title="client_secret_post.py"
+--8<-- "examples/auth_alpha/oauth2/src/client_secret_post.py"
+```
+
+The selected method applies only to the token endpoint. Calls made through `request()` still use the acquired bearer token.
+The client never switches authentication methods automatically after an error. Both methods resolve the current secret for every exchange attempt and share the same token-cache behavior.
+Private-key JWT, mTLS, and interactive grants are not supported.
 
 ### Timeouts, retries, and destination safety
 
@@ -126,7 +138,8 @@ Use the fixed `reason.value` and `retryable` fields for logs and metrics:
 --8<-- "examples/auth_alpha/oauth2/src/diagnostics.py"
 ```
 
-The utility performs no automatic logging. It removes provider exception chains before exposing an auth error. Never log client secrets, access tokens, Authorization headers, or full provider responses.
+The utility performs no automatic logging. It removes provider exception chains before exposing an auth error.
+Never log client secrets, access tokens, Authorization headers, token-request bodies, or full provider responses.
 
 ### Calling downstream APIs from an MCP tool
 

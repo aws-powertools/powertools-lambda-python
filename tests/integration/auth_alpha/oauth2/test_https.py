@@ -13,6 +13,11 @@ from aws_lambda_powertools.utilities.auth_alpha.oauth2.exceptions import Downstr
 TOKEN_RESPONSE = {"access_token": "local-test-token", "token_type": "Bearer", "expires_in": 600}
 
 
+@pytest.fixture(params=["client_secret_basic", "client_secret_post"])
+def auth_method(request):
+    return request.param
+
+
 def client(endpoint, **options):
     return OAuth2Client(
         token_url=endpoint.url + "/token",
@@ -74,10 +79,10 @@ def test_downstream_timeout_has_a_separate_budget_and_a_sanitized_error(https_se
     assert [request[1] for request in https_server.requests] == ["/token", "/inventory"]
 
 
-def test_untrusted_tls_never_sends_client_credentials(https_server, monkeypatch):
+def test_untrusted_tls_never_sends_client_credentials(https_server, monkeypatch, auth_method):
     monkeypatch.delenv("SSL_CERT_FILE")
     https_server.serve("/token", TOKEN_RESPONSE)
-    subject = client(https_server, timeout_seconds=0.15)
+    subject = client(https_server, timeout_seconds=0.15, auth_method=auth_method)
 
     with pytest.raises(TokenExchangeError) as error:
         subject.auth_headers()
@@ -86,7 +91,7 @@ def test_untrusted_tls_never_sends_client_credentials(https_server, monkeypatch)
 
 
 @pytest.mark.parametrize("failure", ["oversized", "redirect", "stall", "trickle"])
-def test_exchange_failures_are_bounded_without_forwarding_credentials(https_server, failure):
+def test_exchange_failures_are_bounded_without_forwarding_credentials(https_server, failure, auth_method):
     if failure == "oversized":
         https_server.serve("/token", b'{"padding":"' + b"x" * (1024 * 1024) + b'"}')
     elif failure == "redirect":
@@ -99,7 +104,7 @@ def test_exchange_failures_are_bounded_without_forwarding_credentials(https_serv
             stall=failure == "stall",
             interval=0.04 if failure == "trickle" else 0,
         )
-    subject = client(https_server, timeout_seconds=0.2)
+    subject = client(https_server, timeout_seconds=0.2, auth_method=auth_method)
     started = time.monotonic()
 
     with pytest.raises(TokenExchangeError) as error:
@@ -241,13 +246,13 @@ def test_empty_downstream_responses_preserve_bytes_and_status(https_server, meth
 
 
 @pytest.mark.parametrize("endpoint", ["token", "inventory"])
-def test_malformed_response_headers_fail_without_logging_credentials(https_server, caplog, endpoint):
+def test_malformed_response_headers_fail_without_logging_credentials(https_server, caplog, endpoint, auth_method):
     private_data = "Bearer local-test-private-token"
     https_server.serve("/token", TOKEN_RESPONSE)
     https_server.serve("/inventory", {"items": [123]})
     payload = TOKEN_RESPONSE if endpoint == "token" else {"items": [123]}
     https_server.serve(f"/{endpoint}", payload, headers={"Broken header": private_data})
-    subject = client(https_server)
+    subject = client(https_server, auth_method=auth_method)
     expected = TokenExchangeError if endpoint == "token" else DownstreamRequestError
 
     with pytest.raises(expected) as error:

@@ -7,7 +7,7 @@ import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from string import ascii_letters, digits, hexdigits
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import quote_plus, urlencode, urlsplit
 
 import urllib3
@@ -73,9 +73,13 @@ class OAuth2Client:
     token_url : str
         Trusted HTTPS OAuth token endpoint.
     client_id : str
-        Identifier for a client supporting ``client_secret_basic``.
+        OAuth client identifier.
     client_secret : str | Callable[[], str]
         Secret or loader invoked for each exchange attempt.
+    auth_method : Literal["client_secret_basic", "client_secret_post"]
+        Client authentication method, by default ``client_secret_basic``.
+        ``client_secret_post`` sends credentials in the form body without an
+        Authorization header. The client never switches methods automatically.
     scopes : list[str], optional
         Scopes requested on every exchange.
     audience : str, optional
@@ -112,6 +116,7 @@ class OAuth2Client:
         token_url: str,
         client_id: str,
         client_secret: str | Callable[[], str],
+        auth_method: Literal["client_secret_basic", "client_secret_post"] = "client_secret_basic",
         scopes: list[str] | None = None,
         audience: str | None = None,
         resource: str | None = None,
@@ -122,10 +127,13 @@ class OAuth2Client:
             raise ValueError("A nonempty OAuth client ID is required")
         if not callable(client_secret) and (not isinstance(client_secret, str) or not client_secret):
             raise ValueError("client_secret must be a nonempty string or a callable")
+        if auth_method not in ("client_secret_basic", "client_secret_post"):
+            raise ValueError("auth_method must be client_secret_basic or client_secret_post")
         if audience is not None and resource is not None:
             raise ValueError("audience and resource are mutually exclusive")
         self._client_id = client_id
         self._client_secret = client_secret
+        self._auth_method = auth_method
         self._scopes = required_scopes(scopes)
         self._timeout = finite_seconds(timeout_seconds, positive=True)
         self._fields = {"grant_type": "client_credentials"}
@@ -320,7 +328,7 @@ class OAuth2Client:
                     raise TokenExchangeError(retryable=error.retryable) from None
                 time.sleep(delay)
 
-    def _credentials(self) -> str:
+    def _token_request(self) -> tuple[bytes, dict[str, str]]:
         try:
             secret = self._client_secret if isinstance(self._client_secret, str) else self._client_secret()
         except Exception:
@@ -329,24 +337,27 @@ class OAuth2Client:
             raise TokenExchangeError() from None
         if not isinstance(secret, str) or not secret:
             raise TokenExchangeError()
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
         try:
+            if self._auth_method == "client_secret_post":
+                # Keep credentials out of reusable fields and load them for every attempt.
+                fields = {**self._fields, "client_id": self._client_id, "client_secret": secret}
+                return urlencode(fields).encode(), headers
             credentials = f"{quote_plus(self._client_id)}:{quote_plus(secret)}"
         except UnicodeError:
             raise TokenExchangeError() from None
-        return base64.b64encode(credentials.encode()).decode()
+        headers["Authorization"] = f"Basic {base64.b64encode(credentials.encode()).decode()}"
+        return self._body, headers
 
     def _exchange_once(self, deadline: Deadline) -> _AccessToken:
-        authorization = self._credentials()
+        body, headers = self._token_request()
         started = time.monotonic()
         status, payload = self._http.json_request(
             "POST",
             self._token_url,
             deadline,
-            body=self._body,
-            headers={
-                "Authorization": f"Basic {authorization}",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
+            body=body,
+            headers=headers,
         )
         if status != 200:
             raise RequestError(retryable=status == 429 or 500 <= status <= 599)

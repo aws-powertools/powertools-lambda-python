@@ -1,18 +1,24 @@
 """A local TLS endpoint exercising the production transport without HTTP mocks."""
 
+from __future__ import annotations
+
 import ipaddress
 import json
 import ssl
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import TYPE_CHECKING
 
 import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @dataclass
@@ -26,6 +32,7 @@ class Reply:
     chunked: bool = False
     chunk_size_interval: float = 0
     trailer_interval: float = 0
+    responder: Callable[[str, dict, bytes], tuple[int, dict]] | None = None
 
 
 def _write_bytes(stream, payload, stop, interval=0):
@@ -87,6 +94,7 @@ class LocalHTTPS:
         chunked=False,
         chunk_size_interval=0,
         trailer_interval=0,
+        responder=None,
     ):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
         self.routes[path] = Reply(
@@ -99,6 +107,7 @@ class LocalHTTPS:
             chunked=chunked,
             chunk_size_interval=chunk_size_interval,
             trailer_interval=trailer_interval,
+            responder=responder,
         )
 
 
@@ -163,6 +172,9 @@ def https_server(tls_files, monkeypatch, request):
             body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
             endpoint.requests.append((self.command, self.path, dict(self.headers), body))
             reply = endpoint.routes.get(self.path, Reply(b"{}", status=404))
+            if reply.responder is not None:
+                status, payload = reply.responder(self.command, dict(self.headers), body)
+                reply = replace(reply, status=status, body=json.dumps(payload).encode())
             self.send_response(reply.status)
             self.send_header("Content-Type", "application/json")
             if reply.chunked:

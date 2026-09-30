@@ -22,12 +22,14 @@ assert "urllib3" not in sys.modules
 assert "OAuth2Client" in dir(auth)
 assert "OAuth2Client" in dir(oauth)
 assert auth.OAuth2Client is oauth.OAuth2Client
-client = oauth.OAuth2Client(
-    token_url="https://idp.example.com/token",
-    client_id="orders",
-    client_secret="test-secret",
-)
-assert repr(client) == "<OAuth2Client>"
+for auth_method in ("client_secret_basic", "client_secret_post"):
+    client = oauth.OAuth2Client(
+        token_url="https://idp.example.com/token",
+        client_id="orders",
+        client_secret="test-secret",
+        auth_method=auth_method,
+    )
+    assert repr(client) == "<OAuth2Client>"
 try:
     oauth.unknown_attribute
 except AttributeError:

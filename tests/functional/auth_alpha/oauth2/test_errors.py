@@ -18,7 +18,8 @@ PRIVATE_DATA = "test-only-sensitive-provider-data"
 
 @pytest.mark.parametrize("operation", ["auth_headers", "request"])
 @pytest.mark.parametrize("failure", ["secret", "transport", "json", "expires_in", "downstream"])
-def test_errors_never_expose_credentials_or_active_exception_chains(http, operation, failure, monkeypatch):
+@pytest.mark.parametrize("auth_method", ["client_secret_basic", "client_secret_post"])
+def test_errors_never_expose_credentials_or_active_exception_chains(http, operation, failure, monkeypatch, auth_method):
     monkeypatch.setattr("time.sleep", lambda seconds: None)
 
     def load_secret():
@@ -26,7 +27,12 @@ def test_errors_never_expose_credentials_or_active_exception_chains(http, operat
             raise RuntimeError(PRIVATE_DATA)
         return PRIVATE_DATA
 
-    subject = OAuth2Client(token_url=TOKEN_URL, client_id="orders", client_secret=load_secret)
+    subject = OAuth2Client(
+        token_url=TOKEN_URL,
+        client_id="orders",
+        client_secret=load_secret,
+        auth_method=auth_method,
+    )
     payload = {"access_token": "test-token", "token_type": "Bearer", "expires_in": 600}
     if failure == "transport":
         payload = urllib3.exceptions.SSLError(PRIVATE_DATA)
@@ -66,9 +72,23 @@ def test_errors_never_expose_credentials_or_active_exception_chains(http, operat
     "status,retryable,attempts",
     [(400, False, 1), (401, False, 1), (429, True, 3), (503, True, 3)],
 )
-def test_exchange_errors_expose_fixed_reason_and_retryability(http, clock, monkeypatch, status, retryable, attempts):
+@pytest.mark.parametrize("auth_method", ["client_secret_basic", "client_secret_post"])
+def test_exchange_errors_expose_fixed_reason_and_retryability(
+    http,
+    clock,
+    monkeypatch,
+    status,
+    retryable,
+    attempts,
+    auth_method,
+):
     monkeypatch.setattr("time.sleep", clock.advance)
-    subject = OAuth2Client(token_url=TOKEN_URL, client_id="orders", client_secret="test-secret")
+    subject = OAuth2Client(
+        token_url=TOKEN_URL,
+        client_id="orders",
+        client_secret="test-secret",
+        auth_method=auth_method,
+    )
     http.serve(TOKEN_URL, {"error_description": PRIVATE_DATA}, method="POST", status=status)
 
     with pytest.raises(TokenExchangeError) as error:
