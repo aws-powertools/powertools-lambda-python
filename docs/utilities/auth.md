@@ -9,6 +9,8 @@ status: new
 
 Auth verifies JWT access tokens in any Lambda workload. Use `verify()` directly, create Event Handler middleware with `require()`, or build a Lambda authorizer response with `authorize()`.
 
+For client-credentials tokens used to call a downstream API, see [OAuth2 client (alpha)](oauth2.md).
+
 ```mermaid
 flowchart LR
     Token["JWT access token"] --> Verify["JWTVerifier.verify()"]
@@ -36,6 +38,20 @@ pip install "aws-lambda-powertools[jwt]"
 
 The `jwt` extra installs PyJWT, cryptography, and urllib3. Build dependencies for the same Python version and architecture as your Lambda function. See [cross-platform builds](../build_recipes/cross-platform.md).
 
+#### Compatibility with boto3
+
+If the function also uses boto3, including through Parameters, install and validate the SDK together with JWT verification:
+
+```shell
+pip install "aws-lambda-powertools[jwt,aws-sdk]"
+python -m pip check
+```
+
+Resolve all function dependencies together, lock their versions, and package boto3, botocore, and urllib3 together. Make a failed `pip check` fail the build.
+
+Packaged urllib3 overrides the runtime copy and can conflict with the runtime's SDK.
+Build checks cannot validate dependencies supplied only by the runtime or separate layers. See [AWS packaging guidance](https://docs.aws.amazon.com/lambda/latest/dg/python-package.html#python-package-dependencies).
+
 ### Create a verifier
 
 Create the verifier outside the Lambda handler so warm invocations reuse its signing-key cache. Configure the trusted issuer, this workload's audience, and the algorithms accepted from that issuer.
@@ -62,11 +78,12 @@ Replace `token_use` with the access-token marker used by your identity provider.
 
 ### Required resources
 
-JWT verification requires no additional IAM permissions. When using issuer discovery or a remote JWKS endpoint, the function needs outbound HTTPS access to the identity provider. A function in private subnets might need a NAT gateway or private connectivity. Static `jwks` does not use the network, but your application is responsible for rotating those keys.
+JWT verification requires no additional IAM permissions. Discovery and remote JWKS require outbound HTTPS; private subnets may need NAT or private connectivity.
+Static `jwks` avoids network access, but your application must rotate those keys.
 
 ### Protect an HTTP route
 
-Create `JWTVerifier` outside the Lambda handler so warm invocations reuse its signing-key cache. The verifier itself is not middleware. Calling `verifier.require()` creates middleware bound to that verifier and to the requested scopes.
+`verifier.require()` creates Event Handler middleware bound to the verifier and requested scopes. Create the verifier outside the handler to reuse its cache.
 
 ```python title="middleware.py"
 --8<-- "examples/auth_alpha/jwt/src/middleware.py"
@@ -91,13 +108,13 @@ Configure public routes and CORS preflight separately.
 
 ### Verify an Authorization header
 
-When handling HTTP authentication without `require()`, pass the complete `Authorization` header to `verify_authorization_header()`. It validates the Bearer scheme and then calls `verify()` with the extracted JWT.
+Without middleware, pass the complete `Authorization` header to `verify_authorization_header()`. It validates the Bearer scheme and verifies the extracted JWT:
 
 ```python title="direct.py"
 --8<-- "examples/auth_alpha/jwt/src/direct.py"
 ```
 
-Use `verify()` for an encoded JWT and `verify_authorization_header()` for the complete HTTP header. Do not split the header in application code. Both methods require `iss`, `aud`, and `exp`; `required_claims` adds more required claims.
+Both verification methods require `iss`, `aud`, and `exp`; use `required_claims` to require additional claims.
 
 ## Advanced
 
@@ -109,9 +126,10 @@ This complete Lambda adds provider-specific token checks, a required scope, a te
 --8<-- "examples/auth_alpha/jwt/src/custom_authorization.py"
 ```
 
-`expected_claims` must match the access-token profile documented by your identity provider. `authorize` runs only after token verification and scope checks succeed. `on_error` can change the error response and emit logs or metrics, but it never invokes the protected route.
+Match `expected_claims` to your provider's access-token profile. `authorize` runs after verification and scope checks.
+`on_error` can change the error response or emit logs/metrics, but cannot invoke the protected route.
 
-The callback receives stable `reason` and `retryable` fields without token data. Preserve `error.status_code` and `error.headers` unless you intentionally want to change the HTTP contract.
+The callback exposes `reason` and `retryable`, without token data. Preserve `error.status_code` and `error.headers` to retain the HTTP contract.
 
 ### Key freshness and Lambda timeouts
 
@@ -121,7 +139,8 @@ The callback receives stable `reason` and `retryable` fields without token data.
 | `jwks_max_age_seconds` | 5 minutes | Limits how long fetched keys remain trusted |
 | `unknown_kid_cooldown_seconds` | 5 minutes | Limits repeated refreshes for unknown key IDs |
 
-The first verification fetches signing keys unless you provide static `jwks`. Warm invocations reuse the cache. A successful refresh replaces the key set so removed keys are no longer trusted. If refresh fails after the cache expires, verification raises `JWKSFetchError` instead of using stale keys.
+The first verification fetches keys unless `jwks` is static. Warm invocations reuse them; a refresh replaces the key set, dropping removed keys.
+An expired cache with a failed refresh raises `JWKSFetchError`; stale keys are not used.
 
 !!! warning "Leave time for Lambda to handle the error"
     Set `timeout_seconds` lower than the Lambda function timeout. If both use the three-second default, Lambda can terminate the invocation before your code receives `JWKSFetchError`.
@@ -132,7 +151,7 @@ Call `prefetch()` after constructing the verifier to retrieve keys during Lambda
 --8<-- "examples/auth_alpha/jwt/src/prefetch.py"
 ```
 
-This can reduce first-invocation latency, but an identity-provider outage can then fail the cold start. `prefetch()` is optional; without it, the first `verify()` retrieves the keys.
+Prefetching can reduce first-invocation latency, but a provider outage can fail the cold start. Without it, the first `verify()` fetches keys.
 
 Static `jwks` avoids network access. Recreate the verifier or execution environment when the configured keys change.
 
@@ -168,7 +187,8 @@ The example template disables API Gateway authorizer-result caching so every req
 --8<-- "examples/auth_alpha/jwt/templates/sam.yaml"
 ```
 
-If you enable Gateway caching, include all request attributes used by authorization in its identity sources to prevent decisions from being reused across different authorization inputs. Even with a complete cache key, a cached allow can outlive the JWT expiration until the cache TTL expires. Keep result caching disabled when every request must respect token expiration. This cache is independent of the verifier JWKS cache.
+If enabling Gateway caching, include every authorization input in its identity sources. A cached allow can still outlive JWT expiration until the cache TTL ends.
+Keep it disabled when every request must respect token expiration. Gateway caching is independent of the JWKS cache.
 
 ### Errors and diagnostics
 
@@ -185,7 +205,7 @@ If you enable Gateway caching, include all request attributes used by authorizat
 | `forbidden` | false |
 | `jwks_unavailable` | true |
 
-Use `reason.value` for log fields and metric dimensions. Do not parse exception messages or log tokens, claims, or request headers. `retryable=true` means a later attempt might succeed after the identity provider recovers; it does not guarantee that retrying will succeed.
+Log `reason.value` and `retryable`, not exception messages, tokens, claims, or request headers. `retryable=true` means a later attempt might succeed after provider recovery.
 
 ## Testing your code
 
@@ -195,4 +215,5 @@ Use `mock_claims` to test the complete middleware Lambda without cryptography or
 --8<-- "examples/auth_alpha/jwt/tests/test_middleware.py"
 ```
 
-The test still sends an HTTP API event, extracts the Bearer token, and checks the required scope before invoking the route. `mock_claims` replaces only token verification and restores the verifier when the context manager exits. Keep separate verification tests for the token profiles your application accepts.
+The test exercises the HTTP event, Bearer extraction, and scope check. `mock_claims` replaces only token verification and restores it on exit.
+Keep separate tests for the token profiles your application accepts.

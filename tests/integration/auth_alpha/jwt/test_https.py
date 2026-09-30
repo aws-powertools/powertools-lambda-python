@@ -1,4 +1,5 @@
 import time
+import traceback
 
 import jwt
 import pytest
@@ -69,4 +70,20 @@ def test_key_endpoint_failures_are_bounded_and_do_not_follow_redirects(https_ser
         subject.prefetch()
     assert time.monotonic() - started < 1
     assert error.value.__context__ is None
+    assert [request[1] for request in https_server.requests] == ["/keys"]
+
+
+def test_malformed_jwks_headers_fail_without_logging_provider_data(https_server, caplog):
+    private_data = "local-test-private-provider-data"
+    https_server.serve("/keys", {"keys": []}, headers={"Broken header": private_data})
+    subject = verifier(https_server, jwks_uri=https_server.url + "/keys")
+
+    with pytest.raises(JWKSFetchError) as error:
+        subject.prefetch()
+
+    assert error.value.__context__ is None
+    assert error.value.__cause__ is None
+    assert private_data not in "".join(traceback.format_exception(error.value))
+    assert private_data not in caplog.text
+    assert not [record for record in caplog.records if record.name == "urllib3.connection"]
     assert [request[1] for request in https_server.requests] == ["/keys"]
