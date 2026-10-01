@@ -5,6 +5,7 @@ import io
 import boto3
 import pytest
 from botocore import stub
+from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
@@ -134,17 +135,57 @@ def test_readlines(s3_seekable_obj, s3_client_stub):
     assert s3_seekable_obj.tell() == len(payload)
 
 
-def test_closed(s3_seekable_obj, s3_client_stub):
-    payload = b"test"
-    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
-
-    s3_client_stub.add_response(
+def test_read_at_end_of_object_returns_empty_bytes(s3_seekable_obj, s3_client_stub):
+    s3_client_stub.add_response("head_object", {"ContentLength": 4})
+    # S3 rejects a range that starts at the end of the object
+    s3_client_stub.add_client_error(
         "get_object",
-        {"Body": streaming_body},
-        {"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+        service_error_code="InvalidRange",
+        http_status_code=416,
+        expected_params={"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=4-"},
     )
 
+    s3_seekable_obj.seek(0, io.SEEK_END)
+
+    assert s3_seekable_obj.read() == b""
+    assert s3_seekable_obj.tell() == 4
+
+
+def test_read_empty_object_returns_empty_bytes(s3_seekable_obj, s3_client_stub):
+    # S3 rejects any range on an empty object
+    s3_client_stub.add_client_error(
+        "get_object",
+        service_error_code="InvalidRange",
+        http_status_code=416,
+        expected_params={"Bucket": s3_seekable_obj.bucket, "Key": s3_seekable_obj.key, "Range": "bytes=0-"},
+    )
+
+    assert s3_seekable_obj.read() == b""
+    assert list(s3_seekable_obj) == []
+    assert s3_seekable_obj.tell() == 0
+
+
+def test_raw_stream_raises_other_client_errors(s3_seekable_obj, s3_client_stub):
+    s3_client_stub.add_client_error("get_object", service_error_code="NoSuchKey", http_status_code=404)
+
+    with pytest.raises(ClientError, match="NoSuchKey"):
+        s3_seekable_obj.read()
+
+
+def test_closed(s3_seekable_obj, s3_client_stub):
     s3_seekable_obj.close()
+
+    assert s3_seekable_obj.closed is True
+    # Closing an object that was never read must not open a stream just to close it
+    s3_client_stub.assert_no_pending_responses()
+
+
+def test_context_manager_at_end_of_object(s3_seekable_obj, s3_client_stub):
+    s3_client_stub.add_response("head_object", {"ContentLength": 4})
+
+    with s3_seekable_obj as f:
+        f.seek(0, io.SEEK_END)
+
     assert s3_seekable_obj.closed is True
 
 
