@@ -7,6 +7,7 @@ import pytest
 from botocore import stub
 from botocore.exceptions import ClientError
 
+from aws_lambda_powertools.utilities.streaming import S3Object
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
@@ -177,6 +178,42 @@ def test_closed(s3_seekable_obj, s3_client_stub):
 
     assert s3_seekable_obj.closed is True
     # Closing an object that was never read must not open a stream just to close it
+    s3_client_stub.assert_no_pending_responses()
+
+
+@pytest.mark.parametrize("stream_class", [_S3SeekableIO, S3Object])
+@pytest.mark.parametrize("read_method", ["read", "readline", "readlines", "__next__"])
+@pytest.mark.parametrize("initial_state", ["unread", "partially_read", "seeked", "empty"])
+def test_reads_after_close_do_not_reopen_stream(s3_client, s3_client_stub, stream_class, read_method, initial_state):
+    stream = stream_class(bucket="bucket", key="key", boto3_client=s3_client)
+    expected_params = {"Bucket": "bucket", "Key": "key", "Range": "bytes=0-"}
+
+    if initial_state == "empty":
+        s3_client_stub.add_client_error(
+            "get_object",
+            service_error_code="InvalidRange",
+            http_status_code=416,
+            expected_params=expected_params,
+        )
+        assert stream.read() == b""
+    elif initial_state != "unread":
+        payload = b"hello\nworld"
+        body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+        s3_client_stub.add_response("get_object", {"Body": body}, expected_params)
+        assert stream.read(1) == b"h"
+        if initial_state == "seeked":
+            stream.seek(3)
+
+    position = stream.tell()
+    stream.close()
+    stream.close()
+
+    with pytest.raises(ValueError, match="I/O operation on closed file"):
+        getattr(stream, read_method)()
+
+    assert stream.closed is True
+    assert stream.tell() == position
+    # The stub has no queued responses, so any attempt to reopen the stream would fail the test.
     s3_client_stub.assert_no_pending_responses()
 
 

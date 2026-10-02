@@ -98,6 +98,9 @@ class _S3SeekableIO(IO[bytes]):
         """
         Returns the boto3 StreamingBody, starting the stream from the sought position.
         """
+        if self._closed:
+            raise ValueError("I/O operation on closed file.")
+
         if self._raw_stream is None:
             range_header = f"bytes={self._position}-"
             logger.debug(f"Starting new stream at {range_header}")
