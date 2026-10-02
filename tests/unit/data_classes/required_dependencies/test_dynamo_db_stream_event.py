@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from decimal import Clamped, Context, Inexact, Overflow, Rounded, Underflow
 
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBRecordEventName,
     DynamoDBStreamEvent,
@@ -93,23 +95,23 @@ def test_dynamodb_stream_record_deserialization_large_int():
     record = StreamRecord(data)
     assert record.new_image == {
         "Name": "Joe",
-        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111111000000000000000000000"),
+        "Age": DECIMAL_CONTEXT.create_decimal("1.1011111111111111E+46"),
     }
 
 
-def test_dynamodb_stream_record_deserialization_large_int_without_trailing_zeros():
+@pytest.mark.parametrize("image", ["Keys", "NewImage", "OldImage"])
+def test_dynamodb_stream_record_deserialization_rejects_inexact_numbers(image):
     data = {
-        "Keys": {"key1": {"attr1": "value1"}},
-        "NewImage": {
+        image: {
             "Name": {"S": "Joe"},
             "Age": {"N": "000000011011111111111112222222222221111111111111111111111"},
         },
     }
     record = StreamRecord(data)
-    assert record.new_image == {
-        "Name": "Joe",
-        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111112222222222221111111111"),
-    }
+    attribute = {"Keys": "keys", "NewImage": "new_image", "OldImage": "old_image"}[image]
+
+    with pytest.raises(Inexact):
+        getattr(record, attribute)
 
 
 def test_dynamodb_stream_record_deserialization_zero_value():
