@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 import pytest
@@ -51,3 +52,16 @@ def test_deserializer_error():
 
     with pytest.raises(TypeError):
         model.data.get("Id")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "-12345678901234567890123456789012345678",
+        "1.2345678901234567890123456789012345678",
+        "110111111111111110000000000000000000000",
+        "12345678901234567890123456789012345678000",
+    ],
+)
+def test_deserializer_keeps_value_of_numbers_with_38_digits_of_precision(value):
+    assert TypeDeserializer().deserialize({"N": value}) == Decimal(value)

@@ -93,7 +93,7 @@ def test_dynamodb_stream_record_deserialization_large_int():
     record = StreamRecord(data)
     assert record.new_image == {
         "Name": "Joe",
-        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111111000000000000000000000"),
+        "Age": DECIMAL_CONTEXT.create_decimal("1.1011111111111111E+46"),
     }
 
 
@@ -108,7 +108,7 @@ def test_dynamodb_stream_record_deserialization_large_int_without_trailing_zeros
     record = StreamRecord(data)
     assert record.new_image == {
         "Name": "Joe",
-        "Age": DECIMAL_CONTEXT.create_decimal("11011111111111112222222222221111111111"),
+        "Age": DECIMAL_CONTEXT.create_decimal("1.1011111111111112222222222221111111111E+49"),
     }
 
 

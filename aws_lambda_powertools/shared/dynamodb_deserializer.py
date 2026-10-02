@@ -15,6 +15,9 @@ DYNAMODB_CONTEXT = Context(
     traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
 )
 
+# Strips trailing zeros from numbers longer than 38 digits without trapping
+_NORMALIZE_CONTEXT = Context(prec=38)
+
 
 class TypeDeserializer:
     """
@@ -81,14 +84,14 @@ class TypeDeserializer:
         if not value or value == ".":
             return DYNAMODB_CONTEXT.create_decimal(0)
 
-        if len(value) > 38:
+        number = Decimal(value)
+        if len(number.as_tuple().digits) > 38:
             # See: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes.Number
-            # Calculate the number of trailing zeros after the 38th character
-            tail = len(value[38:]) - len(value[38:].rstrip("0"))
-            # Trim the value: remove trailing zeros if any, or just take the first 38 characters
-            value = value[:-tail] if tail > 0 else value[:38]
+            # Trailing zeros don't count towards the 38 digits of precision, so move them
+            # into the exponent. Cutting characters off the string would change the value.
+            number = number.normalize(_NORMALIZE_CONTEXT)
 
-        return DYNAMODB_CONTEXT.create_decimal(value)
+        return DYNAMODB_CONTEXT.create_decimal(number)
 
     def _deserialize_s(self, value: str) -> str:
         return value
