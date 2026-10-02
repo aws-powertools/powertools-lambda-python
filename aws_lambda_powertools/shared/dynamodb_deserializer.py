@@ -15,8 +15,9 @@ DYNAMODB_CONTEXT = Context(
     traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
 )
 
-# Strips trailing zeros from numbers longer than 38 digits without trapping
+# Allow removing trailing zeros, but reject any loss of precision.
 _NORMALIZE_CONTEXT = Context(prec=38)
+_NORMALIZE_CONTEXT.traps[Inexact] = True
 
 
 class TypeDeserializer:
@@ -78,10 +79,8 @@ class TypeDeserializer:
         return value
 
     def _deserialize_n(self, value: str) -> Decimal:
-        # value is None or "."? It's zero
-        # then return early
-        value = value.lstrip("0")
-        if not value or value == ".":
+        # Preserve the existing fallback for empty strings and a lone decimal point.
+        if value in ("", "."):
             return DYNAMODB_CONTEXT.create_decimal(0)
 
         number = Decimal(value)
