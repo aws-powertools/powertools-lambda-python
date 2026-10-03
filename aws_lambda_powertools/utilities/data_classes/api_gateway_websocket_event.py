@@ -70,6 +70,11 @@ class APIGatewayWebSocketEventRequestContext(DictWrapper):
         return APIGatewayWebSocketEventIdentity(self["identity"])
 
     @property
+    def authorizer(self) -> dict[str, Any]:
+        """Lambda authorizer context, injected on every invocation for the connection. Values are stringified."""
+        return self.get("authorizer") or {}
+
+    @property
     def request_id(self) -> str:
         return self["requestId"]
 
@@ -84,6 +89,15 @@ class APIGatewayWebSocketEventRequestContext(DictWrapper):
     @property
     def api_id(self) -> str:
         return self["apiId"]
+
+    @property
+    def callback_url(self) -> str:
+        """Management API endpoint (`https://{domain_name}/{stage}`) for sending messages back to this connection.
+
+        For connections made through a custom domain name, this URL is only valid when the domain's
+        API mapping path matches the stage name.
+        """
+        return f"https://{self['domainName']}/{self['stage']}"
 
 
 class APIGatewayWebSocketEvent(DictWrapper):
