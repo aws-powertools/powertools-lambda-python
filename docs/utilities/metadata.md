@@ -21,6 +21,17 @@ The Metadata utility allows you to fetch data from the [AWS Lambda Metadata Endp
 
 You can fetch data from the Lambda Metadata Endpoint using the `get_lambda_metadata` function.
 
+Import it from `aws_lambda_powertools.utilities.metadata` (the public package path):
+
+```python
+from aws_lambda_powertools.utilities.metadata import get_lambda_metadata
+```
+
+???+ warning "Import path is `utilities.metadata`"
+    The correct module path is `aws_lambda_powertools.utilities.metadata`.
+
+    Do **not** import from `aws_lambda_powertools.utilities.lambda_metadata` — that path is not part of the public API (even though the implementation file and `get_lambda_metadata` helper share a similar name).
+
 ???+ tip
     Metadata is cached for the duration of the Lambda sandbox, so subsequent calls to `get_lambda_metadata` will return the cached data.
 
