@@ -4355,3 +4355,73 @@ def test_alb_response_typed_none_body_with_validation(gw_event_alb):
     result = app(gw_event_alb, {})
     assert result["statusCode"] == 204
     assert result["body"] == ""
+
+
+def test_scalar_query_parameter_with_commas(gw_event_http):
+    # GIVEN an APIGatewayHttpResolver with validation enabled
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    @app.get("/search")
+    def handler(search: Annotated[str, Query()]):
+        return {"search": search}
+
+    gw_event_http["rawPath"] = "/search"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["rawQueryString"] = "search=hello,world"
+    gw_event_http["queryStringParameters"] = {"search": "hello,world"}
+
+    # WHEN requesting with comma-separated query parameter value
+    result = app(gw_event_http, {})
+
+    # THEN the scalar string parameter should preserve the comma-separated value
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["search"] == "hello,world"
+
+
+def test_header_parameter_with_commas(gw_event_http):
+    # GIVEN an APIGatewayHttpResolver with validation enabled
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    @app.get("/client-ip")
+    def handler(x_forwarded_for: Annotated[str, Header()]):
+        return {"x_forwarded_for": x_forwarded_for}
+
+    gw_event_http["rawPath"] = "/client-ip"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"]["x-forwarded-for"] = "203.0.113.9, 10.0.0.1"
+
+    # WHEN requesting with comma-separated header value
+    result = app(gw_event_http, {})
+
+    # THEN the scalar string header should preserve the comma-separated value
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["x_forwarded_for"] == "203.0.113.9, 10.0.0.1"
+
+
+def test_model_with_comma_separated_fields(gw_event_http):
+    # GIVEN a model with both scalar string and list sequence fields
+    class SearchParams(BaseModel):
+        search: str
+        tags: List[str]
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    @app.get("/items")
+    def handler(params: Annotated[SearchParams, Query()]):
+        return {"search": params.search, "tags": params.tags}
+
+    gw_event_http["rawPath"] = "/items"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["rawQueryString"] = "search=hello,world&tags=a,b"
+    gw_event_http["queryStringParameters"] = {"search": "hello,world", "tags": "a,b"}
+
+    # WHEN requesting with comma values for both scalar and sequence fields
+    result = app(gw_event_http, {})
+
+    # THEN the scalar field preserves commas and sequence field is parsed as list
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["search"] == "hello,world"
+    assert body["tags"] == ["a", "b"]
