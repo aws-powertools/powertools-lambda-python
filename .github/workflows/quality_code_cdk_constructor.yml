@@ -16,6 +16,7 @@ on:
   pull_request:
     paths:
       - "layer_v3/layer_constructors/**"
+      - "layer_v3/docker/**"
       - "layer_v3/pyproject.toml"
       - "layer_v3/uv.lock"
       - ".github/workflows/quality_code_cdk_constructor.yml"
@@ -24,6 +25,7 @@ on:
   push:
     paths:
         - "layer_v3/layer_constructors/**"
+        - "layer_v3/docker/**"
         - "layer_v3/pyproject.toml"
         - "layer_v3/uv.lock"
         - ".github/workflows/quality_code_cdk_constructor.yml"

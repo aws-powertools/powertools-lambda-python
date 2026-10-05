@@ -19,6 +19,8 @@ on:
     paths:
       - "aws_lambda_powertools/**"
       - "tests/**"
+      - "layer_v3/docker/**"
+      - "layer_v3/layer/canary/**"
       - "examples/**"
       - "pyproject.toml"
       - "uv.lock"
@@ -37,6 +39,8 @@ on:
     paths:
       - "aws_lambda_powertools/**"
       - "tests/**"
+      - "layer_v3/docker/**"
+      - "layer_v3/layer/canary/**"
       - "examples/**"
       - "pyproject.toml"
       - "uv.lock"
