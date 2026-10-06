@@ -95,3 +95,25 @@ def test_ses_reply_to_header():
         reply_to=["reply-kwarg@example.com"],
     )
     assert headers_kwarg.reply_to == ["reply-kwarg@example.com"]
+
+
+def test_ses_trigger_event_with_optional_common_headers():
+    # GIVEN an SES event with cc, bcc, sender and reply-to common headers
+    raw_event = load_event("sesEvent.json")
+    raw_event["Records"][0]["ses"]["mail"]["commonHeaders"].update(
+        {
+            "cc": ["cc@example.com"],
+            "bcc": ["bcc@example.com"],
+            "sender": ["sender@example.com"],
+            "replyTo": ["reply@example.com"],
+        },
+    )
+
+    # WHEN parsing the event
+    common_headers = SesModel(**raw_event).Records[0].ses.mail.commonHeaders
+
+    # THEN the optional common headers are populated
+    assert common_headers.cc == ["cc@example.com"]
+    assert common_headers.bcc == ["bcc@example.com"]
+    assert common_headers.sender == ["sender@example.com"]
+    assert common_headers.reply_to == ["reply@example.com"]
