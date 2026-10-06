@@ -33,7 +33,7 @@ test:
 	uv run --locked pytest --cache-clear tests/performance
 
 test-dependencies:
-	uv run --locked nox --error-on-external-run --reuse-venv=yes --non-interactive
+	uv run --locked nox --error-on-external-run --reuse-venv=no --non-interactive
 
 test-pydanticv2:
 	uv run --locked pytest -m "not perf" --ignore tests/e2e

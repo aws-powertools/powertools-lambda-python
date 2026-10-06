@@ -13,6 +13,7 @@ from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse
 
 
 @pytest.mark.usefixtures("pydanticv2_only")
+@pytest.mark.requires_validation
 def test_openapi_3_1_simple_handler(openapi31_schema):
     # GIVEN APIGatewayRestResolver is initialized with enable_validation=True
     app = APIGatewayRestResolver(enable_validation=True)
@@ -45,6 +46,7 @@ def test_openapi_3_0_with_pydantic_v2():
 
 
 @pytest.mark.usefixtures("pydanticv2_only")
+@pytest.mark.requires_validation
 def test_openapi_3_1_complex_handler(openapi31_schema):
     # GIVEN APIGatewayRestResolver is initialized with enable_validation=True
     app = APIGatewayRestResolver(enable_validation=True)
