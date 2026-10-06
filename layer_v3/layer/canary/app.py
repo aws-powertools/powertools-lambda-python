@@ -1,24 +1,50 @@
 import datetime
+import inspect
 import json
 import os
 import platform
 from importlib.metadata import version
 
-import boto3
-from pydantic import HttpUrl
+from bytecode_monitor import track_layer_compilation, verify_layer_bytecode
 
-from aws_lambda_powertools import Logger, Metrics, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.utilities.data_masking import DataMasking
-from aws_lambda_powertools.utilities.parser import BaseModel, envelopes, event_parser
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.utilities.validation import validator
+# Defer cache failures to Create so CloudFormation can still delete the resource.
+with track_layer_compilation() as import_compilations:
+    import boto3
+    from pydantic import HttpUrl
 
-logger = Logger(service="version-track")
-tracer = Tracer()  # this checks for aws-xray-sdk presence
-metrics = Metrics(namespace="powertools-layer-canary", service="PowertoolsLayerCanary")
-data_masker = DataMasking()
-app = APIGatewayRestResolver()
+    from aws_lambda_powertools import Logger, Metrics, Tracer
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+    from aws_lambda_powertools.utilities.data_masking import DataMasking
+    from aws_lambda_powertools.utilities.parser import BaseModel, envelopes, event_parser
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+    from aws_lambda_powertools.utilities.validation import validator
+
+    logger = Logger(service="version-track")
+    tracer = Tracer()  # this checks for aws-xray-sdk presence
+    metrics = Metrics(namespace="powertools-layer-canary", service="PowertoolsLayerCanary")
+    data_masker = DataMasking()
+    app = APIGatewayRestResolver()
+
+    # Model to check parser imports correctly, tests for pydantic
+    class OrderItem(BaseModel):
+        order_id: int
+        quantity: int
+        description: str
+        url: HttpUrl
+
+    # Tests for jmespath presence
+    @event_parser(model=OrderItem, envelope=envelopes.EventBridgeEnvelope)
+    def envelope_handler(event: OrderItem, context: LambdaContext):
+        return event
+
+    # Tests for fastjsonschema presence
+    @validator(
+        inbound_schema={"type": "object", "required": ["order_id", "quantity", "description", "url"]},
+        envelope="detail",
+    )
+    def validator_handler(event, context: LambdaContext):
+        pass
+
 
 layer_arn = os.getenv("POWERTOOLS_LAYER_ARN")
 powertools_version = os.getenv("POWERTOOLS_VERSION")
@@ -26,30 +52,13 @@ stage = os.getenv("LAYER_PIPELINE_STAGE")
 event_bus_arn = os.getenv("VERSION_TRACKING_EVENT_BUS_ARN")
 
 
-# Model to check parser imports correctly, tests for pydantic
-class OrderItem(BaseModel):
-    order_id: int
-    quantity: int
-    description: str
-    url: HttpUrl
-
-
-# Tests for jmespath presence
-@event_parser(model=OrderItem, envelope=envelopes.EventBridgeEnvelope)
-def envelope_handler(event: OrderItem, context: LambdaContext):
-    assert event.order_id != 1
-
-
-# Tests for fastjsonschema presence
-@validator(inbound_schema={}, envelope="detail")
-def validator_handler(event, context: LambdaContext):
-    pass
-
-
 def handler(event):
     logger.info("Running checks")
     check_envs()
     verify_powertools_version()
+    with track_layer_compilation() as check_compilations:
+        verify_layer_functionality()
+    verify_layer_bytecode(import_compilations + check_compilations)
     send_notification()
     return True
 
@@ -96,6 +105,32 @@ def verify_powertools_version() -> None:
             f'Expected Powertools version is "{powertools_version}", but layer contains version "{current_version}"',
         )
     logger.info(f"Current Powertools version is: {current_version} [{_get_architecture()}]")
+
+
+def verify_layer_functionality() -> None:
+    event = {
+        "version": "0",
+        "id": "12345678-1234-1234-1234-123456789012",
+        "source": "powertools.layer.canary",
+        "account": "123456789012",
+        "time": "2026-01-01T00:00:00Z",
+        "region": "us-east-1",
+        "resources": [],
+        "detail-type": "Canary order",
+        "detail": {
+            "order_id": "2",
+            "quantity": 1,
+            "description": "Layer canary",
+            "url": "https://example.com",
+        },
+    }
+    order = envelope_handler(event, None)
+    if not isinstance(order, OrderItem) or order.order_id != 2:
+        raise ValueError("Layer failed to parse the canary event")
+    validator_handler(event, None)
+    if not inspect.getsource(Logger):
+        raise ValueError("Layer Python sources are unavailable")
+    logger.info("Layer parsing, validation, and source inspection passed")
 
 
 def send_notification():
