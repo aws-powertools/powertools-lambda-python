@@ -37,7 +37,7 @@ class SesMailCommonHeaders(BaseModel):
     cc: List[str] | None = None
     bcc: List[str] | None = None
     sender: List[str] | None = None
-    reply_to: List[str] | None = Field(None, alias="reply-to")
+    reply_to: List[str] | None = Field(None, alias="replyTo")
     returnPath: str
     messageId: str
     date: str
