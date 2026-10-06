@@ -2,13 +2,10 @@ name: Quality check - check code
 
 # PROCESS
 #
-# 1. Install all dependencies and spin off containers for all supported Python versions
-# 2. Run code formatters and linters (various checks) for code standard
-# 3. Run static typing checker for potential bugs
-# 4. Run entire test suite for regressions except end-to-end (unit, functional, performance)
-# 5. Run static analysis (in addition to CodeQL) for common insecure code practices
-# 6. Run complexity baseline to avoid error-prone bugs and keep maintenance lower
-# 7. Collect and report on test coverage
+# 1. Run formatting, linting, security and complexity checks once
+# 2. Run both type checkers and the test suite on every supported Python version
+# 3. Validate optional dependencies with Nox on every supported Python version
+# 4. Collect and report on test coverage
 
 # USAGE
 #
@@ -25,6 +22,8 @@ on:
       - "mypy.ini"
       - "Makefile"
       - "noxfile.py"
+      - "ruff.toml"
+      - "bandit.baseline"
       - ".pre-commit-config.yaml"
       - ".github/workflows/quality_check.yml"
       - ".github/workflows/release-v3.yml"
@@ -43,6 +42,8 @@ on:
       - "mypy.ini"
       - "Makefile"
       - "noxfile.py"
+      - "ruff.toml"
+      - "bandit.baseline"
       - ".pre-commit-config.yaml"
       - ".github/workflows/quality_check.yml"
       - ".github/workflows/release-v3.yml"
@@ -55,7 +56,39 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  static_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: true
+          cache-suffix: static-checks
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+      - name: Install dependencies
+        run: make dev-quality-code
+      - name: Check formatting
+        run: make format-check
+      - name: Lint
+        run: make lint-check
+      - name: Security baseline
+        run: make security-baseline
+      - name: Complexity baseline
+        run: make complexity-baseline
+
   quality_check:
     runs-on: ubuntu-latest
     strategy:
@@ -69,21 +102,30 @@ jobs:
       contents: read # checkout code only
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Set up uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "0.12.19"
           enable-cache: true
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
+          cache-suffix: quality-${{ matrix.python-version }}
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+            noxfile.py
       - name: Install dependencies
         run: make dev-quality-code
-      - name: Checking and enforcing format
-        run: make format-check
-      - name: Formatting and Linting
-        run: make lint
+      - name: Cache mypy analysis
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .mypy_cache
+          key: mypy-${{ runner.os }}-${{ runner.arch }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml', 'mypy.ini') }}-${{ github.sha }}
+          restore-keys: |
+            mypy-${{ runner.os }}-${{ runner.arch }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml', 'mypy.ini') }}-
       - name: Static type checking (mypy)
         run: make mypy
       - name: Static type checking (ty)
@@ -92,10 +134,6 @@ jobs:
         run: make test
       - name: Test dependencies with Nox
         run: make test-dependencies
-      - name: Security baseline
-        run: make security-baseline
-      - name: Complexity baseline
-        run: make complexity-baseline
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # 7.1.1
         with:
