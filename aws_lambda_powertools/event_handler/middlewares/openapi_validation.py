@@ -540,6 +540,8 @@ def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
     if _is_or_contains_sequence(field_info.annotation):
         return value
     elif isinstance(value, list) and value:
+        if all(isinstance(v, str) for v in value):
+            return ",".join(value)
         return value[0]
 
     return value
@@ -611,11 +613,14 @@ def _normalize_multi_params(
 
 
 def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
-    """Process a scalar parameter by normalizing single-item lists."""
+    """Process a scalar parameter by normalizing single-item lists or rejoining split strings."""
     try:
         value = input_dict[param.alias]
-        if isinstance(value, list) and len(value) == 1:
-            input_dict[param.alias] = value[0]
+        if isinstance(value, list) and value:
+            if len(value) == 1:
+                input_dict[param.alias] = value[0]
+            elif all(isinstance(v, str) for v in value):
+                input_dict[param.alias] = ",".join(value)
     except KeyError:
         pass
 
