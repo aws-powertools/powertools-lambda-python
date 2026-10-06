@@ -36,6 +36,8 @@ def test_connect_api_gateway_websocket_event():
     assert request_context.domain_name == request_context_raw["domainName"]
     assert request_context.connection_id == request_context_raw["connectionId"]
     assert request_context.api_id == request_context_raw["apiId"]
+    assert request_context.authorizer == {}
+    assert request_context.callback_url == f"https://{request_context_raw['domainName']}/{request_context_raw['stage']}"
 
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
@@ -71,6 +73,8 @@ def test_disconnect_api_gateway_websocket_event():
     assert request_context.domain_name == request_context_raw["domainName"]
     assert request_context.connection_id == request_context_raw["connectionId"]
     assert request_context.api_id == request_context_raw["apiId"]
+    assert request_context.authorizer == {}
+    assert request_context.callback_url == f"https://{request_context_raw['domainName']}/{request_context_raw['stage']}"
 
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
@@ -108,8 +112,24 @@ def test_message_api_gateway_websocket_event():
     assert request_context.domain_name == request_context_raw["domainName"]
     assert request_context.connection_id == request_context_raw["connectionId"]
     assert request_context.api_id == request_context_raw["apiId"]
+    assert request_context.authorizer == {}
+    assert request_context.callback_url == f"https://{request_context_raw['domainName']}/{request_context_raw['stage']}"
 
     identity = request_context.identity
     identity_raw = request_context_raw["identity"]
     assert identity.source_ip == identity_raw["sourceIp"]
     assert identity.user_agent is None
+
+
+def test_lambda_authorizer_api_gateway_websocket_event():
+    raw_event = load_event("apiGatewayWebSocketApiMessage.json")
+    raw_event["requestContext"]["authorizer"] = {
+        "principalId": "user123",
+        "tenantId": "tenant-a",
+        "numKey": "1",
+        "boolKey": "true",
+    }
+    parsed_event = APIGatewayWebSocketEvent(raw_event)
+
+    assert parsed_event.request_context.authorizer == raw_event["requestContext"]["authorizer"]
+    assert parsed_event.request_context.authorizer["principalId"] == "user123"
