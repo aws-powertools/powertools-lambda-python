@@ -63,6 +63,27 @@ class CaseInsensitiveDict(dict):
             super().update((k.lower(), v) for k, v in data)
         super().update((k.lower(), v) for k, v in kwargs.items())
 
+    def copy(self):
+        return CaseInsensitiveDict(self)
+
+    def __or__(self, other):
+        if not isinstance(other, Mapping):
+            return NotImplemented
+        new = self.copy()
+        new.update(other)
+        return new
+
+    def __ror__(self, other):
+        if not isinstance(other, Mapping):
+            return NotImplemented
+        new = CaseInsensitiveDict(other)
+        new.update(self)
+        return new
+
+    def __ior__(self, other):
+        self.update(other)
+        return self
+
     def __contains__(self, k):
         return super().__contains__(k.lower())
 
