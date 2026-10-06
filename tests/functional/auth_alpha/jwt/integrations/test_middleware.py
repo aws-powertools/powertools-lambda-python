@@ -84,8 +84,7 @@ def test_failed_handler_cannot_leak_claims_into_later_invocations(
     event["headers"] = {"authorization": "Bearer " + issue_token()}
     with pytest.raises(RuntimeError, match="handler failed"):
         app.resolve(event, {})
-    assert "claims" not in app.context
-    assert app.context["application_value"] == "preserved"
+    assert app.context == {}
 
     event["headers"] = {}
     public_event = copy.deepcopy(event)
