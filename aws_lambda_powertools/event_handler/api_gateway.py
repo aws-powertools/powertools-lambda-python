@@ -2560,7 +2560,10 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
         BaseRouter.lambda_context = context
 
-        response = self._build_response(self._resolve())
+        try:
+            response = self._build_response(self._resolve())
+        finally:
+            self.clear_context()
 
         # Debug print Processed Middlewares
         if self._debug:
@@ -2568,8 +2571,6 @@ class ApiGatewayResolver(BaseRouter):
             print("======================")
             print("\n".join(self.processed_stack_frames))
             print("======================")
-
-        self.clear_context()
 
         return response
 
@@ -2621,15 +2622,16 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.current_event = self._to_proxy_event(cast(dict, event))
         BaseRouter.lambda_context = context
 
-        response = self._build_response(await self._resolve_async())
+        try:
+            response = self._build_response(await self._resolve_async())
+        finally:
+            self.clear_context()
 
         if self._debug:
             print("\nProcessed Middlewares:")
             print("======================")
             print("\n".join(self.processed_stack_frames))
             print("======================")
-
-        self.clear_context()
 
         return response
 
@@ -3401,19 +3403,15 @@ class ALBResolver(ApiGatewayResolver):
         try:
             self._validate_response_size(response)
         except ResponseSizeExceededError as exc:
-            try:
-                # Resolved responses retain their route, including not-found and preflight responses.
-                handled_response = self._call_exception_handler(exc, cast(Route, response_builder.route))
-                if handled_response is None:
-                    raise
-
-                handled_response.response = cast(Response, self._to_response(handled_response.response))
-                response = super()._build_response(handled_response)
-                # Validate once more without invoking an exception handler recursively.
-                self._validate_response_size(response)
-            except Exception:
-                self.clear_context()
+            # Resolved responses retain their route, including not-found and preflight responses.
+            handled_response = self._call_exception_handler(exc, cast(Route, response_builder.route))
+            if handled_response is None:
                 raise
+
+            handled_response.response = cast(Response, self._to_response(handled_response.response))
+            response = super()._build_response(handled_response)
+            # Validate once more without invoking an exception handler recursively.
+            self._validate_response_size(response)
 
         return response
 
