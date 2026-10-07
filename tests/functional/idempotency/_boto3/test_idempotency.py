@@ -52,7 +52,6 @@ from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import 
     DataclassSerializer,
 )
 from aws_lambda_powertools.utilities.typing import DurableContextProtocol
-from aws_lambda_powertools.utilities.validation import envelopes, validator
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_response_stub,
@@ -686,6 +685,7 @@ def test_idempotent_lambda_first_execution_with_validation(
     [{"use_local_cache": False}, {"use_local_cache": True}],
     indirect=True,
 )
+@pytest.mark.requires_validation
 def test_idempotent_lambda_with_validator_util(
     config_without_jmespath: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -701,6 +701,7 @@ def test_idempotent_lambda_with_validator_util(
     Test idempotent decorator where event with matching event key has already been succesfully processed, using the
     validator utility to unwrap the event
     """
+    from aws_lambda_powertools.utilities.validation import envelopes, validator
 
     stubber = stub.Stubber(persistence_store.client)
     ddb_response = {

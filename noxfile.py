@@ -1,7 +1,7 @@
 # Run nox tests
 #
 # usage:
-#   uv run --locked nox --error-on-external-run --reuse-venv=yes --non-interactive
+#   uv run --locked nox --error-on-external-run --reuse-venv=no --non-interactive
 #
 # If you want to target a specific Python version, add -p parameter
 from __future__ import annotations
@@ -14,7 +14,12 @@ PREFIX_TESTS_FUNCTIONAL = "tests/functional"
 PREFIX_TESTS_UNIT = "tests/unit"
 
 
-def build_and_run_test(session: nox.Session, folders: list, extras: str = "") -> None:
+def build_and_run_test(
+    session: nox.Session,
+    folders: list,
+    extras: str = "",
+    pytest_args: tuple[str, ...] = (),
+) -> None:
     """
     This function is responsible for setting up the testing environment and running the test suite for specific feature.
 
@@ -32,20 +37,29 @@ def build_and_run_test(session: nox.Session, folders: list, extras: str = "") ->
     extras: Optional[str]
         A string representing additional dependencies that should be installed for the test environment.
         If not provided, the function will install the project with basic dependencies
+    pytest_args: tuple[str, ...]
+        Additional pytest arguments for selecting tests with matching dependencies
     """
 
     # Required install to execute any test
-    # Shared fixtures use JSON Schema validation; previously Poetry installed it transitively.
-    session.install("pytest", "pytest-mock", "pytest_socket", "pytest-asyncio", "fastjsonschema")
+    session.install("pytest", "pytest-mock", "pytest_socket", "pytest-asyncio")
 
     # Powertools project folder is in the root
     if extras:
         session.install(f"./[{extras}]")
     else:
         session.install("./")
+        session.run(
+            "python",
+            "-I",
+            "-c",
+            "from importlib.util import find_spec; "
+            "assert find_spec('fastjsonschema') is None, "
+            "'fastjsonschema leaked into the required-dependencies environment'",
+        )
 
     # Execute test in specific folders
-    session.run("pytest", *folders)
+    session.run("pytest", *folders, *pytest_args)
 
 
 @nox.session()
@@ -72,6 +86,7 @@ def test_with_only_required_packages(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/batch/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/kafka_consumer/required_dependencies/",
         ],
+        pytest_args=("-m", "not requires_validation"),
     )
 
 
@@ -121,6 +136,7 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_boto3/",
         ],
         extras="aws-sdk",
+        pytest_args=("-m", "not requires_validation"),
     )
 
 
@@ -132,8 +148,10 @@ def test_with_fastjsonschema_as_required_package(session: nox.Session):
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/validator/_fastjsonschema/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/required_dependencies/test_api_middlewares.py",
         ],
         extras="validation",
+        pytest_args=("-m", "requires_validation"),
     )
 
 
@@ -170,6 +188,29 @@ def test_with_pydantic_required_package(session: nox.Session):
             f"{PREFIX_TESTS_UNIT}/event_handler/_pydantic/",
         ],
         extras="parser",
+        pytest_args=("-m", "not requires_validation"),
+    )
+
+
+@nox.session()
+def test_with_parser_and_validation_required_packages(session: nox.Session):
+    """Validate generated OpenAPI schemas with Parser and Validation dependencies."""
+    build_and_run_test(
+        session,
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/"],
+        extras="parser,validation",
+        pytest_args=("-m", "requires_validation"),
+    )
+
+
+@nox.session()
+def test_with_boto3_and_validation_required_packages(session: nox.Session):
+    """Test Idempotency combined with the Validation decorator."""
+    build_and_run_test(
+        session,
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_boto3/"],
+        extras="aws-sdk,validation",
+        pytest_args=("-m", "requires_validation"),
     )
 
 

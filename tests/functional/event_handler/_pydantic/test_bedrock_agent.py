@@ -186,6 +186,7 @@ def test_bedrock_agent_with_post():
 
 
 @pytest.mark.usefixtures("pydanticv2_only")
+@pytest.mark.requires_validation
 def test_openapi_schema_for_pydanticv2(openapi30_schema):
     # GIVEN BedrockAgentResolver is initialized with enable_validation=True
     app = BedrockAgentResolver(enable_validation=True)
