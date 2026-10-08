@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import typing
-from typing import TYPE_CHECKING, Any, Callable, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, overload
 
 from pydantic import PydanticSchemaGenerationError
 
@@ -21,11 +21,61 @@ from aws_lambda_powertools.utilities.parser.functions import (
 )
 
 if TYPE_CHECKING:
-    from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
+    from pydantic import TypeAdapter
+
+    from aws_lambda_powertools.shared.types import LambdaHandler
+    from aws_lambda_powertools.utilities.parser.envelopes.base import BaseEnvelope, Envelope
     from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, T
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
+
+ModelT_co = TypeVar("ModelT_co", covariant=True)
+ModelT = TypeVar("ModelT")
+ReturnT = TypeVar("ReturnT")
+
+
+class _EventParserModelHandlerDecorator(Protocol[ModelT_co]):
+    def __call__(
+        self,
+        handler: Callable[[ModelT_co, LambdaContext], ReturnT],
+        /,
+    ) -> LambdaHandler[dict[str, Any] | str, LambdaContext, ReturnT]: ...
+
+
+class _EventParserHandlerDecorator(Protocol):
+    # The handler's event type is Any, as it can't be derived from the arguments, e.g.
+    # - @event_parser()
+    # - @event_parser(model=Annotated[A | B, Field(discriminator="kind")])
+    # - @event_parser(model=A, envelope=SqsEnvelope)
+    def __call__(
+        self,
+        handler: Callable[[Any, LambdaContext], ReturnT],
+        /,
+    ) -> LambdaHandler[dict[str, Any] | str, LambdaContext, ReturnT]: ...
+
+
+@overload
+def event_parser(
+    handler: Callable[[Any, LambdaContext], ReturnT],
+    /,
+) -> LambdaHandler[dict[str, Any] | str, LambdaContext, ReturnT]: ...
+
+
+@overload
+def event_parser(
+    *,
+    model: type[ModelT] | TypeAdapter[ModelT],
+    envelope: None = None,
+) -> _EventParserModelHandlerDecorator[ModelT]: ...
+
+
+@overload
+def event_parser(
+    *,
+    model: Any = None,
+    envelope: type[BaseEnvelope] | None = None,
+) -> _EventParserHandlerDecorator: ...
 
 
 @lambda_handler_decorator

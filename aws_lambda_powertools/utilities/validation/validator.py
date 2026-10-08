@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities import jmespath_utils
@@ -10,7 +10,68 @@ from aws_lambda_powertools.utilities.validation.base import validate_data_agains
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.shared.types import LambdaHandler
+
 logger = logging.getLogger(__name__)
+
+EventT = TypeVar("EventT")
+ContextT = TypeVar("ContextT")
+ReturnT = TypeVar("ReturnT")
+
+
+class _ValidatorHandlerDecorator(Protocol):
+    def __call__(
+        self,
+        handler: Callable[[EventT, ContextT], ReturnT],
+        /,
+    ) -> LambdaHandler[EventT, ContextT, ReturnT]: ...
+
+
+class _ValidatorEnvelopeHandlerDecorator(Protocol):
+    # The handler's event type is Any, as it can't be derived from the arguments, e.g.
+    # - @validator(envelope=envelopes.SQS)
+    def __call__(
+        self,
+        handler: Callable[[Any, ContextT], ReturnT],
+        /,
+    ) -> LambdaHandler[dict[str, Any] | str, ContextT, ReturnT]: ...
+
+
+@overload
+def validator(
+    handler: Callable[[EventT, ContextT], ReturnT],
+    /,
+) -> LambdaHandler[EventT, ContextT, ReturnT]: ...
+
+
+@overload
+def validator(
+    *,
+    inbound_schema: dict | None = None,
+    inbound_formats: dict | None = None,
+    inbound_handlers: dict | None = None,
+    inbound_provider_options: dict | None = None,
+    outbound_schema: dict | None = None,
+    outbound_formats: dict | None = None,
+    outbound_handlers: dict | None = None,
+    outbound_provider_options: dict | None = None,
+) -> _ValidatorHandlerDecorator: ...
+
+
+@overload
+def validator(
+    *,
+    inbound_schema: dict | None = None,
+    inbound_formats: dict | None = None,
+    inbound_handlers: dict | None = None,
+    inbound_provider_options: dict | None = None,
+    outbound_schema: dict | None = None,
+    outbound_formats: dict | None = None,
+    outbound_handlers: dict | None = None,
+    outbound_provider_options: dict | None = None,
+    envelope: str,
+    jmespath_options: dict | None = None,
+) -> _ValidatorEnvelopeHandlerDecorator: ...
 
 
 @lambda_handler_decorator
