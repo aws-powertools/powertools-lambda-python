@@ -3,13 +3,14 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
+from pydantic import field_validator
+
 from aws_lambda_powertools.utilities.parser import BaseEnvelope, BaseModel, event_parser
 from aws_lambda_powertools.utilities.parser.functions import (
     _parse_and_validate_event,
     _retrieve_or_set_model_from_cache,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.utilities.validation import validator
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.parser.types import T
@@ -23,7 +24,8 @@ class CancelOrder(BaseModel):
 class CancelOrderModel(BaseModel):
     body: CancelOrder
 
-    @validator("body", pre=True)
+    @field_validator("body", mode="before")
+    @classmethod
     def transform_body_to_dict(cls, value):
         return json.loads(value) if isinstance(value, str) else value
 

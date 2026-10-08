@@ -7,6 +7,7 @@ from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.shared.types import LambdaHandler
     from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -15,7 +16,7 @@ OutputT = TypeVar("OutputT")
 
 
 class _EventSourceDecorator(Protocol):
-    """Annotation of event_source, that lambda_handler_decorator erases at runtime."""
+    """Type of `event_source`, as `lambda_handler_decorator` returns an untyped `Callable`."""
 
     def __call__(
         self,
@@ -23,7 +24,7 @@ class _EventSourceDecorator(Protocol):
         data_class: type[DataClassT],
     ) -> Callable[
         [Callable[[DataClassT, LambdaContext], OutputT]],
-        Callable[[dict[str, Any], LambdaContext], OutputT],
+        LambdaHandler[dict[str, Any], LambdaContext, OutputT],
     ]: ...
 
 
