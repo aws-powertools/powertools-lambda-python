@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 from pydantic.types import PositiveInt
 
 
@@ -37,7 +37,11 @@ class SesMailCommonHeaders(BaseModel):
     cc: List[str] | None = None
     bcc: List[str] | None = None
     sender: List[str] | None = None
-    reply_to: List[str] | None = Field(None, alias="reply-to")
+    reply_to: List[str] | None = Field(
+        None,
+        validation_alias=AliasChoices("replyTo", "reply-to", "reply_to"),
+        serialization_alias="replyTo",
+    )
     returnPath: str
     messageId: str
     date: str
