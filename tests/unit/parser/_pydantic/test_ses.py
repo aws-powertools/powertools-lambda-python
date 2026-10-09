@@ -50,3 +50,45 @@ def test_ses_trigger_event():
     assert action.type == raw_receipt["action"]["type"]
     assert action.functionArn == raw_receipt["action"]["functionArn"]
     assert action.invocationType == raw_receipt["action"]["invocationType"]
+
+
+def test_ses_reply_to_header():
+    from aws_lambda_powertools.utilities.parser.models.ses import SesMailCommonHeaders
+
+    # Test with standard SES notification camelCase payload
+    headers_camel = SesMailCommonHeaders.model_validate({
+        "from": ["sender@example.com"],
+        "to": ["receiver@example.com"],
+        "returnPath": "bounce@example.com",
+        "messageId": "<msg-001@example.com>",
+        "date": "Wed, 7 Oct 2026 12:34:56 -0700",
+        "subject": "SES Subject",
+        "replyTo": ["reply@example.com"],
+    })
+    assert headers_camel.reply_to == ["reply@example.com"]
+    assert headers_camel.model_dump(by_alias=True)["replyTo"] == ["reply@example.com"]
+
+    # Test backwards compatibility with hyphenated alias
+    headers_hyphen = SesMailCommonHeaders.model_validate({
+        "from": ["sender@example.com"],
+        "to": ["receiver@example.com"],
+        "returnPath": "bounce@example.com",
+        "messageId": "<msg-002@example.com>",
+        "date": "Wed, 7 Oct 2026 12:34:56 -0700",
+        "subject": "SES Subject",
+        "reply-to": ["reply-hyphen@example.com"],
+    })
+    assert headers_hyphen.reply_to == ["reply-hyphen@example.com"]
+
+    # Test keyword argument instantiation
+    headers_kwarg = SesMailCommonHeaders(
+        **{"from": ["sender@example.com"]},
+        to=["receiver@example.com"],
+        returnPath="bounce@example.com",
+        messageId="<msg-003@example.com>",
+        date="Wed, 7 Oct 2026 12:34:56 -0700",
+        subject="SES Subject",
+        reply_to=["reply-kwarg@example.com"],
+    )
+    assert headers_kwarg.reply_to == ["reply-kwarg@example.com"]
+
