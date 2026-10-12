@@ -30,6 +30,7 @@ def test_with_no_configuration_constructor():
         lambda_.Runtime.PYTHON_3_12,
         lambda_.Runtime.PYTHON_3_13,
         lambda_.Runtime.PYTHON_3_14,
+        lambda_.Runtime("python3.15", lambda_.RuntimeFamily.PYTHON, supports_inline_code=True),
     ],
 )
 def test_with_different_python_version_x86_64(python_version):
@@ -66,6 +67,7 @@ def test_with_different_python_version_x86_64(python_version):
         lambda_.Runtime.PYTHON_3_12,
         lambda_.Runtime.PYTHON_3_13,
         lambda_.Runtime.PYTHON_3_14,
+        lambda_.Runtime("python3.15", lambda_.RuntimeFamily.PYTHON, supports_inline_code=True),
     ],
 )
 def test_with_different_python_version_arm64(python_version):

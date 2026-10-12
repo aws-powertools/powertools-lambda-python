@@ -59,16 +59,20 @@ jobs:
         name: Partition (China)
         if: ${{ inputs.partition == 'China' }}
         run: |
-          echo regions='["cn-north-1"]'>> "$GITHUB_OUTPUT"
-          echo partition='aws-cn'>> "$GITHUB_OUTPUT"
-          echo aud='sts.amazonaws.com.cn'>> "$GITHUB_OUTPUT"
+          {
+            echo regions='["cn-north-1"]'
+            echo partition='aws-cn'
+            echo aud='sts.amazonaws.com.cn'
+          } >> "$GITHUB_OUTPUT"
       - id: regions_govcloud
         name: Partition (GovCloud)
         if: ${{ inputs.partition == 'GovCloud' }}
         run: |
-          echo regions='["us-gov-east-1", "us-gov-west-1"]'>> "$GITHUB_OUTPUT"
-          echo partition='aws-us-gov'>> "$GITHUB_OUTPUT"
-          echo aud='sts.amazonaws.com'>> "$GITHUB_OUTPUT"
+          {
+            echo regions='["us-gov-east-1", "us-gov-west-1"]'
+            echo partition='aws-us-gov'
+            echo aud='sts.amazonaws.com'
+          } >> "$GITHUB_OUTPUT"
   download:
     runs-on: ubuntu-latest
     permissions:
@@ -83,6 +87,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
           - AWSLambdaPowertoolsPythonV3-python313
           - AWSLambdaPowertoolsPythonV3-python314
+          - AWSLambdaPowertoolsPythonV3-python315
         arch:
           - arm64
           - x86_64
@@ -154,6 +159,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
           - AWSLambdaPowertoolsPythonV3-python313
           - AWSLambdaPowertoolsPythonV3-python314
+          - AWSLambdaPowertoolsPythonV3-python315
         arch:
           - arm64
           - x86_64

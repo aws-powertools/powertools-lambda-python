@@ -19,7 +19,7 @@ from aws_cdk.aws_iam import (
     Role,
     ServicePrincipal,
 )
-from aws_cdk.aws_lambda import Architecture, Code, Function, LayerVersion, Runtime
+from aws_cdk.aws_lambda import Architecture, Code, Function, LayerVersion, Runtime, RuntimeFamily
 from aws_cdk.aws_logs import RetentionDays
 from aws_cdk.aws_ssm import StringParameter
 from aws_cdk.custom_resources import Provider
@@ -141,6 +141,9 @@ class Canary(Construct):
             runtime = Runtime.PYTHON_3_13
         elif python_version == "python3.14":
             runtime = Runtime.PYTHON_3_14
+        elif python_version == "python3.15":
+            # Use the runtime name until CDK provides PYTHON_3_15.
+            runtime = Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True)
         else:
             raise ValueError("Unsupported Python version")
 
