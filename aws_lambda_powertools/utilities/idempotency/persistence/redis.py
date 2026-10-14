@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 import logging
 from contextlib import contextmanager
@@ -325,7 +325,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         Calculates the number of seconds remaining until a specified expiry time
         """
         if expiry_timestamp:
-            return expiry_timestamp - int(datetime.datetime.now().timestamp())
+            return expiry_timestamp - int(dt.datetime.now().timestamp())
         return self.expires_after_seconds
 
     def _item_to_data_record(self, idempotency_key: str, item: dict[str, Any]) -> DataRecord:
@@ -378,7 +378,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         if self.payload_validation_enabled:
             item["mapping"][self.validation_key_attr] = data_record.payload_hash
 
-        now = datetime.datetime.now()
+        now = dt.datetime.now()
         try:
             # |     LOCKED     |         RETRY if status = "INPROGRESS"                |     RETRY
             # |----------------|-------------------------------------------------------|-------------> .... (time)
