@@ -79,6 +79,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         query_string = _normalize_multi_params(
             app.current_event.resolved_query_string_parameters,
             route.dependant.query_params,
+            multi_dict=getattr(app.current_event, "multi_value_query_string_parameters", None),
         )
 
         # Process query values
@@ -91,6 +92,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         headers = _normalize_multi_params(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
+            multi_dict=getattr(app.current_event, "multi_value_headers", None),
         )
 
         # Process header values
@@ -531,7 +533,25 @@ def _is_or_contains_sequence(annotation: Any) -> bool:
     return False
 
 
-def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
+def _lookup_raw_value(raw_dict: Mapping[str, Any] | None, key: str) -> Any:
+    if not raw_dict:
+        return None
+    if key in raw_dict:
+        return raw_dict[key]
+    key_lower = key.lower()
+    for k, v in raw_dict.items():
+        if k.lower() == key_lower:
+            return v
+    return None
+
+
+def _normalize_field_value(
+    value: Any,
+    field_info: FieldInfo,
+    field_alias: str | None = None,
+    field_name: str | None = None,
+    multi_dict: Mapping[str, list[Any]] | None = None,
+) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
     # When annotation is bytes but value is UploadFile, extract raw content
     if isinstance(value, UploadFile) and field_info.annotation is bytes:
@@ -539,8 +559,17 @@ def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
 
     if _is_or_contains_sequence(field_info.annotation):
         return value
-    elif isinstance(value, list) and value:
-        if all(isinstance(v, str) for v in value):
+
+    if isinstance(value, list) and value:
+        keys_to_check = [k for k in (field_alias, field_name) if k is not None]
+        is_repeated = False
+        if multi_dict:
+            is_repeated = any(
+                isinstance(multi_val := _lookup_raw_value(multi_dict, k), list) and len(multi_val) > 1
+                for k in keys_to_check
+            )
+
+        if not is_repeated and all(isinstance(v, str) for v in value):
             return ",".join(value)
         return value[0]
 
@@ -588,6 +617,7 @@ def _get_embed_body(
 def _normalize_multi_params(
     input_dict: MutableMapping[str, Any],
     params: Sequence[ModelField],
+    multi_dict: Mapping[str, list[Any]] | None = None,
 ) -> MutableMapping[str, Any]:
     """
     Extract and normalize query string or header parameters with Pydantic model support.
@@ -598,6 +628,8 @@ def _normalize_multi_params(
         A dictionary containing the initial query string or header parameters.
     params: Sequence[ModelField]
         A sequence of ModelField objects representing parameters.
+    multi_dict: Mapping[str, list[Any]], optional
+        The multi-value parameters dictionary when available (e.g. from REST v1 or ALB).
 
     Returns
     -------
@@ -606,26 +638,44 @@ def _normalize_multi_params(
     """
     for param in params:
         if is_scalar_field(param):
-            _process_scalar_param(input_dict, param)
+            _process_scalar_param(input_dict, param, multi_dict=multi_dict)
         elif lenient_issubclass(param.field_info.annotation, BaseModel):
-            _process_model_param(input_dict, param)
+            _process_model_param(input_dict, param, multi_dict=multi_dict)
     return input_dict
 
 
-def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
-    """Process a scalar parameter by normalizing single-item lists or rejoining split strings."""
+def _process_scalar_param(
+    input_dict: MutableMapping[str, Any],
+    param: ModelField,
+    multi_dict: Mapping[str, list[Any]] | None = None,
+) -> None:
+    """Process a scalar parameter by normalizing multi-values or preserving comma-separated strings."""
     try:
         value = input_dict[param.alias]
-        if isinstance(value, list) and value:
-            if len(value) == 1:
-                input_dict[param.alias] = value[0]
-            elif all(isinstance(v, str) for v in value):
-                input_dict[param.alias] = ",".join(value)
     except KeyError:
-        pass
+        return
+
+    # Check if this parameter was genuinely repeated via multi-value parameters
+    if multi_dict:
+        multi_val = _lookup_raw_value(multi_dict, param.alias)
+        if isinstance(multi_val, list) and len(multi_val) > 1:
+            input_dict[param.alias] = value[0]
+            return
+
+    if isinstance(value, list) and value:
+        if len(value) == 1:
+            input_dict[param.alias] = value[0]
+        elif all(isinstance(v, str) for v in value):
+            input_dict[param.alias] = ",".join(value)
+        else:
+            input_dict[param.alias] = value[0]
 
 
-def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+def _process_model_param(
+    input_dict: MutableMapping[str, Any],
+    param: ModelField,
+    multi_dict: Mapping[str, list[Any]] | None = None,
+) -> None:
     """Process a Pydantic model parameter by extracting model fields."""
     model_class = cast(type[BaseModel], param.field_info.annotation)
 
@@ -635,7 +685,13 @@ def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField
         value = _get_param_value(input_dict, field_alias, field_name, model_class)
 
         if value is not None:
-            model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
+            model_data[field_alias] = _normalize_field_value(
+                value=value,
+                field_info=field_info,
+                field_alias=field_alias,
+                field_name=field_name,
+                multi_dict=multi_dict,
+            )
 
     input_dict[param.alias] = model_data
 

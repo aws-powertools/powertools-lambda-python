@@ -4425,3 +4425,127 @@ def test_model_with_comma_separated_fields(gw_event_http):
     body = json.loads(result["body"])
     assert body["search"] == "hello,world"
     assert body["tags"] == ["a", "b"]
+
+
+def test_scalar_and_model_repeated_query_params_on_rest_v1(gw_event):
+    # GIVEN a REST v1 resolver with repeated query params in multiValueQueryStringParameters
+    class SearchParams(BaseModel):
+        search: str
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def handler(
+        search: Annotated[str, Query()],
+        model_params: Annotated[SearchParams, Query()],
+    ):
+        return {"scalar_search": search, "model_search": model_params.search}
+
+    gw_event["path"] = "/search"
+    gw_event["httpMethod"] = "GET"
+    gw_event["queryStringParameters"] = {"search": "b"}
+    gw_event["multiValueQueryStringParameters"] = {"search": ["a", "b"]}
+
+    # WHEN requesting with genuinely repeated query parameters
+    result = app(gw_event, {})
+
+    # THEN both scalar and model string fields receive the first value, not joined with comma
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["scalar_search"] == "a"
+    assert body["model_search"] == "a"
+
+
+def test_scalar_and_model_repeated_query_params_on_alb(gw_event_alb):
+    # GIVEN an ALB resolver with repeated query params in multiValueQueryStringParameters
+    class SearchParams(BaseModel):
+        search: str
+
+    app = ALBResolver(enable_validation=True)
+
+    @app.get("/search")
+    def handler(
+        search: Annotated[str, Query()],
+        model_params: Annotated[SearchParams, Query()],
+    ):
+        return {"scalar_search": search, "model_search": model_params.search}
+
+    gw_event_alb["path"] = "/search"
+    gw_event_alb["httpMethod"] = "GET"
+    gw_event_alb["queryStringParameters"] = {"search": "b"}
+    gw_event_alb["multiValueQueryStringParameters"] = {"search": ["a", "b"]}
+
+    # WHEN requesting with genuinely repeated query parameters
+    result = app(gw_event_alb, {})
+
+    # THEN both scalar and model string fields receive the first value, not joined with comma
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["scalar_search"] == "a"
+    assert body["model_search"] == "a"
+
+
+def test_scalar_and_model_comma_query_params_on_rest_v1(gw_event):
+    # GIVEN a REST v1 resolver with comma-separated query parameters
+    class SearchParams(BaseModel):
+        coords: str
+        tags: List[str]
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def handler(
+        search: Annotated[str, Query()],
+        params: Annotated[SearchParams, Query()],
+    ):
+        return {"search": search, "coords": params.coords, "tags": params.tags}
+
+    gw_event["path"] = "/search"
+    gw_event["httpMethod"] = "GET"
+    gw_event["queryStringParameters"] = {"search": "hello,world", "coords": "49.26,-123.25", "tags": "a,b"}
+    gw_event["multiValueQueryStringParameters"] = {
+        "search": ["hello,world"],
+        "coords": ["49.26,-123.25"],
+        "tags": ["a", "b"],
+    }
+
+    result = app(gw_event, {})
+
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["search"] == "hello,world"
+    assert body["coords"] == "49.26,-123.25"
+    assert body["tags"] == ["a", "b"]
+
+
+def test_scalar_and_model_comma_query_params_on_alb(gw_event_alb):
+    # GIVEN an ALB resolver with comma-separated query parameters
+    class SearchParams(BaseModel):
+        coords: str
+        tags: List[str]
+
+    app = ALBResolver(enable_validation=True)
+
+    @app.get("/search")
+    def handler(
+        search: Annotated[str, Query()],
+        params: Annotated[SearchParams, Query()],
+    ):
+        return {"search": search, "coords": params.coords, "tags": params.tags}
+
+    gw_event_alb["path"] = "/search"
+    gw_event_alb["httpMethod"] = "GET"
+    gw_event_alb["queryStringParameters"] = {"search": "hello,world", "coords": "49.26,-123.25", "tags": "a,b"}
+    gw_event_alb["multiValueQueryStringParameters"] = {
+        "search": ["hello,world"],
+        "coords": ["49.26,-123.25"],
+        "tags": ["a", "b"],
+    }
+
+    result = app(gw_event_alb, {})
+
+    assert result["statusCode"] == 200
+    body = json.loads(result["body"])
+    assert body["search"] == "hello,world"
+    assert body["coords"] == "49.26,-123.25"
+    assert body["tags"] == ["a", "b"]
