@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 import warnings
 from collections import namedtuple
@@ -63,7 +63,7 @@ def serialize_single_metric(
     dimension: dict[str, Any],
     namespace: str,
     metadata: dict[str, Any] | None = None,
-    timestamp: int | datetime.datetime | None = None,
+    timestamp: int | dt.datetime | None = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -159,7 +159,7 @@ def test_single_metric_with_custom_timestamp(capsys, metric, dimension, namespac
 
     default_dimensions = {dimension["name"]: dimension["value"]}
 
-    timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+    timestamp = int((dt.datetime.now() - dt.timedelta(days=2)).timestamp() * 1000)
     with single_metric(
         namespace=namespace,
         default_dimensions=default_dimensions,
@@ -1448,7 +1448,7 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
 
 @pytest.mark.parametrize(
     "timestamp",
-    [int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000), 1711105187000],
+    [int((dt.datetime.now() - dt.timedelta(days=2)).timestamp() * 1000), 1711105187000],
 )
 def test_metric_with_custom_timestamp(namespace, metric, capsys, timestamp):
     # GIVEN Metrics instance is initialized
@@ -1475,7 +1475,7 @@ def test_metric_custom_timestamp_more_than_14days_ago(namespace, metric):
     my_metrics = Metrics(namespace=namespace)
 
     # Setting timestamp outside of contraints with 20 days before
-    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=20)).timestamp() * 1000)
+    metric_timestamp = int((dt.datetime.now() - dt.timedelta(days=20)).timestamp() * 1000)
 
     # WHEN we set a wrong timestamp before to flush the metric
     @my_metrics.log_metrics

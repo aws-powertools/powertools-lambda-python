@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import logging
 from typing import Any, Dict
 
@@ -80,7 +80,7 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         if self.payload_validation_enabled:
             item[self.validation_key_attr] = data_record.payload_hash
 
-        now = datetime.datetime.now()
+        now = dt.datetime.now()
         try:
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
             self.table.put_item(

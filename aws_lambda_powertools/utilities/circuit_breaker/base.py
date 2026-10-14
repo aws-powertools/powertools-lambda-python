@@ -8,7 +8,7 @@ path write-free: failures are counted locally and only persisted on a state tran
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import os
 import threading
@@ -281,4 +281,4 @@ class CircuitBreakerHandler:
     @staticmethod
     def _now() -> int:
         """Current unix timestamp in seconds."""
-        return int(datetime.datetime.now().timestamp())
+        return int(dt.datetime.now().timestamp())
