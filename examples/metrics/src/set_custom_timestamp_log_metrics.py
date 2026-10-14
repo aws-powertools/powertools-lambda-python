@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from aws_lambda_powertools import Metrics
 from aws_lambda_powertools.metrics import MetricUnit
@@ -11,5 +11,5 @@ metrics = Metrics()
 def lambda_handler(event: dict, context: LambdaContext):
     metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
 
-    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+    metric_timestamp = int((dt.datetime.now() - dt.timedelta(days=2)).timestamp() * 1000)
     metrics.set_timestamp(metric_timestamp)
