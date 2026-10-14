@@ -4,7 +4,7 @@ Persistence layers supporting idempotency
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import hashlib
 import json
 import logging
@@ -48,7 +48,7 @@ class _IdempotencyKeyEncoder(Encoder):
         except TypeError:
             if isinstance(obj, Enum):
                 return obj.value
-            if isinstance(obj, (datetime.date, datetime.time)):
+            if isinstance(obj, (dt.date, dt.time)):
                 return obj.isoformat()
             if isinstance(obj, (UUID, PurePath)):
                 return str(obj)
@@ -240,8 +240,8 @@ class BasePersistenceLayer(ABC):
             unix timestamp of expiry date for idempotency record
 
         """
-        now = datetime.datetime.now()
-        period = datetime.timedelta(seconds=self.expires_after_seconds)
+        now = dt.datetime.now()
+        period = dt.timedelta(seconds=self.expires_after_seconds)
         return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
@@ -345,8 +345,8 @@ class BasePersistenceLayer(ABC):
         # Therefore, we need to check if remaining_time_in_millis is not None (>=0) to handle this case.
         # See: https://github.com/aws-powertools/powertools-lambda-python/issues/4759
         if remaining_time_in_millis is not None:
-            now = datetime.datetime.now()
-            period = datetime.timedelta(milliseconds=remaining_time_in_millis)
+            now = dt.datetime.now()
+            period = dt.timedelta(milliseconds=remaining_time_in_millis)
             timestamp = (now + period).timestamp()
             data_record.in_progress_expiry_timestamp = int(timestamp * 1000)
         else:
