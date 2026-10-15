@@ -1054,6 +1054,9 @@ Explore how to handle conditional write errors in high-concurrency scenarios wit
 
 The idempotency utility provides several routes to test your code.
 
+???+ tip "Type-checked tests"
+    The `idempotent` decorator is typed, so a decorated handler expects a `LambdaContext` as its second argument. When you use a lightweight fake context in tests, as in the examples below, `cast` it to `LambdaContext` to keep your type checker happy. Runtime behaviour is unchanged.
+
 ### Disabling the idempotency utility
 
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
@@ -1061,7 +1064,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "test_disabling_idempotency_utility.py"
 
-    ```python hl_lines="3 4 23 24"
+    ```python hl_lines="4 5 23 26 28"
     --8<-- "examples/idempotency/tests/test_disabling_idempotency_utility.py"
     ```
 
@@ -1077,7 +1080,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 === "test_with_dynamodb_local.py"
 
-    ```python hl_lines="3-5 25 26"
+    ```python hl_lines="4 5 6 24 29 30"
     --8<-- "examples/idempotency/tests/test_with_dynamodb_local.py"
     ```
 
@@ -1094,7 +1097,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "test_with_io_operations.py"
 
-    ```python hl_lines="4 5 24 25 27"
+    ```python hl_lines="5 6 24 28 29 31"
     --8<-- "examples/idempotency/tests/test_with_io_operations.py"
     ```
 
@@ -1110,7 +1113,7 @@ To test locally, you can either utilize [fakeredis-py](https://github.com/cunla/
 
 === "test_with_mock_redis.py"
 
-    ```python hl_lines="2 3 29 31"
+    ```python hl_lines="3 4 30 32"
     --8<-- "examples/idempotency/tests/test_with_mock_redis.py"
     ```
 
@@ -1124,7 +1127,7 @@ If you want to set up a real Redis client for integration testing, you can refer
 
 === "test_with_real_redis.py"
 
-    ```python hl_lines="3 4 29 38"
+    ```python hl_lines="4 5 30 39"
     --8<-- "examples/idempotency/tests/test_with_real_redis.py"
     ```
 
