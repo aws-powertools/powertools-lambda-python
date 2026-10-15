@@ -61,7 +61,7 @@ class CaseInsensitiveDict(dict):
             if isinstance(data, Mapping):
                 data = data.items()
             super().update((k.lower(), v) for k, v in data)
-        super().update((k.lower(), v) for k, v in kwargs)
+        super().update((k.lower(), v) for k, v in kwargs.items())
 
     def __contains__(self, k):
         return super().__contains__(k.lower())

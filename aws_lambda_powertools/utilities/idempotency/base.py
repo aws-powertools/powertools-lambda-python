@@ -6,7 +6,7 @@ Base for Idempotency utility
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
@@ -255,7 +255,7 @@ class IdempotencyHandler:
 
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
             if data_record.in_progress_expiry_timestamp is not None and data_record.in_progress_expiry_timestamp < int(
-                datetime.datetime.now().timestamp() * 1000,
+                dt.datetime.now().timestamp() * 1000,
             ):
                 raise IdempotencyInconsistentStateError(
                     "item should have been expired in-progress because it already time-outed.",

@@ -5,8 +5,10 @@ import logging
 from typing import IO, TYPE_CHECKING, Any, TypeVar
 
 import boto3
+from botocore.exceptions import ClientError
 
 from aws_lambda_powertools.shared import user_agent
+from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 from aws_lambda_powertools.utilities.streaming.constants import MESSAGE_STREAM_NOT_WRITABLE
 
 if TYPE_CHECKING:
@@ -14,8 +16,6 @@ if TYPE_CHECKING:
     from mmap import mmap
 
     from mypy_boto3_s3.client import S3Client
-
-    from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
     _CData = TypeVar("_CData")
 
@@ -98,10 +98,21 @@ class _S3SeekableIO(IO[bytes]):
         """
         Returns the boto3 StreamingBody, starting the stream from the sought position.
         """
+        if self._closed:
+            raise ValueError("I/O operation on closed file.")
+
         if self._raw_stream is None:
             range_header = f"bytes={self._position}-"
             logger.debug(f"Starting new stream at {range_header}")
-            self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
+            try:
+                self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
+            except ClientError as exc:
+                # S3 rejects a range that starts at or past the end of the object, which includes any range
+                # on an empty object. A file returns no data at that position instead of raising.
+                if exc.response.get("Error", {}).get("Code") != "InvalidRange":
+                    raise
+                logger.debug(f"Position {self._position} is at or past the end of the object")
+                self._raw_stream = PowertoolsStreamingBody(raw_stream=io.BytesIO(b""), content_length=0)
             self._closed = False
 
         return self._raw_stream
@@ -183,7 +194,9 @@ class _S3SeekableIO(IO[bytes]):
         self.close()
 
     def close(self) -> None:
-        self.raw_stream.close()
+        # Only close a stream that is already open, rather than opening a new one just to close it
+        if self._raw_stream is not None:
+            self._raw_stream.close()
         self._closed = True
 
     def fileno(self) -> int:

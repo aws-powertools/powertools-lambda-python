@@ -40,6 +40,9 @@ pip install "aws-lambda-powertools[oauth2]"
 
 The `oauth2` extra installs urllib3; PyJWT and cryptography are not required.
 
+???+ note "Using the Lambda layer"
+    The Powertools for AWS Lambda layer does not include urllib3. With the layer, this utility uses the urllib3 that comes with the Lambda runtime. To control the urllib3 version yourself, install the `oauth2` extra and package it with your function.
+
 #### Compatibility with boto3
 
 If the function also uses boto3, including through Parameters, install and validate the SDK together with OAuth:
