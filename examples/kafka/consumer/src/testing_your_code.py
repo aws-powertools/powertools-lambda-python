@@ -3,6 +3,8 @@ import json
 
 from lambda_handler_test import lambda_handler
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
 
 def test_process_json_message():
     """Test processing a simple JSON message"""
@@ -25,7 +27,7 @@ def test_process_json_message():
     }
 
     # Invoke the Lambda handler
-    response = lambda_handler(test_event, {})
+    response = lambda_handler(test_event, LambdaContext())
 
     # Verify the response
     assert response["statusCode"] == 200
@@ -56,7 +58,7 @@ def test_process_multiple_records():
     }
 
     # Invoke the Lambda handler
-    response = lambda_handler(test_event, {})
+    response = lambda_handler(test_event, LambdaContext())
 
     # Verify the response
     assert response["statusCode"] == 200

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecords
@@ -8,8 +8,33 @@ from aws_lambda_powertools.utilities.kafka.consumer_records import ConsumerRecor
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.shared.types import LambdaHandler
     from aws_lambda_powertools.utilities.kafka.schema_config import SchemaConfig
     from aws_lambda_powertools.utilities.typing import LambdaContext
+
+ReturnT = TypeVar("ReturnT")
+
+
+class _KafkaConsumerHandlerDecorator(Protocol):
+    def __call__(
+        self,
+        handler: Callable[[ConsumerRecords, LambdaContext], ReturnT],
+        /,
+    ) -> LambdaHandler[dict[str, Any], LambdaContext, ReturnT]: ...
+
+
+@overload
+def kafka_consumer(
+    handler: Callable[[ConsumerRecords, LambdaContext], ReturnT],
+    /,
+) -> LambdaHandler[dict[str, Any], LambdaContext, ReturnT]: ...
+
+
+@overload
+def kafka_consumer(
+    *,
+    schema_config: SchemaConfig | None = None,
+) -> _KafkaConsumerHandlerDecorator: ...
 
 
 @lambda_handler_decorator

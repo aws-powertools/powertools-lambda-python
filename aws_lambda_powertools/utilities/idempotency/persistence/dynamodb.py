@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import os
 from typing import TYPE_CHECKING, Any
@@ -197,7 +197,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         if self.payload_validation_enabled and data_record.payload_hash:
             item[self.validation_key_attr] = {"S": data_record.payload_hash}
 
-        now = datetime.datetime.now()
+        now = dt.datetime.now()
         try:
             logger.debug(f"Putting record for idempotency key: {data_record.idempotency_key}")
 

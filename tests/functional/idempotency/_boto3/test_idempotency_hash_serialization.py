@@ -1,5 +1,5 @@
 import dataclasses
-import datetime
+import datetime as dt
 from decimal import Decimal
 from enum import Enum, IntEnum
 from pathlib import PurePosixPath
@@ -130,7 +130,7 @@ def test_existing_key_and_validation_hashes_are_preserved(
 @pytest.mark.parametrize(
     "value,expected_type",
     [
-        pytest.param(datetime.datetime(2024, 3, 20, 14, 30), None, id="datetime"),
+        pytest.param(dt.datetime(2024, 3, 20, 14, 30), None, id="datetime"),
         pytest.param(DecimalAmount.SMALL, None, id="decimal-enum"),
         pytest.param(Point(1, 2), None, id="namedtuple"),
         pytest.param([1, 2], "array", id="list"),
@@ -181,7 +181,7 @@ def test_new_types_support_persistent_replay_and_payload_validation(
     timestamp_future,
     as_dataclass,
 ):
-    value = datetime.datetime(2024, 3, 20, 14, 30, tzinfo=datetime.timezone.utc)
+    value = dt.datetime(2024, 3, 20, 14, 30, tzinfo=dt.timezone.utc)
     payload = Payload("order-1", {"created_at": value, "receipt": PurePosixPath("/orders/receipt.pdf")})
     prepared_value = {"created_at": value.isoformat(), "receipt": "/orders/receipt.pdf"}
     config = IdempotencyConfig(
