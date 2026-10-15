@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING, Any
 
 from botocore.config import Config
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 def evaluate_mocked_schema(
     mocker,
     rules: dict[str, Any],
-    mocked_time: tuple[int, int, int, int, int, int, datetime.tzinfo],  # year, month, day, hour, minute, second
+    mocked_time: tuple[int, int, int, int, int, int, dt.tzinfo],  # year, month, day, hour, minute, second
     context: dict[str, Any] | None = None,
 ) -> JSONType:
     """
@@ -41,7 +41,7 @@ def evaluate_mocked_schema(
     # Mock the current time
     year, month, day, hour, minute, second, timezone = mocked_time
     time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.comparators._get_now_from_timezone")
-    time.return_value = datetime.datetime(
+    time.return_value = dt.datetime(
         year=year,
         month=month,
         day=day,
@@ -95,7 +95,7 @@ def test_time_based_utc_in_between_time_range_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 11, 12, 0, datetime.timezone.utc),
+        mocked_time=(2022, 2, 15, 11, 12, 0, dt.timezone.utc),
     )
 
 
@@ -114,7 +114,7 @@ def test_time_based_utc_in_between_time_range_no_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 7, 12, 0, datetime.timezone.utc),  # no rule match 7:12 am
+        mocked_time=(2022, 2, 15, 7, 12, 0, dt.timezone.utc),  # no rule match 7:12 am
     )
 
 
@@ -133,7 +133,7 @@ def test_time_based_utc_in_between_time_range_full_hour_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 21, 12, 0, datetime.timezone.utc),  # rule match 21:12
+        mocked_time=(2022, 2, 15, 21, 12, 0, dt.timezone.utc),  # rule match 21:12
     )
 
 
@@ -152,7 +152,7 @@ def test_time_based_utc_in_between_time_range_between_days_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 2, 3, 0, datetime.timezone.utc),  # rule match 2:03 am
+        mocked_time=(2022, 2, 15, 2, 3, 0, dt.timezone.utc),  # rule match 2:03 am
     )
 
 
@@ -171,7 +171,7 @@ def test_time_based_utc_in_between_time_range_between_days_rule_no_match(mocker)
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 5, 0, 0, datetime.timezone.utc),  # rule no match 5:00 am
+        mocked_time=(2022, 2, 15, 5, 0, 0, dt.timezone.utc),  # rule no match 5:00 am
     )
 
 
@@ -193,7 +193,7 @@ def test_time_based_utc_in_between_time_range_same_hour_between_days_rule_match(
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 10, 0, 0, datetime.timezone.utc),  # rule match 10:00 am
+        mocked_time=(2022, 2, 15, 10, 0, 0, dt.timezone.utc),  # rule match 10:00 am
     )
 
 
@@ -215,7 +215,7 @@ def test_time_based_utc_in_between_time_range_same_hour_between_days_rule_no_mat
                 ],
             },
         },
-        mocked_time=(2022, 2, 15, 23, 15, 0, datetime.timezone.utc),  # rule no match 23:15
+        mocked_time=(2022, 2, 15, 23, 15, 0, dt.timezone.utc),  # rule no match 23:15
     )
 
 
@@ -287,7 +287,7 @@ def test_time_based_utc_in_between_full_time_range_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 10, 7, 10, 0, 0, datetime.timezone.utc),  # will match rule
+        mocked_time=(2022, 10, 7, 10, 0, 0, dt.timezone.utc),  # will match rule
     )
 
 
@@ -359,7 +359,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(moc
                 ],
             },
         },
-        mocked_time=(2022, 10, 7, 10, 0, 0, datetime.timezone.utc),  # will rule match
+        mocked_time=(2022, 10, 7, 10, 0, 0, dt.timezone.utc),  # will rule match
         context={"username": "ran"},
     )
 
@@ -384,7 +384,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_no_rule_match(
                 ],
             },
         },
-        mocked_time=(2022, 10, 7, 7, 0, 0, datetime.timezone.utc),  # will cause no rule match, 7:00
+        mocked_time=(2022, 10, 7, 7, 0, 0, dt.timezone.utc),  # will cause no rule match, 7:00
         context={"username": "ran"},
     )
 
@@ -412,7 +412,7 @@ def test_time_based_utc_days_range_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 11, 18, 10, 0, 0, datetime.timezone.utc),  # friday
+        mocked_time=(2022, 11, 18, 10, 0, 0, dt.timezone.utc),  # friday
     )
 
 
@@ -439,7 +439,7 @@ def test_time_based_utc_days_range_no_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 11, 20, 10, 0, 0, datetime.timezone.utc),  # sunday, no match
+        mocked_time=(2022, 11, 20, 10, 0, 0, dt.timezone.utc),  # sunday, no match
     )
 
 
@@ -460,7 +460,7 @@ def test_time_based_utc_only_weekend_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 11, 19, 10, 0, 0, datetime.timezone.utc),  # saturday
+        mocked_time=(2022, 11, 19, 10, 0, 0, dt.timezone.utc),  # saturday
     )
 
 
@@ -529,7 +529,7 @@ def test_time_based_utc_only_weekend_no_rule_match(mocker):
                 ],
             },
         },
-        mocked_time=(2022, 11, 18, 10, 0, 0, datetime.timezone.utc),  # friday, no match
+        mocked_time=(2022, 11, 18, 10, 0, 0, dt.timezone.utc),  # friday, no match
     )
 
 
@@ -553,12 +553,12 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
                 ],
             },
         },
-        mocked_time=(2022, 11, 17, 16, 0, 0, datetime.timezone.utc),  # thursday 16:00
+        mocked_time=(2022, 11, 17, 16, 0, 0, dt.timezone.utc),  # thursday 16:00
     )
 
 
 def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule_match(mocker):
-    def evaluate(mocked_time: tuple[int, int, int, int, int, int, datetime.tzinfo]):
+    def evaluate(mocked_time: tuple[int, int, int, int, int, int, dt.tzinfo]):
         evaluate_mocked_schema(
             mocker=mocker,
             rules={
@@ -583,6 +583,6 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule
             mocked_time=mocked_time,
         )
 
-    assert not evaluate(mocked_time=(2022, 11, 17, 9, 0, 0, datetime.timezone.utc))  # thursday 9:00
-    assert not evaluate(mocked_time=(2022, 11, 18, 13, 0, 0, datetime.timezone.utc))  # friday 16:00
-    assert not evaluate(mocked_time=(2022, 11, 18, 9, 0, 0, datetime.timezone.utc))  # friday 9:00
+    assert not evaluate(mocked_time=(2022, 11, 17, 9, 0, 0, dt.timezone.utc))  # thursday 9:00
+    assert not evaluate(mocked_time=(2022, 11, 18, 13, 0, 0, dt.timezone.utc))  # friday 16:00
+    assert not evaluate(mocked_time=(2022, 11, 18, 9, 0, 0, dt.timezone.utc))  # friday 9:00

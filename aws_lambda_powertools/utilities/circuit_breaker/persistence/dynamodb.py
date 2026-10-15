@@ -4,7 +4,7 @@ DynamoDB persistence backend for the Circuit Breaker utility.
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import os
 import warnings
@@ -215,7 +215,7 @@ class CircuitBreakerDynamoDBPersistence(CircuitBreakerPersistenceLayer):
         expression_values: dict = {
             ":open": self._s(str(CircuitState.OPEN)),
             ":half_open": self._s(str(CircuitState.HALF_OPEN)),
-            ":now": self._n(int(datetime.datetime.now().timestamp())),
+            ":now": self._n(int(dt.datetime.now().timestamp())),
         }
 
         if expected_opened_at is not None:
