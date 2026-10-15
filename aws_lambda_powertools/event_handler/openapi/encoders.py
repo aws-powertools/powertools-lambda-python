@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-import datetime
+import datetime as dt
 from collections import defaultdict, deque
 from decimal import Decimal
 from enum import Enum
@@ -306,7 +306,7 @@ def _dump_other(
     )
 
 
-def iso_format(o: datetime.date | datetime.time) -> str:
+def iso_format(o: dt.date | dt.time) -> str:
     """
     ISO format for date and time
     """
@@ -341,10 +341,10 @@ ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
     str: lambda o: o,
     type(None): lambda o: o,
     bytes: lambda o: o.decode(),
-    datetime.date: iso_format,
-    datetime.datetime: iso_format,
-    datetime.time: iso_format,
-    datetime.timedelta: lambda td: td.total_seconds(),
+    dt.date: iso_format,
+    dt.datetime: iso_format,
+    dt.time: iso_format,
+    dt.timedelta: lambda td: td.total_seconds(),
     Decimal: decimal_encoder,
     Enum: lambda o: o.value,
     PurePath: str,
