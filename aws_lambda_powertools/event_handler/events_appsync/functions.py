@@ -71,7 +71,7 @@ def find_best_route(routes: dict[str, Any], path: str):
         """
         Convert a route pattern to a regex pattern with caching.
         Examples:
-            /default/v1/*         -> ^/default/v1/[^/]+$
+            /default/v1/*         -> ^/default/v1/.*$
             /default/v1/users/*   -> ^/default/v1/users/.*$
 
         Parameters
@@ -87,9 +87,11 @@ def find_best_route(routes: dict[str, Any], path: str):
         # Escape special regex chars but convert * to regex pattern
         pattern = re.escape(route).replace("\\*", "[^/]+")
 
-        # If pattern ends with [^/]+, replace with .* for multi-segment match
+        # If pattern ends with [^/]+, replace with .* for multi-segment match.
+        # Only the wildcard is replaced: the preceding "/" must be kept so that
+        # "/default/users/*" does not match "/default/usersettings".
         if pattern.endswith("[^/]+"):
-            pattern = pattern[:-6] + ".*"
+            pattern = pattern[: -len("[^/]+")] + ".*"
 
         # Compile and return the regex pattern
         return re.compile(f"^{pattern}$")

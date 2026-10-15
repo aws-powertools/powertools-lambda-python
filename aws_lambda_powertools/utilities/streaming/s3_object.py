@@ -231,7 +231,7 @@ class S3Object(IO[bytes]):
         return self.transformed_stream.read(size)
 
     def readline(self, size: int | None = -1) -> bytes:
-        return self.transformed_stream.readline()
+        return self.transformed_stream.readline(-1 if size is None else size)
 
     def readlines(self, hint: int = -1) -> list[bytes]:
         return self.transformed_stream.readlines(hint)

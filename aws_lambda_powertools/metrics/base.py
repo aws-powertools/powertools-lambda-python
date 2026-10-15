@@ -6,7 +6,7 @@ Metrics utility
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import functools
 import json
 import logging
@@ -250,7 +250,7 @@ class MetricManager:
 
         return {
             "_aws": {
-                "Timestamp": self.timestamp or int(datetime.datetime.now().timestamp() * 1000),  # epoch
+                "Timestamp": self.timestamp or int(dt.datetime.now().timestamp() * 1000),  # epoch
                 "CloudWatchMetrics": [
                     {
                         "Namespace": self.namespace,  # "test_namespace"
@@ -322,7 +322,7 @@ class MetricManager:
         else:
             self.metadata_set[str(key)] = value
 
-    def set_timestamp(self, timestamp: int | datetime.datetime):
+    def set_timestamp(self, timestamp: int | dt.datetime):
         """
         Set the timestamp for the metric.
 
