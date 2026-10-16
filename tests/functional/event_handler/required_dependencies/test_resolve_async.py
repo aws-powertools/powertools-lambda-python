@@ -456,6 +456,22 @@ class TestResolveAsyncPublic:
         # THEN the context is cleared after resolution
         assert app.context == {}
 
+    def test_resolve_async_clears_context_when_handler_raises(self, public_resolver_and_event):
+        # GIVEN an async handler that raises without a registered exception handler
+        app, event, path = public_resolver_and_event
+
+        @app.get(path)
+        async def get_lambda():
+            app.append_context(custom_key="value")
+            raise ValueError("boom")
+
+        # WHEN calling resolve_async
+        with pytest.raises(ValueError, match="boom"):
+            asyncio.run(app.resolve_async(event, MockLambdaContext()))
+
+        # THEN the context is still cleared
+        assert app.context == {}
+
     def test_resolve_async_not_found(self, public_resolver_and_event):
         # GIVEN no matching route
         app, event, _path = public_resolver_and_event

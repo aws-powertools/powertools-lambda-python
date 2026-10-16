@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import cast
 
 import pytest
 import redis
@@ -13,9 +14,9 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @pytest.fixture
-def lambda_context():
+def lambda_context() -> LambdaContext:
     @dataclass
-    class LambdaContext:
+    class FakeLambdaContext:
         function_name: str = "test"
         memory_limit_in_mb: int = 128
         invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
@@ -24,7 +25,7 @@ def lambda_context():
         def get_remaining_time_in_millis(self) -> int:
             return 1000
 
-    return LambdaContext()
+    return cast(LambdaContext, FakeLambdaContext())
 
 
 @pytest.fixture

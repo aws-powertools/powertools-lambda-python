@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 from decimal import Decimal
 from unittest import mock
@@ -48,13 +48,13 @@ def lambda_context() -> LambdaContext:
 
 @pytest.fixture
 def timestamp_future():
-    return str(int((datetime.datetime.now() + datetime.timedelta(seconds=3600)).timestamp()))
+    return str(int((dt.datetime.now() + dt.timedelta(seconds=3600)).timestamp()))
 
 
 @pytest.fixture
 def timestamp_expired():
-    now = datetime.datetime.now()
-    period = datetime.timedelta(seconds=6400)
+    now = dt.datetime.now()
+    period = dt.timedelta(seconds=6400)
     return str(int((now - period).timestamp()))
 
 

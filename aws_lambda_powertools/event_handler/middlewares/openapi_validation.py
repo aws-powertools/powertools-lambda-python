@@ -5,8 +5,8 @@ import dataclasses
 import json
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Sequence, Union, cast
-from urllib.parse import parse_qs
+from typing import TYPE_CHECKING, Any, Callable, Collection, Mapping, MutableMapping, Sequence, Union, cast
+from urllib.parse import parse_qs, unquote
 
 from pydantic import BaseModel
 from typing_extensions import get_args, get_origin
@@ -29,6 +29,9 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
 )
 from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
 from aws_lambda_powertools.event_handler.openapi.types import UnionType
+from aws_lambda_powertools.utilities.data_classes.alb_event import ALBEvent
+from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
+from aws_lambda_powertools.utilities.data_classes.vpc_lattice import VPCLatticeEventV2
 
 if TYPE_CHECKING:
     from pydantic.fields import FieldInfo
@@ -39,6 +42,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.compat import ModelField
     from aws_lambda_powertools.event_handler.openapi.types import IncEx
     from aws_lambda_powertools.event_handler.types import EventHandlerInstance
+    from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +83,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         query_string = _normalize_multi_params(
             app.current_event.resolved_query_string_parameters,
             route.dependant.query_params,
+            multi_value_params=_get_multi_value_query_params(app.current_event),
         )
 
         # Process query values
@@ -91,6 +96,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         headers = _normalize_multi_params(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
+            multi_value_params=CaseInsensitiveDict(app.current_event.get("multiValueHeaders")),
         )
 
         # Process header values
@@ -583,9 +589,31 @@ def _get_embed_body(
     return received_body, field_alias_omitted
 
 
+def _get_multi_value_query_params(event: BaseProxyEvent) -> Collection[str]:
+    """Identify native repeated parameters so they are not mistaken for split scalar strings."""
+    if raw_query := event.get("rawQueryString"):
+        return {name for name, values in parse_qs(raw_query, keep_blank_values=True).items() if len(values) > 1}
+
+    if isinstance(event, VPCLatticeEventV2):
+        return {
+            name
+            for name, values in (event.get("queryStringParameters") or {}).items()
+            if isinstance(values, list) and len(values) > 1
+        }
+
+    params = event.multi_value_query_string_parameters
+    if isinstance(event, ALBEvent) and event.decode_query_parameters:
+        # Follow the same merge and decoding order as ALBEvent, including decoded key collisions.
+        decoded_sources = {unquote(name): name in params for name in {**event.query_string_parameters, **params}}
+        return {name for name, is_multi_value in decoded_sources.items() if is_multi_value}
+    return params.keys()
+
+
 def _normalize_multi_params(
     input_dict: MutableMapping[str, Any],
     params: Sequence[ModelField],
+    *,
+    multi_value_params: Collection[str] = (),
 ) -> MutableMapping[str, Any]:
     """
     Extract and normalize query string or header parameters with Pydantic model support.
@@ -596,6 +624,8 @@ def _normalize_multi_params(
         A dictionary containing the initial query string or header parameters.
     params: Sequence[ModelField]
         A sequence of ModelField objects representing parameters.
+    multi_value_params: Collection[str]
+        Names supplied as native multiple values rather than comma-separated strings.
 
     Returns
     -------
@@ -604,23 +634,44 @@ def _normalize_multi_params(
     """
     for param in params:
         if is_scalar_field(param):
-            _process_scalar_param(input_dict, param)
+            _process_scalar_param(input_dict, param, multi_value_params)
         elif lenient_issubclass(param.field_info.annotation, BaseModel):
-            _process_model_param(input_dict, param)
+            _process_model_param(input_dict, param, multi_value_params)
     return input_dict
 
 
-def _process_scalar_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
-    """Process a scalar parameter by normalizing single-item lists."""
+def _restore_scalar_parameter(value: Any, name: str, multi_value_params: Collection[str]) -> Any:
+    """Reconstruct a scalar string split by the event, leaving native multiple values intact."""
+    if (
+        isinstance(value, list)
+        and len(value) > 1
+        and name not in multi_value_params
+        and all(isinstance(item, str) for item in value)
+    ):
+        return ",".join(value)
+    return value
+
+
+def _process_scalar_param(
+    input_dict: MutableMapping[str, Any],
+    param: ModelField,
+    multi_value_params: Collection[str],
+) -> None:
+    """Restore scalar strings and unwrap single-item lists."""
     try:
-        value = input_dict[param.alias]
+        value = _restore_scalar_parameter(input_dict[param.alias], param.alias, multi_value_params)
         if isinstance(value, list) and len(value) == 1:
-            input_dict[param.alias] = value[0]
+            value = value[0]
+        input_dict[param.alias] = value
     except KeyError:
         pass
 
 
-def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField) -> None:
+def _process_model_param(
+    input_dict: MutableMapping[str, Any],
+    param: ModelField,
+    multi_value_params: Collection[str],
+) -> None:
     """Process a Pydantic model parameter by extracting model fields."""
     model_class = cast(type[BaseModel], param.field_info.annotation)
 
@@ -630,6 +681,9 @@ def _process_model_param(input_dict: MutableMapping[str, Any], param: ModelField
         value = _get_param_value(input_dict, field_alias, field_name, model_class)
 
         if value is not None:
+            if not _is_or_contains_sequence(field_info.annotation):
+                source_name = field_alias if input_dict.get(field_alias) is not None else field_name
+                value = _restore_scalar_parameter(value, source_name, multi_value_params)
             model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
 
     input_dict[param.alias] = model_data

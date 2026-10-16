@@ -1,6 +1,6 @@
 import copy
 import dataclasses
-import datetime
+import datetime as dt
 import warnings
 from decimal import Decimal
 from enum import Enum
@@ -744,8 +744,8 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
 
-    now = datetime.datetime.now()
-    period = datetime.timedelta(seconds=5)
+    now = dt.datetime.now()
+    period = dt.timedelta(seconds=5)
     timestamp_expires_in_progress = int((now + period).timestamp() * 1000)
 
     expected_params_get_item = {
@@ -791,8 +791,8 @@ def test_idempotent_lambda_expires_in_progress_before_expire_with_sort_key(
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
 
-    now = datetime.datetime.now()
-    period = datetime.timedelta(seconds=5)
+    now = dt.datetime.now()
+    period = dt.timedelta(seconds=5)
     timestamp_expires_in_progress = int((now + period).timestamp() * 1000)
 
     expected_params_get_item = {
@@ -840,7 +840,7 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
     for _ in range(MAX_RETRIES + 1):
         stubber.add_client_error("put_item", "ConditionalCheckFailedException")
 
-        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds=1)
+        one_second_ago = dt.datetime.now() - dt.timedelta(seconds=1)
         expected_params_get_item = {
             "TableName": TABLE_NAME,
             "Key": {"id": {"S": hashed_idempotency_key}},
@@ -952,8 +952,8 @@ def test_handler_for_status_inprogress_data_record_inconsistent(
         persistence_store=persistence_store,
     )
 
-    now = datetime.datetime.now()
-    period = datetime.timedelta(milliseconds=100)
+    now = dt.datetime.now()
+    period = dt.timedelta(milliseconds=100)
     timestamp = int((now - period).timestamp() * 1000)
     data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
 
@@ -973,8 +973,8 @@ def test_handler_for_status_inprogress_data_record_consistent(
         persistence_store=persistence_store,
     )
 
-    now = datetime.datetime.now()
-    period = datetime.timedelta(milliseconds=100)
+    now = dt.datetime.now()
+    period = dt.timedelta(milliseconds=100)
     timestamp = int((now + period).timestamp() * 1000)
     data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
 
@@ -1799,9 +1799,9 @@ def test_idempotent_function_dataclass_with_non_json_types(lambda_context):
     @dataclasses.dataclass
     class Order:
         order_id: UUID
-        created_at: datetime.datetime
-        ship_date: datetime.date
-        delivery_window: tuple[datetime.time, datetime.time]
+        created_at: dt.datetime
+        ship_date: dt.date
+        delivery_window: tuple[dt.time, dt.time]
         item_ids: list[UUID]
         status: OrderStatus
         receipt: PurePosixPath
@@ -1817,9 +1817,9 @@ def test_idempotent_function_dataclass_with_non_json_types(lambda_context):
     # WHEN
     order = Order(
         order_id=UUID("12345678-1234-5678-1234-567812345678"),
-        created_at=datetime.datetime(2024, 3, 20, 14, 30, 0),
-        ship_date=datetime.date(2024, 3, 22),
-        delivery_window=(datetime.time(9, 0), datetime.time(12, 0)),
+        created_at=dt.datetime(2024, 3, 20, 14, 30, 0),
+        ship_date=dt.date(2024, 3, 22),
+        delivery_window=(dt.time(9, 0), dt.time(12, 0)),
         item_ids=[UUID("87654321-4321-8765-4321-876543218765")],
         status=OrderStatus.PAID,
         receipt=PurePosixPath("/receipts/ord-001.pdf"),
@@ -2205,7 +2205,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
 
     # Then idempotent_response value will be added to the response
     assert lambda_resp["idempotent_response"]
-    assert lambda_resp["idempotent_expiration"] == datetime.datetime.fromtimestamp(int(timestamp_future))
+    assert lambda_resp["idempotent_expiration"] == dt.datetime.fromtimestamp(int(timestamp_future))
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -2256,7 +2256,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called_with_none(
     # Then idempotent_response value will be added to the response
     assert lambda_resp["idempotent_response"]
     assert lambda_resp["response"] is None
-    assert lambda_resp["idempotent_expiration"] == datetime.datetime.fromtimestamp(int(timestamp_future))
+    assert lambda_resp["idempotent_expiration"] == dt.datetime.fromtimestamp(int(timestamp_future))
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
