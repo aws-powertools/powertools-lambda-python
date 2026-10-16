@@ -67,7 +67,7 @@ class TransferFamilyAuthorizerResponse:
             raise ValueError(f"Invalid home_directory_type: {home_directory_type}")
 
         if user_uid is not None:
-            response["PosixProfile"] = {"Gid": user_gid, "Uid": user_gid}
+            response["PosixProfile"] = {"Gid": user_gid, "Uid": user_uid}
 
         if policy:
             response["Policy"] = policy

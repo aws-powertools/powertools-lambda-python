@@ -90,6 +90,22 @@ def test_build_authentication_response_efs(home_directory_type):
         assert "HomeDirectory" not in response
 
 
+def test_build_authentication_response_efs_posix_profile():
+    # GIVEN a Authorizer response
+    response = TransferFamilyAuthorizerResponse()
+
+    # WHEN building an authentication response for EFS with different uid and gid
+    response = response.build_authentication_response_efs(
+        role_arn="arn:aws:iam::123456789012:role/EFSAccess",
+        home_directory="/fs-12345678/user",
+        user_gid=1000,
+        user_uid=1001,
+    )
+
+    # THEN the PosixProfile uses the uid and gid that were passed
+    assert response.get("PosixProfile") == {"Gid": 1000, "Uid": 1001}
+
+
 def test_build_authentication_missing_home_directory():
     # GIVEN a Authorizer response
     response = TransferFamilyAuthorizerResponse()
