@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Powertools for AWS Lambda (Python) with the AWS AppConfig Agent Lambda extension
+
+Resources:
+  CommentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.13
+      Architectures: [arm64]
+      Handler: app.lambda_handler
+      Layers:
+        # Pick the ARN for your Region and architecture:
+        # https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-lambda-extensions-versions.html
+        - arn:aws:lambda:us-east-1:027255383542:layer:AWS-AppConfig-Extension-Arm64:265
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: comments
+          # Optional: fetch the configuration before the first invocation
+          AWS_APPCONFIG_EXTENSION_PREFETCH_LIST: comments:dev:config
+      Policies:
+        # The extension, not your code, calls AppConfig with the function's role
+        - Statement:
+            - Effect: Allow
+              Action:
+                - appconfig:StartConfigurationSession
+                - appconfig:GetLatestConfiguration
+              Resource: !Sub arn:${AWS::Partition}:appconfig:${AWS::Region}:${AWS::AccountId}:application/*

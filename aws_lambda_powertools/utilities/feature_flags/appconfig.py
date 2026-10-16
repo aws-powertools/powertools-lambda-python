@@ -15,7 +15,9 @@ from aws_lambda_powertools.utilities import jmespath_utils
 from aws_lambda_powertools.utilities.feature_flags.base import StoreProvider
 from aws_lambda_powertools.utilities.feature_flags.exceptions import ConfigurationStoreError, StoreClientError
 from aws_lambda_powertools.utilities.parameters import (
+    AppConfigExtensionProvider,
     AppConfigProvider,
+    BaseProvider,
     GetParameterError,
     TransformParameterError,
 )
@@ -42,6 +44,7 @@ class AppConfigStore(StoreProvider):
         boto_config: Config | None = None,
         boto3_session: boto3.session.Session | None = None,
         boto3_client: AppConfigDataClient | None = None,
+        use_extension: bool = False,
     ):
         """This class fetches JSON schemas from AWS AppConfig
 
@@ -69,6 +72,9 @@ class AppConfigStore(StoreProvider):
             Boto3 session to use for AWS API communication
         boto3_client : AppConfigDataClient, optional
             Boto3 AppConfigDataClient Client to use, boto3_session and boto_config will be ignored if both are provided
+        use_extension : bool
+            Fetch the configuration from the AWS AppConfig Agent Lambda extension on localhost instead of
+            calling AppConfig with boto3. Requires the AWS-AppConfig-Extension layer. boto3 options are ignored.
         """
         super().__init__()
         self.logger = logger or logging.getLogger(__name__)
@@ -79,13 +85,17 @@ class AppConfigStore(StoreProvider):
         self.config = sdk_config or boto_config
         self.envelope = envelope
         self.jmespath_options = jmespath_options
-        self._conf_store = AppConfigProvider(
-            environment=environment,
-            application=application,
-            config=sdk_config or boto_config,
-            boto3_client=boto3_client,
-            boto3_session=boto3_session,
-        )
+        self._conf_store: BaseProvider
+        if use_extension:
+            self._conf_store = AppConfigExtensionProvider(environment=environment, application=application)
+        else:
+            self._conf_store = AppConfigProvider(
+                environment=environment,
+                application=application,
+                config=sdk_config or boto_config,
+                boto3_client=boto3_client,
+                boto3_session=boto3_session,
+            )
         # Memoised envelope extraction: (raw document, extracted config). The Parameters cache hands back the
         # same raw dict until expiry, so we can reuse the extracted result rather than re-running the JMESPath
         # query and producing a new object on every call.
@@ -158,3 +168,58 @@ class AppConfigStore(StoreProvider):
             return extracted
 
         return config
+
+
+class AppConfigExtensionStore(AppConfigStore):
+    """Feature flags store that reads from the AWS AppConfig Agent Lambda extension.
+
+    Same behaviour as ``AppConfigStore(use_extension=True)``: configuration is read from the
+    extension's local HTTP endpoint instead of calling AppConfig with boto3, so there are no
+    boto3 options to configure. Requires the ``AWS-AppConfig-Extension`` layer.
+
+    Parameters
+    ----------
+    environment: str
+        AppConfig environment, e.g. 'dev'
+    application: str
+        AppConfig application name, e.g. 'powertools'
+    name: str
+        AppConfig configuration name, e.g. 'features'
+    max_age: int
+        Seconds to keep the configuration in Powertools' cache before reading the extension again. The
+        extension keeps its own cache and refreshes it in the background; use 0 to read it on every call.
+    envelope : str | None
+        JMESPath expression to pluck feature flags data from the configuration
+    jmespath_options : dict | None
+        Alternative JMESPath options to be included when filtering expr
+    logger: A logging object
+        Used to log messages. If None is supplied, one will be created.
+
+    Example
+    -------
+    >>> from aws_lambda_powertools.utilities.feature_flags import AppConfigExtensionStore, FeatureFlags
+    >>>
+    >>> store = AppConfigExtensionStore(environment="dev", application="product-catalogue", name="features")
+    >>> feature_flags = FeatureFlags(store=store)
+    """
+
+    def __init__(
+        self,
+        environment: str,
+        application: str,
+        name: str,
+        max_age: int = 5,
+        envelope: str | None = "",
+        jmespath_options: dict | None = None,
+        logger: logging.Logger | Logger | None = None,
+    ):
+        super().__init__(
+            environment=environment,
+            application=application,
+            name=name,
+            max_age=max_age,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
+            logger=logger,
+            use_extension=True,
+        )
