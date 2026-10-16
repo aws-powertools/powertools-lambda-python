@@ -13,6 +13,8 @@ from aws_lambda_powertools.utilities.validation import (
     validator,
 )
 
+pytestmark = pytest.mark.requires_validation
+
 
 def test_validate_raw_event(schema, raw_event):
     validate(event=raw_event, schema=schema)

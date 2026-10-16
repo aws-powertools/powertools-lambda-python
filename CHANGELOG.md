@@ -5,12 +5,75 @@
 # Unreleased
 
 
-<a name="v3.35.0"></a>
-## [v3.35.0] - 2026-09-15
+<a name="v3.36.0"></a>
+## [v3.36.0] - 2026-10-15
+## Bug Fixes
+
+* **layer:** remove urllib3 from the Lambda layer again ([#8556](https://github.com/aws-powertools/powertools-lambda-python/issues/8556))
+
 ## Maintenance
 
 * version bump
+
+
+<a name="v3.35.0"></a>
+## [v3.35.0] - 2026-09-15
+## Bug Fixes
+
+* **data-classes:** normalize authorizer ALL verb ([#8445](https://github.com/aws-powertools/powertools-lambda-python/issues/8445))
+* **data-masking:** fail closed on masking errors ([#8446](https://github.com/aws-powertools/powertools-lambda-python/issues/8446))
+* **docs:** keep China layer versions aligned ([#8438](https://github.com/aws-powertools/powertools-lambda-python/issues/8438))
+* **event_handler:** isolate local ASGI request state ([#8452](https://github.com/aws-powertools/powertools-lambda-python/issues/8452))
+* **event_handler:** match generic alias response models in OpenAPI schema ([#8453](https://github.com/aws-powertools/powertools-lambda-python/issues/8453))
+* **feature_flags:** missing context key never satisfies a condition ([#8429](https://github.com/aws-powertools/powertools-lambda-python/issues/8429))
+* **feature_flags:** handle same-hour midnight rollover and reject malformed HH:MM ([#8428](https://github.com/aws-powertools/powertools-lambda-python/issues/8428))
+* **idempotency:** Redis persistence layer reclaims live in-progress records as orphans, allowing concurrent double-execution ([#8387](https://github.com/aws-powertools/powertools-lambda-python/issues/8387))
+* **idempotency:** is_missing_idempotency_key iterates dict keys instead of values ([#8391](https://github.com/aws-powertools/powertools-lambda-python/issues/8391))
+* **metrics:** stop spurious overwrite warnings from set_default_dimensions ([#8403](https://github.com/aws-powertools/powertools-lambda-python/issues/8403))
+* **parameters:** honor auto transform in batched get_parameters_by_name ([#8436](https://github.com/aws-powertools/powertools-lambda-python/issues/8436))
+* **streaming:** _S3SeekableIO.__next__/__iter__ don't advance self._position, corrupting subsequent seek()/read() ([#8389](https://github.com/aws-powertools/powertools-lambda-python/issues/8389))
+
+## Code Refactoring
+
+* **typing:** use PEP 604 syntax for Optional annotations (UP045) ([#8399](https://github.com/aws-powertools/powertools-lambda-python/issues/8399))
+
+## Maintenance
+
+* version bump
+* **ci:** retire Python 3.9 layer automation ([#8439](https://github.com/aws-powertools/powertools-lambda-python/issues/8439))
+* **ci:** omit null layer metadata fields ([#8416](https://github.com/aws-powertools/powertools-lambda-python/issues/8416))
+* **ci:** mirror commercial layer visibility ([#8422](https://github.com/aws-powertools/powertools-lambda-python/issues/8422))
+* **ci:** add partition layer balancer ([#8419](https://github.com/aws-powertools/powertools-lambda-python/issues/8419))
+* **deps:** bump the github-actions group with 4 updates ([#8383](https://github.com/aws-powertools/powertools-lambda-python/issues/8383))
+* **deps:** bump the github-actions group across 1 directory with 3 updates ([#8456](https://github.com/aws-powertools/powertools-lambda-python/issues/8456))
+* **deps:** bump fastjsonschema from 2.21.2 to 2.22.1 ([#8382](https://github.com/aws-powertools/powertools-lambda-python/issues/8382))
+* **deps:** bump redis from 8.0.1 to 8.1.0 ([#8379](https://github.com/aws-powertools/powertools-lambda-python/issues/8379))
+* **deps:** consolidate Dependabot updates ([#8454](https://github.com/aws-powertools/powertools-lambda-python/issues/8454))
+* **deps:** bump gitpython from 3.1.58 to 3.1.59 in /docs ([#8447](https://github.com/aws-powertools/powertools-lambda-python/issues/8447))
 * **deps:** bump valkey-glide from 2.5.1 to 2.5.2 ([#8459](https://github.com/aws-powertools/powertools-lambda-python/issues/8459))
+* **deps:** bump avro from 1.12.1 to 1.12.2 ([#8462](https://github.com/aws-powertools/powertools-lambda-python/issues/8462))
+* **deps:** bump aws-encryption-sdk from 4.0.6 to 4.0.7 ([#8460](https://github.com/aws-powertools/powertools-lambda-python/issues/8460))
+* **deps:** bump mkdocs-material from 9.7.6 to 9.7.7 ([#8381](https://github.com/aws-powertools/powertools-lambda-python/issues/8381))
+* **deps:** bump mkdocs-material from 9.7.6 to 9.7.7 ([#8394](https://github.com/aws-powertools/powertools-lambda-python/issues/8394))
+* **deps:** bump valkey-glide from 2.5.0 to 2.5.1 ([#8396](https://github.com/aws-powertools/powertools-lambda-python/issues/8396))
+* **deps:** bump the github-actions group across 1 directory with 3 updates ([#8401](https://github.com/aws-powertools/powertools-lambda-python/issues/8401))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.259.0a0 to 2.266.0a0 ([#8395](https://github.com/aws-powertools/powertools-lambda-python/issues/8395))
+* **deps-dev:** bump aws-cdk from 2.1135.1 to 2.1136.0 in the aws-cdk group ([#8392](https://github.com/aws-powertools/powertools-lambda-python/issues/8392))
+* **deps-dev:** bump the dev-dependencies group across 1 directory with 5 updates ([#8407](https://github.com/aws-powertools/powertools-lambda-python/issues/8407))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.318 to 0.1.320 ([#8463](https://github.com/aws-powertools/powertools-lambda-python/issues/8463))
+* **deps-dev:** bump aws-cdk from 2.1130.0 to 2.1135.1 in the aws-cdk group ([#8378](https://github.com/aws-powertools/powertools-lambda-python/issues/8378))
+* **deps-dev:** bump testcontainers from 4.14.2 to 4.15.0 ([#8380](https://github.com/aws-powertools/powertools-lambda-python/issues/8380))
+* **deps-dev:** bump types-python-dateutil from 2.9.0.20260518 to 2.9.0.20260807 ([#8461](https://github.com/aws-powertools/powertools-lambda-python/issues/8461))
+* **deps-dev:** bump gitpython from 3.1.58 to 3.1.59 ([#8448](https://github.com/aws-powertools/powertools-lambda-python/issues/8448))
+* **deps-dev:** bump aws-cdk from 2.1140.0 to 2.1141.0 in the aws-cdk group across 1 directory ([#8408](https://github.com/aws-powertools/powertools-lambda-python/issues/8408))
+* **deps-dev:** bump boto3-stubs from 1.43.89 to 1.43.92 ([#8414](https://github.com/aws-powertools/powertools-lambda-python/issues/8414))
+* **deps-dev:** bump ruff from 0.16.6 to 0.16.7 in the dev-dependencies group across 1 directory ([#8455](https://github.com/aws-powertools/powertools-lambda-python/issues/8455))
+* **feature_flags:** warn on empty schema and empty rules ([#8430](https://github.com/aws-powertools/powertools-lambda-python/issues/8430))
+
+## Performance Improvements
+
+* **feature_flags:** validate schema once per fetched document ([#8431](https://github.com/aws-powertools/powertools-lambda-python/issues/8431))
+* **parser:** lazy-load envelopes to reduce Lambda cold start latency by ~900ms ([#8405](https://github.com/aws-powertools/powertools-lambda-python/issues/8405))
 
 
 <a name="v3.34.0"></a>
@@ -7832,7 +7895,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.35.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.36.0...HEAD
+[v3.36.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.35.0...v3.36.0
 [v3.35.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.34.0...v3.35.0
 [v3.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.1...v3.34.0
 [v3.31.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.31.0...v3.31.1

@@ -1024,6 +1024,37 @@ def test_multiple_related_routes_with_precedence(lambda_context, mock_event):
     assert result == expected_result
 
 
+def test_wildcard_route_does_not_match_sibling_segment_with_same_prefix(lambda_context, mock_event):
+    """Test that a wildcard route only matches whole path segments."""
+    # GIVEN a publish event on a channel that only shares a string prefix with a more specific route
+    mock_event["info"]["channel"]["path"] = "/default/usersettings"
+    mock_event["events"] = [
+        {"id": "123", "payload": {"data": "settings data"}},
+    ]
+
+    # GIVEN an AppSyncEventsResolver with a generic and a more specific route
+    app = AppSyncEventsResolver()
+
+    @app.on_publish(path="/default/*")
+    def default_handler(payload):
+        return {"handler": "default", "data": payload["data"]}
+
+    @app.on_publish(path="/default/users/*")
+    def users_handler(payload):
+        return {"handler": "users", "data": payload["data"]}
+
+    # WHEN we resolve the event
+    result = app.resolve(mock_event, lambda_context)
+
+    # THEN the generic route should be used, since /default/usersettings is not under /default/users/
+    expected_result = {
+        "events": [
+            {"id": "123", "payload": {"handler": "default", "data": "settings data"}},
+        ],
+    }
+    assert result == expected_result
+
+
 def test_integration_with_external_service(lambda_context, mock_event):
     """Test integration with an external service using mocks."""
     # GIVEN a sample publish event

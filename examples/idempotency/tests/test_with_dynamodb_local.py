@@ -1,12 +1,15 @@
 from dataclasses import dataclass
+from typing import cast
 
 import app_test_dynamodb_local
 import boto3
 import pytest
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
 
 @dataclass
-class LambdaContext:
+class FakeLambdaContext:
     function_name: str = "test"
     memory_limit_in_mb: int = 128
     invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
@@ -18,10 +21,10 @@ class LambdaContext:
 
 @pytest.fixture
 def lambda_context() -> LambdaContext:
-    return LambdaContext()
+    return cast(LambdaContext, FakeLambdaContext())
 
 
-def test_idempotent_lambda(lambda_context):
+def test_idempotent_lambda(lambda_context: LambdaContext):
     # Configure the boto3 to use the endpoint for the DynamoDB Local instance
     dynamodb_local_client = boto3.client("dynamodb", endpoint_url="http://localhost:8000")
     app_test_dynamodb_local.persistence_layer.client = dynamodb_local_client
@@ -29,5 +32,5 @@ def test_idempotent_lambda(lambda_context):
     # If desired, you can use a different DynamoDB Local table name than what your code already uses
     # app.persistence_layer.table_name = "another table name" # noqa: ERA001
 
-    result = app_test_dynamodb_local.handler({"testkey": "testvalue"}, lambda_context)
+    result = app_test_dynamodb_local.lambda_handler({"testkey": "testvalue"}, lambda_context)
     assert result["payment_id"] == 12345

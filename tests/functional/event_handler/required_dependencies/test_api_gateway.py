@@ -1892,6 +1892,23 @@ def test_route_context_is_cleared_after_resolve():
     assert app.context == {}
 
 
+def test_route_context_is_cleared_when_handler_raises():
+    # GIVEN a route that raises an exception without a registered exception handler
+    app = APIGatewayRestResolver()
+    app.append_context(is_admin=True)
+
+    @app.get("/my/path")
+    def my_path():
+        raise ValueError("boom")
+
+    # WHEN event resolution kicks in
+    with pytest.raises(ValueError, match="boom"):
+        app.resolve(LOAD_GW_EVENT, {})
+
+    # THEN context should be cleared even though the route raised
+    assert app.context == {}
+
+
 def test_router_has_access_to_app_context(json_dump):
     # GIVEN a Router with registered routes
     app = ApiGatewayResolver()

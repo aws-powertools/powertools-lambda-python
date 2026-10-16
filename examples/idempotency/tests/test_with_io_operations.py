@@ -1,12 +1,15 @@
 from dataclasses import dataclass
+from typing import cast
 from unittest.mock import MagicMock
 
 import app_test_io_operations
 import pytest
 
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
 
 @dataclass
-class LambdaContext:
+class FakeLambdaContext:
     function_name: str = "test"
     memory_limit_in_mb: int = 128
     invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
@@ -18,12 +21,12 @@ class LambdaContext:
 
 @pytest.fixture
 def lambda_context() -> LambdaContext:
-    return LambdaContext()
+    return cast(LambdaContext, FakeLambdaContext())
 
 
-def test_idempotent_lambda(lambda_context):
+def test_idempotent_lambda(lambda_context: LambdaContext):
     mock_client = MagicMock()
     app_test_io_operations.persistence_layer.client = mock_client
-    result = app_test_io_operations.handler({"testkey": "testvalue"}, lambda_context)
+    result = app_test_io_operations.lambda_handler({"testkey": "testvalue"}, lambda_context)
     mock_client.put_item.assert_called()
     assert result
