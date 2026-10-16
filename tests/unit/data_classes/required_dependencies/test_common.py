@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
 
 
@@ -45,3 +47,13 @@ def test_case_insensitive_dict_merge_operators():
     headers |= {"X-Trace-Id": "abc"}
     assert headers["x-trace-id"] == "abc"
     assert list(headers) == ["content-type", "x-trace-id"]
+
+
+def test_case_insensitive_dict_merge_rejects_non_mapping():
+    headers = CaseInsensitiveDict({"Content-Type": "application/json"})
+
+    with pytest.raises(TypeError):
+        headers | [("X-Trace-Id", "abc")]
+
+    with pytest.raises(TypeError):
+        [("X-Trace-Id", "abc")] | headers
