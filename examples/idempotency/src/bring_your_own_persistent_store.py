@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import boto3
 from botocore.config import Config
@@ -38,7 +38,7 @@ class MyOwnPersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         super().__init__()
 
-    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
+    def _item_to_data_record(self, item: dict[str, Any]) -> DataRecord:
         """
         Translate raw item records from DynamoDB to DataRecord
 

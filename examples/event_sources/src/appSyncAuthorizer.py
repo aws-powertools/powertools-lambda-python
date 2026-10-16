@@ -1,5 +1,3 @@
-from typing import Dict
-
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.logger import Logger
 from aws_lambda_powertools.utilities.data_classes.appsync_authorizer_event import (
@@ -18,7 +16,7 @@ def get_user_by_token(token: str):
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.APPSYNC_AUTHORIZER)
 @event_source(data_class=AppSyncAuthorizerEvent)
-def lambda_handler(event: AppSyncAuthorizerEvent, context) -> Dict:
+def lambda_handler(event: AppSyncAuthorizerEvent, context) -> dict:
     user = get_user_by_token(event.authorization_token)
 
     if not user:

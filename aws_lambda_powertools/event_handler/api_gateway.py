@@ -13,7 +13,8 @@ from enum import Enum
 from functools import partial
 from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Literal, Match, Pattern, TypeVar, cast
+from re import Match, Pattern
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, cast
 
 from typing_extensions import override
 

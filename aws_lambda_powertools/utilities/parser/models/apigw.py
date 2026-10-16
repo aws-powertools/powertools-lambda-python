@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Type, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, field_validator, model_validator
 from pydantic.networks import IPvAnyNetwork
@@ -33,7 +33,7 @@ class APIGatewayEventIdentity(BaseModel):
     principalOrgId: str | None = None
     # see #1562, temp workaround until API Gateway fixes it the Test button payload
     # removing it will not be considered a regression in the future
-    sourceIp: Union[IPvAnyNetwork, str]
+    sourceIp: IPvAnyNetwork | str
     user: str | None = None
     userAgent: str | None = None
     userArn: str | None = None
@@ -46,8 +46,8 @@ class APIGatewayEventIdentity(BaseModel):
 
 
 class APIGatewayEventAuthorizer(BaseModel):
-    claims: Dict[str, Any] | None = None
-    scopes: List[str] | None = None
+    claims: dict[str, Any] | None = None
+    scopes: list[str] | None = None
 
 
 class APIGatewayEventRequestContext(BaseModel):
@@ -88,15 +88,15 @@ class APIGatewayProxyEventModel(BaseModel):
     resource: str
     path: str
     httpMethod: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    headers: Dict[str, str]
-    multiValueHeaders: Dict[str, List[str]]
-    queryStringParameters: Dict[str, str] | None = None
-    multiValueQueryStringParameters: Dict[str, List[str]] | None = None
+    headers: dict[str, str]
+    multiValueHeaders: dict[str, list[str]]
+    queryStringParameters: dict[str, str] | None = None
+    multiValueQueryStringParameters: dict[str, list[str]] | None = None
     requestContext: APIGatewayEventRequestContext
-    pathParameters: Dict[str, str] | None = None
-    stageVariables: Dict[str, str] | None = None
+    pathParameters: dict[str, str] | None = None
+    stageVariables: dict[str, str] | None = None
     isBase64Encoded: bool | None = None
-    body: Union[str, Type[BaseModel]] | None = None
+    body: str | type[BaseModel] | None = None
 
 
 class ApiGatewayAuthorizerToken(BaseModel):

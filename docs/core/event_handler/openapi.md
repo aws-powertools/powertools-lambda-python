@@ -31,7 +31,7 @@ Behind the scenes, the [data validation](api_gateway.md#data-validation) feature
 
 === "enabling_swagger.py"
 
-    ```python hl_lines="12-13"
+    ```python hl_lines="10-11"
     --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
     ```
 
@@ -47,7 +47,7 @@ The Swagger UI appears by default at the `/swagger` path, but you can customize 
 
 === "customizing_swagger.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="8"
     --8<-- "examples/event_handler_rest/src/customizing_swagger.py"
     ```
 
@@ -55,7 +55,7 @@ The Swagger UI appears by default at the `/swagger` path, but you can customize 
 
     Use middleware for security headers, authentication, or other request processing.
 
-    ```python hl_lines="7 13-18 21"
+    ```python hl_lines="5 11-16 19"
     --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
     ```
 

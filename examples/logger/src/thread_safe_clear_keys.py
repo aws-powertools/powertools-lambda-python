@@ -1,5 +1,4 @@
 import threading
-from typing import List
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -15,7 +14,7 @@ def threaded_func(order_id: str):
 
 
 def lambda_handler(event: dict, context: LambdaContext) -> str:
-    order_ids: List[str] = event["order_ids"]
+    order_ids: list[str] = event["order_ids"]
 
     threading.Thread(target=threaded_func, args=(order_ids[0],)).start()
     threading.Thread(target=threaded_func, args=(order_ids[1],)).start()

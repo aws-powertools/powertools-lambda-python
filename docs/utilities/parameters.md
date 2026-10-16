@@ -393,7 +393,7 @@ Here are two examples of implementing a custom parameter store. One using an ext
     ```
 
 === "custom_provider_s3.py"
-    ```python hl_lines="6 9 19 29"
+    ```python hl_lines="5 8 18 28"
     --8<-- "examples/parameters/src/custom_provider_s3.py"
     ```
 

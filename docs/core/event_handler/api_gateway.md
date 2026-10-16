@@ -400,7 +400,7 @@ Even better, we can also let Event Handler validate and convert our response acc
 
 === "validating_payloads.py"
 
-    ```python hl_lines="13 16 24 33"
+    ```python hl_lines="11 14 22 31"
     --8<-- "examples/event_handler_rest/src/validating_payloads.py"
     ```
 
@@ -432,7 +432,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 === "validating_payload_subset.py"
 
-    ```python hl_lines="7 8 22"
+    ```python hl_lines="8-9 23"
     --8<-- "examples/event_handler_rest/src/validating_payload_subset.py"
     ```
 
@@ -455,7 +455,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 You can use Pydantic's `Field(discriminator="...")` with union types to create discriminated unions (also known as tagged unions). This allows the Event Handler to automatically determine which model to use based on a discriminator field in the request body.
 
-```python hl_lines="3 4 8 31 36" title="discriminated_unions.py"
+```python hl_lines="1 3 7 30 35" title="discriminated_unions.py"
 --8<-- "examples/event_handler_rest/src/discriminated_unions.py"
 ```
 
@@ -512,7 +512,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
 === "validating_query_strings.py"
 
-    ```python hl_lines="8 9 27"
+    ```python hl_lines="9-10 28"
     --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
     ```
 
@@ -526,7 +526,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     This is merely for your convenience.
 
-    ```python hl_lines="25"
+    ```python hl_lines="23"
     --8<-- "examples/event_handler_rest/src/skip_validating_query_strings.py"
     ```
 
@@ -536,7 +536,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     If you need to handle multi-value query parameters, you can create a list of the desired type.
 
-    ```python hl_lines="23"
+    ```python hl_lines="21"
     --8<-- "examples/event_handler_rest/src/working_with_multi_query_values.py"
     ```
 
@@ -546,7 +546,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     You can use Pydantic models to define your query string parameters.
 
-    ```python hl_lines="18-22 27"
+    ```python hl_lines="17-21 26"
     --8<-- "examples/event_handler_rest/src/validating_query_string_with_pydantic.py"
     ```
 
@@ -560,7 +560,7 @@ Just like we learned in [query string validation](#validating-query-strings), we
 
 For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
 
-```python hl_lines="8 9 27" title="validating_path.py"
+```python hl_lines="9-10 28" title="validating_path.py"
 --8<-- "examples/event_handler_rest/src/validating_path.py"
 ```
 
@@ -582,7 +582,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
 === "validating_headers.py"
 
-    ```python hl_lines="5 9 27"
+    ```python hl_lines="1 8 26"
     --8<-- "examples/event_handler_rest/src/validating_headers.py"
     ```
 
@@ -594,7 +594,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     You can handle multi-value headers by declaring it as a list of the desired type.
 
-    ```python hl_lines="23"
+    ```python hl_lines="21"
     --8<-- "examples/event_handler_rest/src/working_with_headers_multi_value.py"
     ```
 
@@ -604,7 +604,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     You can use Pydantic models to define your headers parameters.
 
-    ```python hl_lines="18-22 27"
+    ```python hl_lines="17-21 26"
     --8<-- "examples/event_handler_rest/src/validating_headers_with_pydantic.py"
     ```
 
@@ -736,7 +736,7 @@ Within `app.current_event` property, you can access all available query strings 
 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property - like the earlier example in the [HTTP Methods](#http-methods) section.
 
-```python hl_lines="19 24" title="Accessing query strings and raw payload"
+```python hl_lines="17 22" title="Accessing query strings and raw payload"
 --8<-- "examples/event_handler_rest/src/accessing_request_details.py"
 ```
 
@@ -789,7 +789,7 @@ We provide pre-defined errors for the most popular ones based on [AWS Lambda API
 
 Use `enable_swagger()` to serve interactive API documentation:
 
-```python hl_lines="12-13" title="enabling_swagger.py"
+```python hl_lines="10-11" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
 ```
 
@@ -1421,7 +1421,7 @@ You can use `Depends()` to declare dependencies that are automatically resolved 
 
 Use `Annotated[Type, Depends(fn)]` to declare a dependency. The return value of `fn` is injected into the parameter automatically.
 
-```python hl_lines="5 8 20 25"
+```python hl_lines="2 7 19 24"
 --8<-- "examples/event_handler_rest/src/dependency_injection.py"
 ```
 
@@ -1429,7 +1429,7 @@ Use `Annotated[Type, Depends(fn)]` to declare a dependency. The return value of 
 
 Dependencies can depend on other dependencies, forming a composable tree. Shared sub-dependencies are resolved once per invocation and cached automatically.
 
-```python hl_lines="18 22 29-30"
+```python hl_lines="17 21 28-29"
 --8<-- "examples/event_handler_rest/src/dependency_injection_nested.py"
 ```
 

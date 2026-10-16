@@ -1,10 +1,10 @@
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, Literal, Union
+from typing import Annotated, Literal
 
 import pytest
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.utilities.parser import parse
 
@@ -50,7 +50,7 @@ class PartisalSuccessCallback(BaseModel):
 
 
 DogCallback = Annotated[
-    Union[SuccessfulCallback, FailedCallback, PartisalSuccessCallback, TemporaryErrorCallback],
+    SuccessfulCallback | FailedCallback | PartisalSuccessCallback | TemporaryErrorCallback,
     Field(discriminator="status"),
 ]
 

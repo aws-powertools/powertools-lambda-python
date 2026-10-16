@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Type, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -45,7 +45,7 @@ class KafkaRecordModel(BaseModel):
         description="The message key, base64-encoded. Can be null for messages without keys.",
         examples=["cmVjb3JkS2V5", "dXNlci0xMjM=", "b3JkZXItNDU2", None],
     )
-    value: Union[str, Type[BaseModel]] = Field(
+    value: str | type[BaseModel] = Field(
         description="The message value, base64-encoded.",
         examples=[
             "eyJrZXkiOiJ2YWx1ZSJ9",
@@ -53,7 +53,7 @@ class KafkaRecordModel(BaseModel):
             "eyJ1c2VyX2lkIjogMTIzLCAiYWN0aW9uIjogImxvZ2luIn0=",
         ],
     )
-    headers: List[Dict[str, bytes]] = Field(
+    headers: list[dict[str, bytes]] = Field(
         description="A list of message headers as key-value pairs with byte array values.",
         examples=[
             [{"headerKey": [104, 101, 97, 100, 101, 114, 86, 97, 108, 117, 101]}],
@@ -91,7 +91,7 @@ class KafkaRecordModel(BaseModel):
 
 
 class KafkaBaseEventModel(BaseModel):
-    bootstrapServers: List[str] = Field(
+    bootstrapServers: list[str] = Field(
         description="A list of Kafka bootstrap servers (broker endpoints).",
         examples=[
             ["b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092"],
@@ -101,7 +101,7 @@ class KafkaBaseEventModel(BaseModel):
             ],
         ],
     )
-    records: Dict[str, List[KafkaRecordModel]] = Field(
+    records: dict[str, list[KafkaRecordModel]] = Field(
         description="A dictionary mapping topic-partition combinations to lists of Kafka records.",
         examples=[
             {"mytopic-0": [{"topic": "mytopic", "partition": 0, "offset": 15}]},

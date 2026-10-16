@@ -1,6 +1,5 @@
 import time
-
-from typing_extensions import Annotated
+from typing import Annotated
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import BedrockAgentResolver

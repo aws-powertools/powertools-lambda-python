@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -10,7 +10,7 @@ class AppSyncEventsInfoChannelModel(BaseModel):
         description="The full path of the AppSync Events channel.",
         examples=["/default/channel", "/notifications/user-updates", "/chat/room-123"],
     )
-    segments: List[str] = Field(
+    segments: list[str] = Field(
         description="The path segments of the channel, split by forward slashes.",
         examples=[["default", "channel"], ["notifications", "user-updates"], ["chat", "room-123"]],
     )
@@ -39,7 +39,7 @@ class AppSyncEventsEventModel(BaseModel):
         description="The unique identifier for the event.",
         examples=["1", "2", "event-123", "notification-456"],
     )
-    payload: Dict[str, Any] = Field(
+    payload: dict[str, Any] = Field(
         description="The event data payload containing the actual event information.",
         examples=[
             {"event_1": "data_1"},
@@ -64,12 +64,12 @@ class AppSyncEventsModel(BaseModel):
         description="Results from the previous operation in a pipeline resolver.",
         examples=["previous-result-data"],
     )
-    outErrors: List[str] | None = Field(
+    outErrors: list[str] | None = Field(
         default=None,
         description="List of output errors that occurred during event processing.",
         examples=[["Error message 1", "Error message 2"]],
     )
-    stash: Dict[str, Any] | None = Field(
+    stash: dict[str, Any] | None = Field(
         default=None,
         description=(
             "The stash is a map that is made available inside each resolver and function mapping template. "
@@ -77,7 +77,7 @@ class AppSyncEventsModel(BaseModel):
         ),
         examples=[{"customData": "value", "userId": "123"}],
     )
-    events: List[AppSyncEventsEventModel] | None = Field(
+    events: list[AppSyncEventsEventModel] | None = Field(
         default=None,
         description="List of events being published or subscribed to in the AppSync Events operation.",
         examples=[

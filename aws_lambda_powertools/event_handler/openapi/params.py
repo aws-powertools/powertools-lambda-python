@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import inspect
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal, get_args, get_origin
 
 from pydantic import BaseConfig, BaseModel, create_model
 from pydantic.fields import FieldInfo
-from typing_extensions import Annotated, get_args, get_origin
 
 from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.openapi.compat import (

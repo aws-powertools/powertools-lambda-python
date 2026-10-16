@@ -1,7 +1,6 @@
-from typing import Literal, Union
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -28,7 +27,7 @@ class BarAction(BaseModel):
     bar_data: int
 
 
-ActionType = Annotated[Union[FooAction, BarAction], Field(discriminator="action")]  # (1)!
+ActionType = Annotated[FooAction | BarAction, Field(discriminator="action")]  # (1)!
 
 
 @app.post("/actions")

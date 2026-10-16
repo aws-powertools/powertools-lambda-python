@@ -1,6 +1,6 @@
 # ruff: noqa: FA100
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Type, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
@@ -16,13 +16,13 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
         description="The approximate date and time when the stream record was created (Unix epoch time).",
         examples=[1693997155.0],
     )
-    Keys: Dict[str, Any] = Field(description="Primary key attributes for the item.", examples=[{"Id": {"N": "101"}}])
-    NewImage: Union[Dict[str, Any], Type[BaseModel], BaseModel] | None = Field(
+    Keys: dict[str, Any] = Field(description="Primary key attributes for the item.", examples=[{"Id": {"N": "101"}}])
+    NewImage: dict[str, Any] | type[BaseModel] | BaseModel | None = Field(
         default=None,
         description="The item after modifications, in DynamoDB attribute-value format.",
         examples=[{"Message": {"S": "New item!"}, "Id": {"N": "101"}}],
     )
-    OldImage: Union[Dict[str, Any], Type[BaseModel], BaseModel] | None = Field(
+    OldImage: dict[str, Any] | type[BaseModel] | BaseModel | None = Field(
         default=None,
         description="The item before modifications, in DynamoDB attribute-value format.",
         examples=[{"Message": {"S": "Old item!"}, "Id": {"N": "100"}}],
@@ -88,7 +88,7 @@ class DynamoDBStreamRecordModel(BaseModel):
 
 
 class DynamoDBStreamModel(BaseModel):
-    Records: List[DynamoDBStreamRecordModel] = Field(
+    Records: list[DynamoDBStreamRecordModel] = Field(
         description="A list of records that contain the details of the DynamoDB stream events.",
         examples=[
             {

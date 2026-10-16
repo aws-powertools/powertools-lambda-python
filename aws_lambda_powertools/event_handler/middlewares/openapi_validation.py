@@ -5,11 +5,10 @@ import dataclasses
 import json
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Collection, Mapping, MutableMapping, Sequence, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast, get_args, get_origin
 from urllib.parse import parse_qs, unquote
 
 from pydantic import BaseModel
-from typing_extensions import get_args, get_origin
 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -34,6 +33,8 @@ from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveD
 from aws_lambda_powertools.utilities.data_classes.vpc_lattice import VPCLatticeEventV2
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Mapping, MutableMapping, Sequence
+
     from pydantic.fields import FieldInfo
 
     from aws_lambda_powertools.event_handler import Response

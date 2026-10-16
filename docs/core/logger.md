@@ -752,7 +752,7 @@ You can append your own thread-local keys in your existing Logger via the `threa
 
 === "thread_safe_append_keys.py"
 
-    ```python hl_lines="11"
+    ```python hl_lines="10"
     --8<-- "examples/logger/src/thread_safe_append_keys.py"
     ```
 
@@ -770,7 +770,7 @@ Use the `thread_safe_remove_keys` method to remove a list of thread-local keys t
 
 === "thread_safe_remove_keys.py"
 
-    ```python hl_lines="13"
+    ```python hl_lines="12"
     --8<-- "examples/logger/src/thread_safe_remove_keys.py"
     ```
 
@@ -786,7 +786,7 @@ Use the `thread_safe_clear_keys` method to remove all thread-local keys that wer
 
 === "thread_safe_clear_keys.py"
 
-    ```python hl_lines="13"
+    ```python hl_lines="12"
     --8<-- "examples/logger/src/thread_safe_clear_keys.py"
     ```
 
@@ -1087,7 +1087,7 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 === "bring_your_own_formatter_from_scratch.py"
 
-    ```python hl_lines="6 9 11-12 15 19 23 26 38"
+    ```python hl_lines="7 10 12-13 16 20 24 27 39"
     --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch.py"
     ```
 

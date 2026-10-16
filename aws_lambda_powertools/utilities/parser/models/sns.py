@@ -1,6 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Union
-from typing import Type as TypingType
+from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 from pydantic.networks import HttpUrl
@@ -48,7 +47,7 @@ class SnsNotificationModel(BaseModel):
         description="The type of message. For Lambda triggers, this is always 'Notification'.",
         examples=["Notification"],
     )
-    MessageAttributes: Dict[str, SnsMsgAttributeModel] | None = Field(
+    MessageAttributes: dict[str, SnsMsgAttributeModel] | None = Field(
         default=None,
         description="User-defined message attributes as key-value pairs with type information.",
         examples=[
@@ -57,7 +56,7 @@ class SnsNotificationModel(BaseModel):
             None,
         ],
     )
-    Message: Union[str, TypingType[BaseModel]] = Field(
+    Message: str | type[BaseModel] = Field(
         description="The message value specified when the notification was published to the topic.",
         examples=[
             "Hello from SNS!",
@@ -147,7 +146,7 @@ class SnsRecordModel(BaseModel):
 
 
 class SnsModel(BaseModel):
-    Records: List[SnsRecordModel] = Field(
+    Records: list[SnsRecordModel] = Field(
         description="A list of SNS message records included in the event.",
         examples=[[{"EventSource": "aws:sns", "Sns": {"MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e"}}]],
     )

@@ -1,5 +1,4 @@
 import os
-from typing import Dict, Type
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -31,11 +30,11 @@ class OrderOutput:
         self.order_id = order_id
 
 
-def order_to_dict(x: Type[OrderOutput]) -> Dict:  # (1)!
+def order_to_dict(x: type[OrderOutput]) -> dict:  # (1)!
     return dict(x.__dict__)
 
 
-def dict_to_order(x: Dict) -> OrderOutput:  # (2)!
+def dict_to_order(x: dict) -> OrderOutput:  # (2)!
     return OrderOutput(**x)
 
 

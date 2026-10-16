@@ -1,9 +1,8 @@
 import asyncio
 import re
-from typing import cast
+from typing import Annotated, cast
 
 import pytest
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (

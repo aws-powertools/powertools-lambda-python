@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import typing
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 from pydantic import PydanticSchemaGenerationError
 
@@ -21,6 +21,8 @@ from aws_lambda_powertools.utilities.parser.functions import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pydantic import TypeAdapter
 
     from aws_lambda_powertools.shared.types import LambdaHandler

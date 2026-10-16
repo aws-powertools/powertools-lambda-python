@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Union
+from typing import Any
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import KinesisStreamEvent, event_source
@@ -13,7 +13,7 @@ def lambda_handler(event: KinesisStreamEvent, context: LambdaContext):
     for record in event.records:
         kinesis_record = record.kinesis
 
-        payload: Union[Dict[str, Any], str]
+        payload: dict[str, Any] | str
 
         try:
             # Try to parse as JSON first
@@ -29,7 +29,7 @@ def lambda_handler(event: KinesisStreamEvent, context: LambdaContext):
     return {"statusCode": 200, "body": "Processed all records successfully"}
 
 
-def process_data(data: Union[Dict[str, Any], str]) -> None:
+def process_data(data: dict[str, Any] | str) -> None:
     if isinstance(data, dict):
         # Handle JSON data
         logger.info(f"Processing JSON data: {data}")

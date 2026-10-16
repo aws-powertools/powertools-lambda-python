@@ -1,9 +1,9 @@
 """Tests for the Depends() dependency injection feature using Annotated."""
 
 import json
+from typing import Annotated
 
 import pytest
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 from aws_lambda_powertools.event_handler.depends import DependencyResolutionError, Depends
