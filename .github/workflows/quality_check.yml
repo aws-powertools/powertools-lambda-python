@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
@@ -78,6 +78,12 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
+      # Valkey GLIDE currently needs a source build on Python 3.15.
+      - name: Install native build dependencies for Python 3.15
+        if: matrix.python-version == '3.15'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends protobuf-compiler
       - name: Install dependencies
         run: make dev-quality-code
       - name: Checking and enforcing format

@@ -31,6 +31,11 @@ class Payload:
 class DecimalAmount(Decimal, Enum):
     SMALL = Decimal("1.00")
 
+    def __deepcopy__(self, memo):
+        # _pydecimal tries to reconstruct this member from str(self), which is an enum name.
+        # Enum members should retain their identity with either Decimal implementation.
+        return self
+
 
 class StringStatus(str, Enum):
     PAID = "paid"

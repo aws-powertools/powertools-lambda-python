@@ -18,6 +18,7 @@ from aws_cdk.aws_lambda import (
     Function,
     LayerVersion,
     Runtime,
+    RuntimeFamily,
     Tracing,
 )
 from filelock import FileLock
@@ -120,12 +121,12 @@ class BaseInfrastructure(InfrastructureProvider):
             "aws-lambda-powertools-e2e-test",
             layer_version_name="aws-lambda-powertools-e2e-test",
             compatible_runtimes=[
-                Runtime.PYTHON_3_9,
                 Runtime.PYTHON_3_10,
                 Runtime.PYTHON_3_11,
                 Runtime.PYTHON_3_12,
                 Runtime.PYTHON_3_13,
                 Runtime.PYTHON_3_14,
+                Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True),
             ],
             compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
@@ -227,7 +228,7 @@ class BaseInfrastructure(InfrastructureProvider):
 
         This allows us to keep our BaseInfrastructure while supporting context lookups.
         """
-        # cdk.out/tracer/cdk_app_v39.py
+        # cdk.out/tracer/cdk_app_V315.py
         temp_file = self._cdk_out_dir / f"cdk_app_{PYTHON_RUNTIME_VERSION}.py"
 
         if temp_file.exists():
@@ -257,9 +258,7 @@ class BaseInfrastructure(InfrastructureProvider):
     def _determine_runtime_version(self) -> Runtime:
         """Determine Python runtime version based on the current Python interpreter"""
         version = sys.version_info
-        if version.major == 3 and version.minor == 9:
-            return Runtime.PYTHON_3_9
-        elif version.major == 3 and version.minor == 10:
+        if version.major == 3 and version.minor == 10:
             return Runtime.PYTHON_3_10
         elif version.major == 3 and version.minor == 11:
             return Runtime.PYTHON_3_11
@@ -269,6 +268,9 @@ class BaseInfrastructure(InfrastructureProvider):
             return Runtime.PYTHON_3_13
         elif version.major == 3 and version.minor == 14:
             return Runtime.PYTHON_3_14
+        elif version.major == 3 and version.minor == 15:
+            # Use the runtime name until CDK provides PYTHON_3_15.
+            return Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True)
         else:
             raise ValueError(f"Unsupported Python version: {version}")
 
