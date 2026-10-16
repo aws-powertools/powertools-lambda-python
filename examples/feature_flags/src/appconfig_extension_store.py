@@ -1,14 +1,13 @@
 from typing import Any
 
-from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
+from aws_lambda_powertools.utilities.feature_flags import AppConfigExtensionStore, FeatureFlags
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # Fetch feature flags from the AWS AppConfig Agent Lambda extension instead of calling AppConfig with boto3
-app_config = AppConfigStore(
+app_config = AppConfigExtensionStore(
     environment="dev",
     application="product-catalogue",
     name="features",
-    use_extension=True,
 )
 
 feature_flags = FeatureFlags(store=app_config)

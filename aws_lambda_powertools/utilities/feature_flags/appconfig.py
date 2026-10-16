@@ -168,3 +168,58 @@ class AppConfigStore(StoreProvider):
             return extracted
 
         return config
+
+
+class AppConfigExtensionStore(AppConfigStore):
+    """Feature flags store that reads from the AWS AppConfig Agent Lambda extension.
+
+    Same behaviour as ``AppConfigStore(use_extension=True)``: configuration is read from the
+    extension's local HTTP endpoint instead of calling AppConfig with boto3, so there are no
+    boto3 options to configure. Requires the ``AWS-AppConfig-Extension`` layer.
+
+    Parameters
+    ----------
+    environment: str
+        AppConfig environment, e.g. 'dev'
+    application: str
+        AppConfig application name, e.g. 'powertools'
+    name: str
+        AppConfig configuration name, e.g. 'features'
+    max_age: int
+        Seconds to keep the configuration in Powertools' cache before reading the extension again. The
+        extension keeps its own cache and refreshes it in the background; use 0 to read it on every call.
+    envelope : str | None
+        JMESPath expression to pluck feature flags data from the configuration
+    jmespath_options : dict | None
+        Alternative JMESPath options to be included when filtering expr
+    logger: A logging object
+        Used to log messages. If None is supplied, one will be created.
+
+    Example
+    -------
+    >>> from aws_lambda_powertools.utilities.feature_flags import AppConfigExtensionStore, FeatureFlags
+    >>>
+    >>> store = AppConfigExtensionStore(environment="dev", application="product-catalogue", name="features")
+    >>> feature_flags = FeatureFlags(store=store)
+    """
+
+    def __init__(
+        self,
+        environment: str,
+        application: str,
+        name: str,
+        max_age: int = 5,
+        envelope: str | None = "",
+        jmespath_options: dict | None = None,
+        logger: logging.Logger | Logger | None = None,
+    ):
+        super().__init__(
+            environment=environment,
+            application=application,
+            name=name,
+            max_age=max_age,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
+            logger=logger,
+            use_extension=True,
+        )

@@ -9,7 +9,7 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
+from aws_lambda_powertools.utilities.feature_flags import AppConfigExtensionStore, AppConfigStore, FeatureFlags
 from aws_lambda_powertools.utilities.parameters import AppConfigExtensionProvider, GetParameterError
 
 
@@ -176,3 +176,13 @@ def test_feature_flags_store_uses_extension(extension, config_path, monkeypatch)
     assert flags.evaluate(name="beta", context={"tenant": "acme"}, default=False) is True
     assert flags.evaluate(name="beta", context={"tenant": "other"}, default=False) is False
     assert extension.requests[0][0] == config_path
+
+
+def test_feature_flags_extension_store_is_a_preconfigured_appconfig_store(extension, config_path, monkeypatch):
+    monkeypatch.setenv("AWS_APPCONFIG_EXTENSION_HTTP_PORT", str(extension.port))
+    extension.respond(config_path, {"beta": {"default": True}})
+    store = AppConfigExtensionStore(environment="dev", application="my_app", name="features", max_age=0)
+
+    assert isinstance(store, AppConfigStore)
+    assert isinstance(store._conf_store, AppConfigExtensionProvider)
+    assert FeatureFlags(store=store).evaluate(name="beta", context={}, default=False) is True

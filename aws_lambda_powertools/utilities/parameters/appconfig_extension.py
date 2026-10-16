@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.parameters.base import BaseProvider
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
 
 DEFAULT_EXTENSION_PORT = 2772
-DEFAULT_EXTENSION_TIMEOUT_SECS = 5.0
+DEFAULT_EXTENSION_TIMEOUT_SECS = 3.0
 
 
 class AppConfigExtensionProvider(BaseProvider):
@@ -34,7 +34,7 @@ class AppConfigExtensionProvider(BaseProvider):
     port: int, optional
         Port of the extension's local HTTP server, by default AWS_APPCONFIG_EXTENSION_HTTP_PORT or 2772
     timeout: float, optional
-        Seconds to wait for a response from the extension, by default 5
+        Seconds to wait for a response from the extension, by default 3
 
     Example
     -------
