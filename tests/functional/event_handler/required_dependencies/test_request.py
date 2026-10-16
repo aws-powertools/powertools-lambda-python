@@ -321,6 +321,24 @@ def test_request_injection_works_across_multiple_invocations():
     assert call_count == 3
 
 
+def test_request_is_not_reused_after_unhandled_exception():
+    """A handler raising must not leave its Request cached for the next invocation."""
+    app = APIGatewayRestResolver()
+    received: list[Request] = []
+
+    @app.get("/counters/<counter_id>")
+    def handler(counter_id: str, request: Request):
+        received.append(request)
+        raise ValueError(counter_id)
+
+    for i in range(2):
+        event = _make_rest_event(f"/counters/{i}", path_parameters={"counter_id": str(i)})
+        with pytest.raises(ValueError):
+            app(event, {})
+
+    assert [req.path_parameters for req in received] == [{"counter_id": "0"}, {"counter_id": "1"}]
+
+
 # ---------------------------------------------------------------------------
 # RuntimeError when accessed outside of request resolution
 # ---------------------------------------------------------------------------

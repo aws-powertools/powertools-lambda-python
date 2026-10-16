@@ -8,7 +8,7 @@ read-through cache and the fail-open policy so every backend behaves identically
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import threading
 from abc import ABC, abstractmethod
@@ -114,12 +114,12 @@ class CircuitBreakerPersistenceLayer(ABC):
         Sized to outlive a full recovery window so a live circuit is never reaped
         mid-cycle, while an abandoned circuit (no further writes) self-cleans soon after.
         """
-        now = int(datetime.datetime.now().timestamp())
+        now = int(dt.datetime.now().timestamp())
         return now + self._settings_for(name).recovery_timeout + PERSISTED_STATE_TTL_BUFFER
 
     def _save_to_cache(self, record: CircuitStateRecord) -> None:
         """Cache a record locally with a short in-memory freshness window."""
-        local_expiry = int(datetime.datetime.now().timestamp()) + self._settings_for(record.name).local_cache_max_age
+        local_expiry = int(dt.datetime.now().timestamp()) + self._settings_for(record.name).local_cache_max_age
         with self._lock:
             self._cache[self._cache_key(record.name)] = (local_expiry, record)
 
@@ -131,7 +131,7 @@ class CircuitBreakerPersistenceLayer(ABC):
                 return None
 
             local_expiry, record = cached
-            if int(datetime.datetime.now().timestamp()) >= local_expiry:
+            if int(dt.datetime.now().timestamp()) >= local_expiry:
                 # Guarded del, not pop: on Python 3.10 OrderedDict.pop re-enters the
                 # subclass __getitem__ after detaching the node, so LRUDict.pop raises
                 # KeyError for a *present* key and corrupts the dict (fixed in 3.11).
@@ -242,7 +242,7 @@ class CircuitBreakerPersistenceLayer(ABC):
             worker already holds it.
         """
         # Lease = recovery_timeout gives the probe a full cycle to complete.
-        probe_lease_expiry = int(datetime.datetime.now().timestamp()) + self._settings_for(name).recovery_timeout
+        probe_lease_expiry = int(dt.datetime.now().timestamp()) + self._settings_for(name).recovery_timeout
         record = CircuitStateRecord(
             name=name,
             state=CircuitState.HALF_OPEN,

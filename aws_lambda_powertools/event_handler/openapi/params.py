@@ -1059,7 +1059,7 @@ def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> tup
     # Reconstruct type_annotation with non-FieldInfo metadata if present
     # This ensures constraints like Interval are preserved
     if other_metadata and not preserve_full_annotation:
-        type_annotation = Annotated[(type_annotation, *other_metadata)]
+        type_annotation = Annotated[(type_annotation,) + tuple(other_metadata)]
 
     # Process the annotation if it exists
     field_info: FieldInfo | None = None

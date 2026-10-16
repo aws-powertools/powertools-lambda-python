@@ -9,7 +9,7 @@ import logging
 import os
 import warnings
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
@@ -25,6 +25,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from aws_lambda_powertools.shared.types import LambdaHandler
     from aws_lambda_powertools.utilities.idempotency.persistence.base import (
         BasePersistenceLayer,
     )
@@ -34,9 +35,33 @@ from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
 
+EventT = TypeVar("EventT")
+ContextT = TypeVar("ContextT", bound="LambdaContext | DurableContextProtocol")
+
+
+class _IdempotentHandlerDecorator(Protocol):
+    # The return type is Any, as responses replayed from the persistence store are deserialized JSON
+    def __call__(
+        self,
+        handler: Callable[[EventT, ContextT], Any],
+        /,
+    ) -> LambdaHandler[EventT, ContextT, Any]: ...
+
+
+class _IdempotentDecorator(Protocol):
+    """Type of `idempotent`, as `lambda_handler_decorator` returns an untyped `Callable`."""
+
+    def __call__(
+        self,
+        *,
+        persistence_store: BasePersistenceLayer,
+        config: IdempotencyConfig | None = None,
+        key_prefix: str | None = None,
+    ) -> _IdempotentHandlerDecorator: ...
+
 
 @lambda_handler_decorator
-def idempotent(
+def _idempotent(
     handler: Callable[[Any, LambdaContext | DurableContextProtocol], Any],
     event: dict[str, Any],
     context: LambdaContext | DurableContextProtocol,
@@ -115,6 +140,9 @@ def idempotent(
     )
 
     return idempotency_handler.handle(is_replay=is_replay)
+
+
+idempotent = cast(_IdempotentDecorator, _idempotent)
 
 
 def idempotent_function(

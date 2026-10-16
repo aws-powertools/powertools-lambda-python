@@ -104,6 +104,17 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run 
 This creates a `.venv` with the locked development dependencies and installs the Git hooks.
 Run tools with `uv run --locked`, or activate `.venv` when working in your editor.
 
+CI runs formatting, linting, security and complexity checks once. Tests, dependency
+checks with Nox, and both type checkers run on every supported Python version.
+Run `make format-check lint-check` to check formatting and linting without modifying
+files. `make lint` still formats files before linting. CI uses `make dev-quality-code`
+to install the same dependencies as `make dev`, without installing Git hooks.
+
+`make test-dependencies` recreates the Nox environments so packages left over from
+earlier runs cannot hide missing dependencies. Tests marked `requires_validation`
+run in dedicated sessions with the Validation extra, keeping the SDK and Parser
+sessions independent of it. The full test suite still runs these tests.
+
 To send us a pull request, please follow these steps:
 
 1. Create a new branch to focus on the specific change you are contributing e.g. `improv/logger-debug-sampling`

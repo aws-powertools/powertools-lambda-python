@@ -50,3 +50,70 @@ def test_ses_trigger_event():
     assert action.type == raw_receipt["action"]["type"]
     assert action.functionArn == raw_receipt["action"]["functionArn"]
     assert action.invocationType == raw_receipt["action"]["invocationType"]
+
+
+def test_ses_reply_to_header():
+    from aws_lambda_powertools.utilities.parser.models.ses import SesMailCommonHeaders
+
+    # Test with standard SES notification camelCase payload
+    headers_camel = SesMailCommonHeaders.model_validate(
+        {
+            "from": ["sender@example.com"],
+            "to": ["receiver@example.com"],
+            "returnPath": "bounce@example.com",
+            "messageId": "<msg-001@example.com>",
+            "date": "Wed, 7 Oct 2026 12:34:56 -0700",
+            "subject": "SES Subject",
+            "replyTo": ["reply@example.com"],
+        },
+    )
+    assert headers_camel.reply_to == ["reply@example.com"]
+    assert headers_camel.model_dump(by_alias=True)["replyTo"] == ["reply@example.com"]
+
+    # Test backwards compatibility with hyphenated alias
+    headers_hyphen = SesMailCommonHeaders.model_validate(
+        {
+            "from": ["sender@example.com"],
+            "to": ["receiver@example.com"],
+            "returnPath": "bounce@example.com",
+            "messageId": "<msg-002@example.com>",
+            "date": "Wed, 7 Oct 2026 12:34:56 -0700",
+            "subject": "SES Subject",
+            "reply-to": ["reply-hyphen@example.com"],
+        },
+    )
+    assert headers_hyphen.reply_to == ["reply-hyphen@example.com"]
+
+    # Test keyword argument instantiation
+    headers_kwarg = SesMailCommonHeaders(
+        **{"from": ["sender@example.com"]},
+        to=["receiver@example.com"],
+        returnPath="bounce@example.com",
+        messageId="<msg-003@example.com>",
+        date="Wed, 7 Oct 2026 12:34:56 -0700",
+        subject="SES Subject",
+        reply_to=["reply-kwarg@example.com"],
+    )
+    assert headers_kwarg.reply_to == ["reply-kwarg@example.com"]
+
+
+def test_ses_trigger_event_with_optional_common_headers():
+    # GIVEN an SES event with cc, bcc, sender and reply-to common headers
+    raw_event = load_event("sesEvent.json")
+    raw_event["Records"][0]["ses"]["mail"]["commonHeaders"].update(
+        {
+            "cc": ["cc@example.com"],
+            "bcc": ["bcc@example.com"],
+            "sender": ["sender@example.com"],
+            "replyTo": ["reply@example.com"],
+        },
+    )
+
+    # WHEN parsing the event
+    common_headers = SesModel(**raw_event).Records[0].ses.mail.commonHeaders
+
+    # THEN the optional common headers are populated
+    assert common_headers.cc == ["cc@example.com"]
+    assert common_headers.bcc == ["bcc@example.com"]
+    assert common_headers.sender == ["sender@example.com"]
+    assert common_headers.reply_to == ["reply@example.com"]
