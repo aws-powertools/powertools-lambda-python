@@ -1,12 +1,14 @@
-.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-website
+.PHONY: target dev dev-quality-code format format-check lint lint-check test coverage-html pr build build-docs build-docs-website
 .PHONY: docs-local security-baseline complexity-baseline release-prod release-test release
 
 target:
 	@$(MAKE) pr
 
-dev dev-quality-code:
-	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey
+dev: dev-quality-code
 	uv run --locked pre-commit install
+
+dev-quality-code:
+	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey
 
 format-check:
 	uv run --locked ruff format aws_lambda_powertools tests examples --check
@@ -15,6 +17,9 @@ format:
 	uv run --locked ruff format aws_lambda_powertools tests examples
 
 lint: format
+	$(MAKE) lint-check
+
+lint-check:
 	uv run --locked ruff check aws_lambda_powertools tests examples
 
 lint-docs:
@@ -28,7 +33,7 @@ test:
 	uv run --locked pytest --cache-clear tests/performance
 
 test-dependencies:
-	uv run --locked nox --error-on-external-run --reuse-venv=yes --non-interactive
+	uv run --locked nox --error-on-external-run --reuse-venv=no --non-interactive
 
 test-pydanticv2:
 	uv run --locked pytest -m "not perf" --ignore tests/e2e

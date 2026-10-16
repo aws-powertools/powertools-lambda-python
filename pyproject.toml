@@ -225,6 +225,7 @@ addopts = "-ra -vv"
 testpaths = "./tests"
 markers = [
   "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
+  "requires_validation: tests that also require the validation extra",
 ]
 
 [tool.ty]
