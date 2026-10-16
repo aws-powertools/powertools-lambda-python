@@ -12,7 +12,7 @@ from botocore import stub
 from aws_lambda_powertools.utilities.streaming import S3Object
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
-from aws_lambda_powertools.utilities.streaming.transformations import GzipTransform
+from aws_lambda_powertools.utilities.streaming.transformations import GzipTransform, ZipTransform
 
 
 @pytest.fixture
@@ -90,4 +90,27 @@ def test_s3_readline_respects_size(s3_client, s3_client_stub, is_gzip, readline_
         assert obj.readline(**readline_kwargs) == b""
         assert obj.tell() == len(payload)
 
+    s3_client_stub.assert_no_pending_responses()
+
+
+@pytest.mark.parametrize("is_gzip", [False, True], ids=["raw", "gzip"])
+def test_s3_closed_after_close_without_reading(s3_client, is_gzip):
+    # GIVEN an object that was never read nor inspected
+    obj = S3Object(bucket="bucket", key="key", boto3_client=s3_client, is_gzip=is_gzip)
+
+    # WHEN it is closed
+    obj.close()
+
+    # THEN it reports as closed, whether or not data transformations are configured
+    assert obj.closed is True
+
+
+def test_s3_closed_does_not_make_requests_for_zip(s3_client, s3_client_stub):
+    # GIVEN an object with a zip transformation, which would read the archive as soon as it is created
+    obj = S3Object(bucket="bucket", key="key", boto3_client=s3_client)
+    obj.transform(ZipTransform(), in_place=True)
+
+    # WHEN checking whether it is closed
+    # THEN no S3 request is issued (the stubber has no responses queued, so any call would fail)
+    assert obj.closed is False
     s3_client_stub.assert_no_pending_responses()
