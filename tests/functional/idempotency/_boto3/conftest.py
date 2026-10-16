@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 from decimal import Decimal
 from unittest import mock
@@ -14,7 +14,6 @@ from jmespath import functions
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.jmespath_utils import query
-from aws_lambda_powertools.utilities.validation import envelopes
 from tests.functional.idempotency.utils import hash_idempotency_key
 from tests.functional.utils import json_serialize, load_event
 
@@ -49,13 +48,13 @@ def lambda_context() -> LambdaContext:
 
 @pytest.fixture
 def timestamp_future():
-    return str(int((datetime.datetime.now() + datetime.timedelta(seconds=3600)).timestamp()))
+    return str(int((dt.datetime.now() + dt.timedelta(seconds=3600)).timestamp()))
 
 
 @pytest.fixture
 def timestamp_expired():
-    now = datetime.datetime.now()
-    period = datetime.timedelta(seconds=6400)
+    now = dt.datetime.now()
+    period = dt.timedelta(seconds=6400)
     return str(int((now - period).timestamp()))
 
 
@@ -198,6 +197,8 @@ def hashed_idempotency_key(request, lambda_apigw_event, default_jmespath, lambda
 
 @pytest.fixture
 def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
+    from aws_lambda_powertools.utilities.validation import envelopes
+
     event = query(
         data=lambda_apigw_event,
         envelope=envelopes.API_GATEWAY_HTTP,

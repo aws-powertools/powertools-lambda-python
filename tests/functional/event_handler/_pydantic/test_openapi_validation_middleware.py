@@ -1,5 +1,5 @@
 import base64
-import datetime
+import datetime as dt
 import json
 import warnings
 from dataclasses import dataclass
@@ -1140,7 +1140,7 @@ def test_validation_query_string_with_encoded_datetime_alb_resolver():
 
     # WHEN a handler is defined with various parameters and routes
     @app.get("/users")
-    def handler(query_dt: datetime.datetime):
+    def handler(query_dt: dt.datetime):
         return None
 
     # THEN the handler should be invoked with the expected result
@@ -2892,7 +2892,7 @@ def test_validation_query_string_with_fully_encoded_datetime_alb_resolver():
     raw_event["queryStringParameters"] = {"query_dt": "2025-12-20T16%3A56%3A02.032000"}
 
     @app.get("/users")
-    def handler(query_dt: datetime.datetime):
+    def handler(query_dt: dt.datetime):
         return {"received": query_dt.isoformat()}
 
     result = app(raw_event, {})
@@ -2929,7 +2929,7 @@ def test_validation_without_decode_query_parameters_alb_resolver():
     raw_event["queryStringParameters"] = {"query_dt": "2025-12-20T16%3A56%3A02.032000"}
 
     @app.get("/users")
-    def handler(query_dt: datetime.datetime):
+    def handler(query_dt: dt.datetime):
         return None
 
     # THEN validation should fail because the encoded string is not a valid datetime

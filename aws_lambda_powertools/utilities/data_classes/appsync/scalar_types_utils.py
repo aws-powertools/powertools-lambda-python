@@ -1,9 +1,9 @@
-import datetime
+import datetime as dt
 import time
 import uuid
 
 
-def _formatted_time(now: datetime.date, fmt: str, timezone_offset: int) -> str:
+def _formatted_time(now: dt.date, fmt: str, timezone_offset: int) -> str:
     """String formatted time with optional timezone offset
 
     Parameters
@@ -20,7 +20,7 @@ def _formatted_time(now: datetime.date, fmt: str, timezone_offset: int) -> str:
         Returns string formatted time with optional timezone offset
     """
     if timezone_offset != 0:
-        now = now + datetime.timedelta(hours=timezone_offset)
+        now = now + dt.timedelta(hours=timezone_offset)
 
     datetime_str = now.strftime(fmt)
     if fmt.endswith(".%f"):
@@ -55,7 +55,7 @@ def aws_date(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSDate scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%Y-%m-%d", timezone_offset)
+    return _formatted_time(dt.datetime.now(dt.timezone.utc), "%Y-%m-%d", timezone_offset)
 
 
 def aws_time(timezone_offset: int = 0) -> str:
@@ -71,7 +71,7 @@ def aws_time(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%H:%M:%S.%f", timezone_offset)
+    return _formatted_time(dt.datetime.now(dt.timezone.utc), "%H:%M:%S.%f", timezone_offset)
 
 
 def aws_datetime(timezone_offset: int = 0) -> str:
@@ -87,7 +87,7 @@ def aws_datetime(timezone_offset: int = 0) -> str:
     str
         Returns current time as AWSDateTime scalar string with optional timezone offset
     """
-    return _formatted_time(datetime.datetime.now(datetime.timezone.utc), "%Y-%m-%dT%H:%M:%S.%f", timezone_offset)
+    return _formatted_time(dt.datetime.now(dt.timezone.utc), "%Y-%m-%dT%H:%M:%S.%f", timezone_offset)
 
 
 def aws_timestamp() -> int:

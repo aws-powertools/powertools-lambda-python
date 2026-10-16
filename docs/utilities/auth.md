@@ -38,6 +38,9 @@ pip install "aws-lambda-powertools[jwt]"
 
 The `jwt` extra installs PyJWT, cryptography, and urllib3. Build dependencies for the same Python version and architecture as your Lambda function. See [cross-platform builds](../build_recipes/cross-platform.md).
 
+???+ note "Using the Lambda layer"
+    The Powertools for AWS Lambda layer does not include urllib3. With the layer, this utility uses the urllib3 that comes with the Lambda runtime. To control the urllib3 version yourself, install the `jwt` extra and package it with your function.
+
 #### Compatibility with boto3
 
 If the function also uses boto3, including through Parameters, install and validate the SDK together with JWT verification:
