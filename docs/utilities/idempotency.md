@@ -270,7 +270,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
     * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
 
-    ```python hl_lines="9 34 38 42 52 54 64"
+    ```python hl_lines="8 33 37 41 51 53 63"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 
@@ -981,7 +981,7 @@ You can set up a `response_hook` in the `IdempotentConfig` class to manipulate t
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="20 22 28 36"
+    ```python hl_lines="19 21 27 35"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 

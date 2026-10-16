@@ -241,7 +241,7 @@ or read the Amplify documentation on using [AWS Lambda for authorization](https:
 
 === "app.py"
 
-    ```python hl_lines="5-7 20"
+    ```python hl_lines="3-5 18"
     --8<-- "examples/event_sources/src/appSyncAuthorizer.py"
     ```
 
@@ -367,7 +367,7 @@ decompress and parse json data from the event.
 
 === "app.py"
 
-    ```python hl_lines="5-7 11"
+    ```python hl_lines="3-5 9"
     --8<-- "examples/event_sources/src/kinesisStreamCloudWatchLogs.py"
     ```
 
@@ -604,7 +604,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Dropping invalid records"
 
-    ```python hl_lines="5-6 14 16"
+    ```python hl_lines="4-5 13 15"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
     ```
 
@@ -646,7 +646,7 @@ for more details.
 
 === "app.py"
 
-    ```python hl_lines="5 10"
+    ```python hl_lines="3 8"
     --8<-- "examples/event_sources/src/rabbit_mq_example.py"
     ```
 

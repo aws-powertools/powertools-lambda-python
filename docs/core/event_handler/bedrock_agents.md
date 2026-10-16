@@ -218,7 +218,7 @@ The function then returns a boolean indicating if the meeting was successfully s
 
 === "Lambda handler"
 
-	```python hl_lines="1 2 6 16-18"
+	```python hl_lines="1 3 7 17-19"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
 	```
 
@@ -300,7 +300,7 @@ use a combination of [Pydantic Models](https://docs.pydantic.dev/latest/concepts
 
 To implement these customizations, include extra constraints when defining your parameters:
 
-```python hl_lines="19" title="customizing_api_parameters.py" title="Customizing API parameters"
+```python hl_lines="20" title="customizing_api_parameters.py" title="Customizing API parameters"
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_parameters.py"
 ```
 
@@ -312,7 +312,7 @@ To implement these customizations, include extra constraints when defining your 
 
 To implement these customizations, include extra parameters when defining your routes:
 
-```python hl_lines="13-22" title="customizing_api_operations.py" title="Customzing API operations"
+```python hl_lines="14-23" title="customizing_api_operations.py" title="Customzing API operations"
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
 
@@ -363,7 +363,7 @@ Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://do
 
 === "assert_bedrock_agent_response_module.py"
 
-	```python hl_lines="14-17"
+	```python hl_lines="13-16"
 	--8<-- "examples/event_handler_bedrock_agents/src/assert_bedrock_agent_response_module.py"
 	```
 

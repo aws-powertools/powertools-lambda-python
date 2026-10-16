@@ -30,7 +30,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 ### Middleware with before logic
 
 === "getting_started_middleware_before_logic_function.py"
-    ```python hl_lines="5 26 27 35 36 38 41 42"
+    ```python hl_lines="5 26-27 35-36 38 41-42"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_function.py"
     ```
 
@@ -43,7 +43,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 ### Middleware with after logic
 
 === "getting_started_middleware_after_logic_function.py"
-    ```python hl_lines="8 14 15 24-26 40 41"
+    ```python hl_lines="8 14-15 24-26 40-41"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_function.py"
     ```
 
@@ -58,7 +58,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 You can also have your own keyword arguments after the mandatory arguments.
 
 === "getting_started_middleware_with_params_function.py"
-    ```python hl_lines="6 30 31 41 53 54"
+    ```python hl_lines="7 31-32 42 54-55"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_function.py"
     ```
 
@@ -83,7 +83,7 @@ You can also use [`POWERTOOLS_TRACE_MIDDLEWARES`](#tracing-middleware-execution)
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md){target="_blank"} inside your middleware, and add annotations as well as metadata for additional operational insights.
 
 === "advanced_middleware_tracer_function.py"
-    ```python hl_lines="7 9 12 16 17 22 28 45 46"
+    ```python hl_lines="7 9 12 16-17 22 28 45-46"
     --8<-- "examples/middleware_factory/src/advanced_middleware_tracer_function.py"
     ```
 
@@ -105,7 +105,7 @@ This makes use of an existing Tracer instance that you may have initialized anyw
     You must [enable Active Tracing](../core/tracer.md#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
 === "getting_started_middleware_tracer_function.py"
-    ```python hl_lines="8 14 15 39 40"
+    ```python hl_lines="8 14-15 39-40"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_function.py"
     ```
 
@@ -134,7 +134,7 @@ In the example below, we create a Middleware with the following features:
 * Save execution history to a DynamoDB table
 
 === "combining_powertools_utilities_function.py"
-    ```python hl_lines="11 28 29 56 64 77 123"
+    ```python hl_lines="11 28-29 56 64 77 123"
     --8<-- "examples/middleware_factory/src/combining_powertools_utilities_function.py"
     ```
 

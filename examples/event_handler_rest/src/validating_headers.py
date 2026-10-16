@@ -1,6 +1,4 @@
-from typing import (
-    Annotated,  # (1)!
-)
+from typing import Annotated  # (1)!
 
 import requests
 from pydantic import BaseModel, Field
