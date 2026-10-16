@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -22,7 +22,7 @@ def record_handler(record: SQSRecord):
     return {"message": record.body}
 
 
-def lambda_handler(event: Dict[str, Any], context: LambdaContext):
+def lambda_handler(event: dict[str, Any], context: LambdaContext):
     config.register_lambda_context(context)  # see Lambda timeouts section
 
     return process_partial_response(

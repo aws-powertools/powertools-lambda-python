@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs
 
 from aws_lambda_powertools.event_handler.api_gateway import (
@@ -15,7 +15,7 @@ from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerialize
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Callable, Mapping, MutableMapping
 
     from aws_lambda_powertools.shared.cookies import Cookie
 

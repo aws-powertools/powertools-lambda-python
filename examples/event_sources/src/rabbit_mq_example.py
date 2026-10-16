@@ -1,5 +1,3 @@
-from typing import Dict
-
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import event_source
 from aws_lambda_powertools.utilities.data_classes.rabbit_mq_event import RabbitMQEvent
@@ -13,7 +11,7 @@ def lambda_handler(event: RabbitMQEvent, context):
         logger.debug(f"Messages for queue: {queue_name}")
         for message in messages:
             logger.debug(f"MessageID: {message.basic_properties.message_id}")
-            data: Dict = message.json_data
+            data: dict = message.json_data
             logger.debug(f"Process json in base64 encoded data str {data}")
     return {
         "queue_name": queue_name,

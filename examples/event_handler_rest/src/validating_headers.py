@@ -1,8 +1,9 @@
-from typing import List
+from typing import (
+    Annotated,  # (1)!
+)
 
 import requests
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated  # (1)!
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -24,7 +25,7 @@ class Todo(BaseModel):
 
 @app.get("/todos")
 @tracer.capture_method
-def get_todos(correlation_id: Annotated[str, Header(min_length=16, max_length=16)]) -> List[Todo]:  # (3)!
+def get_todos(correlation_id: Annotated[str, Header(min_length=16, max_length=16)]) -> list[Todo]:  # (3)!
     url = "https://jsonplaceholder.typicode.com/todos"
 
     todo = requests.get(url, headers={"correlation_id": correlation_id})

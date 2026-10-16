@@ -1,10 +1,9 @@
 import json
 import warnings
-from typing import Literal
+from typing import Annotated, Literal
 
 import pytest
 from pydantic import BaseModel, Field, computed_field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, Server

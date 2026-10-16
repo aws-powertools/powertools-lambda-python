@@ -2,7 +2,6 @@ import functools
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
-from typing import List, Tuple
 
 import boto3
 import requests
@@ -13,7 +12,7 @@ from requests import Request, Response
 from requests.exceptions import RequestException
 from retry import retry
 
-GetLambdaResponse = Tuple[InvocationResponseTypeDef, datetime]
+GetLambdaResponse = tuple[InvocationResponseTypeDef, datetime]
 
 
 class GetLambdaResponseOptions(BaseModel):
@@ -82,8 +81,8 @@ def get_http_response(request: Request) -> Response:
 
 
 def get_lambda_response_in_parallel(
-    get_lambda_response_options: List[GetLambdaResponseOptions],
-) -> List[GetLambdaResponse]:
+    get_lambda_response_options: list[GetLambdaResponseOptions],
+) -> list[GetLambdaResponse]:
     """Invoke functions in parallel
 
     Parameters
@@ -98,7 +97,7 @@ def get_lambda_response_in_parallel(
     """
     result_list = []
     with ThreadPoolExecutor() as executor:
-        running_tasks: List[Future] = []
+        running_tasks: list[Future] = []
         for options in get_lambda_response_options:
             # Sleep 0.5, 1, 1.5, ... seconds between each invocation. This way
             # we can guarantee that lambdas are executed in parallel, but they are

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
@@ -58,7 +58,7 @@ class S3Identity(BaseModel):
 
 
 class S3RequestParameters(BaseModel):
-    sourceIPAddress: Union[IPvAnyNetwork, Literal["s3.amazonaws.com"]] = Field(
+    sourceIPAddress: IPvAnyNetwork | Literal["s3.amazonaws.com"] = Field(
         description="Source IP address of the request.",
         examples=[
             "255.255.255.255",
@@ -498,7 +498,7 @@ class S3RecordModel(BaseModel):
 
 
 class S3Model(BaseModel):
-    Records: List[S3RecordModel] = Field(
+    Records: list[S3RecordModel] = Field(
         description="List of S3 records included in this event.",
         examples=[
             {

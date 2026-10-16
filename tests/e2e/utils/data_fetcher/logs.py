@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Any, List, Union
+from typing import Any
 
 import boto3
 from mypy_boto3_logs.client import CloudWatchLogsClient
@@ -11,7 +11,7 @@ from retry import retry
 class Log(BaseModel, extra="allow"):
     level: str
     location: str
-    message: Union[dict, str]
+    message: dict | str
     timestamp: str
     service: str
     cold_start: bool | None = None
@@ -52,9 +52,9 @@ class LogFetcher:
         self.filter_expression = filter_expression or "message"  # Logger message key
         self.log_group = f"/aws/lambda/{self.function_name}"
         self.minimum_log_entries = minimum_log_entries
-        self.logs: List[Log] = self._get_logs()
+        self.logs: list[Log] = self._get_logs()
 
-    def get_log(self, key: str, value: Any | None = None) -> List[Log]:
+    def get_log(self, key: str, value: Any | None = None) -> list[Log]:
         """Get logs based on key or key and value
 
         Parameters
@@ -78,7 +78,7 @@ class LogFetcher:
                 logs.append(log)
         return logs
 
-    def get_cold_start_log(self) -> List[Log]:
+    def get_cold_start_log(self) -> list[Log]:
         """Get logs where cold start was true
 
         Returns
@@ -98,7 +98,7 @@ class LogFetcher:
         """
         return all(hasattr(log, key) for log in self.logs for key in keys)
 
-    def _get_logs(self) -> List[Log]:
+    def _get_logs(self) -> list[Log]:
         ret = self.log_client.filter_log_events(
             logGroupName=self.log_group,
             startTime=self.start_time,

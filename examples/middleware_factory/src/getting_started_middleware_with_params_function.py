@@ -1,6 +1,7 @@
 import base64
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, List
+from typing import Any
 from uuid import uuid4
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -31,7 +32,7 @@ def obfuscate_sensitive_data(
     handler: Callable[[dict, LambdaContext], dict],
     event: dict,
     context: LambdaContext,
-    fields: List,
+    fields: list,
 ) -> dict:
     # extracting payload from a EventBridge event
     detail: dict = query(data=event, envelope=envelopes.EVENTBRIDGE)

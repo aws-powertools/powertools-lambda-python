@@ -1,11 +1,10 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Literal, Tuple
+from typing import Annotated, Literal
 
 import pytest
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
@@ -318,7 +317,7 @@ def test_openapi_with_tuple_returns():
     app = APIGatewayRestResolver()
 
     @app.get("/")
-    def handler() -> Tuple[str, int]:
+    def handler() -> tuple[str, int]:
         return "Hello, world", 200
 
     schema = app.get_openapi_schema()
@@ -336,7 +335,7 @@ def test_openapi_with_tuple_annotated_returns():
     app = APIGatewayRestResolver()
 
     @app.get("/")
-    def handler() -> Tuple[Annotated[str, Body(title="Response title")], int]:
+    def handler() -> tuple[Annotated[str, Body(title="Response title")], int]:
         return "Hello, world", 200
 
     schema = app.get_openapi_schema()
@@ -368,7 +367,7 @@ def test_openapi_with_list_param():
     app = APIGatewayRestResolver()
 
     @app.get("/")
-    def handler(page: Annotated[List[str], Query()]):
+    def handler(page: Annotated[list[str], Query()]):
         return page
 
     schema = app.get_openapi_schema()
@@ -447,7 +446,7 @@ def test_openapi_with_pydantic_nested_returns():
 
     class User(BaseModel):
         name: str
-        orders: List[Order]
+        orders: list[Order]
 
     @app.get("/")
     def handler() -> User:

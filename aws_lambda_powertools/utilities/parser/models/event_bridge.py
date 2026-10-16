@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -31,7 +30,7 @@ class EventBridgeModel(BaseModel):
         description="Identifies the AWS region where the event originated.",
         examples=["us-east-1", "us-west-2", "eu-west-1"],
     )
-    resources: List[str] = Field(
+    resources: list[str] = Field(
         description="A JSON array that contains ARNs that identify resources involved in the event. "
         "Inclusion of these ARNs is at the discretion of the service.",
         examples=[

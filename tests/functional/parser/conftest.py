@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import BaseModel
@@ -35,7 +35,7 @@ def dummy_envelope_schema():
     """Event wrapper structure"""
 
     class MyDummyEnvelopeSchema(BaseModel):
-        payload: Dict
+        payload: dict
 
     return MyDummyEnvelopeSchema
 
@@ -45,7 +45,7 @@ def dummy_envelope(dummy_envelope_schema):
     class MyDummyEnvelope(BaseEnvelope):
         """Unwrap dummy event within payload key"""
 
-        def parse(self, data: Dict[str, Any], model: BaseModel):
+        def parse(self, data: dict[str, Any], model: BaseModel):
             parsed_enveloped = dummy_envelope_schema(**data)
             return self._parse(data=parsed_enveloped.payload, model=model)
 

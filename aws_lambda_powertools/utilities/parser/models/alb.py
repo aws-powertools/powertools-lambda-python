@@ -1,5 +1,3 @@
-from typing import Dict, Type, Union
-
 from pydantic import BaseModel, Field
 
 
@@ -28,18 +26,18 @@ class AlbModel(BaseModel):
         description="The path portion of the request URL.",
         examples=["/", "/api/users", "/health", "/api/v1/products/123"],
     )
-    body: Union[str, Type[BaseModel]] = Field(
+    body: str | type[BaseModel] = Field(
         description="The request body. Can be a string or a parsed model if content-type allows parsing.",
     )
     isBase64Encoded: bool = Field(description="Indicates whether the body is base64-encoded.", examples=[False, True])
-    headers: Dict[str, str] = Field(
+    headers: dict[str, str] = Field(
         description="The request headers as key-value pairs.",
         examples=[
             {"host": "example.com", "user-agent": "Mozilla/5.0"},
             {"content-type": "application/json", "authorization": "Bearer token123"},
         ],
     )
-    queryStringParameters: Dict[str, str] = Field(
+    queryStringParameters: dict[str, str] = Field(
         description="The query string parameters as key-value pairs.",
         examples=[{"page": "1", "limit": "10"}, {"filter": "active", "sort": "name"}],
     )

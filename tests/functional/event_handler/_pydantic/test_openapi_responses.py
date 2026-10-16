@@ -1,5 +1,4 @@
 from secrets import randbelow
-from typing import Union
 
 from pydantic import BaseModel
 
@@ -122,7 +121,7 @@ def test_openapi_union_response():
             202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
         },
     )
-    def handler() -> Response[Union[User, Order]]:
+    def handler() -> Response[User | Order]:
         if randbelow(2) > 0:
             return Response(status_code=200, body=User())
         else:
@@ -155,7 +154,7 @@ def test_openapi_union_partial_response():
             202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
         },
     )
-    def handler() -> Response[Union[User, Order]]:
+    def handler() -> Response[User | Order]:
         if randbelow(2) > 0:
             return Response(status_code=200, body=User())
         else:

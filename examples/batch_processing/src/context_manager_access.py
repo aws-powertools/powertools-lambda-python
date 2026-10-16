@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import json
-
-from typing_extensions import Literal
+from typing import Literal
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType

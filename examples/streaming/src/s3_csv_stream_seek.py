@@ -1,5 +1,4 @@
 import io
-from typing import Dict
 
 from aws_lambda_powertools.utilities.streaming.s3_object import S3Object
 from aws_lambda_powertools.utilities.streaming.transformations import CsvTransform
@@ -21,7 +20,7 @@ HEADER_SIZE = 21 + 1  # 1 byte newline
 LINES_TO_JUMP = 100
 
 
-def lambda_handler(event: Dict[str, str], context: LambdaContext):
+def lambda_handler(event: dict[str, str], context: LambdaContext):
     sample_csv = S3Object(bucket=event["bucket"], key=event["key"])
 
     # Skip the header line
