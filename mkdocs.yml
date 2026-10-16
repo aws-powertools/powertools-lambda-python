@@ -139,6 +139,7 @@ nav:
       - Parameters:
           - Base: api_doc/parameters/base.md
           - AppConfig: api_doc/parameters/appconfig.md
+          - AppConfig Extension: api_doc/parameters/appconfig_extension.md
           - DynamoDB: api_doc/parameters/dynamodb.md
           - SSM: api_doc/parameters/ssm.md
           - Secrets: api_doc/parameters/secrets.md

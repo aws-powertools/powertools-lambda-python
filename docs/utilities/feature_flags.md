@@ -518,6 +518,7 @@ These are the available options for further customization.
 | **boto3_client**     | `None`           | [AppConfigData boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client){target="_blank"}     |
 | **boto3_session**    | `None`           | [Boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}     |
 | **boto_config**     | `None`            | [Botocore config](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}     |
+| **use_extension**    | `False`          | Fetch configuration from the [AWS AppConfig Agent Lambda extension](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-lambda-extensions.html){target="_blank"} on localhost instead of calling AppConfig with boto3. Requires the extension layer; boto3 options are ignored |
 
 === "appconfig_provider_options.py"
 
@@ -535,6 +536,12 @@ These are the available options for further customization.
 
     ```json hl_lines="6-9"
     --8<-- "examples/feature_flags/src/appconfig_provider_options_features.json"
+    ```
+
+=== "appconfig_extension_store.py"
+
+    ```python hl_lines="7-11"
+    --8<-- "examples/feature_flags/src/appconfig_extension_store.py"
     ```
 
 #### Customizing boto configuration
