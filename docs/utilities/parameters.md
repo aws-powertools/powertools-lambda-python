@@ -190,7 +190,18 @@ Use `AppConfigExtensionProvider` to read from that endpoint. It makes no AppConf
 ???+ note "Who calls AppConfig?"
     The extension calls AppConfig on your behalf using the function's execution role, so the role still needs `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`. If the layer is missing, `get()` raises `GetParameterError` saying the extension is unreachable.
 
-Any keyword argument you pass to `get()` is forwarded to the extension as a query string. Use `flag="name"` or `flag=["a", "b"]` to retrieve only selected flags from an AppConfig feature flags profile. Set `AWS_APPCONFIG_EXTENSION_HTTP_PORT` if you changed the extension port; the provider reads it automatically.
+Any keyword argument you pass to `get()` is forwarded to the extension as a query string. Use `flag="name"` or `flag=["a", "b"]` to retrieve only selected flags from an AppConfig feature flags profile.
+
+The extension itself is configured through environment variables on your function. These are the ones you are most likely to set; see the [full list](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-lambda-extensions-config.html){target="_blank"} in the AWS AppConfig documentation.
+
+| Environment variable                            | Default | Description                                                                                                        |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `AWS_APPCONFIG_EXTENSION_HTTP_PORT`             | `2772`  | Port of the local endpoint. This is the only variable Powertools reads, so the provider always matches the extension |
+| `AWS_APPCONFIG_EXTENSION_PREFETCH_LIST`         | None    | `Application:Environment:Configuration` to fetch before your handler runs, reducing cold start                      |
+| `AWS_APPCONFIG_EXTENSION_POLL_INTERVAL_SECONDS` | `45`    | How often the extension checks AppConfig for new deployments                                                        |
+| `AWS_APPCONFIG_EXTENSION_POLL_TIMEOUT_MILLIS`   | `3000`  | How long a poll may take before the extension serves the previous cached data                                      |
+| `AWS_APPCONFIG_EXTENSION_ROLE_ARN`              | None    | Role to assume to read configuration from another AWS account                                                      |
+| `AWS_APPCONFIG_EXTENSION_SERVICE_REGION`        | None    | Call AppConfig in a different Region than the function                                                             |
 
 ???+ tip "Cache twice?"
     The extension already caches and refreshes data on every poll interval. Use `max_age=0` if you want each invocation to read the extension's latest copy, or keep the default to also skip the local HTTP call between invocations.
