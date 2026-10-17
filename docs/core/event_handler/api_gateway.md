@@ -1457,6 +1457,14 @@ The bridge between them is `request.context`: middleware writes to `app.context`
 --8<-- "examples/event_handler_rest/src/dependency_injection_with_middleware.py"
 ```
 
+Middleware can also declare `Depends()` parameters directly, the same way route handlers do. This is useful when the middleware itself needs typed data access - for example, looking up a user via a DAO before deciding whether to continue:
+
+```python hl_lines="22 25"
+--8<-- "examples/event_handler_rest/src/dependency_injection_middleware_depends.py"
+```
+
+Dependencies declared by middleware share the per-invocation cache with route dependencies, support `dependency_overrides` in tests, and can declare a `Request` parameter. This works for global (`app.use()`), router-level, and route-level (`@app.get(..., middlewares=[...])`) middleware.
+
 ???+ tip "When to use middleware vs Depends()"
     | Use case | Middleware | Depends() |
     | --- | --- | --- |

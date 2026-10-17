@@ -10,6 +10,7 @@ import json
 from typing import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler.api_gateway import Router
 from aws_lambda_powertools.event_handler.depends import Depends
 from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
 from aws_lambda_powertools.event_handler.request import Request
@@ -260,3 +261,56 @@ def test_async_sync_middleware_depends_resolved():
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"config": {"key": "value"}}
     assert call_count == 1
+
+
+def test_router_level_middleware_depends_resolved():
+    """Middleware registered on a Router resolves Depends() params after include_router."""
+    app = APIGatewayHttpResolver()
+    router = Router()
+
+    def get_settings() -> dict:
+        return {"region": "us-east-1"}
+
+    def router_middleware(
+        app: APIGatewayHttpResolver,
+        next_middleware: NextMiddleware,
+        settings: Annotated[dict, Depends(get_settings)],
+    ):
+        app.append_context(router_mw=settings["region"])
+        return next_middleware(app)
+
+    router.use([router_middleware])
+
+    @router.post("/my/path")
+    def handler():
+        return {"router_mw": app.context.get("router_mw")}
+
+    app.include_router(router)
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"router_mw": "us-east-1"}
+
+
+def test_route_level_middleware_depends_resolved():
+    """Middleware attached to a single route resolves Depends() params."""
+    app = APIGatewayHttpResolver()
+
+    def get_greeting() -> str:
+        return "hello"
+
+    def route_middleware(
+        app: APIGatewayHttpResolver,
+        next_middleware: NextMiddleware,
+        greeting: Annotated[str, Depends(get_greeting)],
+    ):
+        app.append_context(route_mw=greeting)
+        return next_middleware(app)
+
+    @app.post("/my/path", middlewares=[route_middleware])
+    def handler():
+        return {"route_mw": app.context.get("route_mw")}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"route_mw": "hello"}
