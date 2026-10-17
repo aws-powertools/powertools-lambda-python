@@ -12,7 +12,7 @@ from botocore import stub
 from aws_lambda_powertools.utilities.streaming import S3Object
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
-from aws_lambda_powertools.utilities.streaming.transformations import GzipTransform, ZipTransform
+from aws_lambda_powertools.utilities.streaming.transformations import CsvTransform, GzipTransform, ZipTransform
 
 
 @pytest.fixture
@@ -114,3 +114,25 @@ def test_s3_closed_does_not_make_requests_for_zip(s3_client, s3_client_stub):
     # THEN no S3 request is issued (the stubber has no responses queued, so any call would fail)
     assert obj.closed is False
     s3_client_stub.assert_no_pending_responses()
+
+
+def _stub_get_object(s3_client_stub, payload: bytes):
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    s3_client_stub.add_response("get_object", {"Body": streaming_body})
+
+
+def test_csv_transform_keeps_options_when_reused(s3_client, s3_client_stub):
+    # GIVEN a single CsvTransform with a non-default encoding applied to two objects
+    transform = CsvTransform(encoding="latin-1", delimiter=";")
+    payload = "name;city\ncafé;Zürich\n".encode("latin-1")
+
+    for _ in range(2):
+        _stub_get_object(s3_client_stub, payload)
+
+        # WHEN each object is transformed
+        rows = list(S3Object(bucket="bucket", key="key", boto3_client=s3_client).transform(transform))
+
+        # THEN the encoding is honoured every time, not only on the first use
+        assert rows == [{"name": "café", "city": "Zürich"}]
+
+    assert transform.transform_options == {"encoding": "latin-1", "delimiter": ";"}
