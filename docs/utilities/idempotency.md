@@ -243,6 +243,12 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
         --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
         ```
 
+    ???+ warning "Results are stored as JSON"
+        `PydanticSerializer` stores your model with `model_dump(mode="json")`, so fields such as `UUID`, `datetime`, `Enum`, `bytes` and `set` are saved as JSON values and validated back into the model on replay. Two cases need attention:
+
+        * `SecretStr` and `SecretBytes` fields are stored **masked** (`**********`), so a replayed result returns the masked value, not the secret. Keep secrets out of idempotent results.
+        * Models with `strict=True` and fields like `datetime` or `UUID` save correctly, but the replay fails validation because strict mode does not accept the stored strings. Use a non-strict model for the result, or a custom serializer.
+
 === "Dataclasses"
 
      Use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
