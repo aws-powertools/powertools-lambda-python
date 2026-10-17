@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from aws_lambda_powertools.event_handler import (
     Response,
     VPCLatticeResolver,
@@ -48,6 +50,42 @@ def test_vpclattice_event_path_trailing_slash(json_dump):
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
     expected = {"statusCode": 404, "message": "Not found"}
     assert result["body"] == json_dump(expected)
+
+
+def test_vpclattice_event_with_query_string():
+    # GIVEN a VPC Lattice event whose raw_path carries the query string
+    app = VPCLatticeResolver()
+
+    @app.get("/testpath")
+    def foo():
+        return {"order_id": app.current_event.query_string_parameters["order-id"]}
+
+    # WHEN calling the event handler
+    result = app(load_event("vpcLatticeEventWithQueryString.json"), {})
+
+    # THEN the route matches the path without the query string
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"order_id": "1"}
+
+
+def test_vpclattice_dynamic_route_with_query_string():
+    # GIVEN a VPC Lattice event for a dynamic route, with the query string in raw_path
+    app = VPCLatticeResolver()
+
+    @app.get("/orders/<order_id>")
+    def get_order(order_id: str):
+        return {"order_id": order_id, "expand": app.current_event.query_string_parameters["expand"]}
+
+    event = load_event("vpcLatticeEvent.json")
+    event["raw_path"] = "/orders/42?expand=items"
+    event["query_string_parameters"] = {"expand": "items"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the path parameter does not include the query string
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"order_id": "42", "expand": "items"}
 
 
 def test_cors_preflight_body_is_empty_not_null():
