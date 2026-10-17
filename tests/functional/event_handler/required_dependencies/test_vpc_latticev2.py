@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import asyncio
+import json
+
 from aws_lambda_powertools.event_handler import (
     Response,
     VPCLatticeV2Resolver,
@@ -48,6 +51,61 @@ def test_vpclatticev2_event_path_trailing_slash(json_dump):
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
     expected = {"statusCode": 404, "message": "Not found"}
     assert result["body"] == json_dump(expected)
+
+
+def test_vpclatticev2_event_with_query_string():
+    # GIVEN an event captured from a VPC Lattice V2 target group, whose path carries the query string
+    app = VPCLatticeV2Resolver()
+
+    @app.post("/echo")
+    def echo():
+        return {"query": app.current_event.query_string_parameters, "body": app.current_event.json_body}
+
+    # WHEN calling the event handler
+    result = app(load_event("vpcLatticeV2EventWithQueryString.json"), {})
+
+    # THEN the route matches the path without the query string
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {
+        "query": {"QS1": "value1,value2", "single": "one"},
+        "body": {"hello": "world"},
+    }
+
+
+def test_vpclatticev2_dynamic_route_with_query_string():
+    # GIVEN a VPC Lattice V2 event for a dynamic route, with the query string in path
+    app = VPCLatticeV2Resolver()
+
+    @app.get("/orders/<order_id>")
+    def get_order(order_id: str):
+        return {"order_id": order_id, "expand": app.current_event.query_string_parameters["expand"]}
+
+    event = load_event("vpcLatticeV2Event.json")
+    event["path"] = "/orders/42?expand=items"
+    event["queryStringParameters"] = {"expand": ["items"]}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the path parameter does not include the query string
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"order_id": "42", "expand": "items"}
+
+
+def test_vpclatticev2_resolve_async_with_query_string():
+    # GIVEN an async handler for a VPC Lattice V2 event whose path carries the query string
+    app = VPCLatticeV2Resolver()
+
+    @app.post("/echo")
+    async def echo():
+        return {"single": app.current_event.query_string_parameters["single"]}
+
+    # WHEN resolving the event asynchronously
+    result = asyncio.run(app.resolve_async(load_event("vpcLatticeV2EventWithQueryString.json"), {}))
+
+    # THEN the route matches the path without the query string
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"single": "one"}
 
 
 def test_cors_preflight_body_is_empty_not_null():
