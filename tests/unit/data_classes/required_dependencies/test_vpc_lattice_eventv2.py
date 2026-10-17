@@ -44,3 +44,32 @@ def test_vpc_lattice_v2_event():
     assert parsed_event.request_context.identity.x509_san_uri is None
     assert parsed_event.request_context.identity.x509_subject_cn is None
     assert parsed_event.request_context.identity.principal_org_id is None
+
+
+def test_vpc_lattice_v2_event_with_query_string():
+    # Event captured from a V2 target group: path carries the query string, which is also sent parsed
+    raw_event = load_event("vpcLatticeV2EventWithQueryString.json")
+    parsed_event = VPCLatticeEventV2(raw_event)
+
+    assert parsed_event.path == "/echo"
+    assert parsed_event.raw_event["path"] == "/echo?QS1=value1&QS1=value2&single=one"
+    assert parsed_event.query_string_parameters == {"QS1": "value1,value2", "single": "one"}
+
+
+@pytest.mark.parametrize(
+    "event_path, expected_path",
+    [
+        ("/?query1=value1&query2=value2", "/"),
+        ("/newpath?", "/newpath"),
+        ("/newpath?next=/orders?page=2", "/newpath"),
+        ("/files/report%3Fv2?download=true", "/files/report%3Fv2"),
+    ],
+    ids=["root_path", "empty_query", "question_mark_in_query", "encoded_question_mark_in_path"],
+)
+def test_vpc_lattice_v2_event_path_excludes_query_string(event_path, expected_path):
+    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event["path"] = event_path
+    parsed_event = VPCLatticeEventV2(raw_event)
+
+    assert parsed_event.path == expected_path
+    assert parsed_event.raw_event["path"] == event_path

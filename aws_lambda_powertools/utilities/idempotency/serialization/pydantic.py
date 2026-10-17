@@ -28,7 +28,8 @@ class PydanticSerializer(BaseIdempotencyModelSerializer):
         self.__model: type[BaseModel] = model
 
     def to_dict(self, data: BaseModel) -> dict:
-        return data.model_dump()
+        # The result is stored as JSON, so dump JSON-compatible values; from_dict validates them back into the model.
+        return data.model_dump(mode="json")
 
     def from_dict(self, data: dict) -> BaseModel:
         return self.__model.model_validate(data)

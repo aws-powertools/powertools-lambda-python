@@ -16,7 +16,7 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import base64
 
 
 class VPCLatticeEventBase(BaseProxyEvent):
-    # is_base64_encoded and path are inherited from BaseProxyEvent class.
+    # is_base64_encoded is inherited from BaseProxyEvent class.
 
     @property
     def body(self) -> str:
@@ -57,7 +57,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
 class VPCLatticeEvent(VPCLatticeEventBase):
     @property
     def raw_path(self) -> str:
-        """The raw VPC Lattice request path."""
+        """The raw VPC Lattice request path, including the query string."""
         return self["raw_path"]
 
     @property
@@ -69,7 +69,8 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     # Added here for consistency with the BaseProxyEvent class
     @property
     def path(self) -> str:
-        return self["raw_path"]
+        """The request path, without the query string that VPC Lattice includes in `raw_path`."""
+        return self["raw_path"].partition("?")[0]
 
     @property
     def query_string_parameters(self) -> dict[str, str]:
@@ -175,6 +176,11 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     def request_context(self) -> vpcLatticeEventV2RequestContext:
         """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
+
+    @property
+    def path(self) -> str:
+        """The request path, without the query string that VPC Lattice includes in `path`."""
+        return self["path"].partition("?")[0]
 
     @cached_property
     def query_string_parameters(self) -> dict[str, str]:

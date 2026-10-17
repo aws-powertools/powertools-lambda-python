@@ -1255,6 +1255,42 @@ def test_validation_query_string_with_vpc_lattice_resolver(
         assert any(text in result["body"] for text in expected_error_text)
 
 
+def test_validation_query_string_in_path_with_vpc_lattice_v1_resolver(gw_event_vpc_lattice_v1):
+    # GIVEN a VPCLatticeResolver with validation enabled
+    app = VPCLatticeResolver(enable_validation=True)
+
+    @app.get("/orders")
+    def handler(order_id: Annotated[int, Query(alias="order-id")]):
+        return {"order_id": order_id}
+
+    # WHEN VPC Lattice sends the query string in raw_path, and parsed in query_string_parameters
+    gw_event_vpc_lattice_v1["raw_path"] = "/orders?order-id=1"
+    gw_event_vpc_lattice_v1["query_string_parameters"] = {"order-id": "1"}
+    result = app(gw_event_vpc_lattice_v1, {})
+
+    # THEN the route matches and the query string parameter is validated
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"order_id": 1}
+
+
+def test_validation_query_string_in_path_with_vpc_lattice_v2_resolver(gw_event_vpc_lattice):
+    # GIVEN a VPCLatticeV2Resolver with validation enabled
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    @app.get("/orders")
+    def handler(order_id: Annotated[int, Query(alias="order-id")]):
+        return {"order_id": order_id}
+
+    # WHEN VPC Lattice sends the query string in path, and parsed in queryStringParameters
+    gw_event_vpc_lattice["path"] = "/orders?order-id=1"
+    gw_event_vpc_lattice["queryStringParameters"] = {"order-id": ["1"]}
+    result = app(gw_event_vpc_lattice, {})
+
+    # THEN the route matches and the query string parameter is validated
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"order_id": 1}
+
+
 ########### TEST WITH HEADER PARAMS
 @pytest.mark.parametrize(
     "handler_func, expected_status_code, expected_error_text",
