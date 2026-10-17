@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, cast
 from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.depends import DependencyResolutionError
 from aws_lambda_powertools.event_handler.exception_handling import ExceptionHandlerManager
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ResponseSizeExceededError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.config import OpenAPIConfig
@@ -2948,6 +2949,16 @@ class ApiGatewayResolver(BaseRouter):
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
     def _call_exception_handler(self, exp: Exception, route: Route) -> ResponseBuilder | None:
+        # Depends() wraps what a dependency raised in DependencyResolutionError. Handle the original exception
+        # as if the route had raised it, unless a handler is registered for DependencyResolutionError itself.
+        # If nothing handles it, this returns None and the caller re-raises the DependencyResolutionError.
+        if (
+            isinstance(exp, DependencyResolutionError)
+            and isinstance(exp.__cause__, Exception)
+            and DependencyResolutionError not in self.exception_handler_manager.get_registered_handlers()
+        ):
+            exp = exp.__cause__
+
         handler = self.exception_handler_manager.lookup_exception_handler(type(exp))
         if handler:
             try:
