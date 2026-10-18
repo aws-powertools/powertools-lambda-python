@@ -3533,3 +3533,15 @@ def test_secrets_provider_get_multiple_with_json_transform_error(config):
 
     with pytest.raises(parameters.TransformParameterError):
         provider.get_multiple(secret_names, transform="binary", raise_on_transform_error=True)
+
+
+def test_get_secret_error_is_caught_as_get_parameter_error(config):
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN get_multiple raises GetSecretError
+    # THEN it can be caught as GetParameterError, as the docstrings say
+    with pytest.raises(parameters.GetParameterError):
+        provider.get_multiple([])
+
+    assert parameters.GetSecretError is GetSecretError
