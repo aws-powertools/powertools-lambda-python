@@ -1750,6 +1750,91 @@ def test_exception_handler_not_found_alt():
     assert result["statusCode"] == 404
 
 
+def test_catch_all_exception_handler_does_not_hijack_not_found():
+    # GIVEN a resolver with a catch-all exception handler, as suggested in the docs
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(Exception)
+    def handle_everything(ex: Exception) -> Response:
+        return Response(status_code=500, content_type=content_types.TEXT_PLAIN, body="generic handler")
+
+    @app.get("/other")
+    def get_other():
+        return {}
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the default 404 is returned instead of the catch-all response
+    assert result["statusCode"] == 404
+    assert json.loads(result["body"]) == {"statusCode": 404, "message": "Not found"}
+
+
+def test_service_error_handler_still_handles_not_found():
+    # GIVEN a resolver with a handler for ServiceError, which NotFoundError inherits from
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ServiceError)
+    def handle_service_error(ex: ServiceError) -> Response:
+        return Response(status_code=ex.status_code, content_type=content_types.TEXT_PLAIN, body="custom format")
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the ServiceError handler keeps formatting the 404
+    assert result["statusCode"] == 404
+    assert result["body"] == "custom format"
+
+
+def test_exception_handler_none_body_on_alb_is_converted_to_empty_string():
+    # GIVEN an ALB resolver whose exception handler returns a Response with no body
+    app = ALBResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError) -> Response:
+        return Response(status_code=400, content_type=content_types.TEXT_PLAIN, body=None)
+
+    @app.get("/lambda")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(load_event("albEvent.json"), {})
+
+    # THEN the body is an empty string, as it is for a route returning the same Response, since ALB rejects null
+    assert result["statusCode"] == 400
+    assert result["body"] == ""
+
+
+@pytest.mark.parametrize(
+    "handler_result, expected_status",
+    [
+        ({"error": "Foo!"}, 200),
+        (({"error": "Foo!"}, 400), 400),
+    ],
+    ids=["dict", "tuple"],
+)
+def test_exception_handler_dict_and_tuple_returns_are_serialized(handler_result, expected_status):
+    # GIVEN an exception handler that returns a dict or a (dict, status_code) tuple, like a route can
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        return handler_result
+
+    @app.get("/my/path")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the result is serialized the same way a route return value is
+    assert result["statusCode"] == expected_status
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert json.loads(result["body"]) == {"error": "Foo!"}
+
+
 def test_exception_handler_raises_service_error(json_dump):
     # GIVEN an exception handler raises a ServiceError (BadRequestError)
     app = ApiGatewayResolver()
