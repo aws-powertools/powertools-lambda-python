@@ -2398,7 +2398,7 @@ def test_get_parameters_by_name_chunks(monkeypatch, config):
 def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
-    cache_key = (mock_name, None)
+    cache_key = SSMProvider(boto_config=config)._build_cache_key(name=mock_name)
 
     class TestProvider(SSMProvider):
         def __init__(self, boto_config: Config = config, **kwargs):
@@ -2408,7 +2408,7 @@ def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config
             raise RuntimeError("Should not be called if it's in cache")
 
     provider = TestProvider()
-    provider.add_to_cache(key=(mock_name, None), value=mock_value, max_age=10)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=10)
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", provider)
 
@@ -3533,3 +3533,50 @@ def test_secrets_provider_get_multiple_with_json_transform_error(config):
 
     with pytest.raises(parameters.TransformParameterError):
         provider.get_multiple(secret_names, transform="binary", raise_on_transform_error=True)
+
+
+def test_ssm_provider_get_parameters_by_name_uses_cache_populated_by_get(mock_name, mock_value, config):
+    # GIVEN a parameter fetched and cached through get()
+    param = f"/a/{mock_name}"
+    get_response = {"Parameter": {"Name": param, "Value": mock_value, "Type": "String", "Version": 1}}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    # only ONE API call is stubbed: a second call would raise UnStubbedResponseError
+    stubber.add_response("get_parameter", get_response, {"Name": param, "WithDecryption": False})
+    stubber.activate()
+
+    # WHEN the same parameter is requested through get_parameters_by_name
+    try:
+        provider.get(param)
+        ret = provider.get_parameters_by_name(parameters={param: {}})
+
+        # THEN it is served from cache, without another API call
+        assert ret == {param: mock_value}
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_uses_cache_populated_by_get_parameters_by_name(mock_name, mock_value, config):
+    # GIVEN a parameter fetched and cached through get_parameters_by_name
+    param = f"/a/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+    stub_response = build_get_parameters_stub(params={param: mock_value}, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    # only ONE API call is stubbed: a second call would raise UnStubbedResponseError
+    stubber.add_response("get_parameters", stub_response, {"Names": [param, fail]})
+    stubber.activate()
+
+    # WHEN the same parameter is requested through get()
+    try:
+        provider.get_parameters_by_name(parameters={param: {}, fail: {}}, raise_on_error=False)
+        ret = provider.get(param)
+
+        # THEN it is served from cache, without another API call
+        assert ret == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
