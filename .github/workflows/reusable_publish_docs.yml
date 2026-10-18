@@ -79,7 +79,7 @@ jobs:
           ALIAS: ${{ inputs.alias }}
         run: |
           rm -rf site
-          mkdocs build
+          zensical build
       - name: Deploy Docs (Version)
         env:
           VERSION: ${{ inputs.version }}

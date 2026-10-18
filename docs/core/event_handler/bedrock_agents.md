@@ -57,7 +57,7 @@ An action group defines actions that the agent can help the user perform. You ca
 
 ### Install
 
-!!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
+!!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../getting-started/install.md#lambda-layer){target="_blank"}."
 
 If you define the action group setting up an **OpenAPI schema**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
 

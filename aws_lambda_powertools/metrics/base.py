@@ -1,7 +1,7 @@
 """
 Metrics utility
 !!! abstract "Usage Documentation"
-    [`Metrics`](../../core/metrics.md)
+    [`Metrics`](../../core/metrics/index.md)
 """
 
 from __future__ import annotations

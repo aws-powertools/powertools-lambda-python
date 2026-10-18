@@ -133,7 +133,7 @@ You **can** use a single DynamoDB table for all functions annotated with Idempot
 
 ##### Limitations
 
-* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-database) as an alternative.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Cache](#cache-database) as an alternative.
 
 * **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
@@ -242,6 +242,12 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
         ```python hl_lines="8 27 35 35 47"
         --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
         ```
+
+    ???+ warning "Results are stored as JSON"
+        `PydanticSerializer` stores your model with `model_dump(mode="json")`, so fields such as `UUID`, `datetime`, `Enum`, `bytes` and `set` are saved as JSON values and validated back into the model on replay. Two cases need attention:
+
+        * `SecretStr` and `SecretBytes` fields are stored **masked** (`**********`), so a replayed result returns the masked value, not the secret. Keep secrets out of idempotent results.
+        * Models with `strict=True` and fields like `datetime` or `UUID` save correctly, but the replay fails validation because strict mode does not accept the stored strings. Use a non-strict model for the result, or a custom serializer.
 
 === "Dataclasses"
 

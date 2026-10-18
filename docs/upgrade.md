@@ -38,7 +38,7 @@ We've made minimal breaking changes to make your transition to v3 as smooth as p
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
 1. **Upgrade** Python to at least v3.10.
-2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}.
+2. **Ensure** you have the latest version via [Lambda Layer or PyPi](getting-started/install.md){target="_blank"}.
 3. **Review** the following sections to confirm if you need to make changes to your code.
 
 ## Drop support for Pydantic v1
