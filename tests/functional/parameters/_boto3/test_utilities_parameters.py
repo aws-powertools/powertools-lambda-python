@@ -134,6 +134,20 @@ def test_dynamodb_provider_get_default_config(monkeypatch, mock_name, mock_value
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_missing_item(mock_name, config):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("get_item", {}, {"TableName": table_name, "Key": {"id": mock_name}})
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == f"Parameter '{mock_name}' not found in table '{table_name}'"
+        stubber.assert_no_pending_responses()
+
+
 def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with a cached value
@@ -306,6 +320,25 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
             assert values[name] == f"{mock_value}/{name}"
     finally:
         stubber.deactivate()
+
+
+@pytest.mark.parametrize("sort_attr", ["sk", "custom_sort_key"])
+def test_dynamodb_provider_get_multiple_missing_sort_attribute(mock_name, config, sort_attr):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, sort_attr=sort_attr, boto_config=config)
+    response = {"Items": [{"id": {"S": mock_name}, "value": {"S": "value"}}]}
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("query", response, expected_params)
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get_multiple(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Sort attribute '{sort_attr}' missing from an item for parameter '{mock_name}' in table '{table_name}'"
+        )
+        stubber.assert_no_pending_responses()
 
 
 def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
@@ -2583,6 +2616,62 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_secret(mock_name)
 
     assert value == mock_value
+
+
+def test_appconf_provider_get_empty_initial_configuration(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "start_configuration_session",
+            {"InitialConfigurationToken": "initial_token"},
+            {
+                "ConfigurationProfileIdentifier": mock_name,
+                "ApplicationIdentifier": "myapp",
+                "EnvironmentIdentifier": "dev",
+            },
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Configuration '{mock_name}' is empty and no cached value is available "
+            "for application 'myapp' in environment 'dev'"
+        )
+        assert provider.get(mock_name) == b"{}"
+        stubber.assert_no_pending_responses()
+
+
+def test_appconf_provider_get_empty_configuration_uses_previous_value(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("start_configuration_session", {"InitialConfigurationToken": "initial_token"})
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        assert provider.get(mock_name) == b"{}"
+        assert provider.get(mock_name, force_fetch=True) == b"{}"
+        stubber.assert_no_pending_responses()
 
 
 def test_appconf_provider_get_configuration_json_content_type(mock_name, config):

@@ -17,6 +17,7 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.utilities.parameters.base import BaseProvider
 from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -144,6 +145,11 @@ class AppConfigProvider(BaseProvider):
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
             self.last_returned_value[name] = return_value
+        elif name not in self.last_returned_value:
+            raise GetParameterError(
+                f"Configuration '{name}' is empty and no cached value is available "
+                f"for application '{self.application}' in environment '{self.environment}'",
+            )
 
         return self.last_returned_value[name]
 
