@@ -1005,7 +1005,8 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SSMProvider(boto_config=config)
 
     # Inject value in the internal store
-    cache_key = provider._build_cache_key(name=mock_name)
+    # SSMProvider.get() always passes decrypt to the SDK call, so it is part of the key
+    cache_key = provider._build_cache_key(name=mock_name, sdk_options={"decrypt": False})
     provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
@@ -1313,6 +1314,153 @@ def test_appconf_provider_clear_cache(mock_name, config):
 
     # THEN store should be empty
     assert provider.store == {}
+
+
+def _ssm_get_parameter_response(name: str, value: str, version: int) -> dict:
+    return {
+        "Parameter": {
+            "Name": name,
+            "Type": "SecureString",
+            "Value": value,
+            "Version": version,
+            "Selector": f"{name}:{version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{name}",
+        },
+    }
+
+
+def test_ssm_provider_get_decrypt_does_not_reuse_encrypted_cache(mock_name, mock_version, config):
+    # GIVEN a parameter fetched without decryption and cached
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameter",
+        _ssm_get_parameter_response(mock_name, "ciphertext", mock_version),
+        {"Name": mock_name, "WithDecryption": False},
+    )
+    stubber.add_response(
+        "get_parameter",
+        _ssm_get_parameter_response(mock_name, "plaintext", mock_version),
+        {"Name": mock_name, "WithDecryption": True},
+    )
+    stubber.activate()
+
+    try:
+        encrypted = provider.get(mock_name)
+
+        # WHEN the same parameter is fetched with decrypt=True
+        decrypted = provider.get(mock_name, decrypt=True)
+
+        # THEN the second call reaches SSM instead of returning the cached ciphertext
+        assert encrypted == "ciphertext"
+        assert decrypted == "plaintext"
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_multiple_recursive_does_not_reuse_non_recursive_cache(mock_name, mock_version, config):
+    # GIVEN a path fetched non-recursively and cached
+    provider = parameters.SSMProvider(boto_config=config)
+
+    def _response(names: list[str]) -> dict:
+        return {
+            "Parameters": [
+                {
+                    "Name": f"{mock_name}/{name}",
+                    "Type": "String",
+                    "Value": name,
+                    "Version": mock_version,
+                    "LastModifiedDate": datetime(2015, 1, 1),
+                    "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+                }
+                for name in names
+            ],
+        }
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters_by_path",
+        _response(["A"]),
+        {"Path": mock_name, "Recursive": False, "WithDecryption": False},
+    )
+    stubber.add_response(
+        "get_parameters_by_path",
+        _response(["A", "B/C"]),
+        {"Path": mock_name, "Recursive": True, "WithDecryption": False},
+    )
+    stubber.activate()
+
+    try:
+        shallow = provider.get_multiple(mock_name)
+
+        # WHEN the same path is fetched recursively
+        deep = provider.get_multiple(mock_name, recursive=True)
+
+        # THEN the recursive call gets the nested parameter too
+        assert shallow == {"A": "A"}
+        assert deep == {"A": "A", "B/C": "B/C"}
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_different_sdk_options_are_cached_separately(mock_name, config):
+    # GIVEN a secret fetched at one version stage and cached
+    provider = parameters.SecretsProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_secret_value",
+        {"Name": mock_name, "SecretString": "previous-value"},
+        {"SecretId": mock_name, "VersionStage": "AWSPREVIOUS"},
+    )
+    stubber.add_response(
+        "get_secret_value",
+        {"Name": mock_name, "SecretString": "current-value"},
+        {"SecretId": mock_name, "VersionStage": "AWSCURRENT"},
+    )
+    stubber.activate()
+
+    try:
+        previous = provider.get(mock_name, VersionStage="AWSPREVIOUS")
+
+        # WHEN it is fetched at another version stage, and again at the first one
+        current = provider.get(mock_name, VersionStage="AWSCURRENT")
+        previous_cached = provider.get(mock_name, VersionStage="AWSPREVIOUS")
+
+        # THEN each stage has its own value and repeated calls are still served from the cache
+        assert previous == "previous-value"
+        assert current == "current-value"
+        assert previous_cached == "previous-value"
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_base_provider_cache_key_includes_unhashable_sdk_options(mock_name):
+    # GIVEN a provider whose SDK options hold an unhashable value
+    calls: list[dict] = []
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **sdk_options) -> str:
+            calls.append(sdk_options)
+            return f"value-{len(calls)}"
+
+        def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    # WHEN the same name is fetched with different and then repeated options
+    first = provider.get(mock_name, Filters=[{"Key": "a"}])
+    second = provider.get(mock_name, Filters=[{"Key": "b"}])
+    first_again = provider.get(mock_name, Filters=[{"Key": "a"}])
+
+    # THEN only the distinct options reach the underlying store
+    assert (first, second, first_again) == ("value-1", "value-2", "value-1")
+    assert len(calls) == 2
 
 
 def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
