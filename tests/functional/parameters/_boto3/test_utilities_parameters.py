@@ -54,30 +54,52 @@ def mock_binary_value() -> str:
     return "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnpkV0lpT2lJeE1qTTBOVFkzT0Rrd0lpd2libUZ0WlNJNklrcHZhRzRnUkc5bElpd2lhV0YwSWpveE5URTJNak01TURJeWZRLlNmbEt4d1JKU01lS0tGMlFUNGZ3cE1lSmYzNlBPazZ5SlZfYWRRc3N3NWMK"  # noqa: E501
 
 
+class GetParametersStub(dict):
+    """
+    GetParameters response where an omitted `InvalidParameters` key reads as an empty list.
+
+    The SSM SDK model requires `InvalidParameters` to have at least one entry, so an empty
+    list fails `botocore.stub.Stubber` validation. AWS always returns the key, possibly
+    empty, and the provider reads it directly, so we omit it when empty and fall back to
+    an empty list on lookup.
+    """
+
+    def __missing__(self, key: str) -> list:
+        if key == "InvalidParameters":
+            return []
+        raise KeyError(key)
+
+
 def build_get_parameters_stub(
     params: dict[str, Any],
     invalid_parameters: list[str] | None = None,
 ) -> dict[str, list]:
     invalid_parameters = invalid_parameters or []
     version = random.randrange(1, 1000)
-    return {
-        "Parameters": [
-            {
-                "Name": param,
-                "Type": "String",
-                "Value": value,
-                "Version": version,
-                "Selector": f"{param}:{version}",
-                "SourceResult": "string",
-                "LastModifiedDate": datetime(2015, 1, 1),
-                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
-                "DataType": "string",
-            }
-            for param, value in params.items()
-            if param not in invalid_parameters
-        ],
-        "InvalidParameters": invalid_parameters,  # official SDK stub fails validation here, need to raise an issue
-    }
+    stub = GetParametersStub(
+        {
+            "Parameters": [
+                {
+                    "Name": param,
+                    "Type": "String",
+                    "Value": value,
+                    "Version": version,
+                    "Selector": f"{param}:{version}",
+                    "SourceResult": "string",
+                    "LastModifiedDate": datetime(2015, 1, 1),
+                    "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
+                    "DataType": "string",
+                }
+                for param, value in params.items()
+                if param not in invalid_parameters
+            ],
+        },
+    )
+
+    if invalid_parameters:
+        stub["InvalidParameters"] = invalid_parameters
+
+    return stub
 
 
 def test_dynamodb_provider_get(mock_name, mock_value, config):
@@ -748,8 +770,7 @@ def test_ssm_provider_set_parameter_invalidates_only_exact_name(mock_name, mock_
     similar_name = f"{mock_name}-similar"
 
     transform_keys = [
-        provider._build_cache_key(name=mock_name, transform=transform)
-        for transform in (None, "json", "binary", "auto")
+        provider._build_cache_key(name=mock_name, transform=transform) for transform in (None, "json", "binary", "auto")
     ]
     batch_key = (mock_name, None)
     single_value_keys = [*transform_keys, batch_key]
