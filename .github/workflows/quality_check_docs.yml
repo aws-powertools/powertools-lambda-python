@@ -47,4 +47,4 @@ jobs:
       - name: Build docs
         run: |
           rm -rf site
-          mkdocs build
+          zensical build

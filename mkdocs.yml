@@ -17,7 +17,6 @@ nav:
           - core/logger.md
           - Metrics:
               - core/metrics/index.md
-              - Amazon CloudWatch EMF: core/metrics.md
               - Datadog: core/metrics/datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
@@ -153,8 +152,8 @@ nav:
 
 theme:
   name: material
-  font:
-    text: Ubuntu
+  variant: classic
+  font: false
   palette:
     - scheme: default
       primary: deep purple
@@ -229,8 +228,6 @@ copyright: |
   </div>
 
 plugins:
-  - privacy
-  - git-revision-date
   - search
   - llmstxt:
       markdown_description: Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity. It provides a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
@@ -245,7 +242,6 @@ plugins:
           - core/tracer.md
           - core/logger.md
           - core/metrics/index.md
-          - core/metrics.md
           - core/metrics/datadog.md
           - core/event_handler/api_gateway.md
           - core/event_handler/appsync.md
@@ -285,7 +281,7 @@ plugins:
       enable_inventory: true
       handlers:
         python:
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
           options:
             # Headings
@@ -315,6 +311,7 @@ plugins:
             summary: true
 
 extra_css:
+  - stylesheets/fonts.css
   - stylesheets/extra.css
 extra_javascript:
   - https://docs.powertools.aws.dev/shared/mermaid.min.js
