@@ -314,3 +314,34 @@ def test_route_level_middleware_depends_resolved():
     result = app(API_GW_V2_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"route_mw": "hello"}
+
+
+def test_bound_method_middleware_depends_resolved():
+    """A bound method cannot cache its inspection as an attribute; it is re-inspected on every request."""
+    app = APIGatewayHttpResolver()
+
+    def get_region() -> str:
+        return "eu-west-1"
+
+    class Middlewares:
+        def with_region(
+            self,
+            app: APIGatewayHttpResolver,
+            next_middleware: NextMiddleware,
+            region: Annotated[str, Depends(get_region)],
+        ):
+            app.append_context(region=region)
+            return next_middleware(app)
+
+    middleware = Middlewares().with_region
+
+    @app.post("/my/path", middlewares=[middleware])
+    def handler():
+        return {"region": app.context.get("region")}
+
+    for _ in range(2):
+        result = app(API_GW_V2_EVENT, {})
+        assert result["statusCode"] == 200
+        assert json.loads(result["body"]) == {"region": "eu-west-1"}
+
+    assert not hasattr(middleware, "_powertools_middleware_inspection")
