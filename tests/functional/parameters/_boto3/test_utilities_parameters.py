@@ -3358,6 +3358,20 @@ def test_secrets_provider_get_multiple_empty_names(config):
         provider.get_multiple([])
 
 
+def test_secrets_provider_get_multiple_error_is_get_parameter_error(config):
+    """
+    Test GetSecretError can be caught as GetParameterError, as the docstrings promise
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN get_multiple fails
+    # THEN the error is a GetParameterError and is exported from the package
+    with pytest.raises(parameters.GetParameterError):
+        provider.get_multiple([])
+    assert parameters.GetSecretError is GetSecretError
+
+
 def test_secrets_provider_non_existing_key(config):
     """
     Test SecretsProvider.get_multiple() with additional filters
