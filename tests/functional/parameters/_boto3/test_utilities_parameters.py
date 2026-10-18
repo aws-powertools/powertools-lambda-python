@@ -3533,3 +3533,60 @@ def test_secrets_provider_get_multiple_with_json_transform_error(config):
 
     with pytest.raises(parameters.TransformParameterError):
         provider.get_multiple(secret_names, transform="binary", raise_on_transform_error=True)
+
+
+@pytest.mark.parametrize("force_fetch", [False, True])
+@pytest.mark.parametrize("secret_value", [{"SecretString": "value"}, {"SecretBinary": b"value"}])
+def test_secrets_provider_get_multiple_excludes_prefix_matches(config, force_fetch, secret_value):
+    provider = parameters.SecretsProvider(boto_config=config)
+    names = ["db", "db-password"]
+    response = {
+        "SecretValues": [{"Name": name, **secret_value} for name in ["db", "db-password", "db2", "db-password-old"]],
+    }
+    expected_params = {"Filters": [{"Key": "name", "Values": names}]}
+    expected = dict.fromkeys(names, next(iter(secret_value.values())))
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("batch_get_secret_value", response, expected_params)
+        assert provider.get_multiple(names) == expected
+        if force_fetch:
+            stubber.add_response("batch_get_secret_value", response, expected_params)
+        assert provider.get_multiple(names, force_fetch=force_fetch) == expected
+        key = provider._build_cache_key(name="|".join(sorted(names)), transform=None, is_nested=True)
+        assert provider.fetch_from_cache(key) == expected
+        stubber.assert_no_pending_responses()
+
+
+def test_secrets_provider_get_multiple_skips_prefix_only_page(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    names = ["db"]
+    expected_params = {"Filters": [{"Key": "name", "Values": names}]}
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db-old", "SecretString": "not json"}], "NextToken": "next-page"},
+            expected_params,
+        )
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db", "SecretString": '{"enabled": true}'}]},
+            {**expected_params, "NextToken": "next-page"},
+        )
+        assert provider.get_multiple(names, transform="json", raise_on_transform_error=True) == {
+            "db": {"enabled": True},
+        }
+        stubber.assert_no_pending_responses()
+
+
+def test_secrets_provider_get_multiple_only_prefix_matches(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db-old", "SecretString": "value"}]},
+            {"Filters": [{"Key": "name", "Values": ["db"]}]},
+        )
+        with pytest.raises(GetSecretError, match="No secrets found matching the provided names"):
+            provider.get_multiple(["db"])
+        assert not provider.store
+        stubber.assert_no_pending_responses()
