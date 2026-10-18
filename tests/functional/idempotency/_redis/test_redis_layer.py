@@ -3,6 +3,7 @@ import copy
 import datetime
 import json
 import time as t
+import warnings
 from threading import Event, Lock as ThreadLock, Thread
 from unittest import mock
 
@@ -210,7 +211,7 @@ def in_progress_record_missing_expiry():
     )
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_connection_standalone():
     # when RedisCachePersistenceLayer is init with the following params
     redis_conf = {
@@ -229,7 +230,7 @@ def test_redis_connection_standalone():
         assert layer.client.__dict__.get(k) == v
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_connection_cluster():
     # when RedisCachePersistenceLayer is init with the following params
     redis_conf = {
@@ -249,7 +250,7 @@ def test_redis_connection_cluster():
         assert layer.client.__dict__.get(k) == v
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_connection_conn_error():
     # when RedisCachePersistenceLayer is init with a bad host
     # then should raise IdempotencyRedisConnectionError
@@ -257,7 +258,7 @@ def test_redis_connection_conn_error():
         RedisCachePersistenceLayer(host=redis_badhost)
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_connection_conf_error():
     # when RedisCachePersistenceLayer is init with a not_supported_mode in mode param
     # then should raise IdempotencyRedisClientConfigError
@@ -265,7 +266,7 @@ def test_redis_connection_conf_error():
         RedisCachePersistenceLayer(mode="not_supported_mode")
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_key_error():
     # when RedisCachePersistenceLayer is trying to get a non-exist key
     # then should raise IdempotencyItemNotFoundError
@@ -274,7 +275,7 @@ def test_redis_key_error():
         layer._get_record(idempotency_key="not_exist")
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_key_corrupted():
     # when RedisCachePersistenceLayer got a non-json formatted record
     # then should raise IdempotencyOrphanRecordError
@@ -284,7 +285,7 @@ def test_redis_key_corrupted():
         layer._get_record(idempotency_key="corrupted_json")
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_orphan_record(orphan_record, valid_record):
     layer = RedisCachePersistenceLayer(host="host")
     # Given orphan record exist
@@ -298,7 +299,7 @@ def test_redis_orphan_record(orphan_record, valid_record):
     )
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_orphan_record_lock(orphan_record, valid_record):
     layer = RedisCachePersistenceLayer(host="host")
     # Given orphan record exist, lock also exist
@@ -315,7 +316,7 @@ def test_redis_orphan_record_lock(orphan_record, valid_record):
     )
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_in_progress_record_missing_expiry_is_not_treated_as_orphan(in_progress_record_missing_expiry):
     layer = RedisCachePersistenceLayer(host="host")
     layer._put_in_progress_record(in_progress_record_missing_expiry)
@@ -382,7 +383,7 @@ def test_idempotent_function_blocks_concurrent_invocation_without_lambda_context
     assert execution_count == 1
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_redis_error_in_progress(valid_record):
     layer = RedisCachePersistenceLayer(host="host", mode="standalone")
     layer.client.close()
@@ -393,7 +394,7 @@ def test_redis_error_in_progress(valid_record):
         layer._put_in_progress_record(valid_record)
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.cache.redis", MockRedis())
 def test_item_to_datarecord_conversion(valid_record):
     layer = RedisCachePersistenceLayer(host="host", mode="standalone")
     item = {
@@ -407,6 +408,30 @@ def test_item_to_datarecord_conversion(valid_record):
     assert record.idempotency_key == "abc"
     assert record.status == STATUS_CONSTANTS["INPROGRESS"]
     assert record.in_progress_expiry_timestamp == item[layer.in_progress_expiry_attr]
+
+
+def test_cache_persistence_layer_does_not_emit_deprecation_warning():
+    """
+    Regression test for: https://github.com/aws-powertools/powertools-lambda-python/issues/8574
+    The new Cache names must not raise a DeprecationWarning meant for the Redis names.
+    """
+    # when instantiating with the new Cache name
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        layer = CachePersistenceLayer(client=MockRedis(host="localhost"))
+
+    # then no DeprecationWarning is raised
+    assert isinstance(layer, CachePersistenceLayer)
+
+
+def test_redis_persistence_layer_emits_deprecation_warning():
+    """
+    The deprecated Redis names must keep raising a DeprecationWarning pointing at the Cache names.
+    """
+    with pytest.warns(DeprecationWarning, match="Please use CachePersistenceLayer instead"):
+        layer = RedisCachePersistenceLayer(client=MockRedis(host="localhost"))
+
+    assert isinstance(layer, CachePersistenceLayer)
 
 
 def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_store_standalone_redis):
