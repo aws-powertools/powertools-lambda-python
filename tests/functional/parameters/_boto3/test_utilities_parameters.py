@@ -1084,6 +1084,50 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
             stubber.deactivate()
 
 
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error(mock_name, config):
+    # GIVEN two parameters are requested
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {}, f"/prod/{mock_name}": {}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InvalidKeyId", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error_decrypt(mock_name, config):
+    # GIVEN two parameters are requested, all with decrypt enabled (GetParameters WithDecryption batch)
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {"decrypt": True}, f"/prod/{mock_name}": {"decrypt": True}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names, "WithDecryption": True}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InternalServerError", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, config):
     # GIVEN two parameters are requested
     success = f"/dev/{mock_name}"

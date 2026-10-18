@@ -630,7 +630,9 @@ class SSMProvider(BaseProvider):
                 response = self.client.get_parameters(Names=parameter_names, WithDecryption=True)
             else:
                 response = self.client.get_parameters(Names=parameter_names)
-        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError):
+        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError) as exc:
+            if raise_on_error:
+                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}") from exc
             return ret, parameter_names
 
         batch_errors = self._handle_any_invalid_get_parameter_errors(response, raise_on_error)
