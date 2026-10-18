@@ -205,6 +205,29 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
+    def _invalidate_cache(self, name: str) -> None:
+        """Remove cached values for a single parameter or secret name, across all transforms
+
+        Only entries holding a single value are removed. Grouped entries, created by
+        ``get_multiple``, hold the values of multiple names under a single key, so they
+        are kept intact to avoid evicting unrelated values. Use ``force_fetch=True``
+        on the next read to refresh grouped results.
+
+        Parameters
+        ----------
+        name: str
+            Parameter or secret name whose cached values should be removed
+        """
+        for key in list(self.store):
+            if key[0] != name:
+                continue
+
+            # Grouped entries are keyed by (name, transform, is_nested=True)
+            if len(key) == 3 and key[2]:
+                continue
+
+            del self.store[key]
+
     def fetch_from_cache(self, key: tuple):
         return self.store[key].value if key in self.store else {}
 

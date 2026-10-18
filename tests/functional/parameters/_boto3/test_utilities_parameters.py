@@ -674,6 +674,199 @@ def test_ssm_provider_set_parameter_raise_on_failure(mock_name, mock_value, mock
             stubber.deactivate()
 
 
+def test_ssm_provider_set_parameter_invalidates_cached_value(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.set() removes a previously cached value so the next get returns the new one
+    """
+    # GIVEN a provider that has cached a parameter value
+    provider = parameters.SSMProvider(boto_config=config)
+    new_value = f"{mock_value}-new"
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameter",
+        {
+            "Parameter": {
+                "Name": mock_name,
+                "Type": "String",
+                "Value": mock_value,
+                "Version": mock_version,
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+            },
+        },
+        {"Name": mock_name, "WithDecryption": False},
+    )
+    stubber.add_response(
+        "put_parameter",
+        {"Version": mock_version + 1, "Tier": "Standard"},
+        {
+            "Name": mock_name,
+            "Value": new_value,
+            "Type": "String",
+            "Overwrite": True,
+            "Description": "",
+            "Tier": "Standard",
+        },
+    )
+    stubber.add_response(
+        "get_parameter",
+        {
+            "Parameter": {
+                "Name": mock_name,
+                "Type": "String",
+                "Value": new_value,
+                "Version": mock_version + 1,
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+            },
+        },
+        {"Name": mock_name, "WithDecryption": False},
+    )
+    stubber.activate()
+
+    try:
+        # WHEN reading the old value, writing a new one, and reading again
+        assert provider.get(mock_name) == mock_value
+        provider.set(name=mock_name, value=new_value, overwrite=True)
+
+        # THEN the next read must hit SSM again and return the new value
+        assert provider.get(mock_name) == new_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_set_parameter_invalidates_only_exact_name(mock_name, mock_value, config):
+    """
+    Test SSMProvider.set() removes every cached transform of the exact name, preserving unrelated entries
+    """
+    # GIVEN a provider with cached values for every transform of the name, the
+    # two-element key used by get_parameters_by_name, a grouped entry, and a
+    # similarly prefixed parameter name
+    provider = parameters.SSMProvider(boto_config=config)
+    similar_name = f"{mock_name}-similar"
+
+    transform_keys = [
+        provider._build_cache_key(name=mock_name, transform=transform)
+        for transform in (None, "json", "binary", "auto")
+    ]
+    batch_key = (mock_name, None)
+    single_value_keys = [*transform_keys, batch_key]
+    grouped_key = provider._build_cache_key(name=mock_name, transform=None, is_nested=True)
+    similar_key = provider._build_cache_key(name=similar_name)
+
+    for key in single_value_keys:
+        provider.add_to_cache(key=key, value=mock_value, max_age=60)
+    provider.add_to_cache(key=grouped_key, value={similar_name: mock_value}, max_age=60)
+    provider.add_to_cache(key=similar_key, value=mock_value, max_age=60)
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "put_parameter",
+        {"Version": 2, "Tier": "Standard"},
+        {
+            "Name": mock_name,
+            "Value": mock_value,
+            "Type": "String",
+            "Overwrite": True,
+            "Description": "",
+            "Tier": "Standard",
+        },
+    )
+    stubber.activate()
+
+    try:
+        # WHEN setting the parameter
+        provider.set(name=mock_name, value=mock_value, overwrite=True)
+
+        # THEN every single-value entry for the exact name is removed
+        assert all(key not in provider.store for key in single_value_keys)
+
+        # AND grouped entries and similarly prefixed names are kept
+        assert grouped_key in provider.store
+        assert similar_key in provider.store
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_set_parameter_failure_keeps_cache(mock_name, mock_value, config):
+    """
+    Test SSMProvider.set() does not invalidate the cache when the write fails
+    """
+    # GIVEN a provider with a cached value
+    provider = parameters.SSMProvider(boto_config=config)
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error(
+        "put_parameter",
+        service_error_code="InternalServerError",
+        service_message="Something went wrong",
+        http_status_code=500,
+    )
+    stubber.activate()
+
+    # WHEN the write fails
+    try:
+        with pytest.raises(parameters.exceptions.SetParameterError, match="Error setting parameter*"):
+            provider.set(name=mock_name, value=mock_value, overwrite=True)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN the cached value is kept
+    assert provider.store[cache_key].value == mock_value
+
+
+def test_ssm_provider_set_parameter_invalidates_get_parameters_by_name_cache(mock_name, mock_value, config):
+    """
+    Test SSMProvider.set() removes the two-element cache key used by get_parameters_by_name
+    """
+    # GIVEN a parameter cached through get_parameters_by_name
+    provider = parameters.SSMProvider(boto_config=config)
+    new_value = f"{mock_value}-new"
+    parameters_batch = {mock_name: {}}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters",
+        build_get_parameters_stub(params={mock_name: mock_value}),
+        {"Names": [mock_name]},
+    )
+    stubber.add_response(
+        "put_parameter",
+        {"Version": 2, "Tier": "Standard"},
+        {
+            "Name": mock_name,
+            "Value": new_value,
+            "Type": "String",
+            "Overwrite": True,
+            "Description": "",
+            "Tier": "Standard",
+        },
+    )
+    stubber.add_response(
+        "get_parameters",
+        build_get_parameters_stub(params={mock_name: new_value}),
+        {"Names": [mock_name]},
+    )
+    stubber.activate()
+
+    try:
+        # WHEN reading the old value, writing a new one, and reading again
+        assert provider.get_parameters_by_name(parameters=parameters_batch)[mock_name] == mock_value
+        provider.set(name=mock_name, value=new_value, overwrite=True)
+
+        # THEN the next batch read must hit SSM again and return the new value
+        assert provider.get_parameters_by_name(parameters=parameters_batch)[mock_name] == new_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_set_secret(monkeypatch, mock_name, mock_value):
     """
     Test set_secret()
@@ -882,6 +1075,122 @@ def test_secret_provider_create_secret_raise_on_error(mocker, mock_name, mock_va
             stubber.assert_no_pending_responses()
         finally:
             stubber.deactivate()
+
+
+def test_secret_provider_update_secret_invalidates_cached_value(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.set() removes a previously cached value when updating a secret
+    """
+    # GIVEN a provider that has cached a secret value
+    provider = parameters.SecretsProvider(boto_config=config)
+    new_value = f"{mock_value}-new"
+    secret_arn = f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_secret_value",
+        {"ARN": secret_arn, "Name": mock_name, "SecretString": mock_value},
+        {"SecretId": mock_name},
+    )
+    stubber.add_response(
+        "put_secret_value",
+        {"ARN": secret_arn, "Name": mock_name},
+        {"SecretId": mock_name, "SecretString": new_value},
+    )
+    stubber.add_response(
+        "get_secret_value",
+        {"ARN": secret_arn, "Name": mock_name, "SecretString": new_value},
+        {"SecretId": mock_name},
+    )
+    stubber.activate()
+
+    try:
+        # WHEN reading the old value, writing a new one, and reading again
+        assert provider.get(mock_name) == mock_value
+        provider.set(name=mock_name, value=new_value)
+
+        # THEN the next read must hit Secrets Manager again and return the new value
+        assert provider.get(mock_name) == new_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secret_provider_create_secret_invalidates_cached_value(mocker, mock_name, mock_value, config):
+    """
+    Test SecretsProvider.set() removes a previously cached value when creating a secret
+    """
+    # GIVEN a provider that has cached a secret value
+    provider = parameters.SecretsProvider(boto_config=config)
+    new_value = f"{mock_value}-new"
+    secret_arn = f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_secret_value",
+        {"ARN": secret_arn, "Name": mock_name, "SecretString": mock_value},
+        {"SecretId": mock_name},
+    )
+    stubber.add_response(
+        "create_secret",
+        {"ARN": secret_arn, "Name": mock_name},
+        {"Name": mock_name, "SecretString": new_value},
+    )
+    stubber.add_response(
+        "get_secret_value",
+        {"ARN": secret_arn, "Name": mock_name, "SecretString": new_value},
+        {"SecretId": mock_name},
+    )
+    stubber.activate()
+
+    try:
+        # GIVEN a cached value for the secret
+        assert provider.get(mock_name) == mock_value
+
+        # WHEN the secret doesn't exist yet and must be created
+        mock_update_secret = mocker.patch.object(provider, "_update_secret")
+        mock_update_secret.side_effect = provider.client.exceptions.ResourceNotFoundException(
+            {"Error": {"Code": "ResourceNotFoundException"}},
+            "put_secret_value",
+        )
+
+        provider.set(name=mock_name, value=new_value)
+
+        # THEN the next read must hit Secrets Manager again and return the new value
+        assert provider.get(mock_name) == new_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secret_provider_set_failure_keeps_cache(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.set() does not invalidate the cache when the write fails
+    """
+    # GIVEN a provider with a cached value
+    provider = parameters.SecretsProvider(boto_config=config)
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error(
+        "put_secret_value",
+        service_error_code="InternalServiceError",
+        service_message="Something went wrong",
+        http_status_code=500,
+    )
+    stubber.activate()
+
+    # WHEN the write fails
+    try:
+        with pytest.raises(parameters.exceptions.SetSecretError, match="Error setting secret*"):
+            provider.set(name=mock_name, value=mock_value)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN the cached value is kept
+    assert provider.store[cache_key].value == mock_value
 
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):
