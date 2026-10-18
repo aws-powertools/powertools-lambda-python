@@ -2830,6 +2830,39 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+@pytest.mark.parametrize(
+    "transform,key",
+    [("binary", "secret"), ("json", "secret"), ("auto", "secret.binary"), ("auto", "secret.json")],
+)
+def test_transform_value_invalid_utf8_obeys_error_policy(transform, key):
+    value = b"\xff\xfe"
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        parameters.base.transform_value(value, transform=transform, key=key)
+
+    assert isinstance(excinfo.value.__cause__, UnicodeDecodeError)
+    assert parameters.base.transform_value(value, transform=transform, key=key, raise_on_transform_error=False) is None
+
+
+@pytest.mark.parametrize("value", [b"\xff\xfe", b"valid UTF-8"])
+@pytest.mark.parametrize("key", ["secret", "secret.bin"])
+def test_secret_provider_auto_preserves_unmatched_binary(value, key, config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("get_secret_value", {"SecretBinary": value}, {"SecretId": key})
+        assert provider.get(key, transform="auto") == value
+        stubber.assert_no_pending_responses()
+
+
+def test_secret_provider_invalid_utf8_raises_transform_error(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("get_secret_value", {"SecretBinary": b"\xff\xfe"}, {"SecretId": "secret"})
+        with pytest.raises(parameters.TransformParameterError):
+            provider.get("secret", transform="binary")
+        stubber.assert_no_pending_responses()
+
+
 def test_transform_value_auto(mock_value: str):
     # GIVEN
     json_data = json.dumps({"A": mock_value})
