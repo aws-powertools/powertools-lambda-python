@@ -23,7 +23,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Load Balanc
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../getting-started/install.md#lambda-layer){target="_blank"}."
 
 **When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V2.
 
@@ -64,7 +64,7 @@ By default, we will use `APIGatewayRestResolver` throughout the documentation. Y
 | **[`ALBResolver`](#application-load-balancer)**         | Amazon Application Load Balancer (ALB) |
 | **[`LambdaFunctionUrlResolver`](#lambda-function-url)** | AWS Lambda Function URL                |
 | **[`VPCLatticeResolver`](#vpc-lattice)**                | Amazon VPC Lattice                     |
-| **[`HttpResolverLocal`](#http-resolver-local)**         | ASGI-compatible resolver               |
+| **[`HttpResolverLocal`](#http-resolver-asgi)**         | ASGI-compatible resolver               |
 <!-- markdownlint-enable MD051 -->
 
 #### Response auto-serialization

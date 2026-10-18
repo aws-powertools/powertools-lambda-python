@@ -25,7 +25,7 @@ Powertools only supports Pydantic v2, so make sure to install the required depen
 pip install aws-lambda-powertools[parser]
 ```
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../getting-started/install.md#lambda-layer){target="_blank"}"
 
 You can also add as a dependency in your preferred tool: `e.g., requirements.txt, pyproject.toml`, etc.
 
