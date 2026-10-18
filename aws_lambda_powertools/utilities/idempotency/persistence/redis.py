@@ -337,7 +337,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             in_progress_expiry_timestamp=in_progress_expiry_timestamp,
             response_data=item.get(self.data_attr, ""),
             payload_hash=item.get(self.validation_key_attr, ""),
-            expiry_timestamp=item.get("expiration"),
+            expiry_timestamp=item.get(self.expiry_attr),
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
