@@ -51,7 +51,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | ------- | ----------- |
 | [Tracer](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions |
 | [Logger](./core/logger.md) | Structured logging made easier, and target to enrich structured logging with key Lambda context details |
-| [Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
+| [Metrics](./core/metrics/index.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
 | [Event Handler](./core/event_handler/api_gateway.md) | Event handler for API Gateway, ALB, Lambda Function URL, VPC Lattice, AppSync, and Bedrock Agents |
 | [Parameters](./utilities/parameters.md) | Retrieve and cache parameter values from Parameter Store, Secrets Manager, AppConfig, or DynamoDB |
 | [Auth (alpha)](./utilities/auth.md) | Verify JWT access tokens and [acquire client-credentials tokens](./utilities/oauth2.md) for downstream APIs |
@@ -89,8 +89,8 @@ For a more complete example, check the [Powertools for AWS workshop](https://cat
 | `POWERTOOLS_LOG_LEVEL` | Sets logging level | [Logger](./core/logger.md) | `INFO` |
 | `POWERTOOLS_LOGGER_LOG_EVENT` | Logs incoming event | [Logger](./core/logger.md) | `false` |
 | `POWERTOOLS_LOGGER_SAMPLE_RATE` | Debug log sampling | [Logger](./core/logger.md) | `0` |
-| `POWERTOOLS_METRICS_NAMESPACE` | Namespace for metrics | [Metrics](./core/metrics.md) | `None` |
-| `POWERTOOLS_METRICS_DISABLED` | Disables metrics emission | [Metrics](./core/metrics.md) | `false` |
+| `POWERTOOLS_METRICS_NAMESPACE` | Namespace for metrics | [Metrics](./core/metrics/index.md) | `None` |
+| `POWERTOOLS_METRICS_DISABLED` | Disables metrics emission | [Metrics](./core/metrics/index.md) | `false` |
 | `POWERTOOLS_TRACE_DISABLED` | Disables tracing | [Tracer](./core/tracer.md) | `false` |
 | `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | Captures return as metadata | [Tracer](./core/tracer.md) | `true` |
 | `POWERTOOLS_TRACER_CAPTURE_ERROR` | Captures exception as metadata | [Tracer](./core/tracer.md) | `true` |

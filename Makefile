@@ -56,11 +56,11 @@ build: pr
 	uv build --no-sources
 
 docs-local:
-	uv run --locked mkdocs serve
+	uv run --locked zensical serve
 
 docs-local-docker:
-	docker build -t squidfunk/mkdocs-material ./docs/
-	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+	docker build -t powertools-docs ./docs/
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs powertools-docs
 
 security-baseline:
 	uv run --locked bandit --baseline bandit.baseline -r aws_lambda_powertools
