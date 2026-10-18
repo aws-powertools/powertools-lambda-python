@@ -30,6 +30,13 @@ class AppConfigProvider(BaseProvider):
     """
     AWS App Config Provider
 
+    A rejected poll token starts a new configuration session and retries retrieval once.
+    If the replacement token is rejected, retrieval raises GetParameterError and the next
+    call can start a fresh session. Other service errors do not trigger session recovery.
+    If reading the response body fails, retrieval raises GetParameterError and discards
+    that configuration's token so the next retrieval can recover. Caching and transforms
+    still apply, and recovery does not reset other configuration profiles.
+
     Parameters
     ----------
     environment: str
@@ -125,17 +132,40 @@ class AppConfigProvider(BaseProvider):
             SDK options to propagate to `start_configuration_session` API call
         """
         if name not in self._next_token:
-            sdk_options["ConfigurationProfileIdentifier"] = name
-            sdk_options["ApplicationIdentifier"] = self.application
-            sdk_options["EnvironmentIdentifier"] = self.environment
-            response_configuration = self.client.start_configuration_session(**sdk_options)
-            self._next_token[name] = response_configuration["InitialConfigurationToken"]
+            self._start_configuration_session(name, **sdk_options)
 
+        try:
+            return self._get_configuration(name)
+        except self.client.exceptions.BadRequestException:
+            # Rejected tokens cannot be reused. Restart once, without recursively retrying
+            # a rejected replacement or treating unrelated service errors as token expiry.
+            self._start_configuration_session(name, **sdk_options)
+            return self._get_configuration(name)
+
+    def _start_configuration_session(self, name: str, **sdk_options) -> None:
+        sdk_options["ConfigurationProfileIdentifier"] = name
+        sdk_options["ApplicationIdentifier"] = self.application
+        sdk_options["EnvironmentIdentifier"] = self.environment
+        response = self.client.start_configuration_session(**sdk_options)
+        self._next_token[name] = response["InitialConfigurationToken"]
+
+    def _get_configuration(self, name: str) -> bytes:
         # The new AppConfig APIs require two API calls to return the configuration
         # First we start the session and after that we retrieve the configuration
         # We need to store the token to use in the next execution
-        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
-        return_value = response["Configuration"].read()
+        try:
+            response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
+        except self.client.exceptions.BadRequestException:
+            self._next_token.pop(name, None)
+            raise
+
+        try:
+            return_value = response["Configuration"].read()
+        except Exception:
+            # The request consumed the token, but we did not receive a complete value.
+            # A new session on the next call retrieves the configuration again.
+            self._next_token.pop(name, None)
+            raise
         self._next_token[name] = response["NextPollConfigurationToken"]
 
         # The return of get_latest_configuration can be null because this value is supposed to be cached
