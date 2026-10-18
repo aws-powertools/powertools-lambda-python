@@ -3103,6 +3103,59 @@ def test_secrets_provider_get_multiple_basic(config):
         stubber.deactivate()
 
 
+def test_secrets_provider_get_multiple_does_not_mutate_caller_filters(config):
+    """
+    Test SecretsProvider.get_multiple() leaves the caller's Filters list untouched
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # GIVEN a shared Filters list, as used in the documentation example
+    my_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+
+    # Stub the boto3 client with two paginated-free responses, one per call
+    stubber = stub.Stubber(provider.client)
+    response_a = {
+        "SecretValues": [
+            {
+                "Name": "a",
+                "SecretString": "1",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_a = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["a"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_a, expected_params_a)
+
+    response_b = {
+        "SecretValues": [
+            {
+                "Name": "b",
+                "SecretString": "2",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_b = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["b"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_b, expected_params_b)
+    stubber.activate()
+
+    try:
+        # WHEN calling get_multiple twice with the same Filters list
+        assert provider.get_multiple(["a"], Filters=my_filters) == {"a": "1"}
+        assert provider.get_multiple(["b"], Filters=my_filters) == {"b": "2"}
+        stubber.assert_no_pending_responses()
+
+        # THEN the caller's list must not have grown stale name filters
+        assert my_filters == [{"Key": "primary-region", "Values": ["us-east-1"]}]
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get_multiple_with_binary(config):
     """
     Test SecretsProvider.get_multiple() with binary secrets
