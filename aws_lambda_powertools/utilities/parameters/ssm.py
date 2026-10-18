@@ -713,7 +713,7 @@ class SSMProvider(BaseProvider):
 
         for parameter, options in parameters.items():
             # NOTE: TypeDict later
-            _overrides = options or {}
+            _overrides = {**(options or {})}
             _overrides["transform"] = _overrides.get("transform") or transform
 
             # These values can be falsy (False, 0)
@@ -723,7 +723,7 @@ class SSMProvider(BaseProvider):
             if "max_age" not in _overrides:
                 _overrides["max_age"] = max_age
 
-            # NOTE: Split parameters who have decrypt OR have it global
+            # NOTE: Split qparameters who have decrypt OR have it global
             if _overrides["decrypt"]:
                 decrypt_parameters[parameter] = _overrides
             else:
