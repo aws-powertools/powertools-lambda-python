@@ -23,7 +23,7 @@ from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
     ExpirableValue,
 )
-from aws_lambda_powertools.utilities.parameters.exceptions import GetSecretError
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, GetSecretError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 
@@ -42,6 +42,13 @@ def mock_value():
 @pytest.fixture(scope="function")
 def mock_version():
     return random.randrange(1, 1000)
+
+
+def test_get_secret_error_is_a_get_parameter_error():
+    # Regression test for #8595: GetSecretError must subclass GetParameterError
+    # so that a caller catching GetParameterError (as documented) also catches
+    # failures from get_secrets_by_name / SecretsProvider.get_multiple.
+    assert issubclass(GetSecretError, GetParameterError)
 
 
 @pytest.fixture(scope="module")
