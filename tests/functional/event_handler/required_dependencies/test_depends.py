@@ -1,12 +1,21 @@
 """Tests for the Depends() dependency injection feature using Annotated."""
 
+import asyncio
 import json
 from typing import Annotated
 
 import pytest
 
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler import (
+    ALBResolver,
+    APIGatewayHttpResolver,
+    APIGatewayRestResolver,
+    Response,
+    VPCLatticeV2Resolver,
+    content_types,
+)
 from aws_lambda_powertools.event_handler.depends import DependencyResolutionError, Depends
+from aws_lambda_powertools.event_handler.exceptions import UnauthorizedError
 from aws_lambda_powertools.event_handler.request import Request
 from tests.functional.utils import load_event
 
@@ -507,3 +516,132 @@ def test_depends_request_resolved_event():
     assert result["statusCode"] == 200
     body = json.loads(result["body"])
     assert body["path"] == "/my/path"
+
+
+# ---------------------------------------------------------------------------
+# Exceptions raised by dependencies are handled like exceptions raised by the route
+# ---------------------------------------------------------------------------
+
+
+def get_current_user() -> str:
+    """Auth dependency rejecting a request without credentials, like the docs example."""
+    raise UnauthorizedError("Missing authentication")
+
+
+def test_depends_service_error_returns_its_status_code():
+    """A ServiceError raised by a dependency returns its HTTP response, as if the route raised it."""
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def handler(user: Annotated[str, Depends(get_current_user)]):
+        return {"user": user}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 401
+    assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
+
+
+def test_depends_exception_handled_by_exception_handler():
+    """An exception_handler receives the exception the dependency raised, not DependencyResolutionError."""
+    app = APIGatewayHttpResolver()
+
+    class TenantNotFoundError(Exception):
+        pass
+
+    @app.exception_handler(TenantNotFoundError)
+    def handle_tenant_not_found(ex: TenantNotFoundError):
+        return Response(status_code=404, content_type=content_types.TEXT_PLAIN, body=str(ex))
+
+    def get_tenant() -> str:
+        raise TenantNotFoundError("Tenant acme not found")
+
+    @app.post("/my/path")
+    def handler(tenant: Annotated[str, Depends(get_tenant)]):
+        return {"tenant": tenant}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 404
+    assert result["body"] == "Tenant acme not found"
+
+
+def test_depends_nested_service_error_returns_its_status_code():
+    """A ServiceError raised by a nested dependency returns its HTTP response."""
+    app = APIGatewayHttpResolver()
+
+    def get_tenant(user: Annotated[str, Depends(get_current_user)]) -> str:
+        return f"tenant-of-{user}"
+
+    @app.post("/my/path")
+    def handler(tenant: Annotated[str, Depends(get_tenant)]):
+        return {"tenant": tenant}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 401
+    assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
+
+
+def test_depends_dependency_resolution_error_handler_takes_precedence():
+    """An exception_handler for DependencyResolutionError still receives it, with the original exception as cause."""
+    app = APIGatewayHttpResolver()
+
+    @app.exception_handler(DependencyResolutionError)
+    def handle_dependency_error(ex: DependencyResolutionError):
+        return Response(status_code=500, content_type=content_types.TEXT_PLAIN, body=type(ex.__cause__).__name__)
+
+    @app.post("/my/path")
+    def handler(user: Annotated[str, Depends(get_current_user)]):
+        return {"user": user}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 500
+    assert result["body"] == "UnauthorizedError"
+
+
+def test_depends_service_error_returns_its_status_code_with_resolve_async():
+    """resolve_async() also returns the HTTP response of a ServiceError raised by a dependency."""
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    async def handler(user: Annotated[str, Depends(get_current_user)]):
+        return {"user": user}
+
+    result = asyncio.run(app.resolve_async(API_GW_V2_EVENT, {}))
+    assert result["statusCode"] == 401
+    assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
+
+
+def test_depends_exception_with_resolve_async_raises_dependency_resolution_error():
+    """With resolve_async(), an exception that no handler handles still raises DependencyResolutionError."""
+    app = APIGatewayHttpResolver()
+
+    def broken() -> str:
+        raise ValueError("boom")
+
+    @app.post("/my/path")
+    async def handler(val: Annotated[str, Depends(broken)]):
+        return {"val": val}
+
+    with pytest.raises(DependencyResolutionError, match="broken.*boom"):
+        asyncio.run(app.resolve_async(API_GW_V2_EVENT, {}))
+
+
+@pytest.mark.parametrize(
+    "resolver, event_file, path",
+    [
+        pytest.param(APIGatewayRestResolver, "apiGatewayProxyEvent.json", "/my/path", id="rest-api"),
+        pytest.param(APIGatewayHttpResolver, "apiGatewayProxyV2Event_GET.json", "/my/path", id="http-api"),
+        pytest.param(ALBResolver, "albEvent.json", "/lambda", id="alb"),
+        pytest.param(VPCLatticeV2Resolver, "vpcLatticeV2Event.json", "/newpath", id="vpc-lattice-v2"),
+    ],
+)
+def test_depends_service_error_returns_its_status_code_for_each_resolver(resolver, event_file, path):
+    """Each proxy resolver returns the HTTP response of a ServiceError raised by a dependency."""
+    app = resolver()
+
+    @app.get(path)
+    def handler(user: Annotated[str, Depends(get_current_user)]):
+        return {"user": user}
+
+    result = app.resolve(load_event(event_file), {})
+    assert result["statusCode"] == 401
+    assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
