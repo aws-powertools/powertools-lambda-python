@@ -364,6 +364,21 @@ def test_mask_nested_field_success(data_masker):
     assert data_masked == {"user": {"contact": {"details": {"address": {"street": "123 Main St", "zip": "xxx"}}}}}
 
 
+def test_erase_json_string_with_masking_rules(data_masker):
+    # GIVEN the data type is a JSON string
+    data = json.dumps({"email": "johndoe@example.com", "address": {"zip": 13000, "street": "123 Main St"}})
+
+    # WHEN erase is called with masking rules
+    masking_rules = {
+        "email": {"regex_pattern": "(.)(.*)(@.*)", "mask_format": r"\1****\3"},
+        "address.zip": {"custom_mask": "xxx"},
+    }
+    masked = data_masker.erase(data=data, masking_rules=masking_rules)
+
+    # THEN the JSON string is parsed and the fields are masked, as with `fields`
+    assert masked == {"email": "j****@example.com", "address": {"zip": "xxx", "street": "123 Main St"}}
+
+
 def test_erase_dictionary_with_masking_rules(data_masker):
     # GIVEN a dictionary with nested sensitive data
     data = {"user": {"name": "John Doe", "ssn": "123-45-6789", "address": {"street": "123 Main St", "zip": "12345"}}}
