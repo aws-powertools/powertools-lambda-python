@@ -71,7 +71,10 @@ def test_openapi_pydantic_query_params():
         elif param.name == "search":
             assert param.required is False  # Optional field
             assert param.description == "Search term"
-            assert param.schema_.type == "string"
+            # str | None is rendered as an anyOf, not a bare string
+            assert param.schema_.type is None
+            assert param.schema_.anyOf is not None
+            assert [s.type for s in param.schema_.anyOf] == ["string", "null"]
 
 
 def test_openapi_pydantic_header_params():
@@ -119,7 +122,10 @@ def test_openapi_pydantic_header_params():
         elif param.name == "accept-language":
             assert param.required is False  # Optional field
             assert param.description == "Language preference"
-            assert param.schema_.type == "string"
+            # str | None is rendered as an anyOf, not a bare string
+            assert param.schema_.type is None
+            assert param.schema_.anyOf is not None
+            assert [s.type for s in param.schema_.anyOf] == ["string", "null"]
 
 
 def test_openapi_pydantic_mixed_params():
