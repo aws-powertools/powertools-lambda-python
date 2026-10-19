@@ -833,7 +833,15 @@ def _encode_non_base64_body(raw_body: str) -> bytes:
         # may contain raw binary data that isn't valid UTF-8
         return raw_body.encode("latin-1")
     except UnicodeEncodeError:
-        # Characters outside latin-1 mean the body was decoded as UTF-8 text
+        # Characters outside latin-1 mean the body was decoded as UTF-8 text. Without binary media
+        # types, API Gateway replaces invalid bytes with U+FFFD in that decoding, so a binary upload
+        # can't be restored: fail instead of passing on a corrupted file.
+        if "�" in raw_body:
+            raise ValueError(
+                "Multipart body contains bytes that were replaced during UTF-8 decoding. "
+                "If using API Gateway REST API (v1), configure Binary Media Types "
+                "to include 'multipart/form-data'.",
+            ) from None
         return raw_body.encode("utf-8")
 
 

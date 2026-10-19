@@ -3893,6 +3893,45 @@ def test_multipart_non_ascii_text_field_non_base64(gw_event, note):
     assert json.loads(result["body"]) == {"note": note, "size": 5}
 
 
+def test_multipart_non_base64_binary_mangled_by_utf8_decoding(gw_event):
+    """Test that a binary upload API Gateway mangled while decoding it as UTF-8 returns 422."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    # Without binary media types, API Gateway decodes the body as UTF-8 and replaces invalid bytes
+    binary_content = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x80\x81"
+    boundary = "----TestBoundary"
+    raw_bytes = (
+        (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file_data"; filename="photo.jpg"\r\n'
+            f"Content-Type: image/jpeg\r\n"
+            f"\r\n"
+        ).encode()
+        + binary_content
+        + f"\r\n--{boundary}--\r\n".encode()
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = raw_bytes.decode("utf-8", errors="replace")
+    gw_event["isBase64Encoded"] = False
+
+    with warnings.catch_warnings(record=True):
+        warnings.simplefilter("always")
+        result = app(gw_event, {})
+
+    assert result["statusCode"] == 422
+    body = json.loads(result["body"])
+    assert body["detail"][0]["type"] == "multipart_invalid"
+
+
 def test_multipart_non_ascii_text_field_base64(gw_event):
     """Test a UTF-8 form field in a base64-encoded multipart body."""
     app = APIGatewayRestResolver(enable_validation=True)
