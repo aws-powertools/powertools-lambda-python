@@ -3284,6 +3284,12 @@ class Router(BaseRouter):
                 status_code,
             )
 
+            if route_key in self._routes:
+                warnings.warn(
+                    f"A route like this was already registered. method: '{', '.join(methods)}' rule: '{rule}'",
+                    stacklevel=2,
+                )
+
             # Collate Middleware for routes
             if middlewares is not None:
                 for handler in middlewares:
