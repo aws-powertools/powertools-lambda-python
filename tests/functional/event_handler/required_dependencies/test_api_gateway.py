@@ -588,6 +588,32 @@ def test_compress_no_accept_encoding():
     assert result["body"] == expected_value
 
 
+@pytest.mark.parametrize(
+    "accept_encoding, expected_compressed",
+    [
+        pytest.param("gzip;q=0", False, id="gzip refused with a zero weight"),
+        pytest.param("deflate, gzip; q=0.0", False, id="gzip refused with a zero weight and spaces"),
+        pytest.param("GZIP", True, id="gzip accepted in uppercase"),
+        pytest.param("deflate, gzip;q=0.5", True, id="gzip accepted with a non-zero weight"),
+    ],
+)
+def test_compress_respects_accept_encoding_weights_and_casing(accept_encoding: str, expected_compressed: bool):
+    # GIVEN a function with compress=True
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", compress=True)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Foo")
+
+    # WHEN the client sends an Accept-Encoding header with a weight or different casing
+    event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": accept_encoding}}
+    result = app(event, None)
+
+    # THEN the response is only gzipped when the client accepts gzip
+    assert result["isBase64Encoded"] is expected_compressed
+    assert ("Content-Encoding" in result["multiValueHeaders"]) is expected_compressed
+
+
 def test_compress_no_accept_encoding_null_headers():
     # GIVEN a function with compress=True
     # AND the request has no headers

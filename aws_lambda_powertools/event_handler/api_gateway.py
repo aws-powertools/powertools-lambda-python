@@ -746,6 +746,20 @@ class Route:
         return operation_id
 
 
+def _accepts_gzip(accept_encoding: str) -> bool:
+    """Returns True if an Accept-Encoding header accepts gzip, honouring casing and a zero q-value"""
+    for coding in accept_encoding.split(","):
+        name, _, params = coding.partition(";")
+        if name.strip().lower() != "gzip":
+            continue
+        _, _, weight = params.replace(" ", "").lower().partition("q=")
+        try:
+            return float(weight) > 0 if weight else True
+        except ValueError:
+            return False
+    return False
+
+
 class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
@@ -798,11 +812,9 @@ class ResponseBuilder(Generic[ResponseEventT]):
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
         encoding = event.resolved_headers_field.get("accept-encoding", "")
-        gzip_accepted = False
-        if isinstance(encoding, str):
-            gzip_accepted = "gzip" in encoding
-        elif isinstance(encoding, list):
-            gzip_accepted = "gzip" in ",".join(encoding)
+        if isinstance(encoding, list):
+            encoding = ",".join(encoding)
+        gzip_accepted = isinstance(encoding, str) and _accepts_gzip(encoding)
 
         if gzip_accepted:
             if response_compression is not None:
