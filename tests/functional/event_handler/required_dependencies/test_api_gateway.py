@@ -843,6 +843,59 @@ def test_cors_multi_origin():
     assert "Access-Control-Allow-Origin" not in headers
 
 
+def test_cors_adds_vary_origin_when_echoing_a_specific_origin():
+    # GIVEN a cors configuration with more than one allowed origin
+    cors_config = CORSConfig(allow_origin="https://a.com", extra_origins=["https://b.com"])
+    app = ApiGatewayResolver(cors=cors_config)
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with one of the allowed origins
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the echoed origin comes with Vary: Origin so shared caches don't reuse it for other origins
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["https://a.com"]
+    assert headers["Vary"] == ["Origin"]
+
+
+def test_cors_keeps_existing_vary_header_when_adding_origin():
+    # GIVEN a route that already sets a Vary header
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="https://a.com"))
+
+    @app.get("/cors")
+    def get_with_vary() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, "{}", headers={"Vary": "Accept-Encoding"})
+
+    # WHEN calling the event handler with the allowed origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN Origin is added to the existing Vary value instead of replacing it
+    assert result["multiValueHeaders"]["Vary"] == ["Accept-Encoding, Origin"]
+
+
+def test_cors_does_not_add_vary_origin_for_wildcard_origin():
+    # GIVEN a cors configuration that allows every origin
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="*"))
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with any origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the wildcard response is the same for every origin, so no Vary header is needed
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["*"]
+    assert "Vary" not in headers
+
+
 def test_custom_cors_config():
     # GIVEN a custom cors configuration
     allow_header = ["foo2"]

@@ -242,6 +242,9 @@ class CORSConfig:
             headers["Access-Control-Max-Age"] = str(self.max_age)
         if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
+        if origin != "*":
+            # The response echoes the request Origin, so shared caches must not reuse it for other origins
+            headers["Vary"] = "Origin"
         return headers
 
     def allowed_origin(self, extracted_origin: str) -> str | None:
@@ -780,7 +783,14 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
         origin = cors.allowed_origin(extracted_origin_header)
         if origin is not None:
-            self.response.headers.update(cors.to_dict(origin))
+            cors_headers = cors.to_dict(origin)
+            # Keep any Vary value the route already set, and add Origin to it
+            existing_vary = self.response.headers.get("Vary")
+            if isinstance(existing_vary, list):
+                existing_vary = ", ".join(existing_vary)
+            if existing_vary and "Vary" in cors_headers:
+                cors_headers["Vary"] = f"{existing_vary}, Origin"
+            self.response.headers.update(cors_headers)
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
