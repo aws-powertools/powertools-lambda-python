@@ -1032,7 +1032,7 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:test:test", TestProvider())
 
     parameters.get_parameter(mock_name)
     parameters.get_secret(mock_name)
@@ -2771,7 +2771,7 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
         def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:dev:myapp", TestProvider())
 
     environment = "dev"
     application = "myapp"
@@ -2796,7 +2796,7 @@ def test_appconf_get_app_config_transform_json(monkeypatch, mock_name):
         def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:dev:myapp", TestProvider())
 
     environment = "dev"
     application = "myapp"
@@ -2826,8 +2826,34 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_app_config(mock_name, environment="dev", application="myapp")
 
     # THEN
-    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig"] is not None
+    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig:dev:myapp"] is not None
     assert value == mock_value
+
+
+def test_appconf_get_app_config_different_environment_and_application(monkeypatch, mock_name):
+    # GIVEN a provider that reports which environment/application it was built for
+    class TestProvider(BaseProvider):
+        def __init__(self, environment: str, application: str):
+            super().__init__()
+            self.environment = environment
+            self.application = application
+
+        def _get(self, name: str, **kwargs) -> str:
+            return f"{self.application}/{self.environment}"
+
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setattr(parameters.appconfig, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.appconfig, "AppConfigProvider", TestProvider)
+
+    # WHEN get_app_config is called with different applications and environments
+    first = parameters.get_app_config(mock_name, environment="dev", application="app-a", max_age=0)
+    second = parameters.get_app_config(mock_name, environment="prod", application="app-b", max_age=0)
+
+    # THEN each call uses its own environment and application
+    assert first == "app-a/dev"
+    assert second == "app-b/prod"
 
 
 def test_transform_value_auto(mock_value: str):

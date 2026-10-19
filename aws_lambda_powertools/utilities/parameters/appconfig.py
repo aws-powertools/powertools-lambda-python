@@ -214,11 +214,12 @@ def get_app_config(
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
     max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-    # Only create the provider if this function is called at least once
-    if "appconfig" not in DEFAULT_PROVIDERS:
-        DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
+    # One provider per environment/application pair, created on first use
+    provider_key = f"appconfig:{environment}:{application}"
+    if provider_key not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS[provider_key] = AppConfigProvider(environment=environment, application=application)
 
-    return DEFAULT_PROVIDERS["appconfig"].get(
+    return DEFAULT_PROVIDERS[provider_key].get(
         name,
         max_age=max_age,
         transform=transform,
