@@ -857,8 +857,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
         """Build the full response dict to be returned by the lambda"""
 
         # We only apply the serializer when the content type is JSON and the
-        # body is not a str, to avoid double encoding
-        if self.response.is_json() and not isinstance(self.response.body, str):
+        # body is not a str or bytes, to avoid double encoding (bytes are base64 encoded below)
+        if self.response.is_json() and not isinstance(self.response.body, (str, bytes)):
             self.response.body = self.serializer(self.response.body)
 
         self._route(event, cors)

@@ -523,6 +523,23 @@ def test_response_is_json_with_multiple_json_content_types():
     assert response.is_json() is True
 
 
+def test_response_with_bytes_body_and_json_content_type_is_base64_encoded():
+    # GIVEN a route that returns a bytes body with a JSON content type
+    app = ApiGatewayResolver()
+    body = b'{"a":1}'
+
+    @app.get("/my/path")
+    def get_bytes() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, body)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the bytes are base64 encoded instead of being passed to the JSON serializer
+    assert result["isBase64Encoded"] is True
+    assert base64.b64decode(result["body"]) == body
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
