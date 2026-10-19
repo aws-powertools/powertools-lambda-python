@@ -540,6 +540,22 @@ def test_response_with_bytes_body_and_json_content_type_is_base64_encoded():
     assert base64.b64decode(result["body"]) == body
 
 
+def test_response_with_lowercase_content_type_header_serializes_json_body():
+    # GIVEN a route that sets the JSON content type with a lowercase header name
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path")
+    def get_lowercase_header() -> Response:
+        return Response(200, headers={"content-type": content_types.APPLICATION_JSON}, body={"a": 1})
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the response is recognised as JSON and the body is serialized
+    assert isinstance(result["body"], str)
+    assert json.loads(result["body"]) == {"a": 1}
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip

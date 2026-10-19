@@ -362,7 +362,8 @@ class Response(Generic[ResponseT]):
         """
         Returns True if the response is JSON, based on the Content-Type.
         """
-        content_type = self.headers.get("Content-Type", "")
+        # Header names are case-insensitive, so match "content-type" in any casing
+        content_type = next((value for key, value in self.headers.items() if key.lower() == "content-type"), "")
         if isinstance(content_type, list):
             content_type = content_type[0]
         return content_type.startswith(DEFAULT_CONTENT_TYPE)
