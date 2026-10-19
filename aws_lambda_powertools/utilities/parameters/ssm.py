@@ -650,9 +650,8 @@ class SSMProvider(BaseProvider):
 
         for parameter in api_response["Parameters"]:
             # For names with a version or label selector (e.g. "/a:prod"), SSM returns the bare name
-            # in "Name" and the requested name in "Selector"
-            selector = parameter.get("Selector")
-            name = selector if selector in parameters else parameter["Name"]
+            # in "Name" and only the selector suffix (e.g. ":prod") in "Selector"
+            name = parameter["Name"] + parameter.get("Selector", "")
             value = parameter["Value"]
             options = parameters[name]
             transform = options["transform"]
