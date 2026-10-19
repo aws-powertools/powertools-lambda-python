@@ -1323,6 +1323,29 @@ def test_remove_prefix_by_regex(path: str):
     assert response["statusCode"] == 200
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/v1/users/v2", id="prefix pattern also appears later in the path"),
+        pytest.param("/users/v2", id="prefix pattern only appears later in the path"),
+    ],
+)
+def test_remove_prefix_by_regex_only_strips_leading_match(path: str):
+    # GIVEN a regex strip_prefix that could also match a later path segment
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/v[1-9]+")])
+
+    @app.get("/users/<name>")
+    def get_user(name: str):
+        return {"name": name}
+
+    # WHEN calling the handler with the pattern repeated later in the path
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN only a leading match is stripped, so the route matches and keeps the later segment
+    assert response["statusCode"] == 200
+    assert json.loads(response["body"]) == {"name": "v2"}
+
+
 def test_empty_path_when_using_regexes():
     app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
 

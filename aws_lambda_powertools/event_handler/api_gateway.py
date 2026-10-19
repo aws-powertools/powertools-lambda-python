@@ -2880,7 +2880,10 @@ class ApiGatewayResolver(BaseRouter):
                     return path[len(prefix) :]
 
             if isinstance(prefix, Pattern):
-                path = re.sub(prefix, "", path)
+                # Only strip a match at the start of the path, and only once
+                match = prefix.match(path)
+                if match:
+                    path = path[match.end() :]
 
                 # When using regexes, we might get into a point where everything is removed
                 # from the string, so we check if it's empty and return /, since there's nothing
