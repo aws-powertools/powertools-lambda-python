@@ -21,6 +21,7 @@ from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from botocore.config import Config
+    from botocore.exceptions import ClientError
     from mypy_boto3_appconfigdata.client import AppConfigDataClient
 
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
@@ -30,9 +31,10 @@ class AppConfigProvider(BaseProvider):
     """
     AWS App Config Provider
 
-    A rejected poll token starts a new configuration session and retries retrieval once.
-    If the replacement token is rejected, retrieval raises GetParameterError and the next
-    call can start a fresh session. Other service errors do not trigger session recovery.
+    An expired or corrupted poll token starts a new configuration session and retries retrieval once.
+    If the replacement token is expired or corrupted, retrieval raises GetParameterError and the next
+    call can start a fresh session. Other service errors, including polling too early, retain
+    the token and do not trigger session recovery.
     If reading the response body fails, retrieval raises GetParameterError and discards
     that configuration's token so the next retrieval can recover. Caching and transforms
     still apply, and recovery does not reset other configuration profiles.
@@ -136,9 +138,11 @@ class AppConfigProvider(BaseProvider):
 
         try:
             return self._get_configuration(name)
-        except self.client.exceptions.BadRequestException:
-            # Rejected tokens cannot be reused. Restart once, without recursively retrying
-            # a rejected replacement or treating unrelated service errors as token expiry.
+        except self.client.exceptions.BadRequestException as exc:
+            if not self._is_token_expired_or_corrupted(exc):
+                raise
+            # Expired or corrupted tokens cannot be reused. Restart once, without recursively
+            # retrying a rejected replacement or bypassing the configured polling interval.
             self._start_configuration_session(name, **sdk_options)
             return self._get_configuration(name)
 
@@ -155,8 +159,9 @@ class AppConfigProvider(BaseProvider):
         # We need to store the token to use in the next execution
         try:
             response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
-        except self.client.exceptions.BadRequestException:
-            self._next_token.pop(name, None)
+        except self.client.exceptions.BadRequestException as exc:
+            if self._is_token_expired_or_corrupted(exc):
+                self._next_token.pop(name, None)
             raise
 
         try:
@@ -176,6 +181,15 @@ class AppConfigProvider(BaseProvider):
             self.last_returned_value[name] = return_value
 
         return self.last_returned_value[name]
+
+    @staticmethod
+    def _is_token_expired_or_corrupted(exc: ClientError) -> bool:
+        problem: object = exc.response
+        for key in ("Details", "InvalidParameters", "ConfigurationToken", "Problem"):
+            if not isinstance(problem, dict):
+                return False
+            problem = problem.get(key)
+        return problem in ("Expired", "Corrupted")
 
     def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
