@@ -645,3 +645,56 @@ def test_depends_service_error_returns_its_status_code_for_each_resolver(resolve
     result = app.resolve(load_event(event_file), {})
     assert result["statusCode"] == 401
     assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
+
+
+def test_depends_with_none_default_is_resolved():
+    """A Depends() parameter that also declares ``= None`` is still resolved (Python 3.10 wraps it in Optional)."""
+    app = APIGatewayHttpResolver()
+
+    def get_region() -> str:
+        return "eu-west-1"
+
+    @app.post("/my/path")
+    def handler(region: Annotated[str, Depends(get_region)] = None):
+        return {"region": region}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"region": "eu-west-1"}
+
+
+def test_depends_inside_explicit_optional_is_resolved():
+    """``Optional[Annotated[str, Depends(...)]]`` and ``Annotated[...] | None`` both resolve."""
+    from typing import Optional
+
+    app = APIGatewayHttpResolver()
+
+    def get_region() -> str:
+        return "eu-west-1"
+
+    def get_zone() -> str:
+        return "a"
+
+    @app.post("/my/path")
+    def handler(
+        region: Optional[Annotated[str, Depends(get_region)]] = None,  # noqa: UP045
+        zone: Annotated[str, Depends(get_zone)] | None = None,
+    ):
+        return {"region": region, "zone": zone}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"region": "eu-west-1", "zone": "a"}
+
+
+def test_request_param_with_none_default_is_injected():
+    """A ``request: Request = None`` parameter is injected on every Python version."""
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def handler(request: Request = None):
+        return {"method": request.method}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"method": "POST"}
