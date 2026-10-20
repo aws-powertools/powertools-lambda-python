@@ -1482,8 +1482,11 @@ def _find_request_param_name(func: Callable) -> str | None:
     except Exception:
         hints = {}
 
+    from aws_lambda_powertools.event_handler.depends import _unwrap_optional
+
     for param_name, annotation in hints.items():
-        if annotation is Request:
+        # Python 3.10 wraps annotations of ``= None`` parameters in Optional[...]
+        if _unwrap_optional(annotation) is Request:
             return param_name
 
     return None
