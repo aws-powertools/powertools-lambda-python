@@ -1085,6 +1085,50 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
             stubber.deactivate()
 
 
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error(mock_name, config):
+    # GIVEN two parameters are requested
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {}, f"/prod/{mock_name}": {}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InvalidKeyId", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error_decrypt(mock_name, config):
+    # GIVEN two parameters are requested, all with decrypt enabled (GetParameters WithDecryption batch)
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {"decrypt": True}, f"/prod/{mock_name}": {"decrypt": True}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names, "WithDecryption": True}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InternalServerError", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure(mock_name, mock_value, config):
     # GIVEN two parameters are requested
     success = f"/dev/{mock_name}"
@@ -1276,6 +1320,40 @@ def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_paramete
         stubber.assert_no_pending_responses()
 
         assert ret is not None
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_does_not_mutate_input_and_honors_new_globals(
+    mock_name,
+    mock_value,
+    config,
+):
+    # GIVEN a reusable parameters dict with a non-empty per-parameter override
+    param = f"/a/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+    all_params = {param: {"max_age": 0}, fail: {}}
+    names = list(all_params.keys())
+    stub_response = build_get_parameters_stub(params={param: mock_value}, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    # first call: global decrypt defaults to False -> no WithDecryption
+    stubber.add_response("get_parameters", stub_response, {"Names": names})
+    # second call: new global decrypt=True must be honored
+    stubber.add_response("get_parameters", stub_response, {"Names": names, "WithDecryption": True})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called twice with different global options
+    try:
+        provider.get_parameters_by_name(parameters=all_params, raise_on_error=False)
+
+        # THEN the caller's dict must not be modified
+        assert all_params == {param: {"max_age": 0}, fail: {}}
+
+        # AND a later global decrypt=True must not be overridden by stale values
+        provider.get_parameters_by_name(parameters=all_params, decrypt=True, raise_on_error=False)
+        stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
 
