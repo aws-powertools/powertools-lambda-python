@@ -1258,6 +1258,35 @@ def test_debug_print_event(capsys):
     assert json.loads(output) == event
 
 
+@pytest.mark.parametrize(
+    "rule, path, expected_route_keys",
+    [
+        pytest.param(".+", "/any/deep/path", {}, id="catch-all matches any path"),
+        pytest.param("/files/.+", "/files/reports/2026/summary.pdf", {}, id="catch-all after a static prefix"),
+        pytest.param(
+            "/users/<user_id>/files/.+",
+            "/users/123/files/docs/report.txt",
+            {"user_id": "123"},
+            id="catch-all after a dynamic parameter",
+        ),
+    ],
+)
+def test_route_rule_supports_documented_catch_all_regex(rule: str, path: str, expected_route_keys: dict):
+    # GIVEN a route that uses a regex catch-all, as shown in the "Catch-all routes" docs
+    app = APIGatewayRestResolver()
+
+    @app.get(rule)
+    def handler(**route_keys):
+        return route_keys
+
+    # WHEN calling the event handler with a nested path
+    result = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN the regex in the rule matches the whole path and dynamic parameters are still captured
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == expected_route_keys
+
+
 def test_similar_dynamic_routes():
     # GIVEN
     app = ApiGatewayResolver()
