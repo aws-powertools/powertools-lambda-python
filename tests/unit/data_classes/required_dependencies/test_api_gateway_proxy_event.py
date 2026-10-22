@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
@@ -198,6 +200,29 @@ def test_api_gateway_proxy_v2_event():
     assert parsed_event.path_parameters == raw_event["pathParameters"]
     assert parsed_event.is_base64_encoded == raw_event["isBase64Encoded"]
     assert parsed_event.stage_variables == raw_event["stageVariables"]
+
+
+@pytest.mark.parametrize(
+    "stage, raw_path, expected_path",
+    [
+        pytest.param("$default", "/my/path", "/my/path", id="default stage"),
+        pytest.param("dev", "/dev/my/path", "/my/path", id="named stage in raw path"),
+        pytest.param("dev", "/my/path", "/my/path", id="named stage not in raw path"),
+        pytest.param("dev", "/dev", "/", id="raw path equals the stage"),
+        pytest.param("dev", "/dev/", "/", id="raw path equals the stage with trailing slash"),
+        pytest.param("dev", "/devices", "/devices", id="raw path starts with the stage name"),
+        pytest.param("dev", "/dev/dev", "/dev", id="stage is stripped once"),
+    ],
+)
+def test_api_gateway_proxy_v2_event_path_strips_stage_only_when_present(stage, raw_path, expected_path):
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["stage"] = stage
+    raw_event["rawPath"] = raw_path
+
+    parsed_event = APIGatewayProxyEventV2(raw_event)
+
+    assert parsed_event.path == expected_path
+    assert parsed_event.raw_path == raw_path
 
 
 def test_api_gateway_proxy_v2_lambda_authorizer_event():

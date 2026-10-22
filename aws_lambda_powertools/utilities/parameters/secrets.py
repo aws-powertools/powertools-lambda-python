@@ -164,6 +164,7 @@ class SecretsProvider(BaseProvider):
         sdk_options.pop("SecretIdList", None)
 
         secrets: dict[str, Any] = {}
+        requested_names = set(names)
         next_token = None
 
         # Handle pagination automatically
@@ -182,6 +183,8 @@ class SecretsProvider(BaseProvider):
             # Process successful secrets
             for secret in response.get("SecretValues", []):
                 secret_name = secret["Name"]
+                if secret_name not in requested_names:
+                    continue
 
                 # Extract secret value (SecretString or SecretBinary)
                 if "SecretString" in secret:
@@ -247,7 +250,12 @@ class SecretsProvider(BaseProvider):
         # Create a unique cache key for this batch of secrets
         # Use sorted names to ensure consistent caching regardless of order
         cache_key_name = "|".join(sorted(names))
-        key = self._build_cache_key(name=cache_key_name, transform=transform, is_nested=True)
+        key = self._build_cache_key(
+            name=cache_key_name,
+            transform=transform,
+            is_nested=True,
+            sdk_options=sdk_options,
+        )
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)

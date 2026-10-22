@@ -635,7 +635,9 @@ class SSMProvider(BaseProvider):
                 response = self.client.get_parameters(Names=parameter_names, WithDecryption=True)
             else:
                 response = self.client.get_parameters(Names=parameter_names)
-        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError):
+        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError) as exc:
+            if raise_on_error:
+                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}") from exc
             return ret, parameter_names
 
         batch_errors = self._handle_any_invalid_get_parameter_errors(response, raise_on_error)
@@ -652,7 +654,9 @@ class SSMProvider(BaseProvider):
         response: dict[str, Any] = {}
 
         for parameter in api_response["Parameters"]:
-            name = parameter["Name"]
+            # For names with a version or label selector (e.g. "/a:prod"), SSM returns the bare name
+            # in "Name" and only the selector suffix (e.g. ":prod") in "Selector"
+            name = parameter["Name"] + parameter.get("Selector", "")
             value = parameter["Value"]
             options = parameters[name]
             transform = options["transform"]
@@ -718,7 +722,7 @@ class SSMProvider(BaseProvider):
 
         for parameter, options in parameters.items():
             # NOTE: TypeDict later
-            _overrides = options or {}
+            _overrides = {**(options or {})}
             _overrides["transform"] = _overrides.get("transform") or transform
 
             # These values can be falsy (False, 0)
