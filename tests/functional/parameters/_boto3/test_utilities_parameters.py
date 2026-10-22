@@ -3103,6 +3103,47 @@ def test_secrets_provider_get_multiple_basic(config):
         stubber.deactivate()
 
 
+def test_secrets_provider_get_multiple_does_not_mutate_caller_filters(config):
+    """
+    Test SecretsProvider.get_multiple() does not mutate the caller's Filters list
+    """
+    # GIVEN a SecretsProvider instance and a caller-owned Filters list
+    provider = parameters.SecretsProvider(boto_config=config)
+    caller_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+
+    stubber = stub.Stubber(provider.client)
+    first_expected_params = {
+        "Filters": [{"Key": "primary-region", "Values": ["us-east-1"]}, {"Key": "name", "Values": ["first-secret"]}],
+    }
+    second_expected_params = {
+        "Filters": [{"Key": "primary-region", "Values": ["us-east-1"]}, {"Key": "name", "Values": ["second-secret"]}],
+    }
+    stubber.add_response(
+        "batch_get_secret_value",
+        {"SecretValues": [{"Name": "first-secret", "SecretString": "1"}], "Errors": []},
+        first_expected_params,
+    )
+    stubber.add_response(
+        "batch_get_secret_value",
+        {"SecretValues": [{"Name": "second-secret", "SecretString": "2"}], "Errors": []},
+        second_expected_params,
+    )
+    stubber.activate()
+
+    try:
+        # WHEN calling get_multiple twice with the same Filters list
+        first = provider.get_multiple(["first-secret"], Filters=caller_filters)
+        second = provider.get_multiple(["second-secret"], Filters=caller_filters)
+
+        # THEN each call sends only its own name filter and the caller's list stays untouched
+        assert first == {"first-secret": "1"}
+        assert second == {"second-secret": "2"}
+        assert caller_filters == [{"Key": "primary-region", "Values": ["us-east-1"]}]
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get_multiple_with_binary(config):
     """
     Test SecretsProvider.get_multiple() with binary secrets

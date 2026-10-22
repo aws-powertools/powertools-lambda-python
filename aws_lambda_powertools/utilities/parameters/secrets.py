@@ -152,13 +152,11 @@ class SecretsProvider(BaseProvider):
             When the parameter provider fails to retrieve secrets
         """
 
-        # Merge filters: combine names with any additional filters from sdk_options
-        filters = sdk_options.get("Filters", [])
+        # Merge filters: combine names with any additional filters from sdk_options.
+        # A new list is created on purpose: mutating the caller's list would leak
+        # a stale name filter into every subsequent call that reuses it.
         name_filter = {"Key": "name", "Values": names}
-
-        # Add name filter to existing filters
-        filters.append(name_filter)
-        sdk_options["Filters"] = filters
+        sdk_options["Filters"] = [*sdk_options.get("Filters", []), name_filter]
 
         # Remove SecretIdList if present to avoid conflicts
         sdk_options.pop("SecretIdList", None)
