@@ -1467,7 +1467,8 @@ class MiddlewareFrame:
         logger.debug("MiddlewareFrame: %s", self)
         app._push_processed_stack_frame(str(self))
 
-        return self.current_middleware(app, self.next_middleware)
+        extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
+        return self.current_middleware(app, self.next_middleware, **extra_kwargs)
 
 
 def _find_request_param_name(func: Callable) -> str | None:
@@ -1481,11 +1482,69 @@ def _find_request_param_name(func: Callable) -> str | None:
     except Exception:
         hints = {}
 
+    from aws_lambda_powertools.event_handler.depends import _unwrap_optional
+
     for param_name, annotation in hints.items():
-        if annotation is Request:
+        # Python 3.10 wraps annotations of ``= None`` parameters in Optional[...]
+        if _unwrap_optional(annotation) is Request:
             return param_name
 
     return None
+
+
+_DEPENDS_CACHE_KEY = "_dependency_cache"
+
+
+def _inspect_middleware(middleware: Callable[..., Any]) -> tuple:
+    """Inspect a middleware's signature once and cache the result on the callable.
+
+    Returns a tuple of the ``Request``-typed parameter name (or ``None``) and the
+    middleware's dependency tree. Results are cached on the callable itself, mirroring
+    how ``Route`` caches its dependant, to avoid repeated signature analysis per request.
+    """
+    from aws_lambda_powertools.event_handler.depends import build_dependency_tree
+
+    cached = getattr(middleware, "_powertools_middleware_inspection", None)
+    if cached is not None:
+        return cached
+
+    inspection = (_find_request_param_name(middleware), build_dependency_tree(middleware))
+    try:
+        middleware._powertools_middleware_inspection = inspection  # type: ignore[attr-defined]
+    except (AttributeError, TypeError):
+        pass  # callables without attribute support are re-inspected per request
+
+    return inspection
+
+
+def _resolve_extra_middleware_kwargs(app: ApiGatewayResolver, middleware: Callable[..., Any]) -> dict:
+    """Resolve extra keyword arguments for a function-based middleware.
+
+    Supports ``Request`` injection and ``Depends()`` parameters, sharing the per-request
+    dependency cache (stored in ``app.context``) with route handlers so the same
+    dependency is resolved only once across middleware and routes. Class-based
+    middleware is intentionally out of scope.
+    """
+    from aws_lambda_powertools.event_handler.depends import solve_dependencies
+
+    request_param, dependency_tree = _inspect_middleware(middleware)
+
+    kwargs: dict = {}
+    if request_param:
+        kwargs[request_param] = app.request
+
+    if dependency_tree.dependencies:
+        dependency_cache = app.context.setdefault(_DEPENDS_CACHE_KEY, {})
+        kwargs.update(
+            solve_dependencies(
+                dependant=dependency_tree,
+                request=app.request,
+                dependency_overrides=app.dependency_overrides or None,
+                dependency_cache=dependency_cache,
+            ),
+        )
+
+    return kwargs
 
 
 def _registered_api_adapter(
@@ -1535,6 +1594,7 @@ def _registered_api_adapter(
                 dependant=build_dependency_tree(route.func),
                 request=app.request,
                 dependency_overrides=app.dependency_overrides or None,
+                dependency_cache=app.context.get(_DEPENDS_CACHE_KEY),
             )
             route_args.update(dep_values)
 
