@@ -3,6 +3,7 @@ import copy
 import datetime
 import json
 import time as t
+import warnings
 from threading import Event, Lock as ThreadLock, Thread
 from unittest import mock
 
@@ -792,3 +793,50 @@ def test_redis_race_condition(lambda_context):
     p2.join()
     # Then only one handler will actually run
     assert redis_client.cache["exec_count"] == 1
+
+
+def test_cache_names_do_not_emit_deprecation_warning():
+    # GIVEN the non-deprecated Cache* names
+    from aws_lambda_powertools.utilities.idempotency.persistence.cache import CacheClientProtocol, CacheConnection
+
+    # WHEN they are used
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        CachePersistenceLayer(client=MockRedis(host="localhost", port="63005"))
+        CacheConnection(host="localhost")
+
+        class MyClient(CacheClientProtocol): ...
+
+    # THEN no DeprecationWarning is raised
+
+
+@pytest.mark.parametrize(
+    "deprecated_name, kwargs",
+    [
+        ("RedisCachePersistenceLayer", {"client": MockRedis(host="localhost", port="63005")}),
+        ("RedisConnection", {"host": "localhost"}),
+    ],
+)
+def test_redis_names_still_emit_deprecation_warning(deprecated_name, kwargs):
+    # GIVEN a deprecated Redis* name
+    from aws_lambda_powertools.utilities.idempotency.persistence import redis as redis_module
+
+    deprecated_cls = getattr(redis_module, deprecated_name)
+
+    # WHEN it is instantiated
+    # THEN a DeprecationWarning pointing to the Cache* name is raised
+    with pytest.warns(DeprecationWarning, match=f"{deprecated_name} will be removed in v4.0.0"):
+        instance = deprecated_cls(**kwargs)
+
+    # AND it is still usable wherever a Cache* object is expected
+    from aws_lambda_powertools.utilities.idempotency.persistence.cache import CacheConnection
+
+    assert isinstance(instance, (CachePersistenceLayer, CacheConnection))
+
+
+def test_redis_client_protocol_still_emits_deprecation_warning_on_subclass():
+    from aws_lambda_powertools.utilities.idempotency.persistence.redis import RedisClientProtocol
+
+    with pytest.warns(DeprecationWarning, match="RedisClientProtocol will be removed in v4.0.0"):
+
+        class MyClient(RedisClientProtocol): ...
