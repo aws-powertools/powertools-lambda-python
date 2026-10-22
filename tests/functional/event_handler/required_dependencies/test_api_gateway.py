@@ -1378,6 +1378,41 @@ def test_api_gateway_v2_raw_path():
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
+@pytest.mark.parametrize(
+    "stage, raw_path, route, expected_path",
+    [
+        pytest.param("dev", "/dev/my/path", "/my/path", "/my/path", id="named stage in raw path"),
+        pytest.param("dev", "/my/path", "/my/path", "/my/path", id="named stage not in raw path"),
+        pytest.param("$default", "/my/path", "/my/path", "/my/path", id="default stage"),
+        pytest.param("dev", "/dev", "/", "/", id="raw path equals the stage"),
+        pytest.param("dev", "/dev/", "/", "/", id="raw path equals the stage with trailing slash"),
+        pytest.param("dev", "/devices", "/devices", "/devices", id="raw path starts with the stage name"),
+        pytest.param("dev", "/dev/devices", "/devices", "/devices", id="named stage and path starting with its name"),
+    ],
+)
+def test_api_gateway_v2_stage_prefix_in_raw_path(stage, raw_path, route, expected_path):
+    # GIVEN an HTTP API resolver with a single route
+    app = APIGatewayHttpResolver()
+
+    @app.get(route)
+    def handler():
+        return {"path": app.current_event.path}
+
+    # AND a request for that stage. The execute-api endpoint puts a named stage in rawPath,
+    # while custom domain API mappings and SAM local send rawPath without it
+    event = load_event("apiGatewayProxyV2Event.json")
+    event["requestContext"]["stage"] = stage
+    event["requestContext"]["http"]["method"] = "GET"
+    event["rawPath"] = event["requestContext"]["http"]["path"] = raw_path
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the stage is stripped only when rawPath starts with it, and the route is found
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"path": expected_path}
+
+
 def test_api_gateway_request_path_equals_strip_prefix():
     # GIVEN a strip_prefix matches the request path
     app = ApiGatewayResolver(strip_prefixes=["/foo"])
