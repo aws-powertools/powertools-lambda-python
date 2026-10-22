@@ -123,7 +123,7 @@ def test_appconfig_preserves_token_and_last_value_for_poll_interval_errors(provi
             provider.get("cfg", force_fetch=True, **options)
         assert provider._next_token["cfg"] == token
         assert provider.last_returned_value["cfg"] == b"old"
-        assert provider.get("cfg", max_age=300) == b"old"
+        assert provider.get("cfg", max_age=300, **options) == b"old"
 
     assert provider.get("cfg", force_fetch=True) == b"old"
     assert provider._next_token["cfg"] == "last"
