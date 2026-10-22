@@ -428,6 +428,70 @@ def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_s
     assert record.payload_hash == ""
 
 
+@pytest.mark.parametrize("expiry_attr", ["expiration", "exp"])
+def test_get_record_reads_expiry_from_expiry_attr(expiry_attr):
+    # GIVEN a persistence layer configured with an expiry attribute name
+    redis_client = MockRedis(host="localhost", port="63005")
+    persistence_layer = RedisCachePersistenceLayer(client=redis_client, expiry_attr=expiry_attr)
+
+    # AND a completed record stored with its expiry, in the past, under that name
+    redis_client.set("test-func#abc123", json.dumps({"status": "COMPLETED", expiry_attr: 1, "data": "{}"}))
+
+    # WHEN reading the record
+    record = persistence_layer._get_record("test-func#abc123")
+
+    # THEN the expiry is read from the configured attribute
+    assert record.expiry_timestamp == 1
+    assert record.is_expired
+    assert record.get_expiration_datetime() == datetime.datetime.fromtimestamp(1)
+
+
+@pytest.mark.parametrize("expiry_attr", ["expiration", "exp"])
+def test_idempotent_function_redis_expiry_attr_round_trip(expiry_attr):
+    # GIVEN a persistence layer configured with an expiry attribute name
+    redis_client = MockRedis(host="localhost", port="63005")
+    persistence_layer = RedisCachePersistenceLayer(client=redis_client, expiry_attr=expiry_attr)
+
+    # AND a response hook that records the expiration of the stored record
+    expirations = []
+
+    def response_hook(response, data_record):
+        expirations.append(data_record.get_expiration_datetime())
+        return response
+
+    result = {"message": "Foo"}
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=IdempotencyConfig(response_hook=response_hook),
+    )
+    def record_handler(record):
+        return result
+
+    # WHEN the function runs for the first time
+    assert record_handler(record={"data": "value"}) == {"message": "Foo"}
+
+    # THEN its record is stored with the expiry under the configured attribute
+    ((key, value),) = redis_client.cache.items()
+    stored = json.loads(value)
+    assert set(stored) == {"status", "data", expiry_attr}
+
+    # WHEN the function is called again with the same payload
+    result = {"message": "Bar"}
+
+    # THEN the stored response is returned and the hook gets the stored expiration
+    assert record_handler(record={"data": "value"}) == {"message": "Foo"}
+    assert expirations == [datetime.datetime.fromtimestamp(stored[expiry_attr])]
+
+    # WHEN the stored record has expired but is still in Redis
+    stored[expiry_attr] = int(datetime.datetime.now().timestamp()) - 10
+    redis_client.cache[key] = json.dumps(stored).encode()
+
+    # THEN the function runs again instead of returning the expired response
+    assert record_handler(record={"data": "value"}) == {"message": "Bar"}
+
+
 def test_idempotent_function_and_lambda_handler_redis_basic(
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
     lambda_context,
