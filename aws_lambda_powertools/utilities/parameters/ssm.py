@@ -563,7 +563,7 @@ class SSMProvider(BaseProvider):
         """Fetch each parameter from batch that hasn't been expired"""
         cache = {}
         for name, options in batch.items():
-            cache_key = (name, options["transform"])
+            cache_key = self._build_cache_key(name=name, transform=options["transform"])
             if self.has_not_expired_in_cache(cache_key):
                 cache[name] = self.store[cache_key].value
 
@@ -663,7 +663,7 @@ class SSMProvider(BaseProvider):
                     key=name,
                 )  # type: ignore[assignment]
 
-            _cache_key = (name, transform)
+            _cache_key = self._build_cache_key(name=name, transform=transform)
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
 
             response[name] = value
