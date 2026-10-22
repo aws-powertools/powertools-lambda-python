@@ -315,10 +315,22 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     @property
     def path(self) -> str:
+        """The request path, without the stage when `rawPath` starts with it.
+
+        A named stage is part of `rawPath` when the request comes through the execute-api endpoint,
+        but not through a custom domain API mapping or SAM local.
+        """
+        raw_path = self.raw_path
         stage = self.request_context.stage
-        if stage != "$default":
-            return self.raw_path[len("/" + stage) :]
-        return self.raw_path
+        if stage == "$default":
+            return raw_path
+
+        stage_prefix = f"/{stage}"
+        if raw_path == stage_prefix:
+            return "/"
+        if raw_path.startswith(f"{stage_prefix}/"):
+            return raw_path[len(stage_prefix) :]
+        return raw_path
 
     @property
     def http_method(self) -> str:

@@ -1378,6 +1378,41 @@ def test_api_gateway_v2_raw_path():
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
 
 
+@pytest.mark.parametrize(
+    "stage, raw_path, route, expected_path",
+    [
+        pytest.param("dev", "/dev/my/path", "/my/path", "/my/path", id="named stage in raw path"),
+        pytest.param("dev", "/my/path", "/my/path", "/my/path", id="named stage not in raw path"),
+        pytest.param("$default", "/my/path", "/my/path", "/my/path", id="default stage"),
+        pytest.param("dev", "/dev", "/", "/", id="raw path equals the stage"),
+        pytest.param("dev", "/dev/", "/", "/", id="raw path equals the stage with trailing slash"),
+        pytest.param("dev", "/devices", "/devices", "/devices", id="raw path starts with the stage name"),
+        pytest.param("dev", "/dev/devices", "/devices", "/devices", id="named stage and path starting with its name"),
+    ],
+)
+def test_api_gateway_v2_stage_prefix_in_raw_path(stage, raw_path, route, expected_path):
+    # GIVEN an HTTP API resolver with a single route
+    app = APIGatewayHttpResolver()
+
+    @app.get(route)
+    def handler():
+        return {"path": app.current_event.path}
+
+    # AND a request for that stage. The execute-api endpoint puts a named stage in rawPath,
+    # while custom domain API mappings and SAM local send rawPath without it
+    event = load_event("apiGatewayProxyV2Event.json")
+    event["requestContext"]["stage"] = stage
+    event["requestContext"]["http"]["method"] = "GET"
+    event["rawPath"] = event["requestContext"]["http"]["path"] = raw_path
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the stage is stripped only when rawPath starts with it, and the route is found
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"path": expected_path}
+
+
 def test_api_gateway_request_path_equals_strip_prefix():
     # GIVEN a strip_prefix matches the request path
     app = ApiGatewayResolver(strip_prefixes=["/foo"])
@@ -1748,6 +1783,91 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_catch_all_exception_handler_does_not_hijack_not_found():
+    # GIVEN a resolver with a catch-all exception handler, as suggested in the docs
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(Exception)
+    def handle_everything(ex: Exception) -> Response:
+        return Response(status_code=500, content_type=content_types.TEXT_PLAIN, body="generic handler")
+
+    @app.get("/other")
+    def get_other():
+        return {}
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the default 404 is returned instead of the catch-all response
+    assert result["statusCode"] == 404
+    assert json.loads(result["body"]) == {"statusCode": 404, "message": "Not found"}
+
+
+def test_service_error_handler_still_handles_not_found():
+    # GIVEN a resolver with a handler for ServiceError, which NotFoundError inherits from
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ServiceError)
+    def handle_service_error(ex: ServiceError) -> Response:
+        return Response(status_code=ex.status_code, content_type=content_types.TEXT_PLAIN, body="custom format")
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the ServiceError handler keeps formatting the 404
+    assert result["statusCode"] == 404
+    assert result["body"] == "custom format"
+
+
+def test_exception_handler_none_body_on_alb_is_converted_to_empty_string():
+    # GIVEN an ALB resolver whose exception handler returns a Response with no body
+    app = ALBResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError) -> Response:
+        return Response(status_code=400, content_type=content_types.TEXT_PLAIN, body=None)
+
+    @app.get("/lambda")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(load_event("albEvent.json"), {})
+
+    # THEN the body is an empty string, as it is for a route returning the same Response, since ALB rejects null
+    assert result["statusCode"] == 400
+    assert result["body"] == ""
+
+
+@pytest.mark.parametrize(
+    "handler_result, expected_status",
+    [
+        ({"error": "Foo!"}, 200),
+        (({"error": "Foo!"}, 400), 400),
+    ],
+    ids=["dict", "tuple"],
+)
+def test_exception_handler_dict_and_tuple_returns_are_serialized(handler_result, expected_status):
+    # GIVEN an exception handler that returns a dict or a (dict, status_code) tuple, like a route can
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        return handler_result
+
+    @app.get("/my/path")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the result is serialized the same way a route return value is
+    assert result["statusCode"] == expected_status
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert json.loads(result["body"]) == {"error": "Foo!"}
 
 
 def test_exception_handler_raises_service_error(json_dump):

@@ -1482,8 +1482,11 @@ def _find_request_param_name(func: Callable) -> str | None:
     except Exception:
         hints = {}
 
+    from aws_lambda_powertools.event_handler.depends import _unwrap_optional
+
     for param_name, annotation in hints.items():
-        if annotation is Request:
+        # Python 3.10 wraps annotations of ``= None`` parameters in Optional[...]
+        if _unwrap_optional(annotation) is Request:
             return param_name
 
     return None
@@ -2762,7 +2765,7 @@ class ApiGatewayResolver(BaseRouter):
                 _headers["Access-Control-Allow-Methods"] = CORSConfig.build_allow_methods(self._cors_methods)
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -2930,7 +2933,7 @@ class ApiGatewayResolver(BaseRouter):
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
             # Customer registered 404 route? Call it.
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -3005,6 +3008,21 @@ class ApiGatewayResolver(BaseRouter):
     def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
+    def _lookup_not_found_handler(self) -> Callable | None:
+        """Find the handler for an unmatched route, ignoring catch-all handlers.
+
+        No exception was raised for an unmatched route, so a handler registered for `Exception` or `BaseException`
+        (e.g. a generic 500 handler) must not turn it into its own response. Handlers for `NotFoundError` and
+        `ServiceError` still apply.
+        """
+        handlers = self.exception_handler_manager.get_registered_handlers()
+        for cls in NotFoundError.__mro__:
+            if cls in (Exception, BaseException):
+                break
+            if cls in handlers:
+                return handlers[cls]
+        return None
+
     def _call_exception_handler(self, exp: Exception, route: Route) -> ResponseBuilder | None:
         # Depends() wraps what a dependency raised in DependencyResolutionError. Handle the original exception
         # as if the route had raised it, unless a handler is registered for DependencyResolutionError itself.
@@ -3019,7 +3037,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self.exception_handler_manager.lookup_exception_handler(type(exp))
         if handler:
             try:
-                return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
+                # Adapt the handler's return value like a route's (dict/tuple, ALB null body)
+                return self._response_builder_class(
+                    response=self._to_response(handler(exp)),  # type: ignore[arg-type]
+                    serializer=self._serializer,
+                    route=route,
+                )
             except ServiceError as service_error:
                 exp = service_error
 
@@ -3477,7 +3500,6 @@ class ALBResolver(ApiGatewayResolver):
             if handled_response is None:
                 raise
 
-            handled_response.response = cast(Response, self._to_response(handled_response.response))
             response = super()._build_response(handled_response)
             # Validate once more without invoking an exception handler recursively.
             self._validate_response_size(response)
