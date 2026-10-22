@@ -2859,13 +2859,7 @@ class ApiGatewayResolver(BaseRouter):
 
         NOTE: See #520 for context
         """
-        # Escape the literal parts of the rule so characters like "." or "+" only match themselves
-        rule_regex: str = "".join(
-            re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, part)
-            if re.fullmatch(_DYNAMIC_ROUTE_PATTERN, part)
-            else re.escape(part)
-            for part in re.split(_DYNAMIC_ROUTE_PATTERN, rule)
-        )
+        rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
     def _to_proxy_event(self, event: dict) -> BaseProxyEvent:

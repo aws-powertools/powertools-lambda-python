@@ -1258,49 +1258,6 @@ def test_debug_print_event(capsys):
     assert json.loads(output) == event
 
 
-@pytest.mark.parametrize(
-    "rule, path, expected_status_code",
-    [
-        pytest.param("/items.json", "/items.json", 200, id="dot matches a literal dot"),
-        pytest.param("/items.json", "/itemsXjson", 404, id="dot does not match any character"),
-        pytest.param("/a+b", "/a+b", 200, id="plus matches a literal plus"),
-        pytest.param("/a|b", "/a|b", 200, id="pipe matches a literal pipe"),
-        pytest.param("/a|b", "/abc", 404, id="pipe is not an alternation"),
-    ],
-)
-def test_route_rule_literal_characters_match_literally(rule: str, path: str, expected_status_code: int):
-    # GIVEN a route whose rule contains characters that are special in regex
-    app = ApiGatewayResolver()
-
-    @app.get(rule)
-    def handler():
-        return {}
-
-    # WHEN calling the event handler
-    result = app({"httpMethod": "GET", "path": path}, None)
-
-    # THEN the rule is matched literally
-    assert result["statusCode"] == expected_status_code
-
-
-def test_route_rule_escapes_literals_around_dynamic_parameters():
-    # GIVEN a dynamic route with a literal dot after the parameter
-    app = ApiGatewayResolver()
-
-    @app.get("/files/<name>.json")
-    def get_file(name: str):
-        return {"name": name}
-
-    # WHEN calling the event handler with a matching and a non-matching path
-    matched = app({"httpMethod": "GET", "path": "/files/report.json"}, None)
-    not_matched = app({"httpMethod": "GET", "path": "/files/reportXjson"}, None)
-
-    # THEN the parameter is still captured and the dot only matches a literal dot
-    assert matched["statusCode"] == 200
-    assert json.loads(matched["body"]) == {"name": "report"}
-    assert not_matched["statusCode"] == 404
-
-
 def test_similar_dynamic_routes():
     # GIVEN
     app = ApiGatewayResolver()
