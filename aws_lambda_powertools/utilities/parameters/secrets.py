@@ -164,6 +164,7 @@ class SecretsProvider(BaseProvider):
         sdk_options.pop("SecretIdList", None)
 
         secrets: dict[str, Any] = {}
+        requested_names = set(names)
         next_token = None
 
         # Handle pagination automatically
@@ -182,6 +183,8 @@ class SecretsProvider(BaseProvider):
             # Process successful secrets
             for secret in response.get("SecretValues", []):
                 secret_name = secret["Name"]
+                if secret_name not in requested_names:
+                    continue
 
                 # Extract secret value (SecretString or SecretBinary)
                 if "SecretString" in secret:
