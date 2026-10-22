@@ -151,6 +151,7 @@ class CircuitBreakerHandler:
             if self._now() >= opened_at + self.config.recovery_timeout:
                 # Recovery window elapsed: try to become the single prober.
                 if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
+                    self._reset_probe_successes()
                     self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
                     return self._call_probe()
             return self._open_response(record.to_circuit_info())
@@ -165,9 +166,22 @@ class CircuitBreakerHandler:
         if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
             logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
             if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), record.opened_at or 0):
+                self._reset_probe_successes()
                 return self._call_probe()
 
         return self._open_response(record.to_circuit_info())
+
+    def _reset_probe_successes(self) -> None:
+        """
+        Start a fresh probe success streak after this worker wins a probe election.
+
+        ``_LOCAL_SUCCESSES`` lives at module level, so a streak left over from an earlier
+        recovery window (this environment probed, then lost the lease, or another
+        environment finished that cycle) would otherwise count towards the new one and
+        close the circuit after fewer than ``success_threshold`` probes.
+        """
+        with _COUNTERS_LOCK:
+            _LOCAL_SUCCESSES[self.name] = 0
 
     def _call_closed(self) -> Any:
         """Run the protected call while the circuit is closed, tracking failures."""
