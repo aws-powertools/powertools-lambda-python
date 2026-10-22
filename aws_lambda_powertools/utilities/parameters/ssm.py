@@ -713,7 +713,7 @@ class SSMProvider(BaseProvider):
 
         for parameter, options in parameters.items():
             # NOTE: TypeDict later
-            _overrides = options or {}
+            _overrides = {**(options or {})}
             _overrides["transform"] = _overrides.get("transform") or transform
 
             # These values can be falsy (False, 0)
