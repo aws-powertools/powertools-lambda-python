@@ -67,7 +67,7 @@ def build_get_parameters_stub(
                 "Type": "String",
                 "Value": value,
                 "Version": version,
-                "Selector": f"{param}:{version}",
+                # SSM only returns "Selector" for names requested with a version or label selector
                 "SourceResult": "string",
                 "LastModifiedDate": datetime(2015, 1, 1),
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
@@ -1356,6 +1356,112 @@ def test_ssm_provider_get_parameters_by_name_does_not_mutate_input_and_honors_ne
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def build_get_parameters_selector_stub(
+    params: dict[str, Any],
+    invalid_parameters: list[str],
+) -> dict[str, list]:
+    # SSM returns the bare name in "Name" and only the selector suffix (e.g. ":prod") in "Selector".
+    # Names requested without a selector come back without "Selector".
+    parameters_out = []
+    for requested, value in params.items():
+        name, sep, suffix = requested.partition(":")
+        parameter = {
+            "Name": name,
+            "Type": "String",
+            "Value": value,
+            "Version": 3,
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{name.lstrip('/')}",
+            "DataType": "text",
+        }
+        if sep:
+            parameter["Selector"] = f":{suffix}"
+        parameters_out.append(parameter)
+
+    return {"Parameters": parameters_out, "InvalidParameters": invalid_parameters}
+
+
+@pytest.mark.parametrize("decrypt", [False, True])
+def test_ssm_provider_get_parameters_by_name_with_selector(mock_name, mock_value, config, decrypt):
+    # GIVEN parameter names with a label and a version selector
+    param_label = f"/a/{mock_name}:prod"
+    param_version = f"/b/{mock_name}:3"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {param_label: {}, param_version: {}, fail: {}}
+    expected_param_values = {param_label: mock_value, param_version: f"{mock_value}-v3"}
+    expected_stub_response = build_get_parameters_selector_stub(params=expected_param_values, invalid_parameters=[fail])
+    expected_stub_params: dict[str, Any] = {"Names": list(all_params.keys())}
+    if decrypt:
+        expected_stub_params["WithDecryption"] = True
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, decrypt=decrypt, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN values should be keyed by the requested names, including the selector
+    assert ret == {**expected_param_values, "_errors": [fail]}
+
+
+def test_ssm_provider_get_parameters_by_name_with_selector_and_bare_name(mock_name, config):
+    # GIVEN the same parameter requested by label, by version and without a selector
+    param = f"/p/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {f"{param}:prod": {}, f"{param}:1": {}, param: {}, fail: {}}
+    expected_param_values = {f"{param}:prod": "label", f"{param}:1": "version-1", param: "latest"}
+    expected_stub_response = build_get_parameters_selector_stub(params=expected_param_values, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, {"Names": list(all_params.keys())})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN each requested name keeps its own value, and the bare name gets the latest version
+    assert ret == {**expected_param_values, "_errors": [fail]}
+
+
+def test_ssm_provider_get_parameters_by_name_with_selector_cache(mock_name, mock_value, config):
+    # GIVEN a parameter name with a label selector
+    param_label = f"/a/{mock_name}:prod"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    expected_stub_response = build_get_parameters_selector_stub(
+        params={param_label: mock_value},
+        invalid_parameters=[fail],
+    )
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, {"Names": [param_label, fail]})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called twice for the selector
+    try:
+        provider.get_parameters_by_name(parameters={param_label: {}, fail: {}}, raise_on_error=False)
+        ret = provider.get_parameters_by_name(parameters={param_label: {}})
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN the second call should be served from the cache under the requested name
+    assert ret == {param_label: mock_value}
 
 
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
