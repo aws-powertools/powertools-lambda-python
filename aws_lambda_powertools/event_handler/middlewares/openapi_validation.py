@@ -4,6 +4,7 @@ import base64
 import dataclasses
 import json
 import logging
+import re
 import warnings
 from typing import TYPE_CHECKING, Any, Union, cast, get_args, get_origin
 from urllib.parse import parse_qs, unquote
@@ -123,6 +124,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             (body_values, body_errors) = _request_body_to_args(
                 required_params=route.dependant.body_params,
                 received_body=self._get_body(app),
+                is_form_body=_is_form_content_type(app.current_event.headers.get("content-type", "")),
             )
             values.update(body_values)
             errors.extend(body_errors)
@@ -211,12 +213,23 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
 
     def _parse_multipart_data(self, app: EventHandlerInstance, content_type: str) -> dict[str, Any]:
         """Parse multipart/form-data from the request body (file uploads)."""
-        try:
-            # Extract the boundary from the content-type header
-            boundary = _extract_multipart_boundary(content_type)
-            if not boundary:
-                raise ValueError("Missing boundary in multipart/form-data content-type header")
+        # Extract the boundary from the content-type header
+        boundary = _extract_multipart_boundary(content_type)
+        if not boundary:
+            raise RequestUnsupportedContentType(
+                "Missing boundary in multipart/form-data content-type header",
+                errors=[
+                    {
+                        "type": "missing_boundary",
+                        "loc": ("body",),
+                        "msg": "Missing boundary in multipart/form-data content-type header",
+                        "input": {},
+                        "ctx": {},
+                    },
+                ],
+            )
 
+        try:
             # Get raw body bytes
             raw_body = app.current_event.body or ""
             if app.current_event.is_base64_encoded:
@@ -231,14 +244,10 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
                     "api-gateway-payload-encodings.html",
                     stacklevel=2,
                 )
-                # Use latin-1 to preserve all byte values (0-255) since the body
-                # may contain raw binary data that isn't valid UTF-8
-                body_bytes = raw_body.encode("latin-1")
+                body_bytes = _encode_non_base64_body(raw_body)
 
             return _parse_multipart_body(body_bytes, boundary)
 
-        except ValueError:
-            raise
         except Exception as e:
             raise RequestValidationError(
                 [
@@ -436,9 +445,13 @@ def _request_params_to_args(
 def _request_body_to_args(
     required_params: list[ModelField],
     received_body: dict[str, Any] | None,
+    is_form_body: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """
     Convert the request body to a dictionary of values using validation, and returns a list of errors.
+
+    Form and multipart parsers collect values into lists, so single values are only unwrapped
+    from lists when ``is_form_body`` is set. JSON lists are passed through to validation as-is.
     """
     values: dict[str, Any] = {}
     errors: list[dict[str, Any]] = []
@@ -458,7 +471,7 @@ def _request_body_to_args(
             _handle_missing_field_value(field, values, errors, loc)
             continue
 
-        value = _normalize_field_value(value=value, field_info=field.field_info)
+        value = _normalize_field_value(value=value, field_info=field.field_info, unwrap_lists=is_form_body)
 
         # UploadFile objects bypass Pydantic validation — they're already constructed
         if isinstance(value, UploadFile):
@@ -538,7 +551,7 @@ def _is_or_contains_sequence(annotation: Any) -> bool:
     return False
 
 
-def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
+def _normalize_field_value(value: Any, field_info: FieldInfo, unwrap_lists: bool = True) -> Any:
     """Normalize field value, converting lists to single values for non-sequence fields."""
     # When annotation is bytes but value is UploadFile, extract raw content
     if isinstance(value, UploadFile) and field_info.annotation is bytes:
@@ -546,7 +559,7 @@ def _normalize_field_value(value: Any, field_info: FieldInfo) -> Any:
 
     if _is_or_contains_sequence(field_info.annotation):
         return value
-    elif isinstance(value, list) and value:
+    elif unwrap_lists and isinstance(value, list) and value:
         return value[0]
 
     return value
@@ -758,7 +771,7 @@ def _parse_multipart_body(body: bytes, boundary: str) -> dict[str, Any]:
         if header_end == -1:
             continue
 
-        header_section = chunk[:header_end].decode("utf-8")
+        header_section = _decode_text(chunk[:header_end])
         body_section = chunk[header_end + 4 :]
 
         # Parse Content-Disposition to get the field name and optional filename
@@ -782,7 +795,7 @@ def _parse_multipart_body(body: bytes, boundary: str) -> dict[str, Any]:
         if filename is not None:
             value: Any = UploadFile(content=body_section, filename=filename, content_type=content_type_header)
         else:
-            value = body_section.decode("utf-8")
+            value = _decode_text(body_section)
 
         # Collect multiple values for same field name into a list
         if field_name in result:
@@ -799,12 +812,44 @@ def _parse_multipart_body(body: bytes, boundary: str) -> dict[str, Any]:
 
 def _extract_header_param(header_line: str, param_name: str) -> str | None:
     """Extract a parameter value from a header line (e.g., name="file" from Content-Disposition)."""
-    search = f'{param_name}="'
-    idx = header_line.find(search)
-    if idx == -1:
+    # Match the parameter only at the start of a "; "-separated segment, so that
+    # looking up "name" does not match inside "filename"
+    match = re.search(rf'(?:^|[;:])\s*{re.escape(param_name)}="([^"]*)"', header_line, re.IGNORECASE)
+    if match is None:
         return None
-    start = idx + len(search)
-    end = header_line.find('"', start)
-    if end == -1:
-        return None
-    return header_line[start:end]
+    return match.group(1)
+
+
+def _is_form_content_type(content_type: str) -> bool:
+    """Whether the content type is parsed into list values (URL-encoded form or multipart)."""
+    content_type = content_type.strip()
+    return content_type.startswith((APPLICATION_FORM_CONTENT_TYPE, MULTIPART_FORM_DATA_CONTENT_TYPE))
+
+
+def _encode_non_base64_body(raw_body: str) -> bytes:
+    """Convert a multipart body that was not base64-encoded back to bytes."""
+    try:
+        # Use latin-1 to preserve all byte values (0-255) since the body
+        # may contain raw binary data that isn't valid UTF-8
+        return raw_body.encode("latin-1")
+    except UnicodeEncodeError:
+        # Characters outside latin-1 mean the body was decoded as UTF-8 text. Without binary media
+        # types, API Gateway replaces invalid bytes with U+FFFD in that decoding, so a binary upload
+        # can't be restored: fail instead of passing on a corrupted file.
+        if "�" in raw_body:
+            raise ValueError(
+                "Multipart body contains bytes that were replaced during UTF-8 decoding. "
+                "If using API Gateway REST API (v1), configure Binary Media Types "
+                "to include 'multipart/form-data'.",
+            ) from None
+        return raw_body.encode("utf-8")
+
+
+def _decode_text(data: bytes) -> str:
+    """Decode multipart headers and text fields, falling back to latin-1 for non UTF-8 bytes."""
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        # A non-base64 body encoded back with latin-1 turns UTF-8 text such as "café"
+        # into single bytes that are not valid UTF-8; latin-1 restores the original text
+        return data.decode("latin-1")

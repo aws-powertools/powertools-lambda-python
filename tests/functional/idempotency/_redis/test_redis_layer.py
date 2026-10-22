@@ -3,6 +3,7 @@ import copy
 import datetime
 import json
 import time as t
+import warnings
 from threading import Event, Lock as ThreadLock, Thread
 from unittest import mock
 
@@ -428,6 +429,70 @@ def test_item_to_datarecord_conversion_missing_optional_attributes(persistence_s
     assert record.payload_hash == ""
 
 
+@pytest.mark.parametrize("expiry_attr", ["expiration", "exp"])
+def test_get_record_reads_expiry_from_expiry_attr(expiry_attr):
+    # GIVEN a persistence layer configured with an expiry attribute name
+    redis_client = MockRedis(host="localhost", port="63005")
+    persistence_layer = RedisCachePersistenceLayer(client=redis_client, expiry_attr=expiry_attr)
+
+    # AND a completed record stored with its expiry, in the past, under that name
+    redis_client.set("test-func#abc123", json.dumps({"status": "COMPLETED", expiry_attr: 1, "data": "{}"}))
+
+    # WHEN reading the record
+    record = persistence_layer._get_record("test-func#abc123")
+
+    # THEN the expiry is read from the configured attribute
+    assert record.expiry_timestamp == 1
+    assert record.is_expired
+    assert record.get_expiration_datetime() == datetime.datetime.fromtimestamp(1)
+
+
+@pytest.mark.parametrize("expiry_attr", ["expiration", "exp"])
+def test_idempotent_function_redis_expiry_attr_round_trip(expiry_attr):
+    # GIVEN a persistence layer configured with an expiry attribute name
+    redis_client = MockRedis(host="localhost", port="63005")
+    persistence_layer = RedisCachePersistenceLayer(client=redis_client, expiry_attr=expiry_attr)
+
+    # AND a response hook that records the expiration of the stored record
+    expirations = []
+
+    def response_hook(response, data_record):
+        expirations.append(data_record.get_expiration_datetime())
+        return response
+
+    result = {"message": "Foo"}
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=IdempotencyConfig(response_hook=response_hook),
+    )
+    def record_handler(record):
+        return result
+
+    # WHEN the function runs for the first time
+    assert record_handler(record={"data": "value"}) == {"message": "Foo"}
+
+    # THEN its record is stored with the expiry under the configured attribute
+    ((key, value),) = redis_client.cache.items()
+    stored = json.loads(value)
+    assert set(stored) == {"status", "data", expiry_attr}
+
+    # WHEN the function is called again with the same payload
+    result = {"message": "Bar"}
+
+    # THEN the stored response is returned and the hook gets the stored expiration
+    assert record_handler(record={"data": "value"}) == {"message": "Foo"}
+    assert expirations == [datetime.datetime.fromtimestamp(stored[expiry_attr])]
+
+    # WHEN the stored record has expired but is still in Redis
+    stored[expiry_attr] = int(datetime.datetime.now().timestamp()) - 10
+    redis_client.cache[key] = json.dumps(stored).encode()
+
+    # THEN the function runs again instead of returning the expired response
+    assert record_handler(record={"data": "value"}) == {"message": "Bar"}
+
+
 def test_idempotent_function_and_lambda_handler_redis_basic(
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
     lambda_context,
@@ -728,3 +793,50 @@ def test_redis_race_condition(lambda_context):
     p2.join()
     # Then only one handler will actually run
     assert redis_client.cache["exec_count"] == 1
+
+
+def test_cache_names_do_not_emit_deprecation_warning():
+    # GIVEN the non-deprecated Cache* names
+    from aws_lambda_powertools.utilities.idempotency.persistence.cache import CacheClientProtocol, CacheConnection
+
+    # WHEN they are used
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        CachePersistenceLayer(client=MockRedis(host="localhost", port="63005"))
+        CacheConnection(host="localhost")
+
+        class MyClient(CacheClientProtocol): ...
+
+    # THEN no DeprecationWarning is raised
+
+
+@pytest.mark.parametrize(
+    "deprecated_name, kwargs",
+    [
+        ("RedisCachePersistenceLayer", {"client": MockRedis(host="localhost", port="63005")}),
+        ("RedisConnection", {"host": "localhost"}),
+    ],
+)
+def test_redis_names_still_emit_deprecation_warning(deprecated_name, kwargs):
+    # GIVEN a deprecated Redis* name
+    from aws_lambda_powertools.utilities.idempotency.persistence import redis as redis_module
+
+    deprecated_cls = getattr(redis_module, deprecated_name)
+
+    # WHEN it is instantiated
+    # THEN a DeprecationWarning pointing to the Cache* name is raised
+    with pytest.warns(DeprecationWarning, match=f"{deprecated_name} will be removed in v4.0.0"):
+        instance = deprecated_cls(**kwargs)
+
+    # AND it is still usable wherever a Cache* object is expected
+    from aws_lambda_powertools.utilities.idempotency.persistence.cache import CacheConnection
+
+    assert isinstance(instance, (CachePersistenceLayer, CacheConnection))
+
+
+def test_redis_client_protocol_still_emits_deprecation_warning_on_subclass():
+    from aws_lambda_powertools.utilities.idempotency.persistence.redis import RedisClientProtocol
+
+    with pytest.warns(DeprecationWarning, match="RedisClientProtocol will be removed in v4.0.0"):
+
+        class MyClient(RedisClientProtocol): ...

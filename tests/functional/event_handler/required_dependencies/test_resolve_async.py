@@ -185,6 +185,22 @@ class TestResolveAsyncNotFound:
         assert response["statusCode"] == 404
         assert response["body"] == '{"error": "custom 404"}'
 
+    def test_catch_all_exception_handler_does_not_hijack_not_found(self):
+        # GIVEN a catch-all exception handler
+        app = APIGatewayRestResolver()
+
+        @app.exception_handler(Exception)
+        def handle_everything(exc):
+            return Response(500, content_types.TEXT_PLAIN, "generic handler")
+
+        # WHEN resolving with no matching route
+        _setup_app(app, API_REST_EVENT)
+        result = asyncio.run(app._resolve_async())
+
+        # THEN the default 404 is returned
+        response = result.build(app.current_event, app._cors)
+        assert response["statusCode"] == 404
+
     def test_cors_preflight_returns_204(self):
         # GIVEN a resolver with CORS enabled
         app = APIGatewayRestResolver(cors=CORSConfig())
