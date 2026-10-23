@@ -413,12 +413,17 @@ class SecretsProvider(BaseProvider):
 
         try:
             logger.debug(f"Attempting to update secret {name}")
-            return self._update_secret(name=name, **sdk_options)
+            response = self._update_secret(name=name, **sdk_options)
         except self.client.exceptions.ResourceNotFoundException:
             logger.debug(f"Secret {name} doesn't exist, creating a new one")
-            return self._create_secret(name=name, **sdk_options)
+            response = self._create_secret(name=name, **sdk_options)
         except Exception as exc:
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
+
+        # Remove any cached value for this secret so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
 
 @overload
