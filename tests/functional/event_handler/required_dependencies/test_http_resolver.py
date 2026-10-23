@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import inspect
 import json
 from typing import Any
 
@@ -10,6 +12,7 @@ import pytest
 
 from aws_lambda_powertools.event_handler import HttpResolverLocal, Response
 from aws_lambda_powertools.event_handler.http_resolver import MockLambdaContext
+from tests.functional.utils import load_event
 
 # =============================================================================
 # ASGI Test Helpers
@@ -1454,3 +1457,86 @@ async def test_cors_disallowed_header_not_in_allow_headers():
     assert "X-Not-Allowed" not in allow_headers_value
     # AND the explicitly allowed header IS present
     assert "X-Custom-Allowed" in allow_headers_value
+
+
+# =============================================================================
+# Lambda Handler Tests
+# =============================================================================
+
+
+def test_app_as_lambda_handler():
+    # GIVEN an app used directly as the Lambda handler (handler = app)
+    app = HttpResolverLocal()
+
+    @app.get("/my/path")
+    def get_path():
+        return {"ok": True}
+
+    # WHEN Lambda invokes it with (event, context)
+    result = app(load_event("apiGatewayProxyEvent.json"), MockLambdaContext())
+
+    # THEN it resolves like app.resolve()
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"ok": True}
+
+
+def test_app_is_detected_as_asgi3_application():
+    # GIVEN an app that is also callable as a Lambda handler
+    app = HttpResolverLocal()
+
+    # THEN ASGI servers still detect it as an ASGI3 app
+    assert asyncio.iscoroutinefunction(app.__call__)
+    assert inspect.iscoroutinefunction(app.__call__)
+
+
+@pytest.mark.parametrize(
+    "event_file,method,path",
+    [
+        ("apiGatewayProxyV2Event.json", "POST", "/my/path"),
+        ("lambdaFunctionUrlEvent.json", "GET", "/"),
+    ],
+)
+def test_resolve_v2_payload_events(event_file: str, method: str, path: str):
+    # GIVEN an app with a route matching an HTTP API v2 or Function URL event
+    app = HttpResolverLocal()
+
+    @app.route(path, method=method)
+    def handler():
+        return {"ok": True}
+
+    # WHEN resolving the v2-shaped event
+    result = app.resolve(load_event(event_file), MockLambdaContext())
+
+    # THEN it is mapped to the matching event contract and resolved
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"ok": True}
+
+
+@pytest.mark.asyncio
+async def test_asgi_binary_request_body():
+    # GIVEN an app that echoes the raw request body back
+    app = HttpResolverLocal()
+    binary_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00"  # not valid UTF-8
+
+    @app.post("/upload")
+    def upload():
+        assert app.current_event.is_base64_encoded
+        return {"size": len(base64.b64decode(app.current_event.body))}
+
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/upload",
+        "query_string": b"",
+        "headers": [(b"content-type", b"application/octet-stream")],
+    }
+
+    receive = make_asgi_receive(binary_data)
+    send, captured = make_asgi_send()
+
+    # WHEN a non-UTF-8 body is sent via ASGI
+    await app(scope, receive, send)
+
+    # THEN the body is base64-encoded instead of failing to decode
+    assert captured["status_code"] == 200
+    assert json.loads(captured["body"]) == {"size": len(binary_data)}
