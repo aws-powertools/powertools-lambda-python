@@ -422,6 +422,10 @@ class DataMasking:
         Returns:
             dict: The masked data dictionary
         """
+        if isinstance(data, str):
+            # Same as `fields`: JSON strings are parsed so path expressions can be resolved
+            data = self.json_deserializer(data)
+
         result = deepcopy(data)
 
         for path, rule in masking_rules.items():
