@@ -242,7 +242,10 @@ def test_native_repeated_parameters_keep_existing_behavior(resolver, location, m
 
     result = app.resolve(event, {})
 
-    if model:
+    if location is Header:
+        assert result["statusCode"] == 200
+        assert json.loads(result["body"]) == {"search": "first,second"}
+    elif model:
         assert result["statusCode"] == 200
         assert json.loads(result["body"]) == {"search": "first"}
     else:
