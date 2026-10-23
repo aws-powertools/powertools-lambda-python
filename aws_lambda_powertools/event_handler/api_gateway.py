@@ -1467,7 +1467,8 @@ class MiddlewareFrame:
         logger.debug("MiddlewareFrame: %s", self)
         app._push_processed_stack_frame(str(self))
 
-        return self.current_middleware(app, self.next_middleware)
+        extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
+        return self.current_middleware(app, self.next_middleware, **extra_kwargs)
 
 
 def _find_request_param_name(func: Callable) -> str | None:
@@ -1481,11 +1482,69 @@ def _find_request_param_name(func: Callable) -> str | None:
     except Exception:
         hints = {}
 
+    from aws_lambda_powertools.event_handler.depends import _unwrap_optional
+
     for param_name, annotation in hints.items():
-        if annotation is Request:
+        # Python 3.10 wraps annotations of ``= None`` parameters in Optional[...]
+        if _unwrap_optional(annotation) is Request:
             return param_name
 
     return None
+
+
+_DEPENDS_CACHE_KEY = "_dependency_cache"
+
+
+def _inspect_middleware(middleware: Callable[..., Any]) -> tuple:
+    """Inspect a middleware's signature once and cache the result on the callable.
+
+    Returns a tuple of the ``Request``-typed parameter name (or ``None``) and the
+    middleware's dependency tree. Results are cached on the callable itself, mirroring
+    how ``Route`` caches its dependant, to avoid repeated signature analysis per request.
+    """
+    from aws_lambda_powertools.event_handler.depends import build_dependency_tree
+
+    cached = getattr(middleware, "_powertools_middleware_inspection", None)
+    if cached is not None:
+        return cached
+
+    inspection = (_find_request_param_name(middleware), build_dependency_tree(middleware))
+    try:
+        middleware._powertools_middleware_inspection = inspection  # type: ignore[attr-defined]
+    except (AttributeError, TypeError):
+        pass  # callables without attribute support are re-inspected per request
+
+    return inspection
+
+
+def _resolve_extra_middleware_kwargs(app: ApiGatewayResolver, middleware: Callable[..., Any]) -> dict:
+    """Resolve extra keyword arguments for a function-based middleware.
+
+    Supports ``Request`` injection and ``Depends()`` parameters, sharing the per-request
+    dependency cache (stored in ``app.context``) with route handlers so the same
+    dependency is resolved only once across middleware and routes. Class-based
+    middleware is intentionally out of scope.
+    """
+    from aws_lambda_powertools.event_handler.depends import solve_dependencies
+
+    request_param, dependency_tree = _inspect_middleware(middleware)
+
+    kwargs: dict = {}
+    if request_param:
+        kwargs[request_param] = app.request
+
+    if dependency_tree.dependencies:
+        dependency_cache = app.context.setdefault(_DEPENDS_CACHE_KEY, {})
+        kwargs.update(
+            solve_dependencies(
+                dependant=dependency_tree,
+                request=app.request,
+                dependency_overrides=app.dependency_overrides or None,
+                dependency_cache=dependency_cache,
+            ),
+        )
+
+    return kwargs
 
 
 def _registered_api_adapter(
@@ -1535,6 +1594,7 @@ def _registered_api_adapter(
                 dependant=build_dependency_tree(route.func),
                 request=app.request,
                 dependency_overrides=app.dependency_overrides or None,
+                dependency_cache=app.context.get(_DEPENDS_CACHE_KEY),
             )
             route_args.update(dep_values)
 
@@ -2705,7 +2765,7 @@ class ApiGatewayResolver(BaseRouter):
                 _headers["Access-Control-Allow-Methods"] = CORSConfig.build_allow_methods(self._cors_methods)
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -2873,7 +2933,7 @@ class ApiGatewayResolver(BaseRouter):
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
             # Customer registered 404 route? Call it.
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -2948,6 +3008,21 @@ class ApiGatewayResolver(BaseRouter):
     def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
+    def _lookup_not_found_handler(self) -> Callable | None:
+        """Find the handler for an unmatched route, ignoring catch-all handlers.
+
+        No exception was raised for an unmatched route, so a handler registered for `Exception` or `BaseException`
+        (e.g. a generic 500 handler) must not turn it into its own response. Handlers for `NotFoundError` and
+        `ServiceError` still apply.
+        """
+        handlers = self.exception_handler_manager.get_registered_handlers()
+        for cls in NotFoundError.__mro__:
+            if cls in (Exception, BaseException):
+                break
+            if cls in handlers:
+                return handlers[cls]
+        return None
+
     def _call_exception_handler(self, exp: Exception, route: Route) -> ResponseBuilder | None:
         # Depends() wraps what a dependency raised in DependencyResolutionError. Handle the original exception
         # as if the route had raised it, unless a handler is registered for DependencyResolutionError itself.
@@ -2962,7 +3037,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self.exception_handler_manager.lookup_exception_handler(type(exp))
         if handler:
             try:
-                return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
+                # Adapt the handler's return value like a route's (dict/tuple, ALB null body)
+                return self._response_builder_class(
+                    response=self._to_response(handler(exp)),  # type: ignore[arg-type]
+                    serializer=self._serializer,
+                    route=route,
+                )
             except ServiceError as service_error:
                 exp = service_error
 
@@ -3420,7 +3500,6 @@ class ALBResolver(ApiGatewayResolver):
             if handled_response is None:
                 raise
 
-            handled_response.response = cast(Response, self._to_response(handled_response.response))
             response = super()._build_response(handled_response)
             # Validate once more without invoking an exception handler recursively.
             self._validate_response_size(response)

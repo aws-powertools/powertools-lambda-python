@@ -442,6 +442,60 @@ def test_stale_local_failures_reset_on_external_close(store, now):
     assert base_module._LOCAL_FAILURES["c"] == 1  # fresh count, not 3
 
 
+def test_new_probe_election_does_not_reuse_successes_from_an_earlier_recovery_window(store, now):
+    """A probe success streak left from an earlier recovery window must not close a new one early."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "ok"
+
+    # This environment wins the probe election and gets 2 of the 3 successes it needs.
+    call()
+    call()
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 2
+
+    # Simulate: this environment goes idle, its probe lease lapses, another environment
+    # takes over, its probe fails and the circuit reopens. That environment cannot reset
+    # this one's module-level counter.
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=0, opened_at=now - 60)
+
+    # The next recovery window is won by this environment again.
+    call()
+
+    # One success must not close the circuit: the new window needs its own 3 in a row.
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 1
+    call()
+    call()
+    assert store.db["c"].state == CircuitState.CLOSED
+
+
+def test_probe_lease_takeover_starts_a_fresh_success_streak(store, now):
+    """Taking over an expired probe lease must not inherit the previous owner's streak."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 200,
+        half_open_owner="recycled-owner",
+        probe_lease_expiry=now - 10,  # expired
+    )
+    # The previous owner shared this environment and left 2 successes behind.
+    base_module._LOCAL_SUCCESSES["c"] = 2
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "ok"
+
+    call()
+
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 1
+
+
 def test_store_write_failure_does_not_mask_downstream_result(store, now):
     """Bug 2: if save_closed() fails, the successful probe result must still be returned."""
     config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30, success_threshold=1, local_cache_max_age=0)

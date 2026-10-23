@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import inspect
 import json
 import os
@@ -142,7 +142,7 @@ def send_notification():
         return
 
     event = {
-        "Time": datetime.datetime.now(),
+        "Time": dt.datetime.now(),
         "Source": "powertools.layer.canary",
         "EventBusName": event_bus_arn,
         "DetailType": "deployment",

@@ -6,6 +6,7 @@ Base for Parameter providers
 
 from __future__ import annotations
 
+import json
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable
@@ -98,7 +99,7 @@ class BaseProvider(ABC):
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
         value: str | bytes | dict | None = None
-        key = self._build_cache_key(name=name, transform=transform)
+        key = self._build_cache_key(name=name, transform=transform, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -172,7 +173,7 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-        key = self._build_cache_key(name=path, transform=transform, is_nested=True)
+        key = self._build_cache_key(name=path, transform=transform, is_nested=True, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -219,6 +220,7 @@ class BaseProvider(ABC):
         name: str,
         transform: TransformOptions = None,
         is_nested: bool = False,
+        sdk_options: dict[str, Any] | None = None,
     ):
         """Creates cache key for parameters
 
@@ -230,13 +232,20 @@ class BaseProvider(ABC):
             Transform method used, by default None
         is_nested : bool, optional
             Whether it's a single parameter or multiple nested parameters, by default False
+        sdk_options : dict, optional
+            Options passed to the underlying API call (e.g. decrypt, recursive, VersionStage).
+            They change the returned value, so calls with different options must not share a cache entry.
 
         Returns
         -------
-        tuple[str, TransformOptions, bool]
+        tuple
             Cache key
         """
-        return (name, transform, is_nested)
+        if not sdk_options:
+            return (name, transform, is_nested)
+
+        # sdk_options may hold unhashable values (dicts, lists), so serialize them deterministically
+        return (name, transform, is_nested, json.dumps(sdk_options, sort_keys=True, default=str))
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:
