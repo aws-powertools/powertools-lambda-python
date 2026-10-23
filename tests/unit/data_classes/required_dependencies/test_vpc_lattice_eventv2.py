@@ -73,3 +73,27 @@ def test_vpc_lattice_v2_event_path_excludes_query_string(event_path, expected_pa
 
     assert parsed_event.path == expected_path
     assert parsed_event.raw_event["path"] == event_path
+
+
+def test_vpc_lattice_v2_event_x509_identity():
+    # GIVEN a VPC Lattice v2 event authenticated with IAM Roles Anywhere
+    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event["requestContext"]["identity"].update(
+        {
+            "x509IssuerOu": "IT Department",
+            "x509SanDns": "example.com",
+            "x509SanNameCn": "example-name",
+            "x509SanUri": "https://example.com",
+            "x509SubjectCn": "example-subject",
+        },
+    )
+
+    # WHEN parsing the event
+    identity = VPCLatticeEventV2(raw_event).request_context.identity
+
+    # THEN all x509 fields are read from the event
+    assert identity.x509_issuer_ou == "IT Department"
+    assert identity.x509_san_dns == "example.com"
+    assert identity.x509_san_name_cn == "example-name"
+    assert identity.x509_san_uri == "https://example.com"
+    assert identity.x509_subject_cn == "example-subject"
