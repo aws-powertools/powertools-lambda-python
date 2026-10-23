@@ -27,7 +27,7 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
     RequestValidationError,
     ResponseValidationError,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
+from aws_lambda_powertools.event_handler.openapi.params import Param, ParamTypes, UploadFile
 from aws_lambda_powertools.event_handler.openapi.types import UnionType
 from aws_lambda_powertools.utilities.data_classes.alb_event import ALBEvent
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
@@ -430,6 +430,11 @@ def _request_params_to_args(
 
         loc = (field_info.in_.value, field.alias)
         value = received_params.get(field.alias)
+
+        # Route args are keyed by the path-template placeholder (the Python argument
+        # name), so an explicit Path alias must not make the param unsatisfiable.
+        if value is None and field_info.in_ == ParamTypes.path and field.name in received_params:
+            value = received_params[field.name]
 
         # If we don't have a value, see if it's required or has a default
         if value is None:

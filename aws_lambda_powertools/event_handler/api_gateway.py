@@ -1866,6 +1866,10 @@ class ApiGatewayResolver(BaseRouter):
         if not isinstance(openapi_extensions, dict):
             openapi_extensions = {}
 
+        for extension_key in openapi_extensions:
+            if not str(extension_key).startswith("x-"):
+                raise SchemaValidationError("An OpenAPI extension key must start with x-")
+
         output: dict[str, Any] = {
             "openapi": openapi_version,
             "info": info,
