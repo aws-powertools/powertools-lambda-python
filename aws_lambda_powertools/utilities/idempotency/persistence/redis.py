@@ -492,6 +492,10 @@ class CachePersistenceLayer(BasePersistenceLayer):
                 self.expiry_attr: data_record.expiry_timestamp,
             },
         }
+
+        if self.payload_validation_enabled:
+            item["mapping"][self.validation_key_attr] = data_record.payload_hash
+
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         encoded_item = self._json_serializer(item["mapping"])
         ttl = self._get_expiry_second(data_record.expiry_timestamp)
