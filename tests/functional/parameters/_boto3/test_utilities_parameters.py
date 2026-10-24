@@ -1238,6 +1238,57 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
         stubber.deactivate()
 
 
+@pytest.mark.parametrize("decrypt", [False, True])
+@pytest.mark.parametrize("error_code", ["ThrottlingException", "InvalidKeyId", "InternalServerError"])
+def test_ssm_provider_get_parameters_by_name_wraps_client_error(mock_name, config, error_code, decrypt):
+    # GIVEN the GetParameters call fails with an SDK error
+    param = f"/{mock_name}"
+    expected_params = {"Names": [param], "WithDecryption": True} if decrypt else {"Names": [param]}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", error_code, expected_params=expected_params)
+    stubber.activate()
+
+    # WHEN fail-fast is enabled in get_parameters_by_name
+    # THEN the SDK error should be wrapped in GetParameterError
+    try:
+        with pytest.raises(parameters.exceptions.GetParameterError, match=error_code):
+            provider.get_parameters_by_name(parameters={param: {}}, decrypt=decrypt)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_client_error(mock_name, mock_value, config):
+    # GIVEN 11 parameters, fetched in two GetParameters chunks
+    # the first chunk has one invalid parameter and the second chunk is throttled
+    names = [f"/{mock_name}/{i}" for i in range(11)]
+    first_chunk = dict.fromkeys(names[:10], mock_value)
+    invalid, throttled = names[9], names[10]
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters",
+        build_get_parameters_stub(params=first_chunk, invalid_parameters=[invalid]),
+        {"Names": names[:10]},
+    )
+    stubber.add_client_error("get_parameters", "ThrottlingException", expected_params={"Names": [throttled]})
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    try:
+        ret = provider.get_parameters_by_name(parameters={name: {} for name in names}, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        # THEN both failures should be reported under `_errors` key and the successful values kept
+        assert ret["_errors"] == [invalid, throttled]
+        assert all(ret[name] == mock_value for name in names[:9])
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
     mock_value,
     mock_version,
