@@ -1841,6 +1841,7 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
+        from aws_lambda_powertools.event_handler.openapi.schema_generator import _validate_openapi_extension_keys
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1863,9 +1864,7 @@ class ApiGatewayResolver(BaseRouter):
         if not isinstance(openapi_extensions, dict):
             openapi_extensions = {}
 
-        for extension_key in openapi_extensions:
-            if not str(extension_key).startswith("x-"):
-                raise SchemaValidationError("An OpenAPI extension key must start with x-")
+        _validate_openapi_extension_keys(openapi_extensions)
 
         output: dict[str, Any] = {
             "openapi": openapi_version,
