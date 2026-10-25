@@ -237,13 +237,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         # by default, those migrating from std logging will use time format codes
         # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
         if self.use_datetime_directive and datefmt:
-            # record.msecs are microseconds, divide by 1000 to get milliseconds
-            timestamp = record.created + record.msecs / 1000
-
+            # record.created already carries the sub-second part, so it is used as is
             if self.utc:
-                dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                dt = datetime.fromtimestamp(record.created, tz=timezone.utc)
             else:
-                dt = datetime.fromtimestamp(timestamp).astimezone()
+                dt = datetime.fromtimestamp(record.created).astimezone()
 
             custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
             return dt.strftime(custom_fmt)
