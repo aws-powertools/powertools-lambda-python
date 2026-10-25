@@ -1540,3 +1540,40 @@ async def test_asgi_binary_request_body():
     # THEN the body is base64-encoded instead of failing to decode
     assert captured["status_code"] == 200
     assert json.loads(captured["body"]) == {"size": len(binary_data)}
+
+
+def test_lambda_handler_rest_event_uses_rest_response_shape():
+    # GIVEN an HttpResolver used directly as the Lambda handler behind a REST API
+    app = HttpResolverLocal()
+
+    @app.get("/my/path")
+    def handler():
+        return {"ok": True}
+
+    # WHEN a REST API (v1) event is resolved
+    result = app(load_event("apiGatewayProxyEvent.json"), {})
+
+    # THEN the response uses the v1 shape; REST API returns 502 when a `cookies` key is present
+    assert result["statusCode"] == 200
+    assert "multiValueHeaders" in result
+    assert "cookies" not in result
+
+
+def test_lambda_handler_http_api_event_uses_v2_response_shape():
+    # GIVEN an HttpResolver used directly as the Lambda handler behind an HTTP API
+    app = HttpResolverLocal()
+    event = load_event("apiGatewayProxyV2Event.json")
+    event["rawPath"] = event["requestContext"]["http"]["path"] = "/my/path"
+    event["requestContext"]["http"]["method"] = "GET"
+
+    @app.get("/my/path")
+    def handler():
+        return {"ok": True}
+
+    # WHEN an HTTP API (v2) event is resolved
+    result = app(event, {})
+
+    # THEN the response uses the v2 shape
+    assert result["statusCode"] == 200
+    assert "cookies" in result
+    assert "multiValueHeaders" not in result

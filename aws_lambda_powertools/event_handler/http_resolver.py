@@ -12,7 +12,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ProxyEventType,
 )
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 if TYPE_CHECKING:
@@ -276,9 +276,16 @@ class HttpResolverLocal(ApiGatewayResolver):
         self._state.processed_stack_frames = value
 
     def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
-        """Convert event dict to HttpProxyEvent, or APIGatewayProxyEventV2 for v2 events."""
+        """Map a Lambda event to its data class, or an ASGI-built dict to HttpProxyEvent.
+
+        The data class decides the response shape: REST API needs `multiValueHeaders` and rejects
+        a `cookies` key, HTTP API and Function URL expect `headers` and `cookies`.
+        """
         if event.get("version") == "2.0" and "httpMethod" not in event:
             return APIGatewayProxyEventV2(event, self._json_body_deserializer)
+
+        if "resource" in event and "multiValueHeaders" in event:
+            return APIGatewayProxyEvent(event, self._json_body_deserializer)
 
         # Create HttpProxyEvent directly from the dict data
         # The dict already has queryStringParameters and multiValueQueryStringParameters
