@@ -682,6 +682,8 @@ def test_depends_class_dependency_with_nested_depends():
     result = app(API_GW_V2_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"tenant": "tenant-1"}
+
+
 def test_depends_with_none_default_is_resolved():
     """A Depends() parameter that also declares ``= None`` is still resolved (Python 3.10 wraps it in Optional)."""
     app = APIGatewayHttpResolver()
