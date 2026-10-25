@@ -87,6 +87,7 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
 | [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
+| [EventBridge Custom Event Bus](#eventbridge-custom-event-bus) | `EventBridgeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_v2_event.py) |
 | [Kafka](#kafka) | `KafkaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kafka_event.py) |
 | [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_stream_event.py) |
 | [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_firehose_event.py) |
@@ -550,6 +551,23 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 === "EventBridge Example Event"
     ```json
     --8<-- "tests/events/eventBridgeEvent.json"
+    ```
+
+### EventBridge Custom Event Bus
+
+The [Custom Event Bus](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-event-bus.html) delivers a single object or an array of events, depending on the subscriber batching. `EventBridgeV2Event` always exposes them through `records`.
+
+Use the `WITH_METADATA` transformer when you need event ids, FIFO groups or replay detection (`system_metadata.delivery_type`). `RAW` deliveries carry no marker, so records are still accepted (classic envelope, PutEvents array or bare PutRawEvents payload) but `metadata` and `system_metadata` are empty.
+
+=== "app.py"
+
+    ```python hl_lines="1 5"
+    --8<-- "examples/event_sources/src/eventBridgeV2Event.py"
+    ```
+
+=== "EventBridge Custom Event Bus Example Event"
+    ```json
+    --8<-- "tests/events/eventBridgeV2Event.json"
     ```
 
 ### Kafka
