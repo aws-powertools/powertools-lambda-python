@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Router
+from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.models import (
     APIKey,
     APIKeyIn,
@@ -266,3 +269,27 @@ def test_openapi_extension_operation_level_multiple_paths_with_router(
     assert (
         schema["paths"]["/test"]["post"]["x-amazon-apigateway-request-validator"] == openapi_extension_validator_detail
     )
+
+
+def test_openapi_extension_root_level_requires_x_prefix():
+    # GIVEN an APIGatewayRestResolver instance
+    app = APIGatewayRestResolver()
+
+    # WHEN we get the OpenAPI schema with a root extension that does not start with x-
+    # THEN it must be rejected like Server and SecurityScheme extensions already are
+    with pytest.raises(SchemaValidationError, match="must start with x-"):
+        app.get_openapi_json_schema(openapi_extensions={"amazon-apigateway-cors": {"maxAge": 0}})
+
+
+def test_openapi_extension_operation_level_requires_x_prefix():
+    # GIVEN a route with an operation extension that does not start with x-
+    app = APIGatewayRestResolver()
+
+    @app.get("/test", openapi_extensions={"amazon-apigateway-integration": {"type": "aws_proxy"}})
+    def lambda_handler():
+        pass
+
+    # WHEN we get the OpenAPI schema
+    # THEN it must be rejected
+    with pytest.raises(SchemaValidationError, match="must start with x-"):
+        app.get_openapi_json_schema()

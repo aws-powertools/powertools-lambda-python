@@ -1,10 +1,11 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Annotated, Literal
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
@@ -1674,3 +1675,71 @@ def test_header_class_annotation_without_parentheses():
     assert result["statusCode"] == 200
     response_body = json.loads(result["body"])
     assert response_body["header"] == "my-value"
+
+
+def test_openapi_query_model_fields_keep_their_types():
+    # GIVEN a Pydantic model used as Query() with optional, sequence and Enum fields
+    class Color(Enum):
+        red = "red"
+        blue = "blue"
+
+    class Filters(BaseModel):
+        limit: int | None = None
+        tags: list[str] = []
+        color: Color = Color.red
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def search(filters: Annotated[Filters, Query()]):
+        return filters.model_dump()
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+    parameters = {p["name"]: p["schema"] for p in schema["paths"]["/search"]["get"]["parameters"]}
+
+    # THEN each field keeps its own type instead of collapsing to string
+    assert parameters["limit"] == {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+    assert parameters["tags"] == {"type": "array", "items": {"type": "string"}}
+    assert parameters["color"]["enum"] == ["red", "blue"]
+    assert parameters["color"]["type"] == "string"
+
+
+def test_openapi_query_model_arbitrary_type_falls_back_to_string():
+    # GIVEN a Pydantic model used as Query() with a field whose type has no JSON schema
+    class Opaque:
+        pass
+
+    class Filters(BaseModel):
+        model_config = ConfigDict(arbitrary_types_allowed=True)
+        token: Opaque
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def search(filters: Annotated[Filters, Query()]):
+        return {}
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+    parameters = {p["name"]: p["schema"] for p in schema["paths"]["/search"]["get"]["parameters"]}
+
+    # THEN the field is documented as a string rather than failing schema generation
+    assert parameters["token"] == {"type": "string"}
+
+
+def test_openapi_validation_error_schema_does_not_require_hidden_msg():
+    # GIVEN a resolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/")
+    def handler():
+        return {}
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the ValidationError component only requires the fields it actually exposes
+    validation_error = schema["components"]["schemas"]["ValidationError"]
+    assert validation_error["required"] == ["loc", "type"]
+    assert "msg" not in validation_error["properties"]
