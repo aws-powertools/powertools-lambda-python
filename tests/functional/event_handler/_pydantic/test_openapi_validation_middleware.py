@@ -4456,3 +4456,65 @@ def test_content_type_case_insensitive_and_json_suffix(gw_event, content_type):
     result = app(gw_event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "powertools"}
+
+
+def test_header_sequence_optional_absent_uses_default(gw_event_http):
+    # GIVEN an APIGatewayHttpResolver with validation enabled and an optional sequence header that is not sent
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {}
+
+    @app.get("/hello")
+    def hello(x_country: Annotated[list[str] | None, Header(alias="x-country")] = None):
+        return {"c": x_country}
+
+    # WHEN the request has no such header
+    result = app(gw_event_http, {})
+
+    # THEN the default is used instead of failing validation
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": None}
+
+
+def test_header_model_sequence_field_single_value(gw_event_http):
+    # GIVEN a Pydantic header model with a sequence field and a single header value on HTTP API
+    class HeaderModel(BaseModel):
+        x_country: list[str] = Field(alias="x-country")
+        x_trace: str = Field(alias="x-trace")
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {"x-country": "US", "x-trace": "t-1"}
+
+    @app.get("/hello")
+    def hello(headers: Annotated[HeaderModel, Header()]):
+        return {"c": headers.x_country, "t": headers.x_trace}
+
+    # WHEN the request carries one value for the sequence field
+    result = app(gw_event_http, {})
+
+    # THEN it is accepted as a one-item list and the scalar field is untouched
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": ["US"], "t": "t-1"}
+
+
+def test_header_model_sequence_field_comma_joined(gw_event_http):
+    # GIVEN a Pydantic header model with a sequence field and a comma-joined header value
+    class HeaderModel(BaseModel):
+        x_country: list[str] = Field(alias="x-country")
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {"x-country": "US,PT"}
+
+    @app.get("/hello")
+    def hello(headers: Annotated[HeaderModel, Header()]):
+        return {"c": headers.x_country}
+
+    result = app(gw_event_http, {})
+
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": ["US", "PT"]}

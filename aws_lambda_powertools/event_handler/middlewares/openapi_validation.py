@@ -679,11 +679,9 @@ def _process_sequence_param(
     except KeyError:
         return
 
-    if value is not None and not isinstance(value, list):
-        if isinstance(value, str):
-            input_dict[param.alias] = value.split(",")
-        else:
-            input_dict[param.alias] = [value]
+    # headers arrive as a single string (possibly comma-joined), query strings already as a list
+    if isinstance(value, str):
+        input_dict[param.alias] = value.split(",")
 
 
 def _process_model_param(
@@ -705,8 +703,6 @@ def _process_model_param(
                 value = _restore_scalar_parameter(value, source_name, multi_value_params)
             elif isinstance(value, str):
                 value = value.split(",")
-            elif not isinstance(value, list):
-                value = [value]
             model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
 
     input_dict[param.alias] = model_data
