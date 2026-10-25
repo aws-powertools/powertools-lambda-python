@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from google.protobuf.internal.decoder import (  # type: ignore[attr-defined]
-    _DecodeSignedVarint,  # ty: ignore[unresolved-import]
+    _DecodeVarint,  # ty: ignore[unresolved-import]
 )
 from google.protobuf.json_format import MessageToDict
 
@@ -103,21 +103,29 @@ class ProtobufDeserializer(DeserializerBase):
         """
         Identifies and removes Confluent Schema Registry MessageIndex from bytes.
         Returns pure protobuf bytes.
+
+        Confluent serializers write the message index array as zigzag encoded varints:
+        the array length followed by each index. The common case, index ``[0]``, is a single ``0x00`` byte.
+        This matches ``_encode_varints`` / ``_read_index_array`` in ``confluent_kafka.schema_registry.protobuf``.
         """
         buffer = memoryview(data)
-        pos = 0
 
         logger.debug("Removing message list bytes")
 
-        # Read first varint (index count or 0)
-        first_value, new_pos = _DecodeSignedVarint(buffer, pos)
-        pos = new_pos
+        # Read the number of indexes (0 means the first message type in the schema)
+        count, pos = _decode_zigzag_varint(buffer, 0)
+        if count < 0:
+            raise ValueError(f"Invalid Confluent message index array length: {count}")
 
         # Skip index values if present
-        if first_value != 0:
-            for _ in range(first_value):
-                _, new_pos = _DecodeSignedVarint(buffer, pos)
-                pos = new_pos
+        for _ in range(count):
+            _, pos = _decode_zigzag_varint(buffer, pos)
 
         # Return remaining bytes (pure protobuf)
         return data[pos:]
+
+
+def _decode_zigzag_varint(buffer: memoryview, pos: int) -> tuple[int, int]:
+    """Decode a zigzag encoded varint, as used by Confluent for message indexes."""
+    value, new_pos = _DecodeVarint(buffer, pos)
+    return (value >> 1) ^ -(value & 1), new_pos
