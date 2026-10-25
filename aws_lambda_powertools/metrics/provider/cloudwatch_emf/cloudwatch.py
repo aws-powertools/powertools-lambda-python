@@ -174,8 +174,9 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         if len(self.metric_set) == MAX_METRICS or len(metric["Value"]) == MAX_METRICS:
             logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
-            metrics = self.serialize_metric_set()
-            print(json.dumps(metrics))
+            if not is_metrics_disabled():
+                metrics = self.serialize_metric_set()
+                print(json.dumps(metrics))
 
             # clear metric set only as opposed to metrics and dimensions set
             # since we could have more than 100 metrics

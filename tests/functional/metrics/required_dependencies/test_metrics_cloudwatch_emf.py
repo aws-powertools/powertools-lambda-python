@@ -26,6 +26,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
     MAX_METRIC_NAME_LENGTH,
+    MAX_METRICS,
     MIN_METRIC_NAME_LENGTH,
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
@@ -1566,6 +1567,74 @@ def test_metrics_disabled_with_namespace_and_service(monkeypatch, capsys):
     # THEN no metrics should have been recorded
     captured = capsys.readouterr()
     assert not captured.out
+
+
+def test_single_metric_disabled_with_env_var(monkeypatch, capsys, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN a single metric is created
+    with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+        pass
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_single_metric_disabled_with_powertools_dev(monkeypatch, capsys, namespace):
+    # GIVEN POWERTOOLS_DEV is enabled and POWERTOOLS_METRICS_DISABLED is not set
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+    monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
+
+    # WHEN a single metric is created
+    with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+        pass
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_cold_start_metric_disabled_with_env_var(monkeypatch, capsys, namespace, service):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    # WHEN log_metrics captures the cold start metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        my_metrics.add_metric(name="test_metric", unit=MetricUnit.Count, value=1)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    # THEN neither the cold start metric nor the application metric should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_metrics_disabled_with_env_var_on_max_metrics_flush(monkeypatch, capsys, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN enough metrics are added to trigger the automatic flush
+    for i in range(MAX_METRICS):
+        my_metrics.add_metric(name=f"metric_{i}", unit=MetricUnit.Count, value=1)
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+    # AND the metric set is still cleared
+    assert not my_metrics.metric_set
+
+
+def test_single_metric_does_not_print_when_block_raises(capsys, namespace):
+    # GIVEN a single metric block
+    # WHEN its body raises
+    with pytest.raises(RuntimeError):
+        with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+            raise RuntimeError("failure")
+
+    # THEN nothing should have been printed
+    assert not capsys.readouterr().out
 
 
 def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):

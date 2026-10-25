@@ -197,7 +197,7 @@ class DatadogProvider(BaseProvider):
             logger.debug("Flushing existing metrics")
             metrics = self.serialize_metric_set()
             # submit through datadog extension
-            if lambda_metric and not self.flush_to_log:
+            if lambda_metric and not self.flush_to_log and not is_metrics_disabled():
                 # use lambda_metric function from datadog package, submit metrics to datadog
                 for metric_item in metrics:  # pragma: no cover
                     lambda_metric(  # pragma: no cover
