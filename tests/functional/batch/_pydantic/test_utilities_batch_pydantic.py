@@ -486,6 +486,34 @@ def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error_and_model(
     assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
 
 
+@pytest.mark.parametrize("skip_group_on_error", [False, True])
+def test_sqs_fifo_batch_processor_model_with_validation_error_after_failure(
+    skip_group_on_error: bool,
+    record_handler_model: Callable,
+    sqs_event_fifo_factory,
+    order_event_factory,
+):
+    # GIVEN a malformed record that is short-circuited because a previous record of its group failed
+    first_record = sqs_event_fifo_factory(order_event_factory({"type": "success"}), "2")
+    failed_record = sqs_event_fifo_factory(order_event_factory({"type": "fail"}), "1")
+    malformed_record = sqs_event_fifo_factory(json.dumps({"poison": "pill"}), "1")
+    fourth_record = sqs_event_fifo_factory(order_event_factory({"type": "success"}), "2")
+    records = [first_record, failed_record, malformed_record, fourth_record]
+
+    # WHEN
+    processor = SqsFifoPartialProcessor(model=OrderSqs, skip_group_on_error=skip_group_on_error)
+    with processor(records, record_handler_model) as batch:
+        batch.process()
+
+    # THEN the malformed record is reported instead of failing the whole batch
+    expected_failures = [failed_record, malformed_record]
+    if not skip_group_on_error:
+        expected_failures.append(fourth_record)
+    assert batch.response() == {
+        "batchItemFailures": [{"itemIdentifier": record["messageId"]} for record in expected_failures],
+    }
+
+
 def test_batch_processor_model_with_partial_validation_error(
     record_handler_model: Callable,
     sqs_event_factory,
