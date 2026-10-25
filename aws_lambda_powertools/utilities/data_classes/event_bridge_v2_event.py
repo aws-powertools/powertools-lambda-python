@@ -102,7 +102,7 @@ class EventBridgeV2Event(DictWrapper):
 
     Documentation:
     --------------
-    - https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-event-bus.html
+    - https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus.html
     """
 
     @cached_property

@@ -555,7 +555,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 
 ### EventBridge Custom Event Bus
 
-The [Custom Event Bus](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-event-bus.html) delivers a single object or an array of events, depending on the subscriber batching. `EventBridgeV2Event` always exposes them through `records`.
+The [Custom Event Bus](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus.html) delivers a single object or an array of events, depending on the subscriber batching. `EventBridgeV2Event` always exposes them through `records`.
 
 Use the `WITH_METADATA` transformer when you need event ids, FIFO groups or replay detection (`system_metadata.delivery_type`). `RAW` deliveries carry no marker, so records are still accepted (classic envelope, PutEvents array or bare PutRawEvents payload) but `metadata` and `system_metadata` are empty.
 

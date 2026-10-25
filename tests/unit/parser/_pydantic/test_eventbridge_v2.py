@@ -87,3 +87,18 @@ def test_envelope_invalid_payload():
 
     with pytest.raises(ValidationError):
         parse(event=raw_event, model=Order, envelope=envelopes.EventBridgeV2Envelope)
+
+
+def test_envelope_parses_octet_stream_json_bytes():
+    # GIVEN a JSON payload published as application/octet-stream, which the bus delivers base64 encoded
+    event = {
+        "Data": base64.b64encode(b'{"orderId": "o-1", "total": 5}').decode(),
+        "Metadata": {},
+        "SystemMetadata": {"ContentType": "application/octet-stream", "aws:DeliveryType": "LIVE"},
+    }
+
+    # WHEN parsing with the envelope
+    orders = parse(event=event, model=Order, envelope=envelopes.EventBridgeV2Envelope)
+
+    # THEN the bytes are decoded and parsed into the model, and the optional aws: fields may be absent
+    assert orders == [Order(orderId="o-1", total=5)]

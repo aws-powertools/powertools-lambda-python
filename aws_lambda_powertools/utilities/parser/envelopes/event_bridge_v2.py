@@ -53,6 +53,9 @@ class EventBridgeV2Envelope(BaseEnvelope):
                 payload = EventBridgeV2Model.model_validate(item).root[0].data
             else:
                 payload = item
+            if isinstance(payload, bytes):
+                # application/octet-stream is delivered as bytes; let the JSON path of _parse handle it
+                payload = payload.decode()
             payloads.append(_unwrap_put_events(payload))
 
         logger.debug(f"Parsing EventBridge V2 payloads with {model}")

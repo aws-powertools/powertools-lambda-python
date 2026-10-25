@@ -11,13 +11,17 @@ OCTET_STREAM = "application/octet-stream"
 class EventBridgeV2SystemMetadataModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    event_id: str = Field(alias="aws:EventId", description="Unique event id assigned by the bus.")
-    sequence_number: str = Field(alias="aws:SequenceNumber", description="Sequence number of the event in the bus.")
+    event_id: str | None = Field(None, alias="aws:EventId", description="Unique event id assigned by the bus.")
+    sequence_number: str | None = Field(
+        None,
+        alias="aws:SequenceNumber",
+        description="Sequence number of the event in the bus.",
+    )
     delivery_type: Literal["LIVE", "REPLAY"] = Field(
         alias="aws:DeliveryType",
         description="Whether the event is delivered live or as part of a replay.",
     )
-    ingestion_time: str = Field(alias="aws:IngestionTime", description="Time the bus ingested the event.")
+    ingestion_time: str | None = Field(None, alias="aws:IngestionTime", description="Time the bus ingested the event.")
     event_group_id: str | None = Field(None, alias="EventGroupId", description="FIFO group id of the event.")
     deduplication_id: str | None = Field(None, alias="DeduplicationId", description="Deduplication id of the event.")
     content_type: str | None = Field(
