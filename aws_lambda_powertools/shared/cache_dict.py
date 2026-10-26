@@ -3,8 +3,8 @@ from collections import OrderedDict
 
 class LRUDict(OrderedDict):
     """
-    Cache implementation based on ordered dict with a maximum number of items. Last accessed item will be evicted
-    first. Currently used by idempotency utility.
+    Cache implementation based on ordered dict with a maximum number of items. Least recently used item will be
+    evicted first. Currently used by idempotency utility.
     """
 
     def __init__(self, max_items=1024, *args, **kwargs):
@@ -26,6 +26,6 @@ class LRUDict(OrderedDict):
 
     def get(self, key, *args, **kwargs):
         item = super().get(key, *args, **kwargs)
-        if item:
+        if key in self:
             self.move_to_end(key=key)
         return item

@@ -43,6 +43,26 @@ def test_cache_order_get(populated_cache):
     assert last_item == f"key_{random_value}"
 
 
+def test_cache_get_missing_key_returns_default():
+    cache = LRUDict(max_items=2)
+    cache["existing"] = "value"
+
+    assert cache.get("missing", "fallback") == "fallback"
+    assert list(cache) == ["existing"]
+
+
+@pytest.mark.parametrize("value", [False, 0, None, ""])
+def test_cache_get_falsey_value_updates_recency(value):
+    cache = LRUDict(max_items=2)
+    cache["falsey"] = value
+    cache["other"] = "value"
+
+    assert cache.get("falsey") == value
+    cache["new"] = "value"
+
+    assert list(cache) == ["falsey", "new"]
+
+
 def test_cache_evict_over_max_items(populated_cache):
     assert "key_0" in populated_cache
     assert len(populated_cache) == MAX_CACHE_ITEMS
