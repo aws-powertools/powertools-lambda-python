@@ -3461,6 +3461,51 @@ def test_secrets_provider_get_multiple_basic(config):
         stubber.deactivate()
 
 
+def test_secrets_provider_get_multiple_does_not_mutate_caller_filters(config):
+    """
+    Test SecretsProvider.get_multiple() leaves the caller's Filters list untouched
+    """
+    # GIVEN a Filters list owned by the caller
+    provider = parameters.SecretsProvider(boto_config=config)
+    caller_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+    original_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+
+    # Stub the boto3 client to expect the caller filter plus exactly one name filter per call
+    stubber = stub.Stubber(provider.client)
+    for name in ["db-password", "api-key"]:
+        response = {
+            "SecretValues": [
+                {
+                    "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{name}",
+                    "Name": name,
+                    "VersionId": "7a9155b8-2dc9-466e-b4f6-5bc46516c84d",
+                    "SecretString": "super-secret-password",
+                    "CreatedDate": datetime(2015, 1, 1),
+                },
+            ],
+            "Errors": [],
+        }
+        expected_params = {
+            "Filters": [
+                {"Key": "primary-region", "Values": ["us-east-1"]},
+                {"Key": "name", "Values": [name]},
+            ],
+        }
+        stubber.add_response("batch_get_secret_value", response, expected_params)
+    stubber.activate()
+
+    try:
+        # WHEN the same caller-owned list is reused across two calls
+        provider.get_multiple(["db-password"], Filters=caller_filters)
+        provider.get_multiple(["api-key"], Filters=caller_filters)
+
+        # THEN the caller's list must not have grown a stale name filter
+        assert caller_filters == original_filters
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get_multiple_with_binary(config):
     """
     Test SecretsProvider.get_multiple() with binary secrets
