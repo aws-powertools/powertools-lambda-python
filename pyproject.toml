@@ -1,6 +1,6 @@
 [project]
 name = "aws_lambda_powertools"
-version = "3.37.0"
+version = "3.38.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 requires-python = ">=3.10,<4.0.0"
 authors = [{name = "Amazon Web Services"}]
