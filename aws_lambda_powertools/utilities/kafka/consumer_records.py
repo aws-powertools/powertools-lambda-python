@@ -32,7 +32,7 @@ class ConsumerRecordRecords(KafkaEventRecordBase):
         key = self.get("key")
 
         # Return None if key doesn't exist
-        if not key:
+        if key is None:
             return None
 
         logger.debug("Deserializing key field")

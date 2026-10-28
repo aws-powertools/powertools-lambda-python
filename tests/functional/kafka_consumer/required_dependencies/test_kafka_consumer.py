@@ -338,6 +338,28 @@ def test_kafka_consumer_default_deserializer_key_is_none(kafka_event_with_json_d
     assert result is None
 
 
+def test_kafka_consumer_default_deserializer_key_is_empty_string(kafka_event_with_json_data, lambda_context):
+    # GIVEN
+    # A Kafka event where record key is empty string ""
+    kafka_event_with_empty_key = deepcopy(kafka_event_with_json_data)
+    kafka_event_with_empty_key["records"]["my-topic-1"][0]["key"] = ""
+
+    # A Kafka consumer with no schema configuration specified
+    @kafka_consumer()
+    def handler(event: ConsumerRecords, context):
+        record = next(event.records)
+        return record.key
+
+    # WHEN
+    # The handler processes the Kafka event with an empty string key
+    result = handler(kafka_event_with_empty_key, lambda_context)
+
+    # THEN
+    # The key should be decoded to an empty string, not None
+    assert result == ""
+    assert result is not None
+
+
 def test_kafka_consumer_json_with_wrong_avro_schema(kafka_event_with_json_data, lambda_context):
     # GIVEN
     # A Kafka event with a null key in the record
