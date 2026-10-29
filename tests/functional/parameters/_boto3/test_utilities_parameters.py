@@ -1620,7 +1620,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_cache_failed_transform(mock_
     # THEN the transform failure is reported and not cached
     assert ret["_errors"] == [param]
     assert param not in ret
-    assert (param, "json") not in provider.store
+    assert provider._build_cache_key(name=param, transform="json", sdk_options={"decrypt": False}) not in provider.store
 
     # WHEN fetching again after the parameter is corrected
     ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
@@ -1629,7 +1629,7 @@ def test_ssm_provider_get_parameters_by_name_do_not_cache_failed_transform(mock_
     assert client.get_parameters_calls == 2
     assert ret["_errors"] == []
     assert ret[param] == corrected_value
-    assert (param, "json") in provider.store
+    assert provider._build_cache_key(name=param, transform="json", sdk_options={"decrypt": False}) in provider.store
 
 
 def test_ssm_provider_get_parameters_by_name_raise_on_transform_failure_with_decrypt(mock_name, config):
@@ -1699,7 +1699,9 @@ def test_ssm_provider_get_parameters_by_name_json_null_is_not_a_transform_failur
     assert ret["_errors"] == []
     assert ret[decrypt_param] is None
     assert ret[batch_param] is None
-    assert (batch_param, "json") in provider.store
+    assert (
+        provider._build_cache_key(name=batch_param, transform="json", sdk_options={"decrypt": False}) in provider.store
+    )
 
 
 def test_ssm_provider_get_parameters_by_name_auto_transform_infers_from_parameter_name(mock_name, mock_value, config):
@@ -3296,7 +3298,7 @@ def test_get_parameters_by_name_chunks(monkeypatch, config):
 def test_get_parameters_by_name_cache(monkeypatch, mock_name, mock_value, config):
     # GIVEN we have a parameter to fetch but is already in cache
     params = {mock_name: {}}
-    cache_key = SSMProvider(boto_config=config)._build_cache_key(name=mock_name)
+    cache_key = SSMProvider(boto_config=config)._build_cache_key(name=mock_name, sdk_options={"decrypt": False})
 
     class TestProvider(SSMProvider):
         def __init__(self, boto_config: Config = config, **kwargs):
@@ -4660,6 +4662,60 @@ def test_ssm_provider_get_uses_cache_populated_by_get_parameters_by_name(mock_na
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_decrypt_does_not_share_cache(mock_name, mock_value, config):
+    # GIVEN a SecureString fetched through get_parameters_by_name with decrypt=True
+    param = f"/a/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+    decrypted = build_get_parameters_stub(params={param: mock_value}, invalid_parameters=[fail])
+    encrypted = build_get_parameters_stub(params={param: "AQICAHg..."}, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", decrypted, {"Names": [param, fail], "WithDecryption": True})
+    stubber.add_response("get_parameters", encrypted, {"Names": [param, fail]})
+    stubber.activate()
+
+    # WHEN the same parameter is requested again without decrypt
+    try:
+        first = provider.get_parameters_by_name(parameters={param: {}, fail: {}}, decrypt=True, raise_on_error=False)
+        second = provider.get_parameters_by_name(parameters={param: {}, fail: {}}, raise_on_error=False)
+
+        # THEN the decrypted value is not served from cache and the API is called again
+        assert first[param] == mock_value
+        assert second[param] == "AQICAHg..."
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_with_decrypt_does_not_share_cache_with_batch(mock_name, mock_value, config):
+    # GIVEN a SecureString fetched through get() with decrypt=True
+    param = f"/a/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+    get_response = {"Parameter": {"Name": param, "Value": mock_value, "Type": "SecureString", "Version": 1}}
+    encrypted = build_get_parameters_stub(params={param: "AQICAHg..."}, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameter", get_response, {"Name": param, "WithDecryption": True})
+    stubber.add_response("get_parameters", encrypted, {"Names": [param, fail]})
+    stubber.activate()
+
+    # WHEN the same parameter is requested through get_parameters_by_name without decrypt
+    try:
+        single = provider.get(param, decrypt=True)
+        batch = provider.get_parameters_by_name(parameters={param: {}, fail: {}}, raise_on_error=False)
+
+        # THEN the decrypted value is not served from cache and the API is called again
+        assert single == mock_value
+        assert batch[param] == "AQICAHg..."
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
 @pytest.mark.parametrize("force_fetch", [False, True])
 @pytest.mark.parametrize("secret_value", [{"SecretString": "value"}, {"SecretBinary": b"value"}])
 def test_secrets_provider_get_multiple_excludes_prefix_matches(config, force_fetch, secret_value):

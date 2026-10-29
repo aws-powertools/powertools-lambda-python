@@ -572,7 +572,13 @@ class SSMProvider(BaseProvider):
         """Fetch each parameter from batch that hasn't been expired"""
         cache = {}
         for name, options in batch.items():
-            cache_key = self._build_cache_key(name=name, transform=options["transform"])
+            # Same key shape as get() so both paths share cache entries; decrypt changes the value,
+            # so a SecureString fetched with decrypt must never be served to a call without it
+            cache_key = self._build_cache_key(
+                name=name,
+                transform=options["transform"],
+                sdk_options={"decrypt": options["decrypt"]},
+            )
             if self.has_not_expired_in_cache(cache_key):
                 cache[name] = self.store[cache_key].value
 
@@ -688,7 +694,11 @@ class SSMProvider(BaseProvider):
                     transform_errors.append(name)
                     continue
 
-            _cache_key = self._build_cache_key(name=name, transform=transform)
+            _cache_key = self._build_cache_key(
+                name=name,
+                transform=transform,
+                sdk_options={"decrypt": options["decrypt"]},
+            )
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
 
             response[name] = value
