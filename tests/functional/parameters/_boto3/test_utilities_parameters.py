@@ -134,6 +134,20 @@ def test_dynamodb_provider_get_default_config(monkeypatch, mock_name, mock_value
         stubber.deactivate()
 
 
+def test_dynamodb_provider_get_missing_item(mock_name, config):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("get_item", {}, {"TableName": table_name, "Key": {"id": mock_name}})
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == f"Parameter '{mock_name}' not found in table '{table_name}'"
+        stubber.assert_no_pending_responses()
+
+
 def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     """
     Test DynamoDBProvider.get() with a cached value
@@ -306,6 +320,25 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
             assert values[name] == f"{mock_value}/{name}"
     finally:
         stubber.deactivate()
+
+
+@pytest.mark.parametrize("sort_attr", ["sk", "custom_sort_key"])
+def test_dynamodb_provider_get_multiple_missing_sort_attribute(mock_name, config, sort_attr):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, sort_attr=sort_attr, boto_config=config)
+    response = {"Items": [{"id": {"S": mock_name}, "value": {"S": "value"}}]}
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("query", response, expected_params)
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get_multiple(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Sort attribute '{sort_attr}' missing from an item for parameter '{mock_name}' in table '{table_name}'"
+        )
+        stubber.assert_no_pending_responses()
 
 
 def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
@@ -1234,6 +1267,57 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
         assert ret["_errors"]
         assert len(ret["_errors"]) == 1
         assert param not in ret
+    finally:
+        stubber.deactivate()
+
+
+@pytest.mark.parametrize("decrypt", [False, True])
+@pytest.mark.parametrize("error_code", ["ThrottlingException", "InvalidKeyId", "InternalServerError"])
+def test_ssm_provider_get_parameters_by_name_wraps_client_error(mock_name, config, error_code, decrypt):
+    # GIVEN the GetParameters call fails with an SDK error
+    param = f"/{mock_name}"
+    expected_params = {"Names": [param], "WithDecryption": True} if decrypt else {"Names": [param]}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", error_code, expected_params=expected_params)
+    stubber.activate()
+
+    # WHEN fail-fast is enabled in get_parameters_by_name
+    # THEN the SDK error should be wrapped in GetParameterError
+    try:
+        with pytest.raises(parameters.exceptions.GetParameterError, match=error_code):
+            provider.get_parameters_by_name(parameters={param: {}}, decrypt=decrypt)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_client_error(mock_name, mock_value, config):
+    # GIVEN 11 parameters, fetched in two GetParameters chunks
+    # the first chunk has one invalid parameter and the second chunk is throttled
+    names = [f"/{mock_name}/{i}" for i in range(11)]
+    first_chunk = dict.fromkeys(names[:10], mock_value)
+    invalid, throttled = names[9], names[10]
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters",
+        build_get_parameters_stub(params=first_chunk, invalid_parameters=[invalid]),
+        {"Names": names[:10]},
+    )
+    stubber.add_client_error("get_parameters", "ThrottlingException", expected_params={"Names": [throttled]})
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    try:
+        ret = provider.get_parameters_by_name(parameters={name: {} for name in names}, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        # THEN both failures should be reported under `_errors` key and the successful values kept
+        assert ret["_errors"] == [invalid, throttled]
+        assert all(ret[name] == mock_value for name in names[:9])
     finally:
         stubber.deactivate()
 
@@ -2917,6 +3001,62 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_appconf_provider_get_empty_initial_configuration(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "start_configuration_session",
+            {"InitialConfigurationToken": "initial_token"},
+            {
+                "ConfigurationProfileIdentifier": mock_name,
+                "ApplicationIdentifier": "myapp",
+                "EnvironmentIdentifier": "dev",
+            },
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Configuration '{mock_name}' is empty and no cached value is available "
+            "for application 'myapp' in environment 'dev'"
+        )
+        assert provider.get(mock_name) == b"{}"
+        stubber.assert_no_pending_responses()
+
+
+def test_appconf_provider_get_empty_configuration_uses_previous_value(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("start_configuration_session", {"InitialConfigurationToken": "initial_token"})
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        assert provider.get(mock_name) == b"{}"
+        assert provider.get(mock_name, force_fetch=True) == b"{}"
+        stubber.assert_no_pending_responses()
+
+
 def test_appconf_provider_get_configuration_json_content_type(mock_name, config):
     """
     Test get_configuration.get with default values
@@ -3494,6 +3634,59 @@ def test_secrets_provider_get_multiple_basic(config):
         stubber.deactivate()
 
 
+def test_secrets_provider_get_multiple_does_not_mutate_caller_filters(config):
+    """
+    Test SecretsProvider.get_multiple() leaves the caller's Filters list untouched
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # GIVEN a shared Filters list, as used in the documentation example
+    my_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+
+    # Stub the boto3 client with two paginated-free responses, one per call
+    stubber = stub.Stubber(provider.client)
+    response_a = {
+        "SecretValues": [
+            {
+                "Name": "a",
+                "SecretString": "1",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_a = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["a"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_a, expected_params_a)
+
+    response_b = {
+        "SecretValues": [
+            {
+                "Name": "b",
+                "SecretString": "2",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_b = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["b"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_b, expected_params_b)
+    stubber.activate()
+
+    try:
+        # WHEN calling get_multiple twice with the same Filters list
+        assert provider.get_multiple(["a"], Filters=my_filters) == {"a": "1"}
+        assert provider.get_multiple(["b"], Filters=my_filters) == {"b": "2"}
+        stubber.assert_no_pending_responses()
+
+        # THEN the caller's list must not have grown stale name filters
+        assert my_filters == [{"Key": "primary-region", "Values": ["us-east-1"]}]
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get_multiple_with_binary(config):
     """
     Test SecretsProvider.get_multiple() with binary secrets
@@ -3747,6 +3940,20 @@ def test_secrets_provider_get_multiple_empty_names(config):
     # THEN it should raise GetParameterError
     with pytest.raises(GetSecretError, match="You must provide at least one secret name"):
         provider.get_multiple([])
+
+
+def test_secrets_provider_get_multiple_error_is_get_parameter_error(config):
+    """
+    Test GetSecretError can be caught as GetParameterError, as the docstrings promise
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN get_multiple fails
+    # THEN the error is a GetParameterError and is exported from the package
+    with pytest.raises(parameters.GetParameterError):
+        provider.get_multiple([])
+    assert parameters.GetSecretError is GetSecretError
 
 
 def test_secrets_provider_non_existing_key(config):
