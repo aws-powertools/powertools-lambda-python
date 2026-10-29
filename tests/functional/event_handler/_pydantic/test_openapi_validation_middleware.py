@@ -4589,3 +4589,131 @@ def test_alb_response_typed_none_body_with_validation(gw_event_alb):
     result = app(gw_event_alb, {})
     assert result["statusCode"] == 204
     assert result["body"] == ""
+
+
+def test_header_sequence_single_value_across_resolvers(gw_event_http):
+    # GIVEN an APIGatewayHttpResolver with validation enabled and a single-value sequence header
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {"x-country": "US"}
+
+    @app.get("/hello")
+    def hello(x_country: Annotated[list[str], Header(alias="x-country")]):
+        return {"c": x_country}
+
+    result = app(gw_event_http, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": ["US"]}
+
+
+def test_repeated_scalar_header_joined_across_resolvers(gw_event):
+    # GIVEN an APIGatewayRestResolver with validation enabled and repeated scalar headers
+    app = APIGatewayRestResolver(enable_validation=True)
+    gw_event["path"] = "/h"
+    gw_event["httpMethod"] = "GET"
+    gw_event["headers"] = {"X-Req": "a"}
+    gw_event["multiValueHeaders"] = {"X-Req": ["a", "b"]}
+
+    @app.get("/h")
+    def h(x_req: Annotated[str, Header()]):
+        return {"x": x_req}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"x": "a,b"}
+
+
+@pytest.mark.parametrize(
+    "content_type",
+    [
+        "Application/JSON",
+        "application/json; charset=utf-8",
+        "Application/JSON; charset=utf-8",
+        "application/vnd.api+json",
+        "application/problem+json",
+        "APPLICATION/PROBLEM+JSON; charset=utf-8",
+    ],
+)
+def test_content_type_case_insensitive_and_json_suffix(gw_event, content_type):
+    # GIVEN an APIGatewayRestResolver with validation enabled and case-insensitive / +json media types
+    class Item(BaseModel):
+        name: str
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/items")
+    def create(item: Item):
+        return item.model_dump()
+
+    gw_event["path"] = "/items"
+    gw_event["httpMethod"] = "POST"
+    gw_event["body"] = json.dumps({"name": "powertools"})
+    gw_event["headers"] = {"Content-Type": content_type}
+    gw_event["multiValueHeaders"] = {"Content-Type": [content_type]}
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"name": "powertools"}
+
+
+def test_header_sequence_optional_absent_uses_default(gw_event_http):
+    # GIVEN an APIGatewayHttpResolver with validation enabled and an optional sequence header that is not sent
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {}
+
+    @app.get("/hello")
+    def hello(x_country: Annotated[list[str] | None, Header(alias="x-country")] = None):
+        return {"c": x_country}
+
+    # WHEN the request has no such header
+    result = app(gw_event_http, {})
+
+    # THEN the default is used instead of failing validation
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": None}
+
+
+def test_header_model_sequence_field_single_value(gw_event_http):
+    # GIVEN a Pydantic header model with a sequence field and a single header value on HTTP API
+    class HeaderModel(BaseModel):
+        x_country: list[str] = Field(alias="x-country")
+        x_trace: str = Field(alias="x-trace")
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {"x-country": "US", "x-trace": "t-1"}
+
+    @app.get("/hello")
+    def hello(headers: Annotated[HeaderModel, Header()]):
+        return {"c": headers.x_country, "t": headers.x_trace}
+
+    # WHEN the request carries one value for the sequence field
+    result = app(gw_event_http, {})
+
+    # THEN it is accepted as a one-item list and the scalar field is untouched
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": ["US"], "t": "t-1"}
+
+
+def test_header_model_sequence_field_comma_joined(gw_event_http):
+    # GIVEN a Pydantic header model with a sequence field and a comma-joined header value
+    class HeaderModel(BaseModel):
+        x_country: list[str] = Field(alias="x-country")
+
+    app = APIGatewayHttpResolver(enable_validation=True)
+    gw_event_http["rawPath"] = gw_event_http["requestContext"]["http"]["path"] = "/hello"
+    gw_event_http["requestContext"]["http"]["method"] = "GET"
+    gw_event_http["headers"] = {"x-country": "US,PT"}
+
+    @app.get("/hello")
+    def hello(headers: Annotated[HeaderModel, Header()]):
+        return {"c": headers.x_country}
+
+    result = app(gw_event_http, {})
+
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"c": ["US", "PT"]}
