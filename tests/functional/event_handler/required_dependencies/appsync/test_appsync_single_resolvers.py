@@ -387,3 +387,26 @@ def test_exception_handler_with_single_resolver():
 
     # THEN the return must be the Exception Handler error message
     assert result["message"] == "error"
+
+
+def test_exception_handler_clears_context():
+    # GIVEN an AppSyncResolver with an exception handler and a resolver that appends context
+    mock_event = load_event("appSyncDirectResolver.json")
+
+    app = AppSyncResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        return {"error": str(ex)}
+
+    @app.resolver(field_name="createSomething")
+    def create_something(id: str):  # noqa AA03 VNE003
+        app.append_context(invocation="data")
+        raise ValueError("something went wrong")
+
+    # WHEN resolving an event that triggers the exception handler
+    result = app.resolve(mock_event, {})
+
+    # THEN the handler result is returned and the context does not leak into the next invocation
+    assert result == {"error": "something went wrong"}
+    assert app.context == {}

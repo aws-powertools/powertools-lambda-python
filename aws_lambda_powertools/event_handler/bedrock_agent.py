@@ -49,7 +49,7 @@ class BedrockResponseBuilder(ResponseBuilder):
                 "httpMethod": event.http_method,
                 "httpStatusCode": self.response.status_code,
                 "responseBody": {
-                    self.response.content_type: {
+                    self.response.content_type or "application/json": {
                         "body": body,
                     },
                 },
@@ -346,8 +346,13 @@ class BedrockAgentResolver(ApiGatewayResolver):
         # In Bedrock Agents, all the parameters come inside the "parameters" key, not on the apiPath
         # So we have to search for route parameters in the parameters key
         parameters: dict[str, str] = {}
-        if match.groupdict() and self.current_event.parameters:
-            parameters = {parameter["name"]: parameter["value"] for parameter in self.current_event.parameters}
+        route_keys = match.groupdict()
+        if route_keys and self.current_event.parameters:
+            parameters = {
+                parameter["name"]: parameter["value"]
+                for parameter in self.current_event.parameters
+                if parameter["name"] in route_keys
+            }
         return parameters
 
     @override
