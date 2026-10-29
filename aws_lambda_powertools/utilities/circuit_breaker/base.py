@@ -9,10 +9,12 @@ path write-free: failures are counted locally and only persisted on a state tran
 from __future__ import annotations
 
 import datetime as dt
+import inspect
 import logging
 import os
 import threading
 import uuid
+from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerOpenError
@@ -25,6 +27,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
         CircuitBreakerPersistenceLayer,
     )
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
     from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo
 
 logger = logging.getLogger(__name__)
@@ -45,9 +48,23 @@ _LAST_OBSERVED_STATE: dict[str, CircuitState] = {}
 # callbacks.
 _COUNTERS_LOCK = threading.Lock()
 
+# Circuit names with a probe currently running in this process, mapped to the pid that
+# claimed it. The probe lease is per thread, so concurrent coroutines in one event loop
+# would all pass the owner check and probe together; this keeps the single-prober
+# guarantee within a process too. The pid lets a forked child ignore an entry it inherited.
+_PROBES_IN_FLIGHT: dict[str, int] = {}
+
 # Identifier used to claim the half-open probe lock, unique per thread so the store's
 # conditional election picks a single prober across threads as well as processes.
 _PROBE_OWNER = threading.local()
+
+
+class _Route(Enum):
+    """How a call is dispatched after reading the persisted circuit state."""
+
+    CLOSED = "closed"
+    PROBE = "probe"
+    OPEN = "open"
 
 
 def _probe_owner_id() -> str:
@@ -130,6 +147,30 @@ class CircuitBreakerHandler:
         CircuitBreakerOpenError
             If the circuit is open and no callback is registered.
         """
+        route, circuit = self._route()
+        if route is _Route.CLOSED:
+            return self._call_closed()
+        if route is _Route.PROBE:
+            return self._call_probe()
+        return self._open_response(circuit)
+
+    async def handle_async(self) -> Any:
+        """Async counterpart of :meth:`handle` for coroutine functions; same routing and bookkeeping."""
+        route, circuit = self._route()
+        if route is _Route.CLOSED:
+            return await self._call_closed_async()
+        if route is _Route.PROBE:
+            return await self._call_probe_async()
+        return await self._open_response_async(circuit)
+
+    def _route(self) -> tuple[_Route, CircuitInfo]:
+        """
+        Read the persisted state and decide how this call runs.
+
+        Shared by the sync and async paths so the state machine lives in one place. Side
+        effects (probe election, OPEN to HALF_OPEN notification) happen here; only the
+        protected call itself differs between the two paths.
+        """
         record = self.persistence_store.get_state(self.name)
 
         if record.state == CircuitState.CLOSED:
@@ -141,35 +182,59 @@ class CircuitBreakerHandler:
                 if prev is not None and prev != CircuitState.CLOSED:
                     _LOCAL_FAILURES[self.name] = 0
                 _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
-            return self._call_closed()
+            route = _Route.CLOSED
+        elif record.state == CircuitState.OPEN:
+            route = self._route_open(record)
+        else:
+            route = self._route_half_open(record)
 
-        if record.state == CircuitState.OPEN:
-            with _COUNTERS_LOCK:
-                _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
-            # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
-            opened_at = record.opened_at if record.opened_at is not None else self._now()
-            if self._now() >= opened_at + self.config.recovery_timeout:
-                # Recovery window elapsed: try to become the single prober.
-                if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
-                    self._reset_probe_successes()
-                    self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
-                    return self._call_probe()
-            return self._open_response(record.to_circuit_info())
+        return route, record.to_circuit_info()
 
-        # HALF_OPEN: only the thread that owns the probe lock runs.
+    def _route_open(self, record: CircuitStateRecord) -> _Route:
+        """OPEN: reject, or elect this worker as the single prober once the recovery window elapsed."""
+        with _COUNTERS_LOCK:
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
+        # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
+        opened_at = record.opened_at if record.opened_at is not None else self._now()
+        if self._now() < opened_at + self.config.recovery_timeout or not self._claim_probe():
+            return _Route.OPEN
+        # Recovery window elapsed: try to become the single prober.
+        if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
+            self._reset_probe_successes()
+            self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
+            return _Route.PROBE
+        self._release_probe()
+        return _Route.OPEN
+
+    def _route_half_open(self, record: CircuitStateRecord) -> _Route:
+        """HALF_OPEN: only the probe owner runs, one probe at a time; expired leases can be taken over."""
         with _COUNTERS_LOCK:
             _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
         if record.half_open_owner == _probe_owner_id():
-            return self._call_probe()
+            # Owner thread: one probe at a time, even when coroutines run concurrently.
+            return _Route.PROBE if self._claim_probe() else _Route.OPEN
 
         # If the probe lease has expired (owner recycled mid-probe), take over.
-        if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
+        lease_expired = record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry
+        if lease_expired and self._claim_probe():
             logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
             if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), record.opened_at or 0):
                 self._reset_probe_successes()
-                return self._call_probe()
+                return _Route.PROBE
+            self._release_probe()
+        return _Route.OPEN
 
-        return self._open_response(record.to_circuit_info())
+    def _claim_probe(self) -> bool:
+        """Mark a probe as in flight for this circuit; False when one is already running in this process."""
+        with _COUNTERS_LOCK:
+            if _PROBES_IN_FLIGHT.get(self.name) == os.getpid():
+                return False
+            _PROBES_IN_FLIGHT[self.name] = os.getpid()
+            return True
+
+    def _release_probe(self) -> None:
+        with _COUNTERS_LOCK:
+            _PROBES_IN_FLIGHT.pop(self.name, None)
 
     def _reset_probe_successes(self) -> None:
         """
@@ -188,57 +253,94 @@ class CircuitBreakerHandler:
         try:
             result = self.function(*self.fn_args, **self.fn_kwargs)
         except Exception as exc:
-            if not self.config.counts_as_failure(exc):
-                raise
-            # Increment and reset atomically so exactly one thread observes the threshold
-            # crossing; racing threads would otherwise lose increments (tripping late) or
-            # each persist the same transition.
-            with _COUNTERS_LOCK:
-                failures = _LOCAL_FAILURES.get(self.name, 0) + 1
-                tripped = failures >= self.config.failure_threshold
-                _LOCAL_FAILURES[self.name] = 0 if tripped else failures
-            if tripped:
-                logger.debug("Circuit '%s' tripping CLOSED to OPEN after %d failures.", self.name, failures)
-                opened_at = self._now()
-                self._safe_persist(
-                    self.persistence_store.save_open,
-                    self.name,
-                    failure_count=failures,
-                    opened_at=opened_at,
-                )
-                self._notify(CircuitState.CLOSED, CircuitState.OPEN, opened_at=opened_at)
+            self._on_closed_failure(exc)
             raise
-        else:
-            with _COUNTERS_LOCK:
-                _LOCAL_FAILURES[self.name] = 0
-            return result
+        self._on_closed_success()
+        return result
+
+    async def _call_closed_async(self) -> Any:
+        """Await the protected coroutine while the circuit is closed, tracking failures."""
+        try:
+            result = await self.function(*self.fn_args, **self.fn_kwargs)
+        except Exception as exc:
+            self._on_closed_failure(exc)
+            raise
+        self._on_closed_success()
+        return result
+
+    def _on_closed_failure(self, exc: Exception) -> None:
+        """Count a qualifying failure while closed and trip the circuit at the threshold."""
+        if not self.config.counts_as_failure(exc):
+            return
+        # Increment and reset atomically so exactly one thread observes the threshold
+        # crossing; racing threads would otherwise lose increments (tripping late) or
+        # each persist the same transition.
+        with _COUNTERS_LOCK:
+            failures = _LOCAL_FAILURES.get(self.name, 0) + 1
+            tripped = failures >= self.config.failure_threshold
+            _LOCAL_FAILURES[self.name] = 0 if tripped else failures
+        if tripped:
+            logger.debug("Circuit '%s' tripping CLOSED to OPEN after %d failures.", self.name, failures)
+            opened_at = self._now()
+            self._safe_persist(
+                self.persistence_store.save_open,
+                self.name,
+                failure_count=failures,
+                opened_at=opened_at,
+            )
+            self._notify(CircuitState.CLOSED, CircuitState.OPEN, opened_at=opened_at)
+
+    def _on_closed_success(self) -> None:
+        with _COUNTERS_LOCK:
+            _LOCAL_FAILURES[self.name] = 0
 
     def _call_probe(self) -> Any:
         """Run a probe during half-open, closing or reopening based on the outcome."""
         try:
             result = self.function(*self.fn_args, **self.fn_kwargs)
         except Exception as exc:
-            if not self.config.counts_as_failure(exc):
-                raise
-            logger.debug("Circuit '%s' probe failed; reopening.", self.name)
-            opened_at = self._now()
-            self._safe_persist(self.persistence_store.save_reopen, self.name, opened_at=opened_at)
-            with _COUNTERS_LOCK:
-                _LOCAL_SUCCESSES[self.name] = 0
-            self._notify(CircuitState.HALF_OPEN, CircuitState.OPEN, opened_at=opened_at)
+            self._on_probe_failure(exc)
             raise
-        else:
-            with _COUNTERS_LOCK:
-                successes = _LOCAL_SUCCESSES.get(self.name, 0) + 1
-                closed = successes >= self.config.success_threshold
-                _LOCAL_SUCCESSES[self.name] = 0 if closed else successes
-                if closed:
-                    _LOCAL_FAILURES[self.name] = 0
+        finally:
+            self._release_probe()
+        self._on_probe_success()
+        return result
+
+    async def _call_probe_async(self) -> Any:
+        """Await a probe during half-open, closing or reopening based on the outcome."""
+        try:
+            result = await self.function(*self.fn_args, **self.fn_kwargs)
+        except Exception as exc:
+            self._on_probe_failure(exc)
+            raise
+        finally:
+            self._release_probe()
+        self._on_probe_success()
+        return result
+
+    def _on_probe_failure(self, exc: Exception) -> None:
+        """A qualifying probe failure reopens the circuit."""
+        if not self.config.counts_as_failure(exc):
+            return
+        logger.debug("Circuit '%s' probe failed; reopening.", self.name)
+        opened_at = self._now()
+        self._safe_persist(self.persistence_store.save_reopen, self.name, opened_at=opened_at)
+        with _COUNTERS_LOCK:
+            _LOCAL_SUCCESSES[self.name] = 0
+        self._notify(CircuitState.HALF_OPEN, CircuitState.OPEN, opened_at=opened_at)
+
+    def _on_probe_success(self) -> None:
+        """Count a probe success and close the circuit at the threshold."""
+        with _COUNTERS_LOCK:
+            successes = _LOCAL_SUCCESSES.get(self.name, 0) + 1
+            closed = successes >= self.config.success_threshold
+            _LOCAL_SUCCESSES[self.name] = 0 if closed else successes
             if closed:
-                logger.debug("Circuit '%s' closing after %d probe successes.", self.name, successes)
-                self._safe_persist(self.persistence_store.save_closed, self.name)
-                self._notify(CircuitState.HALF_OPEN, CircuitState.CLOSED)
-            return result
+                _LOCAL_FAILURES[self.name] = 0
+        if closed:
+            logger.debug("Circuit '%s' closing after %d probe successes.", self.name, successes)
+            self._safe_persist(self.persistence_store.save_closed, self.name)
+            self._notify(CircuitState.HALF_OPEN, CircuitState.CLOSED)
 
     def _safe_persist(self, fn: Callable, *args: Any, **kwargs: Any) -> None:
         """
@@ -270,6 +372,13 @@ class CircuitBreakerHandler:
             f"Circuit '{self.name}' is open.",
             circuit=circuit,
         )
+
+    async def _open_response_async(self, circuit: CircuitInfo) -> Any:
+        """Produce the response for an open circuit, awaiting an async ``on_circuit_open`` callback."""
+        response = self._open_response(circuit)
+        if inspect.isawaitable(response):
+            return await response
+        return response
 
     def _notify(self, from_state: CircuitState, to_state: CircuitState, opened_at: int | None = None) -> None:
         """
