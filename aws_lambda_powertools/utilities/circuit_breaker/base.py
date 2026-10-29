@@ -9,6 +9,7 @@ path write-free: failures are counted locally and only persisted on a state tran
 from __future__ import annotations
 
 import datetime as dt
+import inspect
 import logging
 import os
 import threading
@@ -270,6 +271,121 @@ class CircuitBreakerHandler:
             f"Circuit '{self.name}' is open.",
             circuit=circuit,
         )
+
+    async def _open_response_async(self, circuit: CircuitInfo) -> Any:
+        """Produce the response for an open circuit in an async context."""
+        if self.on_circuit_open is not None:
+            res = self.on_circuit_open(*self.fn_args, **self.fn_kwargs, circuit=circuit)
+            if inspect.iscoroutine(res):
+                return await res
+            return res
+        raise CircuitBreakerOpenError(
+            f"Circuit '{self.name}' is open.",
+            circuit=circuit,
+        )
+
+    async def handle_async(self) -> Any:
+        """
+        Evaluate the circuit and route the call asynchronously.
+
+        Returns
+        -------
+        Any
+            The protected async function's result when the call runs, or the
+            ``on_circuit_open`` callback's return value when the circuit is open.
+
+        Raises
+        ------
+        CircuitBreakerOpenError
+            If the circuit is open and no callback is registered.
+        """
+        record = self.persistence_store.get_state(self.name)
+
+        if record.state == CircuitState.CLOSED:
+            with _COUNTERS_LOCK:
+                prev = _LAST_OBSERVED_STATE.get(self.name)
+                if prev is not None and prev != CircuitState.CLOSED:
+                    _LOCAL_FAILURES[self.name] = 0
+                _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
+            return await self._call_closed_async()
+
+        if record.state == CircuitState.OPEN:
+            with _COUNTERS_LOCK:
+                _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
+            opened_at = record.opened_at if record.opened_at is not None else self._now()
+            if self._now() >= opened_at + self.config.recovery_timeout:
+                if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
+                    self._reset_probe_successes()
+                    self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
+                    return await self._call_probe_async()
+            return await self._open_response_async(record.to_circuit_info())
+
+        with _COUNTERS_LOCK:
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
+        if record.half_open_owner == _probe_owner_id():
+            return await self._call_probe_async()
+
+        if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
+            logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
+            if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), record.opened_at or 0):
+                self._reset_probe_successes()
+                return await self._call_probe_async()
+
+        return await self._open_response_async(record.to_circuit_info())
+
+    async def _call_closed_async(self) -> Any:
+        """Run the protected async call while the circuit is closed, tracking failures."""
+        try:
+            result = await self.function(*self.fn_args, **self.fn_kwargs)
+        except Exception as exc:
+            if not self.config.counts_as_failure(exc):
+                raise
+            with _COUNTERS_LOCK:
+                failures = _LOCAL_FAILURES.get(self.name, 0) + 1
+                tripped = failures >= self.config.failure_threshold
+                _LOCAL_FAILURES[self.name] = 0 if tripped else failures
+            if tripped:
+                logger.debug("Circuit '%s' tripping CLOSED to OPEN after %d failures.", self.name, failures)
+                opened_at = self._now()
+                self._safe_persist(
+                    self.persistence_store.save_open,
+                    self.name,
+                    failure_count=failures,
+                    opened_at=opened_at,
+                )
+                self._notify(CircuitState.CLOSED, CircuitState.OPEN, opened_at=opened_at)
+            raise
+        else:
+            with _COUNTERS_LOCK:
+                _LOCAL_FAILURES[self.name] = 0
+            return result
+
+    async def _call_probe_async(self) -> Any:
+        """Run an async probe during half-open, closing or reopening based on the outcome."""
+        try:
+            result = await self.function(*self.fn_args, **self.fn_kwargs)
+        except Exception as exc:
+            if not self.config.counts_as_failure(exc):
+                raise
+            logger.debug("Circuit '%s' probe failed; reopening.", self.name)
+            opened_at = self._now()
+            self._safe_persist(self.persistence_store.save_reopen, self.name, opened_at=opened_at)
+            with _COUNTERS_LOCK:
+                _LOCAL_SUCCESSES[self.name] = 0
+            self._notify(CircuitState.HALF_OPEN, CircuitState.OPEN, opened_at=opened_at)
+            raise
+        else:
+            with _COUNTERS_LOCK:
+                successes = _LOCAL_SUCCESSES.get(self.name, 0) + 1
+                closed = successes >= self.config.success_threshold
+                _LOCAL_SUCCESSES[self.name] = 0 if closed else successes
+                if closed:
+                    _LOCAL_FAILURES[self.name] = 0
+            if closed:
+                logger.debug("Circuit '%s' closing after %d probe successes.", self.name, successes)
+                self._safe_persist(self.persistence_store.save_closed, self.name)
+                self._notify(CircuitState.HALF_OPEN, CircuitState.CLOSED)
+            return result
 
     def _notify(self, from_state: CircuitState, to_state: CircuitState, opened_at: int | None = None) -> None:
         """

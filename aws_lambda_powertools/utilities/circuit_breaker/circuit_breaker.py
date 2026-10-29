@@ -5,6 +5,7 @@ Primary interface for the Circuit Breaker utility.
 from __future__ import annotations
 
 import functools
+import inspect
 import logging
 import os
 import warnings
@@ -90,6 +91,31 @@ def circuit_breaker(
     config = config or CircuitBreakerConfig()
 
     def decorator(function: Callable) -> Callable:
+        is_async = inspect.iscoroutinefunction(function)
+
+        @functools.wraps(function)
+        async def async_wrapper(*args, **kwargs) -> Any:
+            if strtobool(os.getenv(constants.CIRCUIT_BREAKER_DISABLED_ENV, "false")):
+                warnings.warn(
+                    message="Disabling the circuit breaker is intended for development environments only "
+                    "and should not be used in production.",
+                    category=PowertoolsUserWarning,
+                    stacklevel=2,
+                )
+                return await function(*args, **kwargs)
+
+            handler = CircuitBreakerHandler(
+                function=function,
+                name=name,
+                config=config,
+                persistence_store=persistence_store,
+                on_circuit_open=on_circuit_open,
+                on_transition=on_transition,
+                function_args=args,
+                function_kwargs=kwargs,
+            )
+            return await handler.handle_async()
+
         @functools.wraps(function)
         def wrapper(*args, **kwargs) -> Any:
             # Skip the circuit entirely when disabled (development only).
@@ -114,6 +140,6 @@ def circuit_breaker(
             )
             return handler.handle()
 
-        return wrapper
+        return async_wrapper if is_async else wrapper
 
     return decorator

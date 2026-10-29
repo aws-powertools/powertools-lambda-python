@@ -888,3 +888,139 @@ def test_settings_are_kept_per_circuit_on_a_shared_layer(store, now):
     lease = store.db["a"].probe_lease_expiry
     assert lease is not None
     assert lease <= now + 30 + 2, "the lease must derive from circuit 'a' recovery_timeout, not 'b'"
+
+
+@pytest.mark.asyncio
+async def test_async_closed_circuit_returns_result_and_writes_nothing(store):
+    @circuit_breaker(name="async-c", persistence_store=store, config=CircuitBreakerConfig(local_cache_max_age=0))
+    async def call(value):
+        return value * 2
+
+    assert await call(21) == 42
+    assert store.db == {}, "healthy path must not write to the store"
+
+
+@pytest.mark.asyncio
+async def test_async_trips_open_after_failure_threshold(store):
+    config = CircuitBreakerConfig(failure_threshold=2, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-trip", persistence_store=store, config=config)
+    async def failing_call():
+        raise ConnectionError("downstream down")
+
+    for _ in range(2):
+        with pytest.raises(ConnectionError):
+            await failing_call()
+
+    assert store.db["async-trip"].state == CircuitState.OPEN
+    assert store.db["async-trip"].opened_at is not None
+
+
+@pytest.mark.asyncio
+async def test_async_open_with_callback_returns_callback_value(store, now):
+    store.db["async-open"] = CircuitStateRecord(
+        name="async-open",
+        state=CircuitState.OPEN,
+        failure_count=5,
+        opened_at=now,
+    )
+
+    def sync_on_open(order, circuit):
+        return {"buffered": order, "state": str(circuit.state)}
+
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-open", persistence_store=store, on_circuit_open=sync_on_open, config=config)
+    async def charge(order):
+        return f"charged {order}"
+
+    result = await charge({"id": 1})
+    assert result == {"buffered": {"id": 1}, "state": "OPEN"}
+
+
+@pytest.mark.asyncio
+async def test_async_open_with_async_callback_returns_callback_value(store, now):
+    store.db["async-open-2"] = CircuitStateRecord(
+        name="async-open-2",
+        state=CircuitState.OPEN,
+        failure_count=5,
+        opened_at=now,
+    )
+
+    async def async_on_open(order, circuit):
+        return {"async_buffered": order, "state": str(circuit.state)}
+
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-open-2", persistence_store=store, on_circuit_open=async_on_open, config=config)
+    async def charge(order):
+        return f"charged {order}"
+
+    result = await charge({"id": 2})
+    assert result == {"async_buffered": {"id": 2}, "state": "OPEN"}
+
+
+@pytest.mark.asyncio
+async def test_async_open_without_callback_raises_with_circuit_info(store, now):
+    store.db["async-err"] = CircuitStateRecord(
+        name="async-err",
+        state=CircuitState.OPEN,
+        failure_count=3,
+        opened_at=now,
+    )
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-err", persistence_store=store, config=config)
+    async def call():
+        return "success"
+
+    with pytest.raises(CircuitBreakerOpenError) as exc_info:
+        await call()
+
+    assert exc_info.value.circuit.name == "async-err"
+
+
+@pytest.mark.asyncio
+async def test_async_half_open_probe_success_closes(store, now):
+    store.db["async-probe"] = CircuitStateRecord(name="async-probe", state=CircuitState.OPEN, opened_at=now - 100)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-probe", persistence_store=store, config=config)
+    async def call():
+        return "healed"
+
+    res = await call()
+    assert res == "healed"
+    assert store.db["async-probe"].state == CircuitState.CLOSED
+
+
+@pytest.mark.asyncio
+async def test_async_half_open_probe_failure_reopens(store, now):
+    store.db["async-reopen"] = CircuitStateRecord(name="async-reopen", state=CircuitState.OPEN, opened_at=now - 100)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-reopen", persistence_store=store, config=config)
+    async def call():
+        raise ConnectionError("still down")
+
+    with pytest.raises(ConnectionError):
+        await call()
+
+    assert store.db["async-reopen"].state == CircuitState.OPEN
+
+
+@pytest.mark.asyncio
+async def test_async_disabled_env_bypasses_circuit(store, monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_CIRCUIT_BREAKER_DISABLED", "true")
+    config = CircuitBreakerConfig(failure_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-disabled", persistence_store=store, config=config)
+    async def call():
+        return "bypassed"
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        result = await call()
+
+    assert result == "bypassed"
+    assert any("Disabling the circuit breaker is intended for development" in str(w.message) for w in recorded)
