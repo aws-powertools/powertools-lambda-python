@@ -242,6 +242,9 @@ class CORSConfig:
             headers["Access-Control-Max-Age"] = str(self.max_age)
         if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
+        if origin != "*":
+            # The response echoes the request Origin, so shared caches must not reuse it for other origins
+            headers["Vary"] = "Origin"
         return headers
 
     def allowed_origin(self, extracted_origin: str) -> str | None:
@@ -362,7 +365,8 @@ class Response(Generic[ResponseT]):
         """
         Returns True if the response is JSON, based on the Content-Type.
         """
-        content_type = self.headers.get("Content-Type", "")
+        # Header names are case-insensitive, so match "content-type" in any casing
+        content_type = next((value for key, value in self.headers.items() if key.lower() == "content-type"), "")
         if isinstance(content_type, list):
             content_type = content_type[0]
         return content_type.startswith(DEFAULT_CONTENT_TYPE)
@@ -746,6 +750,20 @@ class Route:
         return operation_id
 
 
+def _accepts_gzip(accept_encoding: str) -> bool:
+    """Returns True if an Accept-Encoding header accepts gzip, honouring casing and a zero q-value"""
+    for coding in accept_encoding.split(","):
+        name, _, params = coding.partition(";")
+        if name.strip().lower() != "gzip":
+            continue
+        _, _, weight = params.replace(" ", "").lower().partition("q=")
+        try:
+            return float(weight) > 0 if weight else True
+        except ValueError:
+            return False
+    return False
+
+
 class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
@@ -765,7 +783,14 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
         origin = cors.allowed_origin(extracted_origin_header)
         if origin is not None:
-            self.response.headers.update(cors.to_dict(origin))
+            cors_headers = cors.to_dict(origin)
+            # Keep any Vary value the route already set, and add Origin to it
+            existing_vary = self.response.headers.get("Vary")
+            if isinstance(existing_vary, list):
+                existing_vary = ", ".join(existing_vary)
+            if existing_vary and "Vary" in cors_headers:
+                cors_headers["Vary"] = f"{existing_vary}, Origin"
+            self.response.headers.update(cors_headers)
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -798,11 +823,9 @@ class ResponseBuilder(Generic[ResponseEventT]):
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
         encoding = event.resolved_headers_field.get("accept-encoding", "")
-        gzip_accepted = False
-        if isinstance(encoding, str):
-            gzip_accepted = "gzip" in encoding
-        elif isinstance(encoding, list):
-            gzip_accepted = "gzip" in ",".join(encoding)
+        if isinstance(encoding, list):
+            encoding = ",".join(encoding)
+        gzip_accepted = isinstance(encoding, str) and _accepts_gzip(encoding)
 
         if gzip_accepted:
             if response_compression is not None:
@@ -845,8 +868,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
         """Build the full response dict to be returned by the lambda"""
 
         # We only apply the serializer when the content type is JSON and the
-        # body is not a str, to avoid double encoding
-        if self.response.is_json() and not isinstance(self.response.body, str):
+        # body is not a str or bytes, to avoid double encoding (bytes are base64 encoded below)
+        if self.response.is_json() and not isinstance(self.response.body, (str, bytes)):
             self.response.body = self.serializer(self.response.body)
 
         self._route(event, cors)
@@ -1482,8 +1505,11 @@ def _find_request_param_name(func: Callable) -> str | None:
     except Exception:
         hints = {}
 
+    from aws_lambda_powertools.event_handler.depends import _unwrap_optional
+
     for param_name, annotation in hints.items():
-        if annotation is Request:
+        # Python 3.10 wraps annotations of ``= None`` parameters in Optional[...]
+        if _unwrap_optional(annotation) is Request:
             return param_name
 
     return None
@@ -1841,6 +1867,7 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
+        from aws_lambda_powertools.event_handler.openapi.schema_generator import _validate_openapi_extension_keys
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1862,6 +1889,8 @@ class ApiGatewayResolver(BaseRouter):
 
         if not isinstance(openapi_extensions, dict):
             openapi_extensions = {}
+
+        _validate_openapi_extension_keys(openapi_extensions)
 
         output: dict[str, Any] = {
             "openapi": openapi_version,
@@ -2762,7 +2791,7 @@ class ApiGatewayResolver(BaseRouter):
                 _headers["Access-Control-Allow-Methods"] = CORSConfig.build_allow_methods(self._cors_methods)
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -2880,7 +2909,10 @@ class ApiGatewayResolver(BaseRouter):
                     return path[len(prefix) :]
 
             if isinstance(prefix, Pattern):
-                path = re.sub(prefix, "", path)
+                # Only strip a match at the start of the path, and only once
+                match = prefix.match(path)
+                if match:
+                    path = path[match.end() :]
 
                 # When using regexes, we might get into a point where everything is removed
                 # from the string, so we check if it's empty and return /, since there's nothing
@@ -2930,7 +2962,7 @@ class ApiGatewayResolver(BaseRouter):
                 return Response(status_code=204, content_type=None, headers=_headers, body="")
 
             # Customer registered 404 route? Call it.
-            custom_not_found_handler = self.exception_handler_manager.lookup_exception_handler(NotFoundError)
+            custom_not_found_handler = self._lookup_not_found_handler()
             if custom_not_found_handler:
                 return custom_not_found_handler(NotFoundError())
 
@@ -3005,6 +3037,21 @@ class ApiGatewayResolver(BaseRouter):
     def exception_handler(self, exc_class: type[Exception] | list[type[Exception]]):
         return self.exception_handler_manager.exception_handler(exc_class=exc_class)
 
+    def _lookup_not_found_handler(self) -> Callable | None:
+        """Find the handler for an unmatched route, ignoring catch-all handlers.
+
+        No exception was raised for an unmatched route, so a handler registered for `Exception` or `BaseException`
+        (e.g. a generic 500 handler) must not turn it into its own response. Handlers for `NotFoundError` and
+        `ServiceError` still apply.
+        """
+        handlers = self.exception_handler_manager.get_registered_handlers()
+        for cls in NotFoundError.__mro__:
+            if cls in (Exception, BaseException):
+                break
+            if cls in handlers:
+                return handlers[cls]
+        return None
+
     def _call_exception_handler(self, exp: Exception, route: Route) -> ResponseBuilder | None:
         # Depends() wraps what a dependency raised in DependencyResolutionError. Handle the original exception
         # as if the route had raised it, unless a handler is registered for DependencyResolutionError itself.
@@ -3019,7 +3066,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self.exception_handler_manager.lookup_exception_handler(type(exp))
         if handler:
             try:
-                return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
+                # Adapt the handler's return value like a route's (dict/tuple, ALB null body)
+                return self._response_builder_class(
+                    response=self._to_response(handler(exp)),  # type: ignore[arg-type]
+                    serializer=self._serializer,
+                    route=route,
+                )
             except ServiceError as service_error:
                 exp = service_error
 
@@ -3284,6 +3336,12 @@ class Router(BaseRouter):
                 status_code,
             )
 
+            if route_key in self._routes:
+                warnings.warn(
+                    f"A route like this was already registered. method: '{', '.join(methods)}' rule: '{rule}'",
+                    stacklevel=2,
+                )
+
             # Collate Middleware for routes
             if middlewares is not None:
                 for handler in middlewares:
@@ -3477,7 +3535,6 @@ class ALBResolver(ApiGatewayResolver):
             if handled_response is None:
                 raise
 
-            handled_response.response = cast(Response, self._to_response(handled_response.response))
             response = super()._build_response(handled_response)
             # Validate once more without invoking an exception handler recursively.
             self._validate_response_size(response)

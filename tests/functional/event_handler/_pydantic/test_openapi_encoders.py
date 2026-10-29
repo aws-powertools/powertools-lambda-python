@@ -242,3 +242,14 @@ def test_openapi_encode_custom_serializer_dataclasses():
 
     # THEN we should get the custom serializer output
     assert result == {"kind": "serialized"}
+
+
+@pytest.mark.parametrize("value", ["NaN", "Infinity", "-Infinity"])
+def test_openapi_encode_non_finite_decimal_raises_serialization_error(value):
+    from decimal import Decimal
+
+    # GIVEN a Decimal that has no JSON number representation
+    # WHEN we try to encode it
+    # THEN we raise a SerializationError instead of leaking a TypeError
+    with pytest.raises(SerializationError, match="not finite"):
+        jsonable_encoder(Decimal(value))

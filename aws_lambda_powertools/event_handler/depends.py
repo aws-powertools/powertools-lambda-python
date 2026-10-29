@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any, get_args, get_origin, get_type_hints
+from types import UnionType
+from typing import TYPE_CHECKING, Annotated, Any, Union, get_args, get_origin, get_type_hints
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -89,13 +90,33 @@ class DependencyParam:
         self.dependant = dependant
 
 
+def _unwrap_optional(annotation: Any) -> Any:
+    """Return the inner type of ``Optional[X]`` / ``X | None``, or the annotation itself.
+
+    On Python 3.10, ``typing.get_type_hints`` wraps the annotation of a parameter whose
+    default is ``None`` in ``Optional[...]``, which would hide ``Annotated`` metadata such
+    as ``Depends()`` or a ``Request`` annotation. Python 3.11 stopped doing that.
+    """
+    if get_origin(annotation) in (Union, UnionType):
+        args = [arg for arg in get_args(annotation) if arg is not type(None)]
+        if len(args) == 1:
+            return args[0]
+    return annotation
+
+
 def _get_depends_from_annotation(annotation: Any) -> Depends | None:
     """Extract a Depends instance from an Annotated[Type, Depends(...)] annotation."""
+    annotation = _unwrap_optional(annotation)
     if get_origin(annotation) is Annotated:
         for arg in get_args(annotation)[1:]:
             if isinstance(arg, Depends):
                 return arg
     return None
+
+
+def _annotation_target(func: Callable[..., Any]) -> Callable[..., Any]:
+    """A class carries its dependency annotations on __init__, not on the class itself."""
+    return func.__init__ if isinstance(func, type) else func  # type: ignore[misc]
 
 
 def _has_depends(func: Callable[..., Any]) -> bool:
@@ -118,7 +139,7 @@ def build_dependency_tree(func: Callable[..., Any]) -> DependencyTree:
     annotations and recursively builds the tree — all without importing pydantic.
     """
     try:
-        hints = get_type_hints(func, include_extras=True)
+        hints = get_type_hints(_annotation_target(func), include_extras=True)
     except Exception:
         return DependencyTree()
 
@@ -198,11 +219,11 @@ def solve_dependencies(
         # Inject Request if the dependency declares it
         if request is not None:
             try:
-                hints = get_type_hints(use_fn)
+                hints = get_type_hints(_annotation_target(use_fn))
             except Exception:  # pragma: no cover - defensive for broken annotations
                 hints = {}
             for param_name, annotation in hints.items():
-                if annotation is RequestClass:
+                if _unwrap_optional(annotation) is RequestClass:
                     sub_values[param_name] = request
 
         try:

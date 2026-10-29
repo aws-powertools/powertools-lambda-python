@@ -253,6 +253,8 @@ def _build_responses(
                 dependant=dependant,
                 model_name_map=model_name_map,
                 field_mapping=field_mapping,
+                resp_code=resp_code,
+                status_code=status_code,
             )
     else:
         response_schema = _build_return_schema(
@@ -353,8 +355,13 @@ def _create_regular_parameter(
         field_mapping=field_mapping,
     )
 
+    # Path parameter names must match the route-template placeholders, which are
+    # keyed by the Python argument name - an explicit alias would otherwise emit
+    # a name that does not exist in the path template.
+    param_name = param.name if field_info.in_.value == "path" else param.alias
+
     parameter: dict[str, Any] = {
-        "name": param.alias,
+        "name": param_name,
         "in": field_info.in_.value,
         "required": param.required,
         "schema": param_schema,
@@ -370,16 +377,34 @@ def _create_regular_parameter(
     return parameter
 
 
-def _get_basic_type_schema(param_type: type) -> dict[str, str]:
+def _get_basic_type_schema(param_type: type) -> dict[str, Any]:
     """Get basic OpenAPI schema for simple types."""
-    type_map: dict[type, str] = {bool: "boolean", int: "integer", float: "number"}
     try:
-        for base_type, schema_type in type_map.items():
-            if issubclass(param_type, base_type):
-                return {"type": schema_type}
+        from pydantic import TypeAdapter
+
+        return TypeAdapter(param_type).json_schema()
+    except Exception:
         return {"type": "string"}
-    except TypeError:
-        return {"type": "string"}
+
+
+def _validate_openapi_extension_keys(openapi_extensions: dict[str, Any]) -> None:
+    """Warn when an OpenAPI extension key does not respect the x- prefix convention.
+
+    The OpenAPI spec reserves the `x-` prefix for extensions. We warn instead of raising so that
+    applications already serving a schema with a wrong key keep working; this becomes an error in v4.
+    """
+    import warnings
+
+    from aws_lambda_powertools.warnings import PowertoolsUserWarning
+
+    for extension_key in openapi_extensions:
+        if not str(extension_key).startswith("x-"):
+            warnings.warn(
+                f"OpenAPI extension key `{extension_key}` must start with `x-`; it is still emitted, "
+                "but this will become an error in a future major version.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
 
 
 def _apply_optional_fields(
@@ -392,6 +417,7 @@ def _apply_optional_fields(
     if security:
         operation["security"] = security
     if openapi_extensions:
+        _validate_openapi_extension_keys(openapi_extensions)
         operation.update(openapi_extensions)
 
 
@@ -501,16 +527,21 @@ def _build_custom_response(
     dependant: Dependant,
     model_name_map: dict[TypeModelOrEnum, str],
     field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+    resp_code: int,
+    status_code: int = DEFAULT_STATUS_CODE,
 ) -> OpenAPIResponse:
     """Build a single custom response, resolving model references in content."""
     if "content" not in response:
-        response["content"] = {
-            DEFAULT_CONTENT_TYPE: _build_return_schema(
-                param=dependant.return_param,
-                model_name_map=model_name_map,
-                field_mapping=field_mapping,
-            ),
-        }
+        # Only the route's own status code inherits the return-type schema;
+        # description-only entries (e.g. a 404) stay description-only.
+        if resp_code == status_code:
+            response["content"] = {
+                DEFAULT_CONTENT_TYPE: _build_return_schema(
+                    param=dependant.return_param,
+                    model_name_map=model_name_map,
+                    field_mapping=field_mapping,
+                ),
+            }
         return response
 
     for content_type, payload in response["content"].items():

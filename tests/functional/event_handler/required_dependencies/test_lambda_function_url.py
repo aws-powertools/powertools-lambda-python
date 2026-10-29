@@ -82,3 +82,18 @@ def test_lambda_function_url_no_matches():
     # THEN process event correctly
     # AND return 404 because the event doesn't match any known route
     assert result["statusCode"] == 404
+
+
+def test_lambda_function_url_get_base_path_checks_http_path():
+    # GIVEN a Lambda Function Url event with a custom stage prefixing the path
+    event = load_event("lambdaFunctionUrlEvent.json")
+    event["requestContext"]["stage"] = "live"
+    event["rawPath"] = "/live/my/path"
+    event["requestContext"]["http"]["path"] = "/live/my/path"
+
+    app = LambdaFunctionUrlResolver()
+    app.current_event = LambdaFunctionUrlEvent(event)
+
+    # WHEN deriving the base path
+    # THEN it comes from the http path, not the http method
+    assert app._get_base_path() == "/live"
