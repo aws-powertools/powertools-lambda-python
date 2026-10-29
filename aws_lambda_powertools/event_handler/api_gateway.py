@@ -1867,6 +1867,7 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
+        from aws_lambda_powertools.event_handler.openapi.schema_generator import _validate_openapi_extension_keys
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1888,6 +1889,8 @@ class ApiGatewayResolver(BaseRouter):
 
         if not isinstance(openapi_extensions, dict):
             openapi_extensions = {}
+
+        _validate_openapi_extension_keys(openapi_extensions)
 
         output: dict[str, Any] = {
             "openapi": openapi_version,
@@ -3332,6 +3335,12 @@ class Router(BaseRouter):
                 custom_response_validation_http_code,
                 status_code,
             )
+
+            if route_key in self._routes:
+                warnings.warn(
+                    f"A route like this was already registered. method: '{', '.join(methods)}' rule: '{rule}'",
+                    stacklevel=2,
+                )
 
             # Collate Middleware for routes
             if middlewares is not None:

@@ -11,6 +11,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 from aws_lambda_powertools.utilities.parameters.base import BaseProvider
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -200,9 +201,13 @@ class DynamoDBProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Key"] = {self.key_attr: name}
 
+        response = self.table.get_item(**sdk_options)
+        if "Item" not in response:
+            raise GetParameterError(f"Parameter '{name}' not found in table '{self.table.name}'")
+
         # maintenance: look for better ways to correctly type DynamoDB multiple return types
         # without a breaking change within ABC return type
-        return self.table.get_item(**sdk_options)["Item"][self.value_attr]  # type: ignore[return-value]  # ty: ignore[invalid-return-type]
+        return response["Item"][self.value_attr]  # type: ignore[return-value]  # ty: ignore[invalid-return-type]
 
     def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
@@ -227,6 +232,12 @@ class DynamoDBProvider(BaseProvider):
             sdk_options["ExclusiveStartKey"] = response["LastEvaluatedKey"]
             response = self.table.query(**sdk_options)
             items.extend(response.get("Items", []))
+
+        if any(self.sort_attr not in item for item in items):
+            raise GetParameterError(
+                f"Sort attribute '{self.sort_attr}' missing from an item "
+                f"for parameter '{path}' in table '{self.table.name}'",
+            )
 
         # maintenance: look for better ways to correctly type DynamoDB multiple return types
         # without a breaking change within ABC return type

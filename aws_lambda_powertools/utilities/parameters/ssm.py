@@ -27,7 +27,11 @@ from aws_lambda_powertools.utilities.parameters.constants import (
     SSM_PARAMETER_TIER,
     SSM_PARAMETER_TYPES,
 )
-from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
+from aws_lambda_powertools.utilities.parameters.exceptions import (
+    GetParameterError,
+    SetParameterError,
+    TransformParameterError,
+)
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -360,9 +364,14 @@ class SSMProvider(BaseProvider):
             opts["KeyId"] = kms_key_id
 
         try:
-            return self.client.put_parameter(**opts)
+            response = self.client.put_parameter(**opts)
         except Exception as exc:
             raise SetParameterError(f"Error setting parameter - {str(exc)}") from exc
+
+        # Remove any cached value for this parameter so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
@@ -532,7 +541,7 @@ class SSMProvider(BaseProvider):
         for parameter, options in batch.items():
             try:
                 response[parameter] = self.get(parameter, options["max_age"], options["transform"], options["decrypt"])
-            except GetParameterError:
+            except (GetParameterError, TransformParameterError):
                 if raise_on_error:
                     raise
                 errors.append(parameter)
@@ -622,21 +631,25 @@ class SSMProvider(BaseProvider):
         batch_errors: list[str] = []
         parameter_names = list(parameters.keys())
 
-        # All params in the batch must be decrypted
-        # we return early if we hit an unrecoverable exception like InvalidKeyId/InternalServerError
-        # everything else should technically be recoverable as GetParameters is non-atomic
+        # Handle request-level failures according to raise_on_error.
+        # Successful responses may still report failures in InvalidParameters.
         try:
             if decrypt:
                 response = self.client.get_parameters(Names=parameter_names, WithDecryption=True)
             else:
                 response = self.client.get_parameters(Names=parameter_names)
-        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError) as exc:
+        except Exception as exc:
             if raise_on_error:
-                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}") from exc
+                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}: {exc}") from exc
             return ret, parameter_names
 
         batch_errors = self._handle_any_invalid_get_parameter_errors(response, raise_on_error)
-        transformed_params = self._transform_and_cache_get_parameters_response(response, parameters, raise_on_error)
+        transformed_params, transform_errors = self._transform_and_cache_get_parameters_response(
+            response,
+            parameters,
+            raise_on_error,
+        )
+        batch_errors.extend(transform_errors)
 
         return transformed_params, batch_errors
 
@@ -645,8 +658,9 @@ class SSMProvider(BaseProvider):
         api_response: GetParametersResultTypeDef,
         parameters: dict[str, Any],
         raise_on_error: bool = True,
-    ) -> dict[str, Any]:
+    ) -> tuple[dict[str, Any], list[str]]:
         response: dict[str, Any] = {}
+        transform_errors: list[str] = []
 
         for parameter in api_response["Parameters"]:
             # For names with a version or label selector (e.g. "/a:prod"), SSM returns the bare name
@@ -658,19 +672,28 @@ class SSMProvider(BaseProvider):
 
             # NOTE: If transform is set, we do it before caching to reduce number of operations
             if transform:
-                value = transform_value(
-                    value=value,
-                    transform=transform,
-                    raise_on_transform_error=raise_on_error,
-                    key=name,
-                )  # type: ignore[assignment]
+                try:
+                    value = transform_value(
+                        value=value,
+                        transform=transform,
+                        raise_on_transform_error=True,
+                        key=name,
+                    )  # type: ignore[assignment]
+                except TransformParameterError:
+                    if raise_on_error:
+                        raise
+
+                    # NOTE: Don't cache failed transforms, otherwise a corrected parameter
+                    # would keep returning None from the cache until max_age expires
+                    transform_errors.append(name)
+                    continue
 
             _cache_key = (name, transform)
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
 
             response[name] = value
 
-        return response
+        return response, transform_errors
 
     @staticmethod
     def _handle_any_invalid_get_parameter_errors(
