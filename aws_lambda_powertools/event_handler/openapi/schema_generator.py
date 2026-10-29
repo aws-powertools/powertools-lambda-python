@@ -388,12 +388,23 @@ def _get_basic_type_schema(param_type: type) -> dict[str, Any]:
 
 
 def _validate_openapi_extension_keys(openapi_extensions: dict[str, Any]) -> None:
-    """Ensure every OpenAPI extension key respects the x- prefix convention."""
-    from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
+    """Warn when an OpenAPI extension key does not respect the x- prefix convention.
+
+    The OpenAPI spec reserves the `x-` prefix for extensions. We warn instead of raising so that
+    applications already serving a schema with a wrong key keep working; this becomes an error in v4.
+    """
+    import warnings
+
+    from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
     for extension_key in openapi_extensions:
         if not str(extension_key).startswith("x-"):
-            raise SchemaValidationError("An OpenAPI extension key must start with x-")
+            warnings.warn(
+                f"OpenAPI extension key `{extension_key}` must start with `x-`; it is still emitted, "
+                "but this will become an error in a future major version.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
 
 
 def _apply_optional_fields(

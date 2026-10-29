@@ -5,7 +5,6 @@ import json
 import pytest
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Router
-from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.models import (
     APIKey,
     APIKeyIn,
@@ -14,6 +13,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     OAuthFlows,
     Server,
 )
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 def test_openapi_extension_root_level():
@@ -271,17 +271,19 @@ def test_openapi_extension_operation_level_multiple_paths_with_router(
     )
 
 
-def test_openapi_extension_root_level_requires_x_prefix():
+def test_openapi_extension_root_level_warns_without_x_prefix():
     # GIVEN an APIGatewayRestResolver instance
     app = APIGatewayRestResolver()
 
     # WHEN we get the OpenAPI schema with a root extension that does not start with x-
-    # THEN it must be rejected like Server and SecurityScheme extensions already are
-    with pytest.raises(SchemaValidationError, match="must start with x-"):
-        app.get_openapi_json_schema(openapi_extensions={"amazon-apigateway-cors": {"maxAge": 0}})
+    # THEN we warn and still emit the schema, so existing applications keep working
+    with pytest.warns(PowertoolsUserWarning, match="must start with `x-`"):
+        schema = json.loads(app.get_openapi_json_schema(openapi_extensions={"amazon-apigateway-cors": {"maxAge": 0}}))
+
+    assert schema["amazon-apigateway-cors"] == {"maxAge": 0}
 
 
-def test_openapi_extension_operation_level_requires_x_prefix():
+def test_openapi_extension_operation_level_warns_without_x_prefix():
     # GIVEN a route with an operation extension that does not start with x-
     app = APIGatewayRestResolver()
 
@@ -290,6 +292,8 @@ def test_openapi_extension_operation_level_requires_x_prefix():
         pass
 
     # WHEN we get the OpenAPI schema
-    # THEN it must be rejected
-    with pytest.raises(SchemaValidationError, match="must start with x-"):
-        app.get_openapi_json_schema()
+    # THEN we warn and the extension is still emitted on the operation
+    with pytest.warns(PowertoolsUserWarning, match="must start with `x-`"):
+        schema = json.loads(app.get_openapi_json_schema())
+
+    assert schema["paths"]["/test"]["get"]["amazon-apigateway-integration"] == {"type": "aws_proxy"}
