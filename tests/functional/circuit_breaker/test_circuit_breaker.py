@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 import warnings
@@ -1024,3 +1025,50 @@ async def test_async_disabled_env_bypasses_circuit(store, monkeypatch):
 
     assert result == "bypassed"
     assert any("Disabling the circuit breaker is intended for development" in str(w.message) for w in recorded)
+
+
+@pytest.mark.asyncio
+async def test_async_concurrent_calls_run_a_single_probe(store, now):
+    """Coroutines share the thread's probe owner id, so without a guard they would all probe at once."""
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=2, local_cache_max_age=0)
+    probes = []
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    async def call(i):
+        probes.append(i)
+        await asyncio.sleep(0.01)
+        return "ok"
+
+    results = await asyncio.gather(*(call(i) for i in range(8)), return_exceptions=True)
+
+    assert len(probes) == 1, "exactly one coroutine must probe per recovery window"
+    assert sum(isinstance(r, CircuitBreakerOpenError) for r in results) == 7
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+
+
+@pytest.mark.asyncio
+async def test_async_probe_slot_is_released_after_success_and_failure(store, now):
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    calls = []
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    async def call(fail=False):
+        calls.append(fail)
+        if fail:
+            raise ValueError("probe failed")
+        return "ok"
+
+    # a successful probe keeps the circuit half-open and must leave the slot free for the next probe
+    assert await call() == "ok"
+    assert await call() == "ok"
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    # a failing probe reopens; once the recovery window elapses the next call must be able to probe again
+    with pytest.raises(ValueError):
+        await call(fail=True)
+    assert store.db["c"].state == CircuitState.OPEN
+    store.db["c"].opened_at = now - 60
+    assert await call() == "ok"
+    assert calls == [False, False, True, False]
+    assert "c" not in base_module._PROBES_IN_FLIGHT

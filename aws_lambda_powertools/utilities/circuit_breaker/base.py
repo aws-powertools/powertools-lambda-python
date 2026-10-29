@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.circuit_breaker.persistence.base import (
         CircuitBreakerPersistenceLayer,
     )
+    from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
     from aws_lambda_powertools.utilities.circuit_breaker.states import CircuitInfo
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,11 @@ _LAST_OBSERVED_STATE: dict[str, CircuitState] = {}
 # lock. Held only while mutating the dicts, never across persistence writes or user
 # callbacks.
 _COUNTERS_LOCK = threading.Lock()
+
+# Circuit names with a probe currently running in this process. The probe lease is per
+# thread, so concurrent coroutines in one event loop would all pass the owner check and
+# probe together; this keeps the single-prober guarantee within a process too.
+_PROBES_IN_FLIGHT: set[str] = set()
 
 # Identifier used to claim the half-open probe lock, unique per thread so the store's
 # conditional election picks a single prober across threads as well as processes.
@@ -175,35 +181,59 @@ class CircuitBreakerHandler:
                 if prev is not None and prev != CircuitState.CLOSED:
                     _LOCAL_FAILURES[self.name] = 0
                 _LAST_OBSERVED_STATE[self.name] = CircuitState.CLOSED
-            return _Route.CLOSED, record.to_circuit_info()
+            route = _Route.CLOSED
+        elif record.state == CircuitState.OPEN:
+            route = self._route_open(record)
+        else:
+            route = self._route_half_open(record)
 
-        if record.state == CircuitState.OPEN:
-            with _COUNTERS_LOCK:
-                _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
-            # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
-            opened_at = record.opened_at if record.opened_at is not None else self._now()
-            if self._now() >= opened_at + self.config.recovery_timeout:
-                # Recovery window elapsed: try to become the single prober.
-                if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
-                    self._reset_probe_successes()
-                    self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
-                    return _Route.PROBE, record.to_circuit_info()
-            return _Route.OPEN, record.to_circuit_info()
+        return route, record.to_circuit_info()
 
-        # HALF_OPEN: only the thread that owns the probe lock runs.
+    def _route_open(self, record: CircuitStateRecord) -> _Route:
+        """OPEN: reject, or elect this worker as the single prober once the recovery window elapsed."""
+        with _COUNTERS_LOCK:
+            _LAST_OBSERVED_STATE[self.name] = CircuitState.OPEN
+        # ``opened_at`` may legitimately be 0 (epoch); treat only None as missing.
+        opened_at = record.opened_at if record.opened_at is not None else self._now()
+        if self._now() < opened_at + self.config.recovery_timeout or not self._claim_probe():
+            return _Route.OPEN
+        # Recovery window elapsed: try to become the single prober.
+        if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), opened_at):
+            self._reset_probe_successes()
+            self._notify(CircuitState.OPEN, CircuitState.HALF_OPEN, opened_at=opened_at)
+            return _Route.PROBE
+        self._release_probe()
+        return _Route.OPEN
+
+    def _route_half_open(self, record: CircuitStateRecord) -> _Route:
+        """HALF_OPEN: only the probe owner runs, one probe at a time; expired leases can be taken over."""
         with _COUNTERS_LOCK:
             _LAST_OBSERVED_STATE[self.name] = CircuitState.HALF_OPEN
         if record.half_open_owner == _probe_owner_id():
-            return _Route.PROBE, record.to_circuit_info()
+            # Owner thread: one probe at a time, even when coroutines run concurrently.
+            return _Route.PROBE if self._claim_probe() else _Route.OPEN
 
         # If the probe lease has expired (owner recycled mid-probe), take over.
-        if record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry:
+        lease_expired = record.probe_lease_expiry is not None and self._now() >= record.probe_lease_expiry
+        if lease_expired and self._claim_probe():
             logger.debug("Circuit '%s' probe lease expired; attempting takeover.", self.name)
             if self.persistence_store.try_acquire_half_open(self.name, _probe_owner_id(), record.opened_at or 0):
                 self._reset_probe_successes()
-                return _Route.PROBE, record.to_circuit_info()
+                return _Route.PROBE
+            self._release_probe()
+        return _Route.OPEN
 
-        return _Route.OPEN, record.to_circuit_info()
+    def _claim_probe(self) -> bool:
+        """Mark a probe as in flight for this circuit; False when one is already running in this process."""
+        with _COUNTERS_LOCK:
+            if self.name in _PROBES_IN_FLIGHT:
+                return False
+            _PROBES_IN_FLIGHT.add(self.name)
+            return True
+
+    def _release_probe(self) -> None:
+        with _COUNTERS_LOCK:
+            _PROBES_IN_FLIGHT.discard(self.name)
 
     def _reset_probe_successes(self) -> None:
         """
@@ -270,6 +300,8 @@ class CircuitBreakerHandler:
         except Exception as exc:
             self._on_probe_failure(exc)
             raise
+        finally:
+            self._release_probe()
         self._on_probe_success()
         return result
 
@@ -280,6 +312,8 @@ class CircuitBreakerHandler:
         except Exception as exc:
             self._on_probe_failure(exc)
             raise
+        finally:
+            self._release_probe()
         self._on_probe_success()
         return result
 

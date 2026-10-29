@@ -191,6 +191,9 @@ After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a 
     thread, so the single-prober guarantee spans threads as well as environments, and the in-memory failure counter is
     synchronized. Single-threaded functions (the normal Lambda model) are unaffected.
 
+    The same holds for coroutines: concurrent `await`s of the same circuit in one event loop run a single probe at a
+    time, and the others get the open response.
+
     Probe ownership belongs to the thread that won the election. If that thread never runs the circuit again (for
     example, a thread-per-request worker pool), recovery waits for the probe lease to expire before another thread or
     environment takes over.
