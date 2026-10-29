@@ -1398,6 +1398,36 @@ def test_idempotent_function_serialization_no_response():
     assert from_dict_called is False, "in case response is None, from_dict should not be called"
 
 
+@pytest.mark.parametrize(
+    "expected_result",
+    [0, False, "", [], {}],
+    ids=["zero", "false", "empty_str", "empty_list", "empty_dict"],
+)
+def test_idempotent_function_falsy_response_replay(expected_result):
+    # GIVEN a function returning a falsy value
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_falsy_response_replay.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    calls = 0
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record", config=config)
+    def record_handler(record):
+        nonlocal calls
+        calls += 1
+        return expected_result
+
+    # WHEN calling the function twice with the same payload
+    first_result = record_handler(record=mock_event)
+    second_result = record_handler(record=mock_event)
+
+    # THEN the second call returns the stored falsy value instead of None
+    assert first_result == expected_result
+    assert second_result == expected_result
+    assert type(second_result) is type(expected_result)
+    assert calls == 1
+
+
 @pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
 def test_idempotent_function_serialization_dataclass(output_serializer_type: str):
     # GIVEN
