@@ -358,9 +358,6 @@ def transform_value(
 
     err_msg = "Unable to transform value using '{transform}' transform: {exc}"
 
-    if isinstance(value, bytes):
-        value = value.decode("utf-8")
-
     if isinstance(value, dict):
         # NOTE: We must handle partial failures when receiving multiple values
         # where one of the keys might fail during transform, e.g. `{"a": "valid", "b": "{"}`
@@ -377,14 +374,14 @@ def transform_value(
                 transformed_values[dict_key] = None
         return transformed_values
 
-    if transform == "auto":
-        # key="a.json", value='{"a": "b"}', or key="a.binary", value="b64_encoded"
-        transform_method = get_transform_method(value=key, transform=transform)
-    else:
-        # value='{"key": "value"}
-        transform_method = get_transform_method(value=value, transform=transform)
+    # Auto transforms inspect the parameter name; explicit transforms ignore it.
+    transform_method = get_transform_method(value=key, transform=transform)
 
     try:
+        # Identity transforms must preserve raw bytes. Decode failures belong to
+        # the same error policy as JSON/base64 failures.
+        if isinstance(value, bytes) and transform_method is not TRANSFORM_METHOD_MAPPING[None]:
+            value = value.decode("utf-8")
         return transform_method(value)
     except Exception as exc:
         if raise_on_transform_error:

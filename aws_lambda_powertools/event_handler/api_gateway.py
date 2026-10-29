@@ -242,6 +242,9 @@ class CORSConfig:
             headers["Access-Control-Max-Age"] = str(self.max_age)
         if origin != "*" and self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
+        if origin != "*":
+            # The response echoes the request Origin, so shared caches must not reuse it for other origins
+            headers["Vary"] = "Origin"
         return headers
 
     def allowed_origin(self, extracted_origin: str) -> str | None:
@@ -362,7 +365,8 @@ class Response(Generic[ResponseT]):
         """
         Returns True if the response is JSON, based on the Content-Type.
         """
-        content_type = self.headers.get("Content-Type", "")
+        # Header names are case-insensitive, so match "content-type" in any casing
+        content_type = next((value for key, value in self.headers.items() if key.lower() == "content-type"), "")
         if isinstance(content_type, list):
             content_type = content_type[0]
         return content_type.startswith(DEFAULT_CONTENT_TYPE)
@@ -746,6 +750,20 @@ class Route:
         return operation_id
 
 
+def _accepts_gzip(accept_encoding: str) -> bool:
+    """Returns True if an Accept-Encoding header accepts gzip, honouring casing and a zero q-value"""
+    for coding in accept_encoding.split(","):
+        name, _, params = coding.partition(";")
+        if name.strip().lower() != "gzip":
+            continue
+        _, _, weight = params.replace(" ", "").lower().partition("q=")
+        try:
+            return float(weight) > 0 if weight else True
+        except ValueError:
+            return False
+    return False
+
+
 class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
@@ -765,7 +783,14 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
         origin = cors.allowed_origin(extracted_origin_header)
         if origin is not None:
-            self.response.headers.update(cors.to_dict(origin))
+            cors_headers = cors.to_dict(origin)
+            # Keep any Vary value the route already set, and add Origin to it
+            existing_vary = self.response.headers.get("Vary")
+            if isinstance(existing_vary, list):
+                existing_vary = ", ".join(existing_vary)
+            if existing_vary and "Vary" in cors_headers:
+                cors_headers["Vary"] = f"{existing_vary}, Origin"
+            self.response.headers.update(cors_headers)
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -798,11 +823,9 @@ class ResponseBuilder(Generic[ResponseEventT]):
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
         encoding = event.resolved_headers_field.get("accept-encoding", "")
-        gzip_accepted = False
-        if isinstance(encoding, str):
-            gzip_accepted = "gzip" in encoding
-        elif isinstance(encoding, list):
-            gzip_accepted = "gzip" in ",".join(encoding)
+        if isinstance(encoding, list):
+            encoding = ",".join(encoding)
+        gzip_accepted = isinstance(encoding, str) and _accepts_gzip(encoding)
 
         if gzip_accepted:
             if response_compression is not None:
@@ -845,8 +868,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
         """Build the full response dict to be returned by the lambda"""
 
         # We only apply the serializer when the content type is JSON and the
-        # body is not a str, to avoid double encoding
-        if self.response.is_json() and not isinstance(self.response.body, str):
+        # body is not a str or bytes, to avoid double encoding (bytes are base64 encoded below)
+        if self.response.is_json() and not isinstance(self.response.body, (str, bytes)):
             self.response.body = self.serializer(self.response.body)
 
         self._route(event, cors)
@@ -2883,7 +2906,10 @@ class ApiGatewayResolver(BaseRouter):
                     return path[len(prefix) :]
 
             if isinstance(prefix, Pattern):
-                path = re.sub(prefix, "", path)
+                # Only strip a match at the start of the path, and only once
+                match = prefix.match(path)
+                if match:
+                    path = path[match.end() :]
 
                 # When using regexes, we might get into a point where everything is removed
                 # from the string, so we check if it's empty and return /, since there's nothing

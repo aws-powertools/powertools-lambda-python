@@ -77,6 +77,7 @@ if TYPE_CHECKING:
         DynamoDBStreamRecordModel,
     )
     from .event_bridge import EventBridgeModel
+    from .event_bridge_v2 import EventBridgeV2Model, EventBridgeV2RecordModel, EventBridgeV2SystemMetadataModel
     from .kafka import (
         KafkaBaseEventModel,
         KafkaMskEventModel,
@@ -199,6 +200,9 @@ _MODEL_MODULES = {
     "DynamoDBStreamModel": "dynamodb",
     "DynamoDBStreamRecordModel": "dynamodb",
     "EventBridgeModel": "event_bridge",
+    "EventBridgeV2Model": "event_bridge_v2",
+    "EventBridgeV2RecordModel": "event_bridge_v2",
+    "EventBridgeV2SystemMetadataModel": "event_bridge_v2",
     "KafkaBaseEventModel": "kafka",
     "KafkaMskEventModel": "kafka",
     "KafkaRecordModel": "kafka",
@@ -311,6 +315,9 @@ __all__ = [
     "AppSyncEventsModel",
     "DynamoDBStreamModel",
     "EventBridgeModel",
+    "EventBridgeV2Model",
+    "EventBridgeV2RecordModel",
+    "EventBridgeV2SystemMetadataModel",
     "DynamoDBStreamChangedRecordModel",
     "DynamoDBStreamLambdaOnFailureDestinationModel",
     "DynamoDBStreamRecordModel",

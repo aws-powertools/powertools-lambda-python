@@ -110,28 +110,28 @@ class vpcLatticeEventV2Identity(DictWrapper):
 
     @property
     def x509_subject_cn(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SubjectCn"""
-        return self.get("X509SubjectCn")
+        """The VPC Lattice v2 Event requestContext x509SubjectCn"""
+        return self.get("x509SubjectCn")
 
     @property
     def x509_issuer_ou(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509IssuerOu"""
-        return self.get("X509IssuerOu")
+        """The VPC Lattice v2 Event requestContext x509IssuerOu"""
+        return self.get("x509IssuerOu")
 
     @property
     def x509_san_dns(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanDns"""
+        """The VPC Lattice v2 Event requestContext x509SanDns"""
         return self.get("x509SanDns")
 
     @property
     def x509_san_uri(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanUri"""
-        return self.get("X509SanUri")
+        """The VPC Lattice v2 Event requestContext x509SanUri"""
+        return self.get("x509SanUri")
 
     @property
     def x509_san_name_cn(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanNameCn"""
-        return self.get("X509SanNameCn")
+        """The VPC Lattice v2 Event requestContext x509SanNameCn"""
+        return self.get("x509SanNameCn")
 
 
 class vpcLatticeEventV2RequestContext(DictWrapper):

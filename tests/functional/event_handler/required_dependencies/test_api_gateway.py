@@ -523,6 +523,39 @@ def test_response_is_json_with_multiple_json_content_types():
     assert response.is_json() is True
 
 
+def test_response_with_bytes_body_and_json_content_type_is_base64_encoded():
+    # GIVEN a route that returns a bytes body with a JSON content type
+    app = ApiGatewayResolver()
+    body = b'{"a":1}'
+
+    @app.get("/my/path")
+    def get_bytes() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, body)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the bytes are base64 encoded instead of being passed to the JSON serializer
+    assert result["isBase64Encoded"] is True
+    assert base64.b64decode(result["body"]) == body
+
+
+def test_response_with_lowercase_content_type_header_serializes_json_body():
+    # GIVEN a route that sets the JSON content type with a lowercase header name
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path")
+    def get_lowercase_header() -> Response:
+        return Response(200, headers={"content-type": content_types.APPLICATION_JSON}, body={"a": 1})
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the response is recognised as JSON and the body is serialized
+    assert isinstance(result["body"], str)
+    assert json.loads(result["body"]) == {"a": 1}
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
@@ -586,6 +619,32 @@ def test_compress_no_accept_encoding():
     # THEN don't perform any gzip compression
     assert result["isBase64Encoded"] is False
     assert result["body"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "accept_encoding, expected_compressed",
+    [
+        pytest.param("gzip;q=0", False, id="gzip refused with a zero weight"),
+        pytest.param("deflate, gzip; q=0.0", False, id="gzip refused with a zero weight and spaces"),
+        pytest.param("GZIP", True, id="gzip accepted in uppercase"),
+        pytest.param("deflate, gzip;q=0.5", True, id="gzip accepted with a non-zero weight"),
+    ],
+)
+def test_compress_respects_accept_encoding_weights_and_casing(accept_encoding: str, expected_compressed: bool):
+    # GIVEN a function with compress=True
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", compress=True)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Foo")
+
+    # WHEN the client sends an Accept-Encoding header with a weight or different casing
+    event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": accept_encoding}}
+    result = app(event, None)
+
+    # THEN the response is only gzipped when the client accepts gzip
+    assert result["isBase64Encoded"] is expected_compressed
+    assert ("Content-Encoding" in result["multiValueHeaders"]) is expected_compressed
 
 
 def test_compress_no_accept_encoding_null_headers():
@@ -782,6 +841,59 @@ def test_cors_multi_origin():
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
     assert "Access-Control-Allow-Origin" not in headers
+
+
+def test_cors_adds_vary_origin_when_echoing_a_specific_origin():
+    # GIVEN a cors configuration with more than one allowed origin
+    cors_config = CORSConfig(allow_origin="https://a.com", extra_origins=["https://b.com"])
+    app = ApiGatewayResolver(cors=cors_config)
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with one of the allowed origins
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the echoed origin comes with Vary: Origin so shared caches don't reuse it for other origins
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["https://a.com"]
+    assert headers["Vary"] == ["Origin"]
+
+
+def test_cors_keeps_existing_vary_header_when_adding_origin():
+    # GIVEN a route that already sets a Vary header
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="https://a.com"))
+
+    @app.get("/cors")
+    def get_with_vary() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, "{}", headers={"Vary": "Accept-Encoding"})
+
+    # WHEN calling the event handler with the allowed origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN Origin is added to the existing Vary value instead of replacing it
+    assert result["multiValueHeaders"]["Vary"] == ["Accept-Encoding, Origin"]
+
+
+def test_cors_does_not_add_vary_origin_for_wildcard_origin():
+    # GIVEN a cors configuration that allows every origin
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="*"))
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with any origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the wildcard response is the same for every origin, so no Vary header is needed
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["*"]
+    assert "Vary" not in headers
 
 
 def test_custom_cors_config():
@@ -1146,6 +1258,35 @@ def test_debug_print_event(capsys):
     assert json.loads(output) == event
 
 
+@pytest.mark.parametrize(
+    "rule, path, expected_route_keys",
+    [
+        pytest.param(".+", "/any/deep/path", {}, id="catch-all matches any path"),
+        pytest.param("/files/.+", "/files/reports/2026/summary.pdf", {}, id="catch-all after a static prefix"),
+        pytest.param(
+            "/users/<user_id>/files/.+",
+            "/users/123/files/docs/report.txt",
+            {"user_id": "123"},
+            id="catch-all after a dynamic parameter",
+        ),
+    ],
+)
+def test_route_rule_supports_documented_catch_all_regex(rule: str, path: str, expected_route_keys: dict):
+    # GIVEN a route that uses a regex catch-all, as shown in the "Catch-all routes" docs
+    app = APIGatewayRestResolver()
+
+    @app.get(rule)
+    def handler(**route_keys):
+        return route_keys
+
+    # WHEN calling the event handler with a nested path
+    result = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN the regex in the rule matches the whole path and dynamic parameters are still captured
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == expected_route_keys
+
+
 def test_similar_dynamic_routes():
     # GIVEN
     app = ApiGatewayResolver()
@@ -1321,6 +1462,29 @@ def test_remove_prefix_by_regex(path: str):
     response = app({"httpMethod": "GET", "path": path}, None)
 
     assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/v1/users/v2", id="prefix pattern also appears later in the path"),
+        pytest.param("/users/v2", id="prefix pattern only appears later in the path"),
+    ],
+)
+def test_remove_prefix_by_regex_only_strips_leading_match(path: str):
+    # GIVEN a regex strip_prefix that could also match a later path segment
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/v[1-9]+")])
+
+    @app.get("/users/<name>")
+    def get_user(name: str):
+        return {"name": name}
+
+    # WHEN calling the handler with the pattern repeated later in the path
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN only a leading match is stripped, so the route matches and keeps the later segment
+    assert response["statusCode"] == 200
+    assert json.loads(response["body"]) == {"name": "v2"}
 
 
 def test_empty_path_when_using_regexes():
