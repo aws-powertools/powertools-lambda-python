@@ -70,6 +70,13 @@ if TYPE_CHECKING:
         CognitoPreTokenGenerationTriggerModelV2AndV3,
         CognitoVerifyAuthChallengeTriggerModel,
     )
+    from .connect_campaign import (
+        ConnectCampaignContextModel,
+        ConnectCustomerProfileModel,
+        ConnectInvocationMetadataModel,
+        ConnectItemsModel,
+        ConnectOutboundCampaignsEventModel,
+    )
     from .dynamodb import (
         DynamoDBStreamChangedRecordModel,
         DynamoDBStreamLambdaOnFailureDestinationModel,
@@ -182,6 +189,11 @@ _MODEL_MODULES = {
     "CloudWatchLogsDecode": "cloudwatch",
     "CloudWatchLogsLogEvent": "cloudwatch",
     "CloudWatchLogsModel": "cloudwatch",
+    "ConnectCampaignContextModel": "connect_campaign",
+    "ConnectCustomerProfileModel": "connect_campaign",
+    "ConnectInvocationMetadataModel": "connect_campaign",
+    "ConnectItemsModel": "connect_campaign",
+    "ConnectOutboundCampaignsEventModel": "connect_campaign",
     "CognitoCreateAuthChallengeTriggerModel": "cognito",
     "CognitoCustomEmailSenderTriggerModel": "cognito",
     "CognitoCustomMessageTriggerModel": "cognito",
@@ -295,6 +307,11 @@ __all__ = [
     "CloudWatchLogsDecode",
     "CloudWatchLogsLogEvent",
     "CloudWatchLogsModel",
+    "ConnectCampaignContextModel",
+    "ConnectCustomerProfileModel",
+    "ConnectInvocationMetadataModel",
+    "ConnectItemsModel",
+    "ConnectOutboundCampaignsEventModel",
     "CognitoPreSignupTriggerModel",
     "CognitoPostConfirmationTriggerModel",
     "CognitoPreAuthenticationTriggerModel",

@@ -119,6 +119,7 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **CloudFormationCustomResourceUpdateModel**       | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
 | **CloudFormationCustomResourceDeleteModel**       | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                         |
 | **CloudwatchLogsModel**                           | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
+| **ConnectOutboundCampaignsEventModel**            | Lambda Event Source payload for Amazon Connect Outbound Campaigns custom actions              |
 | **CognitoPreSignupTriggerModel**                  | Lambda User Pool Pre-Sign-Up trigger event                                                    |
 | **CognitoPostConfirmationTriggerModel**           | Lambda User Pool Post Confirmation trigger event                                              |
 | **CognitoPreAuthenticationTriggerModel**          | Lambda User Pool Pre Authentication trigger event                                             |
