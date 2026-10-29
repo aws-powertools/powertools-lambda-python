@@ -364,9 +364,14 @@ class SSMProvider(BaseProvider):
             opts["KeyId"] = kms_key_id
 
         try:
-            return self.client.put_parameter(**opts)
+            response = self.client.put_parameter(**opts)
         except Exception as exc:
             raise SetParameterError(f"Error setting parameter - {str(exc)}") from exc
+
+        # Remove any cached value for this parameter so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
