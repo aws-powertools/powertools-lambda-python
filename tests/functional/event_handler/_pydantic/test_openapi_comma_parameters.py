@@ -242,7 +242,10 @@ def test_native_repeated_parameters_keep_existing_behavior(resolver, location, m
 
     result = app.resolve(event, {})
 
-    if model:
+    if location is Header:
+        assert result["statusCode"] == 200
+        assert json.loads(result["body"]) == {"search": "first,second"}
+    elif model:
         assert result["statusCode"] == 200
         assert json.loads(result["body"]) == {"search": "first"}
     else:
@@ -341,8 +344,16 @@ def test_lattice_v2_keeps_native_repeated_parameters():
     assert result["statusCode"] == 422
 
 
-@pytest.mark.parametrize("content_type", ["application/json", "application/x-www-form-urlencoded"])
-def test_body_scalar_lists_keep_existing_normalization(content_type):
+@pytest.mark.parametrize(
+    ("content_type", "expected_status", "expected_body"),
+    [
+        # JSON arrays are not unwrapped for scalar body fields (#8578)
+        ("application/json", 422, None),
+        # Form values are parsed into lists, so the first value is used
+        ("application/x-www-form-urlencoded", 200, {"search": "first"}),
+    ],
+)
+def test_body_scalar_lists_normalization(content_type, expected_status, expected_body):
     app = APIGatewayRestResolver(enable_validation=True)
     event = load_event("apiGatewayProxyEvent.json")
     event.update(path="/search", httpMethod="POST", isBase64Encoded=False)
@@ -363,5 +374,6 @@ def test_body_scalar_lists_keep_existing_normalization(content_type):
 
     result = app.resolve(event, {})
 
-    assert result["statusCode"] == 200
-    assert json.loads(result["body"]) == {"search": "first"}
+    assert result["statusCode"] == expected_status
+    if expected_body is not None:
+        assert json.loads(result["body"]) == expected_body

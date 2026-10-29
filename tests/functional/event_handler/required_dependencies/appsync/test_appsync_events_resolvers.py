@@ -1643,3 +1643,19 @@ def test_subscribe_events_throw_unauthorized_exception(lambda_context, mock_even
     # WHEN we resolve the event with unauthorized route
     with pytest.raises(UnauthorizedException):
         app.resolve(mock_event, lambda_context)
+
+
+def test_invalid_path_registration_still_returns_function():
+    # GIVEN an AppSyncEventsResolver
+    app = AppSyncEventsResolver()
+
+    # WHEN registering a resolver for an invalid path
+    with pytest.warns(PowertoolsUserWarning, match="is not valid and will be skipped"):
+
+        @app.on_publish(path="/default/*/sub")
+        def handler(payload):
+            return payload
+
+    # THEN the decorated function is returned instead of None
+    assert handler is not None
+    assert handler("payload") == "payload"
