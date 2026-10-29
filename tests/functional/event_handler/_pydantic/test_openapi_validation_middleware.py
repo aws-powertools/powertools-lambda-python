@@ -4591,6 +4591,26 @@ def test_alb_response_typed_none_body_with_validation(gw_event_alb):
     assert result["body"] == ""
 
 
+def test_validate_path_param_with_alias(gw_event):
+    # GIVEN a path parameter declared with an explicit alias
+    app = APIGatewayRestResolver(enable_validation=True)
+    gw_event["path"] = "/users/42"
+    gw_event["httpMethod"] = "GET"
+
+    @app.get("/users/<user_id>")
+    def get_user(user_id: Annotated[int, Path(alias="userId")]):
+        return {"user_id": user_id}
+
+    # WHEN the route is resolved
+    result = app(gw_event, {})
+
+    # THEN the value is found by the path template name and the schema names the template placeholder
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"user_id": 42}
+    parameters = app.get_openapi_schema().paths["/users/{user_id}"].get.parameters
+    assert [p.name for p in parameters] == ["user_id"]
+
+
 def test_header_sequence_single_value_across_resolvers(gw_event_http):
     # GIVEN an APIGatewayHttpResolver with validation enabled and a single-value sequence header
     app = APIGatewayHttpResolver(enable_validation=True)
