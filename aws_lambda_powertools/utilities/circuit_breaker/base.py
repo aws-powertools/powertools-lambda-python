@@ -48,10 +48,11 @@ _LAST_OBSERVED_STATE: dict[str, CircuitState] = {}
 # callbacks.
 _COUNTERS_LOCK = threading.Lock()
 
-# Circuit names with a probe currently running in this process. The probe lease is per
-# thread, so concurrent coroutines in one event loop would all pass the owner check and
-# probe together; this keeps the single-prober guarantee within a process too.
-_PROBES_IN_FLIGHT: set[str] = set()
+# Circuit names with a probe currently running in this process, mapped to the pid that
+# claimed it. The probe lease is per thread, so concurrent coroutines in one event loop
+# would all pass the owner check and probe together; this keeps the single-prober
+# guarantee within a process too. The pid lets a forked child ignore an entry it inherited.
+_PROBES_IN_FLIGHT: dict[str, int] = {}
 
 # Identifier used to claim the half-open probe lock, unique per thread so the store's
 # conditional election picks a single prober across threads as well as processes.
@@ -226,14 +227,14 @@ class CircuitBreakerHandler:
     def _claim_probe(self) -> bool:
         """Mark a probe as in flight for this circuit; False when one is already running in this process."""
         with _COUNTERS_LOCK:
-            if self.name in _PROBES_IN_FLIGHT:
+            if _PROBES_IN_FLIGHT.get(self.name) == os.getpid():
                 return False
-            _PROBES_IN_FLIGHT.add(self.name)
+            _PROBES_IN_FLIGHT[self.name] = os.getpid()
             return True
 
     def _release_probe(self) -> None:
         with _COUNTERS_LOCK:
-            _PROBES_IN_FLIGHT.discard(self.name)
+            _PROBES_IN_FLIGHT.pop(self.name, None)
 
     def _reset_probe_successes(self) -> None:
         """
