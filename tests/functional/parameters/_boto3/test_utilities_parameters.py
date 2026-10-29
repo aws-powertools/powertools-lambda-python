@@ -67,7 +67,7 @@ def build_get_parameters_stub(
                 "Type": "String",
                 "Value": value,
                 "Version": version,
-                "Selector": f"{param}:{version}",
+                # SSM only returns "Selector" for names requested with a version or label selector
                 "SourceResult": "string",
                 "LastModifiedDate": datetime(2015, 1, 1),
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{param.lstrip('/')}",
@@ -132,6 +132,20 @@ def test_dynamodb_provider_get_default_config(monkeypatch, mock_name, mock_value
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_dynamodb_provider_get_missing_item(mock_name, config):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, boto_config=config)
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("get_item", {}, {"TableName": table_name, "Key": {"id": mock_name}})
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == f"Parameter '{mock_name}' not found in table '{table_name}'"
+        stubber.assert_no_pending_responses()
 
 
 def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
@@ -306,6 +320,25 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
             assert values[name] == f"{mock_value}/{name}"
     finally:
         stubber.deactivate()
+
+
+@pytest.mark.parametrize("sort_attr", ["sk", "custom_sort_key"])
+def test_dynamodb_provider_get_multiple_missing_sort_attribute(mock_name, config, sort_attr):
+    table_name = "TEST_TABLE"
+    provider = parameters.DynamoDBProvider(table_name, sort_attr=sort_attr, boto_config=config)
+    response = {"Items": [{"id": {"S": mock_name}, "value": {"S": "value"}}]}
+    expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
+
+    with stub.Stubber(provider.table.meta.client) as stubber:
+        stubber.add_response("query", response, expected_params)
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get_multiple(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Sort attribute '{sort_attr}' missing from an item for parameter '{mock_name}' in table '{table_name}'"
+        )
+        stubber.assert_no_pending_responses()
 
 
 def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
@@ -1005,7 +1038,8 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SSMProvider(boto_config=config)
 
     # Inject value in the internal store
-    cache_key = provider._build_cache_key(name=mock_name)
+    # SSMProvider.get() always passes decrypt to the SDK call, so it is part of the key
+    cache_key = provider._build_cache_key(name=mock_name, sdk_options={"decrypt": False})
     provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
@@ -1032,7 +1066,7 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:test:test", TestProvider())
 
     parameters.get_parameter(mock_name)
     parameters.get_secret(mock_name)
@@ -1079,6 +1113,50 @@ def test_ssm_provider_get_parameters_by_name_raise_on_failure(mock_name, mock_va
     with pytest.raises(parameters.exceptions.GetParameterError, match=f"Failed to fetch parameters: .*{fail}.*"):
         try:
             provider.get_parameters_by_name(parameters=params)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error(mock_name, config):
+    # GIVEN two parameters are requested
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {}, f"/prod/{mock_name}": {}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InvalidKeyId", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_get_parameters_error_decrypt(mock_name, config):
+    # GIVEN two parameters are requested, all with decrypt enabled (GetParameters WithDecryption batch)
+    provider = parameters.SSMProvider(boto_config=config)
+    params = {f"/dev/{mock_name}": {"decrypt": True}, f"/prod/{mock_name}": {"decrypt": True}}
+    param_names = list(params.keys())
+
+    expected_stub_params = {"Names": param_names, "WithDecryption": True}
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", "InternalServerError", expected_params=expected_stub_params)
+    stubber.activate()
+
+    # WHEN the GetParameters call itself fails
+    # THEN raise GetParameterError instead of returning an empty dict
+    with pytest.raises(parameters.exceptions.GetParameterError, match="Failed to fetch parameters"):
+        try:
+            provider.get_parameters_by_name(parameters=params, raise_on_error=True)
             stubber.assert_no_pending_responses()
         finally:
             stubber.deactivate()
@@ -1333,6 +1411,57 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
         stubber.deactivate()
 
 
+@pytest.mark.parametrize("decrypt", [False, True])
+@pytest.mark.parametrize("error_code", ["ThrottlingException", "InvalidKeyId", "InternalServerError"])
+def test_ssm_provider_get_parameters_by_name_wraps_client_error(mock_name, config, error_code, decrypt):
+    # GIVEN the GetParameters call fails with an SDK error
+    param = f"/{mock_name}"
+    expected_params = {"Names": [param], "WithDecryption": True} if decrypt else {"Names": [param]}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_client_error("get_parameters", error_code, expected_params=expected_params)
+    stubber.activate()
+
+    # WHEN fail-fast is enabled in get_parameters_by_name
+    # THEN the SDK error should be wrapped in GetParameterError
+    try:
+        with pytest.raises(parameters.exceptions.GetParameterError, match=error_code):
+            provider.get_parameters_by_name(parameters={param: {}}, decrypt=decrypt)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_client_error(mock_name, mock_value, config):
+    # GIVEN 11 parameters, fetched in two GetParameters chunks
+    # the first chunk has one invalid parameter and the second chunk is throttled
+    names = [f"/{mock_name}/{i}" for i in range(11)]
+    first_chunk = dict.fromkeys(names[:10], mock_value)
+    invalid, throttled = names[9], names[10]
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters",
+        build_get_parameters_stub(params=first_chunk, invalid_parameters=[invalid]),
+        {"Names": names[:10]},
+    )
+    stubber.add_client_error("get_parameters", "ThrottlingException", expected_params={"Names": [throttled]})
+    stubber.activate()
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    try:
+        ret = provider.get_parameters_by_name(parameters={name: {} for name in names}, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+
+        # THEN both failures should be reported under `_errors` key and the successful values kept
+        assert ret["_errors"] == [invalid, throttled]
+        assert all(ret[name] == mock_value for name in names[:9])
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
     mock_value,
     mock_version,
@@ -1419,6 +1548,146 @@ def test_ssm_provider_get_parameters_by_name_all_decrypt_should_use_get_paramete
         stubber.deactivate()
 
 
+def test_ssm_provider_get_parameters_by_name_does_not_mutate_input_and_honors_new_globals(
+    mock_name,
+    mock_value,
+    config,
+):
+    # GIVEN a reusable parameters dict with a non-empty per-parameter override
+    param = f"/a/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+    all_params = {param: {"max_age": 0}, fail: {}}
+    names = list(all_params.keys())
+    stub_response = build_get_parameters_stub(params={param: mock_value}, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    # first call: global decrypt defaults to False -> no WithDecryption
+    stubber.add_response("get_parameters", stub_response, {"Names": names})
+    # second call: new global decrypt=True must be honored
+    stubber.add_response("get_parameters", stub_response, {"Names": names, "WithDecryption": True})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called twice with different global options
+    try:
+        provider.get_parameters_by_name(parameters=all_params, raise_on_error=False)
+
+        # THEN the caller's dict must not be modified
+        assert all_params == {param: {"max_age": 0}, fail: {}}
+
+        # AND a later global decrypt=True must not be overridden by stale values
+        provider.get_parameters_by_name(parameters=all_params, decrypt=True, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def build_get_parameters_selector_stub(
+    params: dict[str, Any],
+    invalid_parameters: list[str],
+) -> dict[str, list]:
+    # SSM returns the bare name in "Name" and only the selector suffix (e.g. ":prod") in "Selector".
+    # Names requested without a selector come back without "Selector".
+    parameters_out = []
+    for requested, value in params.items():
+        name, sep, suffix = requested.partition(":")
+        parameter = {
+            "Name": name,
+            "Type": "String",
+            "Value": value,
+            "Version": 3,
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{name.lstrip('/')}",
+            "DataType": "text",
+        }
+        if sep:
+            parameter["Selector"] = f":{suffix}"
+        parameters_out.append(parameter)
+
+    return {"Parameters": parameters_out, "InvalidParameters": invalid_parameters}
+
+
+@pytest.mark.parametrize("decrypt", [False, True])
+def test_ssm_provider_get_parameters_by_name_with_selector(mock_name, mock_value, config, decrypt):
+    # GIVEN parameter names with a label and a version selector
+    param_label = f"/a/{mock_name}:prod"
+    param_version = f"/b/{mock_name}:3"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {param_label: {}, param_version: {}, fail: {}}
+    expected_param_values = {param_label: mock_value, param_version: f"{mock_value}-v3"}
+    expected_stub_response = build_get_parameters_selector_stub(params=expected_param_values, invalid_parameters=[fail])
+    expected_stub_params: dict[str, Any] = {"Names": list(all_params.keys())}
+    if decrypt:
+        expected_stub_params["WithDecryption"] = True
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, expected_stub_params)
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, decrypt=decrypt, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN values should be keyed by the requested names, including the selector
+    assert ret == {**expected_param_values, "_errors": [fail]}
+
+
+def test_ssm_provider_get_parameters_by_name_with_selector_and_bare_name(mock_name, config):
+    # GIVEN the same parameter requested by label, by version and without a selector
+    param = f"/p/{mock_name}"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    all_params = {f"{param}:prod": {}, f"{param}:1": {}, param: {}, fail: {}}
+    expected_param_values = {f"{param}:prod": "label", f"{param}:1": "version-1", param: "latest"}
+    expected_stub_response = build_get_parameters_selector_stub(params=expected_param_values, invalid_parameters=[fail])
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, {"Names": list(all_params.keys())})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called
+    try:
+        ret = provider.get_parameters_by_name(parameters=all_params, raise_on_error=False)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN each requested name keeps its own value, and the bare name gets the latest version
+    assert ret == {**expected_param_values, "_errors": [fail]}
+
+
+def test_ssm_provider_get_parameters_by_name_with_selector_cache(mock_name, mock_value, config):
+    # GIVEN a parameter name with a label selector
+    param_label = f"/a/{mock_name}:prod"
+    fail = "/does_not_exist"  # stub model doesn't support all-success yet
+
+    expected_stub_response = build_get_parameters_selector_stub(
+        params={param_label: mock_value},
+        invalid_parameters=[fail],
+    )
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response("get_parameters", expected_stub_response, {"Names": [param_label, fail]})
+    stubber.activate()
+
+    # WHEN get_parameters_by_name is called twice for the selector
+    try:
+        provider.get_parameters_by_name(parameters={param_label: {}, fail: {}}, raise_on_error=False)
+        ret = provider.get_parameters_by_name(parameters={param_label: {}})
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+    # THEN the second call should be served from the cache under the requested name
+    assert ret == {param_label: mock_value}
+
+
 def test_dynamodb_provider_clear_cache(mock_name, mock_value, config):
     # GIVEN a provider is initialized with a cached value
     provider = parameters.DynamoDBProvider(table_name="test", boto_config=config)
@@ -1453,6 +1722,153 @@ def test_appconf_provider_clear_cache(mock_name, config):
 
     # THEN store should be empty
     assert provider.store == {}
+
+
+def _ssm_get_parameter_response(name: str, value: str, version: int) -> dict:
+    return {
+        "Parameter": {
+            "Name": name,
+            "Type": "SecureString",
+            "Value": value,
+            "Version": version,
+            "Selector": f"{name}:{version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{name}",
+        },
+    }
+
+
+def test_ssm_provider_get_decrypt_does_not_reuse_encrypted_cache(mock_name, mock_version, config):
+    # GIVEN a parameter fetched without decryption and cached
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameter",
+        _ssm_get_parameter_response(mock_name, "ciphertext", mock_version),
+        {"Name": mock_name, "WithDecryption": False},
+    )
+    stubber.add_response(
+        "get_parameter",
+        _ssm_get_parameter_response(mock_name, "plaintext", mock_version),
+        {"Name": mock_name, "WithDecryption": True},
+    )
+    stubber.activate()
+
+    try:
+        encrypted = provider.get(mock_name)
+
+        # WHEN the same parameter is fetched with decrypt=True
+        decrypted = provider.get(mock_name, decrypt=True)
+
+        # THEN the second call reaches SSM instead of returning the cached ciphertext
+        assert encrypted == "ciphertext"
+        assert decrypted == "plaintext"
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_multiple_recursive_does_not_reuse_non_recursive_cache(mock_name, mock_version, config):
+    # GIVEN a path fetched non-recursively and cached
+    provider = parameters.SSMProvider(boto_config=config)
+
+    def _response(names: list[str]) -> dict:
+        return {
+            "Parameters": [
+                {
+                    "Name": f"{mock_name}/{name}",
+                    "Type": "String",
+                    "Value": name,
+                    "Version": mock_version,
+                    "LastModifiedDate": datetime(2015, 1, 1),
+                    "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+                }
+                for name in names
+            ],
+        }
+
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameters_by_path",
+        _response(["A"]),
+        {"Path": mock_name, "Recursive": False, "WithDecryption": False},
+    )
+    stubber.add_response(
+        "get_parameters_by_path",
+        _response(["A", "B/C"]),
+        {"Path": mock_name, "Recursive": True, "WithDecryption": False},
+    )
+    stubber.activate()
+
+    try:
+        shallow = provider.get_multiple(mock_name)
+
+        # WHEN the same path is fetched recursively
+        deep = provider.get_multiple(mock_name, recursive=True)
+
+        # THEN the recursive call gets the nested parameter too
+        assert shallow == {"A": "A"}
+        assert deep == {"A": "A", "B/C": "B/C"}
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secrets_provider_get_different_sdk_options_are_cached_separately(mock_name, config):
+    # GIVEN a secret fetched at one version stage and cached
+    provider = parameters.SecretsProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_secret_value",
+        {"Name": mock_name, "SecretString": "previous-value"},
+        {"SecretId": mock_name, "VersionStage": "AWSPREVIOUS"},
+    )
+    stubber.add_response(
+        "get_secret_value",
+        {"Name": mock_name, "SecretString": "current-value"},
+        {"SecretId": mock_name, "VersionStage": "AWSCURRENT"},
+    )
+    stubber.activate()
+
+    try:
+        previous = provider.get(mock_name, VersionStage="AWSPREVIOUS")
+
+        # WHEN it is fetched at another version stage, and again at the first one
+        current = provider.get(mock_name, VersionStage="AWSCURRENT")
+        previous_cached = provider.get(mock_name, VersionStage="AWSPREVIOUS")
+
+        # THEN each stage has its own value and repeated calls are still served from the cache
+        assert previous == "previous-value"
+        assert current == "current-value"
+        assert previous_cached == "previous-value"
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_base_provider_cache_key_includes_unhashable_sdk_options(mock_name):
+    # GIVEN a provider whose SDK options hold an unhashable value
+    calls: list[dict] = []
+
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **sdk_options) -> str:
+            calls.append(sdk_options)
+            return f"value-{len(calls)}"
+
+        def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
+            raise NotImplementedError()
+
+    provider = TestProvider()
+
+    # WHEN the same name is fetched with different and then repeated options
+    first = provider.get(mock_name, Filters=[{"Key": "a"}])
+    second = provider.get(mock_name, Filters=[{"Key": "b"}])
+    first_again = provider.get(mock_name, Filters=[{"Key": "a"}])
+
+    # THEN only the distinct options reach the underlying store
+    assert (first, second, first_again) == ("value-1", "value-2", "value-1")
+    assert len(calls) == 2
 
 
 def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
@@ -2725,6 +3141,62 @@ def test_get_secret_new(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
+def test_appconf_provider_get_empty_initial_configuration(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "start_configuration_session",
+            {"InitialConfigurationToken": "initial_token"},
+            {
+                "ConfigurationProfileIdentifier": mock_name,
+                "ApplicationIdentifier": "myapp",
+                "EnvironmentIdentifier": "dev",
+            },
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        with pytest.raises(parameters.GetParameterError) as exc_info:
+            provider.get(mock_name)
+
+        assert str(exc_info.value) == (
+            f"Configuration '{mock_name}' is empty and no cached value is available "
+            "for application 'myapp' in environment 'dev'"
+        )
+        assert provider.get(mock_name) == b"{}"
+        stubber.assert_no_pending_responses()
+
+
+def test_appconf_provider_get_empty_configuration_uses_previous_value(mock_name, config):
+    provider = parameters.AppConfigProvider(environment="dev", application="myapp", boto_config=config)
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("start_configuration_session", {"InitialConfigurationToken": "initial_token"})
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b"{}"), 2), "NextPollConfigurationToken": "next_token"},
+            {"ConfigurationToken": "initial_token"},
+        )
+        stubber.add_response(
+            "get_latest_configuration",
+            {"Configuration": StreamingBody(BytesIO(b""), 0), "NextPollConfigurationToken": "last_token"},
+            {"ConfigurationToken": "next_token"},
+        )
+
+        assert provider.get(mock_name) == b"{}"
+        assert provider.get(mock_name, force_fetch=True) == b"{}"
+        stubber.assert_no_pending_responses()
+
+
 def test_appconf_provider_get_configuration_json_content_type(mock_name, config):
     """
     Test get_configuration.get with default values
@@ -2911,7 +3383,7 @@ def test_appconf_get_app_config_no_transform(monkeypatch, mock_name):
         def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:dev:myapp", TestProvider())
 
     environment = "dev"
     application = "myapp"
@@ -2936,7 +3408,7 @@ def test_appconf_get_app_config_transform_json(monkeypatch, mock_name):
         def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
             raise NotImplementedError()
 
-    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig", TestProvider())
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "appconfig:dev:myapp", TestProvider())
 
     environment = "dev"
     application = "myapp"
@@ -2966,8 +3438,67 @@ def test_appconf_get_app_config_new(monkeypatch, mock_name, mock_value):
     value = parameters.get_app_config(mock_name, environment="dev", application="myapp")
 
     # THEN
-    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig"] is not None
+    assert parameters.appconfig.DEFAULT_PROVIDERS["appconfig:dev:myapp"] is not None
     assert value == mock_value
+
+
+@pytest.mark.parametrize(
+    "transform,key",
+    [("binary", "secret"), ("json", "secret"), ("auto", "secret.binary"), ("auto", "secret.json")],
+)
+def test_transform_value_invalid_utf8_obeys_error_policy(transform, key):
+    value = b"\xff\xfe"
+
+    with pytest.raises(parameters.TransformParameterError) as excinfo:
+        parameters.base.transform_value(value, transform=transform, key=key)
+
+    assert isinstance(excinfo.value.__cause__, UnicodeDecodeError)
+    assert parameters.base.transform_value(value, transform=transform, key=key, raise_on_transform_error=False) is None
+
+
+@pytest.mark.parametrize("value", [b"\xff\xfe", b"valid UTF-8"])
+@pytest.mark.parametrize("key", ["secret", "secret.bin"])
+def test_secret_provider_auto_preserves_unmatched_binary(value, key, config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("get_secret_value", {"SecretBinary": value}, {"SecretId": key})
+        assert provider.get(key, transform="auto") == value
+        stubber.assert_no_pending_responses()
+
+
+def test_secret_provider_invalid_utf8_raises_transform_error(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("get_secret_value", {"SecretBinary": b"\xff\xfe"}, {"SecretId": "secret"})
+        with pytest.raises(parameters.TransformParameterError):
+            provider.get("secret", transform="binary")
+        stubber.assert_no_pending_responses()
+
+
+def test_appconf_get_app_config_different_environment_and_application(monkeypatch, mock_name):
+    # GIVEN a provider that reports which environment/application it was built for
+    class TestProvider(BaseProvider):
+        def __init__(self, environment: str, application: str):
+            super().__init__()
+            self.environment = environment
+            self.application = application
+
+        def _get(self, name: str, **kwargs) -> str:
+            return f"{self.application}/{self.environment}"
+
+        def _get_multiple(self, path: str, **kwargs) -> dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setattr(parameters.appconfig, "DEFAULT_PROVIDERS", {})
+    monkeypatch.setattr(parameters.appconfig, "AppConfigProvider", TestProvider)
+
+    # WHEN get_app_config is called with different applications and environments
+    first = parameters.get_app_config(mock_name, environment="dev", application="app-a", max_age=0)
+    second = parameters.get_app_config(mock_name, environment="prod", application="app-b", max_age=0)
+
+    # THEN each call uses its own environment and application
+    assert first == "app-a/dev"
+    assert second == "app-b/prod"
 
 
 def test_transform_value_auto(mock_value: str):
@@ -3243,6 +3774,59 @@ def test_secrets_provider_get_multiple_basic(config):
         stubber.deactivate()
 
 
+def test_secrets_provider_get_multiple_does_not_mutate_caller_filters(config):
+    """
+    Test SecretsProvider.get_multiple() leaves the caller's Filters list untouched
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # GIVEN a shared Filters list, as used in the documentation example
+    my_filters = [{"Key": "primary-region", "Values": ["us-east-1"]}]
+
+    # Stub the boto3 client with two paginated-free responses, one per call
+    stubber = stub.Stubber(provider.client)
+    response_a = {
+        "SecretValues": [
+            {
+                "Name": "a",
+                "SecretString": "1",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_a = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["a"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_a, expected_params_a)
+
+    response_b = {
+        "SecretValues": [
+            {
+                "Name": "b",
+                "SecretString": "2",
+            },
+        ],
+        "Errors": [],
+    }
+    expected_params_b = {
+        "Filters": [*my_filters, {"Key": "name", "Values": ["b"]}],
+    }
+    stubber.add_response("batch_get_secret_value", response_b, expected_params_b)
+    stubber.activate()
+
+    try:
+        # WHEN calling get_multiple twice with the same Filters list
+        assert provider.get_multiple(["a"], Filters=my_filters) == {"a": "1"}
+        assert provider.get_multiple(["b"], Filters=my_filters) == {"b": "2"}
+        stubber.assert_no_pending_responses()
+
+        # THEN the caller's list must not have grown stale name filters
+        assert my_filters == [{"Key": "primary-region", "Values": ["us-east-1"]}]
+    finally:
+        stubber.deactivate()
+
+
 def test_secrets_provider_get_multiple_with_binary(config):
     """
     Test SecretsProvider.get_multiple() with binary secrets
@@ -3498,6 +4082,20 @@ def test_secrets_provider_get_multiple_empty_names(config):
         provider.get_multiple([])
 
 
+def test_secrets_provider_get_multiple_error_is_get_parameter_error(config):
+    """
+    Test GetSecretError can be caught as GetParameterError, as the docstrings promise
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(boto_config=config)
+
+    # WHEN get_multiple fails
+    # THEN the error is a GetParameterError and is exported from the package
+    with pytest.raises(parameters.GetParameterError):
+        provider.get_multiple([])
+    assert parameters.GetSecretError is GetSecretError
+
+
 def test_secrets_provider_non_existing_key(config):
     """
     Test SecretsProvider.get_multiple() with additional filters
@@ -3673,3 +4271,60 @@ def test_secrets_provider_get_multiple_with_json_transform_error(config):
 
     with pytest.raises(parameters.TransformParameterError):
         provider.get_multiple(secret_names, transform="binary", raise_on_transform_error=True)
+
+
+@pytest.mark.parametrize("force_fetch", [False, True])
+@pytest.mark.parametrize("secret_value", [{"SecretString": "value"}, {"SecretBinary": b"value"}])
+def test_secrets_provider_get_multiple_excludes_prefix_matches(config, force_fetch, secret_value):
+    provider = parameters.SecretsProvider(boto_config=config)
+    names = ["db", "db-password"]
+    response = {
+        "SecretValues": [{"Name": name, **secret_value} for name in ["db", "db-password", "db2", "db-password-old"]],
+    }
+    expected_params = {"Filters": [{"Key": "name", "Values": names}]}
+    expected = dict.fromkeys(names, next(iter(secret_value.values())))
+
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response("batch_get_secret_value", response, expected_params)
+        assert provider.get_multiple(names) == expected
+        if force_fetch:
+            stubber.add_response("batch_get_secret_value", response, expected_params)
+        assert provider.get_multiple(names, force_fetch=force_fetch) == expected
+        key = provider._build_cache_key(name="|".join(sorted(names)), transform=None, is_nested=True)
+        assert provider.fetch_from_cache(key) == expected
+        stubber.assert_no_pending_responses()
+
+
+def test_secrets_provider_get_multiple_skips_prefix_only_page(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    names = ["db"]
+    expected_params = {"Filters": [{"Key": "name", "Values": names}]}
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db-old", "SecretString": "not json"}], "NextToken": "next-page"},
+            expected_params,
+        )
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db", "SecretString": '{"enabled": true}'}]},
+            {**expected_params, "NextToken": "next-page"},
+        )
+        assert provider.get_multiple(names, transform="json", raise_on_transform_error=True) == {
+            "db": {"enabled": True},
+        }
+        stubber.assert_no_pending_responses()
+
+
+def test_secrets_provider_get_multiple_only_prefix_matches(config):
+    provider = parameters.SecretsProvider(boto_config=config)
+    with stub.Stubber(provider.client) as stubber:
+        stubber.add_response(
+            "batch_get_secret_value",
+            {"SecretValues": [{"Name": "db-old", "SecretString": "value"}]},
+            {"Filters": [{"Key": "name", "Values": ["db"]}]},
+        )
+        with pytest.raises(GetSecretError, match="No secrets found matching the provided names"):
+            provider.get_multiple(["db"])
+        assert not provider.store
+        stubber.assert_no_pending_responses()

@@ -17,10 +17,12 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.utilities.parameters.base import BaseProvider
 from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
     from botocore.config import Config
+    from botocore.exceptions import ClientError
     from mypy_boto3_appconfigdata.client import AppConfigDataClient
 
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
@@ -29,6 +31,14 @@ if TYPE_CHECKING:
 class AppConfigProvider(BaseProvider):
     """
     AWS App Config Provider
+
+    An expired or corrupted poll token starts a new configuration session and retries retrieval once.
+    If the replacement token is expired or corrupted, retrieval raises GetParameterError and the next
+    call can start a fresh session. Other service errors, including polling too early, retain
+    the token and do not trigger session recovery.
+    If reading the response body fails, retrieval raises GetParameterError and discards
+    that configuration's token so the next retrieval can recover. Caching and transforms
+    still apply, and recovery does not reset other configuration profiles.
 
     Parameters
     ----------
@@ -125,17 +135,43 @@ class AppConfigProvider(BaseProvider):
             SDK options to propagate to `start_configuration_session` API call
         """
         if name not in self._next_token:
-            sdk_options["ConfigurationProfileIdentifier"] = name
-            sdk_options["ApplicationIdentifier"] = self.application
-            sdk_options["EnvironmentIdentifier"] = self.environment
-            response_configuration = self.client.start_configuration_session(**sdk_options)
-            self._next_token[name] = response_configuration["InitialConfigurationToken"]
+            self._start_configuration_session(name, **sdk_options)
 
+        try:
+            return self._get_configuration(name)
+        except self.client.exceptions.BadRequestException as exc:
+            if not self._is_token_expired_or_corrupted(exc):
+                raise
+            # Expired or corrupted tokens cannot be reused. Restart once, without recursively
+            # retrying a rejected replacement or bypassing the configured polling interval.
+            self._start_configuration_session(name, **sdk_options)
+            return self._get_configuration(name)
+
+    def _start_configuration_session(self, name: str, **sdk_options) -> None:
+        sdk_options["ConfigurationProfileIdentifier"] = name
+        sdk_options["ApplicationIdentifier"] = self.application
+        sdk_options["EnvironmentIdentifier"] = self.environment
+        response = self.client.start_configuration_session(**sdk_options)
+        self._next_token[name] = response["InitialConfigurationToken"]
+
+    def _get_configuration(self, name: str) -> bytes:
         # The new AppConfig APIs require two API calls to return the configuration
         # First we start the session and after that we retrieve the configuration
         # We need to store the token to use in the next execution
-        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
-        return_value = response["Configuration"].read()
+        try:
+            response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
+        except self.client.exceptions.BadRequestException as exc:
+            if self._is_token_expired_or_corrupted(exc):
+                self._next_token.pop(name, None)
+            raise
+
+        try:
+            return_value = response["Configuration"].read()
+        except Exception:
+            # The request consumed the token, but we did not receive a complete value.
+            # A new session on the next call retrieves the configuration again.
+            self._next_token.pop(name, None)
+            raise
         self._next_token[name] = response["NextPollConfigurationToken"]
 
         # The return of get_latest_configuration can be null because this value is supposed to be cached
@@ -144,8 +180,22 @@ class AppConfigProvider(BaseProvider):
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
             self.last_returned_value[name] = return_value
+        elif name not in self.last_returned_value:
+            raise GetParameterError(
+                f"Configuration '{name}' is empty and no cached value is available "
+                f"for application '{self.application}' in environment '{self.environment}'",
+            )
 
         return self.last_returned_value[name]
+
+    @staticmethod
+    def _is_token_expired_or_corrupted(exc: ClientError) -> bool:
+        problem: object = exc.response
+        for key in ("Details", "InvalidParameters", "ConfigurationToken", "Problem"):
+            if not isinstance(problem, dict):
+                return False
+            problem = problem.get(key)
+        return problem in ("Expired", "Corrupted")
 
     def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         """
@@ -214,11 +264,12 @@ def get_app_config(
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
     max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
-    # Only create the provider if this function is called at least once
-    if "appconfig" not in DEFAULT_PROVIDERS:
-        DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
+    # One provider per environment/application pair, created on first use
+    provider_key = f"appconfig:{environment}:{application}"
+    if provider_key not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS[provider_key] = AppConfigProvider(environment=environment, application=application)
 
-    return DEFAULT_PROVIDERS["appconfig"].get(
+    return DEFAULT_PROVIDERS[provider_key].get(
         name,
         max_age=max_age,
         transform=transform,
