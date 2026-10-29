@@ -36,13 +36,13 @@ class VpcLatticeV2RequestContextIdentity(BaseModel):
     )
     x509_subject_cn: str | None = Field(
         None,
-        alias="X509SubjectCn",
+        alias="x509SubjectCn",
         description="The X.509 certificate subject common name.",
         examples=["example.com"],
     )
     x509_issuer_ou: str | None = Field(
         None,
-        alias="X509IssuerOu",
+        alias="x509IssuerOu",
         description="The X.509 certificate issuer organizational unit.",
         examples=["IT Department"],
     )
@@ -54,13 +54,13 @@ class VpcLatticeV2RequestContextIdentity(BaseModel):
     )
     x509_san_uri: str | None = Field(
         None,
-        alias="X509SanUri",
+        alias="x509SanUri",
         description="The X.509 certificate Subject Alternative Name URI entry.",
         examples=["https://example.com"],
     )
     x509_san_name_cn: str | None = Field(
         None,
-        alias="X509SanNameCn",
+        alias="x509SanNameCn",
         description="The X.509 certificate Subject Alternative Name common name.",
         examples=["example.com"],
     )
