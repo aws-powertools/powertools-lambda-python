@@ -27,10 +27,9 @@ from aws_lambda_powertools.event_handler.openapi.exceptions import (
     RequestValidationError,
     ResponseValidationError,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Param, UploadFile
+from aws_lambda_powertools.event_handler.openapi.params import Param, ParamTypes, UploadFile
 from aws_lambda_powertools.event_handler.openapi.types import UnionType
 from aws_lambda_powertools.utilities.data_classes.alb_event import ALBEvent
-from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict
 from aws_lambda_powertools.utilities.data_classes.vpc_lattice import VPCLatticeEventV2
 
 if TYPE_CHECKING:
@@ -98,7 +97,6 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         headers = _normalize_multi_params(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
-            multi_value_params=CaseInsensitiveDict(app.current_event.get("multiValueHeaders")),
         )
 
         # Process header values
@@ -144,17 +142,18 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         Get the request body from the event, and parse it according to content type.
         """
         content_type = app.current_event.headers.get("content-type", "").strip()
+        media_type = content_type.split(";")[0].strip().lower()
 
         # Handle JSON content
-        if not content_type or content_type.startswith(APPLICATION_JSON_CONTENT_TYPE):
+        if not media_type or media_type == APPLICATION_JSON_CONTENT_TYPE or media_type.endswith("+json"):
             return self._parse_json_data(app)
 
         # Handle URL-encoded form data
-        elif content_type.startswith(APPLICATION_FORM_CONTENT_TYPE):
+        elif media_type == APPLICATION_FORM_CONTENT_TYPE:
             return self._parse_form_data(app)
 
         # Handle multipart/form-data (file uploads)
-        elif content_type.startswith(MULTIPART_FORM_DATA_CONTENT_TYPE):
+        elif media_type == MULTIPART_FORM_DATA_CONTENT_TYPE:
             return self._parse_multipart_data(app, content_type)
 
         else:
@@ -431,6 +430,11 @@ def _request_params_to_args(
         loc = (field_info.in_.value, field.alias)
         value = received_params.get(field.alias)
 
+        # Route args are keyed by the path-template placeholder (the Python argument
+        # name), so an explicit Path alias must not make the param unsatisfiable.
+        if value is None and field_info.in_ == ParamTypes.path and field.name in received_params:
+            value = received_params[field.name]
+
         # If we don't have a value, see if it's required or has a default
         if value is None:
             _handle_missing_field_value(field, values, errors, loc)
@@ -649,6 +653,8 @@ def _normalize_multi_params(
     for param in params:
         if is_scalar_field(param):
             _process_scalar_param(input_dict, param, multi_value_params)
+        elif _is_or_contains_sequence(param.field_info.annotation):
+            _process_sequence_param(input_dict, param)
         elif lenient_issubclass(param.field_info.annotation, BaseModel):
             _process_model_param(input_dict, param, multi_value_params)
     return input_dict
@@ -681,6 +687,21 @@ def _process_scalar_param(
         pass
 
 
+def _process_sequence_param(
+    input_dict: MutableMapping[str, Any],
+    param: ModelField,
+) -> None:
+    """Restore sequence parameters by splitting comma strings or wrapping single values in a list."""
+    try:
+        value = input_dict[param.alias]
+    except KeyError:
+        return
+
+    # headers arrive as a single string (possibly comma-joined), query strings already as a list
+    if isinstance(value, str):
+        input_dict[param.alias] = value.split(",")
+
+
 def _process_model_param(
     input_dict: MutableMapping[str, Any],
     param: ModelField,
@@ -698,6 +719,8 @@ def _process_model_param(
             if not _is_or_contains_sequence(field_info.annotation):
                 source_name = field_alias if input_dict.get(field_alias) is not None else field_name
                 value = _restore_scalar_parameter(value, source_name, multi_value_params)
+            elif isinstance(value, str):
+                value = value.split(",")
             model_data[field_alias] = _normalize_field_value(value=value, field_info=field_info)
 
     input_dict[param.alias] = model_data
