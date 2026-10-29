@@ -121,6 +121,16 @@ There is no wrapper type to inspect. The contract is:
 | **Open**, `on_circuit_open` set       | Whatever the callback returns                                          |
 | **Open**, no callback                 | Raises `CircuitBreakerOpenError` (with the `CircuitInfo` attached)     |
 
+### Protecting async functions
+
+`@circuit_breaker` also wraps `async def` functions. The coroutine is awaited inside the circuit, so failures count towards `failure_threshold`, probes run on the awaited result, and an `on_circuit_open` callback can be a coroutine function too. Call it with `await` as you normally would.
+
+=== "working_with_async_functions.py"
+
+    ```python hl_lines="17 22-28 29"
+    --8<-- "examples/circuit_breaker/src/working_with_async_functions.py"
+    ```
+
 ## Handling an open circuit
 
 ### With a callback
