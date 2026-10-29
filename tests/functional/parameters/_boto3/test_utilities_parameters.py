@@ -1220,6 +1220,146 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_transform(m
         stubber.deactivate()
 
 
+def test_ssm_provider_get_parameters_by_name_do_not_raise_on_transform_failure_with_decrypt(mock_name):
+    # GIVEN one parameter needs decryption and its value can't be transformed
+    # and a second parameter is successfully fetched through the batch API
+    decrypt_fail = f"/decrypt/{mock_name}"
+    success = f"/batch/{mock_name}"
+    params = {decrypt_fail: {"decrypt": True}, success: {}}
+    expected_value = {"value": "success"}
+
+    class FakeClient:
+        def get_parameter(self, **kwargs):
+            assert kwargs["Name"] == decrypt_fail
+            assert kwargs["WithDecryption"] is True
+            return {"Parameter": {"Name": decrypt_fail, "Value": "not json", "Type": "String", "Version": 1}}
+
+        def get_parameters(self, **kwargs):
+            assert kwargs["Names"] == [success]
+            return build_get_parameters_stub(params={success: json.dumps(expected_value)})
+
+    provider = parameters.SSMProvider(boto3_client=FakeClient())
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
+
+    # THEN no error is raised, the transform failure is reported under "_errors",
+    # and its value is not returned
+    assert ret[success] == expected_value
+    assert ret["_errors"] == [decrypt_fail]
+    assert decrypt_fail not in ret
+
+
+def test_ssm_provider_get_parameters_by_name_do_not_cache_failed_transform(mock_name):
+    # GIVEN a parameter whose value can't be transformed
+    param = f"/{mock_name}"
+    params = {param: {}}
+    corrected_value = {"value": "corrected"}
+
+    class FakeClient:
+        def __init__(self):
+            self.get_parameters_calls = 0
+
+        def get_parameters(self, **kwargs):
+            self.get_parameters_calls += 1
+            assert kwargs["Names"] == [param]
+
+            if self.get_parameters_calls == 1:
+                return build_get_parameters_stub(params={param: "not json"})
+
+            return build_get_parameters_stub(params={param: json.dumps(corrected_value)})
+
+    client = FakeClient()
+    provider = parameters.SSMProvider(boto3_client=client)
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
+
+    # THEN the transform failure is reported and not cached
+    assert ret["_errors"] == [param]
+    assert param not in ret
+    assert (param, "json") not in provider.store
+
+    # WHEN fetching again after the parameter is corrected
+    ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
+
+    # THEN a fresh request is made and the corrected value is returned instead of a cached failure
+    assert client.get_parameters_calls == 2
+    assert ret["_errors"] == []
+    assert ret[param] == corrected_value
+    assert (param, "json") in provider.store
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_transform_failure_with_decrypt(mock_name, config):
+    # GIVEN one parameter needs decryption and its value can't be transformed
+    decrypt_fail = f"/decrypt/{mock_name}"
+    success = f"/batch/{mock_name}"
+    params = {decrypt_fail: {"decrypt": True}, success: {}}
+
+    provider = parameters.SSMProvider(boto_config=config)
+    stubber = stub.Stubber(provider.client)
+    stubber.add_response(
+        "get_parameter",
+        {"Parameter": {"Name": decrypt_fail, "Value": "not json", "Type": "String", "Version": 1}},
+        {"Name": decrypt_fail, "WithDecryption": True},
+    )
+    stubber.activate()
+
+    # WHEN using get_parameters_by_name with fail-fast enabled (default)
+    try:
+        with pytest.raises(parameters.TransformParameterError):
+            provider.get_parameters_by_name(parameters=params, transform="json")
+
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_parameters_by_name_raise_on_batch_transform_failure(mock_name):
+    # GIVEN a batch parameter whose value can't be transformed
+    param = f"/{mock_name}"
+    params = {param: {}}
+
+    class FakeClient:
+        def get_parameters(self, **kwargs):
+            assert kwargs["Names"] == [param]
+            return build_get_parameters_stub(params={param: "not json"})
+
+    provider = parameters.SSMProvider(boto3_client=FakeClient())
+
+    # WHEN using get_parameters_by_name with fail-fast enabled (default)
+    with pytest.raises(parameters.TransformParameterError):
+        provider.get_parameters_by_name(parameters=params, transform="json")
+
+
+def test_ssm_provider_get_parameters_by_name_json_null_is_not_a_transform_failure(mock_name):
+    # GIVEN parameters whose values are valid JSON null
+    decrypt_param = f"/decrypt/{mock_name}"
+    batch_param = f"/batch/{mock_name}"
+    params = {decrypt_param: {"decrypt": True}, batch_param: {}}
+
+    class FakeClient:
+        def get_parameter(self, **kwargs):
+            assert kwargs["Name"] == decrypt_param
+            assert kwargs["WithDecryption"] is True
+            return {"Parameter": {"Name": decrypt_param, "Value": "null", "Type": "String", "Version": 1}}
+
+        def get_parameters(self, **kwargs):
+            assert kwargs["Names"] == [batch_param]
+            return build_get_parameters_stub(params={batch_param: "null"})
+
+    provider = parameters.SSMProvider(boto3_client=FakeClient())
+
+    # WHEN fail-fast is disabled in get_parameters_by_name
+    ret = provider.get_parameters_by_name(parameters=params, transform="json", raise_on_error=False)
+
+    # THEN JSON null is a successful transform, not reported as a failure
+    assert ret["_errors"] == []
+    assert ret[decrypt_param] is None
+    assert ret[batch_param] is None
+    assert (batch_param, "json") in provider.store
+
+
 def test_ssm_provider_get_parameters_by_name_auto_transform_infers_from_parameter_name(mock_name, mock_value, config):
     # GIVEN transform="auto" and a parameter name suffixed with ".json"
     # (auto-transform must infer the transform method from the parameter name, not its value)
