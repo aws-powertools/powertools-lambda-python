@@ -155,8 +155,12 @@ class AsyncMiddlewareFrame:
         logger.debug("AsyncMiddlewareFrame: %s", self)
         app._push_processed_stack_frame(str(self))
 
+        from aws_lambda_powertools.event_handler.api_gateway import _resolve_extra_middleware_kwargs
+
+        extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
+
         if inspect.iscoroutinefunction(self.current_middleware):
-            return await self.current_middleware(app, self.next_middleware)
+            return await self.current_middleware(app, self.next_middleware, **extra_kwargs)
 
         loop = asyncio.get_running_loop()
 
@@ -164,7 +168,7 @@ class AsyncMiddlewareFrame:
             future = asyncio.run_coroutine_threadsafe(self.next_middleware(app), loop)
             return future.result()
 
-        return await asyncio.to_thread(self.current_middleware, app, sync_next)
+        return await asyncio.to_thread(self.current_middleware, app, sync_next, **extra_kwargs)
 
 
 async def _registered_api_adapter_async(
@@ -207,12 +211,14 @@ async def _registered_api_adapter_async(
             route_args = {**route_args, route.request_param_name: app.request}
 
         if route.has_dependencies:
+            from aws_lambda_powertools.event_handler.api_gateway import _DEPENDS_CACHE_KEY
             from aws_lambda_powertools.event_handler.depends import build_dependency_tree, solve_dependencies
 
             dep_values = solve_dependencies(
                 dependant=build_dependency_tree(route.func),
                 request=app.request,
                 dependency_overrides=app.dependency_overrides or None,
+                dependency_cache=app.context.get(_DEPENDS_CACHE_KEY),
             )
             route_args.update(dep_values)
 

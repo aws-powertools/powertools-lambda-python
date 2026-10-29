@@ -523,6 +523,39 @@ def test_response_is_json_with_multiple_json_content_types():
     assert response.is_json() is True
 
 
+def test_response_with_bytes_body_and_json_content_type_is_base64_encoded():
+    # GIVEN a route that returns a bytes body with a JSON content type
+    app = ApiGatewayResolver()
+    body = b'{"a":1}'
+
+    @app.get("/my/path")
+    def get_bytes() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, body)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the bytes are base64 encoded instead of being passed to the JSON serializer
+    assert result["isBase64Encoded"] is True
+    assert base64.b64decode(result["body"]) == body
+
+
+def test_response_with_lowercase_content_type_header_serializes_json_body():
+    # GIVEN a route that sets the JSON content type with a lowercase header name
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path")
+    def get_lowercase_header() -> Response:
+        return Response(200, headers={"content-type": content_types.APPLICATION_JSON}, body={"a": 1})
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET"}, None)
+
+    # THEN the response is recognised as JSON and the body is serialized
+    assert isinstance(result["body"], str)
+    assert json.loads(result["body"]) == {"a": 1}
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
@@ -586,6 +619,32 @@ def test_compress_no_accept_encoding():
     # THEN don't perform any gzip compression
     assert result["isBase64Encoded"] is False
     assert result["body"] == expected_value
+
+
+@pytest.mark.parametrize(
+    "accept_encoding, expected_compressed",
+    [
+        pytest.param("gzip;q=0", False, id="gzip refused with a zero weight"),
+        pytest.param("deflate, gzip; q=0.0", False, id="gzip refused with a zero weight and spaces"),
+        pytest.param("GZIP", True, id="gzip accepted in uppercase"),
+        pytest.param("deflate, gzip;q=0.5", True, id="gzip accepted with a non-zero weight"),
+    ],
+)
+def test_compress_respects_accept_encoding_weights_and_casing(accept_encoding: str, expected_compressed: bool):
+    # GIVEN a function with compress=True
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", compress=True)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Foo")
+
+    # WHEN the client sends an Accept-Encoding header with a weight or different casing
+    event = {"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": accept_encoding}}
+    result = app(event, None)
+
+    # THEN the response is only gzipped when the client accepts gzip
+    assert result["isBase64Encoded"] is expected_compressed
+    assert ("Content-Encoding" in result["multiValueHeaders"]) is expected_compressed
 
 
 def test_compress_no_accept_encoding_null_headers():
@@ -782,6 +841,59 @@ def test_cors_multi_origin():
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
     assert "Access-Control-Allow-Origin" not in headers
+
+
+def test_cors_adds_vary_origin_when_echoing_a_specific_origin():
+    # GIVEN a cors configuration with more than one allowed origin
+    cors_config = CORSConfig(allow_origin="https://a.com", extra_origins=["https://b.com"])
+    app = ApiGatewayResolver(cors=cors_config)
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with one of the allowed origins
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the echoed origin comes with Vary: Origin so shared caches don't reuse it for other origins
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["https://a.com"]
+    assert headers["Vary"] == ["Origin"]
+
+
+def test_cors_keeps_existing_vary_header_when_adding_origin():
+    # GIVEN a route that already sets a Vary header
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="https://a.com"))
+
+    @app.get("/cors")
+    def get_with_vary() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, "{}", headers={"Vary": "Accept-Encoding"})
+
+    # WHEN calling the event handler with the allowed origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN Origin is added to the existing Vary value instead of replacing it
+    assert result["multiValueHeaders"]["Vary"] == ["Accept-Encoding, Origin"]
+
+
+def test_cors_does_not_add_vary_origin_for_wildcard_origin():
+    # GIVEN a cors configuration that allows every origin
+    app = ApiGatewayResolver(cors=CORSConfig(allow_origin="*"))
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with any origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://a.com"}}
+    result = app(event, None)
+
+    # THEN the wildcard response is the same for every origin, so no Vary header is needed
+    headers = result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Origin"] == ["*"]
+    assert "Vary" not in headers
 
 
 def test_custom_cors_config():
@@ -1146,6 +1258,35 @@ def test_debug_print_event(capsys):
     assert json.loads(output) == event
 
 
+@pytest.mark.parametrize(
+    "rule, path, expected_route_keys",
+    [
+        pytest.param(".+", "/any/deep/path", {}, id="catch-all matches any path"),
+        pytest.param("/files/.+", "/files/reports/2026/summary.pdf", {}, id="catch-all after a static prefix"),
+        pytest.param(
+            "/users/<user_id>/files/.+",
+            "/users/123/files/docs/report.txt",
+            {"user_id": "123"},
+            id="catch-all after a dynamic parameter",
+        ),
+    ],
+)
+def test_route_rule_supports_documented_catch_all_regex(rule: str, path: str, expected_route_keys: dict):
+    # GIVEN a route that uses a regex catch-all, as shown in the "Catch-all routes" docs
+    app = APIGatewayRestResolver()
+
+    @app.get(rule)
+    def handler(**route_keys):
+        return route_keys
+
+    # WHEN calling the event handler with a nested path
+    result = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN the regex in the rule matches the whole path and dynamic parameters are still captured
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == expected_route_keys
+
+
 def test_similar_dynamic_routes():
     # GIVEN
     app = ApiGatewayResolver()
@@ -1323,6 +1464,29 @@ def test_remove_prefix_by_regex(path: str):
     assert response["statusCode"] == 200
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/v1/users/v2", id="prefix pattern also appears later in the path"),
+        pytest.param("/users/v2", id="prefix pattern only appears later in the path"),
+    ],
+)
+def test_remove_prefix_by_regex_only_strips_leading_match(path: str):
+    # GIVEN a regex strip_prefix that could also match a later path segment
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/v[1-9]+")])
+
+    @app.get("/users/<name>")
+    def get_user(name: str):
+        return {"name": name}
+
+    # WHEN calling the handler with the pattern repeated later in the path
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    # THEN only a leading match is stripped, so the route matches and keeps the later segment
+    assert response["statusCode"] == 200
+    assert json.loads(response["body"]) == {"name": "v2"}
+
+
 def test_empty_path_when_using_regexes():
     app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
 
@@ -1376,6 +1540,41 @@ def test_api_gateway_v2_raw_path():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+
+
+@pytest.mark.parametrize(
+    "stage, raw_path, route, expected_path",
+    [
+        pytest.param("dev", "/dev/my/path", "/my/path", "/my/path", id="named stage in raw path"),
+        pytest.param("dev", "/my/path", "/my/path", "/my/path", id="named stage not in raw path"),
+        pytest.param("$default", "/my/path", "/my/path", "/my/path", id="default stage"),
+        pytest.param("dev", "/dev", "/", "/", id="raw path equals the stage"),
+        pytest.param("dev", "/dev/", "/", "/", id="raw path equals the stage with trailing slash"),
+        pytest.param("dev", "/devices", "/devices", "/devices", id="raw path starts with the stage name"),
+        pytest.param("dev", "/dev/devices", "/devices", "/devices", id="named stage and path starting with its name"),
+    ],
+)
+def test_api_gateway_v2_stage_prefix_in_raw_path(stage, raw_path, route, expected_path):
+    # GIVEN an HTTP API resolver with a single route
+    app = APIGatewayHttpResolver()
+
+    @app.get(route)
+    def handler():
+        return {"path": app.current_event.path}
+
+    # AND a request for that stage. The execute-api endpoint puts a named stage in rawPath,
+    # while custom domain API mappings and SAM local send rawPath without it
+    event = load_event("apiGatewayProxyV2Event.json")
+    event["requestContext"]["stage"] = stage
+    event["requestContext"]["http"]["method"] = "GET"
+    event["rawPath"] = event["requestContext"]["http"]["path"] = raw_path
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN the stage is stripped only when rawPath starts with it, and the route is found
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"path": expected_path}
 
 
 def test_api_gateway_request_path_equals_strip_prefix():
@@ -1748,6 +1947,91 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_catch_all_exception_handler_does_not_hijack_not_found():
+    # GIVEN a resolver with a catch-all exception handler, as suggested in the docs
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(Exception)
+    def handle_everything(ex: Exception) -> Response:
+        return Response(status_code=500, content_type=content_types.TEXT_PLAIN, body="generic handler")
+
+    @app.get("/other")
+    def get_other():
+        return {}
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the default 404 is returned instead of the catch-all response
+    assert result["statusCode"] == 404
+    assert json.loads(result["body"]) == {"statusCode": 404, "message": "Not found"}
+
+
+def test_service_error_handler_still_handles_not_found():
+    # GIVEN a resolver with a handler for ServiceError, which NotFoundError inherits from
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ServiceError)
+    def handle_service_error(ex: ServiceError) -> Response:
+        return Response(status_code=ex.status_code, content_type=content_types.TEXT_PLAIN, body="custom format")
+
+    # WHEN calling the event handler for an unmatched route
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the ServiceError handler keeps formatting the 404
+    assert result["statusCode"] == 404
+    assert result["body"] == "custom format"
+
+
+def test_exception_handler_none_body_on_alb_is_converted_to_empty_string():
+    # GIVEN an ALB resolver whose exception handler returns a Response with no body
+    app = ALBResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError) -> Response:
+        return Response(status_code=400, content_type=content_types.TEXT_PLAIN, body=None)
+
+    @app.get("/lambda")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(load_event("albEvent.json"), {})
+
+    # THEN the body is an empty string, as it is for a route returning the same Response, since ALB rejects null
+    assert result["statusCode"] == 400
+    assert result["body"] == ""
+
+
+@pytest.mark.parametrize(
+    "handler_result, expected_status",
+    [
+        ({"error": "Foo!"}, 200),
+        (({"error": "Foo!"}, 400), 400),
+    ],
+    ids=["dict", "tuple"],
+)
+def test_exception_handler_dict_and_tuple_returns_are_serialized(handler_result, expected_status):
+    # GIVEN an exception handler that returns a dict or a (dict, status_code) tuple, like a route can
+    app = APIGatewayRestResolver()
+
+    @app.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        return handler_result
+
+    @app.get("/my/path")
+    def get_lambda():
+        raise ValueError("Foo!")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the result is serialized the same way a route return value is
+    assert result["statusCode"] == expected_status
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert json.loads(result["body"]) == {"error": "Foo!"}
 
 
 def test_exception_handler_raises_service_error(json_dump):
