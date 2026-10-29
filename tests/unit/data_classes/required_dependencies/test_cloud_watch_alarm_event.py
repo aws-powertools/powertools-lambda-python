@@ -57,6 +57,23 @@ def test_cloud_watch_alarm_event_single_metric():
     assert isinstance(metric_1.metric_stat.metric, dict)
 
 
+def test_cloud_watch_alarm_metric_stat_is_none_for_expression_entries():
+    raw_event = load_event("cloudWatchAlarmEventSingleMetric.json")
+    parsed_event = CloudWatchAlarmEvent(raw_event)
+    metrics = parsed_event.alarm_data.configuration.metrics
+
+    # GIVEN a metric math alarm, whose expression entries carry no metricStat key
+    expression_metric = metrics[0]
+    assert expression_metric.expression is not None
+    assert "metricStat" not in raw_event["alarmData"]["configuration"]["metrics"][0]
+
+    # THEN metric_stat must return None like expression and label do, not raise KeyError
+    assert expression_metric.metric_stat is None
+
+    # AND iterating every metric's metric_stat must be safe
+    assert [metric.metric_stat is not None for metric in metrics] == [False, True, True]
+
+
 def test_cloud_watch_alarm_event_composite_metric():
     raw_event = load_event("cloudWatchAlarmEventCompositeMetric.json")
     parsed_event = CloudWatchAlarmEvent(raw_event)
