@@ -1085,6 +1085,24 @@ def test_use_datetime(stdout, service_name, utc):
 
 
 @pytest.mark.parametrize("utc", [False, True])
+def test_use_datetime_does_not_shift_timestamp(utc):
+    # GIVEN a formatter using datetime directives
+    formatter = LambdaPowertoolsFormatter(datefmt="%Y-%m-%d %H:%M:%S.%F|%f", use_datetime_directive=True, utc=utc)
+
+    # AND a log record created 750 milliseconds after a full second
+    record = logging.LogRecord("test", logging.INFO, __file__, 1, "message", None, None)
+    record.created = 1700000000.75
+    record.msecs = 750.0
+
+    # WHEN the timestamp is formatted
+    timestamp = formatter.formatTime(record, formatter.datefmt)
+
+    # THEN it matches the time the record was created
+    expected = datetime.fromtimestamp(record.created, tz=timezone.utc if utc else None)
+    assert timestamp == expected.strftime("%Y-%m-%d %H:%M:%S.750|%f")
+
+
+@pytest.mark.parametrize("utc", [False, True])
 def test_use_rfc3339_iso8601(stdout, service_name, utc):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout, use_rfc3339=True, utc=utc)
