@@ -622,17 +622,16 @@ class SSMProvider(BaseProvider):
         batch_errors: list[str] = []
         parameter_names = list(parameters.keys())
 
-        # All params in the batch must be decrypted
-        # we return early if we hit an unrecoverable exception like InvalidKeyId/InternalServerError
-        # everything else should technically be recoverable as GetParameters is non-atomic
+        # Handle request-level failures according to raise_on_error.
+        # Successful responses may still report failures in InvalidParameters.
         try:
             if decrypt:
                 response = self.client.get_parameters(Names=parameter_names, WithDecryption=True)
             else:
                 response = self.client.get_parameters(Names=parameter_names)
-        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError) as exc:
+        except Exception as exc:
             if raise_on_error:
-                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}") from exc
+                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}: {exc}") from exc
             return ret, parameter_names
 
         batch_errors = self._handle_any_invalid_get_parameter_errors(response, raise_on_error)
