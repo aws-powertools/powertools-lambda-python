@@ -135,6 +135,7 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **DynamoDBStreamModel**                           | Lambda Event Source payload for Amazon DynamoDB Streams                                       |
 | **DynamoDBStreamLambdaOnFailureDestinationModel** | Lambda on-failure destination payload for Amazon DynamoDB Streams                                          |
 | **EventBridgeModel**                              | Lambda Event Source payload for Amazon EventBridge                                            |
+| **EventBridgeV2Model**                            | Lambda Event Source payload for Amazon EventBridge Custom Event Bus (`WITH_METADATA`, single or array)  |
 | **IoTCoreThingEvent**                             | Lambda Event Source payload for IoT Core Thing created, updated, or deleted.                  |
 | **IoTCoreThingTypeEvent**                         | Lambda Event Source payload for IoT Core Thing Type events.                                   |
 | **IoTCoreThingTypeAssociationEvent**              | Lambda Event Source payload for IoT Core Thing Type associated or disassociated with a Thing. |
@@ -209,6 +210,7 @@ You can use pre-built envelopes provided by the Parser to extract and parse spec
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | **DynamoDBStreamEnvelope**    | 1. Parses data using `DynamoDBStreamModel`. `` 2. Parses records in `NewImage` and `OldImage` keys using your model. `` 3. Returns a list with a dictionary containing `NewImage` and `OldImage` keys | `List[Dict[str, Optional[Model]]]` |
 | **EventBridgeEnvelope**       | 1. Parses data using `EventBridgeModel`. ``2. Parses `detail` key using your model`` and returns it.                                                                                                     | `Model`                            |
+| **EventBridgeV2Envelope**     | 1. Parses data using `EventBridgeV2Model`. ``2. Parses `Data` (or `Data.detail` for PutEvents) of each record using your model`` and returns them in a list. Also accepts RAW deliveries. | `List[Model]`                      |
 | **SqsEnvelope**               | 1. Parses data using `SqsModel`. ``2. Parses records in `body` key using your model`` and return them in a list.                                                                                         | `List[Model]`                      |
 | **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. ``2. Parses records in `message` key using your model`` and return them in a list.                                | `List[Model]`                      |
 | **KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. ``2. Parses records in the `Records` key using your model`` and returns them in a list.                                       | `List[Model]`                      |
