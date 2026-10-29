@@ -126,3 +126,63 @@ def test_handle_invalid_event_with_envelope():
     empty_dict = {}
     with pytest.raises(ValidationError):
         CloudWatchLogsModel(**empty_dict)
+
+
+def _make_cloudwatch_event(messages: list[str]) -> dict:
+    inner_event_dict = {
+        "messageType": "DATA_MESSAGE",
+        "owner": "123456789012",
+        "logGroup": "/aws/lambda/my-function",
+        "logStream": "2024/10/21/[$LATEST]abcdef1234567890",
+        "subscriptionFilters": ["my-filter"],
+        "logEvents": [
+            {"id": f"event-{i}", "timestamp": 1729520895158 + i, "message": message}
+            for i, message in enumerate(messages)
+        ],
+    }
+    compressed = zlib.compress(json.dumps(inner_event_dict).encode("utf-8"), -1)
+    return {"awslogs": {"data": base64.b64encode(compressed)}}
+
+
+def test_cloudwatch_envelope_handles_non_json_messages():
+    plain_text_messages = [
+        "START RequestId: eadc91c8-8273-4a2d-b170-b0a7883b619e Version: $LATEST\n",
+        "2024-10-21T14:28:15.158Z\teadc91c8-8273-4a2d-b170-b0a7883b619e\tINFO\tHello from handler\n",
+        "END RequestId: eadc91c8-8273-4a2d-b170-b0a7883b619e\n",
+        (
+            "REPORT RequestId: eadc91c8-8273-4a2d-b170-b0a7883b619e\tDuration: 2.07 ms\t"
+            "Billed Duration: 3 ms\tMemory Size: 128 MB\tMax Memory Used: 67 MB\t\n"
+        ),
+    ]
+
+    parsed = parse(
+        event=_make_cloudwatch_event(plain_text_messages),
+        model=str,
+        envelope=envelopes.CloudWatchLogsEnvelope,
+    )
+
+    assert parsed == plain_text_messages
+
+
+def test_cloudwatch_envelope_handles_mixed_json_and_plain_text_messages():
+    messages = [
+        json.dumps({"my_message": "hello", "user": "test"}),
+        "START RequestId: eadc91c8-8273-4a2d-b170-b0a7883b619e Version: $LATEST\n",
+    ]
+
+    parsed = parse(
+        event=_make_cloudwatch_event(messages),
+        model=str,
+        envelope=envelopes.CloudWatchLogsEnvelope,
+    )
+
+    assert parsed == messages
+
+
+def test_cloudwatch_envelope_plain_text_still_fails_for_object_model():
+    with pytest.raises(ValidationError):
+        parse(
+            event=_make_cloudwatch_event(["START RequestId: eadc91c8-8273-4a2d-b170-b0a7883b619e\n"]),
+            model=MyCloudWatchBusiness,
+            envelope=envelopes.CloudWatchLogsEnvelope,
+        )
