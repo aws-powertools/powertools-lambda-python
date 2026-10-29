@@ -102,3 +102,39 @@ def test_envelope_parses_octet_stream_json_bytes():
 
     # THEN the bytes are decoded and parsed into the model, and the optional aws: fields may be absent
     assert orders == [Order(orderId="o-1", total=5)]
+
+
+def _octet_stream_event(payload: bytes) -> dict:
+    return {
+        "Data": base64.b64encode(payload).decode(),
+        "Metadata": {},
+        "SystemMetadata": {"ContentType": "application/octet-stream", "aws:DeliveryType": "LIVE"},
+    }
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param(b"\xff\xd8\xff\xe0JFIF", id="binary"),
+        pytest.param(b"hello world", id="plain_text"),
+    ],
+)
+def test_envelope_parses_non_json_octet_stream_into_bytes_model(payload):
+    # GIVEN an application/octet-stream payload that is not JSON
+    event = _octet_stream_event(payload)
+
+    # WHEN parsing it with a bytes model
+    result = parse(event=event, model=bytes, envelope=envelopes.EventBridgeV2Envelope)
+
+    # THEN the raw bytes are returned, matching the data class `data` property
+    assert result == [payload]
+
+
+def test_envelope_raises_validation_error_for_binary_octet_stream_with_object_model():
+    # GIVEN a binary application/octet-stream payload that is not valid UTF-8
+    event = _octet_stream_event(b"\xff\xd8\xff\xe0JFIF")
+
+    # WHEN parsing it with an object model
+    # THEN a ValidationError is raised instead of a UnicodeDecodeError
+    with pytest.raises(ValidationError):
+        parse(event=event, model=Order, envelope=envelopes.EventBridgeV2Envelope)

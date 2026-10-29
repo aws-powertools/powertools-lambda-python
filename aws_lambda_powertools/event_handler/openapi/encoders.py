@@ -327,6 +327,11 @@ def decimal_encoder(dec_value: Decimal) -> int | float:
     >>> decimal_encoder(Decimal("1"))
     1
     """
+    if not dec_value.is_finite():
+        raise SerializationError(
+            f"Unable to serialize the Decimal value {dec_value} as it is not finite.",
+            "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#serializing-objects",
+        )
     if dec_value.as_tuple().exponent >= 0:  # type: ignore[operator]
         return int(dec_value)
     else:

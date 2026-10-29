@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -14,6 +15,20 @@ logger = logging.getLogger(__name__)
 
 def _is_with_metadata(item: Any) -> bool:
     return isinstance(item, dict) and "Data" in item and "SystemMetadata" in item
+
+
+def _decode_octet_stream(data: bytes) -> Any:
+    """Decode an application/octet-stream payload.
+
+    JSON payloads are loaded so they can be parsed into a model. Anything else (binary or plain text)
+    is passed through as bytes, so a `bytes` or `str` model can receive it and any other model raises
+    a ValidationError instead of a UnicodeDecodeError or a JSON error.
+    """
+    try:
+        return json.loads(data)
+    except ValueError:  # JSONDecodeError and UnicodeDecodeError are both ValueError
+        logger.debug("application/octet-stream payload is not JSON, passing it to the model as bytes")
+        return data
 
 
 def _unwrap_put_events(data: Any) -> Any:
@@ -54,9 +69,9 @@ class EventBridgeV2Envelope(BaseEnvelope):
             else:
                 payload = item
             if isinstance(payload, bytes):
-                # application/octet-stream is delivered as bytes; let the JSON path of _parse handle it
-                payload = payload.decode()
-            payloads.append(_unwrap_put_events(payload))
+                payloads.append(_decode_octet_stream(payload))
+            else:
+                payloads.append(_unwrap_put_events(payload))
 
         logger.debug(f"Parsing EventBridge V2 payloads with {model}")
         return [self._parse(data=payload, model=model) for payload in payloads]
