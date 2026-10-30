@@ -4,6 +4,7 @@
 - [Contributing Guidelines](#contributing-guidelines)
     - [Reporting Bugs/Feature Requests](#reporting-bugsfeature-requests)
     - [Contributing via Pull Requests](#contributing-via-pull-requests)
+        - [AI-assisted contributions](#ai-assisted-contributions)
         - [Dev setup](#dev-setup)
         - [Local documentation](#local-documentation)
     - [Conventions](#conventions)
@@ -95,6 +96,15 @@ timeline
                                     : Deploy staging docs
                                     : Update draft release
 ```
+
+### AI-assisted contributions
+
+Contributions written with the help of an AI assistant are welcome, under two conditions:
+
+1. Say so in the issue or the pull request. There is a field for it in both templates.
+2. Verify the change yourself and describe how. Run the tests and read the output; when the change touches an AWS service integration, validate it against the real service or a real event and tell us what you did. Mocks prove the logic, not the contract.
+
+The same rules apply to everyone: one issue per PR, tests through the public API, no changes to existing tests without proof the old expectation was a bug. [AGENTS.md](AGENTS.md) lists them with the commands to run, and [docs/adr](docs/adr/README.md) explains why.
 
 ### Dev setup
 

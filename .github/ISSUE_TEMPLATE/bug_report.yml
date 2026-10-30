@@ -45,6 +45,16 @@ body:
       description: Please share how we might be able to reproduce this issue
     validations:
       required: true
+  - type: dropdown
+    id: reproduced
+    attributes:
+      label: Did you run the reproduction yourself?
+      description: We welcome reports written with AI assistance; tell us whether the snippet above was executed and the failure observed, or derived from reading the code.
+      options:
+        - Yes, I ran it and saw the failure
+        - No, this comes from reading the code
+    validations:
+      required: true
   - type: input
     id: version
     attributes:

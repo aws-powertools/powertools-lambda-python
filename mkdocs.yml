@@ -5,6 +5,10 @@ repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 site_url: https://docs.powertools.aws.dev/lambda/python/latest/
 
+# Architecture decision records live in the repository only, see docs/adr/README.md
+exclude_docs: |
+  adr/
+
 nav:
   - Homepage:
       - index.md
