@@ -622,6 +622,40 @@ def test_compress_no_accept_encoding():
 
 
 @pytest.mark.parametrize(
+    "route_compress, response_compress, response_headers, accept_encoding, expected_vary",
+    [
+        pytest.param(True, None, None, "gzip", ["Accept-Encoding"], id="compressed response"),
+        pytest.param(True, None, None, "deflate", ["Accept-Encoding"], id="uncompressed response of a compress route"),
+        pytest.param(False, True, None, "gzip", ["Accept-Encoding"], id="compress enabled on the response"),
+        pytest.param(True, None, {"Vary": "Origin"}, "gzip", ["Origin, Accept-Encoding"], id="existing Vary kept"),
+        pytest.param(True, None, {"Vary": "accept-encoding"}, "gzip", ["accept-encoding"], id="not added twice"),
+        pytest.param(True, None, {"Vary": "*"}, "gzip", ["*"], id="wildcard Vary kept as is"),
+        pytest.param(False, None, None, "gzip", None, id="compression not enabled"),
+        pytest.param(True, False, None, "gzip", None, id="compression disabled on the response"),
+    ],
+)
+def test_compress_sets_vary_accept_encoding(
+    route_compress: bool,
+    response_compress: bool | None,
+    response_headers: dict | None,
+    accept_encoding: str,
+    expected_vary: list[str] | None,
+):
+    # GIVEN a route whose body depends on the request Accept-Encoding when compression is enabled
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", compress=route_compress)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Foo", headers=response_headers, compress=response_compress)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET", "headers": {"Accept-Encoding": accept_encoding}}, None)
+
+    # THEN Vary names Accept-Encoding whenever compression can change the body, so caches keep encodings apart
+    assert result["multiValueHeaders"].get("Vary") == expected_vary
+
+
+@pytest.mark.parametrize(
     "accept_encoding, expected_compressed",
     [
         pytest.param("gzip;q=0", False, id="gzip refused with a zero weight"),
