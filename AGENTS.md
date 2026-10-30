@@ -27,7 +27,7 @@ Do not run the full suite with `pytest -n auto`; collection differs between work
 - Title follows [conventional commits](.github/semantic.yml): `fix(parameters): ...`, `feat(event_handler): ...`, `docs(...)`. Scope is the utility name.
 - Description contains `closes #<issue>` alone on its own line. Trailing text on that line breaks the related-issue check.
 - Tests for the change. A bug fix adds a test that fails on `develop` and passes with the fix.
-- Tests use the public API only. Do not call or patch private methods, do not assert on private attributes.
+- Functional tests use the public API only, the way a customer would call it. Never test internal methods: do not call or patch private methods, do not assert on private attributes.
 - Existing tests are not modified or deleted unless the PR proves the old behaviour was a bug. Say so in the description.
 - `ruff`, `mypy` and the test suite green on Python 3.10 to 3.14. CI runs all five.
 - Behaviour changes update the docs page and its example under `examples/<utility>/src/`.
