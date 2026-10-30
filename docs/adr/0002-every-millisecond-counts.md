@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-Powertools is imported at the top of most handlers that use it, so our import time is part of every cold start of every customer. A dependency pulled in at import, a schema compiled at module load or a client created eagerly costs milliseconds on each cold start for everyone, including customers who never use that feature.
+Powertools for AWS Lambda (Python) is imported at the top of most handlers that use it, so our import time is part of every cold start of every customer. A dependency pulled in at import, a schema compiled at module load or a client created eagerly costs milliseconds on each cold start for everyone, including customers who never use that feature.
 
 We measure this. `tests/performance/` has import-time and initialisation tests with hard limits, and they fail the build when crossed. The layer ships compiled bytecode for the same reason ([ADR 0004](0004-layer-and-packaging.md)).
 

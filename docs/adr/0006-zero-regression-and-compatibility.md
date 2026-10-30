@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-Customers upgrade Powertools through the layer or by bumping a pin, often without reading release notes. Code that worked on version N must work on N+1 within the same major.
+Customers upgrade Powertools for AWS Lambda (Python) through the layer or by bumping a pin, often without reading release notes. Code that worked on version N must work on N+1 within the same major.
 
 This includes behaviour we consider wrong but never rejected: an OpenAPI extension key without the `x-` prefix, a cookie attribute we emitted incorrectly, a lenient parse. Turning those into errors in a minor release breaks running functions.
 
