@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-Most customers consume Powertools for AWS Lambda (Python) through the public Lambda layer, built in `layer_v3/`. Others package it themselves in a zip or container image. The layer sits on `sys.path` ahead of the Lambda runtime's own packages, so anything we ship in it shadows what the runtime provides.
+We have customers consuming Powertools for AWS Lambda (Python) through the public Lambda layer, built in `layer_v3/`, and customers packaging it themselves in a zip or container image. Both are first-class. The layer sits on `sys.path` ahead of the Lambda runtime's own packages, so anything we ship in it shadows what the runtime provides.
 
 The runtime already provides `boto3`, `botocore` and their dependencies (`urllib3`, `s3transfer`, `python-dateutil`, `six`, `jmespath`). When we shipped `urllib3` by accident (see issues 8555 and 8556), customers got a version of it they did not choose and that could differ from the SDK the runtime expects.
 
