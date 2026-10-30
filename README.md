@@ -94,6 +94,10 @@ Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, 
 
 This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages. When [using Layers](https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.
 
+## Contributing
+
+Issues and pull requests are welcome, including the ones written with AI assistance. If you used an assistant, say so in the issue or PR and tell us how you verified the change: which tests you ran yourself, and which real AWS service or event you validated against when it applies. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the process and [AGENTS.md](AGENTS.md) for the rules the CI enforces and the premises behind them.
+
 ## Credits
 
 * Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
