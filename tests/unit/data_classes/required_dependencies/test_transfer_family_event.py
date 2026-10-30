@@ -20,6 +20,16 @@ def test_transfer_family_authorizer_event():
     assert parsed_event.source_ip == raw_event["sourceIp"]
 
 
+def test_transfer_family_authorizer_event_without_password():
+    # GIVEN an authorizer event with no password, as for a user authenticating with an SSH key
+    raw_event = load_event("transferFamilyAuthorizer.json")
+    del raw_event["password"]
+
+    # WHEN reading the password
+    # THEN it is None, matching the property's type and the Pydantic model's default
+    assert TransferFamilyAuthorizer(raw_event).password is None
+
+
 @pytest.mark.parametrize("home_directory_type", ["LOGICAL", "PATH"])
 def test_build_authentication_response_s3(home_directory_type):
     # GIVEN a Authorizer response
