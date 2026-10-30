@@ -25,6 +25,13 @@ from .code_deploy_lifecycle_hook_event import (
     CodeDeployLifecycleHookEvent,
 )
 from .code_pipeline_job_event import CodePipelineJobEvent
+from .connect_campaign_event import (
+    ConnectOutboundCampaignContext,
+    ConnectOutboundCampaignCustomerProfile,
+    ConnectOutboundCampaignInvocationMetadata,
+    ConnectOutboundCampaignItems,
+    ConnectOutboundCampaignsEvent,
+)
 from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
@@ -73,6 +80,11 @@ __all__ = [
     "CodeDeployLifecycleHookEvent",
     "CodePipelineJobEvent",
     "ConnectContactFlowEvent",
+    "ConnectOutboundCampaignsEvent",
+    "ConnectOutboundCampaignInvocationMetadata",
+    "ConnectOutboundCampaignContext",
+    "ConnectOutboundCampaignItems",
+    "ConnectOutboundCampaignCustomerProfile",
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
     "EventBridgeV2Event",

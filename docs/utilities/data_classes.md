@@ -85,6 +85,7 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/code_pipeline_job_event.py) |
 | [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
+| [Connect Outbound Campaigns](#connect-outbound-campaigns) | `ConnectOutboundCampaignsEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_campaign_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
 | [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
 | [EventBridge Custom Event Bus](#eventbridge-custom-event-bus) | `EventBridgeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_v2_event.py) |
@@ -517,6 +518,21 @@ The example integrates with [Amazon Connect](https://docs.aws.amazon.com/connect
 === "Connect Contact Flow Example Event"
     ```json
     --8<-- "tests/events/connectContactFlowEventAll.json"
+    ```
+
+### Connect Outbound Campaigns
+
+The example integrates with [Amazon Connect Outbound Campaigns](https://docs.aws.amazon.com/connect/latest/adminguide/lambda-invoke-functions.html) by handling custom action block events in journey flows. The function converts the event into a `ConnectOutboundCampaignsEvent` object.
+
+=== "app.py"
+
+    ```python hl_lines="1-5 9"
+    --8<-- "examples/event_sources/src/connect_outbound_campaigns.py"
+    ```
+
+=== "Connect Outbound Campaigns Example Event"
+    ```json
+    --8<-- "tests/events/connectOutboundCampaignsEvent.json"
     ```
 
 ### DynamoDB Streams

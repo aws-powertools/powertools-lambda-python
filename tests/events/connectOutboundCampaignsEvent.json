@@ -1,0 +1,24 @@
+{
+  "InvocationMetadata": {
+    "CampaignContext": {
+      "CampaignId": "campaign-12345",
+      "RunId": "run-67890",
+      "ActionId": "activity-abc123",
+      "CampaignName": "Welcome Campaign"
+    }
+  },
+  "Items": {
+    "CustomerProfiles": [
+      {
+        "ProfileId": "customer-001",
+        "CustomerData": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"john.doe@example.com\"}",
+        "IdempotencyToken": "token-xyz789"
+      },
+      {
+        "ProfileId": "customer-002",
+        "CustomerData": "{\"firstName\":\"Jane\",\"lastName\":\"Smith\",\"email\":\"jane.smith@example.com\"}",
+        "IdempotencyToken": "token-abc456"
+      }
+    ]
+  }
+}
