@@ -5,7 +5,9 @@ Status: Accepted
 
 ## Context
 
-Every dependency we add is installed in every customer function that uses Powertools for AWS Lambda (Python), is part of their security surface, can conflict with versions they pin themselves, and adds to cold start ([ADR 0002](0002-every-millisecond-counts.md)). The core package depends on `jmespath` and `typing-extensions` only. Everything else is optional and installed through extras.
+Every dependency we add is installed in every customer function that uses Powertools for AWS Lambda (Python), is part of their security surface, can conflict with versions they pin themselves, and adds to cold start ([ADR 0002](0002-every-millisecond-counts.md)).
+
+The core package depends on `jmespath` and `typing-extensions` only. Everything else is optional and installed through extras.
 
 ## Decision
 
