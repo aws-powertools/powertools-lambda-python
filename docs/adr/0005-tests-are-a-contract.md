@@ -13,7 +13,8 @@ Tests that reach into private methods and attributes are fragile in the other di
 
 - An existing test is modified or deleted only when the PR demonstrates the old expectation was wrong. The description names the test, states what the old expectation asserted, and shows why that was a bug (a documented behaviour, an AWS contract, a reproduction). Otherwise the change is wrong, not the test.
 - Every bug fix adds a regression test that fails on `develop` without the fix and passes with it.
-- Functional tests never test internal methods. They exercise the public API the way a customer would: the decorators, classes and functions customers import, called with the events and arguments customers use. They do not call private methods, patch private attributes or assert on internal state. We want the test to prove real customer usage works, not that the internals look right. If behaviour cannot be observed through the public API, that is a design question for the PR, not a reason to poke inside.
+- Functional tests never test internal methods. They exercise the public API the way a customer would: the decorators, classes and functions customers import, called with the events and arguments customers use. We want the test to prove real customer usage works, not that the internals look right.
+- No calling private methods, patching private attributes or asserting on internal state. If behaviour cannot be observed through the public API, that is a design question for the PR, not a reason to poke inside.
 - Sample events in `tests/events/` reflect what the AWS service really sends. When a fixture turns out to be wrong (for example a field the service never includes), we add a correct fixture rather than editing the old one to keep old tests green.
 - Coverage of the lines a PR adds is checked before merge. New code without tests does not land.
 - Known flaky tests are tracked and re-run; they are not deleted or loosened to pass.
