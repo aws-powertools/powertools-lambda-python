@@ -164,3 +164,22 @@ def test_appsync_resolver_event_lambda_identity():
     assert isinstance(parsed_event.identity, AppSyncIdentityLambda)
     assert not isinstance(parsed_event.identity, AppSyncIdentityIAM)
     assert parsed_event.identity.resolver_context == raw_event["identity"]["resolverContext"]
+
+
+def test_get_identity_object_iam_unchanged_without_resolver_context():
+    # AWS_IAM authorization must keep falling through when no resolverContext is present
+    identity = {
+        "accountId": "123456789012",
+        "cognitoIdentityAuthProvider": "cognitoIdentityAuthProvider",
+        "cognitoIdentityAuthType": "cognitoIdentityAuthType",
+        "cognitoIdentityId": "cognitoIdentityId",
+        "cognitoIdentityPoolId": "cognitoIdentityPoolId",
+        "sourceIp": ["11.215.2.22"],
+        "userArn": "userArn",
+        "username": "username",
+    }
+
+    identity_object = get_identity_object(identity)
+
+    assert isinstance(identity_object, AppSyncIdentityIAM)
+    assert identity_object.account_id == identity["accountId"]
