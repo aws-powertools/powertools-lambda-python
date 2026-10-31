@@ -409,10 +409,11 @@ To prevent extended failures, use **`register_lambda_context`** function from yo
 
 ### Handling exceptions
 
-There are two failure modes that can cause new invocations to execute your code again despite having the same payload:
+There are three failure modes that can cause new invocations to execute your code again despite having the same payload:
 
 * **Unhandled exception**. We catch them to delete the idempotency record to prevent inconsistencies, then propagate them.
 * **Persistent layer errors**. We raise **`IdempotencyPersistenceLayerError`** for any persistence layer errors _e.g., remove idempotency record_.
+* **Response that can't be serialized**. When your function returns a value the output serializer or JSON can't convert _e.g., `datetime`, `set`, `bytes`_, we delete the idempotency record and raise **`IdempotencyPersistenceLayerError`**. Nothing was saved, so the next invocation runs your code again.
 
 If an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
 

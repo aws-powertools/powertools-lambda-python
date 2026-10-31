@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceConfigError,
     IdempotencyPersistenceConnectionError,
     IdempotencyPersistenceConsistencyError,
+    IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
@@ -710,6 +711,28 @@ def test_idempotent_lambda_redis_delete(
 
     # Then lambda handler should return a actual function output
     assert handler_result2 == result
+
+
+def test_idempotent_function_redis_response_not_json_serializable_runs_again(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+):
+    # GIVEN a function whose response can't be serialized to JSON
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store_standalone_redis, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"created": datetime.datetime(2026, 1, 1)}
+
+    # WHEN calling it twice with the same payload
+    # THEN both calls fail to save the response, and the second call runs the function again
+    # instead of finding the first call's record still in progress
+    for _ in range(2):
+        with pytest.raises(IdempotencyPersistenceLayerError):
+            process_order(order={"id": 1})
+
+    assert function_calls == 2
 
 
 def test_redis_orphan_record_race_condition(lambda_context):
