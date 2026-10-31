@@ -357,7 +357,12 @@ def test_confluent_schema_registry_complex_schema(lambda_context):
     def handler(event: ConsumerRecords, context):
         for record in event.records:
             processed_records.append(
-                {"email": record.value["email"], "age": record.value["age"]},
+                {
+                    "userId": record.value.get("userId"),
+                    "name": record.value.get("name"),
+                    "email": record.value["email"],
+                    "age": record.value["age"],
+                },
             )
         return {"processed": len(processed_records)}
 
@@ -365,10 +370,11 @@ def test_confluent_schema_registry_complex_schema(lambda_context):
     result = handler(complex_event, lambda_context)
 
     # THEN
-    # The handler should successfully process both records
-    # and return the correct count
+    # The handler should successfully process all records
+    # and return the correct count, without losing any field
     assert result == {"processed": 4}
     assert len(processed_records) == 4
+    assert all(r["userId"] == "123" and r["name"] == "Test" for r in processed_records)
 
 
 def test_glue_schema_registry_complex_schema(lambda_context):
@@ -429,3 +435,98 @@ def test_kafka_consumer_protobuf_with_wrong_avro_schema(kafka_event_with_proto_d
     # THEN
     # Ensure the error contains useful diagnostic information
     assert "Expected data is PROTOBUF but you sent " in str(excinfo.value)
+
+
+def _confluent_message_index(indexes: list[int]) -> bytes:
+    # Same encoding as confluent_kafka's ProtobufSerializer: zigzag varints, [0] written as a single 0x00 byte
+    def zigzag_varint(value: int) -> bytes:
+        value = (value << 1) ^ (value >> 63)
+        out = bytearray()
+        while value & ~0x7F:
+            out.append((value & 0x7F) | 0x80)
+            value >>= 7
+        out.append(value)
+        return bytes(out)
+
+    if indexes == [0]:
+        return b"\x00"
+    return zigzag_varint(len(indexes)) + b"".join(zigzag_varint(i) for i in indexes)
+
+
+@pytest.mark.parametrize(
+    "indexes",
+    [
+        pytest.param([0], id="first_message"),
+        pytest.param([1], id="second_message"),
+        pytest.param([2], id="third_message"),
+        pytest.param([1, 0], id="nested_message"),
+        pytest.param([70], id="multi_byte_index"),
+    ],
+)
+def test_confluent_schema_registry_message_index_is_zigzag_decoded(indexes, lambda_context):
+    # GIVEN a Protobuf message framed with a Confluent message index array, as the Confluent serializer writes it
+    profile = UserProfile(userId="123", name="Test", email="test@example.com", age=10)
+    value = _confluent_message_index(indexes) + profile.SerializeToString()
+    event = {
+        "eventSource": "aws:kafka",
+        "records": {
+            "my-topic-1": [
+                {
+                    "topic": "my-topic-1",
+                    "partition": 0,
+                    "offset": 15,
+                    "timestamp": 1545084650987,
+                    "timestampType": "CREATE_TIME",
+                    "key": None,
+                    "value": base64.b64encode(value).decode("utf-8"),
+                    "headers": [],
+                    "valueSchemaMetadata": {"schemaId": "123", "dataFormat": "PROTOBUF"},
+                },
+            ],
+        },
+    }
+    schema_config = SchemaConfig(value_schema_type="PROTOBUF", value_schema=UserProfile)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return next(event.records).value
+
+    # WHEN the handler processes the record
+    result = handler(event, lambda_context)
+
+    # THEN the index array is skipped and every field is decoded
+    assert result == {"userId": "123", "name": "Test", "email": "test@example.com", "age": 10}
+
+
+def test_confluent_schema_registry_invalid_message_index_length_raises(lambda_context):
+    # GIVEN a record whose Confluent message index array has a negative length (zigzag 0x01 is -1)
+    profile = UserProfile(userId="123", name="Test", email="test@example.com", age=10)
+    value = b"\x01" + profile.SerializeToString()
+    event = {
+        "eventSource": "aws:kafka",
+        "records": {
+            "my-topic-1": [
+                {
+                    "topic": "my-topic-1",
+                    "partition": 0,
+                    "offset": 15,
+                    "timestamp": 1545084650987,
+                    "timestampType": "CREATE_TIME",
+                    "key": None,
+                    "value": base64.b64encode(value).decode("utf-8"),
+                    "headers": [],
+                    "valueSchemaMetadata": {"schemaId": "123", "dataFormat": "PROTOBUF"},
+                },
+            ],
+        },
+    }
+    schema_config = SchemaConfig(value_schema_type="PROTOBUF", value_schema=UserProfile)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return [record.value for record in event.records]
+
+    # WHEN the record is deserialized
+    # THEN the invalid index array is reported as a deserialization error instead of corrupt payload bytes
+    with pytest.raises(KafkaConsumerDeserializationError, match="message index array length"):
+        handler(event, lambda_context)
