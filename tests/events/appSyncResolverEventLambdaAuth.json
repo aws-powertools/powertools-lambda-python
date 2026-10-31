@@ -1,0 +1,59 @@
+{
+  "typeName": "Merchant",
+  "fieldName": "locations",
+  "arguments": {
+    "page": 2,
+    "size": 1,
+    "name": "value"
+  },
+  "identity": {
+    "resolverContext": {
+      "userId": "u-1",
+      "tier": "gold",
+      "nested": {
+        "team": "eng"
+      }
+    }
+  },
+  "source": {
+    "name": "Value",
+    "nested": {
+      "name": "value",
+      "list": []
+    }
+  },
+  "request": {
+    "headers": {
+      "x-forwarded-for": "11.215.2.22, 64.44.173.11",
+      "cloudfront-viewer-country": "US",
+      "cloudfront-is-tablet-viewer": "false",
+      "via": "2.0 SOMETHING.cloudfront.net (CloudFront)",
+      "cloudfront-forwarded-proto": "https",
+      "origin": "https://console.aws.amazon.com",
+      "content-length": "156",
+      "accept-language": "en-US,en;q=0.9",
+      "host": "SOMETHING.appsync-api.us-east-1.amazonaws.com",
+      "x-forwarded-proto": "https",
+      "sec-gpc": "1",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) etc.",
+      "accept": "*/*",
+      "cloudfront-is-mobile-viewer": "false",
+      "cloudfront-is-smarttv-viewer": "false",
+      "accept-encoding": "gzip, deflate, br",
+      "referer": "https://console.aws.amazon.com/",
+      "content-type": "application/json",
+      "sec-fetch-mode": "cors",
+      "x-amz-cf-id": "Fo5VIuvP6V6anIEt62WzFDCK45mzM4yEdpt5BYxOl9OFqafd-WR0cA==",
+      "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
+      "authorization": "AUTH-HEADER",
+      "sec-fetch-dest": "empty",
+      "x-amz-user-agent": "AWS-Console-AppSync/",
+      "cloudfront-is-desktop-viewer": "true",
+      "sec-fetch-site": "cross-site",
+      "x-forwarded-port": "443"
+    }
+  },
+  "prev": {
+    "result": {}
+  }
+}

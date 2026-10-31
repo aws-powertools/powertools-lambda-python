@@ -143,3 +143,12 @@ def test_appsync_resolver_event_empty():
 
     assert event.info.field_name is None
     assert event.info.parent_type_name is None
+
+
+def test_appsync_lambda_identity_class_exposes_resolver_context():
+    # AWS_LAMBDA authorization: the identity carries only what the authorizer returned
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncIdentityLambda
+
+    identity = AppSyncIdentityLambda({"resolverContext": {"userId": "u-1", "tier": "gold"}})
+
+    assert identity.resolver_context == {"userId": "u-1", "tier": "gold"}
