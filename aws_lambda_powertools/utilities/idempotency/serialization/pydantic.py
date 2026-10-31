@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from inspect import isclass
-from typing import Any
+from typing import Any, get_origin
 
 from pydantic import BaseModel
 
@@ -42,7 +42,7 @@ class PydanticSerializer(BaseIdempotencyModelSerializer):
         if model_type is None:
             raise IdempotencyNoSerializationModelError("No serialization model was supplied")
 
-        if not isclass(model_type) or not issubclass(model_type, BaseModel):
+        if get_origin(model_type) is not None or not isclass(model_type) or not issubclass(model_type, BaseModel):
             raise IdempotencyModelTypeError("Model type is not inherited from pydantic BaseModel")
 
         return cls(model=model_type)

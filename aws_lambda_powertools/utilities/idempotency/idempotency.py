@@ -7,8 +7,9 @@ from __future__ import annotations
 import functools
 import logging
 import os
+import sys
 import warnings
-from inspect import isclass
+from inspect import isclass, unwrap
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast, get_type_hints
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -146,13 +147,31 @@ idempotent = cast(_IdempotentDecorator, _idempotent)
 
 
 def _get_return_annotation(function: Callable) -> Any:
-    """Return the function's return annotation, resolving string annotations such as the ones
-    `from __future__ import annotations` produces. Annotations that can't be resolved, e.g. a model
-    defined inside another function, are returned as written."""
+    """Resolve only the return annotation, preserving evaluated types and custom metadata."""
+    if sys.version_info >= (3, 14):
+        from annotationlib import Format, get_annotations
+
+        # Deferred annotations can contain parameter names that only exist during type checking.
+        annotation = get_annotations(function, format=Format.FORWARDREF).get("return")
+    else:
+        annotation = getattr(function, "__annotations__", {}).get("return")
+
+    if not isinstance(annotation, str):
+        return annotation
+
+    def return_type(): ...
+
+    # A separate function avoids evaluating input annotations or copying __no_type_check__.
+    return_type.__annotations__ = {"return": annotation}
     try:
-        return get_type_hints(function).get("return")
+        return get_type_hints(
+            return_type,
+            globalns=getattr(unwrap(function), "__globals__", {}),
+            include_extras=True,
+        )["return"]
     except Exception:
-        return function.__annotations__.get("return")
+        # Let the serializer report an unsupported model, as for other invalid annotations.
+        return annotation
 
 
 def idempotent_function(
