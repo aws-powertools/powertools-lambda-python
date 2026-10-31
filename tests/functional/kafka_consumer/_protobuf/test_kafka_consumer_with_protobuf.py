@@ -496,3 +496,37 @@ def test_confluent_schema_registry_message_index_is_zigzag_decoded(indexes, lamb
 
     # THEN the index array is skipped and every field is decoded
     assert result == {"userId": "123", "name": "Test", "email": "test@example.com", "age": 10}
+
+
+def test_confluent_schema_registry_invalid_message_index_length_raises(lambda_context):
+    # GIVEN a record whose Confluent message index array has a negative length (zigzag 0x01 is -1)
+    profile = UserProfile(userId="123", name="Test", email="test@example.com", age=10)
+    value = b"\x01" + profile.SerializeToString()
+    event = {
+        "eventSource": "aws:kafka",
+        "records": {
+            "my-topic-1": [
+                {
+                    "topic": "my-topic-1",
+                    "partition": 0,
+                    "offset": 15,
+                    "timestamp": 1545084650987,
+                    "timestampType": "CREATE_TIME",
+                    "key": None,
+                    "value": base64.b64encode(value).decode("utf-8"),
+                    "headers": [],
+                    "valueSchemaMetadata": {"schemaId": "123", "dataFormat": "PROTOBUF"},
+                },
+            ],
+        },
+    }
+    schema_config = SchemaConfig(value_schema_type="PROTOBUF", value_schema=UserProfile)
+
+    @kafka_consumer(schema_config=schema_config)
+    def handler(event: ConsumerRecords, context):
+        return [record.value for record in event.records]
+
+    # WHEN the record is deserialized
+    # THEN the invalid index array is reported as a deserialization error instead of corrupt payload bytes
+    with pytest.raises(KafkaConsumerDeserializationError, match="message index array length"):
+        handler(event, lambda_context)
