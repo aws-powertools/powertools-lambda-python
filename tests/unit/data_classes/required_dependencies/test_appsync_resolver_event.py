@@ -183,3 +183,15 @@ def test_get_identity_object_iam_unchanged_without_resolver_context():
 
     assert isinstance(identity_object, AppSyncIdentityIAM)
     assert identity_object.account_id == identity["accountId"]
+
+
+def test_get_identity_object_lambda_resolver_context_passthrough():
+    # AWS_LAMBDA authorization: resolver_context must pass through nested structures untouched
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncIdentityLambda
+
+    resolver_context = {"userId": "u-1", "nested": {"team": "eng", "roles": ["admin"]}}
+    identity_object = get_identity_object({"resolverContext": resolver_context})
+
+    assert isinstance(identity_object, AppSyncIdentityLambda)
+    assert identity_object.resolver_context == resolver_context
+    assert identity_object.resolver_context["nested"]["roles"] == ["admin"]
