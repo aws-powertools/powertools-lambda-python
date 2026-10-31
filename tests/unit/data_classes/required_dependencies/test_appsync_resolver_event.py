@@ -152,3 +152,15 @@ def test_appsync_lambda_identity_class_exposes_resolver_context():
     identity = AppSyncIdentityLambda({"resolverContext": {"userId": "u-1", "tier": "gold"}})
 
     assert identity.resolver_context == {"userId": "u-1", "tier": "gold"}
+
+
+def test_appsync_resolver_event_lambda_identity():
+    # AWS_LAMBDA authorization: identity with resolverContext must dispatch to AppSyncIdentityLambda
+    from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import AppSyncIdentityLambda
+
+    raw_event = load_event("appSyncResolverEventLambdaAuth.json")
+    parsed_event = AppSyncResolverEvent(raw_event)
+
+    assert isinstance(parsed_event.identity, AppSyncIdentityLambda)
+    assert not isinstance(parsed_event.identity, AppSyncIdentityIAM)
+    assert parsed_event.identity.resolver_context == raw_event["identity"]["resolverContext"]
