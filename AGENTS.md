@@ -6,6 +6,7 @@ Short guide for anyone, human or coding agent, changing this repository. It poin
 ## Before you start
 
 - Work from an issue that a maintainer triaged. PRs on untriaged issues usually wait or get closed.
+- Claim the issue first: comment on it and wait until a maintainer assigns it to you before opening a PR. If two PRs show up for one issue, the one from the assignee stays and the other is closed, whatever its quality.
 - One issue, one PR. Do not bundle unrelated fixes, even small ones.
 - Branch from `develop`. Keep the diff limited to what the issue needs; do not reformat or "improve" code you did not have to touch.
 
