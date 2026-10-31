@@ -9,7 +9,7 @@ import logging
 import os
 import warnings
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast, get_type_hints
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
@@ -145,6 +145,16 @@ def _idempotent(
 idempotent = cast(_IdempotentDecorator, _idempotent)
 
 
+def _get_return_annotation(function: Callable) -> Any:
+    """Return the function's return annotation, resolving string annotations such as the ones
+    `from __future__ import annotations` produces. Annotations that can't be resolved, e.g. a model
+    defined inside another function, are returned as written."""
+    try:
+        return get_type_hints(function).get("return")
+    except Exception:
+        return function.__annotations__.get("return")
+
+
 def idempotent_function(
     function: AnyCallableT | None = None,
     *,
@@ -208,7 +218,7 @@ def idempotent_function(
 
     if isclass(output_serializer) and issubclass(output_serializer, BaseIdempotencyModelSerializer):
         # instantiate an instance of the serializer class
-        output_serializer = output_serializer.instantiate(function.__annotations__.get("return", None))
+        output_serializer = output_serializer.instantiate(_get_return_annotation(function))
 
     config = config or IdempotencyConfig()
 
