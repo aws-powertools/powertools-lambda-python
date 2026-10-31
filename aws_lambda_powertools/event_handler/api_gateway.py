@@ -785,12 +785,10 @@ class ResponseBuilder(Generic[ResponseEventT]):
         if origin is not None:
             cors_headers = cors.to_dict(origin)
             # Keep any Vary value the route already set, and add Origin to it
-            existing_vary = self.response.headers.get("Vary")
-            if isinstance(existing_vary, list):
-                existing_vary = ", ".join(existing_vary)
-            if existing_vary and "Vary" in cors_headers:
-                cors_headers["Vary"] = f"{existing_vary}, Origin"
+            vary = cors_headers.pop("Vary", None)
             self.response.headers.update(cors_headers)
+            if vary:
+                self._add_vary(vary)
 
     def _add_vary(self, field: str):
         """Add a request header name to the Vary response header, keeping any value already set"""
