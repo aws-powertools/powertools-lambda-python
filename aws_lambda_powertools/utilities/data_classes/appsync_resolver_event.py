@@ -22,6 +22,10 @@ def get_identity_object(identity: dict | None) -> Any:
     if "sub" in identity:
         return AppSyncIdentityCognito(identity)
 
+    # AWS_LAMBDA authorization
+    if "resolverContext" in identity:
+        return AppSyncIdentityLambda(identity)
+
     # AWS_IAM authorization
     return AppSyncIdentityIAM(identity)
 
@@ -54,13 +58,13 @@ class AppSyncEventBase(DictWrapper):
         return self.get("stash") or {}
 
     @property
-    def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | None:
+    def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | AppSyncIdentityLambda | None:
         """An object that contains information about the caller.
         Depending on the type of identify found:
         - API_KEY authorization - returns None
         - AWS_IAM authorization - returns AppSyncIdentityIAM
         - AMAZON_COGNITO_USER_POOLS authorization - returns AppSyncIdentityCognito
-        - AWS_LAMBDA authorization - returns None - NEED TO TEST
+        - AWS_LAMBDA authorization - returns AppSyncIdentityLambda
         - OPENID_CONNECT authorization - returns None - NEED TO TEST
         """
         return get_identity_object(self.get("identity"))
@@ -148,6 +152,19 @@ class AppSyncIdentityCognito(DictWrapper):
     def issuer(self) -> str:
         """The token issuer."""
         return self["issuer"]
+
+
+class AppSyncIdentityLambda(DictWrapper):
+    """AWS_LAMBDA authorization
+
+    When using a Lambda authorizer, the identity object contains only the
+    ``resolverContext`` returned by the authorizer.
+    """
+
+    @property
+    def resolver_context(self) -> dict[str, Any]:
+        """The resolver context returned by the Lambda authorizer."""
+        return self["resolverContext"]
 
 
 class AppSyncResolverEventInfo(DictWrapper):
