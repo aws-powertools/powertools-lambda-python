@@ -159,7 +159,7 @@ class IdempotencyHandler:
                 data=self.data,
                 remaining_time_in_millis=self._get_remaining_time_in_millis(),
             )
-        except (IdempotencyKeyError, IdempotencyValidationError):
+        except (IdempotencyKeyError, IdempotencyValidationError, IdempotencyInconsistentStateError):
             raise
         except IdempotencyItemAlreadyExistsError as exc:
             # Attempt to retrieve the existing record, either from the exception ReturnValuesOnConditionCheckFailure

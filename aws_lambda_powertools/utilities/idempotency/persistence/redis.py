@@ -12,6 +12,7 @@ from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyInconsistentStateError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
     IdempotencyPersistenceConfigError,
@@ -409,7 +410,12 @@ class CachePersistenceLayer(BasePersistenceLayer):
             # - An expired idempotency record that has not been deleted by Cache.
             # In any case, we proceed to retrieve the record for further inspection.
 
-            idempotency_record = self._get_record(data_record.idempotency_key)
+            try:
+                idempotency_record = self._get_record(data_record.idempotency_key)
+            except IdempotencyItemNotFoundError as exc:
+                raise IdempotencyInconsistentStateError(
+                    "save_inprogress and get_record return inconsistent results.",
+                ) from exc
 
             # If the status of the idempotency record is 'COMPLETED' and the record has not expired
             # (i.e., the expiry timestamp is greater than the current timestamp), then a valid completed

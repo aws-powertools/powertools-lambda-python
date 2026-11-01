@@ -12,6 +12,7 @@ from multiprocess import Lock, Manager, Process
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
+    IdempotencyInconsistentStateError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
     IdempotencyPersistenceConfigError,
@@ -840,3 +841,86 @@ def test_redis_client_protocol_still_emits_deprecation_warning_on_subclass():
     with pytest.warns(DeprecationWarning, match="RedisClientProtocol will be removed in v4.0.0"):
 
         class MyClient(RedisClientProtocol): ...
+
+
+def test_redis_inconsistent_state_when_record_disappears():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value"}
+
+    # Simulate SET NX reporting an existing key, followed by GET finding no record.
+    redis_client.set = mock.Mock(return_value=None)
+    redis_client.get = mock.Mock(return_value=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        layer.save_inprogress(mock_event, 1000)
+
+
+def test_redis_inconsistent_state_preserves_original_exception():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value"}
+
+    redis_client.set = mock.Mock(return_value=None)
+    redis_client.get = mock.Mock(return_value=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError) as exc_info:
+        layer.save_inprogress(mock_event, 1000)
+
+    assert isinstance(exc_info.value.__cause__, IdempotencyItemNotFoundError)
+
+
+def test_redis_inconsistent_state_retries_and_executes_function():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"id": 1}
+    execution_count = 0
+
+    original_set = redis_client.set
+    set_calls = 0
+
+    def mock_set(*args, **kwargs):
+        nonlocal set_calls
+        set_calls += 1
+
+        # First SET NX: simulate an existing record.
+        if set_calls == 1:
+            return None
+
+        # Subsequent SET: allow the retry to succeed.
+        return original_set(*args, **kwargs)
+
+    original_get = redis_client.get
+    get_calls = 0
+
+    def mock_get(*args, **kwargs):
+        nonlocal get_calls
+        get_calls += 1
+
+        # The record expires between SET NX and GET.
+        if get_calls == 1:
+            return None
+
+        return original_get(*args, **kwargs)
+
+    redis_client.set = mock_set
+    redis_client.get = mock_get
+
+    @idempotent_function(
+        data_keyword_argument="order",
+        persistence_store=layer,
+    )
+    def process(order):
+        nonlocal execution_count
+        execution_count += 1
+        return "ok"
+
+    result = process(order=mock_event)
+
+    assert result == "ok"
+    assert execution_count == 1
+    assert set_calls >= 2
+    assert get_calls >= 1
