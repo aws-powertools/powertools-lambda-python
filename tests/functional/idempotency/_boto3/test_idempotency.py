@@ -1704,6 +1704,38 @@ def test_idempotency_disabled_envvar(
     assert len(persistence_store.client.method_calls) == 4
 
 
+@pytest.mark.parametrize("idempotency_disabled_value", ["", " ", "maybe", None])
+def test_idempotency_disabled_envvar_empty_or_unparsable(
+    monkeypatch,
+    lambda_context,
+    persistence_store: DynamoDBPersistenceLayer,
+    idempotency_disabled_value,
+):
+    # Scenario to validate an empty, unset or unparsable 'POWERTOOLS_IDEMPOTENCY_DISABLED'
+    # keeps idempotency enabled instead of crashing the invocation
+    mock_event = {"data": "value"}
+
+    persistence_store.client = MagicMock()
+
+    if idempotency_disabled_value is None:
+        monkeypatch.delenv("POWERTOOLS_IDEMPOTENCY_DISABLED", raising=False)
+    else:
+        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", idempotency_disabled_value)
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store)
+    def dummy(data):
+        return {"message": "hello"}
+
+    @idempotent(persistence_store=persistence_store)
+    def dummy_handler(event, context):
+        return {"message": "hi"}
+
+    assert dummy(data=mock_event) == {"message": "hello"}
+    assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
+
+    assert len(persistence_store.client.method_calls) == 4
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_function_duplicates(
     idempotency_config: IdempotencyConfig,

@@ -39,6 +39,20 @@ EventT = TypeVar("EventT")
 ContextT = TypeVar("ContextT", bound="LambdaContext | DurableContextProtocol")
 
 
+def _is_idempotency_disabled() -> bool:
+    # An empty or unparsable value is easy to end up with in IaC templates and CI variables;
+    # treat it as "not disabled" instead of failing every invocation
+    value = os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")
+    try:
+        return strtobool(value)
+    except ValueError:
+        logger.debug(
+            f"Ignoring {constants.IDEMPOTENCY_DISABLED_ENV}={value!r}: "
+            "not a recognised boolean, idempotency stays enabled",
+        )
+        return False
+
+
 class _IdempotentHandlerDecorator(Protocol):
     # The return type is Any, as responses replayed from the persistence store are deserialized JSON
     def __call__(
@@ -106,7 +120,7 @@ def _idempotent(
 
     # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
     # Raises a warning if not running in development mode
-    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+    if _is_idempotency_disabled():
         warnings.warn(
             message="Disabling idempotency is intended for development environments only "
             "and should not be used in production.",
@@ -216,7 +230,7 @@ def idempotent_function(
     def decorate(*args, **kwargs):
         # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
         # Raises a warning if not running in development mode
-        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+        if _is_idempotency_disabled():
             warnings.warn(
                 message="Disabling idempotency is intended for development environments only "
                 "and should not be used in production.",
