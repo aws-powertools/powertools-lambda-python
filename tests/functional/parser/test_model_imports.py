@@ -20,6 +20,12 @@ MODEL_IMPORT_CASES = [
         "s3_event_notification",
         ["s3_event_notification", "s3", "event_bridge", "sqs"],
     ),
+    ("IoTCoreThingEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingTypeEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingTypeAssociationEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreAddOrRemoveFromThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreAddOrDeleteFromThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
 ]
 
 
