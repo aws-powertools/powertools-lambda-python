@@ -18,6 +18,7 @@ make mypy               # static typing, must pass
 uv run pytest tests/unit tests/functional/<utility>      # fast loop for one utility
 make test               # full unit + functional + performance, what CI runs
 make pr                 # everything CI checks, run it before opening the PR
+make agent-skill        # regenerate .agents/skills/*/references after changing docs/ or examples/ (pre-commit does it too)
 ```
 
 Do not run the full suite with `pytest -n auto`; collection differs between workers and it fails for reasons unrelated to your change.

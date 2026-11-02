@@ -34,7 +34,7 @@ Copy the skill directory into your project's `.agents/skills/` (or `.claude/skil
 
 ## Keeping it current
 
-The reference files are regenerated from the documentation on every change by `scripts/build_agent_skill_references.py`, and a test fails if they drift. Reinstall the skill when you upgrade Powertools for AWS Lambda (Python) to pick up new utilities and changed APIs.
+The reference files are regenerated from the documentation by `scripts/build_agent_skill_references.py`: a pre-commit hook runs it whenever `docs/` or `examples/` change, `make agent-skill` runs it by hand, and a test in the suite fails if they drift. Reinstall the skill when you upgrade Powertools for AWS Lambda (Python) to pick up new utilities and changed APIs.
 
 ## See also
 
