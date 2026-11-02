@@ -964,6 +964,8 @@ For inheritance, Logger uses `child` parameter to ensure we don't compete with i
 
 Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same `service` name is important when instantiating them.
 
+A child Logger without a `level` follows its parent's log level, including later changes from `setLevel()` and sampling. Pass `level` to give a child its own log level.
+
 === "logging_inheritance_good.py"
 
     ```python hl_lines="1 9"

@@ -10,6 +10,7 @@ import re
 import secrets
 import string
 import sys
+import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
@@ -1445,6 +1446,117 @@ def test_logger_change_level_child_logger(stdout, service_name):
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 1
     assert "service" in logs[0]
+
+
+def test_child_logger_without_level_follows_parent_level(stdout, service_name):
+    # GIVEN a child Logger without a level, created before its parent as when imported from another module
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+    Logger(service=service_name, stream=stdout, level="DEBUG")
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the parent's DEBUG level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+    assert log["level"] == "DEBUG"
+    assert child_logger.log_level == logging.DEBUG
+
+
+def test_child_logger_without_level_follows_parent_set_level(stdout, service_name):
+    # GIVEN a parent Logger and a child Logger without a level
+    logger = Logger(service=service_name, stream=stdout)
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the parent switches to DEBUG after the child was created
+    logger.setLevel("DEBUG")
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the new parent level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+
+
+def test_child_logger_without_level_follows_less_verbose_parent_level(stdout, service_name):
+    # GIVEN a parent Logger with WARNING level and a child Logger without a level
+    Logger(service=service_name, stream=stdout, level="WARNING")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits an INFO log
+    child_logger.info("CHILD")
+
+    # THEN nothing must be emitted, as the parent level is WARNING
+    assert stdout.getvalue() == ""
+
+
+def test_child_logger_without_level_follows_parent_sampled_debug_level(stdout, service_name):
+    # GIVEN a parent Logger sampling every request at DEBUG level and a child Logger without a level
+    Logger(service=service_name, stream=stdout, sampling_rate=1)
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the sampled DEBUG level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+
+
+def test_child_logger_without_level_follows_parent_level_after_sample_rate_refresh(
+    monkeypatch,
+    lambda_context,
+    stdout,
+    service_name,
+):
+    # GIVEN sampling is configured for the function but this request isn't sampled
+    monkeypatch.setenv(constants.LOGGER_LOG_SAMPLING_RATE, "0")
+    # GIVEN a parent Logger with DEBUG level and a child Logger without a level decorating the handler
+    Logger(service=service_name, stream=stdout, level="DEBUG")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    @child_logger.inject_lambda_context
+    def handler(event, context):
+        child_logger.debug("CHILD")
+
+    # WHEN the handler is invoked twice, refreshing the sampling decision on the warm invocation
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    # THEN the child must keep following the parent's DEBUG level on every invocation
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert [log["message"] for log in logs] == ["CHILD", "CHILD"]
+
+
+def test_child_logger_without_level_follows_parent_level_over_env_var(monkeypatch, stdout, service_name):
+    # GIVEN POWERTOOLS_LOG_LEVEL is DEBUG but the parent Logger has an explicit INFO level
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_ENV, "DEBUG")
+    Logger(service=service_name, stream=stdout, level="INFO")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN nothing must be emitted, as an explicit level takes precedence over POWERTOOLS_LOG_LEVEL
+    assert stdout.getvalue() == ""
+
+
+@pytest.mark.parametrize("child_level", [None, "DEBUG"])
+def test_child_logger_respects_advanced_logging_controls(monkeypatch, stdout, service_name, child_level):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+    Logger(service=service_name, stream=stdout)
+
+    # WHEN a child Logger is created with or without a DEBUG level
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        child_logger = Logger(service=service_name, child=True, stream=stdout, level=child_level)
+    child_logger.debug("CHILD DEBUG")
+    child_logger.info("CHILD INFO")
+
+    # THEN ALC level must take precedence for the child
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert [log["message"] for log in logs] == ["CHILD INFO"]
+    assert child_logger.log_level == logging.INFO
 
 
 def test_clear_state_with_append_keys():

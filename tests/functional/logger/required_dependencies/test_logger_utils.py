@@ -252,6 +252,20 @@ def test_copy_config_to_parent_loggers_only_with_exclude(stdout):
     assert child.parent.name == service
 
 
+def test_copy_config_from_child_logger_uses_parent_level(stdout, logger):
+    # GIVEN an external logger, a parent Logger with DEBUG level and a child Logger without a level
+    ext_logger = logger()
+    service = service_name()
+    Logger(stream=stdout, service=service, level="DEBUG")
+    child = Logger(stream=stdout, service=service, child=True)
+
+    # WHEN configuration is copied from the child Logger
+    utils.copy_config_to_registered_loggers(source_logger=child, include={ext_logger.name})
+
+    # THEN the external logger must use the level the child logs at, inherited from its parent
+    assert ext_logger.level == logging.DEBUG
+
+
 def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level):
     # GIVEN an root logger, external logger and Powertools for AWS Lambda (Python) logger initialized
 
