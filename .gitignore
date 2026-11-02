@@ -320,8 +320,7 @@ cdk.context.json
 *.swp
 
 # LLMs
-.claude/*
-!.claude/skills/
+.claude
 .amazonq
 .kiro
 .github/instructions

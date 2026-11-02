@@ -30,7 +30,7 @@ npx skills add aws-powertools/powertools-lambda-python
 
 ### Manually
 
-Copy the skill directory into your project's `.agents/skills/` (or `.claude/skills/` for Claude Code), or clone the repository and symlink it. The skill is plain Markdown, there is nothing to build.
+Copy the skill directory into your project's `.agents/skills/` (or `.claude/skills/` for Claude Code). The skill is plain Markdown, there is nothing to build.
 
 ## Keeping it current
 

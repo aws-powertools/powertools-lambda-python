@@ -1,6 +1,6 @@
 ---
 name: building-lambda-functions-with-powertools-python
-description: Build AWS Lambda functions in Python with Powertools for AWS Lambda (Python), structured logging, tracing, metrics, REST/GraphQL/Bedrock event handlers, idempotency, batch processing, parameters, validation, parsing and more. Use when the user mentions Powertools, imports aws_lambda_powertools, or asks for a Lambda handler with logging, tracing, metrics, API routing, idempotency, batch or SQS/Kinesis/DynamoDB Streams processing, parameter or secret retrieval, event parsing or validation.
+description: Build AWS Lambda functions in Python with Powertools for AWS Lambda (Python), structured logging, tracing, metrics, REST/GraphQL/Bedrock event handlers, idempotency, batch processing, parameters, validation, parsing and more. Use when the user mentions Powertools, imports aws_lambda_powertools, or asks for a Lambda handler with logging, tracing, metrics, API routing, idempotency, batch or SQS/Kinesis/DynamoDB Streams processing, parameter or secret retrieval, event parsing or validation. Not for contributing to the Powertools library itself; that repository has its own AGENTS.md.
 license: MIT-0
 compatibility: Python 3.10 to 3.14, AWS Lambda
 metadata:
@@ -21,7 +21,7 @@ Powertools for AWS Lambda (Python) is a toolkit of independent utilities for Lam
 - The user wants to route API Gateway, ALB, Function URL, VPC Lattice, AppSync or Bedrock Agents requests inside one function
 - The user needs idempotent handlers, partial batch failure handling for SQS, Kinesis or DynamoDB Streams, cached parameters or secrets, typed access to event payloads, or input validation
 
-Do not use it for non-Lambda web frameworks, or for the Powertools libraries of other languages (TypeScript, Java, .NET).
+Do not use it for non-Lambda web frameworks, or for the Powertools libraries of other languages (TypeScript, Java, .NET). Do not use it when working inside the `aws-powertools/powertools-lambda-python` repository: there you are changing the library, not using it, and `AGENTS.md` at the repository root has the rules that apply.
 
 ## Before writing code
 

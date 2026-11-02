@@ -57,5 +57,6 @@ Do not run the full suite with `pytest -n auto`; collection differs between work
 | Sample events | `tests/events/` |
 | Docs and examples | `docs/<area>/<utility>.md`, `examples/<utility>/src/` |
 | Project premises | `docs/adr/` |
+| Agent skill for library users | `.agents/skills/` (the `references/` folder is generated from `docs/`; do not edit it or use it as a source, change `docs/` and run `scripts/build_agent_skill_references.py`) |
 | Layer build | `layer_v3/` |
 | Maintainer process | [MAINTAINERS.md](MAINTAINERS.md), [docs/maintainers.md](docs/maintainers.md) |
