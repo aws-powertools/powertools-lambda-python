@@ -16,6 +16,7 @@ from botocore import stub
 from botocore.config import Config
 from botocore.response import StreamingBody
 
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.parameters import AppConfigProvider, DynamoDBProvider, SecretsProvider, SSMProvider
 from aws_lambda_powertools.utilities.parameters.base import (
@@ -24,7 +25,7 @@ from aws_lambda_powertools.utilities.parameters.base import (
     ExpirableValue,
 )
 from aws_lambda_powertools.utilities.parameters.exceptions import GetSecretError
-from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
+from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning, PowertoolsUserWarning
 
 
 @pytest.fixture(scope="function")
@@ -567,6 +568,51 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
         value = provider.get(mock_name)
 
         assert value == mock_value
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_with_invalid_max_age_env_var(mock_name, mock_value, mock_version, config, monkeypatch):
+    """
+    Test SSMProvider.get() when POWERTOOLS_PARAMETERS_MAX_AGE is empty or non-integer.
+
+    A malformed environment variable must not break every parameters call: the
+    documented default applies and a PowertoolsUserWarning names the ignored value.
+    """
+
+    # Create a new provider
+    provider = parameters.SSMProvider(boto_config=config)
+
+    # Stub the boto3 client; one SDK call per env var value tested
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameter": {
+            "Name": mock_name,
+            "Type": "String",
+            "Value": mock_value,
+            "Version": mock_version,
+            "Selector": f"{mock_name}:{mock_version}",
+            "SourceResult": "string",
+            "LastModifiedDate": datetime(2015, 1, 1),
+            "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
+        },
+    }
+    expected_params = {"Name": mock_name, "WithDecryption": False}
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.add_response("get_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        for env_value in ("", "abc"):
+            monkeypatch.setenv(constants.PARAMETERS_MAX_AGE_ENV, env_value)
+            # Each iteration resolves the env var afresh: the default applied
+            # after the first lookup would otherwise serve the second from cache.
+            provider.clear_cache()
+            with pytest.warns(PowertoolsUserWarning, match=constants.PARAMETERS_MAX_AGE_ENV):
+                value = provider.get(mock_name)
+            assert value == mock_value
+
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
