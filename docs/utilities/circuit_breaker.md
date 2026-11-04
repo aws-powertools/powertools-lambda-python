@@ -121,6 +121,16 @@ There is no wrapper type to inspect. The contract is:
 | **Open**, `on_circuit_open` set       | Whatever the callback returns                                          |
 | **Open**, no callback                 | Raises `CircuitBreakerOpenError` (with the `CircuitInfo` attached)     |
 
+### Protecting async functions
+
+`@circuit_breaker` also wraps `async def` functions. The coroutine is awaited inside the circuit, so failures count towards `failure_threshold`, probes run on the awaited result, and an `on_circuit_open` callback can be a coroutine function too. Call it with `await` as you normally would.
+
+=== "working_with_async_functions.py"
+
+    ```python hl_lines="17 22-28 29"
+    --8<-- "examples/circuit_breaker/src/working_with_async_functions.py"
+    ```
+
 ## Handling an open circuit
 
 ### With a callback
@@ -180,6 +190,9 @@ After `recovery_timeout` seconds, the circuit moves to `HALF_OPEN` and elects a 
     The utility is safe to share across threads: within a multi-threaded environment the probe election picks a single
     thread, so the single-prober guarantee spans threads as well as environments, and the in-memory failure counter is
     synchronized. Single-threaded functions (the normal Lambda model) are unaffected.
+
+    The same holds for coroutines: concurrent `await`s of the same circuit in one event loop run a single probe at a
+    time, and the others get the open response.
 
     Probe ownership belongs to the thread that won the election. If that thread never runs the circuit again (for
     example, a thread-per-request worker pool), recovery waits for the probe lease to expire before another thread or

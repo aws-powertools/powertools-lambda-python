@@ -5,12 +5,47 @@
 # Unreleased
 
 
+<a name="v3.39.0"></a>
+## [v3.39.0] - 2026-11-03
+## Bug Fixes
+
+* **parser:** add IoT Core registry models to parser.models exports ([#8746](https://github.com/aws-powertools/powertools-lambda-python/issues/8746))
+
+## Maintenance
+
+* version bump
+
+
 <a name="v3.38.0"></a>
 ## [v3.38.0] - 2026-10-28
+## Bug Fixes
+
+* **event_handler:** strip the HTTP API stage only when rawPath has it ([#8605](https://github.com/aws-powertools/powertools-lambda-python/issues/8605))
+* **event_handler:** fix prefix stripping, gzip negotiation, JSON detection and CORS Vary ([#8638](https://github.com/aws-powertools/powertools-lambda-python/issues/8638))
+* **event_handler:** keep catch-all exception handlers off 404s and adapt exception handler returns ([#8624](https://github.com/aws-powertools/powertools-lambda-python/issues/8624))
+* **event_handler:** harden multipart and JSON body validation ([#8626](https://github.com/aws-powertools/powertools-lambda-python/issues/8626))
+* **idempotency:** read expiry from expiry_attr in CachePersistenceLayer ([#8606](https://github.com/aws-powertools/powertools-lambda-python/issues/8606))
+* **idempotency:** stop CachePersistenceLayer from emitting the Redis deprecation warning ([#8625](https://github.com/aws-powertools/powertools-lambda-python/issues/8625))
+* **logger:** stop adding milliseconds twice when use_datetime_directive is set ([#8632](https://github.com/aws-powertools/powertools-lambda-python/issues/8632))
+* **parameters:** include sdk_options in the cache key ([#8619](https://github.com/aws-powertools/powertools-lambda-python/issues/8619))
+* **parameters:** raise GetParameterError when GetParameters fails in fail-fast mode ([#8616](https://github.com/aws-powertools/powertools-lambda-python/issues/8616))
+* **parameters:** avoid mutating caller's dict in get_parameters_by_name ([#8607](https://github.com/aws-powertools/powertools-lambda-python/issues/8607))
+* **parameters:** support version and label selectors in get_parameters_by_name ([#8620](https://github.com/aws-powertools/powertools-lambda-python/issues/8620))
+* **parameters:** return only requested secret names ([#8621](https://github.com/aws-powertools/powertools-lambda-python/issues/8621))
+* **parameters:** key appconfig default provider by environment and ap… ([#8635](https://github.com/aws-powertools/powertools-lambda-python/issues/8635))
+* **parameters:** recover AppConfig sessions after rejected poll tokens ([#8615](https://github.com/aws-powertools/powertools-lambda-python/issues/8615))
+* **parser:** pass non-JSON octet-stream payloads to the model in EventBridgeV2Envelope ([#8669](https://github.com/aws-powertools/powertools-lambda-python/issues/8669))
+
 ## Maintenance
 
 * version bump
 * **deps:** bump virtualenv from 21.14.9 to 21.14.13 ([#8687](https://github.com/aws-powertools/powertools-lambda-python/issues/8687))
+* **deps:** bump ddtrace from 4.8.2 to 4.15.6 ([#8688](https://github.com/aws-powertools/powertools-lambda-python/issues/8688))
+* **deps:** bump pydantic, aws-cdk, sentry-sdk, pytest-mock, ruff, zensical and GitHub Actions ([#8685](https://github.com/aws-powertools/powertools-lambda-python/issues/8685))
+* **deps:** bump virtualenv from 21.13.0 to 21.14.9 ([#8654](https://github.com/aws-powertools/powertools-lambda-python/issues/8654))
+* **deps:** bump certifi from 2026.2.25 to 2026.10.19 ([#8653](https://github.com/aws-powertools/powertools-lambda-python/issues/8653))
+* **deps:** bump opentelemetry-api from 1.40.0 to 1.45.1 ([#8686](https://github.com/aws-powertools/powertools-lambda-python/issues/8686))
+* **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 5.0.10 to 5.0.11 in the github-actions group across 1 directory ([#8689](https://github.com/aws-powertools/powertools-lambda-python/issues/8689))
 
 
 <a name="v3.37.0"></a>
@@ -7997,7 +8032,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.38.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.39.0...HEAD
+[v3.39.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.38.0...v3.39.0
 [v3.38.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.37.0...v3.38.0
 [v3.37.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.36.0...v3.37.0
 [v3.36.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.35.0...v3.36.0

@@ -98,7 +98,10 @@ async def _run_sync_middleware_in_thread(
     # If middleware raised before calling next, propagate immediately
     if not next_app_holder:
         thread.join()
-        raise middleware_error_holder[0]
+        if middleware_error_holder:
+            raise middleware_error_holder[0]
+        # Middleware short-circuited without calling next: return its own response
+        return middleware_result_holder[0] if middleware_result_holder else None
 
     # Resolve the async next_handler on the event-loop
     real_response = await next_handler(next_app_holder[0])
@@ -159,8 +162,18 @@ class AsyncMiddlewareFrame:
 
         extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
 
-        if inspect.iscoroutinefunction(self.current_middleware):
-            return await self.current_middleware(app, self.next_middleware, **extra_kwargs)
+        # Class-based middlewares expose their logic through `handler`, which may be a coroutine
+        # function even though the instance itself is not
+        middleware_handler = getattr(self.current_middleware, "handler", None)
+        is_async_middleware = inspect.iscoroutinefunction(
+            self.current_middleware,
+        ) or inspect.iscoroutinefunction(middleware_handler)
+
+        if is_async_middleware:
+            result = self.current_middleware(app, self.next_middleware, **extra_kwargs)
+            if inspect.iscoroutine(result):
+                result = await result
+            return result
 
         loop = asyncio.get_running_loop()
 
