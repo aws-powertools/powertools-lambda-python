@@ -7,6 +7,12 @@ import pytest
 
 MODEL_IMPORT_CASES = [
     ("SqsModel", "sqs", ["sqs"]),
+    ("IoTCoreThingEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingTypeEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingTypeAssociationEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreAddOrRemoveFromThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
+    ("IoTCoreAddOrDeleteFromThingGroupEvent", "iot_registry_events", ["iot_registry_events"]),
     ("S3Model", "s3", ["s3", "event_bridge"]),
     ("AppSyncEventsModel", "appsync_events", ["appsync_events", "appsync"]),
     ("LambdaFunctionUrlModel", "lambda_function_url", ["lambda_function_url", "apigwv2"]),

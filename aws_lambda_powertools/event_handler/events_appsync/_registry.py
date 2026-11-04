@@ -43,7 +43,7 @@ class ResolverEventsRegistry:
             A Callable
         """
 
-        def _register(func) -> Callable | None:
+        def _register(func) -> Callable:
             if not is_valid_path(path):
                 warnings.warn(
                     f"The path `{path}` registered for `{self.kind_resolver}` is not valid and will be skipped."
@@ -53,7 +53,7 @@ class ResolverEventsRegistry:
                     stacklevel=2,
                     category=PowertoolsUserWarning,
                 )
-                return None
+                return func
 
             logger.debug(
                 f"Adding resolver `{func.__name__}` for path `{path}` and kind_resolver `{self.kind_resolver}`",

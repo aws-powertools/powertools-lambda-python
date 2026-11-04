@@ -647,6 +647,43 @@ def test_depends_service_error_returns_its_status_code_for_each_resolver(resolve
     assert json.loads(result["body"]) == {"statusCode": 401, "message": "Missing authentication"}
 
 
+def test_depends_class_dependency_receives_request():
+    """A class dependency gets Request injected into its __init__."""
+    app = APIGatewayHttpResolver()
+
+    class Service:
+        def __init__(self, request: Request):
+            self.path = request.resolved_event.path
+
+    @app.post("/my/path")
+    def handler(svc: Annotated[Service, Depends(Service)]):
+        return {"path": svc.path}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"path": "/my/path"}
+
+
+def test_depends_class_dependency_with_nested_depends():
+    """A class dependency resolves its own Depends() parameters declared on __init__."""
+    app = APIGatewayHttpResolver()
+
+    def get_tenant() -> str:
+        return "tenant-1"
+
+    class Service:
+        def __init__(self, tenant: Annotated[str, Depends(get_tenant)]):
+            self.tenant = tenant
+
+    @app.post("/my/path")
+    def handler(svc: Annotated[Service, Depends(Service)]):
+        return {"tenant": svc.tenant}
+
+    result = app(API_GW_V2_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"tenant": "tenant-1"}
+
+
 def test_depends_with_none_default_is_resolved():
     """A Depends() parameter that also declares ``= None`` is still resolved (Python 3.10 wraps it in Optional)."""
     app = APIGatewayHttpResolver()
