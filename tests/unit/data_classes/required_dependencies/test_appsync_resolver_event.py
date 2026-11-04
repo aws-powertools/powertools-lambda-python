@@ -143,3 +143,37 @@ def test_appsync_resolver_event_empty():
 
     assert event.info.field_name is None
     assert event.info.parent_type_name is None
+
+
+def test_get_identity_object_openid_connect_identity():
+    # GIVEN an OPENID_CONNECT identity, which always carries `sub`
+    identity = {
+        "sub": "string",
+        "claims": {"sub": "string"},
+        "defaultAuthStrategy": "ALLOW",
+        "groups": None,
+        "issuer": "https://example.com",
+        "sourceIp": ["string"],
+        "username": "string",
+    }
+
+    # WHEN dispatched to a type
+    identity_object = get_identity_object(identity)
+
+    # THEN it resolves to AppSyncIdentityCognito, which already models the OIDC fields
+    assert isinstance(identity_object, AppSyncIdentityCognito)
+    assert identity_object.sub == identity["sub"]
+    assert identity_object.claims == identity["claims"]
+    assert identity_object.default_auth_strategy == identity["defaultAuthStrategy"]
+    assert identity_object.issuer == identity["issuer"]
+
+
+def test_get_identity_object_only_none_identity_returns_none():
+    # GIVEN any non-null identity, whichever authorization mode produced it
+    # THEN a concrete class is returned
+    assert isinstance(get_identity_object({"sub": "string"}), AppSyncIdentityCognito)
+    assert isinstance(get_identity_object({"accountId": "string"}), AppSyncIdentityIAM)
+    assert isinstance(get_identity_object({}), AppSyncIdentityIAM)
+
+    # AND only an absent identity maps to None
+    assert get_identity_object(None) is None
