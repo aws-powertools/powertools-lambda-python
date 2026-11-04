@@ -4,7 +4,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pydantic import IPvAnyNetwork, TypeAdapter
+from pydantic import IPvAnyNetwork, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 
@@ -80,6 +80,15 @@ def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter[T
                 "See issue: https://github.com/aws-powertools/powertools-lambda-python/issues/5303",
             )
             data = json.loads(data)
+        except ValidationError as exc:
+            # validate_json fails on plain-text payloads (e.g. CloudWatch Logs
+            # subscriptions forward Lambda runtime START/END/REPORT lines).
+            # Fall back to validate_python so string-compatible models still
+            # receive the raw payload; otherwise surface the original error.
+            try:
+                return adapter.validate_python(data)
+            except ValidationError:
+                raise exc from None
 
     return adapter.validate_python(data)
 
