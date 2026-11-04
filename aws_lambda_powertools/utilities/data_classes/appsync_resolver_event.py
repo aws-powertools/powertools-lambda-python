@@ -60,12 +60,12 @@ class AppSyncEventBase(DictWrapper):
     @property
     def identity(self) -> AppSyncIdentityIAM | AppSyncIdentityCognito | AppSyncIdentityLambda | None:
         """An object that contains information about the caller.
-        Depending on the type of identify found:
+        Depending on the type of identity found:
         - API_KEY authorization - returns None
         - AWS_IAM authorization - returns AppSyncIdentityIAM
         - AMAZON_COGNITO_USER_POOLS authorization - returns AppSyncIdentityCognito
+        - OPENID_CONNECT authorization - returns AppSyncIdentityCognito
         - AWS_LAMBDA authorization - returns AppSyncIdentityLambda
-        - OPENID_CONNECT authorization - returns None - NEED TO TEST
         """
         return get_identity_object(self.get("identity"))
 
