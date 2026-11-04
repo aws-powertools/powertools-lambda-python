@@ -260,6 +260,8 @@ and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsyn
 
 The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
 
+With [AWS_LAMBDA authorization](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization){target="_blank"}, the caller identity is whatever the Lambda authorizer returned in `resolverContext`. In that case, `AppSyncResolverEvent.identity` returns an `AppSyncIdentityLambda`, and the authorizer context is available via `identity.resolver_context`.
+
 === "app.py"
 
     ```python hl_lines="2-4 9"

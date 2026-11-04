@@ -85,6 +85,14 @@ if TYPE_CHECKING:
     )
     from .event_bridge import EventBridgeModel
     from .event_bridge_v2 import EventBridgeV2Model, EventBridgeV2RecordModel, EventBridgeV2SystemMetadataModel
+    from .iot_registry_events import (
+        IoTCoreAddOrDeleteFromThingGroupEvent,
+        IoTCoreAddOrRemoveFromThingGroupEvent,
+        IoTCoreThingEvent,
+        IoTCoreThingGroupEvent,
+        IoTCoreThingTypeAssociationEvent,
+        IoTCoreThingTypeEvent,
+    )
     from .kafka import (
         KafkaBaseEventModel,
         KafkaMskEventModel,
@@ -215,6 +223,12 @@ _MODEL_MODULES = {
     "EventBridgeV2Model": "event_bridge_v2",
     "EventBridgeV2RecordModel": "event_bridge_v2",
     "EventBridgeV2SystemMetadataModel": "event_bridge_v2",
+    "IoTCoreAddOrDeleteFromThingGroupEvent": "iot_registry_events",
+    "IoTCoreAddOrRemoveFromThingGroupEvent": "iot_registry_events",
+    "IoTCoreThingEvent": "iot_registry_events",
+    "IoTCoreThingGroupEvent": "iot_registry_events",
+    "IoTCoreThingTypeAssociationEvent": "iot_registry_events",
+    "IoTCoreThingTypeEvent": "iot_registry_events",
     "KafkaBaseEventModel": "kafka",
     "KafkaMskEventModel": "kafka",
     "KafkaRecordModel": "kafka",
@@ -387,6 +401,12 @@ __all__ = [
     "KafkaSelfManagedEventModel",
     "KafkaRecordModel",
     "KafkaMskEventModel",
+    "IoTCoreAddOrDeleteFromThingGroupEvent",
+    "IoTCoreAddOrRemoveFromThingGroupEvent",
+    "IoTCoreThingEvent",
+    "IoTCoreThingGroupEvent",
+    "IoTCoreThingTypeAssociationEvent",
+    "IoTCoreThingTypeEvent",
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",
