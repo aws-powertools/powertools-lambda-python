@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.data_classes.appsync_resolver_event import (
     AppSyncIdentityCognito,
     AppSyncIdentityIAM,
+    AppSyncIdentityLambda,
     AppSyncResolverEventInfo,
     get_identity_object,
 )
@@ -177,3 +178,37 @@ def test_get_identity_object_only_none_identity_returns_none():
 
     # AND only an absent identity maps to None
     assert get_identity_object(None) is None
+
+
+def test_get_identity_object_lambda_authorizer():
+    # GIVEN an AWS_LAMBDA authorization identity, whose only field is the authorizer's resolverContext
+    identity = {"resolverContext": {"userId": "u-1", "tier": "gold"}}
+
+    # WHEN dispatched to a type
+    identity_object = get_identity_object(identity)
+
+    # THEN it resolves to AppSyncIdentityLambda, exposing the authorizer context
+    assert isinstance(identity_object, AppSyncIdentityLambda)
+    assert identity_object.resolver_context == identity["resolverContext"]
+
+
+def test_get_identity_object_prefers_sub_over_resolver_context():
+    # GIVEN an identity carrying both `sub` and `resolverContext` (authorization modes are exclusive in practice)
+    identity = {"sub": "string", "resolverContext": {"userId": "u-1"}}
+
+    # THEN the existing Cognito dispatch wins, keeping the old behaviour
+    assert isinstance(get_identity_object(identity), AppSyncIdentityCognito)
+
+
+def test_appsync_resolver_event_lambda_authorizer():
+    raw_event = load_event("appSyncLambdaAuthorizerResolverEvent.json")
+    parsed_event = AppSyncResolverEvent(raw_event)
+
+    assert parsed_event.type_name == raw_event["typeName"]
+    assert parsed_event.field_name == raw_event["fieldName"]
+    assert parsed_event.arguments == raw_event["arguments"]
+
+    assert isinstance(parsed_event.identity, AppSyncIdentityLambda)
+    identity: AppSyncIdentityLambda = parsed_event.identity
+    assert identity.resolver_context == raw_event["identity"]["resolverContext"]
+    assert identity.resolver_context["userId"] == "u-1"
