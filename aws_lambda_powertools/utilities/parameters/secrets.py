@@ -153,12 +153,10 @@ class SecretsProvider(BaseProvider):
         """
 
         # Merge filters: combine names with any additional filters from sdk_options
-        filters = sdk_options.get("Filters", [])
+        # without mutating the caller's Filters list (a copy avoids appending the
+        # name filter to a shared/module-level list on every call)
         name_filter = {"Key": "name", "Values": names}
-
-        # Add name filter to existing filters
-        filters.append(name_filter)
-        sdk_options["Filters"] = filters
+        sdk_options["Filters"] = [*sdk_options.get("Filters", []), name_filter]
 
         # Remove SecretIdList if present to avoid conflicts
         sdk_options.pop("SecretIdList", None)
@@ -413,12 +411,17 @@ class SecretsProvider(BaseProvider):
 
         try:
             logger.debug(f"Attempting to update secret {name}")
-            return self._update_secret(name=name, **sdk_options)
+            response = self._update_secret(name=name, **sdk_options)
         except self.client.exceptions.ResourceNotFoundException:
             logger.debug(f"Secret {name} doesn't exist, creating a new one")
-            return self._create_secret(name=name, **sdk_options)
+            response = self._create_secret(name=name, **sdk_options)
         except Exception as exc:
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
+
+        # Remove any cached value for this secret so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
 
 @overload

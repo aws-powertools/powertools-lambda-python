@@ -1,0 +1,40 @@
+[
+  {
+    "Data": {"orderId": "s3-0", "total": 5},
+    "Metadata": {"sub": "s3", "tenant": "acme"},
+    "SystemMetadata": {
+      "EventGroupId": "43e6837b-3d96-44db-863d-e8abd80cd1e8",
+      "DeduplicationId": "43e6837b-3d96-44db-863d-e8abd80cd1e8",
+      "ContentType": "application/json",
+      "aws:IngestionTime": "2026-10-25T11:48:54.064Z",
+      "aws:EventId": "e3474ffa-0283-4fe7-af27-803e30cd92f4",
+      "aws:SequenceNumber": "10000000000000007000",
+      "aws:DeliveryType": "LIVE"
+    }
+  },
+  {
+    "Data": {
+      "version": "0",
+      "id": "1cd1f343-9859-4e28-a539-89352846ce44",
+      "detail-type": "s6",
+      "source": "com.example.orders",
+      "account": "123456789012",
+      "time": "2026-10-25T11:48:53Z",
+      "region": "us-east-1",
+      "resources": [],
+      "detail": {"orderId": "s6-1", "total": 10}
+    },
+    "Metadata": {},
+    "SystemMetadata": {
+      "EventGroupId": "d8c85953-b07f-4bc1-b2ff-044a1c2b03bc",
+      "DeduplicationId": "d8c85953-b07f-4bc1-b2ff-044a1c2b03bc",
+      "ContentType": "application/eventbridge+json",
+      "aws:IngestionTime": "2026-10-25T11:48:53.977Z",
+      "aws:Source": "com.example.orders",
+      "aws:DetailType": "s6",
+      "aws:EventId": "b9c941f6-ccae-473e-95d5-1982a0b1e8a5",
+      "aws:SequenceNumber": "10000000000000006001",
+      "aws:DeliveryType": "REPLAY"
+    }
+  }
+]

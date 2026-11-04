@@ -206,6 +206,30 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
+    def _invalidate_cache(self, name: str) -> None:
+        """Remove cached values for a single parameter or secret name, across all transforms
+
+        Only entries holding a single value are removed. Grouped entries, created by
+        ``get_multiple``, hold the values of multiple names under a single key, so they
+        are kept intact to avoid evicting unrelated values. Use ``force_fetch=True``
+        on the next read to refresh grouped results.
+
+        Parameters
+        ----------
+        name: str
+            Parameter or secret name whose cached values should be removed
+        """
+        for key in list(self.store):
+            if key[0] != name:
+                continue
+
+            # Grouped entries hold multiple values under one key; their third element is is_nested=True.
+            # Keys can also carry a fourth sdk_options element and can be two-element batch keys.
+            if len(key) >= 3 and key[2]:
+                continue
+
+            del self.store[key]
+
     def fetch_from_cache(self, key: tuple):
         return self.store[key].value if key in self.store else {}
 
@@ -334,9 +358,6 @@ def transform_value(
 
     err_msg = "Unable to transform value using '{transform}' transform: {exc}"
 
-    if isinstance(value, bytes):
-        value = value.decode("utf-8")
-
     if isinstance(value, dict):
         # NOTE: We must handle partial failures when receiving multiple values
         # where one of the keys might fail during transform, e.g. `{"a": "valid", "b": "{"}`
@@ -353,14 +374,14 @@ def transform_value(
                 transformed_values[dict_key] = None
         return transformed_values
 
-    if transform == "auto":
-        # key="a.json", value='{"a": "b"}', or key="a.binary", value="b64_encoded"
-        transform_method = get_transform_method(value=key, transform=transform)
-    else:
-        # value='{"key": "value"}
-        transform_method = get_transform_method(value=value, transform=transform)
+    # Auto transforms inspect the parameter name; explicit transforms ignore it.
+    transform_method = get_transform_method(value=key, transform=transform)
 
     try:
+        # Identity transforms must preserve raw bytes. Decode failures belong to
+        # the same error policy as JSON/base64 failures.
+        if isinstance(value, bytes) and transform_method is not TRANSFORM_METHOD_MAPPING[None]:
+            value = value.decode("utf-8")
         return transform_method(value)
     except Exception as exc:
         if raise_on_transform_error:

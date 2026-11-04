@@ -6,6 +6,7 @@ from .bedrock_agent import BedrockAgentEnvelope, BedrockAgentFunctionEnvelope
 from .cloudwatch import CloudWatchLogsEnvelope
 from .dynamodb import DynamoDBStreamEnvelope
 from .event_bridge import EventBridgeEnvelope
+from .event_bridge_v2 import EventBridgeV2Envelope
 from .kafka import KafkaEnvelope
 from .kinesis import KinesisDataStreamEnvelope
 from .kinesis_firehose import KinesisFirehoseEnvelope
@@ -24,6 +25,7 @@ __all__ = [
     "CloudWatchLogsEnvelope",
     "DynamoDBStreamEnvelope",
     "EventBridgeEnvelope",
+    "EventBridgeV2Envelope",
     "KinesisDataStreamEnvelope",
     "KinesisFirehoseEnvelope",
     "LambdaFunctionUrlEnvelope",
