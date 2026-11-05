@@ -18,6 +18,7 @@ make mypy               # static typing, must pass
 uv run pytest tests/unit tests/functional/<utility>      # fast loop for one utility
 make test               # full unit + functional + performance, what CI runs
 make pr                 # everything CI checks, run it before opening the PR
+make agent-skill        # regenerate .agents/skills/*/references after changing docs/ or examples/ (pre-commit does it too)
 ```
 
 Do not run the full suite with `pytest -n auto`; collection differs between workers and it fails for reasons unrelated to your change.
@@ -57,5 +58,6 @@ Do not run the full suite with `pytest -n auto`; collection differs between work
 | Sample events | `tests/events/` |
 | Docs and examples | `docs/<area>/<utility>.md`, `examples/<utility>/src/` |
 | Project premises | `docs/adr/` |
+| Agent skill for library users | `.agents/skills/` (the `references/` folder is generated from `docs/`; do not edit it or use it as a source, change `docs/` and run `scripts/build_agent_skill_references.py`) |
 | Layer build | `layer_v3/` |
 | Maintainer process | [MAINTAINERS.md](MAINTAINERS.md), [docs/maintainers.md](docs/maintainers.md) |
