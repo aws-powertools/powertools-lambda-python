@@ -296,7 +296,9 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | Parameter     | Default | Description                                                                                    |
 | ------------- | ------- | ---------------------------------------------------------------------------------------------- |
 | **decrypt**   | `False` | Will automatically decrypt the parameter.                                                      |
-| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+| **recursive** | `False` | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+
+The module-level `get_parameters()` function defaults `recursive` to `True`.
 
 You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
