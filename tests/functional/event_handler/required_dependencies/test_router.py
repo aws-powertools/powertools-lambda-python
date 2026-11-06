@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from aws_lambda_powertools.event_handler import (
     ALBResolver,
     APIGatewayHttpResolver,
@@ -76,3 +78,20 @@ def test_lambda_function_url_router_event_type():
     app.include_router(router)
     result = app(load_event("lambdaFunctionUrlEvent.json"), {})
     assert result["body"] == "routed"
+
+
+def test_router_warns_on_duplicate_route():
+    # GIVEN a Router with a registered route
+    router = APIGatewayRouter()
+
+    @router.get("/my/path")
+    def first():
+        return {"fn": "first"}
+
+    # WHEN registering the same route again
+    # THEN a warning is emitted like the resolver does
+    with pytest.warns(UserWarning, match="A route like this was already registered"):
+
+        @router.get("/my/path")
+        def second():
+            return {"fn": "second"}

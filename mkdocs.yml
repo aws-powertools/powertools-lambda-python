@@ -5,10 +5,18 @@ repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 site_url: https://docs.powertools.aws.dev/lambda/python/latest/
 
+# Architecture decision records live in the repository only, see docs/adr/README.md
+# The Dockerfile and requirements files are for building the docs locally, not for the site
+exclude_docs: |
+  adr/
+  /Dockerfile
+  /requirements.*
+
 nav:
   - Homepage:
       - index.md
       - Installation: getting-started/install.md
+      - Coding agent skills: getting-started/coding-agent-skills.md
       - Changelog: changelog.md
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank

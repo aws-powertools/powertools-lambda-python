@@ -90,8 +90,15 @@ class CloudWatchAlarmMetric(DictWrapper):
         return self["returnData"]
 
     @property
-    def metric_stat(self) -> CloudWatchAlarmMetricStat:
-        return CloudWatchAlarmMetricStat(self["metricStat"])
+    def metric_stat(self) -> CloudWatchAlarmMetricStat | None:
+        """
+        Optional metric stat of the alarm metric.
+
+        Metric math alarms list expression entries alongside metric entries, and an
+        expression entry has no metricStat.
+        """
+        metric_stat = self.get("metricStat")
+        return CloudWatchAlarmMetricStat(metric_stat) if metric_stat else None
 
 
 class CloudWatchAlarmMetricStat(DictWrapper):

@@ -615,6 +615,39 @@ def test_idempotent_function_and_lambda_handler_redis_validation(
         lambda_handler(mock_event, lambda_context)
 
 
+def test_idempotent_function_and_lambda_handler_redis_validation_same_payload(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+    lambda_context,
+):
+    mock_event = {"user_id": "xyz", "time": "1234"}
+    persistence_layer = persistence_store_standalone_redis
+    expected_result = {"message": "Foo"}
+    config = IdempotencyConfig(event_key_jmespath="user_id", payload_validation_jmespath="time")
+    calls = 0
+
+    @idempotent(persistence_store=persistence_layer, config=config)
+    def lambda_handler(event, context):
+        nonlocal calls
+        calls += 1
+        return expected_result
+
+    # WHEN calling the handler with payload validation enabled
+    first_result = lambda_handler(mock_event, lambda_context)
+
+    # THEN the completed record keeps the payload hash
+    stored_record = json.loads(next(iter(persistence_layer.client.cache.values())))
+    assert stored_record["status"] == "COMPLETED"
+    assert stored_record[persistence_layer.validation_key_attr]
+
+    # WHEN calling the handler again with the same payload
+    second_result = lambda_handler(mock_event, lambda_context)
+
+    # THEN the stored response is returned without running the handler again
+    assert first_result == expected_result
+    assert second_result == expected_result
+    assert calls == 1
+
+
 def test_idempotent_function_and_lambda_handler_redis_basic_no_decode(
     persistence_store_standalone_redis_no_decode: RedisCachePersistenceLayer,
     lambda_context,

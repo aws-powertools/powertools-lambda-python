@@ -254,6 +254,9 @@ class AppSyncEventsResolver(Router):
             try:
                 result_return = resolver["func"](payload=event.get("payload"))
                 results.append({"id": event.get("id"), "payload": result_return})
+            except UnauthorizedException:
+                # Authorization failures must fail the whole request, same as the aggregate path
+                raise
             except Exception as error:
                 logger.debug(f"Failed to process event number {idx}")
                 error_return = {"id": event.get("id"), "error": self._format_error_response(error)}
@@ -314,6 +317,12 @@ class AppSyncEventsResolver(Router):
         #       this will become useful when we support exception handling in AppSync resolver
         # Aggregate results and exceptions, then filter them out
         results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Authorization failures must fail the whole request, same as the aggregate path
+        for result in results:
+            if isinstance(result, UnauthorizedException):
+                raise result
+
         response_async.extend(
             [
                 (
