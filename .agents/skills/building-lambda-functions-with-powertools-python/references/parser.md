@@ -190,7 +190,8 @@ The example above uses `SqsModel`. Other built-in models can be found below.
 | **CloudFormationCustomResourceCreateModel**       | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                         |
 | **CloudFormationCustomResourceUpdateModel**       | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                         |
 | **CloudFormationCustomResourceDeleteModel**       | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                         |
-| **CloudwatchLogsModel**                           | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
+| **CloudWatchLogsModel**                           | Lambda Event Source payload for Amazon CloudWatch Logs                                        |
+| **ConnectOutboundCampaignsEventModel**            | Lambda Event Source payload for Amazon Connect Outbound Campaigns custom actions              |
 | **CognitoPreSignupTriggerModel**                  | Lambda User Pool Pre-Sign-Up trigger event                                                    |
 | **CognitoPostConfirmationTriggerModel**           | Lambda User Pool Post Confirmation trigger event                                              |
 | **CognitoPreAuthenticationTriggerModel**          | Lambda User Pool Pre Authentication trigger event                                             |
@@ -349,7 +350,7 @@ You can use pre-built envelopes provided by the Parser to extract and parse spec
 | **EventBridgeEnvelope**       | 1. Parses data using `EventBridgeModel`. ``2. Parses `detail` key using your model`` and returns it.                                                                                                     | `Model`                            |
 | **EventBridgeV2Envelope**     | 1. Parses data using `EventBridgeV2Model`. ``2. Parses `Data` (or `Data.detail` for PutEvents) of each record using your model`` and returns them in a list. Also accepts RAW deliveries. | `List[Model]`                      |
 | **SqsEnvelope**               | 1. Parses data using `SqsModel`. ``2. Parses records in `body` key using your model`` and return them in a list.                                                                                         | `List[Model]`                      |
-| **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudwatchLogsModel` which will base64 decode and decompress it. ``2. Parses records in `message` key using your model`` and return them in a list.                                | `List[Model]`                      |
+| **CloudWatchLogsEnvelope**    | 1. Parses data using `CloudWatchLogsModel` which will base64 decode and decompress it. ``2. Parses records in `message` key using your model`` and return them in a list.                                | `List[Model]`                      |
 | **KinesisDataStreamEnvelope** | 1. Parses data using `KinesisDataStreamModel` which will base64 decode it. ``2. Parses records in the `Records` key using your model`` and returns them in a list.                                       | `List[Model]`                      |
 | **KinesisFirehoseEnvelope**   | 1. Parses data using `KinesisFirehoseModel` which will base64 decode it. ``2. Parses records in the `Records` key using your model`` and returns them in a list.                                         | `List[Model]`                      |
 | **SnsEnvelope**               | 1. Parses data using `SnsModel`. ``2. Parses records in `body` key using your model`` and return them in a list.                                                                                         | `List[Model]`                      |

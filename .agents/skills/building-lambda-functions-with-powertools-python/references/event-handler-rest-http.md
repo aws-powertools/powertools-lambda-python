@@ -677,7 +677,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 
 #### Http Resolver (ASGI)
 
-`HttpResolver` is an ASGI-compatible resolver that lets you run your Powertools application with any ASGI server like [uvicorn](https://www.uvicorn.org/). It implements the [ASGI specification](https://asgi.readthedocs.io/), is lightweight with no external dependencies, and works seamlessly with Lambda or any environment that speaks HTTP.
+`HttpResolver` is an ASGI-compatible resolver that lets you run your Powertools application with any ASGI server like [uvicorn](https://uvicorn.dev/). It implements the [ASGI specification](https://asgi.readthedocs.io/), is lightweight with no external dependencies, and works seamlessly with Lambda or any environment that speaks HTTP.
 
 If your Lambda is behind [Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter) or any other HTTP proxy that speaks the HTTP protocol, it works seamlessly.
 
@@ -4872,4 +4872,4 @@ Resources:
 
 > **Note**
 
-You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html) or [Pants](https://www.pantsbuild.org/docs/awslambda-python).
+You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html) or [Pants](https://www.pantsbuild.org/stable/docs/python/integrations/aws-lambda).

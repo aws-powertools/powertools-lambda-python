@@ -48,7 +48,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:41
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
 
 Resources:
   CaptureLambdaHandlerExample:
@@ -555,6 +555,12 @@ tracer = Tracer()
 def collect_payment(charge_id: str) -> str:
     return f"dummy payment collected for charge: {charge_id}"
 ```
+
+### CloudWatch Omni
+
+Traces captured by Tracer go to AWS X-Ray, and X-Ray data is available in [CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/) through Transaction Search. Omni's own instrumentation path is OpenTelemetry, which Tracer does not emit today; if you need OTLP traces from your function, follow [this feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/7003).
+
+The `service` name you pass to Tracer is what ties your segments to the logs and metrics of the same service, so keep it aligned with Logger and Metrics.
 
 ## Tips
 

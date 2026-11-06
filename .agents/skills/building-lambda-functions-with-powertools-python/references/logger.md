@@ -45,7 +45,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:41
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
 
 Resources:
   LoggerLambdaHandlerExample:
@@ -1754,6 +1754,25 @@ from aws_lambda_powertools.logging.formatters.datadog import DatadogLogFormatter
 logger = Logger(service="payment", logger_formatter=DatadogLogFormatter())
 logger.info("hello")
 ```
+
+### CloudWatch Omni
+
+[CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/) is the unified observability experience built on top of Amazon CloudWatch. It works on the telemetry you already send to CloudWatch, so there is nothing to configure in Logger: every log line goes to CloudWatch Logs as structured JSON and is available in your Omni space from there.
+
+What makes those lines useful in Omni is the shape Logger gives them. Each record is a single JSON object, and the [standard structured keys](#standard-structured-keys) are the fields you filter and correlate on:
+
+| Key | Set by | Use it to |
+| --- | --- | --- |
+| `service` | `Logger(service=...)` or `POWERTOOLS_SERVICE_NAME` | group logs of one service and tie them to the metrics emitted with the same `service` dimension |
+| `correlation_id` | `inject_lambda_context(correlation_id_path=...)` or `set_correlation_id()` | follow one request across functions |
+| `xray_trace_id` | automatically when tracing is active | jump from a log line to its X-Ray trace |
+| `function_name`, `function_request_id`, `cold_start` | `inject_lambda_context` | slice by function, invocation and cold starts |
+
+Keys you add with `append_keys()` or as `extra` become fields too, so prefer stable, flat names such as `order_id` over nested or free-form values when you plan to query them.
+
+> **Tip: Keep `service` consistent across Logger, Metrics and Tracer**
+
+Omni correlates logs, metrics and traces by service. Use the same value in `Logger(service=...)`, `Metrics(service=...)` and `Tracer(service=...)`, or set `POWERTOOLS_SERVICE_NAME` once for all three.
 
 ### Migrating from other Loggers
 
