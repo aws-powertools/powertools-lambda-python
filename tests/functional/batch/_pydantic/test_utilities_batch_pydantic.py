@@ -29,6 +29,7 @@ from aws_lambda_powertools.utilities.parser.models import (
 from aws_lambda_powertools.utilities.parser.types import Literal
 from tests.functional.batch._pydantic.sample_models import (
     OrderDynamoDBRecord,
+    OrderIdSqs,
     OrderKinesisRecord,
     OrderSqs,
 )
@@ -510,6 +511,51 @@ def test_batch_processor_model_with_partial_validation_error(
             {"itemIdentifier": malformed_record["messageId"]},
         ],
     }
+
+
+def test_batch_processor_model_with_non_validation_error_during_conversion(sqs_event_factory):
+    # GIVEN a model whose validator raises an exception Pydantic doesn't wrap in a ValidationError
+    first_record = sqs_event_factory(json.dumps({"order_id": 1}))
+    malformed_record = sqs_event_factory(json.dumps({"unexpected": 1}))
+    second_record = sqs_event_factory(json.dumps({"order_id": 2}))
+    records = [first_record, malformed_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderIdSqs)
+    with processor(records, lambda record: record.body) as batch:
+        batch.process()
+
+    # THEN only the malformed record is reported, with the original exception
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["messageId"]},
+        ],
+    }
+    assert batch.exceptions[0][0] is KeyError
+
+
+def test_async_batch_processor_model_with_non_validation_error_during_conversion(sqs_event_factory):
+    # GIVEN a model whose validator raises an exception Pydantic doesn't wrap in a ValidationError
+    first_record = sqs_event_factory(json.dumps({"order_id": 1}))
+    malformed_record = sqs_event_factory(json.dumps({"unexpected": 1}))
+    second_record = sqs_event_factory(json.dumps({"order_id": 2}))
+    records = [first_record, malformed_record, second_record]
+
+    async def async_record_handler(record):
+        return record.body
+
+    # WHEN
+    processor = AsyncBatchProcessor(event_type=EventType.SQS, model=OrderIdSqs)
+    with processor(records, async_record_handler) as batch:
+        batch.async_process()
+
+    # THEN only the malformed record is reported, with the original exception
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["messageId"]},
+        ],
+    }
+    assert batch.exceptions[0][0] is KeyError
 
 
 def test_batch_processor_dynamodb_context_model_with_partial_validation_error(
