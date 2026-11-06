@@ -299,7 +299,14 @@ class BasePersistenceLayer(ABC):
             # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
-        response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        try:
+            response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        except Exception as exc:
+            # Nothing was written yet, so clear the in progress record to let the next call
+            # with the same payload run the function again instead of failing as in progress.
+            # A failure while writing the record below keeps it, as the write may have landed.
+            self.delete_record(data=data, exception=exc)
+            raise
 
         data_record = DataRecord(
             idempotency_key=idempotency_key,

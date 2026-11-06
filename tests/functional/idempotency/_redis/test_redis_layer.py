@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceConfigError,
     IdempotencyPersistenceConnectionError,
     IdempotencyPersistenceConsistencyError,
+    IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
@@ -743,6 +744,91 @@ def test_idempotent_lambda_redis_delete(
 
     # Then lambda handler should return a actual function output
     assert handler_result2 == result
+
+
+def test_idempotent_function_redis_response_not_json_serializable_runs_again(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+):
+    # GIVEN a function whose response can't be serialized to JSON
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store_standalone_redis, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"created": datetime.datetime(2026, 1, 1)}
+
+    # WHEN calling it twice with the same payload
+    # THEN both calls fail to save the response, and the second call runs the function again
+    # instead of finding the first call's record still in progress
+    for _ in range(2):
+        with pytest.raises(IdempotencyPersistenceLayerError):
+            process_order(order={"id": 1})
+
+    assert function_calls == 2
+
+
+class MockRedisFailingCompletedWrite(MockRedis):
+    # fails the write that stores the COMPLETED record, after or before it lands
+    def __init__(self, write_lands: bool, **kwargs):
+        self.write_lands = write_lands
+        super().__init__(**kwargs)
+
+    def set(self, name, value, ex: int = 0, nx: bool = False):
+        if not nx and STATUS_CONSTANTS["COMPLETED"] in str(value):
+            if self.write_lands:
+                super().set(name=name, value=value, ex=ex, nx=nx)
+            raise self.exceptions.RedisError
+        return super().set(name=name, value=value, ex=ex, nx=nx)
+
+
+@pytest.mark.parametrize("use_local_cache", [False, True])
+def test_idempotent_function_redis_completed_write_landed_then_failed_keeps_record(use_local_cache):
+    # GIVEN a store that saves the COMPLETED record but then fails the write call
+    persistence_store = CachePersistenceLayer(
+        client=MockRedisFailingCompletedWrite(write_lands=True, host="localhost", port="63005"),
+    )
+    config = IdempotencyConfig(use_local_cache=use_local_cache)
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store, config=config, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"order_id": order["id"]}
+
+    # WHEN the first call fails to confirm the write
+    with pytest.raises(IdempotencyPersistenceLayerError):
+        process_order(order={"id": 1})
+
+    # THEN the stored result is kept, and the next call returns it without running the function again
+    assert process_order(order={"id": 1}) == {"order_id": 1}
+    assert function_calls == 1
+
+
+@pytest.mark.parametrize("use_local_cache", [False, True])
+def test_idempotent_function_redis_completed_write_failed_keeps_in_progress_record(use_local_cache):
+    # GIVEN a store that fails the write of the COMPLETED record before saving it
+    persistence_store = CachePersistenceLayer(
+        client=MockRedisFailingCompletedWrite(write_lands=False, host="localhost", port="63005"),
+    )
+    config = IdempotencyConfig(use_local_cache=use_local_cache)
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store, config=config, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"order_id": order["id"]}
+
+    # WHEN the first call fails to save the response
+    with pytest.raises(IdempotencyPersistenceLayerError):
+        process_order(order={"id": 1})
+
+    # THEN the in progress record is kept, as the write could have landed
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        process_order(order={"id": 1})
+    assert function_calls == 1
 
 
 def test_redis_orphan_record_race_condition(lambda_context):
