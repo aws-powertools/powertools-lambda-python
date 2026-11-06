@@ -69,7 +69,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:41
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
 
 Resources:
   CaptureLambdaHandlerExample:
@@ -852,6 +852,15 @@ Current providers:
 | ---------------------------------------- | -------------------------------------------------------- |
 | [Datadog](./datadog.md) | Uses Datadog SDK and Datadog Lambda Extension by default |
 
+### CloudWatch Omni
+
+[CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/) reads the same metrics you already publish to CloudWatch, so metrics emitted with this utility are available in your Omni space without changes. The EMF blob Metrics writes to the log is turned into CloudWatch metrics by the Lambda service, and those are what Omni dashboards and alerts use.
+
+Two things help on the Omni side:
+
+* Keep the `service` dimension set, through `Metrics(service=...)` or `POWERTOOLS_SERVICE_NAME`, and use the same value in Logger and Tracer. Omni correlates telemetry by service.
+* Use the `namespace` and dimension names you would want to see in a query. Omni queries metrics by namespace and dimensions, the same way CloudWatch does.
+
 This observability provider creates custom metrics by flushing metrics to [Datadog Lambda extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli), or to standard output via [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation). These metrics can be visualized in the [Datadog console](https://app.datadoghq.com/metric/explore).
 
 ```mermaid
@@ -928,7 +937,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:41
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
       # Find the latest Layer version in the Datadog official documentation
 
       # Datadog SDK

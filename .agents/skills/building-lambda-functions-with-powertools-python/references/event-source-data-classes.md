@@ -136,6 +136,7 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/code_pipeline_job_event.py) |
 | [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
+| [Connect Outbound Campaigns](#connect-outbound-campaigns) | `ConnectOutboundCampaignsEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_campaign_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
 | [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
 | [EventBridge Custom Event Bus](#eventbridge-custom-event-bus) | `EventBridgeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_v2_event.py) |
@@ -798,6 +799,8 @@ Used when building Lambda GraphQL Resolvers with [Amplify GraphQL Transform Libr
 and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/).
 
 The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
+
+With [AWS_LAMBDA authorization](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization), the caller identity is whatever the Lambda authorizer returned in `resolverContext`. In that case, `AppSyncResolverEvent.identity` returns an `AppSyncIdentityLambda`, and the authorizer context is available via `identity.resolver_context`.
 
 **app.py**
 
@@ -1828,6 +1831,60 @@ def lambda_handler(event, context):
             "ParameterTwo": "Two"
         }
     }
+}
+```
+
+### Connect Outbound Campaigns
+
+The example integrates with [Amazon Connect Outbound Campaigns](https://docs.aws.amazon.com/connect/latest/adminguide/lambda-invoke-functions.html) by handling custom action block events in journey flows. The function converts the event into a `ConnectOutboundCampaignsEvent` object.
+
+**app.py**
+
+```python
+from aws_lambda_powertools.utilities.data_classes import (
+    ConnectOutboundCampaignsEvent,
+    event_source,
+)
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+@event_source(data_class=ConnectOutboundCampaignsEvent)
+def lambda_handler(event: ConnectOutboundCampaignsEvent, context: LambdaContext):
+    campaign = event.invocation_metadata.campaign_context
+    print(f"Processing campaign {campaign.campaign_name} (ID: {campaign.campaign_id})")
+
+    for profile in event.customer_profiles:
+        profile_id = profile.profile_id
+        # json_customer_data deserializes the embedded JSON string
+        customer_info = profile.json_customer_data
+        print(f"Customer {profile_id}: {customer_info}")
+```
+
+**Connect Outbound Campaigns Example Event**
+
+```json
+{
+  "InvocationMetadata": {
+    "CampaignContext": {
+      "CampaignId": "campaign-12345",
+      "RunId": "run-67890",
+      "ActionId": "activity-abc123",
+      "CampaignName": "Welcome Campaign"
+    }
+  },
+  "Items": {
+    "CustomerProfiles": [
+      {
+        "ProfileId": "customer-001",
+        "CustomerData": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"john.doe@example.com\"}",
+        "IdempotencyToken": "token-xyz789"
+      },
+      {
+        "ProfileId": "customer-002",
+        "CustomerData": "{\"firstName\":\"Jane\",\"lastName\":\"Smith\",\"email\":\"jane.smith@example.com\"}",
+        "IdempotencyToken": "token-abc456"
+      }
+    ]
+  }
 }
 ```
 
