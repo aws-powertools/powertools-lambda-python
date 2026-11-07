@@ -418,6 +418,21 @@ def test_metrics_disabled_with_env_var(monkeypatch, capsys):
     assert not captured.out
 
 
+def test_metrics_disabled_with_env_var_does_not_submit_through_datadog_extension(monkeypatch, mocker):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    # AND the datadog_lambda package is available
+    lambda_metric = mocker.patch("aws_lambda_powertools.metrics.provider.datadog.datadog.lambda_metric")
+
+    # WHEN metrics are flushed through the Datadog extension
+    metrics = DatadogMetrics(flush_to_log=False)
+    metrics.add_metric(name="test_metric", value=1)
+    metrics.flush_metrics()
+
+    # THEN no metrics should have been submitted
+    lambda_metric.assert_not_called()
+
+
 def test_metrics_disabled_persists_after_flush(monkeypatch, capsys):
     # GIVEN environment variable is set to disable metrics
     monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
