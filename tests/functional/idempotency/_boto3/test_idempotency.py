@@ -1168,6 +1168,33 @@ def test_jmespath_with_powertools_json(
     assert result == "test-func.handler#" + persistence_store._generate_hash(expected_value)
 
 
+def test_configure_warns_when_reused_with_a_different_config(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a persistence layer already configured with one IdempotencyConfig
+    persistence_store.configure(IdempotencyConfig(event_key_jmespath="order_id"), "charge")
+
+    # WHEN it's configured again with a config whose settings differ
+    with pytest.warns(PowertoolsUserWarning, match="Use a separate persistence layer instance for each"):
+        persistence_store.configure(IdempotencyConfig(event_key_jmespath="user_id"), "notify")
+
+    # THEN the settings of the first config are kept
+    assert persistence_store.event_key_jmespath == "order_id"
+
+
+def test_configure_does_not_warn_when_reused_with_the_same_settings(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a persistence layer configured by a function with a shared IdempotencyConfig
+    shared_config = IdempotencyConfig(event_key_jmespath="order_id")
+    persistence_store.configure(shared_config, "charge")
+
+    # WHEN another function uses the same config, and a new config with the same settings is passed,
+    # as @idempotent does per call when no config is given
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
+        persistence_store.configure(shared_config, "notify")
+        persistence_store.configure(IdempotencyConfig(event_key_jmespath="order_id"), "notify")
+
+    # THEN no warning is emitted
+
+
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
     config_with_jmespath_options: IdempotencyConfig,

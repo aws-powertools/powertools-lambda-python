@@ -31,6 +31,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     DataRecord,
 )
 from aws_lambda_powertools.utilities.jmespath_utils import PowertoolsFunctions
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -73,6 +74,7 @@ class BasePersistenceLayer(ABC):
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
         self.hash_function = hashlib.md5
+        self._config_settings: tuple | None = None
 
     def configure(
         self,
@@ -96,10 +98,31 @@ class BasePersistenceLayer(ABC):
             key_prefix or f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
         )
 
+        # Settings this layer applies from the config. lambda_context and response_hook are read per call instead.
+        config_settings = (
+            config.event_key_jmespath,
+            config.payload_validation_jmespath,
+            config.jmespath_options,
+            config.raise_on_no_idempotency_key,
+            config.expires_after_seconds,
+            config.use_local_cache,
+            config.local_cache_max_items,
+            config.hash_function,
+        )
+
         if self.configured:
             # Prevent being reconfigured multiple times
+            if config_settings != self._config_settings:
+                warnings.warn(
+                    f"This persistence layer is already configured with a different IdempotencyConfig, so "
+                    f"'{self.function_name}' will use the settings of the first one. "
+                    "Use a separate persistence layer instance for each IdempotencyConfig.",
+                    category=PowertoolsUserWarning,
+                    stacklevel=2,
+                )
             return
         self.configured = True
+        self._config_settings = config_settings
 
         self.event_key_jmespath = config.event_key_jmespath
         if config.event_key_jmespath:
