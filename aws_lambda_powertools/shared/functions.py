@@ -121,7 +121,7 @@ def bytes_to_string(value: bytes) -> str:
 
 
 def powertools_dev_is_set() -> bool:
-    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "0"))
+    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV) or "0")
     if is_on:
         warnings.warn(
             "POWERTOOLS_DEV environment variable is enabled. Increasing verbosity across utilities.",
@@ -133,7 +133,7 @@ def powertools_dev_is_set() -> bool:
 
 
 def powertools_debug_is_set() -> bool:
-    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEBUG_ENV, "0"))
+    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEBUG_ENV) or "0")
     if is_on:
         warnings.warn("POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG.", stacklevel=2)
         return True

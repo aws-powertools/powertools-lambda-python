@@ -106,7 +106,7 @@ def _idempotent(
 
     # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
     # Raises a warning if not running in development mode
-    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV) or "false"):
         warnings.warn(
             message="Disabling idempotency is intended for development environments only "
             "and should not be used in production.",
@@ -216,7 +216,7 @@ def idempotent_function(
     def decorate(*args, **kwargs):
         # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
         # Raises a warning if not running in development mode
-        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV) or "false"):
             warnings.warn(
                 message="Disabling idempotency is intended for development environments only "
                 "and should not be used in production.",

@@ -155,8 +155,8 @@ def is_metrics_disabled() -> bool:
     - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is not set: Disable metrics
     """
 
-    is_dev_mode = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "false"))
-    is_metrics_disabled = strtobool(os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+    is_dev_mode = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV) or "false")
+    is_metrics_disabled = strtobool(os.getenv(constants.METRICS_DISABLED_ENV) or "false")
 
     disable_conditions = [
         is_metrics_disabled,

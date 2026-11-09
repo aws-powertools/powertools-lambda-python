@@ -4,6 +4,7 @@ import os
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 import pytest
 from pydantic import BaseModel
@@ -82,6 +83,31 @@ def test_powertools_debug_warning(monkeypatch: pytest.MonkeyPatch):
         powertools_debug_is_set()
         assert len(w) == 1
         assert str(w[0].message) == warning_message
+
+
+@pytest.mark.parametrize(
+    "env_var,resolver",
+    [
+        (constants.POWERTOOLS_DEV_ENV, powertools_dev_is_set),
+        (constants.POWERTOOLS_DEBUG_ENV, powertools_debug_is_set),
+    ],
+)
+def test_powertools_bool_env_var_set_to_empty_string(
+    monkeypatch: pytest.MonkeyPatch,
+    env_var: str,
+    resolver: Callable[[], bool],
+):
+    # GIVEN a boolean env var that is set but empty, e.g. `POWERTOOLS_DEV=` in a
+    # docker-compose file, a CI job, or a shell that exports it from an unset value
+    monkeypatch.setenv(env_var, "")
+
+    # WHEN the resolver runs
+    # THEN an empty value means "not configured" and resolves to False
+    # (an explicit `os.getenv(name, default)` never applies its default here)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        assert resolver() is False
+        assert len(w) == 0
 
 
 def test_extract_event_dict():

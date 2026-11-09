@@ -93,7 +93,7 @@ def circuit_breaker(
     def decorator(function: Callable) -> Callable:
         def disabled() -> bool:
             # Skip the circuit entirely when disabled (development only).
-            if not strtobool(os.getenv(constants.CIRCUIT_BREAKER_DISABLED_ENV, "false")):
+            if not strtobool(os.getenv(constants.CIRCUIT_BREAKER_DISABLED_ENV) or "false"):
                 return False
             warnings.warn(
                 message="Disabling the circuit breaker is intended for development environments only "
