@@ -146,9 +146,15 @@ The `erase` method also supports additional flags for more advanced and flexible
 
     > Field result: `'email': 'j****@example.com'`
 
+    !!! warning "Regular expressions and untrusted input"
+        Patterns run with Python's `re`, which has no protection against catastrophic backtracking. Keep `regex_pattern` under your control and avoid nested quantifiers such as `(a+)+` when the value comes from outside your function.
+
 === "masking_rules"
 
-    (dict) Allows you to apply different masking rules (flags) for each data field.
+    (dict) Allows you to apply different masking rules (flags) for each data field. Rules take the same options as the parameters above and accept a JSON string as input, like `fields` does.
+    A rule pointing at a dictionary or a list is applied to every value underneath it, keeping the structure.
+
+    `masking_rules` and `fields` cannot be combined in the same call: pass one or the other, or `erase` raises `DataMaskingError`.
     ```python hl_lines="20"
     --8<-- "examples/data_masking/src/custom_data_masking.py"
     ```
@@ -253,6 +259,7 @@ For a stronger security posture, you can add metadata to each encryption operati
 ???+ note "Current limitations"
     1. The `fields` parameter is not yet supported in `encrypt` and `decrypt` operations.
     2. We support `JSON` data types only - see [data serialization for more details](#data-serialization).
+    3. `raise_on_missing_field` checks whether an expression matched anything. With a list expression such as `records[*].card_number`, one record without the field does not raise as long as another record has it.
 
 You can use the `fields` parameter with the dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
@@ -441,9 +448,11 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ### Data serialization
 
 ???+ tip "Extended input support"
-    We support `Pydantic models`, `Dataclasses`, and custom classes with `dict()` or `__dict__` for input.
+    We support `Pydantic models`, `Dataclasses`, and custom classes with `dict()`, `__dict__` or `__slots__` for input, including the same object referenced more than once in a payload.
 
-    These types are automatically converted into dictionaries before `masking` and `encrypting` operations. Please not that we **don't convert back** to the original type, and the returned object will be a dictionary.
+    These types are automatically converted into dictionaries before `masking` and `encrypting` operations.
+    Pydantic models are dumped in JSON mode, so `SecretStr` and `SecretBytes` fields keep Pydantic's masked rendering and types such as `UUID`, `datetime` and `Decimal` become strings.
+    Please note that we **don't convert back** to the original type, and the returned object will be a dictionary.
 
 Before we traverse the data structure, we perform two important operations on input data:
 

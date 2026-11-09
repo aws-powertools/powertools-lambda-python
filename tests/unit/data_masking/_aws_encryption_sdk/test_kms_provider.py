@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import pytest
+from aws_encryption_sdk.exceptions import SerializationError
+from cryptography.exceptions import InvalidSignature
 
 from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingContextMismatchError,
+    DataMaskingDecryptValueError,
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import (
+    AWSEncryptionSDKProvider,
     KMSKeyProvider,
 )
 
@@ -42,3 +46,35 @@ def test_encryption_context_supported_values():
 def test_encryption_context_non_str_validation(ctx):
     with pytest.raises(DataMaskingUnsupportedTypeError):
         KMSKeyProvider._validate_encryption_context(ctx)
+
+
+@pytest.mark.parametrize(
+    "sdk_error",
+    [InvalidSignature(), SerializationError("truncated"), ValueError("bad header")],
+    ids=["tampered", "truncated", "garbage"],
+)
+def test_decrypt_wraps_sdk_errors(monkeypatch, sdk_error):
+    # GIVEN a provider whose SDK client rejects the ciphertext
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    provider = AWSEncryptionSDKProvider(keys=["arn:aws:kms:us-east-1:111122223333:key/test"])
+
+    def failing_decrypt(**kwargs):
+        raise sdk_error
+
+    monkeypatch.setattr(provider._key_provider.client, "decrypt", failing_decrypt)
+
+    # WHEN decrypting a well-formed base64 payload
+    # THEN the failure is reported as DataMaskingDecryptValueError, not as the SDK's own exception
+    with pytest.raises(DataMaskingDecryptValueError):
+        provider.decrypt("QUJDRA==")
+
+
+def test_decrypt_rejects_non_base64_input(monkeypatch):
+    # GIVEN a provider
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+    provider = AWSEncryptionSDKProvider(keys=["arn:aws:kms:us-east-1:111122223333:key/test"])
+
+    # WHEN decrypting something that is not base64
+    # THEN it is a DataMaskingDecryptValueError, not a raw ValueError
+    with pytest.raises(DataMaskingDecryptValueError):
+        provider.decrypt("not base64 at all!!")

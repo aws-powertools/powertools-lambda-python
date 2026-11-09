@@ -12,7 +12,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 PRESERVE_CHARS = set("-_. ")
-_regex_cache: dict[str, re.Pattern[str]] = {}
+
+
+@functools.lru_cache(maxsize=256)
+def _compile_regex(pattern: str) -> re.Pattern[str]:
+    return re.compile(pattern)
+
 
 JSON_DUMPS_CALL = functools.partial(json.dumps, ensure_ascii=False)
 
@@ -181,9 +186,7 @@ class BaseProvider:
     def _regex_mask(self, data: str, regex_pattern: str, mask_format: str) -> str:
         """Apply regex masking to string data."""
         try:
-            if regex_pattern not in _regex_cache:
-                _regex_cache[regex_pattern] = re.compile(regex_pattern)
-            return _regex_cache[regex_pattern].sub(mask_format, data)
+            return _compile_regex(regex_pattern).sub(mask_format, data)
         except re.error as exc:
             raise DataMaskingError("Invalid regex pattern") from exc
 
