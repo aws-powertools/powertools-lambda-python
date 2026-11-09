@@ -7,6 +7,7 @@ Base class for Data Masking
 from __future__ import annotations
 
 import dataclasses
+import enum
 import functools
 import logging
 import warnings
@@ -56,6 +57,8 @@ def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
 def _convert(data: Any, _visited: set[int]) -> Any:
     """Convert one container or object; ``prepare_data`` handles primitives and the visited set."""
     handlers: list[tuple[Callable[[Any], bool], Callable[[Any], Any]]] = [
+        # Enum members carry their class in __dict__; only the value matters
+        (lambda x: isinstance(x, enum.Enum), lambda x: prepare_data(x.value, _visited)),
         # Dataclasses
         (lambda x: hasattr(x, "__dataclass_fields__"), lambda x: prepare_data(dataclasses.asdict(x), _visited)),
         # Pydantic models: JSON mode renders secret types masked and makes UUID, datetime, Decimal... JSON safe

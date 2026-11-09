@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import json
 
 import pytest
@@ -613,3 +614,46 @@ def test_prepare_data_object_without_attributes_is_returned_as_is():
     # WHEN preparing it
     # THEN it is passed through unchanged, there is nothing to convert
     assert prepare_data(marker) is marker
+
+
+def test_erase_regex_without_match_masks_whole_value(data_masker):
+    # GIVEN a regex rule whose pattern does not match the value
+    data = {"card": "no digits here"}
+
+    # WHEN erasing with a pattern built for a different shape
+    result = data_masker.erase(
+        data,
+        masking_rules={"card": {"regex_pattern": r"(\d{4})\d{8}(\d{4})", "mask_format": r"\1********\2"}},
+    )
+
+    # THEN the value is not handed back untouched, it is fully masked
+    assert result == {"card": "** ****** ****"}
+
+
+def test_erase_regex_with_match_keeps_format(data_masker):
+    # GIVEN a regex rule whose pattern matches
+    data = {"card": "1234567812345678"}
+
+    # WHEN erasing
+    result = data_masker.erase(
+        data,
+        masking_rules={"card": {"regex_pattern": r"(\d{4})\d{8}(\d{4})", "mask_format": r"\1********\2"}},
+    )
+
+    # THEN the format is applied
+    assert result == {"card": "1234********5678"}
+
+
+def test_erase_enum_value(data_masker):
+    # GIVEN an Enum member as a value
+    class Status(enum.Enum):
+        ACTIVE = "active-token"
+
+    data = {"status": Status.ACTIVE, "other": "keep"}
+
+    # WHEN erasing the field
+    result = data_masker.erase(data, fields=["status"])
+
+    # THEN only the member value is considered and masked, no class internals leak into the output
+    assert result == {"status": DATA_MASKING_STRING, "other": "keep"}
+    assert prepare_data(data) == {"status": "active-token", "other": "keep"}

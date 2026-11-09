@@ -146,6 +146,8 @@ The `erase` method also supports additional flags for more advanced and flexible
 
     > Field result: `'email': 'j****@example.com'`
 
+    If the pattern does not match the value, the whole value is masked with the dynamic mask. A value that does not look the way you expected is never returned untouched.
+
     !!! warning "Regular expressions and untrusted input"
         Patterns run with Python's `re`, which has no protection against catastrophic backtracking. Keep `regex_pattern` under your control and avoid nested quantifiers such as `(a+)+` when the value comes from outside your function.
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from aws_encryption_sdk.exceptions import SerializationError
+from aws_encryption_sdk.exceptions import MasterKeyProviderError, SerializationError
 from cryptography.exceptions import InvalidSignature
 
 from aws_lambda_powertools.utilities.data_masking.exceptions import (
@@ -50,8 +50,13 @@ def test_encryption_context_non_str_validation(ctx):
 
 @pytest.mark.parametrize(
     "sdk_error",
-    [InvalidSignature(), SerializationError("truncated"), ValueError("bad header")],
-    ids=["tampered", "truncated", "garbage"],
+    [
+        InvalidSignature(),
+        SerializationError("truncated"),
+        ValueError("bad header"),
+        MasterKeyProviderError("Key commitment validation failed"),
+    ],
+    ids=["tampered", "truncated", "garbage", "key_commitment"],
 )
 def test_decrypt_wraps_sdk_errors(monkeypatch, sdk_error):
     # GIVEN a provider whose SDK client rejects the ciphertext
