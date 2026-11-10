@@ -873,3 +873,50 @@ def test_redis_client_protocol_still_emits_deprecation_warning_on_subclass():
     with pytest.warns(DeprecationWarning, match="RedisClientProtocol will be removed in v4.0.0"):
 
         class MyClient(RedisClientProtocol): ...
+
+
+@pytest.mark.parametrize("expires_after_seconds, want_lock_ex", [(2, 2), (30, 10)])
+def test_orphan_lock_ttl_follows_configured_expiry(expires_after_seconds, want_lock_ex, lambda_context):
+    """The orphan lock must live no longer than the record it protects."""
+
+    class RecordingRedis(MockRedis):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.set_calls = []
+
+        def set(self, name, value, ex: int = 0, nx: bool = False):
+            self.set_calls.append((name, ex))
+            return super().set(name, value, ex=ex, nx=nx)
+
+    redis_client = RecordingRedis(host="localhost", port="63005")
+    persistence_layer = CachePersistenceLayer(client=redis_client)
+
+    # An INPROGRESS record from an invocation that timed out before finishing.
+    orphan = json.dumps(
+        {
+            "status": STATUS_CONSTANTS["INPROGRESS"],
+            "expiration": int(t.time()) + expires_after_seconds,
+            "in_progress_expiration": int(t.time() * 1000) - 1,
+        },
+    )
+    config = IdempotencyConfig(expires_after_seconds=expires_after_seconds)
+    mock_event = {"user_id": "orphan-lock-ttl"}
+
+    @idempotent(persistence_store=persistence_layer, config=config)
+    def lambda_handler(event, context):
+        return {"message": "ok"}
+
+    # The orphan record uses the hashed idempotency key, which the first call
+    # generates. Seed it by letting the decorator compute the key via a first
+    # call, then replace that record with the orphan and call again.
+    lambda_handler(mock_event, lambda_context)
+    record_key = next(name for name, _ in reversed(redis_client.set_calls) if not name.endswith(":lock"))
+    redis_client.cache[record_key] = orphan.encode()
+    redis_client.expire_dict[record_key] = t.time() + expires_after_seconds
+
+    lock_before = len([c for c in redis_client.set_calls if c[0].endswith(":lock")])
+    lambda_handler(mock_event, lambda_context)
+
+    lock_calls = [c for c in redis_client.set_calls if c[0].endswith(":lock")]
+    assert len(lock_calls) > lock_before, "orphan record did not trigger a lock acquisition"
+    assert lock_calls[-1][1] == want_lock_ex, f"lock ex={lock_calls[-1][1]}, want {want_lock_ex}"

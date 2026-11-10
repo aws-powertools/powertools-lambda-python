@@ -315,7 +315,6 @@ class CachePersistenceLayer(BasePersistenceLayer):
         self._json_serializer = json.dumps
         self._json_deserializer = json.loads
         super().__init__()
-        self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
     def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:
         """
@@ -461,7 +460,12 @@ class CachePersistenceLayer(BasePersistenceLayer):
         the lock is only set if it does not already exist, thereby enforcing mutual exclusion.
         """
         try:
-            acquired = self.client.set(name=f"{name}:lock", value="True", ex=self._orphan_lock_timeout, nx=True)
+            acquired = self.client.set(
+                name=f"{name}:lock",
+                value="True",
+                ex=min(10, self.expires_after_seconds),
+                nx=True,
+            )
             logger.debug("acquiring lock to overwrite orphan record")
             if acquired:
                 logger.debug("lock acquired")
