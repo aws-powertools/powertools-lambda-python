@@ -1730,8 +1730,14 @@ def test_idempotency_disabled_envvar_empty_or_unparsable(
     def dummy_handler(event, context):
         return {"message": "hi"}
 
-    assert dummy(data=mock_event) == {"message": "hello"}
-    assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
+    if idempotency_disabled_value is None:
+        assert dummy(data=mock_event) == {"message": "hello"}
+        assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
+    else:
+        with pytest.warns(PowertoolsUserWarning, match="not a recognised boolean"):
+            assert dummy(data=mock_event) == {"message": "hello"}
+        with pytest.warns(PowertoolsUserWarning, match="not a recognised boolean"):
+            assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
 
     assert len(persistence_store.client.method_calls) == 4
 

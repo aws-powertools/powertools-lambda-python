@@ -46,9 +46,11 @@ def _is_idempotency_disabled() -> bool:
     try:
         return strtobool(value)
     except ValueError:
-        logger.debug(
+        warnings.warn(
             f"Ignoring {constants.IDEMPOTENCY_DISABLED_ENV}={value!r}: "
             "not a recognised boolean, idempotency stays enabled",
+            category=PowertoolsUserWarning,
+            stacklevel=3,
         )
         return False
 
