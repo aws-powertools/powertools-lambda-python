@@ -225,6 +225,12 @@ Tracer keeps a copy of its configuration after the first initialization. This is
     --8<-- "examples/tracer/src/tracer_reuse_module.py"
     ```
 
+### CloudWatch Omni
+
+Traces captured by Tracer go to AWS X-Ray, and X-Ray data is available in [CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/){target="_blank"} through Transaction Search. Omni's own instrumentation path is OpenTelemetry, which Tracer does not emit today; if you need OTLP traces from your function, follow [this feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/7003){target="_blank"}.
+
+The `service` name you pass to Tracer is what ties your segments to the logs and metrics of the same service, so keep it aligned with Logger and Metrics.
+
 ## Testing your code
 
 Tracer is disabled by default when not running in the AWS Lambda environment, including AWS SAM CLI and Chalice environments. This means no code changes or environment variables to be set.

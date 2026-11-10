@@ -115,6 +115,16 @@ def test_cookie_with_same_site():
     assert str(cookie) == "powertools=test; Path=/; Secure; SameSite=Strict"
 
 
+def test_cookie_with_same_site_default_mode():
+    # GIVEN a cookie with the default same_site mode
+    cookie = Cookie(name="powertools", value="test", path="/", same_site=SameSite.DEFAULT_MODE)
+
+    # WHEN getting the cookie's attributes
+    # THEN the SameSite attribute should be left out instead of sent without a value
+    assert cookie.same_site == SameSite.DEFAULT_MODE
+    assert str(cookie) == "powertools=test; Path=/; Secure"
+
+
 def test_cookie_with_custom_attribute():
     # GIVEN a cookie with custom_attributes
     cookie = Cookie(name="powertools", value="test", path="/", custom_attributes=["extra1=value1", "extra2=value2"])
