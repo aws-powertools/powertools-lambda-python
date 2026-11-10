@@ -7,7 +7,7 @@ from tests.unit.parser._pydantic.schemas import MyVpcLatticeBusiness
 
 
 def test_vpc_lattice_v2_event_with_envelope():
-    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event = load_event("vpcLatticeV2EventWithHeaders.json")
     raw_event["body"] = '{"username": "Stephen", "name": "Bawks"}'
     parsed_event: MyVpcLatticeBusiness = parse(
         event=raw_event,
@@ -20,7 +20,7 @@ def test_vpc_lattice_v2_event_with_envelope():
 
 
 def test_vpc_lattice_v2_event():
-    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event = load_event("vpcLatticeV2EventWithHeaders.json")
     model = VpcLatticeV2Model(**raw_event)
 
     assert model.body == raw_event["body"]
@@ -51,7 +51,7 @@ def test_vpc_lattice_v2_event():
 
 def test_vpc_lattice_v2_event_x509_identity():
     # GIVEN a VPC Lattice v2 event authenticated with IAM Roles Anywhere
-    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event = load_event("vpcLatticeV2EventWithHeaders.json")
     raw_event["requestContext"]["identity"].update(
         {
             "x509IssuerOu": "IT Department",
@@ -77,15 +77,56 @@ def test_vpc_lattice_v2_event_custom_model():
     class MyCustomResource(VpcLatticeV2Model):
         body: str
 
-    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event = load_event("vpcLatticeV2EventWithHeaders.json")
     model = MyCustomResource(**raw_event)
 
     assert model.body == raw_event["body"]
 
 
 def test_vpc_lattice_v2_event_invalid():
-    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event = load_event("vpcLatticeV2EventWithHeaders.json")
     raw_event["body"] = ["some_more_data"]
 
+    with pytest.raises(ValidationError):
+        VpcLatticeV2Model(**raw_event)
+
+
+def test_vpc_lattice_v2_event_captured_from_target_group():
+    # GIVEN the event a VPC Lattice V2 target group sends, every header and query string value is a list
+    raw_event = load_event("vpcLatticeV2EventWithQueryString.json")
+
+    # WHEN parsing it
+    model = VpcLatticeV2Model(**raw_event)
+
+    # THEN single values stay as one-element lists and repeated values keep every element
+    assert model.headers["content-type"] == ["application/json"]
+    assert model.headers["header1"] == ["value1", "value2"]
+    assert model.query_string_parameters == {"QS1": ["value1", "value2"], "single": ["one"]}
+    assert model.request_context.identity.source_vpc_arn == raw_event["requestContext"]["identity"]["sourceVpcArn"]
+
+
+def test_vpc_lattice_v2_event_captured_from_target_group_with_envelope():
+    # GIVEN the captured V2 event
+    raw_event = load_event("vpcLatticeV2EventWithQueryString.json")
+    raw_event["body"] = '{"username": "Stephen", "name": "Bawks"}'
+
+    # WHEN parsing the body through the envelope
+    parsed_event: MyVpcLatticeBusiness = parse(
+        event=raw_event,
+        model=MyVpcLatticeBusiness,
+        envelope=envelopes.VpcLatticeV2Envelope,
+    )
+
+    # THEN the body model is returned
+    assert parsed_event.username == "Stephen"
+    assert parsed_event.name == "Bawks"
+
+
+def test_vpc_lattice_v2_event_rejects_plain_string_values():
+    # GIVEN an event with header and query string values as plain strings, a shape VPC Lattice V2 never sends
+    raw_event = load_event("vpcLatticeV2Event.json")
+
+    # WHEN parsing it
+    # THEN the model rejects it, the field types describe the real payload
     with pytest.raises(ValidationError):
         VpcLatticeV2Model(**raw_event)
