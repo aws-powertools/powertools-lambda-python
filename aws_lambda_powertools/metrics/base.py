@@ -658,7 +658,6 @@ def single_metric(
         When metric object fails EMF schema validation
     """  # noqa: E501
     metric_set: dict | None = None
-    publish = True
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
@@ -669,9 +668,8 @@ def single_metric(
 
         yield metric
         # add_metric drops a non-finite value with a warning, leaving nothing to publish
-        publish = bool(metric.metric_set)
-        if publish:
+        if metric.metric_set:
             metric_set = metric.serialize_metric_set()
     finally:
-        if publish:
+        if metric_set is not None:
             print(json.dumps(metric_set, separators=(",", ":")))

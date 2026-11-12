@@ -1285,6 +1285,17 @@ def test_single_metric_with_non_finite_value(namespace, capsys):
     assert capsys.readouterr().out == ""
 
 
+def test_single_metric_body_raises(namespace, capsys):
+    # GIVEN a single metric whose context manager body raises
+    # WHEN the exception leaves the context manager
+    with pytest.raises(RuntimeError, match="boom"):
+        with single_metric(name="my_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+            raise RuntimeError("boom")
+
+    # THEN no metric or `null` line is printed
+    assert capsys.readouterr().out == ""
+
+
 def test_get_and_set_namespace_and_service_properties(namespace, service, metrics, capsys):
     # GIVEN Metrics instance is initialized without namespace and service
     my_metrics = Metrics()
