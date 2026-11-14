@@ -575,7 +575,8 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
             model = getattr(exc, "model", None) or getattr(exc, "title", None)
             model_name = getattr(self.model, "__name__", None)
 
-            if model in (self.model, model_name):
+            # `data is None` means converting the record failed, e.g. a validator raised an error Pydantic doesn't wrap
+            if model in (self.model, model_name) or data is None:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
@@ -724,7 +725,8 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
             model = getattr(exc, "model", None) or getattr(exc, "title", None)
             model_name = getattr(self.model, "__name__", None)
 
-            if model in (self.model, model_name):
+            # `data is None` means converting the record failed, e.g. a validator raised an error Pydantic doesn't wrap
+            if model in (self.model, model_name) or data is None:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())

@@ -24,6 +24,8 @@ uv add aws-lambda-powertools
 
 Or use the [public Lambda layer](https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/#lambda-layer), published for every supported Python version on `x86_64` and `arm64`. Some utilities need an extra, for example `aws-lambda-powertools[parser]` for Pydantic; the [installation guide](https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/) lists them.
 
+Building with a coding agent? Install the [Powertools skill](https://docs.powertools.aws.dev/lambda/python/latest/getting-started/coding-agent-skills/) so Claude Code, Codex, Cursor or Gemini CLI work from the current documentation and examples: `npx skills add aws-powertools/powertools-lambda-python`.
+
 ## Features
 
 ### Core

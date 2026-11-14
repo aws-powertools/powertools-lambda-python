@@ -10,7 +10,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import strtobool
+from aws_lambda_powertools.shared.functions import resolve_bool_env_var
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
@@ -155,8 +155,8 @@ def is_metrics_disabled() -> bool:
     - If POWERTOOLS_DEV is True and POWERTOOLS_METRICS_DISABLED is not set: Disable metrics
     """
 
-    is_dev_mode = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "false"))
-    is_metrics_disabled = strtobool(os.getenv(constants.METRICS_DISABLED_ENV, "false"))
+    is_dev_mode = resolve_bool_env_var(constants.POWERTOOLS_DEV_ENV)
+    is_metrics_disabled = resolve_bool_env_var(constants.METRICS_DISABLED_ENV)
 
     disable_conditions = [
         is_metrics_disabled,
