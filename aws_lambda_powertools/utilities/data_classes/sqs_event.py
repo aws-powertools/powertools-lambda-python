@@ -74,15 +74,15 @@ class SQSMessageAttribute(DictWrapper):
 
     @property
     def string_value(self) -> str | None:
-        """Strings are Unicode with UTF-8 binary encoding."""
-        return self["stringValue"]
+        """Strings are Unicode with UTF-8 binary encoding. None for a Binary attribute."""
+        return self.get("stringValue")
 
     @property
     def binary_value(self) -> str | None:
         """Binary type attributes can store any binary data, such as compressed data, encrypted data, or images.
 
-        Base64-encoded binary data object"""
-        return self["binaryValue"]
+        Base64-encoded binary data object. None for a String or Number attribute."""
+        return self.get("binaryValue")
 
     @property
     def data_type(self) -> str:
