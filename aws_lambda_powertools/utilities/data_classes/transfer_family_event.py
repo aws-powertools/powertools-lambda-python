@@ -18,9 +18,9 @@ class TransferFamilyAuthorizer(DictWrapper):
     def password(self) -> str | None:
         """
         The password used for authentication.
-        None in case customer authenticating with certificates
+        None when the event has no password, e.g. when the user authenticates with an SSH key
         """
-        return self["password"]
+        return self.get("password")
 
     @property
     def protocol(self) -> str:

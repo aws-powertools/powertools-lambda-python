@@ -271,7 +271,7 @@ class IdempotencyHandler:
             raise IdempotencyAlreadyInProgressError(inprogress_error_message)
 
         response_dict = data_record.response_json_as_dict()
-        serialized_response = self.output_serializer.from_dict(response_dict) if response_dict else None
+        serialized_response = self.output_serializer.from_dict(response_dict) if response_dict is not None else None
 
         if self.config.response_hook:
             logger.debug("Response hook configured, invoking function")
