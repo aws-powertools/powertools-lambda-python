@@ -13,16 +13,15 @@ import boto3
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
-    resolve_max_age,
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
 from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
+    resolve_parameters_max_age,
     transform_value,
 )
 from aws_lambda_powertools.utilities.parameters.constants import (
-    DEFAULT_MAX_AGE_SECS,
     DEFAULT_PROVIDERS,
     SSM_PARAMETER_TIER,
     SSM_PARAMETER_TYPES,
@@ -181,7 +180,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -235,7 +234,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -490,7 +489,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -881,7 +880,7 @@ def get_parameter(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
@@ -1019,7 +1018,7 @@ def get_parameters(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
@@ -1215,7 +1214,7 @@ def get_parameters_by_name(
     # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(

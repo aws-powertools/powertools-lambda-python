@@ -18,7 +18,7 @@ config = IdempotencyConfig()
 
 @idempotent_function(data_keyword_argument="data", config=config, persistence_store=persistence_layer)
 def call_external_service(data: dict):
-    # Any exception raised will lead to idempotency record to be deleted
+    # Any exception raised, or a response that can't be serialized, will lead to idempotency record to be deleted
     result: requests.Response = requests.post(
         "https://jsonplaceholder.typicode.com/comments/",
         json=data,

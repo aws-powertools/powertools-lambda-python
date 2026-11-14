@@ -8,6 +8,7 @@ from aws_lambda_powertools.metrics import Metrics
 from aws_lambda_powertools.metrics.functions import (
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
+    is_metrics_disabled,
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -104,3 +105,12 @@ def test_add_dimension_overwrite_warning(warning_catcher):
     # AND a warning should be issued with the exact message
     expected_warning = f"Dimension '{dimension_name}' has already been added. The previous value will be overwritten."
     assert any(str(w) == expected_warning for w in warning_catcher)
+
+
+@pytest.mark.parametrize("env_value", ["", "maybe"])
+def test_is_metrics_disabled_empty_or_unparsable(monkeypatch: pytest.MonkeyPatch, env_value: str):
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", env_value)
+    monkeypatch.delenv("POWERTOOLS_DEV", raising=False)
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_METRICS_DISABLED has an unrecognised value"):
+        assert is_metrics_disabled() is False

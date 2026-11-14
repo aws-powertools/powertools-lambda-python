@@ -122,7 +122,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
             (body_values, body_errors) = _request_body_to_args(
                 required_params=route.dependant.body_params,
                 received_body=self._get_body(app),
-                is_form_body=_is_form_content_type(app.current_event.headers.get("content-type", "")),
+                is_form_body=_is_form_content_type(_get_content_type(app)),
             )
             values.update(body_values)
             errors.extend(body_errors)
@@ -141,7 +141,7 @@ class OpenAPIRequestValidationMiddleware(BaseMiddlewareHandler):
         """
         Get the request body from the event, and parse it according to content type.
         """
-        content_type = app.current_event.headers.get("content-type", "").strip()
+        content_type = _get_content_type(app)
         media_type = content_type.split(";")[0].strip().lower()
 
         # Handle JSON content
@@ -841,6 +841,14 @@ def _extract_header_param(header_line: str, param_name: str) -> str | None:
     if match is None:
         return None
     return match.group(1)
+
+
+def _get_content_type(app: EventHandlerInstance) -> str:
+    """Read the request Content-Type as a string; VPC Lattice V2 sends every header value as a list."""
+    content_type = app.current_event.headers.get("content-type", "")
+    if isinstance(content_type, list):
+        content_type = content_type[0] if content_type else ""
+    return content_type.strip()
 
 
 def _is_form_content_type(content_type: str) -> bool:

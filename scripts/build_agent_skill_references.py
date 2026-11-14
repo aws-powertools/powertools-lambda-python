@@ -3,7 +3,11 @@
 Each reference is a documentation page with the mkdocs-only syntax removed and the
 ``--8<--`` snippet includes resolved, so coding agents read the same content and the
 same tested examples the website shows. Run without arguments to regenerate, or with
-``--check`` to fail when the committed references are out of date (used by the tests).
+``--check`` to report whether the committed references are out of date.
+
+Contributors do not need to run this: the pre-commit hook regenerates on docs changes for
+those who have it installed, and a workflow regenerates on every push to ``develop`` that
+touches the docs, opening a PR with the result.
 """
 
 from __future__ import annotations
@@ -61,6 +65,12 @@ TARGET_BLANK = re.compile(r"\{[^{}]*target=[^{}]*\}")
 ICON = re.compile(r":(?:material|octicons|fontawesome|simple)-[\w-]+:(?:\{[^}]*\})?")
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 ATTR_LIST = re.compile(r"^\{\s*\..*\}\s*$")
+LAYER_ARN = re.compile(r"layer:AWSLambdaPowertoolsPythonV3-")
+LAYER_ARN_VERSION = re.compile(r"(layer:AWSLambdaPowertoolsPythonV3-[A-Za-z0-9_{}-]+):\d+")
+LAYER_ARN_NOTE = (
+    "Layer ARNs per region, runtime and architecture are listed on the installation page: "
+    f"{DOCS_URL}getting-started/install/. The version suffix changes with every release, so always copy it from there."
+)
 
 
 def resolve_includes(text: str) -> str:
@@ -125,6 +135,30 @@ def drop_sections(text: str) -> str:
     return "\n".join(out) + "\n"
 
 
+def strip_layer_arns(text: str) -> str:
+    """Replace the per-region layer ARN tables with a pointer to the docs and mask the version suffix.
+
+    Thirty ARNs that change every release are churn, not knowledge; the version in the examples is
+    masked so an agent never hardcodes a stale one.
+    """
+    out: list[str] = []
+    table: list[str] = []
+
+    def flush() -> None:
+        if table:
+            out.extend([LAYER_ARN_NOTE] if any(LAYER_ARN.search(row) for row in table) else table)
+            table.clear()
+
+    for line in text.splitlines():
+        if line.startswith("|"):
+            table.append(line)
+            continue
+        flush()
+        out.append(line)
+    flush()
+    return LAYER_ARN_VERSION.sub(r"\1:<version>", "\n".join(out) + "\n")
+
+
 def clean(text: str) -> str:
     text = FRONT_MATTER.sub("", text)
     text = HTML_COMMENT.sub("", text)
@@ -154,7 +188,7 @@ def build_reference(name: str, pages: list[str]) -> str:
         while previous != text:
             previous, text = text, flatten_blocks(text)
         text = drop_sections(text)
-        parts.append(clean(text))
+        parts.append(clean(strip_layer_arns(text)))
     return "\n".join(parts)
 
 
