@@ -983,6 +983,8 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 ### Manipulating the Idempotent Response
 
+With a DynamoDB composite key, `DataRecord.idempotency_key` contains the sort key value identifying the operation, rather than the shared static partition key. Replayed records use this same key for local caching.
+
 You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 === "Using an Idempotent Response Hook"

@@ -16,7 +16,7 @@ logger = Logger()
 
 
 def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
-    # Return inserted Header data into the Idempotent Response
+    # With a composite key, this is the operation's sort key, not the shared partition key
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 
     # expiry_timestamp can be None so include if set
