@@ -23,7 +23,11 @@ from aws_lambda_powertools.metrics.exceptions import (
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.functions import convert_timestamp_to_emf_format, validate_emf_timestamp
+from aws_lambda_powertools.metrics.functions import (
+    convert_timestamp_to_emf_format,
+    is_metrics_disabled,
+    validate_emf_timestamp,
+)
 from aws_lambda_powertools.metrics.provider import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
@@ -659,4 +663,5 @@ def single_metric(
         yield metric
         metric_set = metric.serialize_metric_set()
     finally:
-        print(json.dumps(metric_set, separators=(",", ":")))
+        if metric_set is not None and not is_metrics_disabled():
+            print(json.dumps(metric_set, separators=(",", ":")))
