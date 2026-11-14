@@ -6,14 +6,13 @@ from __future__ import annotations
 
 import functools
 import logging
-import os
 import warnings
 from inspect import isclass
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import strtobool
+from aws_lambda_powertools.shared.functions import resolve_bool_env_var
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -106,7 +105,7 @@ def _idempotent(
 
     # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
     # Raises a warning if not running in development mode
-    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+    if resolve_bool_env_var(constants.IDEMPOTENCY_DISABLED_ENV):
         warnings.warn(
             message="Disabling idempotency is intended for development environments only "
             "and should not be used in production.",
@@ -216,7 +215,7 @@ def idempotent_function(
     def decorate(*args, **kwargs):
         # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
         # Raises a warning if not running in development mode
-        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+        if resolve_bool_env_var(constants.IDEMPOTENCY_DISABLED_ENV):
             warnings.warn(
                 message="Disabling idempotency is intended for development environments only "
                 "and should not be used in production.",
