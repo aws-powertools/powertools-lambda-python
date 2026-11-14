@@ -65,7 +65,7 @@ def generate_openapi_path(
     """
     Generate the OpenAPI path spec and definitions for a single route.
     """
-    from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params
+    from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params, get_path_param_names
 
     definitions: dict[str, Any] = {}
 
@@ -91,6 +91,7 @@ def generate_openapi_path(
         all_route_params=all_route_params,
         model_name_map=model_name_map,
         field_mapping=field_mapping,
+        path_param_names=get_path_param_names(openapi_path),
     )
 
     if parameters:
@@ -162,6 +163,7 @@ def _build_operation_parameters(
     all_route_params: Sequence[ModelField],
     model_name_map: dict[TypeModelOrEnum, str],
     field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+    path_param_names: set[str],
 ) -> list[dict[str, Any]]:
     """Build the list of OpenAPI operation parameters."""
     from aws_lambda_powertools.event_handler.openapi.params import Param
@@ -176,7 +178,7 @@ def _build_operation_parameters(
         if _is_pydantic_model_param(field_info):
             generated_parameters = _expand_pydantic_model_parameters(field_info)
         else:
-            generated_parameters = [_create_regular_parameter(param, model_name_map, field_mapping)]
+            generated_parameters = [_create_regular_parameter(param, model_name_map, field_mapping, path_param_names)]
 
         parameters.extend(
             parameter
@@ -339,10 +341,18 @@ def _create_pydantic_field_parameter(
     return individual_param
 
 
+def _resolve_parameter_name(param: ModelField, field_info: Param, path_param_names: set[str]) -> str:
+    """Resolve the OpenAPI parameter name, aligning path parameters with route-template placeholders."""
+    if field_info.in_.value == "path" and param.alias not in path_param_names and param.name in path_param_names:
+        return param.name
+    return param.alias
+
+
 def _create_regular_parameter(
     param: ModelField,
     model_name_map: dict[TypeModelOrEnum, str],
     field_mapping: dict[tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+    path_param_names: set[str],
 ) -> dict[str, Any]:
     """Create an OpenAPI parameter from a regular ModelField."""
     from aws_lambda_powertools.event_handler.openapi.compat import get_schema_from_model_field
@@ -355,13 +365,8 @@ def _create_regular_parameter(
         field_mapping=field_mapping,
     )
 
-    # Path parameter names must match the route-template placeholders, which are
-    # keyed by the Python argument name - an explicit alias would otherwise emit
-    # a name that does not exist in the path template.
-    param_name = param.name if field_info.in_.value == "path" else param.alias
-
     parameter: dict[str, Any] = {
-        "name": param_name,
+        "name": _resolve_parameter_name(param, field_info, path_param_names),
         "in": field_info.in_.value,
         "required": param.required,
         "schema": param_schema,
