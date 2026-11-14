@@ -4,6 +4,7 @@ Persistence layers supporting idempotency
 
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import hashlib
 import json
@@ -46,13 +47,24 @@ class _IdempotencyKeyEncoder(Encoder):
             # Preserve existing encodings, including Decimal subclasses mixed with Enum.
             return super().default(obj)
         except TypeError:
-            if isinstance(obj, Enum):
-                return obj.value
-            if isinstance(obj, (dt.date, dt.time)):
-                return obj.isoformat()
-            if isinstance(obj, (UUID, PurePath)):
-                return str(obj)
-            raise
+            return self._encode_custom_type(obj)
+
+    @staticmethod
+    def _encode_custom_type(obj: Any) -> Any:
+        if isinstance(obj, Enum):
+            return obj.value
+        if isinstance(obj, (dt.date, dt.time)):
+            return obj.isoformat()
+        if isinstance(obj, (UUID, PurePath)):
+            return str(obj)
+        if isinstance(obj, (set, frozenset)):
+            try:
+                return sorted(obj)
+            except TypeError:
+                return sorted(obj, key=repr)
+        if isinstance(obj, bytes):
+            return base64.b64encode(obj).decode("utf-8")
+        raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
 class BasePersistenceLayer(ABC):

@@ -14,10 +14,11 @@ from aws_encryption_sdk import (
     StrictAwsKmsMasterKeyProvider,
 )
 from aws_encryption_sdk.exceptions import (
+    AWSEncryptionSDKClientError,
     DecryptKeyError,
     GenerateKeyError,
-    NotSupportedError,
 )
+from cryptography.exceptions import InvalidSignature
 
 from aws_lambda_powertools.shared.functions import (
     base64_decode,
@@ -199,7 +200,7 @@ class KMSKeyProvider:
 
         try:
             ciphertext_decoded = base64_decode(data)
-        except Error:
+        except (Error, ValueError, TypeError):
             raise DataMaskingDecryptValueError(
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
@@ -214,7 +215,8 @@ class KMSKeyProvider:
             raise DataMaskingDecryptKeyError(
                 "Failed to decrypt data - Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
             )
-        except (TypeError, NotSupportedError):
+        except (TypeError, ValueError, AWSEncryptionSDKClientError, InvalidSignature):
+            # tampered, truncated or garbage ciphertext, failed key commitment: our own error, not the SDK's internals
             raise DataMaskingDecryptValueError(
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )

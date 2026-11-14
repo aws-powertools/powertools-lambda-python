@@ -1,0 +1,30 @@
+{
+  "typeName": "Query",
+  "fieldName": "getUser",
+  "arguments": {
+    "userId": "u-1"
+  },
+  "identity": {
+    "resolverContext": {
+      "userId": "u-1",
+      "tier": "gold"
+    }
+  },
+  "source": null,
+  "request": {
+    "headers": {
+      "x-forwarded-for": "11.215.2.22",
+      "host": "SOMETHING.appsync-api.us-east-1.amazonaws.com"
+    },
+    "domainName": "SOMETHING.appsync-api.us-east-1.amazonaws.com"
+  },
+  "prev": null,
+  "info": {
+    "selectionSetList": ["userId", "tier"],
+    "selectionSetGraphQL": "{\n  userId\n  tier\n}",
+    "parentTypeName": "Query",
+    "fieldName": "getUser",
+    "variables": {}
+  },
+  "stash": {}
+}

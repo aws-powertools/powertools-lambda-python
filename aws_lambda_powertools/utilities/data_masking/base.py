@@ -7,6 +7,7 @@ Base class for Data Masking
 from __future__ import annotations
 
 import dataclasses
+import enum
 import functools
 import logging
 import warnings
@@ -32,24 +33,40 @@ logger = logging.getLogger(__name__)
 def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
     """
     Recursively convert complex objects into dictionaries or simple types.
-    Handles dataclasses, Pydantic models, and prevents circular references.
-    """
-    _visited = _visited or set()
 
-    # Handle circular references and primitive types
+    Handles dataclasses, Pydantic models, objects with ``__dict__`` or ``__slots__``,
+    and prevents circular references. ``_visited`` holds only the ancestors of the current
+    recursion path, so the same object referenced twice in a structure is converted twice
+    instead of being mistaken for a cycle.
+    """
+    if isinstance(data, (str, int, float, bool, type(None))):
+        return data
+
+    _visited = set() if _visited is None else _visited
     data_id = id(data)
-    if data_id in _visited or isinstance(data, (str, int, float, bool, type(None))):
+    if data_id in _visited:
         return data
 
     _visited.add(data_id)
+    try:
+        return _convert(data, _visited)
+    finally:
+        _visited.discard(data_id)
 
-    # Define handlers as (condition, transformer) pairs
+
+def _convert(data: Any, _visited: set[int]) -> Any:
+    """Convert one container or object; ``prepare_data`` handles primitives and the visited set."""
     handlers: list[tuple[Callable[[Any], bool], Callable[[Any], Any]]] = [
+        # Enum members carry their class in __dict__; only the value matters
+        (lambda x: isinstance(x, enum.Enum), lambda x: prepare_data(x.value, _visited)),
         # Dataclasses
         (lambda x: hasattr(x, "__dataclass_fields__"), lambda x: prepare_data(dataclasses.asdict(x), _visited)),
-        # Pydantic models
-        (lambda x: callable(getattr(x, "model_dump", None)), lambda x: prepare_data(x.model_dump(), _visited)),
-        # Objects with dict() method
+        # Pydantic models: JSON mode renders secret types masked and makes UUID, datetime, Decimal... JSON safe
+        (
+            lambda x: callable(getattr(x, "model_dump", None)),
+            lambda x: prepare_data(x.model_dump(mode="json"), _visited),
+        ),
+        # Objects exposing a dict() method
         (
             lambda x: callable(getattr(x, "dict", None)) and not isinstance(x, dict),
             lambda x: prepare_data(x.dict(), _visited),
@@ -61,17 +78,29 @@ def prepare_data(data: Any, _visited: set[int] | None = None) -> Any:
         ),
         # Lists, tuples, sets
         (lambda x: isinstance(x, (list, tuple, set)), lambda x: type(x)(prepare_data(item, _visited) for item in x)),
-        # Objects with __dict__
-        (lambda x: hasattr(x, "__dict__"), lambda x: prepare_data(vars(x), _visited)),
+        # Plain objects, with __dict__ and/or __slots__
+        (lambda x: _object_attributes(x) is not None, lambda x: prepare_data(_object_attributes(x), _visited)),
     ]
-
-    # Find and apply the first matching handler
     for condition, transformer in handlers:
         if condition(data):
             return transformer(data)
-
-    # Default fallback
     return data
+
+
+def _object_attributes(data: Any) -> dict[str, Any] | None:
+    """Return the attributes of a plain object, from ``__dict__`` and ``__slots__``, or None."""
+    attributes: dict[str, Any] = {}
+    found = False
+    if hasattr(data, "__dict__"):
+        attributes.update(vars(data))
+        found = True
+    for cls in type(data).__mro__:
+        slots = getattr(cls, "__slots__", ())
+        for slot in (slots,) if isinstance(slots, str) else slots:
+            if slot not in ("__dict__", "__weakref__") and hasattr(data, slot):
+                attributes[slot] = getattr(data, slot)
+                found = True
+    return attributes if found else None
 
 
 class DataMasking:
@@ -232,6 +261,12 @@ class DataMasking:
         Any
             The data with sensitive information erased or masked.
         """
+        if fields and masking_rules:
+            raise DataMaskingError(
+                "fields and masking_rules cannot be used together: use masking_rules alone to mask fields "
+                "with different rules, or fields with the mask options for a single rule.",
+            )
+
         data = prepare_data(data)
         if masking_rules:
             return self._apply_masking_rules(data=data, masking_rules=masking_rules)
@@ -422,7 +457,8 @@ class DataMasking:
         Returns:
             dict: The masked data dictionary
         """
-        result = deepcopy(data)
+        # Same as the fields path: JSON strings are parsed so path expressions can be resolved
+        result = deepcopy(self._normalize_data_to_parse(data) if isinstance(data, str) else data)
 
         for path, rule in masking_rules.items():
             try:
@@ -444,7 +480,8 @@ class DataMasking:
                     continue
 
                 try:
-                    masked_value = self.provider.erase(str(value), **rule)
+                    # the provider recurses into dicts and lists; str() here would mask the Python repr instead
+                    masked_value = self.provider.erase(value, **rule)
                     match.full_path.update(result, masked_value)
                 except DataMaskingError:
                     raise

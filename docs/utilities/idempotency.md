@@ -223,13 +223,17 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
     Function returns must be annotated with a single type, optionally wrapped in `Optional` or `Union` with `None`.
 
+    Inference supports `from __future__ import annotations`. Define the output model at module scope so its name can be resolved when the function is decorated.
+    If the model is local to another function, pass an explicit serializer instance, such as `PydanticSerializer(model=OrderOutput)` or `DataclassSerializer(model=OrderOutput)`.
+    Containers such as `list[OrderOutput]` are not supported by these model serializers and raise `IdempotencyModelTypeError`.
+
 === "Pydantic"
 
     Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
-        ```python hl_lines="8 27 35 38 48"
+        ```python hl_lines="1 10 29 37 40 50"
         --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
         ```
 
@@ -255,7 +259,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
     === "Inferring via the return type"
 
-        ```python hl_lines="9 30 38 41 51"
+        ```python hl_lines="1 11 32 40 43 53"
         --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
         ```
 
@@ -986,6 +990,8 @@ You can create your own persistent store from scratch by inheriting the `BasePer
     For example, the `_put_record` method needs to raise an exception if a non-expired record already exists in the data store with a matching key.
 
 ### Manipulating the Idempotent Response
+
+With a DynamoDB composite key, `DataRecord.idempotency_key` contains the sort key value identifying the operation, rather than the shared static partition key. Replayed records use this same key for local caching.
 
 You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
