@@ -1764,9 +1764,9 @@ def test_idempotency_disabled_envvar_empty_or_unparsable(
         assert dummy(data=mock_event) == {"message": "hello"}
         assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
     else:
-        with pytest.warns(PowertoolsUserWarning, match="not a recognised boolean"):
+        with pytest.warns(PowertoolsUserWarning, match="unrecognised value"):
             assert dummy(data=mock_event) == {"message": "hello"}
-        with pytest.warns(PowertoolsUserWarning, match="not a recognised boolean"):
+        with pytest.warns(PowertoolsUserWarning, match="unrecognised value"):
             assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
 
     assert len(persistence_store.client.method_calls) == 4

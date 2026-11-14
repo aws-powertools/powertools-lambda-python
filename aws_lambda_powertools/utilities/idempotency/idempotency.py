@@ -6,14 +6,13 @@ from __future__ import annotations
 
 import functools
 import logging
-import os
 import warnings
 from inspect import isclass
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import strtobool
+from aws_lambda_powertools.shared.functions import resolve_bool_env_var
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -37,22 +36,6 @@ logger = logging.getLogger(__name__)
 
 EventT = TypeVar("EventT")
 ContextT = TypeVar("ContextT", bound="LambdaContext | DurableContextProtocol")
-
-
-def _is_idempotency_disabled() -> bool:
-    # An empty or unparsable value is easy to end up with in IaC templates and CI variables;
-    # treat it as "not disabled" instead of failing every invocation
-    value = os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")
-    try:
-        return strtobool(value)
-    except ValueError:
-        warnings.warn(
-            f"Ignoring {constants.IDEMPOTENCY_DISABLED_ENV}={value!r}: "
-            "not a recognised boolean, idempotency stays enabled",
-            category=PowertoolsUserWarning,
-            stacklevel=3,
-        )
-        return False
 
 
 class _IdempotentHandlerDecorator(Protocol):
@@ -122,7 +105,7 @@ def _idempotent(
 
     # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
     # Raises a warning if not running in development mode
-    if _is_idempotency_disabled():
+    if resolve_bool_env_var(constants.IDEMPOTENCY_DISABLED_ENV):
         warnings.warn(
             message="Disabling idempotency is intended for development environments only "
             "and should not be used in production.",
@@ -232,7 +215,7 @@ def idempotent_function(
     def decorate(*args, **kwargs):
         # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
         # Raises a warning if not running in development mode
-        if _is_idempotency_disabled():
+        if resolve_bool_env_var(constants.IDEMPOTENCY_DISABLED_ENV):
             warnings.warn(
                 message="Disabling idempotency is intended for development environments only "
                 "and should not be used in production.",
