@@ -867,6 +867,9 @@ You can override and further extend idempotency behavior via **`IdempotencyConfi
 | **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                  |
 | **response_hook**               | `None`  | Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
+!!! warning "Use one persistence layer instance per `IdempotencyConfig`"
+    A persistence layer applies the settings of the first `IdempotencyConfig` it is used with. If functions with different configs share the same persistence layer instance, the later ones use the first config's settings, and we emit a `PowertoolsUserWarning`.
+
 ### Handling concurrent executions with the same payload
 
 This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if you receive **multiple invocations with the same payload while the first invocation hasn't completed yet**.
