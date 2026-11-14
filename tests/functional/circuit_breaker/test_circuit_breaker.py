@@ -17,6 +17,7 @@ from aws_lambda_powertools.utilities.circuit_breaker import (
 )
 from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerError
 from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 # All tests disable the local read cache (max_age=0) so each call re-reads the fake store.
 
@@ -316,6 +317,17 @@ def test_disabled_env_bypasses_circuit(store, now, monkeypatch):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         assert call() == "ran anyway"
+
+
+def test_disabled_env_empty_or_unparsable_keeps_circuit_enabled(store, monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_CIRCUIT_BREAKER_DISABLED", "")
+
+    @circuit_breaker(name="c", persistence_store=store, config=CircuitBreakerConfig(local_cache_max_age=0))
+    def call():
+        return "ran"
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_CIRCUIT_BREAKER_DISABLED has an unrecognised value"):
+        assert call() == "ran"
 
 
 def test_config_is_optional(store):
