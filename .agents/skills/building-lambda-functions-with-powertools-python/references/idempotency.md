@@ -484,6 +484,10 @@ When using the `output_serializer` parameter, the data will continue to be store
 
 Function returns must be annotated with a single type, optionally wrapped in `Optional` or `Union` with `None`.
 
+Inference supports `from __future__ import annotations`. Define the output model at module scope so its name can be resolved when the function is decorated.
+If the model is local to another function, pass an explicit serializer instance, such as `PydanticSerializer(model=OrderOutput)` or `DataclassSerializer(model=OrderOutput)`.
+Containers such as `list[OrderOutput]` are not supported by these model serializers and raise `IdempotencyModelTypeError`.
+
 **Pydantic**
 
 Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
@@ -491,6 +495,8 @@ Use `PydanticSerializer` to automatically serialize what's retrieved from the pe
 **Inferring via the return type**
 
 ```python
+from __future__ import annotations
+
 import os
 
 from aws_lambda_powertools.utilities.idempotency import (
@@ -601,6 +607,8 @@ def lambda_handler(event: dict, context: LambdaContext):
 **Inferring via the return type**
 
 ```python
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 
@@ -2306,6 +2314,8 @@ For example, the `_put_record` method needs to raise an exception if a non-expir
 
 ### Manipulating the Idempotent Response
 
+With a DynamoDB composite key, `DataRecord.idempotency_key` contains the sort key value identifying the operation, rather than the shared static partition key. Replayed records use this same key for local caching.
+
 You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 **Using an Idempotent Response Hook**
@@ -2328,7 +2338,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
-    # Return inserted Header data into the Idempotent Response
+    # With a composite key, this is the operation's sort key, not the shared partition key
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 
     # expiry_timestamp can be None so include if set
