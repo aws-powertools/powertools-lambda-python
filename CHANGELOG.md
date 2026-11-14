@@ -5,15 +5,52 @@
 # Unreleased
 
 
-<a name="v3.39.0"></a>
-## [v3.39.0] - 2026-11-03
+<a name="v3.40.0"></a>
+## [v3.40.0] - 2026-11-10
 ## Bug Fixes
 
-* **parser:** add IoT Core registry models to parser.models exports ([#8746](https://github.com/aws-powertools/powertools-lambda-python/issues/8746))
+* **batch:** report short-circuited FIFO records that don't match the model ([#8663](https://github.com/aws-powertools/powertools-lambda-python/issues/8663))
 
 ## Maintenance
 
 * version bump
+
+
+<a name="v3.39.0"></a>
+## [v3.39.0] - 2026-11-03
+## Bug Fixes
+
+* **cache:** preserve LRUDict.get defaults and LRU order ([#8683](https://github.com/aws-powertools/powertools-lambda-python/issues/8683))
+* **circuit_breaker:** await async coroutines inside circuit breaker failure tracking ([#8703](https://github.com/aws-powertools/powertools-lambda-python/issues/8703))
+* **data_classes:** return None from CloudWatchAlarmMetric.metric_stat for expression entries ([#8691](https://github.com/aws-powertools/powertools-lambda-python/issues/8691))
+* **event_handler:** correct six OpenAPI schema inaccuracies ([#8630](https://github.com/aws-powertools/powertools-lambda-python/issues/8630))
+* **event_handler:** unify header validation, scalar list joining, and content-type parsing ([#8602](https://github.com/aws-powertools/powertools-lambda-python/issues/8602))
+* **event_handler:** make HttpResolverLocal usable as a Lambda handler ([#8634](https://github.com/aws-powertools/powertools-lambda-python/issues/8634))
+* **event_handler:** propagate UnauthorizedException and await async class-based middlewares ([#8633](https://github.com/aws-powertools/powertools-lambda-python/issues/8633))
+* **event_handlers:** Bedrock kwargs and media type, AppSync registry and context, Router duplicates, Function URL base path, Depends with classes ([#8629](https://github.com/aws-powertools/powertools-lambda-python/issues/8629))
+* **parameters:** make GetSecretError inherit from GetParameterError ([#8611](https://github.com/aws-powertools/powertools-lambda-python/issues/8611))
+* **parameters:** use shared cache key in get_parameters_by_name ([#8614](https://github.com/aws-powertools/powertools-lambda-python/issues/8614))
+* **parameters:** invalidate cache after set_parameter and set_secret ([#8622](https://github.com/aws-powertools/powertools-lambda-python/issues/8622))
+* **parameters:** handle transform failures gracefully in get_parameters_by_name ([#8623](https://github.com/aws-powertools/powertools-lambda-python/issues/8623))
+* **parameters:** handle invalid UTF-8 transform errors ([#8609](https://github.com/aws-powertools/powertools-lambda-python/issues/8609))
+* **parameters:** clarify errors for missing DynamoDB and AppConfig data ([#8618](https://github.com/aws-powertools/powertools-lambda-python/issues/8618))
+* **parameters:** wrap GetParameters client errors in get_parameters_by_name ([#8617](https://github.com/aws-powertools/powertools-lambda-python/issues/8617))
+* **parameters:** do not mutate the caller's Filters list in SecretsProvider.get_multiple ([#8604](https://github.com/aws-powertools/powertools-lambda-python/issues/8604))
+* **parser:** add IoT Core registry models to parser.models exports ([#8746](https://github.com/aws-powertools/powertools-lambda-python/issues/8746))
+
+## Documentation
+
+* fix dead Pants and uvicorn links ([#8760](https://github.com/aws-powertools/powertools-lambda-python/issues/8760))
+* refresh the README and the feature table ([#8733](https://github.com/aws-powertools/powertools-lambda-python/issues/8733))
+* write down the project premises, add AGENTS.md and the AI-assisted contribution policy ([#8717](https://github.com/aws-powertools/powertools-lambda-python/issues/8717))
+* **parameters:** correct the documented default of recursive per provider ([#8610](https://github.com/aws-powertools/powertools-lambda-python/issues/8610))
+
+## Maintenance
+
+* version bump
+* **deps:** bump python from `a6e34c5` to `f17ec84` in /docs ([#8737](https://github.com/aws-powertools/powertools-lambda-python/issues/8737))
+* **deps:** bump pydantic, pytest, nox, type stubs, zensical, aws-cdk and setup-uv ([#8756](https://github.com/aws-powertools/powertools-lambda-python/issues/8756))
+* **deps-dev:** bump filelock from 4.0.3 to 4.1.0 ([#8758](https://github.com/aws-powertools/powertools-lambda-python/issues/8758))
 
 
 <a name="v3.38.0"></a>
@@ -8032,7 +8069,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.39.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.40.0...HEAD
+[v3.40.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.39.0...v3.40.0
 [v3.39.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.38.0...v3.39.0
 [v3.38.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.37.0...v3.38.0
 [v3.37.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.36.0...v3.37.0
