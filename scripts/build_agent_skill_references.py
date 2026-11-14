@@ -6,8 +6,8 @@ same tested examples the website shows. Run without arguments to regenerate, or 
 ``--check`` to report whether the committed references are out of date.
 
 Contributors do not need to run this: the pre-commit hook regenerates on docs changes for
-those who have it installed, and a workflow regenerates on every push to ``develop`` that
-touches the docs, opening a PR with the result.
+those who have it installed, and the release workflow regenerates the references in the same
+PR that updates the layer version in the docs.
 """
 
 from __future__ import annotations
