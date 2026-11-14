@@ -25,6 +25,9 @@ lint-check:
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
 
+agent-skill:
+	uv run --locked python scripts/build_agent_skill_references.py
+
 lint-docs-fix:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
@@ -50,7 +53,7 @@ coverage-html:
 pre-commit:
 	uv run --locked pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs agent-skill mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	uv build --no-sources
