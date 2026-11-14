@@ -86,10 +86,7 @@ uv add --prerelease allow "aws-lambda-powertools"
 
 Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version}` with a currently supported runtime: `python310`, `python311`, `python312`, `python313`, or `python314`. Python 3.9 layers stopped at layer version 27.
 
-| Architecture | Layer ARN |
-| ------------ | --------- |
-| x86_64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:37` |
-| ARM64 | `arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:37` |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 ### All regional Layer ARNs
 
@@ -99,178 +96,23 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 **Python 3.10**
 
-| Region               | Layer ARN                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.11**
 
-| Region               | Layer ARN                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.12**
 
-| Region               | Layer ARN                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.13**
 
-| Region               | Layer ARN                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.14**
 
-| Region               | Layer ARN                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **arm64**
 
@@ -278,178 +120,28 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 **Python 3.10**
 
-| Region               | Layer ARN                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.11**
 
-| Region               | Layer ARN                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.12**
 
-| Region               | Layer ARN                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.13**
 
-| Region               | Layer ARN                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 **Python 3.14**
 
-| Region               | Layer ARN                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 > **Tip: Want to inspect the Layer contents?**
 
 ```bash
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:<version> --region eu-west-1
 ```
 The pre-signed URL will be in the `Location` key.
 
@@ -494,7 +186,7 @@ Resources:
             Runtime: python3.12
             Handler: app.lambda_handler
             Layers:
-            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43
+            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:<version>
 ```
 
 **CDK**
@@ -510,7 +202,7 @@ class SampleApp(Stack):
         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
             self,
             id="lambda-powertools",
-            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43",
+            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:<version>",
         )
         aws_lambda.Function(
             self,
@@ -537,7 +229,7 @@ functions:
     handler: lambda_function.lambda_handler
     architecture: arm64
     layers:
-    - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43
+    - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:<version>
 ```
 
 **Terraform**
@@ -579,7 +271,7 @@ resource "aws_lambda_function" "test_lambda" {
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.test"
   runtime       = "python3.12"
-  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43"]
+  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:<version>"]
 
   source_code_hash = filebase64sha256("lambda_function_payload.zip")
 }
@@ -612,7 +304,7 @@ lambda_function = aws.lambda_.Function(
         pulumi.Output.concat(
             "arn:aws:lambda:",
             aws.get_region_output().name,
-            ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:37",
+            ":017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:<version>",
         ),
     ],
     tracing_config={"mode": "Active"},
@@ -626,19 +318,11 @@ lambda_function = aws.lambda_.Function(
 
 ### AWS China regions
 
-| Region | Architecture | Layer ARN |
-| ------ | ------------ | --------- |
-| cn-north-1 | x86_64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:37` |
-| cn-north-1 | ARM64 | `arn:aws-cn:lambda:cn-north-1:498634801083:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:37` |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 ### AWS GovCloud regions
 
-| Region | Architecture | Layer ARN |
-| ------ | ------------ | --------- |
-| us-gov-east-1 | x86_64 | `arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:27` |
-| us-gov-east-1 | ARM64 | `arn:aws-us-gov:lambda:us-gov-east-1:165087284144:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:27` |
-| us-gov-west-1 | x86_64 | `arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-x86_64:27` |
-| us-gov-west-1 | ARM64 | `arn:aws-us-gov:lambda:us-gov-west-1:165093116878:layer:AWSLambdaPowertoolsPythonV3-{python_version}-arm64:27` |
+Layer ARNs per region, runtime and architecture are listed on the installation page: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/. The version suffix changes with every release, so always copy it from there.
 
 ## Serverless Application Repository (SAR)
 
