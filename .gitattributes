@@ -1,0 +1,3 @@
+
+# Agent skill references are generated from docs/ by scripts/build_agent_skill_references.py
+.agents/skills/*/references/*.md linguist-generated=true

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel
 
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     abs_lambda_path,
@@ -23,6 +24,7 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 @pytest.fixture
@@ -82,6 +84,29 @@ def test_powertools_debug_warning(monkeypatch: pytest.MonkeyPatch):
         powertools_debug_is_set()
         assert len(w) == 1
         assert str(w[0].message) == warning_message
+
+
+@pytest.mark.parametrize("env_value", ["", "maybe"])
+def test_powertools_dev_empty_or_unparsable(monkeypatch: pytest.MonkeyPatch, env_value: str):
+    monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, env_value)
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_DEV has an unrecognised value"):
+        assert powertools_dev_is_set() is False
+
+
+@pytest.mark.parametrize("env_value", ["", "maybe"])
+def test_powertools_debug_empty_or_unparsable(monkeypatch: pytest.MonkeyPatch, env_value: str):
+    monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, env_value)
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_DEBUG has an unrecognised value"):
+        assert powertools_debug_is_set() is False
+
+
+def test_logger_init_with_empty_powertools_dev(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "")
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_DEV has an unrecognised value"):
+        Logger(service="svc")
 
 
 def test_extract_event_dict():
