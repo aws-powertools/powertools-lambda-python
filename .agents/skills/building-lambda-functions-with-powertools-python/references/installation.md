@@ -101,176 +101,176 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 | Region               | Layer ARN                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
+| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-x86_64:43**{: .copyMe}      |
 
 **Python 3.11**
 
 | Region               | Layer ARN                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
+| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-x86_64:43**{: .copyMe}      |
 
 **Python 3.12**
 
 | Region               | Layer ARN                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
+| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43**{: .copyMe}      |
 
 **Python 3.13**
 
 | Region               | Layer ARN                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
+| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43**{: .copyMe}      |
 
 **Python 3.14**
 
 | Region               | Layer ARN                                                                                                 |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}   |
-| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
+| **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-x86_64:43**{: .copyMe}      |
 
 **arm64**
 
@@ -280,176 +280,176 @@ Replace `{region}` with your AWS region (e.g., `eu-west-1`) and `{python_version
 
 | Region               | Layer ARN                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python310-arm64:43**{: .copyMe}      |
 
 **Python 3.11**
 
 | Region               | Layer ARN                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:43**{: .copyMe}      |
 
 **Python 3.12**
 
 | Region               | Layer ARN                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:43**{: .copyMe}      |
 
 **Python 3.13**
 
 | Region               | Layer ARN                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:43**{: .copyMe}      |
 
 **Python 3.14**
 
 | Region               | Layer ARN                                                                                                       |
 | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe} |
-| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}   |
-| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}   |
-| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}   |
-| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}     |
-| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}   |
-| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}   |
-| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
-| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:42**{: .copyMe}      |
+| **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-southeast-5`** | **arn:aws:lambda:ap-southeast-5:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ap-southeast-7`** | **arn:aws:lambda:ap-southeast-7:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe} |
+| **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
+| **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
+| **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
+| **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}     |
+| **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
+| **`mx-central-1`**   | **arn:aws:lambda:mx-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}   |
+| **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
+| **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV3-python314-arm64:43**{: .copyMe}      |
 
 > **Tip: Want to inspect the Layer contents?**
 
 ```bash
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:42 --region eu-west-1
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:43 --region eu-west-1
 ```
 The pre-signed URL will be in the `Location` key.
 
@@ -494,7 +494,7 @@ Resources:
             Runtime: python3.12
             Handler: app.lambda_handler
             Layers:
-            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
+            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43
 ```
 
 **CDK**
@@ -510,7 +510,7 @@ class SampleApp(Stack):
         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
             self,
             id="lambda-powertools",
-            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42",
+            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43",
         )
         aws_lambda.Function(
             self,
@@ -537,7 +537,7 @@ functions:
     handler: lambda_function.lambda_handler
     architecture: arm64
     layers:
-    - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42
+    - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43
 ```
 
 **Terraform**
@@ -579,7 +579,7 @@ resource "aws_lambda_function" "test_lambda" {
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "index.test"
   runtime       = "python3.12"
-  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:42"]
+  layers        = ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-x86_64:43"]
 
   source_code_hash = filebase64sha256("lambda_function_payload.zip")
 }
