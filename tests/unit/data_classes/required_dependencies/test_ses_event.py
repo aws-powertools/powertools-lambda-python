@@ -55,3 +55,24 @@ def test_ses_trigger_event():
     assert parsed_event.record.raw_event == raw_event["Records"][0]
     assert parsed_event.mail.raw_event == raw_event["Records"][0]["ses"]["mail"]
     assert parsed_event.receipt.raw_event == raw_event["Records"][0]["ses"]["receipt"]
+
+
+def test_ses_trigger_event_without_common_headers_or_invocation_type():
+    # GIVEN an SES event for an email without any common headers and a Lambda action without an invocation type
+    raw_event = load_event("sesEvent.json")
+    raw_event["Records"][0]["ses"]["mail"]["commonHeaders"] = {}
+    del raw_event["Records"][0]["ses"]["receipt"]["action"]["invocationType"]
+
+    # WHEN reading the common headers and the action
+    parsed_event = SESEvent(raw_event)
+    common_headers = parsed_event.mail.common_headers
+    action = parsed_event.receipt.action
+
+    # THEN the missing headers are empty instead of raising KeyError
+    assert common_headers.return_path is None
+    assert common_headers.get_from == []
+    assert common_headers.date is None
+    assert common_headers.to == []
+    assert common_headers.message_id is None
+    assert common_headers.subject is None
+    assert action.invocation_type is None
