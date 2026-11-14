@@ -7,9 +7,10 @@ from __future__ import annotations
 import functools
 import logging
 import os
+import sys
 import warnings
-from inspect import isclass
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
+from inspect import isclass, unwrap
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast, get_type_hints
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
@@ -145,6 +146,34 @@ def _idempotent(
 idempotent = cast(_IdempotentDecorator, _idempotent)
 
 
+def _get_return_annotation(function: Callable) -> Any:
+    """Resolve only the return annotation, preserving evaluated types and custom metadata."""
+    if sys.version_info >= (3, 14):
+        from annotationlib import Format, get_annotations
+
+        # Deferred annotations can contain parameter names that only exist during type checking.
+        annotation = get_annotations(function, format=Format.FORWARDREF).get("return")
+    else:
+        annotation = getattr(function, "__annotations__", {}).get("return")
+
+    if not isinstance(annotation, str):
+        return annotation
+
+    def return_type(): ...
+
+    # A separate function avoids evaluating input annotations or copying __no_type_check__.
+    return_type.__annotations__ = {"return": annotation}
+    try:
+        return get_type_hints(
+            return_type,
+            globalns=getattr(unwrap(function), "__globals__", {}),
+            include_extras=True,
+        )["return"]
+    except Exception:
+        # Let the serializer report an unsupported model, as for other invalid annotations.
+        return annotation
+
+
 def idempotent_function(
     function: AnyCallableT | None = None,
     *,
@@ -208,7 +237,7 @@ def idempotent_function(
 
     if isclass(output_serializer) and issubclass(output_serializer, BaseIdempotencyModelSerializer):
         # instantiate an instance of the serializer class
-        output_serializer = output_serializer.instantiate(function.__annotations__.get("return", None))
+        output_serializer = output_serializer.instantiate(_get_return_annotation(function))
 
     config = config or IdempotencyConfig()
 
