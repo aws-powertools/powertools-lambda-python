@@ -4737,3 +4737,28 @@ def test_header_model_sequence_field_comma_joined(gw_event_http):
 
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"c": ["US", "PT"]}
+
+
+def test_validate_path_param_alias_matches_route_template(gw_event):
+    # GIVEN a route placeholder in camelCase bound to a snake_case argument via Path(alias=...)
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/users/<userId>")
+    def get_user(user_id: Annotated[int, Path(alias="userId")]):
+        return {"user_id": user_id}
+
+    # WHEN a valid request and an invalid request are resolved
+    gw_event["httpMethod"] = "GET"
+    gw_event["path"] = "/users/42"
+    valid_result = app(gw_event, {})
+
+    gw_event["path"] = "/users/not-an-int"
+    invalid_result = app(gw_event, {})
+
+    # THEN runtime validation resolves by alias and the OpenAPI schema emits the matching alias
+    assert valid_result["statusCode"] == 200
+    assert json.loads(valid_result["body"]) == {"user_id": 42}
+    assert invalid_result["statusCode"] == 422
+    assert json.loads(invalid_result["body"])["detail"][0]["loc"] == ["path", "userId"]
+    parameters = app.get_openapi_schema().paths["/users/{userId}"].get.parameters
+    assert [p.name for p in parameters] == ["userId"]

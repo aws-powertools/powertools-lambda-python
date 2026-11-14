@@ -6,17 +6,14 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import warnings
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import boto3
 
-from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider, transform_value
-from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider, resolve_parameters_max_age, transform_value
+from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_PROVIDERS
 from aws_lambda_powertools.utilities.parameters.exceptions import (
     GetSecretError,
     SetSecretError,
@@ -256,7 +253,7 @@ class SecretsProvider(BaseProvider):
         )
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             cached_values = self.fetch_from_cache(key)
@@ -517,7 +514,7 @@ def get_secret(
     """
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
@@ -596,7 +593,7 @@ def get_secrets_by_name(
         raise GetSecretError("You must provide at least one secret name")
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
