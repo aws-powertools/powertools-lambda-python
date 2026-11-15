@@ -3,13 +3,13 @@
 
 Source of truth: https://docs.powertools.aws.dev/lambda/python/latest/utilities/auth/, https://docs.powertools.aws.dev/lambda/python/latest/utilities/oauth2/
 
-> **Warning: Alpha / experimental**
-
-This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
-
 Auth verifies JWT access tokens in any Lambda workload. Use `verify()` directly, create Event Handler middleware with `require()`, or build a Lambda authorizer response with `authorize()`.
 
-For client-credentials tokens used to call a downstream API, see [OAuth2 client (alpha)](oauth2.md).
+For client-credentials tokens used to call a downstream API, see [OAuth2 client](oauth2.md).
+
+> **Note: Coming from `auth_alpha`?**
+
+Auth shipped as `aws_lambda_powertools.utilities.auth_alpha` from 3.36.0 to 3.40.0, under an alpha label that said the API could change before GA. The alpha namespace is gone; change the import to `aws_lambda_powertools.utilities.auth`, nothing else changes.
 
 ```mermaid
 flowchart LR
@@ -63,7 +63,7 @@ Create the verifier outside the Lambda handler so warm invocations reuse its sig
 ```python title="basic.py"
 import os
 
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
+from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 verifier = JWTVerifier(
@@ -109,7 +109,7 @@ Static `jwks` avoids network access, but your application must rotate those keys
 import os
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
+from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayHttpResolver()
@@ -155,8 +155,8 @@ Without middleware, pass the complete `Authorization` header to `verify_authoriz
 import os
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
-from aws_lambda_powertools.utilities.auth_alpha.jwt.exceptions import InvalidTokenError, JWKSFetchError
+from aws_lambda_powertools.utilities.auth import JWTVerifier
+from aws_lambda_powertools.utilities.auth.jwt.exceptions import InvalidTokenError, JWKSFetchError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayHttpResolver()
@@ -202,7 +202,7 @@ import os
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
-from aws_lambda_powertools.utilities.auth_alpha import AuthErrorContext, JWTVerifier
+from aws_lambda_powertools.utilities.auth import AuthErrorContext, JWTVerifier
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayHttpResolver()
@@ -269,7 +269,7 @@ Call `prefetch()` after constructing the verifier to retrieve keys during Lambda
 ```python title="prefetch.py"
 import os
 
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
+from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 verifier = JWTVerifier(
@@ -299,7 +299,7 @@ Use the Cognito profile for resource-bound Cognito access tokens:
 import os
 
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
+from aws_lambda_powertools.utilities.auth import JWTVerifier
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayHttpResolver()
@@ -329,8 +329,8 @@ Use `authorize()` when API Gateway invokes a dedicated Lambda authorizer:
 import os
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.auth_alpha import JWTVerifier
-from aws_lambda_powertools.utilities.auth_alpha.jwt.exceptions import AuthError
+from aws_lambda_powertools.utilities.auth import JWTVerifier
+from aws_lambda_powertools.utilities.auth.jwt.exceptions import AuthError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
@@ -482,10 +482,6 @@ Keep it disabled when every request must respect token expiration. Gateway cachi
 
 Log `reason.value` and `retryable`, not exception messages, tokens, claims, or request headers. `retryable=true` means a later attempt might succeed after provider recovery.
 
-> **Warning: Alpha / experimental**
-
-This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
-
 `OAuth2Client` obtains bearer tokens for a Lambda function calling an API on its own behalf.
 It uses the client-credentials grant with `client_secret_basic` (default) or explicit `client_secret_post` authentication.
 
@@ -554,7 +550,7 @@ from urllib.parse import quote
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.auth_alpha import OAuth2Client
+from aws_lambda_powertools.utilities.auth import OAuth2Client
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 secrets = parameters.SecretsProvider(
@@ -630,7 +626,7 @@ This example uses `CLIENT_SECRET` instead of `CLIENT_SECRET_NAME` and calls `INV
 ```python title="client_secret_post.py"
 import os
 
-from aws_lambda_powertools.utilities.auth_alpha import OAuth2Client
+from aws_lambda_powertools.utilities.auth import OAuth2Client
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 # Create outside the handler so warm invocations can reuse the token cache.
@@ -704,7 +700,7 @@ from urllib.parse import quote, urlsplit
 
 import urllib3
 
-from aws_lambda_powertools.utilities.auth_alpha import OAuth2Client
+from aws_lambda_powertools.utilities.auth import OAuth2Client
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 INVENTORY_URL = os.environ["INVENTORY_URL"]
@@ -809,7 +805,7 @@ Use configured, trusted URLs, never caller-controlled destinations. `request()` 
 
 ### Errors and diagnostics
 
-OAuth errors inherit from `AuthError` in `auth_alpha.exceptions`.
+OAuth errors inherit from `AuthError` in `auth.exceptions`.
 
 | Exception | Reason | Retryable |
 | --------- | ------ | --------- |
@@ -827,8 +823,8 @@ import os
 from urllib.parse import quote
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.auth_alpha import OAuth2Client
-from aws_lambda_powertools.utilities.auth_alpha.oauth2.exceptions import DownstreamRequestError, TokenExchangeError
+from aws_lambda_powertools.utilities.auth import OAuth2Client
+from aws_lambda_powertools.utilities.auth.oauth2.exceptions import DownstreamRequestError, TokenExchangeError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()

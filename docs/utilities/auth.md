@@ -1,15 +1,15 @@
 ---
-title: Auth (alpha)
+title: Auth
 description: JWT access-token verification for Lambda
 status: new
 ---
 
-!!! warning "Alpha / experimental"
-    This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
-
 Auth verifies JWT access tokens in any Lambda workload. Use `verify()` directly, create Event Handler middleware with `require()`, or build a Lambda authorizer response with `authorize()`.
 
-For client-credentials tokens used to call a downstream API, see [OAuth2 client (alpha)](oauth2.md).
+For client-credentials tokens used to call a downstream API, see [OAuth2 client](oauth2.md).
+
+???+ note "Coming from `auth_alpha`?"
+    Auth shipped as `aws_lambda_powertools.utilities.auth_alpha` from 3.36.0 to 3.40.0, under an alpha label that said the API could change before GA. The alpha namespace is gone; change the import to `aws_lambda_powertools.utilities.auth`, nothing else changes.
 
 ```mermaid
 flowchart LR
@@ -60,7 +60,7 @@ Build checks cannot validate dependencies supplied only by the runtime or separa
 Create the verifier outside the Lambda handler so warm invocations reuse its signing-key cache. Configure the trusted issuer, this workload's audience, and the algorithms accepted from that issuer.
 
 ```python title="basic.py"
---8<-- "examples/auth_alpha/jwt/src/basic.py"
+--8<-- "examples/auth/jwt/src/basic.py"
 ```
 
 Replace `token_use` with the access-token marker used by your identity provider. This prevents another JWT type from being accepted only because it has the same audience.
@@ -89,7 +89,7 @@ Static `jwks` avoids network access, but your application must rotate those keys
 `verifier.require()` creates Event Handler middleware bound to the verifier and requested scopes. Create the verifier outside the handler to reuse its cache.
 
 ```python title="middleware.py"
---8<-- "examples/auth_alpha/jwt/src/middleware.py"
+--8<-- "examples/auth/jwt/src/middleware.py"
 ```
 
 Here, `app.get()` registers the middleware only for `GET /orders`. For each matching request, the middleware:
@@ -114,7 +114,7 @@ Configure public routes and CORS preflight separately.
 Without middleware, pass the complete `Authorization` header to `verify_authorization_header()`. It validates the Bearer scheme and verifies the extracted JWT:
 
 ```python title="direct.py"
---8<-- "examples/auth_alpha/jwt/src/direct.py"
+--8<-- "examples/auth/jwt/src/direct.py"
 ```
 
 Both verification methods require `iss`, `aud`, and `exp`; use `required_claims` to require additional claims.
@@ -126,7 +126,7 @@ Both verification methods require `iss`, `aud`, and `exp`; use `required_claims`
 This complete Lambda adds provider-specific token checks, a required scope, a tenant authorization rule, and custom error handling:
 
 ```python title="custom_authorization.py"
---8<-- "examples/auth_alpha/jwt/src/custom_authorization.py"
+--8<-- "examples/auth/jwt/src/custom_authorization.py"
 ```
 
 Match `expected_claims` to your provider's access-token profile. `authorize` runs after verification and scope checks.
@@ -151,7 +151,7 @@ An expired cache with a failed refresh raises `JWKSFetchError`; stale keys are n
 Call `prefetch()` after constructing the verifier to retrieve keys during Lambda INIT:
 
 ```python title="prefetch.py"
---8<-- "examples/auth_alpha/jwt/src/prefetch.py"
+--8<-- "examples/auth/jwt/src/prefetch.py"
 ```
 
 Prefetching can reduce first-invocation latency, but a provider outage can fail the cold start. Without it, the first `verify()` fetches keys.
@@ -163,7 +163,7 @@ Static `jwks` avoids network access. Recreate the verifier or execution environm
 Use the Cognito profile for resource-bound Cognito access tokens:
 
 ```python title="cognito.py"
---8<-- "examples/auth_alpha/jwt/src/cognito.py"
+--8<-- "examples/auth/jwt/src/cognito.py"
 ```
 
 This profile checks RS256, `token_use="access"`, the configured app client ID, and the resource audience. Cognito ID tokens and access tokens without the configured resource audience are rejected.
@@ -175,7 +175,7 @@ Use `JWTVerifier.any_of()` when the same Lambda trusts access tokens from multip
 Use `authorize()` when API Gateway invokes a dedicated Lambda authorizer:
 
 ```python title="authorizer.py"
---8<-- "examples/auth_alpha/jwt/src/authorizer/authorizer.py"
+--8<-- "examples/auth/jwt/src/authorizer/authorizer.py"
 ```
 
 The helper supports REST API TOKEN and REQUEST events and HTTP API REQUEST payloads. Choose `response_format="iam"` for an IAM policy or `response_format="simple"` for an HTTP API 2.0 simple response.
@@ -187,7 +187,7 @@ Invalid tokens and insufficient scopes return Deny or `isAuthorized=false`. If s
 The example template disables API Gateway authorizer-result caching so every request is verified:
 
 ```yaml title="templates/sam.yaml"
---8<-- "examples/auth_alpha/jwt/templates/sam.yaml"
+--8<-- "examples/auth/jwt/templates/sam.yaml"
 ```
 
 If enabling Gateway caching, include every authorization input in its identity sources. A cached allow can still outlive JWT expiration until the cache TTL ends.
@@ -215,7 +215,7 @@ Log `reason.value` and `retryable`, not exception messages, tokens, claims, or r
 Use `mock_claims` to test the complete middleware Lambda without cryptography or network calls:
 
 ```python title="test_middleware.py"
---8<-- "examples/auth_alpha/jwt/tests/test_middleware.py"
+--8<-- "examples/auth/jwt/tests/test_middleware.py"
 ```
 
 The test exercises the HTTP event, Bearer extraction, and scope check. `mock_claims` replaces only token verification and restores it on exit.
