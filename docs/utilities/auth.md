@@ -9,7 +9,7 @@ Auth verifies JWT access tokens in any Lambda workload. Use `verify()` directly,
 For client-credentials tokens used to call a downstream API, see [OAuth2 client](oauth2.md).
 
 ???+ note "Coming from `auth_alpha`?"
-    Auth shipped as `aws_lambda_powertools.utilities.auth_alpha` from 3.36.0 to 3.40.0. That import path still works and emits a `PowertoolsDeprecationWarning`; it goes away in v4. Change the import to `aws_lambda_powertools.utilities.auth`, nothing else changes.
+    Auth shipped as `aws_lambda_powertools.utilities.auth_alpha` from 3.36.0 to 3.40.0, under an alpha label that said the API could change before GA. The alpha namespace is gone; change the import to `aws_lambda_powertools.utilities.auth`, nothing else changes.
 
 ```mermaid
 flowchart LR
