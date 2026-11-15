@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import math
 import numbers
 import os
 import warnings
@@ -155,6 +156,15 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             )
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
+
+        if not math.isfinite(float(value)):
+            warnings.warn(
+                f"Skipping metric {name}: value {value} is not finite. "
+                "Metric values must be finite numbers; NaN and Infinity break CloudWatch EMF JSON.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
 
         unit = extract_cloudwatch_metric_unit_value(
             metric_units=self._metric_units,

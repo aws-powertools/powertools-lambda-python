@@ -10,6 +10,7 @@ import datetime as dt
 import functools
 import json
 import logging
+import math
 import numbers
 import os
 import warnings
@@ -38,6 +39,7 @@ from aws_lambda_powertools.metrics.provider.cold_start import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import is_durable_context, resolve_env_var_choice
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
@@ -149,6 +151,15 @@ class MetricManager:
             )
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
+
+        if not math.isfinite(float(value)):
+            warnings.warn(
+                f"Skipping metric {name}: value {value} is not finite. "
+                "Metric values must be finite numbers; NaN and Infinity break CloudWatch EMF JSON.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
 
         unit = self._extract_metric_unit_value(unit=unit)
         resolution = self._extract_metric_resolution_value(resolution=resolution)

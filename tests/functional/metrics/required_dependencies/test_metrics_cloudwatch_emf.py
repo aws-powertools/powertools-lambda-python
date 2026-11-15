@@ -29,6 +29,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MIN_METRIC_NAME_LENGTH,
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
@@ -488,6 +489,47 @@ def test_schema_validation_incorrect_metric_value(metric, dimension, namespace):
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
         with single_metric(**metric):
             pass
+
+
+@pytest.mark.parametrize("non_finite_value", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_metric_value_warns_and_skips(namespace, non_finite_value):
+    # GIVEN Metrics is initialized and a non-finite value is used
+    my_metrics = Metrics(service="test_service", namespace=namespace)
+
+    # WHEN we add a valid metric and a non-finite metric
+    my_metrics.add_metric(name="ValidMetric", unit=MetricUnit.Count, value=1)
+    with pytest.warns(PowertoolsUserWarning, match="is not finite"):
+        my_metrics.add_metric(name="BadMetric", unit=MetricUnit.Count, value=non_finite_value)
+
+    # THEN the non-finite metric is skipped and only the valid metric remains
+    assert "ValidMetric" in my_metrics.metric_set
+    assert "BadMetric" not in my_metrics.metric_set
+
+
+@pytest.mark.parametrize("non_finite_value", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_metric_value_emf_provider_warns_and_skips(namespace, non_finite_value):
+    # GIVEN AmazonCloudWatchEMFProvider is initialized
+    provider = AmazonCloudWatchEMFProvider(namespace=namespace, service="test_service")
+
+    # WHEN we add a valid metric and a non-finite metric
+    provider.add_metric(name="ValidMetric", unit=MetricUnit.Count, value=1)
+    with pytest.warns(PowertoolsUserWarning, match="is not finite"):
+        provider.add_metric(name="BadMetric", unit=MetricUnit.Count, value=non_finite_value)
+
+    # THEN the non-finite metric is skipped and only the valid metric remains
+    assert "ValidMetric" in provider.metric_set
+    assert "BadMetric" not in provider.metric_set
+
+
+@pytest.mark.parametrize("non_finite_value", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_single_metric_warns_and_skips(namespace, non_finite_value, capsys):
+    # GIVEN single_metric context manager with a non-finite value
+    # WHEN we create a single metric with a non-finite value
+    # THEN it should warn and skip the metric, resulting in SchemaValidationError on flush
+    with pytest.warns(PowertoolsUserWarning, match="is not finite"):
+        with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
+            with single_metric(name="BadMetric", unit=MetricUnit.Count, value=non_finite_value, namespace=namespace):
+                pass
 
 
 def test_schema_no_metrics(service, namespace):

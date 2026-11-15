@@ -9,6 +9,7 @@ import pytest
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_flag
 from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics, DatadogProvider
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 def test_datadog_coldstart(capsys):
@@ -123,6 +124,23 @@ def test_datadog_with_invalid_metric_value():
     # THEN it should fail validation and raise MetricValueError
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
         metrics.add_metric(name="item_sold", value="a", product="latte", order="online")
+
+
+@pytest.mark.parametrize("non_finite_value", [float("nan"), float("inf"), float("-inf")])
+def test_datadog_with_non_finite_metric_value_warns_and_skips(non_finite_value):
+    # GIVEN DatadogMetrics is initialized with a fresh provider
+    provider = DatadogProvider(flush_to_log=True)
+    metrics = DatadogMetrics(provider=provider)
+
+    # WHEN we add a valid metric and a non-finite metric
+    metrics.add_metric(name="valid_item", value=1, product="latte")
+    with pytest.warns(PowertoolsUserWarning, match="is not finite"):
+        metrics.add_metric(name="bad_item", value=non_finite_value, product="latte")
+
+    # THEN the non-finite metric is skipped and only the valid metric remains in provider
+    metric_names = [m["m"] for m in provider.metric_set]
+    assert "valid_item" in metric_names
+    assert "bad_item" not in metric_names
 
 
 def test_datadog_with_invalid_metric_name():
