@@ -522,14 +522,16 @@ def test_non_finite_metric_value_emf_provider_warns_and_skips(namespace, non_fin
 
 
 @pytest.mark.parametrize("non_finite_value", [float("nan"), float("inf"), float("-inf")])
-def test_non_finite_single_metric_warns_and_skips(namespace, non_finite_value, capsys):
-    # GIVEN single_metric context manager with a non-finite value
-    # WHEN we create a single metric with a non-finite value
-    # THEN it should warn and skip the metric, resulting in SchemaValidationError on flush
+def test_non_finite_single_metric_warns_and_skips(namespace, non_finite_value):
+    # GIVEN SingleMetric instance with a non-finite value
+    metric = SingleMetric(namespace=namespace)
+
+    # WHEN we add a metric with a non-finite value
+    # THEN it should warn and skip the metric
     with pytest.warns(PowertoolsUserWarning, match="is not finite"):
-        with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
-            with single_metric(name="BadMetric", unit=MetricUnit.Count, value=non_finite_value, namespace=namespace):
-                pass
+        metric.add_metric(name="BadMetric", unit=MetricUnit.Count, value=non_finite_value)
+
+    assert "BadMetric" not in metric.metric_set
 
 
 def test_schema_no_metrics(service, namespace):
