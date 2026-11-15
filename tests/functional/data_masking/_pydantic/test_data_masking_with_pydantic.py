@@ -217,3 +217,71 @@ def test_erase_on_nested_complex_structure(data_masker):
     assert result["plain_dict"]["value"] == DATA_MASKING_STRING
     assert result["list"][0]["value"] == DATA_MASKING_STRING
     assert result["list"][1]["value"] == DATA_MASKING_STRING
+
+
+def test_erase_pydantic_secret_fields_are_not_exposed():
+    # GIVEN a model with SecretStr and SecretBytes fields
+    from pydantic import SecretBytes, SecretStr
+
+    class Login(BaseModel):
+        user: str
+        token: SecretStr
+        key: SecretBytes
+
+    model = Login(user="pat", token=SecretStr("tok-value"), key=SecretBytes(b"key-value"))
+
+    # WHEN erasing another field
+    result = DataMasking().erase(model, fields=["user"])
+
+    # THEN the secret fields keep Pydantic's masked rendering instead of the raw value
+    assert result["user"] == DATA_MASKING_STRING
+    assert result["token"] == "**********"
+    assert result["key"] == "**********"
+    assert "tok-value" not in str(result) and "key-value" not in str(result)
+
+
+def test_erase_pydantic_non_json_field_types():
+    # GIVEN a model with UUID, datetime and Decimal fields
+    import datetime as dt
+    import uuid
+    from decimal import Decimal
+
+    class Order(BaseModel):
+        id: uuid.UUID
+        created: dt.datetime
+        total: Decimal
+        customer: str
+
+    model = Order(
+        id=uuid.UUID(int=1),
+        created=dt.datetime(2026, 1, 2, 3, 4, 5),
+        total=Decimal("9.50"),
+        customer="Pat",
+    )
+
+    # WHEN erasing through the fields path, which serializes to JSON internally
+    result = DataMasking().erase(model, fields=["customer"])
+
+    # THEN it no longer fails with TypeError and the other fields are JSON-safe values
+    assert result["customer"] == DATA_MASKING_STRING
+    assert result["id"] == "00000000-0000-0000-0000-000000000001"
+    assert result["created"] == "2026-01-02T03:04:05"
+    assert result["total"] == "9.50"
+
+
+def test_prepare_data_nested_models_referenced_twice():
+    # GIVEN a model used twice inside the same payload
+    class Address(BaseModel):
+        city: str
+
+    class Order(BaseModel):
+        shipping: Address
+        billing: Address
+
+    address = Address(city="Lisbon")
+
+    # WHEN preparing the data
+    result = prepare_data(Order(shipping=address, billing=address))
+
+    # THEN both references are converted
+    assert result == {"shipping": {"city": "Lisbon"}, "billing": {"city": "Lisbon"}}

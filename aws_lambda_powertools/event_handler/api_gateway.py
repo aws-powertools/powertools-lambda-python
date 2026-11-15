@@ -785,12 +785,23 @@ class ResponseBuilder(Generic[ResponseEventT]):
         if origin is not None:
             cors_headers = cors.to_dict(origin)
             # Keep any Vary value the route already set, and add Origin to it
-            existing_vary = self.response.headers.get("Vary")
-            if isinstance(existing_vary, list):
-                existing_vary = ", ".join(existing_vary)
-            if existing_vary and "Vary" in cors_headers:
-                cors_headers["Vary"] = f"{existing_vary}, Origin"
+            vary = cors_headers.pop("Vary", None)
             self.response.headers.update(cors_headers)
+            if vary:
+                self._add_vary(vary)
+
+    def _add_vary(self, field: str):
+        """Add a request header name to the Vary response header, keeping any value already set"""
+        existing_vary = self.response.headers.get("Vary")
+        if isinstance(existing_vary, list):
+            existing_vary = ", ".join(existing_vary)
+        if not existing_vary:
+            self.response.headers["Vary"] = field
+            return
+        values = {value.strip().lower() for value in existing_vary.split(",")}
+        # "*" already covers every request header
+        if field.lower() not in values and "*" not in values:
+            self.response.headers["Vary"] = f"{existing_vary}, {field}"
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -857,6 +868,10 @@ class ResponseBuilder(Generic[ResponseEventT]):
             self._add_cors(event, cors or CORSConfig())
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
+        compression = self.response.compress if self.response.compress is not None else self.route.compress
+        if compression:
+            # The body depends on Accept-Encoding, so shared caches must not reuse it across encodings
+            self._add_vary("Accept-Encoding")
         if self._has_compression_enabled(
             route_compression=self.route.compress,
             response_compression=self.response.compress,

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD043 -->
 #### Http Resolver (ASGI)
 
-`HttpResolver` is an ASGI-compatible resolver that lets you run your Powertools application with any ASGI server like [uvicorn](https://www.uvicorn.org/){target="_blank"}. It implements the [ASGI specification](https://asgi.readthedocs.io/){target="_blank"}, is lightweight with no external dependencies, and works seamlessly with Lambda or any environment that speaks HTTP.
+`HttpResolver` is an ASGI-compatible resolver that lets you run your Powertools application with any ASGI server like [uvicorn](https://uvicorn.dev/){target="_blank"}. It implements the [ASGI specification](https://asgi.readthedocs.io/){target="_blank"}, is lightweight with no external dependencies, and works seamlessly with Lambda or any environment that speaks HTTP.
 
 If your Lambda is behind [Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter){target="_blank"} or any other HTTP proxy that speaks the HTTP protocol, it works seamlessly.
 

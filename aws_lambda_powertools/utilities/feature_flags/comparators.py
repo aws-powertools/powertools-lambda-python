@@ -19,11 +19,23 @@ def _get_now_from_timezone(timezone: tzinfo | None) -> datetime:
     return datetime.now(timezone)
 
 
+# Indexed by datetime.weekday(), where Monday is 0
+_DAYS_OF_WEEK = (
+    TimeValues.MONDAY.value,
+    TimeValues.TUESDAY.value,
+    TimeValues.WEDNESDAY.value,
+    TimeValues.THURSDAY.value,
+    TimeValues.FRIDAY.value,
+    TimeValues.SATURDAY.value,
+    TimeValues.SUNDAY.value,
+)
+
+
 def compare_days_of_week(context_value: Any, condition_value: dict) -> bool:
     timezone_name = condition_value.get(TimeValues.TIMEZONE.value, "UTC")
 
-    # %A = Weekday as locale’s full name.
-    current_day = _get_now_from_timezone(gettz(timezone_name)).strftime("%A").upper()
+    # Not strftime("%A"): it names the day in the process locale, e.g. "FREITAG" under a German LC_TIME
+    current_day = _DAYS_OF_WEEK[_get_now_from_timezone(gettz(timezone_name)).weekday()]
 
     days = condition_value.get(TimeValues.DAYS.value, [])
     return current_day in days

@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, NamedTuple, cast, overload
 
 from aws_lambda_powertools.shared import constants, user_agent
-from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, TransformParameterError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
@@ -102,7 +103,7 @@ class BaseProvider(ABC):
         key = self._build_cache_key(name=name, transform=transform, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.fetch_from_cache(key)
@@ -176,7 +177,7 @@ class BaseProvider(ABC):
         key = self._build_cache_key(name=path, transform=transform, is_nested=True, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.fetch_from_cache(key)
@@ -270,6 +271,41 @@ class BaseProvider(ABC):
 
         # sdk_options may hold unhashable values (dicts, lists), so serialize them deterministically
         return (name, transform, is_nested, json.dumps(sdk_options, sort_keys=True, default=str))
+
+
+def resolve_parameters_max_age(choice: int | None) -> int:
+    """
+    Resolve the caching max age against the ``POWERTOOLS_PARAMETERS_MAX_AGE`` environment variable.
+
+    An explicit ``choice`` always wins. Otherwise the environment variable is used, and an
+    empty or non-integer value is ignored with a :class:`PowertoolsUserWarning` rather than
+    crashing every lookup: a configuration typo must not break parameter and secret reads
+    (ADR 0006: warn now, harden in a future major).
+
+    Parameters
+    ----------
+    choice : int | None
+        Explicit max age passed by the caller, taking precedence over the environment.
+
+    Returns
+    -------
+    int
+        The resolved max age in seconds.
+    """
+    if choice is not None:
+        return choice
+
+    env = os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS)
+    try:
+        return int(env)
+    except ValueError:
+        warnings.warn(
+            f"Ignoring invalid {constants.PARAMETERS_MAX_AGE_ENV} value {env!r}; "
+            f"falling back to the default of {DEFAULT_MAX_AGE_SECS} seconds.",
+            category=PowertoolsUserWarning,
+            stacklevel=3,
+        )
+        return int(DEFAULT_MAX_AGE_SECS)
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:

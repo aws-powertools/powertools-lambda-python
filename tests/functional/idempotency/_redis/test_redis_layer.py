@@ -12,11 +12,13 @@ from multiprocess import Lock, Manager, Process
 
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
+    IdempotencyInconsistentStateError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
     IdempotencyPersistenceConfigError,
     IdempotencyPersistenceConnectionError,
     IdempotencyPersistenceConsistencyError,
+    IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
@@ -615,6 +617,39 @@ def test_idempotent_function_and_lambda_handler_redis_validation(
         lambda_handler(mock_event, lambda_context)
 
 
+def test_idempotent_function_and_lambda_handler_redis_validation_same_payload(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+    lambda_context,
+):
+    mock_event = {"user_id": "xyz", "time": "1234"}
+    persistence_layer = persistence_store_standalone_redis
+    expected_result = {"message": "Foo"}
+    config = IdempotencyConfig(event_key_jmespath="user_id", payload_validation_jmespath="time")
+    calls = 0
+
+    @idempotent(persistence_store=persistence_layer, config=config)
+    def lambda_handler(event, context):
+        nonlocal calls
+        calls += 1
+        return expected_result
+
+    # WHEN calling the handler with payload validation enabled
+    first_result = lambda_handler(mock_event, lambda_context)
+
+    # THEN the completed record keeps the payload hash
+    stored_record = json.loads(next(iter(persistence_layer.client.cache.values())))
+    assert stored_record["status"] == "COMPLETED"
+    assert stored_record[persistence_layer.validation_key_attr]
+
+    # WHEN calling the handler again with the same payload
+    second_result = lambda_handler(mock_event, lambda_context)
+
+    # THEN the stored response is returned without running the handler again
+    assert first_result == expected_result
+    assert second_result == expected_result
+    assert calls == 1
+
+
 def test_idempotent_function_and_lambda_handler_redis_basic_no_decode(
     persistence_store_standalone_redis_no_decode: RedisCachePersistenceLayer,
     lambda_context,
@@ -710,6 +745,91 @@ def test_idempotent_lambda_redis_delete(
 
     # Then lambda handler should return a actual function output
     assert handler_result2 == result
+
+
+def test_idempotent_function_redis_response_not_json_serializable_runs_again(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+):
+    # GIVEN a function whose response can't be serialized to JSON
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store_standalone_redis, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"created": datetime.datetime(2026, 1, 1)}
+
+    # WHEN calling it twice with the same payload
+    # THEN both calls fail to save the response, and the second call runs the function again
+    # instead of finding the first call's record still in progress
+    for _ in range(2):
+        with pytest.raises(IdempotencyPersistenceLayerError):
+            process_order(order={"id": 1})
+
+    assert function_calls == 2
+
+
+class MockRedisFailingCompletedWrite(MockRedis):
+    # fails the write that stores the COMPLETED record, after or before it lands
+    def __init__(self, write_lands: bool, **kwargs):
+        self.write_lands = write_lands
+        super().__init__(**kwargs)
+
+    def set(self, name, value, ex: int = 0, nx: bool = False):
+        if not nx and STATUS_CONSTANTS["COMPLETED"] in str(value):
+            if self.write_lands:
+                super().set(name=name, value=value, ex=ex, nx=nx)
+            raise self.exceptions.RedisError
+        return super().set(name=name, value=value, ex=ex, nx=nx)
+
+
+@pytest.mark.parametrize("use_local_cache", [False, True])
+def test_idempotent_function_redis_completed_write_landed_then_failed_keeps_record(use_local_cache):
+    # GIVEN a store that saves the COMPLETED record but then fails the write call
+    persistence_store = CachePersistenceLayer(
+        client=MockRedisFailingCompletedWrite(write_lands=True, host="localhost", port="63005"),
+    )
+    config = IdempotencyConfig(use_local_cache=use_local_cache)
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store, config=config, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"order_id": order["id"]}
+
+    # WHEN the first call fails to confirm the write
+    with pytest.raises(IdempotencyPersistenceLayerError):
+        process_order(order={"id": 1})
+
+    # THEN the stored result is kept, and the next call returns it without running the function again
+    assert process_order(order={"id": 1}) == {"order_id": 1}
+    assert function_calls == 1
+
+
+@pytest.mark.parametrize("use_local_cache", [False, True])
+def test_idempotent_function_redis_completed_write_failed_keeps_in_progress_record(use_local_cache):
+    # GIVEN a store that fails the write of the COMPLETED record before saving it
+    persistence_store = CachePersistenceLayer(
+        client=MockRedisFailingCompletedWrite(write_lands=False, host="localhost", port="63005"),
+    )
+    config = IdempotencyConfig(use_local_cache=use_local_cache)
+    function_calls = 0
+
+    @idempotent_function(persistence_store=persistence_store, config=config, data_keyword_argument="order")
+    def process_order(order):
+        nonlocal function_calls
+        function_calls += 1
+        return {"order_id": order["id"]}
+
+    # WHEN the first call fails to save the response
+    with pytest.raises(IdempotencyPersistenceLayerError):
+        process_order(order={"id": 1})
+
+    # THEN the in progress record is kept, as the write could have landed
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        process_order(order={"id": 1})
+    assert function_calls == 1
 
 
 def test_redis_orphan_record_race_condition(lambda_context):
@@ -840,3 +960,86 @@ def test_redis_client_protocol_still_emits_deprecation_warning_on_subclass():
     with pytest.warns(DeprecationWarning, match="RedisClientProtocol will be removed in v4.0.0"):
 
         class MyClient(RedisClientProtocol): ...
+
+
+def test_redis_inconsistent_state_when_record_disappears():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value"}
+
+    # Simulate SET NX reporting an existing key, followed by GET finding no record.
+    redis_client.set = mock.Mock(return_value=None)
+    redis_client.get = mock.Mock(return_value=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        layer.save_inprogress(mock_event, 1000)
+
+
+def test_redis_inconsistent_state_preserves_original_exception():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value"}
+
+    redis_client.set = mock.Mock(return_value=None)
+    redis_client.get = mock.Mock(return_value=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError) as exc_info:
+        layer.save_inprogress(mock_event, 1000)
+
+    assert isinstance(exc_info.value.__cause__, IdempotencyItemNotFoundError)
+
+
+def test_redis_inconsistent_state_retries_and_executes_function():
+    redis_client = MockRedis(host="localhost", port="63005")
+    layer = CachePersistenceLayer(client=redis_client)
+
+    mock_event = {"id": 1}
+    execution_count = 0
+
+    original_set = redis_client.set
+    set_calls = 0
+
+    def mock_set(*args, **kwargs):
+        nonlocal set_calls
+        set_calls += 1
+
+        # First SET NX: simulate an existing record.
+        if set_calls == 1:
+            return None
+
+        # Subsequent SET: allow the retry to succeed.
+        return original_set(*args, **kwargs)
+
+    original_get = redis_client.get
+    get_calls = 0
+
+    def mock_get(*args, **kwargs):
+        nonlocal get_calls
+        get_calls += 1
+
+        # The record expires between SET NX and GET.
+        if get_calls == 1:
+            return None
+
+        return original_get(*args, **kwargs)
+
+    redis_client.set = mock_set
+    redis_client.get = mock_get
+
+    @idempotent_function(
+        data_keyword_argument="order",
+        persistence_store=layer,
+    )
+    def process(order):
+        nonlocal execution_count
+        execution_count += 1
+        return "ok"
+
+    result = process(order=mock_event)
+
+    assert result == "ok"
+    assert execution_count == 1
+    assert set_calls >= 2
+    assert get_calls >= 1

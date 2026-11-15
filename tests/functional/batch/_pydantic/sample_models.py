@@ -49,3 +49,11 @@ class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
     dynamodb: OrderDynamoDBChangeRecord
+
+
+class OrderIdSqs(SqsRecordModel):
+    @field_validator("body")
+    @classmethod
+    def parse_order_id(cls, value: str):
+        # Pydantic only wraps ValueError/AssertionError, so a KeyError escapes model_validate as-is
+        return json.loads(value)["order_id"]

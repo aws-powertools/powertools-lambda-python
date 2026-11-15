@@ -7,12 +7,11 @@ from __future__ import annotations
 import functools
 import inspect
 import logging
-import os
 import warnings
 from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import strtobool
+from aws_lambda_powertools.shared.functions import resolve_bool_env_var
 from aws_lambda_powertools.utilities.circuit_breaker.base import CircuitBreakerHandler
 from aws_lambda_powertools.utilities.circuit_breaker.config import CircuitBreakerConfig
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
@@ -93,7 +92,7 @@ def circuit_breaker(
     def decorator(function: Callable) -> Callable:
         def disabled() -> bool:
             # Skip the circuit entirely when disabled (development only).
-            if not strtobool(os.getenv(constants.CIRCUIT_BREAKER_DISABLED_ENV, "false")):
+            if not resolve_bool_env_var(constants.CIRCUIT_BREAKER_DISABLED_ENV):
                 return False
             warnings.warn(
                 message="Disabling the circuit breaker is intended for development environments only "

@@ -162,7 +162,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         """
         data = self._deserializer.deserialize({"M": item})
         return DataRecord(
-            idempotency_key=data[self.key_attr],
+            idempotency_key=data[self.sort_key_attr] if self.sort_key_attr else data[self.key_attr],
             status=data[self.status_attr],
             expiry_timestamp=data[self.expiry_attr],
             in_progress_expiry_timestamp=data.get(self.in_progress_expiry_attr),

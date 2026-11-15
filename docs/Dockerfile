@@ -1,6 +1,6 @@
 # Local docs preview with Zensical (see `make docs-local-docker`)
 # python:3.12-slim
-FROM python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python@sha256:f17ec845ebdd4f3347431579e1c22eaeec82913f039f2a54b937c7ff870bacdb
 # pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt

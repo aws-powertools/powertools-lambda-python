@@ -4,7 +4,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pydantic import IPvAnyNetwork, TypeAdapter
+from pydantic import IPvAnyNetwork, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.shared.cache_dict import LRUDict
 
@@ -49,6 +49,28 @@ def _retrieve_or_set_model_from_cache(model: type[T]) -> TypeAdapter[T]:
     return CACHE_TYPE_ADAPTER[id_model]
 
 
+def _parse_string_payload(data: str, adapter: TypeAdapter[T]):
+    """Validate a string payload as JSON first, then as a plain Python value.
+
+    Falls back to Python validation when Pydantic cannot validate the type from JSON
+    (see https://github.com/aws-powertools/powertools-lambda-python/issues/5303) and when
+    the string is not JSON at all, e.g. the plain-text Lambda runtime lines that CloudWatch Logs
+    subscriptions forward (see https://github.com/aws-powertools/powertools-lambda-python/issues/8695).
+    If the fallback fails too, the original JSON error is raised so callers see the same message.
+    """
+    try:
+        return adapter.validate_json(data)
+    except NotImplementedError:
+        # See: https://github.com/pydantic/pydantic/issues/8890
+        logger.debug("Falling back to Python validation due to Pydantic implementation.")
+        return adapter.validate_python(json.loads(data))
+    except ValidationError as exc:
+        try:
+            return adapter.validate_python(data)
+        except ValidationError:
+            raise exc from None
+
+
 def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter[T]):
     """
     Parse and validate the event data using the provided adapter.
@@ -70,16 +92,7 @@ def _parse_and_validate_event(data: dict[str, Any] | Any, adapter: TypeAdapter[T
 
     if isinstance(data, str):
         logger.debug("Parsing event as string")
-        try:
-            return adapter.validate_json(data)
-        except NotImplementedError:
-            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/5303
-            # See: https://github.com/pydantic/pydantic/issues/8890
-            logger.debug(
-                "Falling back to Python validation due to Pydantic implementation."
-                "See issue: https://github.com/aws-powertools/powertools-lambda-python/issues/5303",
-            )
-            data = json.loads(data)
+        return _parse_string_payload(data, adapter)
 
     return adapter.validate_python(data)
 

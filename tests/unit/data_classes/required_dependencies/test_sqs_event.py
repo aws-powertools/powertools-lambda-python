@@ -169,3 +169,22 @@ def test_sqs_event_typing():
 
     # This assertion compares the return from .items() to the return of __getitem__
     assert list(attributes.items())[0][1] == attributes["key"]
+
+
+def test_sqs_message_attribute_with_only_one_value():
+    # GIVEN message attributes as Lambda delivers them: a String attribute carries no binaryValue
+    # and a Binary attribute carries no stringValue
+    raw_event = load_event("sqsEvent.json")
+    raw_event["Records"][0]["messageAttributes"] = {
+        "text": {"stringValue": "myValue", "stringListValues": [], "binaryListValues": [], "dataType": "String"},
+        "blob": {"binaryValue": "YmFzZTY0", "stringListValues": [], "binaryListValues": [], "dataType": "Binary"},
+    }
+
+    # WHEN reading the attributes
+    attributes = next(SQSEvent(raw_event).records).message_attributes
+
+    # THEN the value a type doesn't carry is None
+    assert attributes["text"].string_value == "myValue"
+    assert attributes["text"].binary_value is None
+    assert attributes["blob"].binary_value == "YmFzZTY0"
+    assert attributes["blob"].string_value is None

@@ -416,6 +416,48 @@ def test_time_based_utc_days_range_rule_match(mocker):
     )
 
 
+def test_time_based_days_range_rule_match_with_non_english_locale(mocker):
+    # GIVEN a process whose LC_TIME names the days in German, so strftime("%A") on a Friday is "Freitag"
+    class GermanDatetime(dt.datetime):
+        def strftime(self, fmt):
+            return super().strftime(fmt).replace("Friday", "Freitag")
+
+    friday = GermanDatetime(2022, 11, 18, 10, 0, 0, tzinfo=dt.timezone.utc)
+    mocker.patch(
+        "aws_lambda_powertools.utilities.feature_flags.comparators._get_now_from_timezone",
+        return_value=friday,
+    )
+    mocked_get_conf = mocker.patch("aws_lambda_powertools.utilities.parameters.AppConfigProvider.get")
+    mocked_get_conf.return_value = {
+        "my_feature": {
+            FEATURE_DEFAULT_VAL_KEY: False,
+            RULES_KEY: {
+                "match only on fridays": {
+                    RULE_MATCH_VALUE: True,
+                    CONDITIONS_KEY: [
+                        {
+                            CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
+                            CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK.value,
+                            CONDITION_VALUE: {TimeValues.DAYS.value: [TimeValues.FRIDAY.value]},
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    store = AppConfigStore(
+        environment="test_env",
+        application="test_app",
+        name="test_conf_name",
+        max_age=600,
+        sdk_config=Config(region_name="us-east-1"),
+    )
+
+    # WHEN evaluating the rule
+    # THEN the day still matches FRIDAY
+    assert FeatureFlags(store=store).evaluate(name="my_feature", context={}, default=False)
+
+
 def test_time_based_utc_days_range_no_rule_match(mocker):
     assert not evaluate_mocked_schema(
         mocker=mocker,

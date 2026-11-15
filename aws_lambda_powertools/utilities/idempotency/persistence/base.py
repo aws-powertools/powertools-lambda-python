@@ -4,6 +4,7 @@ Persistence layers supporting idempotency
 
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import hashlib
 import json
@@ -46,13 +47,24 @@ class _IdempotencyKeyEncoder(Encoder):
             # Preserve existing encodings, including Decimal subclasses mixed with Enum.
             return super().default(obj)
         except TypeError:
-            if isinstance(obj, Enum):
-                return obj.value
-            if isinstance(obj, (dt.date, dt.time)):
-                return obj.isoformat()
-            if isinstance(obj, (UUID, PurePath)):
-                return str(obj)
-            raise
+            return self._encode_custom_type(obj)
+
+    @staticmethod
+    def _encode_custom_type(obj: Any) -> Any:
+        if isinstance(obj, Enum):
+            return obj.value
+        if isinstance(obj, (dt.date, dt.time)):
+            return obj.isoformat()
+        if isinstance(obj, (UUID, PurePath)):
+            return str(obj)
+        if isinstance(obj, (set, frozenset)):
+            try:
+                return sorted(obj)
+            except TypeError:
+                return sorted(obj, key=repr)
+        if isinstance(obj, bytes):
+            return base64.b64encode(obj).decode("utf-8")
+        raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
 class BasePersistenceLayer(ABC):
@@ -299,7 +311,14 @@ class BasePersistenceLayer(ABC):
             # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
-        response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        try:
+            response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        except Exception as exc:
+            # Nothing was written yet, so clear the in progress record to let the next call
+            # with the same payload run the function again instead of failing as in progress.
+            # A failure while writing the record below keeps it, as the write may have landed.
+            self.delete_record(data=data, exception=exc)
+            raise
 
         data_record = DataRecord(
             idempotency_key=idempotency_key,

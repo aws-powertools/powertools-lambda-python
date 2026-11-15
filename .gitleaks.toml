@@ -12,4 +12,6 @@ description = "Allow list false positive"
 # Allow list paths to ignore due to false positives.
 paths = [
   '''tests/unit/parser/test_kinesis_firehose\.py''',
+  # generated from the docs and examples; sample event ids like the SQS SenderId look like access keys
+  '''\.agents/skills/.*/references/.*\.md''',
 ]
