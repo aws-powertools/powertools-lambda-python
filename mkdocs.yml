@@ -33,9 +33,10 @@ nav:
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
-          - Auth (alpha):
+          - Auth:
               - JWT verification: utilities/auth.md
               - OAuth2 client: utilities/oauth2.md
+              - Request signing: utilities/signer.md
           - utilities/batch.md
           - utilities/kafka.md
           - utilities/typing.md

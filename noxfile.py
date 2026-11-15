@@ -289,3 +289,23 @@ def test_with_oauth2_required_packages(session: nox.Session):
         folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth/oauth2/"],
         extras="oauth2",
     )
+
+
+@nox.session()
+def test_with_signer_required_packages(session: nox.Session):
+    """Verify SigV4 request signing with only botocore, the package the Lambda runtime already ships."""
+    build_and_run_test(
+        session,
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth/signer/"],
+        extras="aws-sdk",
+    )
+
+
+@nox.session()
+def test_with_sigv4a_required_packages(session: nox.Session):
+    """Verify SigV4a request signing with the awscrt extra."""
+    build_and_run_test(
+        session,
+        folders=[f"{PREFIX_TESTS_FUNCTIONAL}/auth/signer/"],
+        extras="aws-sdk,auth-sigv4a",
+    )

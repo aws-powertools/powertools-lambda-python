@@ -16,6 +16,7 @@ class AuthFailureReason(str, Enum):
     JWKS_UNAVAILABLE = "jwks_unavailable"
     TOKEN_EXCHANGE_FAILED = "token_exchange_failed"  # nosec B105
     DOWNSTREAM_REQUEST_FAILED = "downstream_request_failed"
+    SIGNER_MISCONFIGURED = "signer_misconfigured"
 
 
 class AuthError(Exception):

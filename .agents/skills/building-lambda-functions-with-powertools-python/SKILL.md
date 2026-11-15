@@ -196,7 +196,7 @@ These come from the project's architecture decision records.
 | Event Handler: AppSync Events | [references/event-handler-appsync-events.md](references/event-handler-appsync-events.md) |
 | Event Handler: Bedrock Agents | [references/event-handler-bedrock-agents.md](references/event-handler-bedrock-agents.md) |
 | Parameters and secrets | [references/parameters.md](references/parameters.md) |
-| Auth (alpha): JWT verification, OAuth2 client | [references/auth-jwt-oauth2.md](references/auth-jwt-oauth2.md) |
+| Auth: JWT verification, OAuth2 client, SigV4 request signing | [references/auth-jwt-oauth2.md](references/auth-jwt-oauth2.md) |
 | Batch processing | [references/batch-processing.md](references/batch-processing.md) |
 | Kafka consumer | [references/kafka.md](references/kafka.md) |
 | Typing | [references/typing.md](references/typing.md) |

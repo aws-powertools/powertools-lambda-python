@@ -7,3 +7,6 @@
 ::: aws_lambda_powertools.utilities.auth.jwt.testing
 ::: aws_lambda_powertools.utilities.auth.oauth2.client
 ::: aws_lambda_powertools.utilities.auth.oauth2.exceptions
+::: aws_lambda_powertools.utilities.auth.signer.sigv4
+::: aws_lambda_powertools.utilities.auth.signer.sigv4a
+::: aws_lambda_powertools.utilities.auth.signer.exceptions
