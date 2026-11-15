@@ -42,8 +42,9 @@ Some features require additional dependencies. Install them as needed:
 | [Tracer](../core/tracer.md) | `pip install "aws-lambda-powertools[tracer]"` | `aws-xray-sdk` |
 | [Validation](../utilities/validation.md) | `pip install "aws-lambda-powertools[validation]"` | `fastjsonschema` |
 | [Parser](../utilities/parser.md) | `pip install "aws-lambda-powertools[parser]"` | `pydantic` |
-| [JWT verification (alpha)](../utilities/auth.md) | `pip install "aws-lambda-powertools[jwt]"` | `PyJWT`, `cryptography`, `urllib3` |
-| [OAuth2 client (alpha)](../utilities/oauth2.md) | `pip install "aws-lambda-powertools[oauth2]"` | `urllib3` |
+| [JWT verification](../utilities/auth.md) | `pip install "aws-lambda-powertools[jwt]"` | `PyJWT`, `cryptography`, `urllib3` |
+| [OAuth2 client](../utilities/oauth2.md) | `pip install "aws-lambda-powertools[oauth2]"` | `urllib3` |
+| [Request signing](../utilities/signer.md) | nothing for SigV4, `pip install "aws-lambda-powertools[auth-sigv4a]"` for SigV4a | `botocore` from the runtime, `awscrt` for SigV4a |
 | [Data Masking](../utilities/data_masking.md) | `pip install "aws-lambda-powertools[datamasking]"` | `aws-encryption-sdk`, `jsonpath-ng` |
 | [Datadog Metrics](../core/metrics/datadog.md) | `pip install "aws-lambda-powertools[datadog]"` | `datadog-lambda` |
 | [Kafka (Avro)](../utilities/kafka.md) | `pip install "aws-lambda-powertools[kafka-consumer-avro]"` | `avro` |
