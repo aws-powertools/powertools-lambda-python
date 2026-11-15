@@ -8,7 +8,7 @@ dev: dev-quality-code
 	uv run --locked pre-commit install
 
 dev-quality-code:
-	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey
+	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey --extra auth-sigv4a
 
 format-check:
 	uv run --locked ruff format aws_lambda_powertools tests examples --check

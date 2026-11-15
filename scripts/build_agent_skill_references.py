@@ -34,7 +34,7 @@ PAGES: dict[str, list[str]] = {
     "event-handler-appsync-events": ["core/event_handler/appsync_events.md"],
     "event-handler-bedrock-agents": ["core/event_handler/bedrock_agents.md"],
     "parameters": ["utilities/parameters.md"],
-    "auth-jwt-oauth2": ["utilities/auth.md", "utilities/oauth2.md"],
+    "auth-jwt-oauth2": ["utilities/auth.md", "utilities/oauth2.md", "utilities/signer.md"],
     "batch-processing": ["utilities/batch.md"],
     "kafka": ["utilities/kafka.md"],
     "typing": ["utilities/typing.md"],

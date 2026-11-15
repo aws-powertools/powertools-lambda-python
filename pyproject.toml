@@ -91,6 +91,9 @@ datamasking = [
 kafka-consumer-avro = [
     "avro (>=1.12.0,<2.0.0)",
 ]
+auth-sigv4a = [
+    "awscrt (>=0.23.0,<1.0.0)",
+]
 kafka-consumer-protobuf = [
     "protobuf (>=6.30.2,<8.0.0)",
 ]
