@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSMessageAttributes
 from tests.functional.utils import load_event
@@ -188,3 +190,65 @@ def test_sqs_message_attribute_with_only_one_value():
     assert attributes["text"].binary_value is None
     assert attributes["blob"].binary_value == "YmFzZTY0"
     assert attributes["blob"].string_value is None
+
+
+@pytest.mark.parametrize(
+    "arn, expected_queue_url",
+    [
+        (
+            "arn:aws:sqs:us-east-1:123456789012:my-queue",
+            "https://sqs.us-east-1.amazonaws.com/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-cn:sqs:cn-north-1:123456789012:my-queue",
+            "https://sqs.cn-north-1.amazonaws.com.cn/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-cn:sqs:cn-northwest-1:123456789012:my-queue",
+            "https://sqs.cn-northwest-1.amazonaws.com.cn/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-us-gov:sqs:us-gov-west-1:123456789012:my-queue",
+            "https://sqs.us-gov-west-1.amazonaws.com/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-iso:sqs:us-iso-east-1:123456789012:my-queue",
+            "https://sqs.us-iso-east-1.c2s.ic.gov/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-iso-b:sqs:us-isob-east-1:123456789012:my-queue",
+            "https://sqs.us-isob-east-1.sc2s.sgov.gov/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-iso-e:sqs:eu-isoe-west-1:123456789012:my-queue",
+            "https://sqs.eu-isoe-west-1.cloud.adc-e.uk/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-iso-f:sqs:us-isof-south-1:123456789012:my-queue",
+            "https://sqs.us-isof-south-1.csp.hci.ic.gov/123456789012/my-queue",
+        ),
+        (
+            "arn:aws-eusc:sqs:eusc-central-1:123456789012:my-queue",
+            "https://sqs.eusc-central-1.amazonaws.eu/123456789012/my-queue",
+        ),
+        (
+            "arn:custom-partition:sqs:custom-region:123456789012:my-queue",
+            "https://sqs.custom-region.amazonaws.com/123456789012/my-queue",
+        ),
+    ],
+)
+def test_sqs_record_queue_url_partitions(arn: str, expected_queue_url: str):
+    event = SQSEvent(
+        {
+            "Records": [
+                {
+                    "messageId": "1",
+                    "body": "test",
+                    "eventSourceARN": arn,
+                    "awsRegion": arn.split(":")[3],
+                },
+            ],
+        },
+    )
+    record = next(event.records)
+    assert record.queue_url == expected_queue_url
