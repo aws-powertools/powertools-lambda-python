@@ -40,7 +40,7 @@ def copy_config_to_registered_loggers(
     exclude : set[str] | None, optional
         List of logger names to exclude, by default None
     """
-    level = log_level or source_logger.log_level
+    level = source_logger.log_level if log_level is None else log_level
 
     # Assumptions: Only take parent loggers not children (dot notation rule)
     # Steps:
@@ -54,10 +54,8 @@ def copy_config_to_registered_loggers(
     # from receiving/pushing updates to keys being added/removed
     source_logger_name = source_logger.name.split(".")[0]
 
-    if exclude:
-        exclude.update([source_logger_name, PACKAGE_LOGGER])
-    else:
-        exclude = {source_logger_name, PACKAGE_LOGGER}
+    # Build a new set so the caller's exclude set is not changed
+    exclude = {*(exclude or ()), source_logger_name, PACKAGE_LOGGER}
 
     # Prepare loggers set
     if include:

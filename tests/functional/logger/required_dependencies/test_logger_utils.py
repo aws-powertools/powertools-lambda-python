@@ -197,6 +197,37 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, 
     assert log["level"] == log_level.WARNING.name
 
 
+def test_copy_config_to_ext_loggers_keeps_caller_exclude_set(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
+    exclude = {logger.name}
+
+    # WHEN configuration copied with a caller-owned exclude set
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude=exclude)
+
+    # THEN the caller's exclude set is not changed
+    assert exclude == {logger.name}
+    assert not logger.handlers
+
+
+def test_copy_config_to_ext_loggers_log_level_notset(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+
+    # WHEN configuration copied with log_level NOTSET (0)
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        log_level=log_level.NOTSET.value,
+        include={logger.name},
+    )
+
+    # THEN external logger uses NOTSET instead of the source logger level
+    assert powertools_logger.level == log_level.CRITICAL.value
+    assert logger.level == log_level.NOTSET.value
+
+
 def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_level):
     # GIVEN Powertools for AWS Lambda (Python) logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
