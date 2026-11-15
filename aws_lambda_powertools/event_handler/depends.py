@@ -114,6 +114,11 @@ def _get_depends_from_annotation(annotation: Any) -> Depends | None:
     return None
 
 
+def _annotation_target(func: Callable[..., Any]) -> Callable[..., Any]:
+    """A class carries its dependency annotations on __init__, not on the class itself."""
+    return func.__init__ if isinstance(func, type) else func  # type: ignore[misc]
+
+
 def _has_depends(func: Callable[..., Any]) -> bool:
     """Check if a callable has any Depends() parameters, without importing pydantic."""
     try:
@@ -134,7 +139,7 @@ def build_dependency_tree(func: Callable[..., Any]) -> DependencyTree:
     annotations and recursively builds the tree — all without importing pydantic.
     """
     try:
-        hints = get_type_hints(func, include_extras=True)
+        hints = get_type_hints(_annotation_target(func), include_extras=True)
     except Exception:
         return DependencyTree()
 
@@ -214,7 +219,7 @@ def solve_dependencies(
         # Inject Request if the dependency declares it
         if request is not None:
             try:
-                hints = get_type_hints(use_fn)
+                hints = get_type_hints(_annotation_target(use_fn))
             except Exception:  # pragma: no cover - defensive for broken annotations
                 hints = {}
             for param_name, annotation in hints.items():

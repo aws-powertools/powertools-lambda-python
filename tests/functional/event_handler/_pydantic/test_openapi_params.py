@@ -1,10 +1,11 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Annotated, Literal
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
@@ -19,6 +20,7 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Header,
     Param,
     ParamTypes,
+    Path,
     Query,
     _create_model_field,
 )
@@ -71,7 +73,10 @@ def test_openapi_pydantic_query_params():
         elif param.name == "search":
             assert param.required is False  # Optional field
             assert param.description == "Search term"
-            assert param.schema_.type == "string"
+            # str | None is rendered as an anyOf, not a bare string
+            assert param.schema_.type is None
+            assert param.schema_.anyOf is not None
+            assert [s.type for s in param.schema_.anyOf] == ["string", "null"]
 
 
 def test_openapi_pydantic_header_params():
@@ -119,7 +124,10 @@ def test_openapi_pydantic_header_params():
         elif param.name == "accept-language":
             assert param.required is False  # Optional field
             assert param.description == "Language preference"
-            assert param.schema_.type == "string"
+            # str | None is rendered as an anyOf, not a bare string
+            assert param.schema_.type is None
+            assert param.schema_.anyOf is not None
+            assert [s.type for s in param.schema_.anyOf] == ["string", "null"]
 
 
 def test_openapi_pydantic_mixed_params():
@@ -1668,3 +1676,150 @@ def test_header_class_annotation_without_parentheses():
     assert result["statusCode"] == 200
     response_body = json.loads(result["body"])
     assert response_body["header"] == "my-value"
+
+
+def test_openapi_query_model_fields_keep_their_types():
+    # GIVEN a Pydantic model used as Query() with optional, sequence and Enum fields
+    class Color(Enum):
+        red = "red"
+        blue = "blue"
+
+    class Filters(BaseModel):
+        limit: int | None = None
+        tags: list[str] = []
+        color: Color = Color.red
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def search(filters: Annotated[Filters, Query()]):
+        return filters.model_dump()
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+    parameters = {p["name"]: p["schema"] for p in schema["paths"]["/search"]["get"]["parameters"]}
+
+    # THEN each field keeps its own type instead of collapsing to string
+    assert parameters["limit"] == {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+    assert parameters["tags"] == {"type": "array", "items": {"type": "string"}}
+    assert parameters["color"]["enum"] == ["red", "blue"]
+    assert parameters["color"]["type"] == "string"
+
+
+def test_openapi_query_model_arbitrary_type_falls_back_to_string():
+    # GIVEN a Pydantic model used as Query() with a field whose type has no JSON schema
+    class Opaque:
+        pass
+
+    class Filters(BaseModel):
+        model_config = ConfigDict(arbitrary_types_allowed=True)
+        token: Opaque
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/search")
+    def search(filters: Annotated[Filters, Query()]):
+        return {}
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+    parameters = {p["name"]: p["schema"] for p in schema["paths"]["/search"]["get"]["parameters"]}
+
+    # THEN the field is documented as a string rather than failing schema generation
+    assert parameters["token"] == {"type": "string"}
+
+
+def test_openapi_validation_error_schema_does_not_require_hidden_msg():
+    # GIVEN a resolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/")
+    def handler():
+        return {}
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the ValidationError component only requires the fields it actually exposes
+    validation_error = schema["components"]["schemas"]["ValidationError"]
+    assert validation_error["required"] == ["loc", "type"]
+    assert "msg" not in validation_error["properties"]
+
+
+def test_openapi_path_param_alias_matches_route_template():
+    # GIVEN a snake_case Python argument using Path(alias=...) to match a camelCase route placeholder
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/P/<camelId>")
+    def get_p(snake_id: Annotated[str, Path(alias="camelId")]):
+        return {"id": snake_id}
+
+    @app.get("/Q/<camelId>")
+    def get_q(camelId: Annotated[str, Path()]):
+        return {"id": camelId}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN both operations emit the route-template placeholder name in their path parameters
+    p_params = schema["paths"]["/P/{camelId}"]["get"]["parameters"]
+    q_params = schema["paths"]["/Q/{camelId}"]["get"]["parameters"]
+    assert [(p["name"], p["in"], p["required"]) for p in p_params] == [("camelId", "path", True)]
+    assert [(p["name"], p["in"], p["required"]) for p in q_params] == [("camelId", "path", True)]
+
+
+def test_openapi_path_param_validation_alias_matches_route_template():
+    # GIVEN a path parameter using validation_alias to match the route placeholder
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/orders/<orderId>")
+    def get_order(order_id: Annotated[str, Path(validation_alias="orderId")]):
+        return {"order_id": order_id}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the path parameter name matches the route placeholder
+    params = schema["paths"]["/orders/{orderId}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["orderId"]
+
+
+def test_openapi_path_param_alias_preserved_when_neither_matches_template():
+    # GIVEN a path parameter where neither the Python argument name nor the alias matches the route template
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/items/<item_id>")
+    def get_item(other_id: Annotated[str, Path(alias="customId")]):
+        return {"id": other_id}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the explicit alias is preserved rather than falling back to an equally non-matching argument name
+    params = schema["paths"]["/items/{item_id}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["customId"]
+
+
+def test_openapi_path_param_alias_with_included_router_prefix():
+    # GIVEN a Router mounted under a dynamic prefix where handler arguments use Path(alias=...)
+    app = APIGatewayRestResolver(enable_validation=True)
+    router = Router()
+
+    @router.get("/items/<itemId>")
+    def get_item(
+        org_id: Annotated[str, Path(alias="orgId")],
+        item_id: Annotated[int, Path(alias="itemId")],
+    ):
+        return {"org_id": org_id, "item_id": item_id}
+
+    app.include_router(router, prefix="/orgs/<orgId>")
+
+    # WHEN we generate the OpenAPI schema and invoke the route
+    schema = json.loads(app.get_openapi_json_schema())
+    result = app({"resource": "/orgs/{orgId}/items/{itemId}", "path": "/orgs/acme/items/7", "httpMethod": "GET"}, {})
+
+    # THEN schema parameters match both route placeholders and runtime validation succeeds
+    params = schema["paths"]["/orgs/{orgId}/items/{itemId}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["orgId", "itemId"]
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"org_id": "acme", "item_id": 7}

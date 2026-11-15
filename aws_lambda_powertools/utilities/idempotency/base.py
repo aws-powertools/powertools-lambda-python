@@ -159,7 +159,7 @@ class IdempotencyHandler:
                 data=self.data,
                 remaining_time_in_millis=self._get_remaining_time_in_millis(),
             )
-        except (IdempotencyKeyError, IdempotencyValidationError):
+        except (IdempotencyKeyError, IdempotencyValidationError, IdempotencyInconsistentStateError):
             raise
         except IdempotencyItemAlreadyExistsError as exc:
             # Attempt to retrieve the existing record, either from the exception ReturnValuesOnConditionCheckFailure
@@ -271,7 +271,7 @@ class IdempotencyHandler:
             raise IdempotencyAlreadyInProgressError(inprogress_error_message)
 
         response_dict = data_record.response_json_as_dict()
-        serialized_response = self.output_serializer.from_dict(response_dict) if response_dict else None
+        serialized_response = self.output_serializer.from_dict(response_dict) if response_dict is not None else None
 
         if self.config.response_hook:
             logger.debug("Response hook configured, invoking function")
@@ -296,7 +296,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                serialized_response: dict = self.output_serializer.to_dict(response) if response is not None else None
+                serialized_response: dict = self._serialize_response(response)
                 self.persistence_store.save_success(data=self.data, result=serialized_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
@@ -305,3 +305,14 @@ class IdempotencyHandler:
                 ) from save_exception
 
         return response
+
+    def _serialize_response(self, response: Any) -> Any:
+        if response is None:
+            return None
+        try:
+            return self.output_serializer.to_dict(response)
+        except Exception as serialize_exception:
+            # Nothing reached the persistence store yet, so clear the in progress record
+            # to let the next call with the same payload run the function again
+            self.persistence_store.delete_record(data=self.data, exception=serialize_exception)
+            raise

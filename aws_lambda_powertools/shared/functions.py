@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -55,6 +56,23 @@ def resolve_truthy_env_var_choice(env: str, choice: bool | None = None) -> bool:
         resolved choice as either bool or environment value
     """
     return choice if choice is not None else strtobool(env)
+
+
+def resolve_bool_env_var(env_var: str, default: bool = False) -> bool:
+    """Resolve a boolean environment variable, falling back to the default on an empty or unparsable value"""
+    value = os.getenv(env_var)
+    if value is None:
+        return default
+
+    try:
+        return strtobool(value)
+    except ValueError:
+        warnings.warn(
+            f"{env_var} has an unrecognised value {value!r}. Falling back to {default}.",
+            category=PowertoolsUserWarning,
+            stacklevel=3,
+        )
+        return default
 
 
 def resolve_max_age(env: str, choice: int | None) -> int:
@@ -121,7 +139,7 @@ def bytes_to_string(value: bytes) -> str:
 
 
 def powertools_dev_is_set() -> bool:
-    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "0"))
+    is_on = resolve_bool_env_var(constants.POWERTOOLS_DEV_ENV)
     if is_on:
         warnings.warn(
             "POWERTOOLS_DEV environment variable is enabled. Increasing verbosity across utilities.",
@@ -133,7 +151,7 @@ def powertools_dev_is_set() -> bool:
 
 
 def powertools_debug_is_set() -> bool:
-    is_on = strtobool(os.getenv(constants.POWERTOOLS_DEBUG_ENV, "0"))
+    is_on = resolve_bool_env_var(constants.POWERTOOLS_DEBUG_ENV)
     if is_on:
         warnings.warn("POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG.", stacklevel=2)
         return True

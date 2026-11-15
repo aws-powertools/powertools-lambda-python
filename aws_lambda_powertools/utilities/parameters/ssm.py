@@ -13,21 +13,24 @@ import boto3
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
-    resolve_max_age,
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
 from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
+    resolve_parameters_max_age,
     transform_value,
 )
 from aws_lambda_powertools.utilities.parameters.constants import (
-    DEFAULT_MAX_AGE_SECS,
     DEFAULT_PROVIDERS,
     SSM_PARAMETER_TIER,
     SSM_PARAMETER_TYPES,
 )
-from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
+from aws_lambda_powertools.utilities.parameters.exceptions import (
+    GetParameterError,
+    SetParameterError,
+    TransformParameterError,
+)
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -177,7 +180,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -231,7 +234,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -360,9 +363,14 @@ class SSMProvider(BaseProvider):
             opts["KeyId"] = kms_key_id
 
         try:
-            return self.client.put_parameter(**opts)
+            response = self.client.put_parameter(**opts)
         except Exception as exc:
             raise SetParameterError(f"Error setting parameter - {str(exc)}") from exc
+
+        # Remove any cached value for this parameter so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
@@ -481,7 +489,7 @@ class SSMProvider(BaseProvider):
         """
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
@@ -532,7 +540,7 @@ class SSMProvider(BaseProvider):
         for parameter, options in batch.items():
             try:
                 response[parameter] = self.get(parameter, options["max_age"], options["transform"], options["decrypt"])
-            except GetParameterError:
+            except (GetParameterError, TransformParameterError):
                 if raise_on_error:
                     raise
                 errors.append(parameter)
@@ -563,7 +571,13 @@ class SSMProvider(BaseProvider):
         """Fetch each parameter from batch that hasn't been expired"""
         cache = {}
         for name, options in batch.items():
-            cache_key = (name, options["transform"])
+            # Same key shape as get() so both paths share cache entries; decrypt changes the value,
+            # so a SecureString fetched with decrypt must never be served to a call without it
+            cache_key = self._build_cache_key(
+                name=name,
+                transform=options["transform"],
+                sdk_options={"decrypt": options["decrypt"]},
+            )
             if self.has_not_expired_in_cache(cache_key):
                 cache[name] = self.store[cache_key].value
 
@@ -622,21 +636,25 @@ class SSMProvider(BaseProvider):
         batch_errors: list[str] = []
         parameter_names = list(parameters.keys())
 
-        # All params in the batch must be decrypted
-        # we return early if we hit an unrecoverable exception like InvalidKeyId/InternalServerError
-        # everything else should technically be recoverable as GetParameters is non-atomic
+        # Handle request-level failures according to raise_on_error.
+        # Successful responses may still report failures in InvalidParameters.
         try:
             if decrypt:
                 response = self.client.get_parameters(Names=parameter_names, WithDecryption=True)
             else:
                 response = self.client.get_parameters(Names=parameter_names)
-        except (self.client.exceptions.InvalidKeyId, self.client.exceptions.InternalServerError) as exc:
+        except Exception as exc:
             if raise_on_error:
-                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}") from exc
+                raise GetParameterError(f"Failed to fetch parameters: {parameter_names}: {exc}") from exc
             return ret, parameter_names
 
         batch_errors = self._handle_any_invalid_get_parameter_errors(response, raise_on_error)
-        transformed_params = self._transform_and_cache_get_parameters_response(response, parameters, raise_on_error)
+        transformed_params, transform_errors = self._transform_and_cache_get_parameters_response(
+            response,
+            parameters,
+            raise_on_error,
+        )
+        batch_errors.extend(transform_errors)
 
         return transformed_params, batch_errors
 
@@ -645,8 +663,9 @@ class SSMProvider(BaseProvider):
         api_response: GetParametersResultTypeDef,
         parameters: dict[str, Any],
         raise_on_error: bool = True,
-    ) -> dict[str, Any]:
+    ) -> tuple[dict[str, Any], list[str]]:
         response: dict[str, Any] = {}
+        transform_errors: list[str] = []
 
         for parameter in api_response["Parameters"]:
             # For names with a version or label selector (e.g. "/a:prod"), SSM returns the bare name
@@ -658,19 +677,32 @@ class SSMProvider(BaseProvider):
 
             # NOTE: If transform is set, we do it before caching to reduce number of operations
             if transform:
-                value = transform_value(
-                    value=value,
-                    transform=transform,
-                    raise_on_transform_error=raise_on_error,
-                    key=name,
-                )  # type: ignore[assignment]
+                try:
+                    value = transform_value(
+                        value=value,
+                        transform=transform,
+                        raise_on_transform_error=True,
+                        key=name,
+                    )  # type: ignore[assignment]
+                except TransformParameterError:
+                    if raise_on_error:
+                        raise
 
-            _cache_key = (name, transform)
+                    # NOTE: Don't cache failed transforms, otherwise a corrected parameter
+                    # would keep returning None from the cache until max_age expires
+                    transform_errors.append(name)
+                    continue
+
+            _cache_key = self._build_cache_key(
+                name=name,
+                transform=transform,
+                sdk_options={"decrypt": options["decrypt"]},
+            )
             self.add_to_cache(key=_cache_key, value=value, max_age=options["max_age"])
 
             response[name] = value
 
-        return response
+        return response, transform_errors
 
     @staticmethod
     def _handle_any_invalid_get_parameter_errors(
@@ -848,7 +880,7 @@ def get_parameter(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
@@ -986,7 +1018,7 @@ def get_parameters(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
@@ -1182,7 +1214,7 @@ def get_parameters_by_name(
     # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(

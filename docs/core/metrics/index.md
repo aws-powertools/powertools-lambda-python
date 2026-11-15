@@ -418,6 +418,15 @@ Current providers:
 | ---------------------------------------- | -------------------------------------------------------- |
 | [Datadog](./datadog.md){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
 
+### CloudWatch Omni
+
+[CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/){target="_blank"} reads the same metrics you already publish to CloudWatch, so metrics emitted with this utility are available in your Omni space without changes. The EMF blob Metrics writes to the log is turned into CloudWatch metrics by the Lambda service, and those are what Omni dashboards and alerts use.
+
+Two things help on the Omni side:
+
+* Keep the `service` dimension set, through `Metrics(service=...)` or `POWERTOOLS_SERVICE_NAME`, and use the same value in Logger and Tracer. Omni correlates telemetry by service.
+* Use the `namespace` and dimension names you would want to see in a query. Omni queries metrics by namespace and dimensions, the same way CloudWatch does.
+
 ## Testing your code
 
 ### Setting environment variables

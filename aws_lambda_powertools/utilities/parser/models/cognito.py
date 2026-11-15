@@ -6,7 +6,7 @@ from pydantic import BaseModel
 # Common context model for Cognito triggers
 class CognitoCallerContextModel(BaseModel):
     awsSdkVersion: str
-    clientId: str
+    clientId: str | None = None
 
 
 # Base model for all Cognito triggers
@@ -33,7 +33,7 @@ class CognitoPreSignupResponseModel(BaseModel):
 
 
 class CognitoPreSignupTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["PreSignUp_SignUp"]
+    triggerSource: Literal["PreSignUp_SignUp", "PreSignUp_AdminCreateUser", "PreSignUp_ExternalProvider"]
     request: CognitoPreSignupRequestModel
     response: CognitoPreSignupResponseModel
 
@@ -45,7 +45,7 @@ class CognitoPostConfirmationRequestModel(BaseModel):
 
 
 class CognitoPostConfirmationTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["PostConfirmation_ConfirmSignUp"]
+    triggerSource: Literal["PostConfirmation_ConfirmSignUp", "PostConfirmation_ConfirmForgotPassword"]
     request: CognitoPostConfirmationRequestModel
     response: dict[str, Any] = {}
 
@@ -157,18 +157,36 @@ class CognitoCustomEmailSMSSenderRequestModel(BaseModel):
 
 
 class CognitoCustomEmailSenderTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["CustomEmailSender_SignUp"]
+    triggerSource: Literal[
+        "CustomEmailSender_SignUp",
+        "CustomEmailSender_ResendCode",
+        "CustomEmailSender_ForgotPassword",
+        "CustomEmailSender_UpdateUserAttribute",
+        "CustomEmailSender_VerifyUserAttribute",
+        "CustomEmailSender_AdminCreateUser",
+        "CustomEmailSender_Authentication",
+        "CustomEmailSender_AccountTakeOverNotification",
+    ]
     request: CognitoCustomEmailSMSSenderRequestModel
 
 
 class CognitoCustomSMSSenderTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["CustomSMSSender_SignUp"]
+    triggerSource: Literal[
+        "CustomSMSSender_SignUp",
+        "CustomSMSSender_ResendCode",
+        "CustomSMSSender_ForgotPassword",
+        "CustomSMSSender_UpdateUserAttribute",
+        "CustomSMSSender_VerifyUserAttribute",
+        "CustomSMSSender_AdminCreateUser",
+        "CustomSMSSender_Authentication",
+    ]
     request: CognitoCustomEmailSMSSenderRequestModel
 
 
 # Models for Challenge Authentication flows
 class CognitoChallengeResultModel(BaseModel):
     challengeName: Literal[
+        "CUSTOM_CHALLENGE",
         "SRP_A",
         "PASSWORD_VERIFIER",
         "SMS_MFA",
@@ -222,7 +240,7 @@ class CognitoVerifyAuthChallengeRequestModel(BaseModel):
 
 
 class CognitoVerifyAuthChallengeResponseModel(BaseModel):
-    answerCorrect: bool
+    answerCorrect: bool | None = None
 
 
 class CognitoVerifyAuthChallengeTriggerModel(CognitoTriggerBaseSchema):

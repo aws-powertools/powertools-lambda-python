@@ -102,6 +102,7 @@ def reset_local_counters():
     base_module._LOCAL_FAILURES.clear()
     base_module._LOCAL_SUCCESSES.clear()
     base_module._LAST_OBSERVED_STATE.clear()
+    base_module._PROBES_IN_FLIGHT.clear()
     yield
     base_module._LOCAL_FAILURES.clear()
     base_module._LOCAL_SUCCESSES.clear()

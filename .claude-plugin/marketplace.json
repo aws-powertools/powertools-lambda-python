@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "aws-powertools",
+  "description": "Powertools for AWS Lambda (Python) skills for coding agents.",
+  "owner": {
+    "name": "Powertools for AWS Lambda",
+    "email": "aws-powertools-maintainers@amazon.com"
+  },
+  "plugins": [
+    {
+      "name": "powertools-lambda-python",
+      "description": "Build AWS Lambda functions in Python with Powertools for AWS Lambda (Python): logging, tracing, metrics, event handlers, idempotency, batch processing, parameters, parsing and validation.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Powertools for AWS Lambda",
+        "email": "aws-powertools-maintainers@amazon.com"
+      },
+      "source": "./.agents",
+      "category": "development",
+      "homepage": "https://docs.powertools.aws.dev/lambda/python/latest/getting-started/coding-agent-skills/"
+    }
+  ]
+}

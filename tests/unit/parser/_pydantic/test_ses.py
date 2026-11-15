@@ -1,3 +1,5 @@
+import pytest
+
 from aws_lambda_powertools.utilities.parser.models import SesModel, SesRecordModel
 from tests.functional.utils import load_event
 
@@ -117,3 +119,45 @@ def test_ses_trigger_event_with_optional_common_headers():
     assert common_headers.bcc == ["bcc@example.com"]
     assert common_headers.sender == ["sender@example.com"]
     assert common_headers.reply_to == ["reply@example.com"]
+
+
+@pytest.mark.parametrize("invocation_type", ["Event", "RequestResponse"])
+def test_ses_trigger_event_with_invocation_type(invocation_type):
+    # GIVEN an SES event from a Lambda action with either documented invocation type
+    raw_event = load_event("sesEvent.json")
+    raw_event["Records"][0]["ses"]["receipt"]["action"]["invocationType"] = invocation_type
+
+    # WHEN parsing the event
+    action = SesModel(**raw_event).Records[0].ses.receipt.action
+
+    # THEN the invocation type is kept
+    assert action.invocationType == invocation_type
+
+
+def test_ses_trigger_event_without_invocation_type():
+    # GIVEN an SES event whose Lambda action has no invocation type
+    raw_event = load_event("sesEvent.json")
+    del raw_event["Records"][0]["ses"]["receipt"]["action"]["invocationType"]
+
+    # WHEN parsing the event
+    action = SesModel(**raw_event).Records[0].ses.receipt.action
+
+    # THEN the invocation type is None
+    assert action.invocationType is None
+
+
+def test_ses_trigger_event_without_common_headers():
+    # GIVEN an SES event for an email without any common headers (SES only sends the ones the email has)
+    raw_event = load_event("sesEvent.json")
+    raw_event["Records"][0]["ses"]["mail"]["commonHeaders"] = {}
+
+    # WHEN parsing the event
+    common_headers = SesModel(**raw_event).Records[0].ses.mail.commonHeaders
+
+    # THEN every common header is None
+    assert common_headers.header_from is None
+    assert common_headers.to is None
+    assert common_headers.returnPath is None
+    assert common_headers.messageId is None
+    assert common_headers.date is None
+    assert common_headers.subject is None

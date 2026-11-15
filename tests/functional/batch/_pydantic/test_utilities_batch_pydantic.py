@@ -29,6 +29,7 @@ from aws_lambda_powertools.utilities.parser.models import (
 from aws_lambda_powertools.utilities.parser.types import Literal
 from tests.functional.batch._pydantic.sample_models import (
     OrderDynamoDBRecord,
+    OrderIdSqs,
     OrderKinesisRecord,
     OrderSqs,
 )
@@ -486,6 +487,34 @@ def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error_and_model(
     assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
 
 
+@pytest.mark.parametrize("skip_group_on_error", [False, True])
+def test_sqs_fifo_batch_processor_model_with_validation_error_after_failure(
+    skip_group_on_error: bool,
+    record_handler_model: Callable,
+    sqs_event_fifo_factory,
+    order_event_factory,
+):
+    # GIVEN a malformed record that is short-circuited because a previous record of its group failed
+    first_record = sqs_event_fifo_factory(order_event_factory({"type": "success"}), "2")
+    failed_record = sqs_event_fifo_factory(order_event_factory({"type": "fail"}), "1")
+    malformed_record = sqs_event_fifo_factory(json.dumps({"poison": "pill"}), "1")
+    fourth_record = sqs_event_fifo_factory(order_event_factory({"type": "success"}), "2")
+    records = [first_record, failed_record, malformed_record, fourth_record]
+
+    # WHEN
+    processor = SqsFifoPartialProcessor(model=OrderSqs, skip_group_on_error=skip_group_on_error)
+    with processor(records, record_handler_model) as batch:
+        batch.process()
+
+    # THEN the malformed record is reported instead of failing the whole batch
+    expected_failures = [failed_record, malformed_record]
+    if not skip_group_on_error:
+        expected_failures.append(fourth_record)
+    assert batch.response() == {
+        "batchItemFailures": [{"itemIdentifier": record["messageId"]} for record in expected_failures],
+    }
+
+
 def test_batch_processor_model_with_partial_validation_error(
     record_handler_model: Callable,
     sqs_event_factory,
@@ -510,6 +539,51 @@ def test_batch_processor_model_with_partial_validation_error(
             {"itemIdentifier": malformed_record["messageId"]},
         ],
     }
+
+
+def test_batch_processor_model_with_non_validation_error_during_conversion(sqs_event_factory):
+    # GIVEN a model whose validator raises an exception Pydantic doesn't wrap in a ValidationError
+    first_record = sqs_event_factory(json.dumps({"order_id": 1}))
+    malformed_record = sqs_event_factory(json.dumps({"unexpected": 1}))
+    second_record = sqs_event_factory(json.dumps({"order_id": 2}))
+    records = [first_record, malformed_record, second_record]
+
+    # WHEN
+    processor = BatchProcessor(event_type=EventType.SQS, model=OrderIdSqs)
+    with processor(records, lambda record: record.body) as batch:
+        batch.process()
+
+    # THEN only the malformed record is reported, with the original exception
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["messageId"]},
+        ],
+    }
+    assert batch.exceptions[0][0] is KeyError
+
+
+def test_async_batch_processor_model_with_non_validation_error_during_conversion(sqs_event_factory):
+    # GIVEN a model whose validator raises an exception Pydantic doesn't wrap in a ValidationError
+    first_record = sqs_event_factory(json.dumps({"order_id": 1}))
+    malformed_record = sqs_event_factory(json.dumps({"unexpected": 1}))
+    second_record = sqs_event_factory(json.dumps({"order_id": 2}))
+    records = [first_record, malformed_record, second_record]
+
+    async def async_record_handler(record):
+        return record.body
+
+    # WHEN
+    processor = AsyncBatchProcessor(event_type=EventType.SQS, model=OrderIdSqs)
+    with processor(records, async_record_handler) as batch:
+        batch.async_process()
+
+    # THEN only the malformed record is reported, with the original exception
+    assert batch.response() == {
+        "batchItemFailures": [
+            {"itemIdentifier": malformed_record["messageId"]},
+        ],
+    }
+    assert batch.exceptions[0][0] is KeyError
 
 
 def test_batch_processor_dynamodb_context_model_with_partial_validation_error(

@@ -112,7 +112,8 @@ class Cookie:
         if self.secure:
             payload.write("; Secure")
 
-        if self.same_site:
+        # DEFAULT_MODE leaves the attribute out, so the browser applies its own default
+        if self.same_site and self.same_site.value:
             payload.write(f"; SameSite={self.same_site.value}")
 
         if self.custom_attributes:

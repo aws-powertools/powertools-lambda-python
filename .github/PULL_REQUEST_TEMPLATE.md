@@ -11,6 +11,11 @@
 
 > Please share what the user experience looks like before and after this change
 
+### Verification
+
+> How did you verify this change? Tests you ran yourself, and the real AWS service or event you validated against when it applies.
+> If you used an AI assistant to write any part of this PR, say so here. That is welcome; what we ask is the verification above, done by you.
+
 <!-------
 Before creating the pull request, please make sure you do the following:
 

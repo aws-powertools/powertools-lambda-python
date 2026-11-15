@@ -418,3 +418,39 @@ def test_bedrock_agent_with_custom_serializer_preserves_non_ascii():
     body = result["response"]["responseBody"]["application/json"]["body"]
     assert "잔액은 1,000원입니다 💰" in body
     assert json.loads(body) == {"output": "잔액은 1,000원입니다 💰"}
+
+
+def test_bedrock_agent_ignores_non_path_params_when_validation_is_off():
+    # GIVEN a Bedrock Agent event with a parameter that is not a path parameter
+    event = load_event("bedrockAgentEventWithPathParams.json")
+    event["parameters"] = [*event["parameters"], {"type": "string", "name": "verbose", "value": "true"}]
+
+    app = BedrockAgentResolver(enable_validation=False)
+
+    @app.get("/claims/<claim_id>", description="Gets claims by ID")
+    def claims(claim_id: str):
+        return {"claim_id": claim_id}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN only path parameters are injected as kwargs and the handler resolves
+    assert result["response"]["httpStatusCode"] == 200
+    body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
+    assert body == {"claim_id": "123"}
+
+
+def test_bedrock_agent_response_without_content_type_defaults_to_json():
+    # GIVEN a handler returning a Response without a content type
+    app = BedrockAgentResolver(enable_validation=False)
+
+    @app.get("/claims", description="Gets claims")
+    def claims():
+        return Response(status_code=200, body="ok")
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN the response body media type defaults to application/json instead of "null"
+    assert "null" not in result["response"]["responseBody"]
+    assert result["response"]["responseBody"]["application/json"]["body"] == "ok"

@@ -13,10 +13,10 @@ import boto3
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     resolve_env_var_choice,
-    resolve_max_age,
 )
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider
-from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider, resolve_parameters_max_age
+from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
 from aws_lambda_powertools.warnings import PowertoolsDeprecationWarning
 
 if TYPE_CHECKING:
@@ -179,6 +179,11 @@ class AppConfigProvider(BaseProvider):
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
             self.last_returned_value[name] = return_value
+        elif name not in self.last_returned_value:
+            raise GetParameterError(
+                f"Configuration '{name}' is empty and no cached value is available "
+                f"for application '{self.application}' in environment '{self.environment}'",
+            )
 
         return self.last_returned_value[name]
 
@@ -256,7 +261,7 @@ def get_app_config(
         My configuration's JSON value
     """
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # One provider per environment/application pair, created on first use
     provider_key = f"appconfig:{environment}:{application}"

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import TypeAdapter
 
@@ -26,5 +26,6 @@ class PydanticOutputSerializer(OutputSerializerBase):
     def serialize(self, data: dict[str, Any], output: type[T] | Callable | None = None) -> T | dict[str, Any]:
         logger.debug("Serializing output data with PydanticOutputSerializer")
         # Use TypeAdapter for better support of Union types and other complex types
-        adapter: TypeAdapter = TypeAdapter(output)
+        # pydantic 2.14 types the TypeAdapter argument as TypeForm; our output can also be a callable
+        adapter: TypeAdapter[Any] = TypeAdapter(cast("Any", output))
         return adapter.validate_python(data)

@@ -20,35 +20,35 @@ class SESMailHeader(DictWrapper):
 
 class SESMailCommonHeaders(DictWrapper):
     @property
-    def return_path(self) -> str:
+    def return_path(self) -> str | None:
         """The values in the Return-Path header of the email."""
-        return self["returnPath"]
+        return self.get("returnPath")
 
     @property
     def get_from(self) -> list[str]:
         """The values in the From header of the email."""
         # Note: this name conflicts with existing python builtins
-        return self["from"]
+        return self.get("from") or []
 
     @property
-    def date(self) -> str:
+    def date(self) -> str | None:
         """The date and time when Amazon SES received the message."""
-        return self["date"]
+        return self.get("date")
 
     @property
     def to(self) -> list[str]:
         """The values in the To header of the email."""
-        return self["to"]
+        return self.get("to") or []
 
     @property
-    def message_id(self) -> str:
+    def message_id(self) -> str | None:
         """The ID of the original message."""
-        return str(self["messageId"])
+        return self.get("messageId")
 
     @property
-    def subject(self) -> str:
+    def subject(self) -> str | None:
         """The value of the Subject header for the email."""
-        return str(self["subject"])
+        return self.get("subject")
 
     @property
     def cc(self) -> list[str]:
@@ -148,10 +148,10 @@ class SESReceiptAction(DictWrapper):
         return self["functionArn"]
 
     @property
-    def invocation_type(self) -> str:
+    def invocation_type(self) -> str | None:
         """String that contains the invocation type of the Lambda function. Possible values are RequestResponse
         and Event. Present only for the Lambda action type."""
-        return self["invocationType"]
+        return self.get("invocationType")
 
 
 class SESReceipt(DictWrapper):

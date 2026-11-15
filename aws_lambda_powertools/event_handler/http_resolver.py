@@ -12,6 +12,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ProxyEventType,
 )
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 
 if TYPE_CHECKING:
@@ -66,10 +67,15 @@ class HttpProxyEvent(BaseProxyEvent):
             multi_query_params = parsed
             query_params = {k: v[-1] for k, v in parsed.items()}
 
-        # Normalize body to string
-        body_str = None
-        if body is not None:
-            body_str = body.decode("utf-8") if isinstance(body, bytes) else body
+        # Normalize body to string, base64 if not UTF-8
+        body_str = body
+        is_base64_encoded = False
+        if isinstance(body, bytes):
+            try:
+                body_str = body.decode("utf-8")
+            except UnicodeDecodeError:
+                body_str = base64.b64encode(body).decode("ascii")
+                is_base64_encoded = True
 
         # Build the internal dict structure that BaseProxyEvent expects
         data = {
@@ -77,7 +83,7 @@ class HttpProxyEvent(BaseProxyEvent):
             "path": path,
             "headers": headers or {},
             "body": body_str,
-            "isBase64Encoded": False,
+            "isBase64Encoded": is_base64_encoded,
             "queryStringParameters": query_params,
             "multiValueQueryStringParameters": multi_query_params,
             "pathParameters": path_parameters or {},
@@ -226,6 +232,8 @@ class HttpResolverLocal(ApiGatewayResolver):
             strip_prefixes=strip_prefixes,
             enable_validation=enable_validation,
         )
+        # ASGI servers inspect app.__call__ to detect an ASGI3 app
+        self.__call__ = self.asgi_handler  # type: ignore[method-assign]
 
     @property
     def _state(self) -> _RequestState:
@@ -268,7 +276,17 @@ class HttpResolverLocal(ApiGatewayResolver):
         self._state.processed_stack_frames = value
 
     def _to_proxy_event(self, event: dict) -> BaseProxyEvent:
-        """Convert event dict to HttpProxyEvent."""
+        """Map a Lambda event to its data class, or an ASGI-built dict to HttpProxyEvent.
+
+        The data class decides the response shape: REST API needs `multiValueHeaders` and rejects
+        a `cookies` key, HTTP API and Function URL expect `headers` and `cookies`.
+        """
+        if event.get("version") == "2.0" and "httpMethod" not in event:
+            return APIGatewayProxyEventV2(event, self._json_body_deserializer)
+
+        if "resource" in event and "multiValueHeaders" in event:
+            return APIGatewayProxyEvent(event, self._json_body_deserializer)
+
         # Create HttpProxyEvent directly from the dict data
         # The dict already has queryStringParameters and multiValueQueryStringParameters
         return HttpProxyEvent._from_dict(event)
@@ -345,14 +363,11 @@ class HttpResolverLocal(ApiGatewayResolver):
         # Send HTTP response
         await self._send_response(send, response)
 
-    async def __call__(  # type: ignore[override]
-        self,
-        scope: MutableMapping[str, Any],
-        receive: Callable,
-        send: Callable,
-    ) -> None:
-        """ASGI interface - allows running with uvicorn/hypercorn/etc."""
-        await self.asgi_handler(scope, receive, send)
+    def __call__(self, *args: Any) -> Any:
+        """Lambda handler or ASGI app, depending on the arguments."""
+        if len(args) == 3:
+            return self.asgi_handler(*args)
+        return self.resolve(*args)
 
     async def _send_response(self, send: Callable, response: dict) -> None:
         """Send the response via ASGI."""
