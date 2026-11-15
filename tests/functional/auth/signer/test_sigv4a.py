@@ -32,3 +32,16 @@ def test_sigv4a_rejects_an_empty_region_set(lambda_env):
 
     with pytest.raises(SignerConfigError, match="region_set cannot be empty"):
         SigV4aSigner(service="execute-api", region_set=[])
+
+
+def test_sigv4a_without_awscrt_points_to_the_extra(lambda_env, monkeypatch):
+    import sys
+
+    from aws_lambda_powertools.utilities.auth import SigV4aSigner
+
+    # GIVEN an environment where botocore's CRT signers cannot be imported
+    monkeypatch.setitem(sys.modules, "botocore.crt.auth", None)
+
+    # THEN construction fails with the install hint, before any request is signed
+    with pytest.raises(SignerConfigError, match=r"auth-sigv4a"):
+        SigV4aSigner(service="s3", region_set="*")

@@ -261,3 +261,43 @@ def test_httpx_auth_sends_the_canonical_url(lambda_env, frozen_clock):
         client.get(API_URL, params=[("status", "open"), ("status", "paid"), ("q", "a b")])
 
     assert seen["url"] == f"{API_URL}?status=open&status=paid&q=a%20b"
+
+
+def test_session_without_credentials_fails_at_construction(lambda_env):
+    class EmptySession:
+        def get_credentials(self):
+            return None
+
+    with pytest.raises(SignerConfigError, match="the session has no credentials"):
+        SigV4Signer(service="execute-api", session=EmptySession())
+
+
+def test_requests_auth_signs_a_text_body(lambda_env, frozen_clock):
+    requests = pytest.importorskip("requests")
+
+    # GIVEN a form-style text body, which requests keeps as str
+    prepared = requests.Request(
+        "POST",
+        API_URL,
+        data="name=powertools",
+        auth=SigV4Signer(service="execute-api").requests_auth(),
+    ).prepare()
+
+    # THEN it is signed over the encoded bytes of that text
+    expected = reference_signature(
+        "POST",
+        API_URL,
+        {k: v for k, v in prepared.headers.items() if k not in ("Authorization", "X-Amz-Date", "X-Amz-Security-Token")},
+        b"name=powertools",
+        "execute-api",
+        "us-east-1",
+    )
+    assert prepared.headers["Authorization"] == expected["Authorization"]
+
+
+def test_signer_package_exposes_only_its_public_names():
+    from aws_lambda_powertools.utilities.auth import signer
+
+    assert {"SigV4Signer", "SigV4aSigner", "SignedRequest"} <= set(dir(signer))
+    with pytest.raises(AttributeError, match="has no attribute 'unknown'"):
+        _ = signer.unknown
