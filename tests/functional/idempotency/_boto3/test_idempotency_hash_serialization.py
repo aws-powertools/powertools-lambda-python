@@ -238,7 +238,7 @@ def test_new_types_support_persistent_replay_and_payload_validation(
         stubber.assert_no_pending_responses()
 
 
-@pytest.mark.parametrize("value", [b"bytes", {1, 2}, complex(1, 2)], ids=["bytes", "set", "complex"])
+@pytest.mark.parametrize("value", [complex(1, 2)], ids=["complex"])
 def test_unsupported_key_types_still_raise(persistence_store, lambda_context, value):
     @idempotent_function(
         data_keyword_argument="payload",
@@ -253,4 +253,77 @@ def test_unsupported_key_types_still_raise(persistence_store, lambda_context, va
             process(payload=Payload("order-1", value))
         assert isinstance(error.value.__cause__, TypeError)
         assert "is not JSON serializable" in str(error.value.__cause__)
+        stubber.assert_no_pending_responses()
+
+
+@pytest.mark.parametrize("as_dataclass", [True, False], ids=["dataclass", "dict"])
+def test_set_frozenset_and_bytes_support(
+    persistence_store,
+    lambda_context,
+    timestamp_future,
+    as_dataclass,
+):
+    """Asserts that sets, frozensets with different insertion orders produce the same key, and bytes work."""
+    # Payload 1 with set and frozenset in one insertion order
+    value_1 = {
+        "tags": {"b", "a", "c"},
+        "frozen_tags": frozenset(["z", "y"]),
+        "token": b"secret-token",
+    }
+    payload_1 = Payload("order-1", value_1)
+
+    # Payload 2 with the exact same set and frozenset in a DIFFERENT insertion order
+    value_2 = {
+        "tags": {"c", "a", "b"},
+        "frozen_tags": frozenset(["y", "z"]),
+        "token": b"secret-token",
+    }
+    payload_2 = Payload("order-1", value_2)
+
+    prepared_value = {
+        "tags": ["a", "b", "c"],
+        "frozen_tags": ["y", "z"],
+        "token": "c2VjcmV0LXRva2Vu",
+    }
+
+    config = IdempotencyConfig(
+        event_key_jmespath="order_id",
+        payload_validation_jmespath="value",
+        lambda_context=lambda_context,
+        use_local_cache=False,
+    )
+
+    @idempotent_function(
+        data_keyword_argument="payload",
+        persistence_store=persistence_store,
+        config=config,
+        key_prefix="orders",
+    )
+    def process(payload):
+        return {"status": "already processed"}
+
+    expected_update = build_idempotency_update_item_stub("order-1", {"status": "already processed"})
+    expected_update["Key"]["id"] = {"S": f"orders#{hash_idempotency_key('order-1')}"}
+    expected_update["ExpressionAttributeNames"]["#validation_key"] = "validation"
+    expected_update["ExpressionAttributeValues"][":validation_key"] = {"S": hash_idempotency_key(prepared_value)}
+    expected_update["UpdateExpression"] += ", #validation_key = :validation_key"
+
+    with stub.Stubber(persistence_store.client) as stubber:
+        # Test first insertion order (puts item into the store)
+        stubber.add_response("put_item", {}, _expected_put("order-1", prepared_value))
+        stubber.add_response("update_item", {}, expected_update)
+
+        request_1 = payload_1 if as_dataclass else dataclasses.asdict(payload_1)
+        assert process(payload=request_1) == {"status": "already processed"}
+
+        # Test second insertion order (produces the exact same hash/key, successfully reusing the record)
+        stubber.add_client_error(
+            "put_item",
+            "ConditionalCheckFailedException",
+            modeled_fields=_completed_record("order-1", prepared_value, timestamp_future),
+            expected_params=_expected_put("order-1", prepared_value),
+        )
+        request_2 = payload_2 if as_dataclass else dataclasses.asdict(payload_2)
+        assert process(payload=request_2) == {"status": "already processed"}
+
         stubber.assert_no_pending_responses()

@@ -20,6 +20,7 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Header,
     Param,
     ParamTypes,
+    Path,
     Query,
     _create_model_field,
 )
@@ -1743,3 +1744,82 @@ def test_openapi_validation_error_schema_does_not_require_hidden_msg():
     validation_error = schema["components"]["schemas"]["ValidationError"]
     assert validation_error["required"] == ["loc", "type"]
     assert "msg" not in validation_error["properties"]
+
+
+def test_openapi_path_param_alias_matches_route_template():
+    # GIVEN a snake_case Python argument using Path(alias=...) to match a camelCase route placeholder
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/P/<camelId>")
+    def get_p(snake_id: Annotated[str, Path(alias="camelId")]):
+        return {"id": snake_id}
+
+    @app.get("/Q/<camelId>")
+    def get_q(camelId: Annotated[str, Path()]):
+        return {"id": camelId}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN both operations emit the route-template placeholder name in their path parameters
+    p_params = schema["paths"]["/P/{camelId}"]["get"]["parameters"]
+    q_params = schema["paths"]["/Q/{camelId}"]["get"]["parameters"]
+    assert [(p["name"], p["in"], p["required"]) for p in p_params] == [("camelId", "path", True)]
+    assert [(p["name"], p["in"], p["required"]) for p in q_params] == [("camelId", "path", True)]
+
+
+def test_openapi_path_param_validation_alias_matches_route_template():
+    # GIVEN a path parameter using validation_alias to match the route placeholder
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/orders/<orderId>")
+    def get_order(order_id: Annotated[str, Path(validation_alias="orderId")]):
+        return {"order_id": order_id}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the path parameter name matches the route placeholder
+    params = schema["paths"]["/orders/{orderId}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["orderId"]
+
+
+def test_openapi_path_param_alias_preserved_when_neither_matches_template():
+    # GIVEN a path parameter where neither the Python argument name nor the alias matches the route template
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/items/<item_id>")
+    def get_item(other_id: Annotated[str, Path(alias="customId")]):
+        return {"id": other_id}
+
+    # WHEN we generate the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+
+    # THEN the explicit alias is preserved rather than falling back to an equally non-matching argument name
+    params = schema["paths"]["/items/{item_id}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["customId"]
+
+
+def test_openapi_path_param_alias_with_included_router_prefix():
+    # GIVEN a Router mounted under a dynamic prefix where handler arguments use Path(alias=...)
+    app = APIGatewayRestResolver(enable_validation=True)
+    router = Router()
+
+    @router.get("/items/<itemId>")
+    def get_item(
+        org_id: Annotated[str, Path(alias="orgId")],
+        item_id: Annotated[int, Path(alias="itemId")],
+    ):
+        return {"org_id": org_id, "item_id": item_id}
+
+    app.include_router(router, prefix="/orgs/<orgId>")
+
+    # WHEN we generate the OpenAPI schema and invoke the route
+    schema = json.loads(app.get_openapi_json_schema())
+    result = app({"resource": "/orgs/{orgId}/items/{itemId}", "path": "/orgs/acme/items/7", "httpMethod": "GET"}, {})
+
+    # THEN schema parameters match both route placeholders and runtime validation succeeds
+    params = schema["paths"]["/orgs/{orgId}/items/{itemId}"]["get"]["parameters"]
+    assert [p["name"] for p in params] == ["orgId", "itemId"]
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"org_id": "acme", "item_id": 7}

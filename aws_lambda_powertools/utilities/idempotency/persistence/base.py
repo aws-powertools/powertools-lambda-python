@@ -4,6 +4,7 @@ Persistence layers supporting idempotency
 
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import hashlib
 import json
@@ -31,6 +32,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     DataRecord,
 )
 from aws_lambda_powertools.utilities.jmespath_utils import PowertoolsFunctions
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -46,13 +48,24 @@ class _IdempotencyKeyEncoder(Encoder):
             # Preserve existing encodings, including Decimal subclasses mixed with Enum.
             return super().default(obj)
         except TypeError:
-            if isinstance(obj, Enum):
-                return obj.value
-            if isinstance(obj, (dt.date, dt.time)):
-                return obj.isoformat()
-            if isinstance(obj, (UUID, PurePath)):
-                return str(obj)
-            raise
+            return self._encode_custom_type(obj)
+
+    @staticmethod
+    def _encode_custom_type(obj: Any) -> Any:
+        if isinstance(obj, Enum):
+            return obj.value
+        if isinstance(obj, (dt.date, dt.time)):
+            return obj.isoformat()
+        if isinstance(obj, (UUID, PurePath)):
+            return str(obj)
+        if isinstance(obj, (set, frozenset)):
+            try:
+                return sorted(obj)
+            except TypeError:
+                return sorted(obj, key=repr)
+        if isinstance(obj, bytes):
+            return base64.b64encode(obj).decode("utf-8")
+        raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
 class BasePersistenceLayer(ABC):
@@ -73,6 +86,7 @@ class BasePersistenceLayer(ABC):
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
         self.hash_function = hashlib.md5
+        self._config_settings: tuple | None = None
 
     def configure(
         self,
@@ -96,10 +110,31 @@ class BasePersistenceLayer(ABC):
             key_prefix or f"{os.getenv(constants.LAMBDA_FUNCTION_NAME_ENV, 'test-func')}.{function_name or ''}"
         )
 
+        # Settings this layer applies from the config. lambda_context and response_hook are read per call instead.
+        config_settings = (
+            config.event_key_jmespath,
+            config.payload_validation_jmespath,
+            config.jmespath_options,
+            config.raise_on_no_idempotency_key,
+            config.expires_after_seconds,
+            config.use_local_cache,
+            config.local_cache_max_items,
+            config.hash_function,
+        )
+
         if self.configured:
             # Prevent being reconfigured multiple times
+            if config_settings != self._config_settings:
+                warnings.warn(
+                    f"This persistence layer is already configured with a different IdempotencyConfig, so "
+                    f"'{self.function_name}' will use the settings of the first one. "
+                    "Use a separate persistence layer instance for each IdempotencyConfig.",
+                    category=PowertoolsUserWarning,
+                    stacklevel=2,
+                )
             return
         self.configured = True
+        self._config_settings = config_settings
 
         self.event_key_jmespath = config.event_key_jmespath
         if config.event_key_jmespath:
@@ -299,7 +334,14 @@ class BasePersistenceLayer(ABC):
             # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
-        response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        try:
+            response_data = json.dumps(result, cls=Encoder, sort_keys=True)
+        except Exception as exc:
+            # Nothing was written yet, so clear the in progress record to let the next call
+            # with the same payload run the function again instead of failing as in progress.
+            # A failure while writing the record below keeps it, as the write may have landed.
+            self.delete_record(data=data, exception=exc)
+            raise
 
         data_record = DataRecord(
             idempotency_key=idempotency_key,

@@ -198,3 +198,18 @@ def test_apigw_event_authorizer_event():
 
     assert parsed_event.type == raw_event["type"]
     assert parsed_event.methodArn == raw_event["methodArn"]
+
+
+def test_apigw_event_with_lambda_authorizer_context():
+    raw_event = load_event("apiGatewayProxyEvent.json")
+    lambda_authorizer_event = load_event("apiGatewayProxyEventPrincipalId.json")
+    raw_event["requestContext"]["authorizer"] = lambda_authorizer_event["requestContext"]["authorizer"]
+
+    parsed_event: APIGatewayProxyEventModel = parse(event=raw_event, model=APIGatewayProxyEventModel)
+
+    authorizer = parsed_event.requestContext.authorizer
+    assert authorizer.principalId == "fake"
+    assert authorizer.integrationLatency == 451
+    assert authorizer.model_extra == {"user_id": "fake_username"}
+    assert authorizer.claims is None
+    assert authorizer.scopes is None

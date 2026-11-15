@@ -277,6 +277,9 @@ jobs:
 
       - name: Replace layer versions in documentation
         run: ./layer_v3/scripts/update_layer_arn_v3.sh ${{ inputs.layer_documentation_version }}
+      # The agent skill references are generated from the docs; regenerate them here so the release PR carries both
+      - name: Regenerate agent skill references
+        run: python3 scripts/build_agent_skill_references.py
       # NOTE: It felt unnecessary creating yet another PR to update changelog w/ latest tag
       # since this is the only step in the release where we update docs from a temp branch
       - name: Update changelog with latest tag
@@ -285,7 +288,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "docs/index.md docs/getting-started/install.md docs/includes/_layer_homepage_arm64.md docs/includes/_layer_homepage_x86.md examples CHANGELOG.md"
+          files: "docs/index.md docs/getting-started/install.md docs/includes/_layer_homepage_arm64.md docs/includes/_layer_homepage_x86.md examples CHANGELOG.md .agents/skills/building-lambda-functions-with-powertools-python/references"
           temp_branch_prefix: "ci-layer-docs"
           pull_request_title: "chore(ci): layer docs update"
           github_token: ${{ secrets.GITHUB_TOKEN }}

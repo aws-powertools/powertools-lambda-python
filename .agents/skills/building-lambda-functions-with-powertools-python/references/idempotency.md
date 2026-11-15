@@ -484,6 +484,10 @@ When using the `output_serializer` parameter, the data will continue to be store
 
 Function returns must be annotated with a single type, optionally wrapped in `Optional` or `Union` with `None`.
 
+Inference supports `from __future__ import annotations`. Define the output model at module scope so its name can be resolved when the function is decorated.
+If the model is local to another function, pass an explicit serializer instance, such as `PydanticSerializer(model=OrderOutput)` or `DataclassSerializer(model=OrderOutput)`.
+Containers such as `list[OrderOutput]` are not supported by these model serializers and raise `IdempotencyModelTypeError`.
+
 **Pydantic**
 
 Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
@@ -491,6 +495,8 @@ Use `PydanticSerializer` to automatically serialize what's retrieved from the pe
 **Inferring via the return type**
 
 ```python
+from __future__ import annotations
+
 import os
 
 from aws_lambda_powertools.utilities.idempotency import (
@@ -601,6 +607,8 @@ def lambda_handler(event: dict, context: LambdaContext):
 **Inferring via the return type**
 
 ```python
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 
@@ -1109,12 +1117,16 @@ This means that if an invocation expired during execution, it will be quickly ex
 
 ### Handling exceptions
 
-There are two failure modes that can cause new invocations to execute your code again despite having the same payload:
+There are three failure modes that can cause new invocations to execute your code again despite having the same payload:
 
 * **Unhandled exception**. We catch them to delete the idempotency record to prevent inconsistencies, then propagate them.
 * **Persistent layer errors**. We raise **`IdempotencyPersistenceLayerError`** for any persistence layer errors _e.g., remove idempotency record_.
+* **Response that can't be serialized**. When your function returns a value the output serializer or JSON can't convert _e.g., `datetime`, `set`, `bytes`_, we try to delete the in progress record, then raise **`IdempotencyPersistenceLayerError`**.
+  The next invocation runs your code again once that record is deleted, or after it expires if the deletion fails.
 
-If an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
+If saving the response fails after it was serialized, we keep the record, as the write could have landed. New invocations return the saved response or wait until the in progress record expires.
+
+Apart from a response that can't be serialized, if an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
 
 ```python title="working_with_exceptions.py"
 import os
@@ -1136,7 +1148,7 @@ config = IdempotencyConfig()
 
 @idempotent_function(data_keyword_argument="data", config=config, persistence_store=persistence_layer)
 def call_external_service(data: dict):
-    # Any exception raised will lead to idempotency record to be deleted
+    # Any exception raised, or a response that can't be serialized, will lead to idempotency record to be deleted
     result: requests.Response = requests.post(
         "https://jsonplaceholder.typicode.com/comments/",
         json=data,
@@ -2306,6 +2318,8 @@ For example, the `_put_record` method needs to raise an exception if a non-expir
 
 ### Manipulating the Idempotent Response
 
+With a DynamoDB composite key, `DataRecord.idempotency_key` contains the sort key value identifying the operation, rather than the shared static partition key. Replayed records use this same key for local caching.
+
 You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 **Using an Idempotent Response Hook**
@@ -2328,7 +2342,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
-    # Return inserted Header data into the Idempotent Response
+    # With a composite key, this is the operation's sort key, not the shared partition key
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 
     # expiry_timestamp can be None so include if set

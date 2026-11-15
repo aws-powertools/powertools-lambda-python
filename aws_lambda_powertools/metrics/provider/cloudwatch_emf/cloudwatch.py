@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import math
 import numbers
 import os
 import warnings
@@ -165,6 +166,14 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             metric_resolutions=self._metric_resolutions,
             resolution=resolution,
         )
+        if not math.isfinite(value):
+            warnings.warn(
+                f"The metric {name} has a non-finite value ({value}) and won't be added. "
+                "CloudWatch EMF only accepts finite numbers.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
         metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
