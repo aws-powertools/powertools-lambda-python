@@ -633,6 +633,34 @@ def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(
     assert len(logs) == 4
 
 
+def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_name(stdout):
+    # GIVEN a root logger configured with a handler (as in Lambda runtime)
+    root_stream = io.StringIO()
+    root_handler = logging.StreamHandler(root_stream)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(root_handler)
+
+    try:
+        # AND a Powertools logger with service "core"
+        Logger(service="core", stream=stdout)
+        child_logger = Logger(service="core", child=True, stream=stdout)
+        unrelated_logger = logging.getLogger("botocore")
+
+        # WHEN an unrelated logger whose name contains the service string logs a message
+        # AND a child logger of the Powertools logger logs a message
+        unrelated_logger.warning("credentials expire soon")
+        child_logger.warning("child message")
+
+        # THEN the unrelated logger must not be suppressed by the root handler's SuppressFilter
+        root_output = root_stream.getvalue()
+        assert "credentials expire soon" in root_output
+
+        # AND the genuine child logger must still be suppressed from bubbling to the root handler
+        assert "child message" not in root_output
+    finally:
+        root_logger.removeHandler(root_handler)
+
+
 def test_logger_exception_extract_exception_name(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
