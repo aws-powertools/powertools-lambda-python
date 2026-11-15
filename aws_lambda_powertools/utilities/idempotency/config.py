@@ -37,7 +37,7 @@ class IdempotencyConfig:
         use_local_cache: bool, optional
             Whether to locally cache idempotency results, by default False
         local_cache_max_items: int, optional
-            Max number of items to store in local cache, by default 1024
+            Max number of items to store in local cache, by default 256
         hash_function: str, optional
             Function to use for calculating hashes, by default md5.
         lambda_context: LambdaContext, optional
