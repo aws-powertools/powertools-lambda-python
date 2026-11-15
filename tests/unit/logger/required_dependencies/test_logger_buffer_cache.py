@@ -164,3 +164,27 @@ def test_cache_size_tracking():
     # THEN current size is tracked correctly
     assert logger_cache.get_current_size("key1") == len("small") + len("another_item")
     assert logger_cache.get_current_size("key1") <= 30
+
+
+def test_cache_size_counts_utf8_bytes():
+    # GIVEN a new instance of LoggerBufferCache with 12 bytes
+    logger_cache = LoggerBufferCache(12)
+
+    # WHEN adding two non-ASCII items of 5 characters and 10 bytes each
+    logger_cache.add("key1", "ééééé")
+    logger_cache.add("key1", "ééééé")
+
+    # THEN the size is counted in bytes and the oldest item is evicted
+    assert logger_cache.get_current_size("key1") == 10
+    assert logger_cache.get("key1") == ["ééééé"]
+    assert logger_cache.has_items_evicted("key1") is True
+
+
+def test_item_larger_than_cache_in_bytes():
+    # GIVEN a new instance of LoggerBufferCache with 8 bytes
+    logger_cache = LoggerBufferCache(8)
+
+    # WHEN adding an item of 5 characters and 10 bytes
+    # THEN it is rejected because its encoded size exceeds the cache
+    with pytest.raises(BufferError):
+        logger_cache.add("key1", "ééééé")
