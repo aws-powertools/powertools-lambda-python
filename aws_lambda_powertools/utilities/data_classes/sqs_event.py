@@ -12,10 +12,12 @@ if TYPE_CHECKING:
     from collections.abc import ItemsView, Iterator
 
 
+_DEFAULT_DNS_SUFFIX = "amazonaws.com"
+
 _PARTITION_DNS_SUFFIX: dict[str, str] = {
-    "aws": "amazonaws.com",
+    "aws": _DEFAULT_DNS_SUFFIX,
     "aws-cn": "amazonaws.com.cn",
-    "aws-us-gov": "amazonaws.com",
+    "aws-us-gov": _DEFAULT_DNS_SUFFIX,
     "aws-iso": "c2s.ic.gov",
     "aws-iso-b": "sc2s.sgov.gov",
     "aws-iso-e": "cloud.adc-e.uk",
@@ -202,7 +204,7 @@ class SQSRecord(DictWrapper):
         account_id = arn_parts[4]
         queue_name = arn_parts[5]
 
-        dns_suffix = _PARTITION_DNS_SUFFIX.get(partition, "amazonaws.com")
+        dns_suffix = _PARTITION_DNS_SUFFIX.get(partition, _DEFAULT_DNS_SUFFIX)
         queue_url = f"https://sqs.{region}.{dns_suffix}/{account_id}/{queue_name}"
 
         return queue_url
