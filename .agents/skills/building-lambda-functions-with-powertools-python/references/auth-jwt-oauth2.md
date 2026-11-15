@@ -1019,6 +1019,7 @@ Use `service="s3"`. The signer switches to the S3 canonical URI rules, so object
 
 ```python
 import os
+from urllib.parse import quote
 
 import requests
 
@@ -1031,7 +1032,7 @@ BUCKET = os.environ["REPORTS_BUCKET"]
 s3 = SigV4Signer(service="s3")
 
 def lambda_handler(event: dict, context: LambdaContext) -> str:
-    url = f"https://{BUCKET}.s3.{s3.region}.amazonaws.com/{requests.utils.quote(event['key'])}"
+    url = f"https://{BUCKET}.s3.{s3.region}.amazonaws.com/{quote(event['key'])}"
     response = requests.get(url, auth=s3.requests_auth(), timeout=5)
     response.raise_for_status()
     return response.text
