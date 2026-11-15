@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import io
 import json
+import logging
 import random
 import string
+import sys
+import time
 import warnings
 from collections import namedtuple
 
@@ -13,6 +17,7 @@ import pytest
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.buffer import LoggerBufferConfig
+from aws_lambda_powertools.logging.utils import copy_config_to_registered_loggers
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
@@ -584,3 +589,94 @@ def test_flush_buffer_preserves_percent_style_formatting(stdout, service_name, m
     # THEN The flushed log should contain the interpolated message
     log = capture_multiple_logging_statements_output(stdout)
     assert log[0]["message"] == "user=alice count=42"
+
+
+def test_buffer_honours_stacklevel_when_flushed(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a buffer
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    def business():
+        def wrapper():
+            logger.debug("direct caller", stacklevel=2)
+            logger.debug("caller of the wrapper", stacklevel=3)
+
+        wrapper()
+
+    # WHEN Logging from a nested function with different stacklevels and flushing the buffer
+    business()
+    logger.flush_buffer()
+
+    # THEN Each flushed record reports the same location the unbuffered logger would
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert "wrapper" in logs[0]["location"]
+    assert "business" in logs[1]["location"]
+
+
+def test_buffer_preserves_third_party_logger_name_location_and_stack_info(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a buffer, shared with a third-party logger
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+    logger.append_keys(stack_info="%(stack_info)s")
+    external_logger = logging.getLogger("external_library")
+    external_logger.setLevel(logging.DEBUG)
+    copy_config_to_registered_loggers(logger, include_buffering=True)
+
+    def library_function():
+        external_logger.debug("from a third-party library", stack_info=True)
+
+    # WHEN The third-party logger logs and the buffer is flushed
+    library_function()
+    logger.flush_buffer()
+
+    # THEN The location and name are the library's, and the stack info is kept
+    log = capture_logging_output(stdout)
+    assert "library_function" in log["location"]
+    assert log["name"] == "external_library"
+    assert "Stack (most recent call last)" in log["stack_info"]
+
+
+def test_buffer_preserves_provided_exc_info(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a buffer
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN An exception is saved outside its except block and logged later
+    try:
+        raise ValueError("saved")
+    except ValueError:
+        saved_exc_info = sys.exc_info()
+
+    logger.debug("later", exc_info=saved_exc_info)
+    logger.flush_buffer()
+
+    # THEN The flushed record still carries the exception
+    log = capture_logging_output(stdout)
+    assert "ValueError: saved" in log["exception"]
+    assert log["exception_name"] == "ValueError"
+
+
+def test_buffer_preserves_original_timestamp(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with a buffer
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging a message, waiting, and then flushing the buffer
+    before = dt.datetime.now(dt.timezone.utc)
+    logger.debug("this log line will be flushed")
+    after = dt.datetime.now(dt.timezone.utc)
+    time.sleep(0.4)
+    logger.flush_buffer()
+
+    # THEN The timestamp carries the creation milliseconds, not the flush time
+    log = capture_logging_output(stdout)
+    logged_at = dt.datetime.strptime(log["timestamp"], "%Y-%m-%d %H:%M:%S,%f%z")
+    assert int(before.timestamp() * 1000) - 1 <= int(logged_at.timestamp() * 1000) <= int(after.timestamp() * 1000)
