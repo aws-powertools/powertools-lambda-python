@@ -490,7 +490,8 @@ def set_context_keys(**kwargs: dict[str, Any]) -> None:
 
 def remove_context_keys(keys: Iterable[str]) -> None:
     context = _get_context()
-    context_values = context.get()
+    # Copy instead of mutating in place: asyncio tasks and copied contexts share this dict object
+    context_values = dict(context.get())
 
     for k in keys:
         context_values.pop(k, None)

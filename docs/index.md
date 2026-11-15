@@ -58,6 +58,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic |
 | [Batch Processing](./utilities/batch.md) | Handle partial failures for SQS, Kinesis Data Streams, and DynamoDB Streams |
 | [Idempotency](./utilities/idempotency.md) | Make your Lambda functions idempotent and prevent duplicate execution |
+| [Circuit Breaker](./utilities/circuit_breaker.md) | Stop calling a failing downstream and recover with a single probe across execution environments |
 | [Feature Flags](./utilities/feature_flags.md) | A simple rule engine to evaluate when features should be enabled |
 | [Validation](./utilities/validation.md) | JSON Schema validator for inbound events and responses |
 | [Data Masking](./utilities/data_masking.md) | Protect confidential data with easy removal or encryption |
@@ -67,6 +68,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | [Event Source Data Classes](./utilities/data_classes.md) | Data classes describing the schema of common Lambda event triggers |
 | [JMESPath Functions](./utilities/jmespath_functions.md) | Built-in JMESPath functions to deserialize common encoded JSON payloads |
 | [Kafka](./utilities/kafka.md) | Deserialize and validate Kafka events with support for Avro, Protocol Buffers, and JSON Schema |
+| [Metadata](./utilities/metadata.md) | Read the Lambda Metadata Endpoint, such as the Availability Zone ID of the execution environment |
 
 ## Examples
 

@@ -10,6 +10,7 @@ import datetime as dt
 import functools
 import json
 import logging
+import math
 import numbers
 import os
 import warnings
@@ -42,6 +43,7 @@ from aws_lambda_powertools.metrics.provider.cold_start import (
 )
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import is_durable_context, resolve_env_var_choice
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
@@ -156,6 +158,14 @@ class MetricManager:
 
         unit = self._extract_metric_unit_value(unit=unit)
         resolution = self._extract_metric_resolution_value(resolution=resolution)
+        if not math.isfinite(value):
+            warnings.warn(
+                f"The metric {name} has a non-finite value ({value}) and won't be added. "
+                "CloudWatch EMF only accepts finite numbers.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
         metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
@@ -661,7 +671,9 @@ def single_metric(
                 metric.add_dimension(name=dim_name, value=dim_value)
 
         yield metric
-        metric_set = metric.serialize_metric_set()
+        # add_metric drops a non-finite value with a warning, leaving nothing to publish
+        if metric.metric_set:
+            metric_set = metric.serialize_metric_set()
     finally:
         if metric_set is not None and not is_metrics_disabled():
             print(json.dumps(metric_set, separators=(",", ":")))

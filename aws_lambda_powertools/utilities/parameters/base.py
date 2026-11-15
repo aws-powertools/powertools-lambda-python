@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, NamedTuple, cast, overload
 
 from aws_lambda_powertools.shared import constants, user_agent
-from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, TransformParameterError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.parameters.types import TransformOptions
@@ -102,7 +103,7 @@ class BaseProvider(ABC):
         key = self._build_cache_key(name=name, transform=transform, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.fetch_from_cache(key)
@@ -176,7 +177,7 @@ class BaseProvider(ABC):
         key = self._build_cache_key(name=path, transform=transform, is_nested=True, sdk_options=sdk_options)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.fetch_from_cache(key)
@@ -205,6 +206,30 @@ class BaseProvider(ABC):
 
     def clear_cache(self):
         self.store.clear()
+
+    def _invalidate_cache(self, name: str) -> None:
+        """Remove cached values for a single parameter or secret name, across all transforms
+
+        Only entries holding a single value are removed. Grouped entries, created by
+        ``get_multiple``, hold the values of multiple names under a single key, so they
+        are kept intact to avoid evicting unrelated values. Use ``force_fetch=True``
+        on the next read to refresh grouped results.
+
+        Parameters
+        ----------
+        name: str
+            Parameter or secret name whose cached values should be removed
+        """
+        for key in list(self.store):
+            if key[0] != name:
+                continue
+
+            # Grouped entries hold multiple values under one key; their third element is is_nested=True.
+            # Keys can also carry a fourth sdk_options element and can be two-element batch keys.
+            if len(key) >= 3 and key[2]:
+                continue
+
+            del self.store[key]
 
     def fetch_from_cache(self, key: tuple):
         return self.store[key].value if key in self.store else {}
@@ -246,6 +271,41 @@ class BaseProvider(ABC):
 
         # sdk_options may hold unhashable values (dicts, lists), so serialize them deterministically
         return (name, transform, is_nested, json.dumps(sdk_options, sort_keys=True, default=str))
+
+
+def resolve_parameters_max_age(choice: int | None) -> int:
+    """
+    Resolve the caching max age against the ``POWERTOOLS_PARAMETERS_MAX_AGE`` environment variable.
+
+    An explicit ``choice`` always wins. Otherwise the environment variable is used, and an
+    empty or non-integer value is ignored with a :class:`PowertoolsUserWarning` rather than
+    crashing every lookup: a configuration typo must not break parameter and secret reads
+    (ADR 0006: warn now, harden in a future major).
+
+    Parameters
+    ----------
+    choice : int | None
+        Explicit max age passed by the caller, taking precedence over the environment.
+
+    Returns
+    -------
+    int
+        The resolved max age in seconds.
+    """
+    if choice is not None:
+        return choice
+
+    env = os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS)
+    try:
+        return int(env)
+    except ValueError:
+        warnings.warn(
+            f"Ignoring invalid {constants.PARAMETERS_MAX_AGE_ENV} value {env!r}; "
+            f"falling back to the default of {DEFAULT_MAX_AGE_SECS} seconds.",
+            category=PowertoolsUserWarning,
+            stacklevel=3,
+        )
+        return int(DEFAULT_MAX_AGE_SECS)
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:
@@ -334,9 +394,6 @@ def transform_value(
 
     err_msg = "Unable to transform value using '{transform}' transform: {exc}"
 
-    if isinstance(value, bytes):
-        value = value.decode("utf-8")
-
     if isinstance(value, dict):
         # NOTE: We must handle partial failures when receiving multiple values
         # where one of the keys might fail during transform, e.g. `{"a": "valid", "b": "{"}`
@@ -353,14 +410,14 @@ def transform_value(
                 transformed_values[dict_key] = None
         return transformed_values
 
-    if transform == "auto":
-        # key="a.json", value='{"a": "b"}', or key="a.binary", value="b64_encoded"
-        transform_method = get_transform_method(value=key, transform=transform)
-    else:
-        # value='{"key": "value"}
-        transform_method = get_transform_method(value=value, transform=transform)
+    # Auto transforms inspect the parameter name; explicit transforms ignore it.
+    transform_method = get_transform_method(value=key, transform=transform)
 
     try:
+        # Identity transforms must preserve raw bytes. Decode failures belong to
+        # the same error policy as JSON/base64 failures.
+        if isinstance(value, bytes) and transform_method is not TRANSFORM_METHOD_MAPPING[None]:
+            value = value.decode("utf-8")
         return transform_method(value)
     except Exception as exc:
         if raise_on_transform_error:

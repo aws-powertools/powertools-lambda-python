@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 import os
@@ -484,6 +485,32 @@ def test_thread_safe_remove_key(service_name, stdout):
 
     assert logs[0].get("exampleThread1Key") == "thread1"
     assert logs[1].get("exampleThread1Key") is None
+
+
+def test_thread_safe_remove_keys_does_not_affect_tasks_sharing_the_context(service_name, stdout):
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    async def process_order():
+        await asyncio.sleep(0)
+        logger.info("processing order")
+
+    async def main():
+        logger.thread_safe_append_keys(order_id="order-1")
+        task = asyncio.create_task(process_order())  # the task runs in a copy of the current context
+        logger.thread_safe_remove_keys(["order_id"])
+        await task
+        logger.info("caller after removing the key")
+
+    asyncio.run(main())
+
+    logs = capture_logging_output(stdout)
+
+    assert logs[0].get("message") == "processing order"
+    assert logs[0].get("order_id") == "order-1"
+    assert logs[1].get("order_id") is None
 
 
 def test_thread_safe_clear_key(service_name, stdout):

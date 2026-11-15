@@ -35,7 +35,7 @@ validation_error_definition = {
         # For security reasons, we hide **msg** details (don't leak Python, Pydantic or filenames)
         "type": {"title": "Error Type", "type": "string"},
     },
-    "required": ["loc", "msg", "type"],
+    "required": ["loc", "type"],
 }
 
 validation_error_response_definition = {

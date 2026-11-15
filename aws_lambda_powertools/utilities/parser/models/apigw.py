@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from pydantic.networks import IPvAnyNetwork
 
 from aws_lambda_powertools.utilities.parser.functions import _validate_source_ip
@@ -46,8 +46,13 @@ class APIGatewayEventIdentity(BaseModel):
 
 
 class APIGatewayEventAuthorizer(BaseModel):
+    # A Lambda authorizer's context keys are sent next to principalId, so keep them as extra fields
+    model_config = ConfigDict(extra="allow")
+
     claims: dict[str, Any] | None = None
     scopes: list[str] | None = None
+    principalId: str | None = None
+    integrationLatency: int | None = None
 
 
 class APIGatewayEventRequestContext(BaseModel):

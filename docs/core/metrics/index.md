@@ -81,6 +81,9 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 ???+ note "Note: Metrics overflow"
     CloudWatch EMF supports a max of 100 metrics per batch. Metrics utility will flush all metrics when adding the 100th metric. Subsequent metrics (101th+) will be aggregated into a new EMF object, for your convenience.
 
+???+ note "Note: Non-finite values"
+    CloudWatch EMF only accepts finite numbers. `add_metric` skips a `NaN` or infinite value and emits a `PowertoolsUserWarning`, so the other metrics in the batch are still published.
+
 ???+ warning "Warning: Do not create metrics or dimensions outside the handler"
     Metrics or dimensions added in the global scope will only be added during cold start. Disregard if that's the intended behavior.
 
@@ -417,6 +420,15 @@ Current providers:
 | Provider                                 | Notes                                                    |
 | ---------------------------------------- | -------------------------------------------------------- |
 | [Datadog](./datadog.md){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
+
+### CloudWatch Omni
+
+[CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/){target="_blank"} reads the same metrics you already publish to CloudWatch, so metrics emitted with this utility are available in your Omni space without changes. The EMF blob Metrics writes to the log is turned into CloudWatch metrics by the Lambda service, and those are what Omni dashboards and alerts use.
+
+Two things help on the Omni side:
+
+* Keep the `service` dimension set, through `Metrics(service=...)` or `POWERTOOLS_SERVICE_NAME`, and use the same value in Logger and Tracer. Omni correlates telemetry by service.
+* Use the `namespace` and dimension names you would want to see in a query. Omni queries metrics by namespace and dimensions, the same way CloudWatch does.
 
 ## Testing your code
 

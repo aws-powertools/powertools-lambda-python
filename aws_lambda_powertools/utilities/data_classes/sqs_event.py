@@ -12,6 +12,20 @@ if TYPE_CHECKING:
     from collections.abc import ItemsView, Iterator
 
 
+_DEFAULT_DNS_SUFFIX = "amazonaws.com"
+
+_PARTITION_DNS_SUFFIX: dict[str, str] = {
+    "aws": _DEFAULT_DNS_SUFFIX,
+    "aws-cn": "amazonaws.com.cn",
+    "aws-us-gov": _DEFAULT_DNS_SUFFIX,
+    "aws-iso": "c2s.ic.gov",
+    "aws-iso-b": "sc2s.sgov.gov",
+    "aws-iso-e": "cloud.adc-e.uk",
+    "aws-iso-f": "csp.hci.ic.gov",
+    "aws-eusc": "amazonaws.eu",
+}
+
+
 class SQSRecordAttributes(DictWrapper):
     @property
     def aws_trace_header(self) -> str | None:
@@ -74,15 +88,15 @@ class SQSMessageAttribute(DictWrapper):
 
     @property
     def string_value(self) -> str | None:
-        """Strings are Unicode with UTF-8 binary encoding."""
-        return self["stringValue"]
+        """Strings are Unicode with UTF-8 binary encoding. None for a Binary attribute."""
+        return self.get("stringValue")
 
     @property
     def binary_value(self) -> str | None:
         """Binary type attributes can store any binary data, such as compressed data, encrypted data, or images.
 
-        Base64-encoded binary data object"""
-        return self["binaryValue"]
+        Base64-encoded binary data object. None for a String or Number attribute."""
+        return self.get("binaryValue")
 
     @property
     def data_type(self) -> str:
@@ -185,11 +199,13 @@ class SQSRecord(DictWrapper):
     def queue_url(self) -> str:
         """The URL of the queue."""
         arn_parts = self["eventSourceARN"].split(":")
+        partition = arn_parts[1]
         region = arn_parts[3]
         account_id = arn_parts[4]
         queue_name = arn_parts[5]
 
-        queue_url = f"https://sqs.{region}.amazonaws.com/{account_id}/{queue_name}"
+        dns_suffix = _PARTITION_DNS_SUFFIX.get(partition, _DEFAULT_DNS_SUFFIX)
+        queue_url = f"https://sqs.{region}.{dns_suffix}/{account_id}/{queue_name}"
 
         return queue_url
 
