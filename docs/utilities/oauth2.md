@@ -1,11 +1,8 @@
 ---
-title: OAuth2 client (alpha)
+title: OAuth2 client
 description: Acquire and cache client-credentials tokens for downstream APIs
 status: new
 ---
-
-!!! warning "Alpha / experimental"
-    This utility ships under the `auth_alpha` namespace while we collect feedback. Its public API may change before GA. Pin your Powertools version before using it in production.
 
 `OAuth2Client` obtains bearer tokens for a Lambda function calling an API on its own behalf.
 It uses the client-credentials grant with `client_secret_basic` (default) or explicit `client_secret_post` authentication.
@@ -68,7 +65,7 @@ Create the client outside the Lambda handler so warm invocations reuse its token
 This complete Lambda loads a plain-string secret through Parameters and calls `GET /stock/{sku}` on an inventory API that returns JSON:
 
 ```python title="client_credentials.py"
---8<-- "examples/auth_alpha/oauth2/src/client_credentials.py"
+--8<-- "examples/auth/oauth2/src/client_credentials.py"
 ```
 
 Configure these environment variables:
@@ -108,7 +105,7 @@ Select your provider's method; there is no automatic fallback. API requests alwa
 This example uses `CLIENT_SECRET` instead of `CLIENT_SECRET_NAME` and calls `INVENTORY_URL` directly:
 
 ```python title="client_secret_post.py"
---8<-- "examples/auth_alpha/oauth2/src/client_secret_post.py"
+--8<-- "examples/auth/oauth2/src/client_secret_post.py"
 ```
 
 You can also pass the Parameters `load_secret` function from the first example as `client_secret`.
@@ -156,7 +153,7 @@ Your application selects the client; routing and failover are not automatic.
 Pass the fresh `Authorization: Bearer <token>` dictionary from `auth_headers()` to your HTTP client:
 
 ```python title="headers.py"
---8<-- "examples/auth_alpha/oauth2/src/headers.py"
+--8<-- "examples/auth/oauth2/src/headers.py"
 ```
 
 This example validates HTTPS before acquiring credentials. Configure your HTTP client's timeouts, redirects, and retries yourself.
@@ -223,7 +220,7 @@ Invalid headers and case-insensitive Authorization overrides are rejected before
 
 ### Errors and diagnostics
 
-OAuth errors inherit from `AuthError` in `auth_alpha.exceptions`.
+OAuth errors inherit from `AuthError` in `auth.exceptions`.
 
 | Exception | Reason | Retryable |
 | --------- | ------ | --------- |
@@ -236,7 +233,7 @@ Invalid client configuration, method, URL, timeout, headers, or option names rai
 Use the fixed `reason.value` and `retryable` fields for logs and metrics:
 
 ```python title="diagnostics.py"
---8<-- "examples/auth_alpha/oauth2/src/diagnostics.py"
+--8<-- "examples/auth/oauth2/src/diagnostics.py"
 ```
 
 This handler returns proxy-style responses and uses the environment-secret deployment settings.
@@ -284,5 +281,5 @@ Cancelling the task does not stop the worker's request; timeouts still apply. In
 Mock the client operation when testing application behavior, and test your provider configuration separately:
 
 ```python title="test_client_credentials.py"
---8<-- "examples/auth_alpha/oauth2/tests/test_client_credentials.py"
+--8<-- "examples/auth/oauth2/tests/test_client_credentials.py"
 ```
