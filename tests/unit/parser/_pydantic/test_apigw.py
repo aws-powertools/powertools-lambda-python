@@ -183,6 +183,17 @@ def test_apigw_event_empty_body():
     parse(event=event, model=APIGatewayProxyEventModel)
 
 
+def test_apigw_event_from_console_test_without_headers():
+    # The Test tab in the API Gateway console sends null headers when the test has none
+    raw_event = load_event("apiGatewayProxyEventConsoleTest.json")
+    parsed_event: APIGatewayProxyEventModel = parse(event=raw_event, model=APIGatewayProxyEventModel)
+
+    assert parsed_event.headers == {}
+    assert parsed_event.multiValueHeaders == {}
+    assert parsed_event.requestContext.stage == "test-invoke-stage"
+    assert parsed_event.requestContext.identity.sourceIp == "test-invoke-source-ip"
+
+
 def test_apigw_event_authorizer_token():
     raw_event = load_event("apiGatewayAuthorizerTokenEvent.json")
     parsed_event: ApiGatewayAuthorizerToken = ApiGatewayAuthorizerToken(**raw_event)
