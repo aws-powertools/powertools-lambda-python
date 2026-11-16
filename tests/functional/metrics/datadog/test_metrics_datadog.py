@@ -9,6 +9,7 @@ import pytest
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_flag
 from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics, DatadogProvider
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 
 def test_datadog_coldstart(capsys):
@@ -123,6 +124,29 @@ def test_datadog_with_invalid_metric_value():
     # THEN it should fail validation and raise MetricValueError
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
         metrics.add_metric(name="item_sold", value="a", product="latte", order="online")
+
+
+def _reject_non_finite(constant: str):
+    raise ValueError(f"Datadog output contains {constant}, which is not valid JSON")
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_datadog_add_metric_with_non_finite_value(capsys, value):
+    # GIVEN DatadogMetrics is initialized with flush_to_log
+    dd_provider = DatadogProvider(flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    # WHEN we add a non-finite metric value next to a valid metric
+    with pytest.warns(PowertoolsUserWarning, match="The metric bad_metric has a non-finite value *"):
+        metrics.add_metric(name="bad_metric", value=value)
+    metrics.add_metric(name="good_metric", value=1.0)
+    metrics.flush_metrics()
+
+    # THEN the flushed log is valid JSON and only contains the valid metric
+    output = capsys.readouterr().out.strip()
+    logs = json.loads(output, parse_constant=_reject_non_finite)
+    assert logs["m"] == "good_metric"
+    assert logs["v"] == 1.0
 
 
 def test_datadog_with_invalid_metric_name():

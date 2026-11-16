@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import numbers
 import os
 import re
@@ -15,6 +16,7 @@ from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice, strtobool
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.shared.types import AnyCallableT
@@ -118,6 +120,15 @@ class DatadogProvider(BaseProvider):
 
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
+
+        if not math.isfinite(value):
+            warnings.warn(
+                f"The metric {name} has a non-finite value ({value}) and won't be added. "
+                "Datadog only accepts finite numbers.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
 
         if not timestamp:
             timestamp = int(time.time())

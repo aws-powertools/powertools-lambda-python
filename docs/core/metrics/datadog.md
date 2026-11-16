@@ -79,6 +79,9 @@ By default, we will generate the current timestamp for you. Alternatively, you c
     --8<-- "examples/metrics_datadog/src/add_metrics_with_timestamp.py"
     ```
 
+???+ note "Note: Non-finite values"
+    Datadog only accepts finite numbers. `add_metric` skips a `NaN` or infinite value and emits a `PowertoolsUserWarning`.
+
 ???+ warning "Warning: Do not create metrics outside the handler"
     Metrics added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
 
