@@ -47,9 +47,28 @@ class RequestContextV2Http(BaseModel):
         return _validate_source_ip(value=value)
 
 
+class RequestContextV2ClientCertValidity(BaseModel):
+    notBefore: str
+    notAfter: str
+
+
+class RequestContextV2ClientCert(BaseModel):
+    clientCertPem: str
+    subjectDN: str
+    issuerDN: str
+    serialNumber: str
+    validity: RequestContextV2ClientCertValidity
+
+
+class RequestContextV2Authentication(BaseModel):
+    # Only sent when mutual TLS is enabled on the API's custom domain name
+    clientCert: RequestContextV2ClientCert | None = None
+
+
 class RequestContextV2(BaseModel):
     accountId: str
     apiId: str
+    authentication: RequestContextV2Authentication | None = None
     authorizer: RequestContextV2Authorizer | None = None
     domainName: str
     domainPrefix: str
