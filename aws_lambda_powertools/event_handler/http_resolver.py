@@ -13,7 +13,11 @@ from aws_lambda_powertools.event_handler.api_gateway import (
 )
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent, APIGatewayProxyEventV2
-from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
+from aws_lambda_powertools.utilities.data_classes.common import (
+    BaseProxyEvent,
+    DictWrapper,
+    RequestContextV2Http,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, MutableMapping
@@ -39,6 +43,30 @@ class HttpHeadersSerializer(BaseHeadersSerializer):
         cookie_headers = [str(cookie) for cookie in cookies] if cookies else []
 
         return {"headers": combined_headers, "cookies": cookie_headers}
+
+
+class HttpRequestContext(DictWrapper):
+    """Request context for a local HTTP event.
+
+    Local events have no API Gateway, so only the fields the ASGI scope can
+    provide are populated: the stage, the request id and the HTTP details
+    (method, path, protocol, source IP and user agent).
+    """
+
+    @property
+    def stage(self) -> str:
+        """The deployment stage of the request."""
+        return self.get("stage") or "local"
+
+    @property
+    def request_id(self) -> str:
+        """The ID assigned to the request."""
+        return self.get("requestId") or "local-request-id"
+
+    @property
+    def http(self) -> RequestContextV2Http:
+        """HTTP details of the request (method, path, protocol, source IP, user agent)."""
+        return RequestContextV2Http(self.get("http") or {})
 
 
 class HttpProxyEvent(BaseProxyEvent):
@@ -91,7 +119,13 @@ class HttpProxyEvent(BaseProxyEvent):
             or {
                 "stage": "local",
                 "requestId": "local-request-id",
-                "http": {"method": method.upper(), "path": path},
+                "http": {
+                    "method": method.upper(),
+                    "path": path,
+                    "protocol": "HTTP/1.1",
+                    "sourceIp": "",
+                    "userAgent": "",
+                },
             },
         }
 
@@ -132,13 +166,33 @@ class HttpProxyEvent(BaseProxyEvent):
             else:
                 headers[header_name] = header_value
 
+        # The ASGI scope carries the client address as a (host, port) tuple
+        # and the user agent in the headers; fill the request context from them.
+        client = scope.get("client")
+        source_ip = client[0] if client and client[0] else ""
+
         return cls(
             method=scope["method"],
             path=scope["path"],
             headers=headers,
             body=body,
             query_string=scope.get("query_string", b"").decode("utf-8"),
+            request_context={
+                "stage": "local",
+                "requestId": "local-request-id",
+                "http": {
+                    "method": scope["method"].upper(),
+                    "path": scope["path"],
+                    "protocol": f"HTTP/{scope.get('http_version', '1.1')}",
+                    "sourceIp": source_ip,
+                    "userAgent": headers.get("user-agent", ""),
+                },
+            },
         )
+
+    @property
+    def request_context(self) -> HttpRequestContext:
+        return HttpRequestContext(self["requestContext"])
 
     def header_serializer(self) -> BaseHeadersSerializer:
         """Return the HTTP headers serializer."""
