@@ -1162,36 +1162,45 @@ class Logger:
         between different tracer contexts.
         """
 
-        # Determine tracer ID, defaulting to first invoke marker
+        # Get the current X-Ray trace ID
         tracer_id = get_tracer_id()
 
-        if tracer_id and self._buffer_config:
-            if not self._buffer_cache.get(tracer_id):
-                # Detect new Lambda invocation context and reset buffer to maintain log isolation
-                # Ensures logs from previous invocations do not leak into current execution
-                # Prevent memory excessive usage
-                self._buffer_cache.clear()
+        if not self._buffer_config:
+            return
 
-            log_record: dict[str, Any] = _create_buffer_record(
-                level=level,
-                msg=msg,
-                args=args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                extra=extra,
+        log_record: dict[str, Any] = _create_buffer_record(
+            level=level,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+        )
+
+        if not tracer_id:
+            # Without a tracer ID, buffer isolation is not possible.
+            # Emit immediately to avoid losing the log record.
+            self._create_and_flush_log_record(log_record)
+            return
+
+        if not self._buffer_cache.get(tracer_id):
+            # Detect new Lambda invocation context and reset buffer to maintain log isolation
+            # Ensures logs from previous invocations do not leak into current execution
+            # Prevent memory excessive usage
+            self._buffer_cache.clear()
+
+        try:
+            self._buffer_cache.add(tracer_id, log_record)
+        except BufferError:
+            warnings.warn(
+                message="Cannot add item to the buffer. "
+                f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
             )
-            try:
-                self._buffer_cache.add(tracer_id, log_record)
-            except BufferError:
-                warnings.warn(
-                    message="Cannot add item to the buffer. "
-                    f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
-                    category=PowertoolsUserWarning,
-                    stacklevel=2,
-                )
 
-                # flush this log to avoid data loss
-                self._create_and_flush_log_record(log_record)
+            # flush this log to avoid data loss
+            self._create_and_flush_log_record(log_record)
 
     def flush_buffer(self) -> None:
         """
