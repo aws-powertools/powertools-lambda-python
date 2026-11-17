@@ -8,10 +8,10 @@
             "eventVersion": "2.1",
             "replicationEventData": {
                 "destinationBucket": "arn:aws:s3:::destination-bucket",
-                "failureReason": "AssumedRole is not authorized to perform the requested operation.",
+                "failureReason": "AssumeRoleNotPermitted",
                 "replicationRuleId": "replication-rule-1",
                 "requestTime": "2019-09-03T19:37:27.192Z",
-                "s3Operation": "ObjectCreated:Put"
+                "s3Operation": "OBJECT_PUT"
             },
             "requestParameters": {
                 "sourceIPAddress": "s3.amazonaws.com"

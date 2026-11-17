@@ -88,7 +88,7 @@ class S3EventRecordReplicationEventData(BaseModel):
     s3Operation: str | None = Field(
         default=None,
         description="The S3 operation that was replicated. For Replication events.",
-        examples=["ObjectCreated:Put"],
+        examples=["OBJECT_PUT"],
     )
     requestTime: str | None = Field(
         default=None,
@@ -99,7 +99,7 @@ class S3EventRecordReplicationEventData(BaseModel):
         default=None,
         description="The reason the replication failed, present only for failed replication events. "
         "For Replication events.",
-        examples=["AssumedRole is not authorized to perform the requested operation."],
+        examples=["AssumeRoleNotPermitted"],
     )
 
 
@@ -554,9 +554,9 @@ class S3RecordModel(BaseModel):
             {
                 "replicationRuleId": "replication-rule-1",
                 "destinationBucket": "arn:aws:s3:::destination-bucket",
-                "s3Operation": "ObjectCreated:Put",
+                "s3Operation": "OBJECT_PUT",
                 "requestTime": "2019-09-03T19:37:27.192Z",
-                "failureReason": "AssumedRole is not authorized to perform the requested operation.",
+                "failureReason": "AssumeRoleNotPermitted",
             },
         ],
     )
