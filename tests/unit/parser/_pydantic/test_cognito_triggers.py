@@ -13,6 +13,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     CognitoPreAuthenticationTriggerModel,
     CognitoPreSignupTriggerModel,
     CognitoPreTokenGenerationTriggerModelV1,
+    CognitoPreTokenGenerationTriggerModelV2AndV3,
     CognitoVerifyAuthChallengeTriggerModel,
 )
 from tests.functional.utils import load_event
@@ -27,6 +28,7 @@ from tests.functional.utils import load_event
         ("cognitoPreAuthenticationEvent.json", CognitoPreAuthenticationTriggerModel),
         ("cognitoPostAuthenticationEvent.json", CognitoPostAuthenticationTriggerModel),
         ("cognitoPreTokenGenerationEvent.json", CognitoPreTokenGenerationTriggerModelV1),
+        ("cognitoPreTokenV2GenerationEvent.json", CognitoPreTokenGenerationTriggerModelV2AndV3),
         ("cognitoUserMigrationEvent.json", CognitoMigrateUserTriggerModel),
         ("cognitoCustomMessageEvent.json", CognitoCustomMessageTriggerModel),
         ("cognitoCustomEmailSenderEvent.json", CognitoCustomEmailSenderTriggerModel),
@@ -150,3 +152,13 @@ def test_cognito_trigger_models_accept_null_client_id():
     parsed = parse(event=event, model=CognitoPostConfirmationTriggerModel)
 
     assert parsed.callerContext.clientId is None
+
+
+def test_cognito_pre_token_generation_v2_and_v3_model_keeps_scopes_and_trigger_source():
+    # V2 and V3 events send scopes as a list of strings
+    event = load_event("cognitoPreTokenV2GenerationEvent.json")
+
+    parsed = parse(event=event, model=CognitoPreTokenGenerationTriggerModelV2AndV3)
+
+    assert parsed.request.scopes == ["aws.cognito.signin.user.admin"]
+    assert parsed.triggerSource == "TokenGeneration_Authentication"
