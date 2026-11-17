@@ -809,9 +809,12 @@ class Logger:
         )
 
     def append_keys(self, **additional_keys: object) -> None:
-        for key in additional_keys:
-            if key in RESERVED_LOG_ATTRS:
-                raise ValueError(f"Key '{key}' is a reserved LogRecord attribute and cannot be used.")
+        for key, value in additional_keys.items():
+            if key in RESERVED_LOG_ATTRS and value and not isinstance(value, str):
+                raise ValueError(
+                    f"Key '{key}' is a reserved LogRecord attribute and needs a str value, "
+                    f"instead got '{type(value).__name__}'.",
+                )
         self.registered_formatter.append_keys(**additional_keys)
 
     def get_current_keys(self) -> dict[str, Any]:
@@ -860,9 +863,12 @@ class Logger:
     # They prevent race conditions and ensure data consistency across multiple threads.
     def thread_safe_append_keys(self, **additional_keys: object) -> None:
         # Append additional key-value pairs to the context safely in a thread-safe manner.
-        for key in additional_keys:
-            if key in RESERVED_LOG_ATTRS:
-                raise ValueError(f"Key '{key}' is a reserved LogRecord attribute and cannot be used.")
+        for key, value in additional_keys.items():
+            if key in RESERVED_LOG_ATTRS and value and not isinstance(value, str):
+                raise ValueError(
+                    f"Key '{key}' is a reserved LogRecord attribute and needs a str value, "
+                    f"instead got '{type(value).__name__}'.",
+                )
         self.registered_formatter.thread_safe_append_keys(**additional_keys)
 
     def thread_safe_get_current_keys(self) -> dict[str, Any]:
