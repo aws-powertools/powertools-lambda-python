@@ -228,6 +228,22 @@ def test_copy_config_to_ext_loggers_log_level_notset(stdout, logger, log_level):
     assert logger.level == log_level.NOTSET.value
 
 
+def test_copy_config_to_ext_loggers_empty_log_level_uses_source_level(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+
+    # WHEN configuration copied with an empty log_level
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        log_level="",
+        include={logger.name},
+    )
+
+    # THEN external logger falls back to the source logger level
+    assert logger.level == log_level.CRITICAL.value
+
+
 def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_level):
     # GIVEN Powertools for AWS Lambda (Python) logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)

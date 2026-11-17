@@ -40,7 +40,7 @@ def copy_config_to_registered_loggers(
     exclude : set[str] | None, optional
         List of logger names to exclude, by default None
     """
-    level = source_logger.log_level if log_level is None else log_level
+    level = source_logger.log_level if log_level in (None, "") else log_level
 
     # Assumptions: Only take parent loggers not children (dot notation rule)
     # Steps:
