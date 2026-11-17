@@ -1642,7 +1642,7 @@ def test_thread_safe_append_keys_rejects_reserved_log_attrs(stdout, service_name
     # WHEN attempting to append a reserved LogRecord attribute in thread-safe method
     # THEN it should raise ValueError
     with pytest.raises(ValueError, match="Key 'levelname' is a reserved LogRecord attribute"):
-        logger.thread_safe_append_keys(levelname="INFO")
+        logger.thread_safe_append_keys(levelname=20)
 
     # AND subsequent logs should still work normally
     logger.info("after rejected thread-safe append")
