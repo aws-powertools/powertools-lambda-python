@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import logging
 import random
 import string
 import warnings
@@ -584,3 +585,51 @@ def test_flush_buffer_preserves_percent_style_formatting(stdout, service_name, m
     # THEN The flushed log should contain the interpolated message
     log = capture_multiple_logging_statements_output(stdout)
     assert log[0]["message"] == "user=alice count=42"
+
+
+def test_logger_log_method_buffers_and_flushes_on_error(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with buffer and flush on error
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, flush_on_error_log=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging debug via log() method
+    logger.log(logging.DEBUG, "buffered via log()")
+
+    # THEN Message should be buffered, not immediately output
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+    # WHEN Logging error via log() method
+    logger.log(logging.ERROR, "error via log()")
+
+    # THEN Both the buffered debug log and error log should be output
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2
+    assert log[0]["message"] == "buffered via log()"
+    assert log[1]["message"] == "error via log()"
+
+
+def test_logger_warn_and_fatal_aliases(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with buffer and flush on error
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING", flush_on_error_log=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging via warn() alias
+    logger.warn("buffered via warn()")
+
+    # THEN Message should be buffered
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+    # WHEN Logging via fatal() alias
+    logger.fatal("flushed via fatal()")
+
+    # THEN Buffer should flush and both messages should appear
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2
+    assert log[0]["message"] == "buffered via warn()"
+    assert log[1]["message"] == "flushed via fatal()"
