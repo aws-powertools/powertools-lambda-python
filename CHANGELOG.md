@@ -5,15 +5,52 @@
 # Unreleased
 
 
+<a name="v3.41.0"></a>
+## [v3.41.0] - 2026-11-18
+## Features
+
+* **auth:** add SigV4 and SigV4a request signing ([#8820](https://github.com/aws-powertools/powertools-lambda-python/issues/8820))
+
+## Maintenance
+
+* version bump
+
+
 <a name="v3.40.0"></a>
 ## [v3.40.0] - 2026-11-10
 ## Bug Fixes
 
 * **batch:** report short-circuited FIFO records that don't match the model ([#8663](https://github.com/aws-powertools/powertools-lambda-python/issues/8663))
+* **batch:** report records that fail model conversion with non-validation errors ([#8662](https://github.com/aws-powertools/powertools-lambda-python/issues/8662))
+* **data_classes:** return None for the SQS attribute value an attribute does not carry ([#8713](https://github.com/aws-powertools/powertools-lambda-python/issues/8713))
+* **data_classes:** return None from TransferFamilyAuthorizer.password when the event has none ([#8715](https://github.com/aws-powertools/powertools-lambda-python/issues/8715))
+* **data_classes:** add AppSyncIdentityLambda for AWS_LAMBDA authorization ([#8720](https://github.com/aws-powertools/powertools-lambda-python/issues/8720))
+* **data_masking:** mask what the docs promise in the edge cases of erase ([#8781](https://github.com/aws-powertools/powertools-lambda-python/issues/8781))
+* **event_handler:** add Vary: Accept-Encoding to responses of compressed routes ([#8711](https://github.com/aws-powertools/powertools-lambda-python/issues/8711))
+* **event_handler:** leave SameSite out of cookies in DEFAULT_MODE ([#8709](https://github.com/aws-powertools/powertools-lambda-python/issues/8709))
+* **feature_flags:** match days of week regardless of locale ([#8707](https://github.com/aws-powertools/powertools-lambda-python/issues/8707))
+* **idempotency:** return stored falsy responses on replay ([#8701](https://github.com/aws-powertools/powertools-lambda-python/issues/8701))
+* **idempotency:** keep the payload hash when completing records in the Redis layer ([#8656](https://github.com/aws-powertools/powertools-lambda-python/issues/8656))
+* **kafka:** deserialize empty string record key instead of returning None ([#8698](https://github.com/aws-powertools/powertools-lambda-python/issues/8698))
+* **kafka:** decode Confluent Protobuf message indexes as zigzag varints ([#8670](https://github.com/aws-powertools/powertools-lambda-python/issues/8670))
+* **parser:** fall back to Python validation for non-JSON string payloads ([#8699](https://github.com/aws-powertools/powertools-lambda-python/issues/8699))
+
+## Documentation
+
+* explain how Logger, Metrics and Tracer telemetry shows up in CloudWatch Omni ([#8693](https://github.com/aws-powertools/powertools-lambda-python/issues/8693))
+* exclude tooling files from the published docs site ([#8770](https://github.com/aws-powertools/powertools-lambda-python/issues/8770))
+* **data_classes:** correct AppSync identity docstring for OPENID_CONNECT and pin the dispatch ([#8705](https://github.com/aws-powertools/powertools-lambda-python/issues/8705))
+
+## Features
+
+* **docs:** ship an Agent Skill for building Lambda functions with Powertools ([#8745](https://github.com/aws-powertools/powertools-lambda-python/issues/8745))
+* **event_sources:** add support for Amazon Connect Outbound Campaigns ([#8702](https://github.com/aws-powertools/powertools-lambda-python/issues/8702))
 
 ## Maintenance
 
 * version bump
+* **deps:** bump pydantic, valkey-glide, fastjsonschema, pip, ruff, zensical, aws-cdk and upload-sarif ([#8792](https://github.com/aws-powertools/powertools-lambda-python/issues/8792))
+* **docs:** regenerate the agent skill references ([#8775](https://github.com/aws-powertools/powertools-lambda-python/issues/8775))
 
 
 <a name="v3.39.0"></a>
@@ -8069,7 +8106,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.40.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.41.0...HEAD
+[v3.41.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.40.0...v3.41.0
 [v3.40.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.39.0...v3.40.0
 [v3.39.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.38.0...v3.39.0
 [v3.38.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v3.37.0...v3.38.0
