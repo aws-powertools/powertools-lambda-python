@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10, <4.0.0"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -508,15 +508,15 @@ wheels = [
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.15.0"
+version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/25/0cbd7a440080def5e6f063720c3b190a25f8aa2938c1e34415dc18241596/aws_xray_sdk-2.15.0.tar.gz", hash = "sha256:794381b96e835314345068ae1dd3b9120bd8b4e21295066c37e8814dbb341365", size = 76315, upload-time = "2025-10-29T20:59:45Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/5e/1f8df19306f44bd864f3e2e2aaca0e631d798e795aec26564bd2b1d9fab6/aws_xray_sdk-2.16.0.tar.gz", hash = "sha256:4eb02acb861b83edd8b83603194ed549aaa929106be3f1d57d459983f5107d79", size = 100114, upload-time = "2026-10-30T21:24:56.652Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/c3/f30a7a63e664acc7c2545ca0491b6ce8264536e0e5cad3965f1d1b91e960/aws_xray_sdk-2.15.0-py2.py3-none-any.whl", hash = "sha256:422d62ad7d52e373eebb90b642eb1bb24657afe03b22a8df4a8b2e5108e278a3", size = 103228, upload-time = "2025-10-29T21:00:24.12Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/36/62d2509b223d86aab5cc67a653b56633e5b8c37bd5343a4b26cbff2a3be6/aws_xray_sdk-2.16.0-py2.py3-none-any.whl", hash = "sha256:d2ae9400654369cbce65f6402276b211afd8fd0931e208e6199a20dc1e01a5da", size = 105229, upload-time = "2026-10-30T21:25:23.018Z" },
 ]
 
 [[package]]
