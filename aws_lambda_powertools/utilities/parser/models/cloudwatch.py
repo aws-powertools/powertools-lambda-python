@@ -4,12 +4,14 @@ import logging
 import zlib
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
 
 class CloudWatchLogsLogEvent(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     id: str = Field(
         description="Unique identifier for the log event within the batch.",
         examples=["eventId1", "abc123def456"],
@@ -22,6 +24,12 @@ class CloudWatchLogsLogEvent(BaseModel):
         description="The actual log message string or structured JSON payload emitted by the service or application.",
         examples=["This is a sample log message", '{"statusCode":200,"path":"/hello"}'],
     )
+    extracted_fields: dict[str, str] = Field(
+        default_factory=dict,
+        alias="extractedFields",
+        description="Key-value pairs of fields extracted from the log message if a filter pattern was used.",
+        examples=[{"timestamp": "2023-01-15T10:30:00Z", "request_id": "1234"}],
+    )
 
 
 class CloudWatchLogsDecode(BaseModel):
@@ -29,20 +37,28 @@ class CloudWatchLogsDecode(BaseModel):
         description="The type of CloudWatch Logs message.",
         examples=["DATA_MESSAGE", "CONTROL_MESSAGE"],
     )
-    owner: str = Field(description="The AWS account ID of the originating log data.", examples=["123456789012"])
-    logGroup: str = Field(
+    owner: str | None = Field(
+        default=None,
+        description="The AWS account ID of the originating log data.",
+        examples=["123456789012"],
+    )
+    logGroup: str | None = Field(
+        default=None,
         description="The name of the log group that contains the log stream.",
         examples=["/aws/lambda/my-function", "/aws/apigateway/my-api"],
     )
-    logStream: str = Field(
+    logStream: str | None = Field(
+        default=None,
         description="The name of the log stream that stores the log events.",
         examples=["2023/01/15/[$LATEST]abcdef1234567890", "i-1234567890abcdef0"],
     )
     subscriptionFilters: list[str] = Field(
+        default_factory=list,
         description="List of subscription filter names associated with the log group.",
         examples=[["LambdaStream_cloudwatch", "AlertFilter"]],
     )
     logEvents: list[CloudWatchLogsLogEvent] = Field(
+        default_factory=list,
         description="Array of log events included in the message.",
         examples=[[{"id": "eventId1", "timestamp": 1673779200000, "message": "Sample log line"}]],
     )
