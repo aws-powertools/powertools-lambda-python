@@ -1294,6 +1294,7 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
         ("critical", logging.CRITICAL),
         (15, 15),
         (logging.INFO, logging.INFO),
+        ("", logging.INFO),
     ],
 )
 def test_logger_level_case_insensitive_and_integer_without_alc(stdout, service_name, level_input, expected_level):

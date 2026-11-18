@@ -1048,7 +1048,7 @@ class Logger:
         log_level_env = os.getenv(constants.POWERTOOLS_LOG_LEVEL_ENV) or os.getenv(
             constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV,
         )
-        if isinstance(level, str):
+        if isinstance(level, str) and level:
             return level.upper()
 
         if isinstance(level, int) and not isinstance(level, bool):
