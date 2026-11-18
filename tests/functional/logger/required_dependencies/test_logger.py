@@ -633,7 +633,7 @@ def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(
     assert len(logs) == 4
 
 
-def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_name(stdout):
+def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_name(stdout, service_name):
     # GIVEN a root logger configured with a handler (as in Lambda runtime)
     root_stream = io.StringIO()
     root_handler = logging.StreamHandler(root_stream)
@@ -641,10 +641,11 @@ def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_n
     root_logger.addHandler(root_handler)
 
     try:
-        # AND a Powertools logger with service "core"
-        Logger(service="core", stream=stdout)
-        child_logger = Logger(service="core", child=True, stream=stdout)
-        unrelated_logger = logging.getLogger("botocore")
+        # AND a Powertools logger, plus an unrelated logger whose name contains the service name
+        # (like "botocore" for service "core")
+        Logger(service=service_name, stream=stdout)
+        child_logger = Logger(service=service_name, child=True, stream=stdout)
+        unrelated_logger = logging.getLogger(f"boto{service_name}")
 
         # WHEN an unrelated logger whose name contains the service string logs a message
         # AND a child logger of the Powertools logger logs a message
