@@ -350,6 +350,50 @@ def test_bedrock_agent_function_append_context():
     assert not hasattr(app.context, "new_key")
 
 
+def test_bedrock_agent_function_clears_context_when_tool_raises():
+    # GIVEN a Bedrock Agent Function resolver with a tool that appends context and then raises
+    app = BedrockAgentFunctionResolver()
+
+    @app.tool()
+    def failing_function():
+        app.append_context(user_id="12345")
+        raise ValueError("Something went wrong")
+
+    @app.tool()
+    def context_function():
+        return dict(app.context)
+
+    # WHEN the failing tool is invoked
+    raw_event = load_event("bedrockAgentFunctionEvent.json")
+    raw_event["function"] = "failing_function"
+    failed_result = app.resolve(raw_event, LambdaContext())
+
+    # THEN the error is returned to the agent and the context is cleared
+    failed_body = failed_result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"]
+    assert failed_body == json.dumps("Error: ValueError: Something went wrong")
+    assert app.context == {}
+
+    # WHEN the next invocation runs in the same execution environment
+    raw_event["function"] = "context_function"
+    next_result = app.resolve(raw_event, LambdaContext())
+
+    # THEN it does not see the context from the failed invocation
+    assert next_result["response"]["functionResponse"]["responseBody"]["TEXT"]["body"] == json.dumps({})
+
+
+def test_bedrock_agent_function_clears_context_when_event_is_invalid():
+    # GIVEN a Bedrock Agent Function resolver with context appended before resolving
+    app = BedrockAgentFunctionResolver()
+    app.append_context(user_id="12345")
+
+    # WHEN resolving an event without the required fields
+    with pytest.raises(ValueError, match="Missing required field"):
+        app.resolve({}, LambdaContext())
+
+    # THEN the context is cleared
+    assert app.context == {}
+
+
 def test_resolve_with_no_current_event():
     """Test that _resolve() raises ValueError when current_event is None"""
     # GIVEN a Bedrock Agent Function resolver with no current event
