@@ -388,7 +388,7 @@ def test_bedrock_agent_function_clears_context_when_event_is_invalid():
 
     # WHEN resolving an event without the required fields
     with pytest.raises(ValueError, match="Missing required field"):
-        app.resolve({}, LambdaContext())
+        app.resolve({}, {})
 
     # THEN the context is cleared
     assert app.context == {}
