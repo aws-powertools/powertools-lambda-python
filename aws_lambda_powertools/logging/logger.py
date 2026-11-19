@@ -17,7 +17,7 @@ from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, TypeVar, cast, overload
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
-from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level, _create_buffer_record
+from aws_lambda_powertools.logging.buffer.functions import _create_buffer_record
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_HANDLER,
     LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
@@ -581,7 +581,9 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        level_num = logging._checkLevel(level)
+        level_num = logging.getLevelName(level) if isinstance(level, str) else level
+        if not isinstance(level_num, int):
+            raise ValueError(f"Unknown level: {level!r}")
 
         if level_num >= logging.ERROR:
             if self._buffer_config and self._buffer_config.flush_on_error_log:
@@ -610,8 +612,7 @@ class Logger:
             )
 
         # Bypass buffer when log severity meets or exceeds configured minimum
-        level_name = logging.getLevelName(level_num)
-        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, level_name):
+        if level_num > logging.getLevelName(self._buffer_config.buffer_at_verbosity):
             return self._logger.log(
                 level_num,
                 msg,

@@ -633,3 +633,19 @@ def test_logger_warn_and_fatal_aliases(stdout, service_name, monkeypatch):
     assert len(log) == 2
     assert log[0]["message"] == "buffered via warn()"
     assert log[1]["message"] == "flushed via fatal()"
+
+
+def test_logger_log_method_does_not_buffer_custom_level_above_threshold(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger that buffers DEBUG logs only
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging with a custom level between INFO and WARNING
+    logger.log(25, "custom level via log()")
+
+    # THEN Message should be output right away, like info()
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert log[0]["message"] == "custom level via log()"
