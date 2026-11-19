@@ -37,28 +37,20 @@ class CloudWatchLogsDecode(BaseModel):
         description="The type of CloudWatch Logs message.",
         examples=["DATA_MESSAGE", "CONTROL_MESSAGE"],
     )
-    owner: str | None = Field(
-        default=None,
-        description="The AWS account ID of the originating log data.",
-        examples=["123456789012"],
-    )
-    logGroup: str | None = Field(
-        default=None,
+    owner: str = Field(description="The AWS account ID of the originating log data.", examples=["123456789012"])
+    logGroup: str = Field(
         description="The name of the log group that contains the log stream.",
         examples=["/aws/lambda/my-function", "/aws/apigateway/my-api"],
     )
-    logStream: str | None = Field(
-        default=None,
+    logStream: str = Field(
         description="The name of the log stream that stores the log events.",
         examples=["2023/01/15/[$LATEST]abcdef1234567890", "i-1234567890abcdef0"],
     )
     subscriptionFilters: list[str] = Field(
-        default_factory=list,
         description="List of subscription filter names associated with the log group.",
         examples=[["LambdaStream_cloudwatch", "AlertFilter"]],
     )
     logEvents: list[CloudWatchLogsLogEvent] = Field(
-        default_factory=list,
         description="Array of log events included in the message.",
         examples=[[{"id": "eventId1", "timestamp": 1673779200000, "message": "Sample log line"}]],
     )
