@@ -1618,3 +1618,33 @@ def test_logger_with_durable_context(lambda_context, durable_context, stdout, se
     log = capture_logging_output(stdout)
     assert log["function_name"] == lambda_context.function_name
     assert log["function_request_id"] == lambda_context.aws_request_id
+
+
+def test_append_keys_rejects_reserved_log_attrs(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN attempting to append a reserved LogRecord attribute
+    # THEN it should raise ValueError with clear message
+    with pytest.raises(ValueError, match="Key 'lineno' is a reserved LogRecord attribute"):
+        logger.append_keys(lineno=5)
+
+    # AND subsequent logs should still work normally
+    logger.info("after rejected append")
+    output = stdout.getvalue()
+    assert "after rejected append" in output
+
+
+def test_thread_safe_append_keys_rejects_reserved_log_attrs(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN attempting to append a reserved LogRecord attribute in thread-safe method
+    # THEN it should raise ValueError
+    with pytest.raises(ValueError, match="Key 'levelname' is a reserved LogRecord attribute"):
+        logger.thread_safe_append_keys(levelname=20)
+
+    # AND subsequent logs should still work normally
+    logger.info("after rejected thread-safe append")
+    output = stdout.getvalue()
+    assert "after rejected thread-safe append" in output
