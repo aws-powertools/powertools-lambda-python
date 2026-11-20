@@ -43,6 +43,7 @@ RESERVED_LOG_ATTRS = (
     "threadName",
     "processName",
     "process",
+    "taskName",
     "asctime",
     "location",
     "timestamp",

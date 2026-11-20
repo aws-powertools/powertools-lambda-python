@@ -323,6 +323,29 @@ def test_log_dict_xray_is_not_present_when_explicitly_disabled(
     assert "xray_trace_id" not in log_dict
 
 
+def test_log_dict_task_name_is_not_present_when_inside_asyncio_task(
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    # WHEN logging a message inside an asyncio task
+    async def task():
+        logger.info("in asyncio task")
+
+    asyncio.run(task())
+
+    # THEN the logs should not contain the taskName key
+    logs = capture_logging_output(stdout)
+
+    assert logs[0].get("message") == "in asyncio task"
+    assert "taskName" not in logs[0]
+
+
 def test_log_custom_std_log_attribute(stdout, service_name):
     # GIVEN a logger where we have a standard log attr process
     # https://docs.python.org/3/library/logging.html#logrecord-attributes
