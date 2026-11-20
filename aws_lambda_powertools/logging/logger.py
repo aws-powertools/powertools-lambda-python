@@ -107,7 +107,7 @@ class Logger:
     level : str, int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
         or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
-        by default "INFO"
+        by default "INFO"; a child Logger without a level follows its parent's level
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
     sampling_rate: float, optional
@@ -283,7 +283,8 @@ class Logger:
             self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
 
         # Used in case of sampling
-        self.initial_log_level = self._determine_log_level(level)
+        # A child Logger without an explicit level stays NOTSET, so it follows its parent's level
+        self.initial_log_level = logging.NOTSET if child and level is None else self._determine_log_level(level)
 
         self._init_logger(
             formatter_options=formatter_options,
@@ -348,7 +349,9 @@ class Logger:
         #   c) multiple messages from being logged as handlers can be duplicated
         is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child:
-            self.setLevel(log_level)
+            # Only set a level when one was given; otherwise the child follows its parent's level
+            if log_level is not None:
+                self.setLevel(log_level)
             if getattr(self._logger.parent, "powertools_buffer_config", None):
                 # Initializes a new, empty LoggerBufferCache for child logger
                 # Preserves parent's buffer configuration while resetting cache contents
@@ -973,7 +976,8 @@ class Logger:
 
     @property
     def log_level(self) -> int:
-        return self._logger.level
+        # Effective level, so a child Logger without its own level reports the level it inherits
+        return self._logger.getEffectiveLevel()
 
     @property
     def name(self) -> str:
