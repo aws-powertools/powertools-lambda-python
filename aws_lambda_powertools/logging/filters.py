@@ -13,4 +13,4 @@ class SuppressFilter(logging.Filter):
         created by loggers who don't have a handler.
         """
         logger = record.name
-        return self.logger not in logger
+        return not (logger == self.logger or logger.startswith(f"{self.logger}."))

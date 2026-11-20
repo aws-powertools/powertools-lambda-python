@@ -5,7 +5,6 @@ AWS SSM Parameter retrieval and caching utility
 from __future__ import annotations
 
 import logging
-import os
 import warnings
 from typing import TYPE_CHECKING, Any, Literal, overload
 
@@ -13,7 +12,7 @@ import boto3
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
-    resolve_truthy_env_var_choice,
+    resolve_bool_env_var,
     slice_dictionary,
 )
 from aws_lambda_powertools.utilities.parameters.base import (
@@ -183,10 +182,8 @@ class SSMProvider(BaseProvider):
         max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
-        decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-            choice=decrypt,
-        )
+        if decrypt is None:
+            decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
         sdk_options["decrypt"] = decrypt
         sdk_options["recursive"] = recursive
@@ -237,10 +234,8 @@ class SSMProvider(BaseProvider):
         max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
-        decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-            choice=decrypt,
-        )
+        if decrypt is None:
+            decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
         # Add to `decrypt` sdk_options to we can have an explicit option for this
         sdk_options["decrypt"] = decrypt
@@ -492,10 +487,8 @@ class SSMProvider(BaseProvider):
         max_age = resolve_parameters_max_age(choice=max_age)
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
-        decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-            choice=decrypt,
-        )
+        if decrypt is None:
+            decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
         # Init potential batch/decrypt batch responses and errors
         batch_ret: dict[str, Any] = {}
@@ -883,10 +876,8 @@ def get_parameter(
     max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
-    decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-        choice=decrypt,
-    )
+    if decrypt is None:
+        decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
     return DEFAULT_PROVIDERS["ssm"].get(
         name=name,
@@ -1021,10 +1012,8 @@ def get_parameters(
     max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
-    decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-        choice=decrypt,
-    )
+    if decrypt is None:
+        decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
     return DEFAULT_PROVIDERS["ssm"].get_multiple(
         path=path,
@@ -1217,10 +1206,8 @@ def get_parameters_by_name(
     max_age = resolve_parameters_max_age(choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
-    decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
-        choice=decrypt,
-    )
+    if decrypt is None:
+        decrypt = resolve_bool_env_var(constants.PARAMETERS_SSM_DECRYPT_ENV)
 
     # Only create the provider if this function is called at least once
     if "ssm" not in DEFAULT_PROVIDERS:
