@@ -4,6 +4,11 @@ from collections import deque
 from typing import Any
 
 
+def _item_size(item: Any) -> int:
+    """Return the UTF-8 encoded size of an item, in bytes."""
+    return len(str(item).encode("utf-8"))
+
+
 class KeyBufferCache:
     """
     A cache implementation for a single key with size tracking and eviction support.
@@ -39,7 +44,7 @@ class KeyBufferCache:
         item : Any
             The item to be stored in the cache.
         """
-        item_size = len(str(item))
+        item_size = _item_size(item)
         self.cache.append(item)
         self.current_size += item_size
 
@@ -53,7 +58,7 @@ class KeyBufferCache:
             The removed item.
         """
         removed_item = self.cache.popleft()
-        self.current_size -= len(str(removed_item))
+        self.current_size -= _item_size(removed_item)
         self.has_evicted = True
         return removed_item
 
@@ -131,7 +136,7 @@ class LoggerBufferCache:
             True if item was added, False otherwise.
         """
         # Check if item is larger than entire buffer
-        item_size = len(str(item))
+        item_size = _item_size(item)
         if item_size > self.max_size_bytes:
             raise BufferError("Cannot add item to the buffer")
 

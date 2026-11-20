@@ -634,6 +634,35 @@ def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(
     assert len(logs) == 4
 
 
+def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_name(stdout, service_name):
+    # GIVEN a root logger configured with a handler (as in Lambda runtime)
+    root_stream = io.StringIO()
+    root_handler = logging.StreamHandler(root_stream)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(root_handler)
+
+    try:
+        # AND a Powertools logger, plus an unrelated logger whose name contains the service name
+        # (like "botocore" for service "core")
+        Logger(service=service_name, stream=stdout)
+        child_logger = Logger(service=service_name, child=True, stream=stdout)
+        unrelated_logger = logging.getLogger(f"boto{service_name}")
+
+        # WHEN an unrelated logger whose name contains the service string logs a message
+        # AND a child logger of the Powertools logger logs a message
+        unrelated_logger.warning("credentials expire soon")
+        child_logger.warning("child message")
+
+        # THEN the unrelated logger must not be suppressed by the root handler's SuppressFilter
+        root_output = root_stream.getvalue()
+        assert "credentials expire soon" in root_output
+
+        # AND the genuine child logger must still be suppressed from bubbling to the root handler
+        assert "child message" not in root_output
+    finally:
+        root_logger.removeHandler(root_handler)
+
+
 def test_logger_exception_extract_exception_name(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -1283,6 +1312,88 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
 
     # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
     assert logger.log_level == logging.INFO
+
+
+@pytest.mark.parametrize(
+    "level_input, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+        (15, 15),
+        (logging.INFO, logging.INFO),
+        ("", logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_without_alc(stdout, service_name, level_input, expected_level):
+    # GIVEN no ALC environment variable
+    # WHEN Logger is initialized with lowercase string or integer level
+    logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN the log level matches the expected numeric level
+    assert logger.log_level == expected_level
+
+    # AND setLevel also accepts lowercase and custom integer
+    logger.setLevel(level=level_input)
+    assert logger.log_level == expected_level
+
+
+@pytest.mark.parametrize(
+    "level_input, alc_level, should_warn, expected_effective_level",
+    [
+        ("debug", "INFO", True, logging.INFO),
+        ("info", "INFO", False, logging.INFO),
+        ("warning", "INFO", False, logging.INFO),
+        (15, "INFO", True, logging.INFO),
+        (15, "DEBUG", False, logging.DEBUG),
+        (25, "INFO", False, logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_with_alc(
+    monkeypatch,
+    stdout,
+    service_name,
+    level_input,
+    alc_level,
+    should_warn,
+    expected_effective_level,
+):
+    # GIVEN ALC is configured
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, alc_level)
+
+    # WHEN Logger is initialized with lowercase string or integer level
+    if should_warn:
+        with pytest.warns(UserWarning):
+            logger = Logger(service=service_name, stream=stdout, level=level_input)
+    else:
+        logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN ALC takes precedence
+    assert logger.log_level == expected_effective_level
+
+
+@pytest.mark.parametrize("env_var", [constants.POWERTOOLS_LOG_LEVEL_ENV, constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV])
+@pytest.mark.parametrize(
+    "env_value, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+    ],
+)
+def test_logger_env_var_case_insensitive(monkeypatch, stdout, service_name, env_var, env_value, expected_level):
+    # GIVEN POWERTOOLS_LOG_LEVEL or LOG_LEVEL is set with lowercase string
+    monkeypatch.setenv(env_var, env_value)
+
+    # WHEN Logger is initialized without explicit level
+    logger = Logger(service=service_name, stream=stdout)
+
+    # THEN Logger normalizes the level case-insensitively
+    assert logger.log_level == expected_level
 
 
 def test_logger_add_remove_filter(stdout, service_name):
