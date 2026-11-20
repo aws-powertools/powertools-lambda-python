@@ -122,6 +122,38 @@ def test_with_json_message(stdout, service_name):
     assert msg == log_dict["message"]
 
 
+@pytest.mark.parametrize("msg", ["null", "true", "123", "1e3", '"quoted"', "NaN"])
+def test_with_json_scalar_string_message_stays_string(stdout, service_name, msg):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a string that is also a valid JSON scalar
+    logger.info(msg)
+
+    # THEN the message is kept as the original string
+    log_dict = json.loads(stdout.getvalue())
+    assert log_dict["message"] == msg
+
+
+@pytest.mark.parametrize(
+    "msg, expected",
+    [
+        ('{"order_id": 123, "items": ["a", "b"]}', {"order_id": 123, "items": ["a", "b"]}),
+        ('["a", "b"]', ["a", "b"]),
+    ],
+)
+def test_with_json_object_or_array_string_message_is_decoded(stdout, service_name, msg, expected):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a string that is a JSON object or array
+    logger.info(msg)
+
+    # THEN the message is decoded into structured output
+    log_dict = json.loads(stdout.getvalue())
+    assert log_dict["message"] == expected
+
+
 def test_with_unserializable_value_in_message(stdout, service_name):
     logger = Logger(service=service_name, level="DEBUG", stream=stdout)
 
