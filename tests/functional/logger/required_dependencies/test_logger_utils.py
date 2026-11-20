@@ -417,6 +417,42 @@ def test_copy_config_with_buffering_uses_buffering_handler(stdout, logger, log_l
         assert "Test message from external logger" in output
 
 
+def test_copy_config_with_buffering_logs_immediately_without_tracer_id(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools logger with buffer_config
+    ext_logger = logger()
+    buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING")
+    powertools_logger = Logger(
+        service=service_name(),
+        level=log_level.INFO.value,
+        stream=stdout,
+        buffer_config=buffer_config,
+    )
+
+    # WHEN configuration is copied with include_buffering=True
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        include_buffering=True,
+        include={ext_logger.name},
+    )
+
+    # AND the external logger emits a message without a tracer ID
+    with patch("aws_lambda_powertools.logging.logger.get_tracer_id", return_value=None):
+        ext_logger.info("Test message from external logger")
+
+    # THEN the message is emitted immediately
+    log = capture_logging_output(stdout)
+    assert log["message"] == "Test message from external logger"
+
+    # AND a subsequent flush with a tracer ID does not emit it again
+    with patch(
+        "aws_lambda_powertools.logging.logger.get_tracer_id",
+        return_value="1-67c39786-5908a82a246fb67f3089263f",
+    ):
+        powertools_logger.flush_buffer()
+
+    assert len(stdout.getvalue().strip().splitlines()) == 1
+
+
 def test_copy_config_buffering_without_config_uses_normal_handlers(stdout, logger, log_level):
     # GIVEN an external logger and Powertools logger WITHOUT buffer_config
     ext_logger = logger()
