@@ -999,9 +999,34 @@ class Logger:
 
         return constants.LAMBDA_ADVANCED_LOGGING_LEVELS.get(os.getenv(constants.LAMBDA_LOG_LEVEL_ENV))
 
-    def _get_powertools_log_level(self, level: str | int | None) -> str | None:
+    def _to_numeric_log_level(self, level: str | int) -> int:
+        """Convert a log level name or integer to its numeric value."""
+        if isinstance(level, str):
+            name = level.upper()
+            mapping = (
+                logging.getLevelNamesMapping() if hasattr(logging, "getLevelNamesMapping") else logging._nameToLevel
+            )
+            if name in mapping:
+                return mapping[name]
+
+            val = logging.getLevelName(name)
+            if isinstance(val, int):
+                return val
+
+            if hasattr(logging, "_checkLevel"):
+                return logging._checkLevel(name)
+
+            raise ValueError(f"Unknown level: {level!r}")
+
+        if isinstance(level, int) and not isinstance(level, bool):
+            return level
+
+        raise TypeError(f"Level not an integer or a valid string: {level!r}")
+
+    def _get_powertools_log_level(self, level: str | int | None) -> str | int | None:
         """Retrieve the log level for Powertools from the environment variable or level parameter.
-        If log level is an integer, we convert to its respective string level `logging.getLevelName()`.
+        If log level is an integer, we return it directly as an integer.
+        If log level is a string, we normalize it to uppercase.
         If no log level is provided, we check env vars for the log level: POWERTOOLS_LOG_LEVEL_ENV and POWERTOOLS_LOG_LEVEL_LEGACY_ENV.
         Parameters:
         -----------
@@ -1015,7 +1040,7 @@ class Logger:
             log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
         Returns:
         --------
-        str | None:
+        str | int | None:
             The corresponding logging level. Returns None if the log level is not explicitly specified.
         """  # noqa E501
 
@@ -1023,11 +1048,16 @@ class Logger:
         log_level_env = os.getenv(constants.POWERTOOLS_LOG_LEVEL_ENV) or os.getenv(
             constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV,
         )
-        # If level is an int (logging.INFO), return its respective string ("INFO")
-        if isinstance(level, int):
-            return logging.getLevelName(level)
+        if isinstance(level, str) and level:
+            return level.upper()
 
-        return level or log_level_env
+        if isinstance(level, int) and not isinstance(level, bool):
+            return level
+
+        if log_level_env is not None:
+            return log_level_env.upper()
+
+        return None
 
     def _determine_log_level(self, level: str | int | None) -> str | int:
         """Determine the effective log level considering Lambda and Powertools preferences.
@@ -1038,7 +1068,7 @@ class Logger:
             The specified log level as a string, integer, or None.
         Returns:
         ----------
-            str | int: The effective logging level.
+        str | int: The effective logging level.
         """
 
         # This function consider the following order of precedence:
@@ -1051,9 +1081,9 @@ class Logger:
         lambda_log_level = self._get_aws_lambda_log_level()
         powertools_log_level = self._get_powertools_log_level(level)
 
-        if powertools_log_level and lambda_log_level:
+        if powertools_log_level is not None and lambda_log_level:
             # If Powertools log level is set and higher than AWS Lambda Advanced Logging Controls, emit a warning
-            if logging.getLevelName(lambda_log_level) > logging.getLevelName(powertools_log_level):
+            if self._to_numeric_log_level(lambda_log_level) > self._to_numeric_log_level(powertools_log_level):
                 warnings.warn(
                     f"Current log level ({powertools_log_level}) does not match AWS Lambda Advanced Logging Controls "
                     f"minimum log level ({lambda_log_level}). This can lead to data loss, consider adjusting them.",
@@ -1065,8 +1095,8 @@ class Logger:
             if (
                 hasattr(self, "_buffer_config")
                 and self._buffer_config
-                and logging.getLevelName(lambda_log_level)
-                > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+                and self._to_numeric_log_level(lambda_log_level)
+                > self._to_numeric_log_level(self._buffer_config.buffer_at_verbosity)
             ):
                 warnings.warn(
                     "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
@@ -1085,7 +1115,7 @@ class Logger:
             return logging.INFO
 
         # Powertools log level is set, we use this
-        return powertools_log_level.upper()
+        return powertools_log_level
 
     # FUNCTIONS for Buffering log
 

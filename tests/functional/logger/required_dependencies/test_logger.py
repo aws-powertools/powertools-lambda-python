@@ -1313,6 +1313,88 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
     assert logger.log_level == logging.INFO
 
 
+@pytest.mark.parametrize(
+    "level_input, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+        (15, 15),
+        (logging.INFO, logging.INFO),
+        ("", logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_without_alc(stdout, service_name, level_input, expected_level):
+    # GIVEN no ALC environment variable
+    # WHEN Logger is initialized with lowercase string or integer level
+    logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN the log level matches the expected numeric level
+    assert logger.log_level == expected_level
+
+    # AND setLevel also accepts lowercase and custom integer
+    logger.setLevel(level=level_input)
+    assert logger.log_level == expected_level
+
+
+@pytest.mark.parametrize(
+    "level_input, alc_level, should_warn, expected_effective_level",
+    [
+        ("debug", "INFO", True, logging.INFO),
+        ("info", "INFO", False, logging.INFO),
+        ("warning", "INFO", False, logging.INFO),
+        (15, "INFO", True, logging.INFO),
+        (15, "DEBUG", False, logging.DEBUG),
+        (25, "INFO", False, logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_with_alc(
+    monkeypatch,
+    stdout,
+    service_name,
+    level_input,
+    alc_level,
+    should_warn,
+    expected_effective_level,
+):
+    # GIVEN ALC is configured
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, alc_level)
+
+    # WHEN Logger is initialized with lowercase string or integer level
+    if should_warn:
+        with pytest.warns(UserWarning):
+            logger = Logger(service=service_name, stream=stdout, level=level_input)
+    else:
+        logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN ALC takes precedence
+    assert logger.log_level == expected_effective_level
+
+
+@pytest.mark.parametrize("env_var", [constants.POWERTOOLS_LOG_LEVEL_ENV, constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV])
+@pytest.mark.parametrize(
+    "env_value, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+    ],
+)
+def test_logger_env_var_case_insensitive(monkeypatch, stdout, service_name, env_var, env_value, expected_level):
+    # GIVEN POWERTOOLS_LOG_LEVEL or LOG_LEVEL is set with lowercase string
+    monkeypatch.setenv(env_var, env_value)
+
+    # WHEN Logger is initialized without explicit level
+    logger = Logger(service=service_name, stream=stdout)
+
+    # THEN Logger normalizes the level case-insensitively
+    assert logger.log_level == expected_level
+
+
 def test_logger_add_remove_filter(stdout, service_name):
     # GIVEN a Logger with a custom logging filter
     class ApiKeyFilter(logging.Filter):  # NOSONAR  # need filter to test actual impl.
