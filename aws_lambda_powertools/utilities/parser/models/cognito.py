@@ -96,10 +96,11 @@ class CognitoPreTokenGenerationTriggerModelV1(CognitoTriggerBaseSchema):
 
 
 class CognitoPreTokenGenerationRequestModelV2AndV3(CognitoPreTokenGenerationRequestModel):
-    scopes: dict[str, Any] | None = None
+    scopes: list[str] | None = None
 
 
 class CognitoPreTokenGenerationTriggerModelV2AndV3(CognitoTriggerBaseSchema):
+    triggerSource: str
     request: CognitoPreTokenGenerationRequestModelV2AndV3
     response: dict[str, Any] = {}
 
