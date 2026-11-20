@@ -103,6 +103,12 @@ class APIGatewayProxyEventModel(BaseModel):
     isBase64Encoded: bool | None = None
     body: str | type[BaseModel] | None = None
 
+    @field_validator("headers", "multiValueHeaders", mode="before")
+    @classmethod
+    def _null_headers_as_empty(cls, value):
+        # The Test tab in the API Gateway console sends null headers when the test has none
+        return {} if value is None else value
+
 
 class ApiGatewayAuthorizerToken(BaseModel):
     type: Literal["TOKEN"]
