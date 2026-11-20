@@ -649,3 +649,32 @@ def test_logger_log_method_does_not_buffer_custom_level_above_threshold(stdout, 
     log = capture_multiple_logging_statements_output(stdout)
     assert len(log) == 1
     assert log[0]["message"] == "custom level via log()"
+
+
+def test_logger_log_method_supports_valid_string_level(stdout, service_name):
+    # GIVEN A logger without buffering
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout)
+
+    # WHEN Logging using string level name
+    logger.log("INFO", "string level via log()")
+
+    # THEN Message should be logged with INFO level
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert log[0]["message"] == "string level via log()"
+    assert log[0]["level"] == "INFO"
+
+
+def test_logger_log_method_raises_on_invalid_level(stdout, service_name):
+    # GIVEN A standard logger
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout)
+
+    # WHEN Logging with an unknown string level
+    # THEN ValueError should be raised
+    with pytest.raises(ValueError, match="Unknown level: 'UNKNOWN_LEVEL'"):
+        logger.log("UNKNOWN_LEVEL", "test message")
+
+    # WHEN Logging with a non-int, non-string level (e.g. None)
+    # THEN ValueError should be raised
+    with pytest.raises(ValueError, match="Unknown level: None"):
+        logger.log(None, "test message")  # type: ignore[arg-type]
