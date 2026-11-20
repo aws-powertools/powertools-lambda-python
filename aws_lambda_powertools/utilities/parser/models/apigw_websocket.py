@@ -47,6 +47,11 @@ class APIGatewayWebSocketDisconnectEventRequestContext(APIGatewayWebSocketEventR
 class APIGatewayWebSocketConnectEventModel(BaseModel):
     headers: dict[str, str] = Field(alias="headers")
     multi_value_headers: dict[str, list[str]] = Field(alias="multiValueHeaders")
+    query_string_parameters: dict[str, str] | None = Field(None, alias="queryStringParameters")
+    multi_value_query_string_parameters: dict[str, list[str]] | None = Field(
+        None,
+        alias="multiValueQueryStringParameters",
+    )
     request_context: APIGatewayWebSocketConnectEventRequestContext = Field(alias="requestContext")
     is_base64_encoded: bool = Field(alias="isBase64Encoded")
 
