@@ -4,12 +4,14 @@ import logging
 import zlib
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
 
 class CloudWatchLogsLogEvent(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     id: str = Field(
         description="Unique identifier for the log event within the batch.",
         examples=["eventId1", "abc123def456"],
@@ -21,6 +23,12 @@ class CloudWatchLogsLogEvent(BaseModel):
     message: str | type[BaseModel] = Field(
         description="The actual log message string or structured JSON payload emitted by the service or application.",
         examples=["This is a sample log message", '{"statusCode":200,"path":"/hello"}'],
+    )
+    extracted_fields: dict[str, str] = Field(
+        default_factory=dict,
+        alias="extractedFields",
+        description="Key-value pairs of fields extracted from the log message if a filter pattern was used.",
+        examples=[{"timestamp": "2023-01-15T10:30:00Z", "request_id": "1234"}],
     )
 
 
