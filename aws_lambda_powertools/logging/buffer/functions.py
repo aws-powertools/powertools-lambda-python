@@ -16,6 +16,7 @@ def _create_buffer_record(
     exc_info: logging._ExcInfoType = None,
     stack_info: bool = False,
     extra: Mapping[str, object] | None = None,
+    depth: int = 4,
 ) -> dict[str, Any]:
     """
     Create a structured log record for buffering to save in buffer.
@@ -47,7 +48,7 @@ def _create_buffer_record(
     """
     # Retrieve the caller's frame information to capture precise log context
     # Uses inspect.stack() with index 3 to get the original caller's details
-    caller_frame = sys._getframe(3)
+    caller_frame = sys._getframe(depth)
 
     # Get the current timestamp
     timestamp = time.time()
