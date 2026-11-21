@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+from inspect import isclass
+from typing import Any, get_origin
 
 from pydantic import BaseModel
 
@@ -28,7 +29,8 @@ class PydanticSerializer(BaseIdempotencyModelSerializer):
         self.__model: type[BaseModel] = model
 
     def to_dict(self, data: BaseModel) -> dict:
-        return data.model_dump()
+        # The result is stored as JSON, so dump JSON-compatible values; from_dict validates them back into the model.
+        return data.model_dump(mode="json")
 
     def from_dict(self, data: dict) -> BaseModel:
         return self.__model.model_validate(data)
@@ -40,7 +42,7 @@ class PydanticSerializer(BaseIdempotencyModelSerializer):
         if model_type is None:
             raise IdempotencyNoSerializationModelError("No serialization model was supplied")
 
-        if not issubclass(model_type, BaseModel):
+        if get_origin(model_type) is not None or not isclass(model_type) or not issubclass(model_type, BaseModel):
             raise IdempotencyModelTypeError("Model type is not inherited from pydantic BaseModel")
 
         return cls(model=model_type)

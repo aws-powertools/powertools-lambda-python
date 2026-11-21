@@ -18,9 +18,9 @@ class TransferFamilyAuthorizer(DictWrapper):
     def password(self) -> str | None:
         """
         The password used for authentication.
-        None in case customer authenticating with certificates
+        None when the event has no password, e.g. when the user authenticates with an SSH key
         """
-        return self["password"]
+        return self.get("password")
 
     @property
     def protocol(self) -> str:
@@ -67,7 +67,7 @@ class TransferFamilyAuthorizerResponse:
             raise ValueError(f"Invalid home_directory_type: {home_directory_type}")
 
         if user_uid is not None:
-            response["PosixProfile"] = {"Gid": user_gid, "Uid": user_gid}
+            response["PosixProfile"] = {"Gid": user_gid, "Uid": user_uid}
 
         if policy:
             response["Policy"] = policy

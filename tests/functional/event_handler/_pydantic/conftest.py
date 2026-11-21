@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 
-import fastjsonschema
 import pytest
 
 from aws_lambda_powertools.event_handler.openapi.models import APIKey, APIKeyIn
@@ -99,6 +98,8 @@ def pydanticv2_only():
 def openapi30_schema():
     from urllib.request import urlopen
 
+    import fastjsonschema
+
     f = urlopen("https://spec.openapis.org/oas/3.0/schema/2021-09-28")
     data = json.loads(f.read().decode("utf-8"))
     return fastjsonschema.compile(
@@ -110,6 +111,8 @@ def openapi30_schema():
 @pytest.fixture(scope="session")
 def openapi31_schema():
     from urllib.request import urlopen
+
+    import fastjsonschema
 
     f = urlopen("https://spec.openapis.org/oas/3.1/schema/2022-10-07")
     data = json.loads(f.read().decode("utf-8"))

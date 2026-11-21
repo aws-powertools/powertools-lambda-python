@@ -51,13 +51,14 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | ------- | ----------- |
 | [Tracer](./core/tracer.md) | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions |
 | [Logger](./core/logger.md) | Structured logging made easier, and target to enrich structured logging with key Lambda context details |
-| [Metrics](./core/metrics.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
+| [Metrics](./core/metrics/index.md) | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF) |
 | [Event Handler](./core/event_handler/api_gateway.md) | Event handler for API Gateway, ALB, Lambda Function URL, VPC Lattice, AppSync, and Bedrock Agents |
 | [Parameters](./utilities/parameters.md) | Retrieve and cache parameter values from Parameter Store, Secrets Manager, AppConfig, or DynamoDB |
-| [Auth (alpha)](./utilities/auth.md) | Verify JWT access tokens and [acquire client-credentials tokens](./utilities/oauth2.md) for downstream APIs |
+| [Auth](./utilities/auth.md) | Verify JWT access tokens, [acquire client-credentials tokens](./utilities/oauth2.md) for downstream APIs, and [sign requests](./utilities/signer.md) to IAM-protected AWS endpoints |
 | [Parser](./utilities/parser.md) | Data parsing and deep validation using Pydantic |
 | [Batch Processing](./utilities/batch.md) | Handle partial failures for SQS, Kinesis Data Streams, and DynamoDB Streams |
 | [Idempotency](./utilities/idempotency.md) | Make your Lambda functions idempotent and prevent duplicate execution |
+| [Circuit Breaker](./utilities/circuit_breaker.md) | Stop calling a failing downstream and recover with a single probe across execution environments |
 | [Feature Flags](./utilities/feature_flags.md) | A simple rule engine to evaluate when features should be enabled |
 | [Validation](./utilities/validation.md) | JSON Schema validator for inbound events and responses |
 | [Data Masking](./utilities/data_masking.md) | Protect confidential data with easy removal or encryption |
@@ -67,6 +68,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 | [Event Source Data Classes](./utilities/data_classes.md) | Data classes describing the schema of common Lambda event triggers |
 | [JMESPath Functions](./utilities/jmespath_functions.md) | Built-in JMESPath functions to deserialize common encoded JSON payloads |
 | [Kafka](./utilities/kafka.md) | Deserialize and validate Kafka events with support for Avro, Protocol Buffers, and JSON Schema |
+| [Metadata](./utilities/metadata.md) | Read the Lambda Metadata Endpoint, such as the Availability Zone ID of the execution environment |
 
 ## Examples
 
@@ -89,8 +91,8 @@ For a more complete example, check the [Powertools for AWS workshop](https://cat
 | `POWERTOOLS_LOG_LEVEL` | Sets logging level | [Logger](./core/logger.md) | `INFO` |
 | `POWERTOOLS_LOGGER_LOG_EVENT` | Logs incoming event | [Logger](./core/logger.md) | `false` |
 | `POWERTOOLS_LOGGER_SAMPLE_RATE` | Debug log sampling | [Logger](./core/logger.md) | `0` |
-| `POWERTOOLS_METRICS_NAMESPACE` | Namespace for metrics | [Metrics](./core/metrics.md) | `None` |
-| `POWERTOOLS_METRICS_DISABLED` | Disables metrics emission | [Metrics](./core/metrics.md) | `false` |
+| `POWERTOOLS_METRICS_NAMESPACE` | Namespace for metrics | [Metrics](./core/metrics/index.md) | `None` |
+| `POWERTOOLS_METRICS_DISABLED` | Disables metrics emission | [Metrics](./core/metrics/index.md) | `false` |
 | `POWERTOOLS_TRACE_DISABLED` | Disables tracing | [Tracer](./core/tracer.md) | `false` |
 | `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | Captures return as metadata | [Tracer](./core/tracer.md) | `true` |
 | `POWERTOOLS_TRACER_CAPTURE_ERROR` | Captures exception as metadata | [Tracer](./core/tracer.md) | `true` |

@@ -12,12 +12,20 @@ You can pass it as a context variable when running `synth` or `deploy`,
 cdk synth --context version=3.0.0 --pythonVersion=3.12
 ```
 
+The build precompiles Python sources for the selected runtime and retains the `.py` files for source inspection and fallback.
+Bytecode uses checked hashes so ZIP timestamp changes do not invalidate the cache.
+This increases the layer size.
+
 ## Canary stack
 
 We use a canary stack to verify that the deployment is successful and we can use the layer by adding it to a newly created Lambda function.
 The canary is deployed after the layer construct. Because the layer ARN is created during the deploy we need to pass this information async via SSM parameter.
 To achieve that we use SSM parameter store to pass the layer ARN to the canary.
 The layer stack writes the layer ARN after the deployment as SSM parameter and the canary stacks reads this information and adds the layer to the function.
+
+On creation, the canary verifies parsing, validation, source inspection, and that imports use the layer's bytecode.
+Recompilation of layer sources fails the canary before it sends a version-tracking notification.
+The cache check does not prevent deletion of the custom resource during rollback.
 
 ## Version tracking
 

@@ -48,9 +48,12 @@ class CsvTransform(BaseTransform):
     """
 
     def transform(self, input_stream: IO[bytes]) -> DictReader:
-        encoding = self.transform_options.pop("encoding", "utf-8")
-        newline = self.transform_options.pop("newline", None)
+        # Work on a copy: the same transform can be applied more than once (e.g. a reused instance, or when
+        # S3Object re-creates its transformed stream), and each call must see the original options.
+        options = dict(self.transform_options)
+        encoding = options.pop("encoding", "utf-8")
+        newline = options.pop("newline", None)
 
         # csv module needs an Iterator[str], so we wrap the underlying stream into a TextIO
         iterator = io.TextIOWrapper(input_stream, encoding=encoding, newline=newline)
-        return csv.DictReader(iterator, **self.transform_options)
+        return csv.DictReader(iterator, **options)

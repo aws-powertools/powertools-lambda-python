@@ -935,14 +935,14 @@ Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amaz
 
 ### Simplifying with Metrics
 
-[Powertools for AWS Lambda (Python) Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"} to create custom metrics **asynchronously** via a native integration with Lambda.
+[Powertools for AWS Lambda (Python) Metrics](../core/metrics/index.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"} to create custom metrics **asynchronously** via a native integration with Lambda.
 
 In general terms, EMF is a specification that expects metrics in a JSON payload within CloudWatch Logs. Lambda ingests all logs emitted by a given function into CloudWatch Logs. CloudWatch automatically looks up for log entries that follow the EMF format and transforms them into a CloudWatch metric.
 
 ???+ info
     If you are interested in the details of the EMF mechanism, follow [blog post](https://aws.amazon.com/blogs/mt/enhancing-workload-observability-using-amazon-cloudwatch-embedded-metric-format/){target="_blank"}.
 
-Let's implement that using [Metrics](../core/metrics.md){target="_blank}:
+Let's implement that using [Metrics](../core/metrics/index.md){target="_blank}:
 
 ```python title="Refactoring with Powertools for AWS Lambda (Python) Metrics" hl_lines="1 4 9 18 27 33"
 from aws_lambda_powertools import Logger, Tracer, Metrics
@@ -991,7 +991,7 @@ That's a lot less boilerplate code! Let's break this down:
 * **L9**: We initialize `Metrics` with our service name (`APP`) and metrics namespace (`MyApp`), reducing the need to add the `service` dimension for every metric and setting the namespace later
 * **L18, 27**: We use `add_metric` similarly to our custom function, except we now have an enum `MetricCount` to help us understand which Metric Units we have at our disposal
 * **L33**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
-* **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
+* **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics/index.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank" rel="nofollow"} and [K6.io](https://k6.io/open-source){target="_blank" rel="nofollow"} are quick ways to generate some load.
 
@@ -1035,7 +1035,7 @@ If you're curious about how the EMF portion of your function logs look like, you
 
 We covered a lot of ground here and we only scratched the surface of the feature set available within Powertools for AWS Lambda (Python).
 <!-- markdownlint-disable-next-line MD013 -->
-When it comes to the observability features ([Tracer](../core/tracer.md){target="_blank"}, [Metrics](../core/metrics.md){target="_blank"}, [Logging](../core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
+When it comes to the observability features ([Tracer](../core/tracer.md){target="_blank"}, [Metrics](../core/metrics/index.md){target="_blank"}, [Logging](../core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
 
 This requires a change in mindset to ensure operational excellence is part of the software development lifecycle.
 

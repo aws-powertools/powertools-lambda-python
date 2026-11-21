@@ -90,7 +90,7 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
 === "getting_started_graphql_api_resolver.py"
 
-    ```python hl_lines="7 14 24 26 27 36 38 46 48 59"
+    ```python hl_lines="7 14 24 26-27 36 38 46 48 59"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 
@@ -152,7 +152,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 === "nested_mappings.py"
 
-    ```python hl_lines="4 10 20 21 23 30"
+    ```python hl_lines="4 10 20-21 23 30"
     --8<-- "examples/event_handler_graphql/src/nested_mappings.py"
     ```
 
@@ -166,7 +166,7 @@ You can nest `app.resolver()` decorator multiple times when resolving fields wit
 
 For Lambda Python3.8+ runtime, this utility supports async functions when you use in conjunction with `asyncio.run`.
 
-```python hl_lines="7 14 24 25 34 36" title="Resolving GraphQL resolvers async"
+```python hl_lines="7 14 24-25 34 36" title="Resolving GraphQL resolvers async"
 --8<-- "examples/event_handler_graphql/src/async_resolvers.py"
 ```
 
@@ -176,7 +176,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 
 === "custom_models.py.py"
 
-    ```python hl_lines="4 7-9 25-27 31 32 39 45"
+    ```python hl_lines="4 7-9 25-27 31-32 39 45"
     --8<-- "examples/event_handler_graphql/src/custom_models.py"
     ```
 
@@ -205,7 +205,7 @@ Let's assume you have `split_operation.py` as your Lambda function entrypoint an
 
     We import **Router** instead of **AppSyncResolver**; syntax wise is exactly the same.
 
-  	```python hl_lines="4 8 18 19"
+  	```python hl_lines="4 8 18-19"
     --8<-- "examples/event_handler_graphql/src/split_operation_module.py"
   	```
 
@@ -554,7 +554,7 @@ And an example for testing asynchronous resolvers. Note that this requires the `
 
 === "assert_async_graphql_response.py"
 
-    ```python hl_lines="31"
+    ```python hl_lines="30"
     --8<-- "examples/event_handler_graphql/src/assert_async_graphql_response.py"
     ```
 

@@ -1,5 +1,5 @@
+import json
 from secrets import randbelow
-from typing import Union
 
 from pydantic import BaseModel
 
@@ -122,7 +122,7 @@ def test_openapi_union_response():
             202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
         },
     )
-    def handler() -> Response[Union[User, Order]]:
+    def handler() -> Response[User | Order]:
         if randbelow(2) > 0:
             return Response(status_code=200, body=User())
         else:
@@ -155,7 +155,7 @@ def test_openapi_union_partial_response():
             202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
         },
     )
-    def handler() -> Response[Union[User, Order]]:
+    def handler() -> Response[User | Order]:
         if randbelow(2) > 0:
             return Response(status_code=200, body=User())
         else:
@@ -493,3 +493,32 @@ def test_openapi_custom_response_with_generic_alias_models():
     dict_schema = schema.paths["/items/by-name"].get.responses[200].content["application/json"].schema_
     assert dict_schema.type == "object"
     assert dict_schema.additionalProperties.ref == "#/components/schemas/Item"
+
+
+def test_openapi_custom_response_without_content_keeps_description_only():
+    # GIVEN a route with a return type and a description-only custom response for another status code
+    class Todo(BaseModel):
+        id: int
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get(
+        "/todos/<todo_id>",
+        responses={
+            200: {"description": "The todo"},
+            404: {"description": "Todo not found"},
+            201: {"description": "Created"},
+        },
+    )
+    def get_todo(todo_id: int) -> Todo:
+        return Todo(id=todo_id)
+
+    # WHEN we get the OpenAPI schema
+    schema = json.loads(app.get_openapi_json_schema())
+    responses = schema["paths"]["/todos/{todo_id}"]["get"]["responses"]
+
+    # THEN only the route's own status code carries the return-type content
+    assert responses["200"]["description"] == "The todo"
+    assert "content" in responses["200"]
+    assert responses["404"] == {"description": "Todo not found"}
+    assert responses["201"] == {"description": "Created"}

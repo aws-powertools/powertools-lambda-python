@@ -133,7 +133,7 @@ You **can** use a single DynamoDB table for all functions annotated with Idempot
 
 ##### Limitations
 
-* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-database) as an alternative.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Cache](#cache-database) as an alternative.
 
 * **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
@@ -223,13 +223,17 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
     Function returns must be annotated with a single type, optionally wrapped in `Optional` or `Union` with `None`.
 
+    Inference supports `from __future__ import annotations`. Define the output model at module scope so its name can be resolved when the function is decorated.
+    If the model is local to another function, pass an explicit serializer instance, such as `PydanticSerializer(model=OrderOutput)` or `DataclassSerializer(model=OrderOutput)`.
+    Containers such as `list[OrderOutput]` are not supported by these model serializers and raise `IdempotencyModelTypeError`.
+
 === "Pydantic"
 
     Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
-        ```python hl_lines="8 27 35 38 48"
+        ```python hl_lines="1 10 29 37 40 50"
         --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
         ```
 
@@ -243,13 +247,19 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
         --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
         ```
 
+    ???+ warning "Results are stored as JSON"
+        `PydanticSerializer` stores your model with `model_dump(mode="json")`, so fields such as `UUID`, `datetime`, `Enum`, `bytes` and `set` are saved as JSON values and validated back into the model on replay. Two cases need attention:
+
+        * `SecretStr` and `SecretBytes` fields are stored **masked** (`**********`), so a replayed result returns the masked value, not the secret. Keep secrets out of idempotent results.
+        * Models with `strict=True` and fields like `datetime` or `UUID` save correctly, but the replay fails validation because strict mode does not accept the stored strings. Use a non-strict model for the result, or a custom serializer.
+
 === "Dataclasses"
 
      Use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
-        ```python hl_lines="9 30 38 41 51"
+        ```python hl_lines="1 11 32 40 43 53"
         --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
         ```
 
@@ -270,7 +280,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
     * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
 
-    ```python hl_lines="9 34 38 42 52 54 64"
+    ```python hl_lines="8 33 37 41 51 53 63"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 
@@ -403,12 +413,16 @@ To prevent extended failures, use **`register_lambda_context`** function from yo
 
 ### Handling exceptions
 
-There are two failure modes that can cause new invocations to execute your code again despite having the same payload:
+There are three failure modes that can cause new invocations to execute your code again despite having the same payload:
 
 * **Unhandled exception**. We catch them to delete the idempotency record to prevent inconsistencies, then propagate them.
 * **Persistent layer errors**. We raise **`IdempotencyPersistenceLayerError`** for any persistence layer errors _e.g., remove idempotency record_.
+* **Response that can't be serialized**. When your function returns a value the output serializer or JSON can't convert _e.g., `datetime`, `set`, `bytes`_, we try to delete the in progress record, then raise **`IdempotencyPersistenceLayerError`**.
+  The next invocation runs your code again once that record is deleted, or after it expires if the deletion fails.
 
-If an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
+If saving the response fails after it was serialized, we keep the record, as the write could have landed. New invocations return the saved response or wait until the in progress record expires.
+
+Apart from a response that can't be serialized, if an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
 
 ```python title="working_with_exceptions.py" hl_lines="21 32 38"
 --8<-- "examples/idempotency/src/working_with_exceptions.py"
@@ -861,6 +875,9 @@ You can override and further extend idempotency behavior via **`IdempotencyConfi
 | **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                  |
 | **response_hook**               | `None`  | Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
+!!! warning "Use one persistence layer instance per `IdempotencyConfig`"
+    A persistence layer applies the settings of the first `IdempotencyConfig` it is used with. If functions with different configs share the same persistence layer instance, the later ones use the first config's settings, and we emit a `PowertoolsUserWarning`.
+
 ### Handling concurrent executions with the same payload
 
 This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if you receive **multiple invocations with the same payload while the first invocation hasn't completed yet**.
@@ -977,11 +994,13 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 ### Manipulating the Idempotent Response
 
+With a DynamoDB composite key, `DataRecord.idempotency_key` contains the sort key value identifying the operation, rather than the shared static partition key. Replayed records use this same key for local caching.
+
 You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="20 22 28 36"
+    ```python hl_lines="19 21 27 35"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 

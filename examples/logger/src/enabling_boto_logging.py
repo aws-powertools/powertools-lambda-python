@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import boto3
 
 from aws_lambda_powertools import Logger
@@ -12,7 +10,7 @@ logger = Logger()
 client = boto3.client("s3")
 
 
-def lambda_handler(event: Dict, context: LambdaContext) -> List:
+def lambda_handler(event: dict, context: LambdaContext) -> list:
     response = client.list_buckets()
 
     return response.get("Buckets", [])

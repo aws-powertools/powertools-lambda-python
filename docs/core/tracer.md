@@ -23,7 +23,7 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../getting-started/install.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[tracer]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Tracer.
 
@@ -224,6 +224,12 @@ Tracer keeps a copy of its configuration after the first initialization. This is
     ```python hl_lines="3"
     --8<-- "examples/tracer/src/tracer_reuse_module.py"
     ```
+
+### CloudWatch Omni
+
+Traces captured by Tracer go to AWS X-Ray, and X-Ray data is available in [CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/){target="_blank"} through Transaction Search. Omni's own instrumentation path is OpenTelemetry, which Tracer does not emit today; if you need OTLP traces from your function, follow [this feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/7003){target="_blank"}.
+
+The `service` name you pass to Tracer is what ties your segments to the logs and metrics of the same service, so keep it aligned with Logger and Metrics.
 
 ## Testing your code
 

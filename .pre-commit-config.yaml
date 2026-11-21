@@ -22,6 +22,12 @@ repos:
         entry: uv run --locked ruff check
         language: system
         types: [python]
+      - id: agent-skill-references
+        name: docs::agent skill references
+        entry: uv run --locked python scripts/build_agent_skill_references.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/|examples/|scripts/build_agent_skill_references\.py)
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: "ce0d77ac47dc921b62429804fe763d4d35f66a76" # v0.34.0
     hooks:

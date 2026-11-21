@@ -1,6 +1,5 @@
 import os
 import uuid
-from typing import Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.idempotency import (
@@ -16,8 +15,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
-    # Return inserted Header data into the Idempotent Response
+def my_response_hook(response: dict, idempotent_data: DataRecord) -> dict:
+    # With a composite key, this is the operation's sort key, not the shared partition key
     response["x-idempotent-key"] = idempotent_data.idempotency_key
 
     # expiry_timestamp can be None so include if set

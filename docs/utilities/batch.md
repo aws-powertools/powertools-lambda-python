@@ -502,7 +502,7 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="14-15 24 34 39 43 49 58"
+    ```python hl_lines="12-13 22 32 37 41 47 56"
     --8<-- "examples/batch_processing/src/pydantic_dynamodb.py"
     ```
 
@@ -537,7 +537,7 @@ Use the context manager to access a list of all returned values from your `recor
 
 === "Accessing raw processed messages"
 
-    ```python hl_lines="28-35"
+    ```python hl_lines="27-34"
     --8<-- "examples/batch_processing/src/context_manager_access.py"
     ```
 

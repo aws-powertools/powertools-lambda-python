@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Type, TypedDict, Union
+from typing import TypedDict
 
 has_pydantic = "pydantic" in sys.modules
 
@@ -15,15 +15,13 @@ if has_pydantic:  # pragma: no cover
     from aws_lambda_powertools.utilities.parser.models.kafka import KafkaRecordModel
 
     BatchTypeModels = (
-        Union[
-            Type[SqsRecordModel],
-            Type[DynamoDBStreamRecordModel],
-            Type[KinesisDataStreamRecordModel],
-            Type[KafkaRecordModel],
-        ]
+        type[SqsRecordModel]
+        | type[DynamoDBStreamRecordModel]
+        | type[KinesisDataStreamRecordModel]
+        | type[KafkaRecordModel]
         | None
     )
-    BatchSqsTypeModel = Type[SqsRecordModel] | None
+    BatchSqsTypeModel = type[SqsRecordModel] | None
 else:  # pragma: no cover
     BatchTypeModels = "BatchTypeModels"  # type: ignore
     BatchSqsTypeModel = "BatchSqsTypeModel"  # type: ignore

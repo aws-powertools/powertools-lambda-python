@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote
 
 from typing_extensions import override
@@ -15,6 +15,9 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     CaseInsensitiveDict,
     DictWrapper,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class ALBEventRequestContext(DictWrapper):

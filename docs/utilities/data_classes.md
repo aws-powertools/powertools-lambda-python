@@ -85,8 +85,10 @@ Each event source is linked to its corresponding GitHub file with the full set o
 | [CodePipeline Job Event](#codepipeline-job) | `CodePipelineJobEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/code_pipeline_job_event.py) |
 | [Cognito User Pool](#cognito-user-pool) | Multiple available under `cognito_user_pool_event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/cognito_user_pool_event.py) |
 | [Connect Contact Flow](#connect-contact-flow) | `ConnectContactFlowEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_contact_flow_event.py) |
+| [Connect Outbound Campaigns](#connect-outbound-campaigns) | `ConnectOutboundCampaignsEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/connect_campaign_event.py) |
 | [DynamoDB streams](#dynamodb-streams) | `DynamoDBStreamEvent`, `DynamoDBRecordEventName` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/dynamo_db_stream_event.py) |
 | [EventBridge](#eventbridge) | `EventBridgeEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_event.py) |
+| [EventBridge Custom Event Bus](#eventbridge-custom-event-bus) | `EventBridgeV2Event` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/event_bridge_v2_event.py) |
 | [Kafka](#kafka) | `KafkaEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kafka_event.py) |
 | [Kinesis Data Stream](#kinesis-streams) | `KinesisStreamEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_stream_event.py) |
 | [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream) | `KinesisFirehoseEvent` | [Github](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/utilities/data_classes/kinesis_firehose_event.py) |
@@ -241,7 +243,7 @@ or read the Amplify documentation on using [AWS Lambda for authorization](https:
 
 === "app.py"
 
-    ```python hl_lines="5-7 20"
+    ```python hl_lines="3-5 18"
     --8<-- "examples/event_sources/src/appSyncAuthorizer.py"
     ```
 
@@ -257,6 +259,8 @@ Used when building Lambda GraphQL Resolvers with [Amplify GraphQL Transform Libr
 and [AppSync Direct Lambda Resolvers](https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/){target="_blank"}.
 
 The example serves as an AppSync resolver for the `locations` field of the `Merchant` type. It uses the `@event_source` decorator to parse the AppSync event, handles pagination and filtering for locations, and demonstrates `AppSyncIdentityCognito`.
+
+With [AWS_LAMBDA authorization](https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization){target="_blank"}, the caller identity is whatever the Lambda authorizer returned in `resolverContext`. In that case, `AppSyncResolverEvent.identity` returns an `AppSyncIdentityLambda`, and the authorizer context is available via `identity.resolver_context`.
 
 === "app.py"
 
@@ -367,7 +371,7 @@ decompress and parse json data from the event.
 
 === "app.py"
 
-    ```python hl_lines="5-7 11"
+    ```python hl_lines="3-5 9"
     --8<-- "examples/event_sources/src/kinesisStreamCloudWatchLogs.py"
     ```
 
@@ -518,6 +522,21 @@ The example integrates with [Amazon Connect](https://docs.aws.amazon.com/connect
     --8<-- "tests/events/connectContactFlowEventAll.json"
     ```
 
+### Connect Outbound Campaigns
+
+The example integrates with [Amazon Connect Outbound Campaigns](https://docs.aws.amazon.com/connect/latest/adminguide/lambda-invoke-functions.html) by handling custom action block events in journey flows. The function converts the event into a `ConnectOutboundCampaignsEvent` object.
+
+=== "app.py"
+
+    ```python hl_lines="1-5 9"
+    --8<-- "examples/event_sources/src/connect_outbound_campaigns.py"
+    ```
+
+=== "Connect Outbound Campaigns Example Event"
+    ```json
+    --8<-- "tests/events/connectOutboundCampaignsEvent.json"
+    ```
+
 ### DynamoDB Streams
 
 The DynamoDB data class utility provides the base class for `DynamoDBStreamEvent`, as well as enums for stream view type (`StreamViewType`) and event type.
@@ -550,6 +569,23 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 === "EventBridge Example Event"
     ```json
     --8<-- "tests/events/eventBridgeEvent.json"
+    ```
+
+### EventBridge Custom Event Bus
+
+The [Custom Event Bus](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus.html) delivers a single object or an array of events, depending on the subscriber batching. `EventBridgeV2Event` always exposes them through `records`.
+
+Use the `WITH_METADATA` transformer when you need event ids, FIFO groups or replay detection (`system_metadata.delivery_type`). `RAW` deliveries carry no marker, so records are still accepted (classic envelope, PutEvents array or bare PutRawEvents payload) but `metadata` and `system_metadata` are empty.
+
+=== "app.py"
+
+    ```python hl_lines="1 5"
+    --8<-- "examples/event_sources/src/eventBridgeV2Event.py"
+    ```
+
+=== "EventBridge Custom Event Bus Example Event"
+    ```json
+    --8<-- "tests/events/eventBridgeV2Event.json"
     ```
 
 ### Kafka
@@ -604,7 +640,7 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Dropping invalid records"
 
-    ```python hl_lines="5-6 14 16"
+    ```python hl_lines="4-5 13 15"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
     ```
 
@@ -646,7 +682,7 @@ for more details.
 
 === "app.py"
 
-    ```python hl_lines="5 10"
+    ```python hl_lines="3 8"
     --8<-- "examples/event_sources/src/rabbit_mq_example.py"
     ```
 

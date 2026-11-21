@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -26,7 +26,7 @@ class IoTCoreThingEvent(IoTCoreRegistryEventsBase):
     thing_name: str = Field(..., alias="thingName")
     version_number: int = Field(..., alias="versionNumber")
     thing_type_name: str | None = Field(None, alias="thingTypeName")
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
 
 
 class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
@@ -47,8 +47,8 @@ class IoTCoreThingTypeEvent(IoTCoreRegistryEventsBase):
     thing_type_name: str = Field(..., alias="thingTypeName")
     is_deprecated: bool = Field(..., alias="isDeprecated")
     deprecation_date: datetime | None = Field(None, alias="deprecationDate")
-    searchable_attributes: List[str] = Field(..., alias="searchableAttributes")
-    propagating_attributes: List[Dict[str, str]] = Field(..., alias="propagatingAttributes")
+    searchable_attributes: list[str] = Field(..., alias="searchableAttributes")
+    propagating_attributes: list[dict[str, str]] = Field(..., alias="propagatingAttributes")
     description: str
 
 
@@ -87,8 +87,8 @@ class IoTCoreThingGroupEvent(IoTCoreRegistryEventsBase):
     parent_group_name: str | None = Field(None, alias="parentGroupName")
     parent_group_id: str | None = Field(None, alias="parentGroupId")
     description: str
-    root_to_parent_thing_groups: List[Dict[str, str]] = Field(..., alias="rootToParentThingGroups")
-    attributes: Dict[str, Any]
+    root_to_parent_thing_groups: list[dict[str, str]] = Field(..., alias="rootToParentThingGroups")
+    attributes: dict[str, Any]
     dynamic_group_mapping_id: str | None = Field(None, alias="dynamicGroupMappingId")
 
 

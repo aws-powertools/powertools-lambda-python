@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from typing import Annotated  # noqa: TC002
+
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated  # noqa: TC002
 
 from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import (

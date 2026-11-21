@@ -8,10 +8,11 @@ from datetime import timedelta
 from typing import Any, Literal, Protocol, cast
 
 import redis
-from typing_extensions import TypeAlias, deprecated
+from typing_extensions import deprecated
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyInconsistentStateError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
     IdempotencyPersistenceConfigError,
@@ -26,8 +27,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 logger = logging.getLogger(__name__)
 
 
-@deprecated("RedisPersistenceLayer will be removed in v4.0.0. Please use CacheProtocol instead.")
-class RedisClientProtocol(Protocol):
+class CacheClientProtocol(Protocol):
     """
     Protocol class defining the interface for a Cache client.
 
@@ -80,8 +80,7 @@ class RedisClientProtocol(Protocol):
         raise NotImplementedError
 
 
-@deprecated("RedisConnection will be removed in v4.0.0. Please use CacheConnection instead.")
-class RedisConnection:
+class CacheConnection:
     def __init__(
         self,
         url: str = "",
@@ -172,7 +171,7 @@ class RedisConnection:
         self.ssl = ssl
         self.mode = mode
 
-    def _init_client(self) -> RedisClientProtocol:
+    def _init_client(self) -> CacheClientProtocol:
         logger.debug(f"Trying to connect to Redis: {self.host}")
         client: type[redis.Redis | redis.cluster.RedisCluster]
         if self.mode == "standalone":
@@ -185,7 +184,7 @@ class RedisConnection:
         try:
             if self.url:
                 logger.debug(f"Using URL format to connect to Cache: {self.host}")
-                return cast(RedisClientProtocol, client.from_url(url=self.url))
+                return cast(CacheClientProtocol, client.from_url(url=self.url))
             else:
                 # Cache in cluster mode doesn't support db parameter
                 extra_param_connection: dict[str, Any] = {}
@@ -194,7 +193,7 @@ class RedisConnection:
 
                 logger.debug(f"Using arguments to connect to Cache: {self.host}")
                 return cast(
-                    RedisClientProtocol,
+                    CacheClientProtocol,
                     client(
                         host=self.host,
                         port=self.port,
@@ -210,8 +209,7 @@ class RedisConnection:
             raise IdempotencyPersistenceConnectionError("Could not to connect to Cache endpoint", exc) from exc
 
 
-@deprecated("RedisCachePersistenceLayer will be removed in v4.0.0. Please use CachePersistenceLayer instead.")
-class RedisCachePersistenceLayer(BasePersistenceLayer):
+class CachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
         url: str = "",
@@ -222,7 +220,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         db_index: int = 0,
         mode: Literal["standalone", "cluster"] = "standalone",
         ssl: bool = True,
-        client: RedisClientProtocol | None = None,
+        client: CacheClientProtocol | None = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
         expiry_attr: str = "expiration",
         status_attr: str = "status",
@@ -297,7 +295,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
         # Initialize Cache client with cache config if no client is passed in
         if client is None:
-            self.client = RedisConnection(
+            self.client = CacheConnection(
                 host=host,
                 port=port,
                 username=username,
@@ -318,7 +316,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self._json_serializer = json.dumps
         self._json_deserializer = json.loads
         super().__init__()
-        self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
     def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:
         """
@@ -337,7 +334,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             in_progress_expiry_timestamp=in_progress_expiry_timestamp,
             response_data=item.get(self.data_attr, ""),
             payload_hash=item.get(self.validation_key_attr, ""),
-            expiry_timestamp=item.get("expiration"),
+            expiry_timestamp=item.get(self.expiry_attr),
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
@@ -412,7 +409,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             # - An expired idempotency record that has not been deleted by Cache.
             # In any case, we proceed to retrieve the record for further inspection.
 
-            idempotency_record = self._get_record(data_record.idempotency_key)
+            try:
+                idempotency_record = self._get_record(data_record.idempotency_key)
+            except IdempotencyItemNotFoundError as exc:
+                raise IdempotencyInconsistentStateError(
+                    "save_inprogress and get_record return inconsistent results.",
+                ) from exc
 
             # If the status of the idempotency record is 'COMPLETED' and the record has not expired
             # (i.e., the expiry timestamp is greater than the current timestamp), then a valid completed
@@ -464,7 +466,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         the lock is only set if it does not already exist, thereby enforcing mutual exclusion.
         """
         try:
-            acquired = self.client.set(name=f"{name}:lock", value="True", ex=self._orphan_lock_timeout, nx=True)
+            acquired = self.client.set(
+                name=f"{name}:lock",
+                value="True",
+                ex=min(10, self.expires_after_seconds),
+                nx=True,
+            )
             logger.debug("acquiring lock to overwrite orphan record")
             if acquired:
                 logger.debug("lock acquired")
@@ -495,6 +502,10 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                 self.expiry_attr: data_record.expiry_timestamp,
             },
         }
+
+        if self.payload_validation_enabled:
+            item["mapping"][self.validation_key_attr] = data_record.payload_hash
+
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         encoded_item = self._json_serializer(item["mapping"])
         ttl = self._get_expiry_second(data_record.expiry_timestamp)
@@ -517,6 +528,14 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.client.delete(data_record.idempotency_key)
 
 
-CachePersistenceLayer: TypeAlias = RedisCachePersistenceLayer
-CacheClientProtocol: TypeAlias = RedisClientProtocol
-CacheConnection: TypeAlias = RedisConnection
+# Deprecated Redis* names are thin subclasses, so only they emit the DeprecationWarning.
+@deprecated("RedisClientProtocol will be removed in v4.0.0. Please use CacheClientProtocol instead.")
+class RedisClientProtocol(CacheClientProtocol, Protocol): ...
+
+
+@deprecated("RedisConnection will be removed in v4.0.0. Please use CacheConnection instead.")
+class RedisConnection(CacheConnection): ...
+
+
+@deprecated("RedisCachePersistenceLayer will be removed in v4.0.0. Please use CachePersistenceLayer instead.")
+class RedisCachePersistenceLayer(CachePersistenceLayer): ...

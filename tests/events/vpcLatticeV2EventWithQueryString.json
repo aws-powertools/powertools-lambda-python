@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "path": "/echo?QS1=value1&QS1=value2&single=one",
+  "method": "POST",
+  "headers": {
+    "x-amzn-requestid": ["6ccfc913-b027-4fdc-be66-a07809329ee3"],
+    "content-type": ["application/json"],
+    "x-forwarded-for": ["10.42.0.189"],
+    "header1": ["value1", "value2"],
+    "host": ["my-service-0123456789abcdef0.7d67968.vpc-lattice-svcs.eu-west-1.on.aws"]
+  },
+  "queryStringParameters": {
+    "QS1": ["value1", "value2"],
+    "single": ["one"]
+  },
+  "body": "{\"hello\":\"world\"}",
+  "requestContext": {
+    "serviceNetworkArn": "arn:aws:vpc-lattice:eu-west-1:123456789012:servicenetwork/sn-0123456789abcdef0",
+    "serviceArn": "arn:aws:vpc-lattice:eu-west-1:123456789012:service/svc-0123456789abcdef0",
+    "targetGroupArn": "arn:aws:vpc-lattice:eu-west-1:123456789012:targetgroup/tg-0123456789abcdef0",
+    "identity": {
+      "sourceVpcArn": "arn:aws:ec2:eu-west-1:123456789012:vpc/vpc-0123456789abcdef0"
+    },
+    "region": "eu-west-1",
+    "timeEpoch": "1790935900260914"
+  },
+  "requestId": "6ccfc913-b027-4fdc-be66-a07809329ee3"
+}

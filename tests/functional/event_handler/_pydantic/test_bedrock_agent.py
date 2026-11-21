@@ -1,9 +1,8 @@
 import json
 from functools import partial
-from typing import Any, Dict
+from typing import Annotated, Any
 
 import pytest
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, BedrockResponse, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body, Query
@@ -18,7 +17,7 @@ def test_bedrock_agent_event():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
         return {"output": claims_response}
@@ -111,7 +110,7 @@ def test_bedrock_agent_event_with_validation_error():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return "oh no, this is not a dict"  # type: ignore
 
     # WHEN calling the event handler
@@ -186,13 +185,14 @@ def test_bedrock_agent_with_post():
 
 
 @pytest.mark.usefixtures("pydanticv2_only")
+@pytest.mark.requires_validation
 def test_openapi_schema_for_pydanticv2(openapi30_schema):
     # GIVEN BedrockAgentResolver is initialized with enable_validation=True
     app = BedrockAgentResolver(enable_validation=True)
 
     # WHEN we have a simple handler
     @app.get("/", description="Testing")
-    def handler() -> Dict | None:
+    def handler() -> dict | None:
         pass
 
     # WHEN we get the schema
@@ -267,7 +267,7 @@ def test_bedrock_agent_with_partial_bedrock_response():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             session_attributes={"user_id": "123"},
@@ -306,7 +306,7 @@ def test_bedrock_agent_with_different_attributes_combination():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return BedrockResponse(
             body={"message": "test"},
             prompt_session_attributes={"context": "testing"},
@@ -336,7 +336,7 @@ def test_bedrock_resolver_with_openapi_extensions():
 
     # WHEN we have a simple handler with openapi extension
     @app.get("/", description="Testing", openapi_extensions={"x-requireConfirmation": "ENABLED"})
-    def handler() -> Dict | None:
+    def handler() -> dict | None:
         pass
 
     # WHEN we get the schema
@@ -391,7 +391,7 @@ def test_bedrock_agent_with_default_serializer_escapes_non_ascii():
     app = BedrockAgentResolver()
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return {"output": "잔액은 1,000원입니다 💰"}
 
     # WHEN calling the event handler
@@ -408,7 +408,7 @@ def test_bedrock_agent_with_custom_serializer_preserves_non_ascii():
     app = BedrockAgentResolver(serializer=partial(json.dumps, ensure_ascii=False))
 
     @app.get("/claims", description="Gets claims")
-    def claims() -> Dict[str, Any]:
+    def claims() -> dict[str, Any]:
         return {"output": "잔액은 1,000원입니다 💰"}
 
     # WHEN calling the event handler
@@ -418,3 +418,39 @@ def test_bedrock_agent_with_custom_serializer_preserves_non_ascii():
     body = result["response"]["responseBody"]["application/json"]["body"]
     assert "잔액은 1,000원입니다 💰" in body
     assert json.loads(body) == {"output": "잔액은 1,000원입니다 💰"}
+
+
+def test_bedrock_agent_ignores_non_path_params_when_validation_is_off():
+    # GIVEN a Bedrock Agent event with a parameter that is not a path parameter
+    event = load_event("bedrockAgentEventWithPathParams.json")
+    event["parameters"] = [*event["parameters"], {"type": "string", "name": "verbose", "value": "true"}]
+
+    app = BedrockAgentResolver(enable_validation=False)
+
+    @app.get("/claims/<claim_id>", description="Gets claims by ID")
+    def claims(claim_id: str):
+        return {"claim_id": claim_id}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN only path parameters are injected as kwargs and the handler resolves
+    assert result["response"]["httpStatusCode"] == 200
+    body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
+    assert body == {"claim_id": "123"}
+
+
+def test_bedrock_agent_response_without_content_type_defaults_to_json():
+    # GIVEN a handler returning a Response without a content type
+    app = BedrockAgentResolver(enable_validation=False)
+
+    @app.get("/claims", description="Gets claims")
+    def claims():
+        return Response(status_code=200, body="ok")
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN the response body media type defaults to application/json instead of "null"
+    assert "null" not in result["response"]["responseBody"]
+    assert result["response"]["responseBody"]["application/json"]["body"] == "ok"

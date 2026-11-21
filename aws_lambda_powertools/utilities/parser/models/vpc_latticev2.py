@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict, Type, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -37,13 +36,13 @@ class VpcLatticeV2RequestContextIdentity(BaseModel):
     )
     x509_subject_cn: str | None = Field(
         None,
-        alias="X509SubjectCn",
+        alias="x509SubjectCn",
         description="The X.509 certificate subject common name.",
         examples=["example.com"],
     )
     x509_issuer_ou: str | None = Field(
         None,
-        alias="X509IssuerOu",
+        alias="x509IssuerOu",
         description="The X.509 certificate issuer organizational unit.",
         examples=["IT Department"],
     )
@@ -55,13 +54,13 @@ class VpcLatticeV2RequestContextIdentity(BaseModel):
     )
     x509_san_uri: str | None = Field(
         None,
-        alias="X509SanUri",
+        alias="x509SanUri",
         description="The X.509 certificate Subject Alternative Name URI entry.",
         examples=["https://example.com"],
     )
     x509_san_name_cn: str | None = Field(
         None,
-        alias="X509SanNameCn",
+        alias="x509SanNameCn",
         description="The X.509 certificate Subject Alternative Name common name.",
         examples=["example.com"],
     )
@@ -113,20 +112,20 @@ class VpcLatticeV2Model(BaseModel):
         description="The HTTP method used for the request.",
         examples=["GET", "POST", "PUT", "DELETE", "PATCH"],
     )
-    headers: Dict[str, str] = Field(
-        description="The request headers as key-value pairs.",
+    headers: dict[str, list[str]] = Field(
+        description="The request headers. VPC Lattice sends every value as a list, even when there is only one.",
         examples=[
-            {"host": "test-lambda-service.vpc-lattice-svcs.us-east-2.on.aws", "user-agent": "curl/7.64.1"},
-            {"content-type": "application/json"},
+            {"host": ["test-lambda-service.vpc-lattice-svcs.us-east-2.on.aws"], "user-agent": ["curl/7.64.1"]},
+            {"content-type": ["application/json"], "header1": ["value1", "value2"]},
         ],
     )
-    query_string_parameters: Dict[str, str] | None = Field(
+    query_string_parameters: dict[str, list[str]] | None = Field(
         None,
         alias="queryStringParameters",
-        description="The query string parameters as key-value pairs.",
-        examples=[{"order-id": "1"}, {"page": "2", "limit": "10"}],
+        description="The query string parameters. VPC Lattice sends every value as a list, even with one value.",
+        examples=[{"order-id": ["1"]}, {"page": ["2"], "tag": ["a", "b"]}],
     )
-    body: Union[str, Type[BaseModel]] | None = Field(
+    body: str | type[BaseModel] | None = Field(
         None,
         description="The request body. Can be a string or a parsed model if content-type allows parsing.",
     )

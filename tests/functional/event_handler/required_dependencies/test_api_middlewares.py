@@ -19,9 +19,6 @@ from aws_lambda_powertools.event_handler.middlewares import (
     BaseMiddlewareHandler,
     NextMiddleware,
 )
-from aws_lambda_powertools.event_handler.middlewares.schema_validation import (
-    SchemaValidationMiddleware,
-)
 from tests.functional.utils import load_event
 
 if TYPE_CHECKING:
@@ -236,7 +233,10 @@ def test_middleware_early_return(app: ApiGatewayResolver, event):
         ),
     ],
 )
+@pytest.mark.requires_validation
 def test_pass_schema_validation(app: ApiGatewayResolver, event, validation_schema):
+    from aws_lambda_powertools.event_handler.middlewares.schema_validation import SchemaValidationMiddleware
+
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "path")
@@ -266,7 +266,10 @@ def test_pass_schema_validation(app: ApiGatewayResolver, event, validation_schem
         ),
     ],
 )
+@pytest.mark.requires_validation
 def test_fail_schema_validation(app: ApiGatewayResolver, event, validation_schema):
+    from aws_lambda_powertools.event_handler.middlewares.schema_validation import SchemaValidationMiddleware
+
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
@@ -300,7 +303,10 @@ def test_fail_schema_validation(app: ApiGatewayResolver, event, validation_schem
         ),
     ],
 )
+@pytest.mark.requires_validation
 def test_invalid_schema_validation(app: ApiGatewayResolver, event):
+    from aws_lambda_powertools.event_handler.middlewares.schema_validation import SchemaValidationMiddleware
+
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(inbound_schema="schema.json")])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")

@@ -1,9 +1,8 @@
 # ruff: noqa: FA100
 from enum import Enum
-from typing import Any, Literal, Union
+from typing import Annotated, Any, Literal, Union
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, model_validator
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
 from aws_lambda_powertools.event_handler.openapi.exceptions import SchemaValidationError
@@ -90,7 +89,7 @@ class ServerVariable(BaseModel):
 
 # https://swagger.io/specification/#server-object
 class Server(OpenAPIExtensions):
-    url: Union[AnyUrl, str]
+    url: AnyUrl | str
     description: str | None = None
     variables: dict[str, ServerVariable] | None = None
 
@@ -212,7 +211,7 @@ class Schema(BaseModel):
 
 # Ref: https://json-schema.org/draft/2020-12/json-schema-core.html#name-json-schema-documents
 # A JSON Schema MUST be an object or a boolean.
-SchemaOrBool = Union[Schema, bool]
+SchemaOrBool = Schema | bool
 
 
 # https://swagger.io/specification/#example-object
@@ -245,8 +244,8 @@ class Encoding(BaseModel):
 
 # https://swagger.io/specification/#media-type-object
 class MediaType(BaseModel):
-    schema_: Union[Schema, Reference] | None = Field(default=None, alias="schema")
-    examples: dict[str, Union[Example, Reference]] | None = None
+    schema_: Schema | Reference | None = Field(default=None, alias="schema")
+    examples: dict[str, Example | Reference] | None = None
     encoding: dict[str, Encoding] | None = None
 
     model_config = MODEL_CONFIG_ALLOW
@@ -261,8 +260,8 @@ class ParameterBase(BaseModel):
     style: str | None = None
     explode: bool | None = None
     allowReserved: bool | None = None
-    schema_: Union[Schema, Reference] | None = Field(default=None, alias="schema")
-    examples: dict[str, Union[Example, Reference]] | None = None
+    schema_: Schema | Reference | None = Field(default=None, alias="schema")
+    examples: dict[str, Example | Reference] | None = None
     # Serialization rules for more complex scenarios
     content: dict[str, MediaType] | None = None
 
@@ -291,8 +290,8 @@ class RequestBody(BaseModel):
 class Link(BaseModel):
     operationRef: str | None = None
     operationId: str | None = None
-    parameters: dict[str, Union[Any, str]] | None = None
-    requestBody: Union[Any, str] | None = None
+    parameters: dict[str, Any | str] | None = None
+    requestBody: Any | str | None = None
     description: str | None = None
     server: Server | None = None
 
@@ -302,9 +301,9 @@ class Link(BaseModel):
 # https://swagger.io/specification/#response-object
 class Response(BaseModel):
     description: str
-    headers: dict[str, Union[Header, Reference]] | None = None
+    headers: dict[str, Header | Reference] | None = None
     content: dict[str, MediaType] | None = None
-    links: dict[str, Union[Link, Reference]] | None = None
+    links: dict[str, Link | Reference] | None = None
 
     model_config = MODEL_CONFIG_ALLOW
 
@@ -325,11 +324,11 @@ class Operation(OpenAPIExtensions):
     description: str | None = None
     externalDocs: ExternalDocumentation | None = None
     operationId: str | None = None
-    parameters: list[Union[Parameter, Reference]] | None = None
-    requestBody: Union[RequestBody, Reference] | None = None
+    parameters: list[Parameter | Reference] | None = None
+    requestBody: RequestBody | Reference | None = None
     # Using Any for Specification Extensions
-    responses: dict[int, Union[Response, Any]] | None = None
-    callbacks: dict[str, Union[dict[str, "PathItem"], Reference]] | None = None
+    responses: dict[int, Response | Any] | None = None
+    callbacks: dict[str, dict[str, "PathItem"] | Reference] | None = None
     deprecated: bool | None = None
     security: list[dict[str, list[str]]] | None = None
     servers: list[Server] | None = None
@@ -351,7 +350,7 @@ class PathItem(BaseModel):
     patch: Operation | None = None
     trace: Operation | None = None
     servers: list[Server] | None = None
-    parameters: list[Union[Parameter, Reference]] | None = None
+    parameters: list[Parameter | Reference] | None = None
 
     model_config = MODEL_CONFIG_ALLOW
 
@@ -444,22 +443,22 @@ class MutualTLS(SecurityBase):
     type_: SecuritySchemeType = Field(default=SecuritySchemeType.mutualTLS, alias="type")
 
 
-SecurityScheme = Union[APIKey, HTTPBase, OAuth2, OpenIdConnect, HTTPBearer, MutualTLS]
+SecurityScheme = APIKey | HTTPBase | OAuth2 | OpenIdConnect | HTTPBearer | MutualTLS
 
 
 # https://swagger.io/specification/#components-object
 class Components(BaseModel):
-    schemas: dict[str, Union[Schema, Reference]] | None = None
-    responses: dict[str, Union[Response, Reference]] | None = None
-    parameters: dict[str, Union[Parameter, Reference]] | None = None
-    examples: dict[str, Union[Example, Reference]] | None = None
-    requestBodies: dict[str, Union[RequestBody, Reference]] | None = None
-    headers: dict[str, Union[Header, Reference]] | None = None
-    securitySchemes: dict[str, Union[SecurityScheme, Reference]] | None = None
-    links: dict[str, Union[Link, Reference]] | None = None
+    schemas: dict[str, Schema | Reference] | None = None
+    responses: dict[str, Response | Reference] | None = None
+    parameters: dict[str, Parameter | Reference] | None = None
+    examples: dict[str, Example | Reference] | None = None
+    requestBodies: dict[str, RequestBody | Reference] | None = None
+    headers: dict[str, Header | Reference] | None = None
+    securitySchemes: dict[str, SecurityScheme | Reference] | None = None
+    links: dict[str, Link | Reference] | None = None
     # Using Any for Specification Extensions
-    callbacks: dict[str, Union[dict[str, PathItem], Reference, Any]] | None = None
-    pathItems: dict[str, Union[PathItem, Reference]] | None = None
+    callbacks: dict[str, dict[str, PathItem] | Reference | Any] | None = None
+    pathItems: dict[str, PathItem | Reference] | None = None
 
     model_config = MODEL_CONFIG_ALLOW
 
@@ -471,8 +470,8 @@ class OpenAPI(OpenAPIExtensions):
     jsonSchemaDialect: str | None = None
     servers: list[Server] | None = None
     # Using Any for Specification Extensions
-    paths: dict[str, Union[PathItem, Any]] | None = None
-    webhooks: dict[str, Union[PathItem, Reference]] | None = None
+    paths: dict[str, PathItem | Any] | None = None
+    webhooks: dict[str, PathItem | Reference] | None = None
     components: Components | None = None
     security: list[dict[str, list[str]]] | None = None
     tags: list[Tag] | None = None

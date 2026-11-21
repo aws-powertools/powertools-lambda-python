@@ -1,136 +1,304 @@
-from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
-from .apigw import (
-    ApiGatewayAuthorizerRequest,
-    ApiGatewayAuthorizerToken,
-    APIGatewayEventAuthorizer,
-    APIGatewayEventIdentity,
-    APIGatewayEventRequestContext,
-    APIGatewayProxyEventModel,
-)
-from .apigw_websocket import (
-    APIGatewayWebSocketConnectEventModel,
-    APIGatewayWebSocketConnectEventRequestContext,
-    APIGatewayWebSocketDisconnectEventModel,
-    APIGatewayWebSocketDisconnectEventRequestContext,
-    APIGatewayWebSocketEventIdentity,
-    APIGatewayWebSocketEventRequestContextBase,
-    APIGatewayWebSocketMessageEventModel,
-    APIGatewayWebSocketMessageEventRequestContext,
-)
-from .apigwv2 import (
-    ApiGatewayAuthorizerRequestV2,
-    APIGatewayProxyEventV2Model,
-    RequestContextV2,
-    RequestContextV2Authorizer,
-    RequestContextV2AuthorizerIam,
-    RequestContextV2AuthorizerIamCognito,
-    RequestContextV2AuthorizerJwt,
-    RequestContextV2Http,
-)
-from .appsync import AppSyncResolverEventModel
-from .appsync_events import AppSyncEventsModel
-from .bedrock_agent import (
-    BedrockAgentEventModel,
-    BedrockAgentFunctionEventModel,
-    BedrockAgentModel,
-    BedrockAgentPropertyModel,
-    BedrockAgentRequestBodyModel,
-    BedrockAgentRequestMediaModel,
-)
-from .cloudformation_custom_resource import (
-    CloudFormationCustomResourceBaseModel,
-    CloudFormationCustomResourceCreateModel,
-    CloudFormationCustomResourceDeleteModel,
-    CloudFormationCustomResourceUpdateModel,
-)
-from .cloudwatch import (
-    CloudWatchLogsData,
-    CloudWatchLogsDecode,
-    CloudWatchLogsLogEvent,
-    CloudWatchLogsModel,
-)
-from .cognito import (
-    CognitoCreateAuthChallengeTriggerModel,
-    CognitoCustomEmailSenderTriggerModel,
-    CognitoCustomMessageTriggerModel,
-    CognitoCustomSMSSenderTriggerModel,
-    CognitoDefineAuthChallengeTriggerModel,
-    CognitoMigrateUserTriggerModel,
-    CognitoPostAuthenticationTriggerModel,
-    CognitoPostConfirmationTriggerModel,
-    CognitoPreAuthenticationTriggerModel,
-    CognitoPreSignupTriggerModel,
-    CognitoPreTokenGenerationTriggerModelV1,
-    CognitoPreTokenGenerationTriggerModelV2AndV3,
-    CognitoVerifyAuthChallengeTriggerModel,
-)
-from .dynamodb import (
-    DynamoDBStreamChangedRecordModel,
-    DynamoDBStreamLambdaOnFailureDestinationModel,
-    DynamoDBStreamModel,
-    DynamoDBStreamRecordModel,
-)
-from .event_bridge import EventBridgeModel
-from .kafka import (
-    KafkaBaseEventModel,
-    KafkaMskEventModel,
-    KafkaRecordModel,
-    KafkaSelfManagedEventModel,
-)
-from .kinesis import (
-    KinesisDataStreamModel,
-    KinesisDataStreamRecord,
-    KinesisDataStreamRecordPayload,
-)
-from .kinesis_firehose import (
-    KinesisFirehoseModel,
-    KinesisFirehoseRecord,
-    KinesisFirehoseRecordMetadata,
-)
-from .kinesis_firehose_sqs import KinesisFirehoseSqsModel, KinesisFirehoseSqsRecord
-from .lambda_function_url import LambdaFunctionUrlModel
-from .s3 import (
-    S3EventNotificationEventBridgeDetailModel,
-    S3EventNotificationEventBridgeModel,
-    S3EventNotificationObjectModel,
-    S3Model,
-    S3RecordModel,
-)
-from .s3_batch_operation import (
-    S3BatchOperationJobModel,
-    S3BatchOperationModel,
-    S3BatchOperationTaskModel,
-)
-from .s3_event_notification import (
-    S3SqsEventNotificationModel,
-    S3SqsEventNotificationRecordModel,
-)
-from .s3_object_event import (
-    S3ObjectConfiguration,
-    S3ObjectContext,
-    S3ObjectLambdaEvent,
-    S3ObjectSessionAttributes,
-    S3ObjectSessionContext,
-    S3ObjectSessionIssuer,
-    S3ObjectUserIdentity,
-    S3ObjectUserRequest,
-)
-from .ses import (
-    SesMail,
-    SesMailCommonHeaders,
-    SesMailHeaders,
-    SesMessage,
-    SesModel,
-    SesReceipt,
-    SesReceiptAction,
-    SesReceiptVerdict,
-    SesRecordModel,
-)
-from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
-from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
-from .transfer_family import TransferFamilyAuthorizer
-from .vpc_lattice import VpcLatticeModel
-from .vpc_latticev2 import VpcLatticeV2Model
+"""Event models loaded on first access to avoid initializing unrelated schemas."""
+
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
+    from .apigw import (
+        ApiGatewayAuthorizerRequest,
+        ApiGatewayAuthorizerToken,
+        APIGatewayEventAuthorizer,
+        APIGatewayEventIdentity,
+        APIGatewayEventRequestContext,
+        APIGatewayProxyEventModel,
+    )
+    from .apigw_websocket import (
+        APIGatewayWebSocketConnectEventModel,
+        APIGatewayWebSocketConnectEventRequestContext,
+        APIGatewayWebSocketDisconnectEventModel,
+        APIGatewayWebSocketDisconnectEventRequestContext,
+        APIGatewayWebSocketEventIdentity,
+        APIGatewayWebSocketEventRequestContextBase,
+        APIGatewayWebSocketMessageEventModel,
+        APIGatewayWebSocketMessageEventRequestContext,
+    )
+    from .apigwv2 import (
+        ApiGatewayAuthorizerRequestV2,
+        APIGatewayProxyEventV2Model,
+        RequestContextV2,
+        RequestContextV2Authorizer,
+        RequestContextV2AuthorizerIam,
+        RequestContextV2AuthorizerIamCognito,
+        RequestContextV2AuthorizerJwt,
+        RequestContextV2Http,
+    )
+    from .appsync import AppSyncResolverEventModel
+    from .appsync_events import AppSyncEventsModel
+    from .bedrock_agent import (
+        BedrockAgentEventModel,
+        BedrockAgentFunctionEventModel,
+        BedrockAgentModel,
+        BedrockAgentPropertyModel,
+        BedrockAgentRequestBodyModel,
+        BedrockAgentRequestMediaModel,
+    )
+    from .cloudformation_custom_resource import (
+        CloudFormationCustomResourceBaseModel,
+        CloudFormationCustomResourceCreateModel,
+        CloudFormationCustomResourceDeleteModel,
+        CloudFormationCustomResourceUpdateModel,
+    )
+    from .cloudwatch import (
+        CloudWatchLogsData,
+        CloudWatchLogsDecode,
+        CloudWatchLogsLogEvent,
+        CloudWatchLogsModel,
+    )
+    from .cognito import (
+        CognitoCreateAuthChallengeTriggerModel,
+        CognitoCustomEmailSenderTriggerModel,
+        CognitoCustomMessageTriggerModel,
+        CognitoCustomSMSSenderTriggerModel,
+        CognitoDefineAuthChallengeTriggerModel,
+        CognitoMigrateUserTriggerModel,
+        CognitoPostAuthenticationTriggerModel,
+        CognitoPostConfirmationTriggerModel,
+        CognitoPreAuthenticationTriggerModel,
+        CognitoPreSignupTriggerModel,
+        CognitoPreTokenGenerationTriggerModelV1,
+        CognitoPreTokenGenerationTriggerModelV2AndV3,
+        CognitoVerifyAuthChallengeTriggerModel,
+    )
+    from .connect_campaign import (
+        ConnectCampaignContextModel,
+        ConnectCustomerProfileModel,
+        ConnectInvocationMetadataModel,
+        ConnectItemsModel,
+        ConnectOutboundCampaignsEventModel,
+    )
+    from .dynamodb import (
+        DynamoDBStreamChangedRecordModel,
+        DynamoDBStreamLambdaOnFailureDestinationModel,
+        DynamoDBStreamModel,
+        DynamoDBStreamRecordModel,
+    )
+    from .event_bridge import EventBridgeModel
+    from .event_bridge_v2 import EventBridgeV2Model, EventBridgeV2RecordModel, EventBridgeV2SystemMetadataModel
+    from .iot_registry_events import (
+        IoTCoreAddOrDeleteFromThingGroupEvent,
+        IoTCoreAddOrRemoveFromThingGroupEvent,
+        IoTCoreThingEvent,
+        IoTCoreThingGroupEvent,
+        IoTCoreThingTypeAssociationEvent,
+        IoTCoreThingTypeEvent,
+    )
+    from .kafka import (
+        KafkaBaseEventModel,
+        KafkaMskEventModel,
+        KafkaRecordModel,
+        KafkaSelfManagedEventModel,
+    )
+    from .kinesis import (
+        KinesisDataStreamModel,
+        KinesisDataStreamRecord,
+        KinesisDataStreamRecordPayload,
+    )
+    from .kinesis_firehose import (
+        KinesisFirehoseModel,
+        KinesisFirehoseRecord,
+        KinesisFirehoseRecordMetadata,
+    )
+    from .kinesis_firehose_sqs import KinesisFirehoseSqsModel, KinesisFirehoseSqsRecord
+    from .lambda_function_url import LambdaFunctionUrlModel
+    from .s3 import (
+        S3EventNotificationEventBridgeDetailModel,
+        S3EventNotificationEventBridgeModel,
+        S3EventNotificationObjectModel,
+        S3Model,
+        S3RecordModel,
+    )
+    from .s3_batch_operation import (
+        S3BatchOperationJobModel,
+        S3BatchOperationModel,
+        S3BatchOperationTaskModel,
+    )
+    from .s3_event_notification import (
+        S3SqsEventNotificationModel,
+        S3SqsEventNotificationRecordModel,
+    )
+    from .s3_object_event import (
+        S3ObjectConfiguration,
+        S3ObjectContext,
+        S3ObjectLambdaEvent,
+        S3ObjectSessionAttributes,
+        S3ObjectSessionContext,
+        S3ObjectSessionIssuer,
+        S3ObjectUserIdentity,
+        S3ObjectUserRequest,
+    )
+    from .ses import (
+        SesMail,
+        SesMailCommonHeaders,
+        SesMailHeaders,
+        SesMessage,
+        SesModel,
+        SesReceipt,
+        SesReceiptAction,
+        SesReceiptVerdict,
+        SesRecordModel,
+    )
+    from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
+    from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
+    from .transfer_family import TransferFamilyAuthorizer
+    from .vpc_lattice import VpcLatticeModel
+    from .vpc_latticev2 import VpcLatticeV2Model
+
+
+_MODEL_MODULES = {
+    "AlbModel": "alb",
+    "AlbRequestContext": "alb",
+    "AlbRequestContextData": "alb",
+    "ApiGatewayAuthorizerRequest": "apigw",
+    "ApiGatewayAuthorizerToken": "apigw",
+    "APIGatewayEventAuthorizer": "apigw",
+    "APIGatewayEventIdentity": "apigw",
+    "APIGatewayEventRequestContext": "apigw",
+    "APIGatewayProxyEventModel": "apigw",
+    "APIGatewayWebSocketConnectEventModel": "apigw_websocket",
+    "APIGatewayWebSocketConnectEventRequestContext": "apigw_websocket",
+    "APIGatewayWebSocketDisconnectEventModel": "apigw_websocket",
+    "APIGatewayWebSocketDisconnectEventRequestContext": "apigw_websocket",
+    "APIGatewayWebSocketEventIdentity": "apigw_websocket",
+    "APIGatewayWebSocketEventRequestContextBase": "apigw_websocket",
+    "APIGatewayWebSocketMessageEventModel": "apigw_websocket",
+    "APIGatewayWebSocketMessageEventRequestContext": "apigw_websocket",
+    "ApiGatewayAuthorizerRequestV2": "apigwv2",
+    "APIGatewayProxyEventV2Model": "apigwv2",
+    "RequestContextV2": "apigwv2",
+    "RequestContextV2Authorizer": "apigwv2",
+    "RequestContextV2AuthorizerIam": "apigwv2",
+    "RequestContextV2AuthorizerIamCognito": "apigwv2",
+    "RequestContextV2AuthorizerJwt": "apigwv2",
+    "RequestContextV2Http": "apigwv2",
+    "AppSyncResolverEventModel": "appsync",
+    "AppSyncEventsModel": "appsync_events",
+    "BedrockAgentEventModel": "bedrock_agent",
+    "BedrockAgentFunctionEventModel": "bedrock_agent",
+    "BedrockAgentModel": "bedrock_agent",
+    "BedrockAgentPropertyModel": "bedrock_agent",
+    "BedrockAgentRequestBodyModel": "bedrock_agent",
+    "BedrockAgentRequestMediaModel": "bedrock_agent",
+    "CloudFormationCustomResourceBaseModel": "cloudformation_custom_resource",
+    "CloudFormationCustomResourceCreateModel": "cloudformation_custom_resource",
+    "CloudFormationCustomResourceDeleteModel": "cloudformation_custom_resource",
+    "CloudFormationCustomResourceUpdateModel": "cloudformation_custom_resource",
+    "CloudWatchLogsData": "cloudwatch",
+    "CloudWatchLogsDecode": "cloudwatch",
+    "CloudWatchLogsLogEvent": "cloudwatch",
+    "CloudWatchLogsModel": "cloudwatch",
+    "ConnectCampaignContextModel": "connect_campaign",
+    "ConnectCustomerProfileModel": "connect_campaign",
+    "ConnectInvocationMetadataModel": "connect_campaign",
+    "ConnectItemsModel": "connect_campaign",
+    "ConnectOutboundCampaignsEventModel": "connect_campaign",
+    "CognitoCreateAuthChallengeTriggerModel": "cognito",
+    "CognitoCustomEmailSenderTriggerModel": "cognito",
+    "CognitoCustomMessageTriggerModel": "cognito",
+    "CognitoCustomSMSSenderTriggerModel": "cognito",
+    "CognitoDefineAuthChallengeTriggerModel": "cognito",
+    "CognitoMigrateUserTriggerModel": "cognito",
+    "CognitoPostAuthenticationTriggerModel": "cognito",
+    "CognitoPostConfirmationTriggerModel": "cognito",
+    "CognitoPreAuthenticationTriggerModel": "cognito",
+    "CognitoPreSignupTriggerModel": "cognito",
+    "CognitoPreTokenGenerationTriggerModelV1": "cognito",
+    "CognitoPreTokenGenerationTriggerModelV2AndV3": "cognito",
+    "CognitoVerifyAuthChallengeTriggerModel": "cognito",
+    "DynamoDBStreamChangedRecordModel": "dynamodb",
+    "DynamoDBStreamLambdaOnFailureDestinationModel": "dynamodb",
+    "DynamoDBStreamModel": "dynamodb",
+    "DynamoDBStreamRecordModel": "dynamodb",
+    "EventBridgeModel": "event_bridge",
+    "EventBridgeV2Model": "event_bridge_v2",
+    "EventBridgeV2RecordModel": "event_bridge_v2",
+    "EventBridgeV2SystemMetadataModel": "event_bridge_v2",
+    "IoTCoreAddOrDeleteFromThingGroupEvent": "iot_registry_events",
+    "IoTCoreAddOrRemoveFromThingGroupEvent": "iot_registry_events",
+    "IoTCoreThingEvent": "iot_registry_events",
+    "IoTCoreThingGroupEvent": "iot_registry_events",
+    "IoTCoreThingTypeAssociationEvent": "iot_registry_events",
+    "IoTCoreThingTypeEvent": "iot_registry_events",
+    "KafkaBaseEventModel": "kafka",
+    "KafkaMskEventModel": "kafka",
+    "KafkaRecordModel": "kafka",
+    "KafkaSelfManagedEventModel": "kafka",
+    "KinesisDataStreamModel": "kinesis",
+    "KinesisDataStreamRecord": "kinesis",
+    "KinesisDataStreamRecordPayload": "kinesis",
+    "KinesisFirehoseModel": "kinesis_firehose",
+    "KinesisFirehoseRecord": "kinesis_firehose",
+    "KinesisFirehoseRecordMetadata": "kinesis_firehose",
+    "KinesisFirehoseSqsModel": "kinesis_firehose_sqs",
+    "KinesisFirehoseSqsRecord": "kinesis_firehose_sqs",
+    "LambdaFunctionUrlModel": "lambda_function_url",
+    "S3EventNotificationEventBridgeDetailModel": "s3",
+    "S3EventNotificationEventBridgeModel": "s3",
+    "S3EventNotificationObjectModel": "s3",
+    "S3Model": "s3",
+    "S3RecordModel": "s3",
+    "S3BatchOperationJobModel": "s3_batch_operation",
+    "S3BatchOperationModel": "s3_batch_operation",
+    "S3BatchOperationTaskModel": "s3_batch_operation",
+    "S3SqsEventNotificationModel": "s3_event_notification",
+    "S3SqsEventNotificationRecordModel": "s3_event_notification",
+    "S3ObjectConfiguration": "s3_object_event",
+    "S3ObjectContext": "s3_object_event",
+    "S3ObjectLambdaEvent": "s3_object_event",
+    "S3ObjectSessionAttributes": "s3_object_event",
+    "S3ObjectSessionContext": "s3_object_event",
+    "S3ObjectSessionIssuer": "s3_object_event",
+    "S3ObjectUserIdentity": "s3_object_event",
+    "S3ObjectUserRequest": "s3_object_event",
+    "SesMail": "ses",
+    "SesMailCommonHeaders": "ses",
+    "SesMailHeaders": "ses",
+    "SesMessage": "ses",
+    "SesModel": "ses",
+    "SesReceipt": "ses",
+    "SesReceiptAction": "ses",
+    "SesReceiptVerdict": "ses",
+    "SesRecordModel": "ses",
+    "SnsModel": "sns",
+    "SnsNotificationModel": "sns",
+    "SnsRecordModel": "sns",
+    "SqsAttributesModel": "sqs",
+    "SqsModel": "sqs",
+    "SqsMsgAttributeModel": "sqs",
+    "SqsRecordModel": "sqs",
+    "TransferFamilyAuthorizer": "transfer_family",
+    "VpcLatticeModel": "vpc_lattice",
+    "VpcLatticeV2Model": "vpc_latticev2",
+}
+_SUBMODULES = frozenset(_MODEL_MODULES.values())
+
+
+def __getattr__(name: str) -> object:
+    if name in _MODEL_MODULES:
+        module = importlib.import_module(f".{_MODEL_MODULES[name]}", __name__)
+        value = getattr(module, name)
+    elif name in _SUBMODULES:
+        value = importlib.import_module(f".{name}", __name__)
+    else:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__) | _SUBMODULES)
+
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
@@ -153,6 +321,11 @@ __all__ = [
     "CloudWatchLogsDecode",
     "CloudWatchLogsLogEvent",
     "CloudWatchLogsModel",
+    "ConnectCampaignContextModel",
+    "ConnectCustomerProfileModel",
+    "ConnectInvocationMetadataModel",
+    "ConnectItemsModel",
+    "ConnectOutboundCampaignsEventModel",
     "CognitoPreSignupTriggerModel",
     "CognitoPostConfirmationTriggerModel",
     "CognitoPreAuthenticationTriggerModel",
@@ -173,6 +346,9 @@ __all__ = [
     "AppSyncEventsModel",
     "DynamoDBStreamModel",
     "EventBridgeModel",
+    "EventBridgeV2Model",
+    "EventBridgeV2RecordModel",
+    "EventBridgeV2SystemMetadataModel",
     "DynamoDBStreamChangedRecordModel",
     "DynamoDBStreamLambdaOnFailureDestinationModel",
     "DynamoDBStreamRecordModel",
@@ -225,6 +401,12 @@ __all__ = [
     "KafkaSelfManagedEventModel",
     "KafkaRecordModel",
     "KafkaMskEventModel",
+    "IoTCoreAddOrDeleteFromThingGroupEvent",
+    "IoTCoreAddOrRemoveFromThingGroupEvent",
+    "IoTCoreThingEvent",
+    "IoTCoreThingGroupEvent",
+    "IoTCoreThingTypeAssociationEvent",
+    "IoTCoreThingTypeEvent",
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",

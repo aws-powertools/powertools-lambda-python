@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
@@ -50,6 +50,59 @@ class S3EventRecordIntelligentTieringEventData(BaseModel):
     )
 
 
+class S3EventRecordLifecycleTransitionEventData(BaseModel):
+    destinationStorageClass: str = Field(
+        description="The storage class the object transitioned to. For Lifecycle Transition events.",
+        examples=[
+            "INTELLIGENT_TIERING",
+            "STANDARD_IA",
+            "GLACIER",
+        ],
+    )
+
+
+class S3EventRecordLifecycleEventData(BaseModel):
+    transitionEventData: S3EventRecordLifecycleTransitionEventData = Field(
+        description="Event data produced only for 's3:LifecycleTransition' events.",
+        examples=[
+            {
+                "transitionEventData": {
+                    "destinationStorageClass": "INTELLIGENT_TIERING",
+                },
+            },
+        ],
+    )
+
+
+class S3EventRecordReplicationEventData(BaseModel):
+    replicationRuleId: str | None = Field(
+        default=None,
+        description="The ID of the replication rule. For Replication events.",
+        examples=["replication-rule-1"],
+    )
+    destinationBucket: str | None = Field(
+        default=None,
+        description="The destination bucket ARN for the replication. For Replication events.",
+        examples=["arn:aws:s3:::destination-bucket"],
+    )
+    s3Operation: str | None = Field(
+        default=None,
+        description="The S3 operation that was replicated. For Replication events.",
+        examples=["OBJECT_PUT"],
+    )
+    requestTime: str | None = Field(
+        default=None,
+        description="The time, in ISO-8601 format, when the replication was requested. For Replication events.",
+        examples=["2019-09-03T19:37:27.192Z"],
+    )
+    failureReason: str | None = Field(
+        default=None,
+        description="The reason the replication failed, present only for failed replication events. "
+        "For Replication events.",
+        examples=["AssumeRoleNotPermitted"],
+    )
+
+
 class S3Identity(BaseModel):
     principalId: str = Field(
         description="Amazon identifier of the user, role, account or services who caused the event.",
@@ -58,7 +111,7 @@ class S3Identity(BaseModel):
 
 
 class S3RequestParameters(BaseModel):
-    sourceIPAddress: Union[IPvAnyNetwork, Literal["s3.amazonaws.com"]] = Field(
+    sourceIPAddress: IPvAnyNetwork | Literal["s3.amazonaws.com"] = Field(
         description="Source IP address of the request.",
         examples=[
             "255.255.255.255",
@@ -483,6 +536,30 @@ class S3RecordModel(BaseModel):
             },
         ],
     )
+    lifecycleEventData: S3EventRecordLifecycleEventData | None = Field(
+        default=None,
+        description="The Lifecycle event data object.",
+        examples=[
+            {
+                "transitionEventData": {
+                    "destinationStorageClass": "INTELLIGENT_TIERING",
+                },
+            },
+        ],
+    )
+    replicationEventData: S3EventRecordReplicationEventData | None = Field(
+        default=None,
+        description="The Replication event data object.",
+        examples=[
+            {
+                "replicationRuleId": "replication-rule-1",
+                "destinationBucket": "arn:aws:s3:::destination-bucket",
+                "s3Operation": "OBJECT_PUT",
+                "requestTime": "2019-09-03T19:37:27.192Z",
+                "failureReason": "AssumeRoleNotPermitted",
+            },
+        ],
+    )
 
     @model_validator(mode="before")
     def validate_s3_object(cls, values):
@@ -498,7 +575,7 @@ class S3RecordModel(BaseModel):
 
 
 class S3Model(BaseModel):
-    Records: List[S3RecordModel] = Field(
+    Records: list[S3RecordModel] = Field(
         description="List of S3 records included in this event.",
         examples=[
             {

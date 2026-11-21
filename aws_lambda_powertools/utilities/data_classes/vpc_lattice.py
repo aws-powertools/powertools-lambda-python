@@ -16,7 +16,7 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import base64
 
 
 class VPCLatticeEventBase(BaseProxyEvent):
-    # is_base64_encoded and path are inherited from BaseProxyEvent class.
+    # is_base64_encoded is inherited from BaseProxyEvent class.
 
     @property
     def body(self) -> str:
@@ -57,7 +57,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
 class VPCLatticeEvent(VPCLatticeEventBase):
     @property
     def raw_path(self) -> str:
-        """The raw VPC Lattice request path."""
+        """The raw VPC Lattice request path, including the query string."""
         return self["raw_path"]
 
     @property
@@ -69,7 +69,8 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     # Added here for consistency with the BaseProxyEvent class
     @property
     def path(self) -> str:
-        return self["raw_path"]
+        """The request path, without the query string that VPC Lattice includes in `raw_path`."""
+        return self["raw_path"].partition("?")[0]
 
     @property
     def query_string_parameters(self) -> dict[str, str]:
@@ -109,28 +110,28 @@ class vpcLatticeEventV2Identity(DictWrapper):
 
     @property
     def x509_subject_cn(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SubjectCn"""
-        return self.get("X509SubjectCn")
+        """The VPC Lattice v2 Event requestContext x509SubjectCn"""
+        return self.get("x509SubjectCn")
 
     @property
     def x509_issuer_ou(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509IssuerOu"""
-        return self.get("X509IssuerOu")
+        """The VPC Lattice v2 Event requestContext x509IssuerOu"""
+        return self.get("x509IssuerOu")
 
     @property
     def x509_san_dns(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanDns"""
+        """The VPC Lattice v2 Event requestContext x509SanDns"""
         return self.get("x509SanDns")
 
     @property
     def x509_san_uri(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanUri"""
-        return self.get("X509SanUri")
+        """The VPC Lattice v2 Event requestContext x509SanUri"""
+        return self.get("x509SanUri")
 
     @property
     def x509_san_name_cn(self) -> str | None:
-        """The VPC Lattice v2 Event requestContext X509SanNameCn"""
-        return self.get("X509SanNameCn")
+        """The VPC Lattice v2 Event requestContext x509SanNameCn"""
+        return self.get("x509SanNameCn")
 
 
 class vpcLatticeEventV2RequestContext(DictWrapper):
@@ -175,6 +176,11 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     def request_context(self) -> vpcLatticeEventV2RequestContext:
         """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
+
+    @property
+    def path(self) -> str:
+        """The request path, without the query string that VPC Lattice includes in `path`."""
+        return self["path"].partition("?")[0]
 
     @cached_property
     def query_string_parameters(self) -> dict[str, str]:

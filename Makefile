@@ -1,12 +1,14 @@
-.PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-website
+.PHONY: target dev dev-quality-code format format-check lint lint-check test coverage-html pr build build-docs build-docs-website
 .PHONY: docs-local security-baseline complexity-baseline release-prod release-test release
 
 target:
 	@$(MAKE) pr
 
-dev dev-quality-code:
-	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey
+dev: dev-quality-code
 	uv run --locked pre-commit install
+
+dev-quality-code:
+	uv sync --locked --extra all --extra redis --extra datamasking --extra valkey --extra auth-sigv4a
 
 format-check:
 	uv run --locked ruff format aws_lambda_powertools tests examples --check
@@ -15,10 +17,16 @@ format:
 	uv run --locked ruff format aws_lambda_powertools tests examples
 
 lint: format
+	$(MAKE) lint-check
+
+lint-check:
 	uv run --locked ruff check aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
+
+agent-skill:
+	uv run --locked python scripts/build_agent_skill_references.py
 
 lint-docs-fix:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
@@ -28,7 +36,7 @@ test:
 	uv run --locked pytest --cache-clear tests/performance
 
 test-dependencies:
-	uv run --locked nox --error-on-external-run --reuse-venv=yes --non-interactive
+	uv run --locked nox --error-on-external-run --reuse-venv=no --non-interactive
 
 test-pydanticv2:
 	uv run --locked pytest -m "not perf" --ignore tests/e2e
@@ -45,17 +53,17 @@ coverage-html:
 pre-commit:
 	uv run --locked pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs agent-skill mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	uv build --no-sources
 
 docs-local:
-	uv run --locked mkdocs serve
+	uv run --locked zensical serve
 
 docs-local-docker:
-	docker build -t squidfunk/mkdocs-material ./docs/
-	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+	docker build -t powertools-docs ./docs/
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs powertools-docs
 
 security-baseline:
 	uv run --locked bandit --baseline bandit.baseline -r aws_lambda_powertools

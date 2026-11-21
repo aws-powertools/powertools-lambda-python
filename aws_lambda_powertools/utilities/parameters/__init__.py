@@ -3,16 +3,19 @@ Parameter retrieval and caching utility
 """
 
 from .appconfig import AppConfigProvider, get_app_config
+from .appconfig_extension import AppConfigExtensionProvider
 from .base import BaseProvider, clear_caches
 from .dynamodb import DynamoDBProvider
-from .exceptions import GetParameterError, TransformParameterError
+from .exceptions import GetParameterError, GetSecretError, TransformParameterError
 from .secrets import SecretsProvider, get_secret, get_secrets_by_name, set_secret
 from .ssm import SSMProvider, get_parameter, get_parameters, get_parameters_by_name, set_parameter
 
 __all__ = [
+    "AppConfigExtensionProvider",
     "AppConfigProvider",
     "BaseProvider",
     "GetParameterError",
+    "GetSecretError",
     "DynamoDBProvider",
     "SecretsProvider",
     "SSMProvider",

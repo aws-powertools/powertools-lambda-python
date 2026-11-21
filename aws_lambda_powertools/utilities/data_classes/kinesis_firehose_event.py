@@ -11,8 +11,7 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-
-    from typing_extensions import Literal
+    from typing import Literal
 
 
 @dataclass(repr=False, order=False, frozen=True)

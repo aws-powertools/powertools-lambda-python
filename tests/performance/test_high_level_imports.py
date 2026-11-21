@@ -1,6 +1,5 @@
 import importlib
 from types import ModuleType
-from typing import Tuple
 
 import pytest
 
@@ -16,7 +15,7 @@ METRICS_PACKAGE = "aws_lambda_powertools.metrics"
 TRACER_PACKAGE = "aws_lambda_powertools.utilities.parser"
 
 
-def import_core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
+def import_core_utilities() -> tuple[ModuleType, ModuleType, ModuleType]:
     """Dynamically imports and return Tracing, Logging, and Metrics modules"""
     return (
         importlib.import_module(TRACING_PACKAGE),

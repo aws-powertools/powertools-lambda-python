@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import Json
 
 from aws_lambda_powertools.utilities.parser.models.s3 import S3Model
@@ -11,4 +9,4 @@ class S3SqsEventNotificationRecordModel(SqsRecordModel):  # type: ignore[overrid
 
 
 class S3SqsEventNotificationModel(SqsModel):  # type: ignore[override]
-    Records: List[S3SqsEventNotificationRecordModel]
+    Records: list[S3SqsEventNotificationRecordModel]

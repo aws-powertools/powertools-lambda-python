@@ -14,7 +14,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Tuple, TypeGuard, Union, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, Union, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
@@ -56,10 +56,11 @@ class EventType(Enum):
 # When using processor with default arguments, records will carry EventSourceDataClassTypes
 # and depending on what EventType it's passed it'll correctly map to the right record
 # When using Pydantic Models, it'll accept any subclass from SQS, DynamoDB, Kinesis and Kafka
-EventSourceDataClassTypes = Union[SQSRecord, KinesisStreamRecord, DynamoDBRecord, KafkaEventRecord]
-BatchEventTypes = Union[EventSourceDataClassTypes, BatchTypeModels]
-SuccessResponse = Tuple[str, Any, BatchEventTypes]
-FailureResponse = Tuple[str, str, BatchEventTypes]
+EventSourceDataClassTypes = SQSRecord | KinesisStreamRecord | DynamoDBRecord | KafkaEventRecord
+# BatchTypeModels is a string placeholder when Pydantic is not installed, which `|` cannot combine at runtime.
+BatchEventTypes = Union[EventSourceDataClassTypes, BatchTypeModels]  # noqa: UP007
+SuccessResponse = tuple[str, Any, BatchEventTypes]
+FailureResponse = tuple[str, str, BatchEventTypes]
 
 
 def _has_traceback(exception: ExceptionInfo) -> TypeGuard[tuple[type[BaseException], BaseException, TracebackType]]:
@@ -574,7 +575,8 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
             model = getattr(exc, "model", None) or getattr(exc, "title", None)
             model_name = getattr(self.model, "__name__", None)
 
-            if model in (self.model, model_name):
+            # `data is None` means converting the record failed, e.g. a validator raised an error Pydantic doesn't wrap
+            if model in (self.model, model_name) or data is None:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
@@ -723,7 +725,8 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
             model = getattr(exc, "model", None) or getattr(exc, "title", None)
             model_name = getattr(self.model, "__name__", None)
 
-            if model in (self.model, model_name):
+            # `data is None` means converting the record failed, e.g. a validator raised an error Pydantic doesn't wrap
+            if model in (self.model, model_name) or data is None:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())

@@ -1,5 +1,11 @@
+import json
+from datetime import datetime, timezone
+from enum import Enum
+from uuid import UUID
+
 import pytest
 from pydantic import BaseModel
+from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
@@ -22,6 +28,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import (
 from tests.functional.idempotency.utils import (
     hash_idempotency_key,
 )
+from tests.functional.utils import json_serialize
 
 TESTS_MODULE_PREFIX = "test-func.tests.functional.idempotency._pydantic.test_idempotency_with_pydantic"
 
@@ -263,3 +270,87 @@ def test_idempotent_function_serialization_pydantic_with_optional_return(output_
     assert isinstance(second_call, PaymentOutput)
     assert second_call.customer_id == payment.customer_id
     assert second_call.transaction_id == payment.transaction_id
+
+
+class PaymentStatus(Enum):
+    PAID = "paid"
+
+
+class PaymentReceipt(BaseModel):
+    payment_id: UUID
+    paid_at: datetime
+    status: PaymentStatus
+    customer_id: str
+
+
+@pytest.fixture
+def payment_receipt() -> PaymentReceipt:
+    return PaymentReceipt(
+        payment_id=UUID("12345678-1234-5678-1234-567812345678"),
+        paid_at=datetime(2024, 3, 20, 14, 30, tzinfo=timezone.utc),
+        status=PaymentStatus.PAID,
+        customer_id="c-456",
+    )
+
+
+def test_pydantic_serializer_round_trips_non_json_types(payment_receipt: PaymentReceipt):
+    # GIVEN a serializer for a model with UUID, datetime and plain Enum fields
+    serializer = PydanticSerializer(model=PaymentReceipt)
+
+    # WHEN the model is stored as JSON, the same way the persistence layer saves a result
+    stored = json_serialize(serializer.to_dict(payment_receipt))
+
+    # THEN reading it back returns the same model
+    assert serializer.from_dict(json.loads(stored)) == payment_receipt
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_pydantic_with_non_json_types(
+    output_serializer_type: str,
+    payment_receipt: PaymentReceipt,
+    mocker: MockerFixture,
+):
+    # GIVEN a function that returns a model with UUID, datetime and plain Enum fields
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "c-456", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_with_non_json_types.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa: E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    update_record_spy = mocker.spy(persistence_layer, "_update_record")
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = PydanticSerializer(
+            model=PaymentReceipt,
+        )
+    else:
+        output_serializer = PydanticSerializer
+
+    executions = []
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentReceipt:
+        executions.append(payment)
+        return payment_receipt
+
+    # WHEN calling the function for the first time
+    payment = PaymentInput(**mock_event)
+    first_call = collect_payment(payment=payment)
+
+    # THEN the result is saved as a COMPLETED record
+    assert update_record_spy.call_args.kwargs["data_record"].status == "COMPLETED"
+
+    # WHEN calling the function again with the same payment
+    second_call = collect_payment(payment=payment)
+
+    # THEN the saved result is returned as the model, without running the function again
+    assert isinstance(second_call, PaymentReceipt)
+    assert second_call == first_call
+    assert executions == [payment]

@@ -7,7 +7,7 @@ class GetParameterError(Exception):
     """When a provider raises an exception on parameter retrieval"""
 
 
-class GetSecretError(Exception):
+class GetSecretError(GetParameterError):
     """When a provider raises an exception on secret retrieval"""
 
 

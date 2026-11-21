@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Dict, Type, Union
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
@@ -10,8 +10,8 @@ from aws_lambda_powertools.utilities.parser import parse
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
 
-AnyInheritedModel = Union[Type[BaseModel], BaseModel]
-RawDictOrModel = Union[Dict[str, Any], AnyInheritedModel]
+AnyInheritedModel = type[BaseModel] | BaseModel
+RawDictOrModel = dict[str, Any] | AnyInheritedModel
 
 
 class ModelWithUnionType(BaseModel):

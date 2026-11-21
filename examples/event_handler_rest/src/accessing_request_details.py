@@ -1,5 +1,3 @@
-from typing import List
-
 import requests
 from requests import Response
 
@@ -21,7 +19,7 @@ def get_todos():
     _: str | None = app.current_event.query_string_parameters.get("id")
 
     # or multi-value query string parameters; ?category="red"&?category="blue"
-    _: List[str] = app.current_event.multi_value_query_string_parameters["category"]
+    _: list[str] = app.current_event.multi_value_query_string_parameters["category"]
 
     # Payload
     _: str | None = app.current_event.body  # raw str | None

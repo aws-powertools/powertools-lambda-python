@@ -27,13 +27,13 @@ We will fetch parts of your data from S3 as you process each line, consuming onl
 
 === "Non-versioned bucket"
 
-    ```python hl_lines="8 9"
+    ```python hl_lines="6-7"
     --8<-- "examples/streaming/src/s3_basic_stream.py"
     ```
 
 === "Versioned bucket"
 
-    ```python hl_lines="8 9"
+    ```python hl_lines="6-7"
     --8<-- "examples/streaming/src/s3_basic_stream_with_version.py"
     ```
 
@@ -47,7 +47,7 @@ For popular data transformations like CSV or Gzip, you can quickly enable it at 
 
 === "Decompressing and deserializing CSV"
 
-    ```python hl_lines="8"
+    ```python hl_lines="6"
     --8<-- "examples/streaming/src/s3_transform_common.py"
     ```
 
@@ -58,7 +58,7 @@ Alternatively, you can apply transformations later via the `transform` method. B
 
 === "Returning a new object"
 
-    ```python hl_lines="13"
+    ```python hl_lines="11"
     --8<-- "examples/streaming/src/s3_transform.py"
     ```
 
@@ -66,7 +66,7 @@ Alternatively, you can apply transformations later via the `transform` method. B
 
     Note that when using `in_place=True`, there is no return (`None`).
 
-    ```python hl_lines="13"
+    ```python hl_lines="11"
     --8<-- "examples/streaming/src/s3_transform_in_place.py"
     ```
 
@@ -107,7 +107,7 @@ For example, let's imagine you have a large CSV file, each row has a non-uniform
 
 You found out the last row has exactly 30 bytes. We can use `seek()` to skip to the end of the file, read 30 bytes, then transform to CSV.
 
-```python title="Reading only the last CSV row" hl_lines="16 19"
+```python title="Reading only the last CSV row" hl_lines="15 18"
 --8<-- "examples/streaming/src/s3_csv_stream_non_uniform_seek.py"
 ```
 
@@ -123,7 +123,7 @@ You can also solve with `seek`, but let's take a large uniform CSV file to make 
 
 You found out that each row has 8 bytes, the header line has 21 bytes, and every new line has 1 byte. You want to skip the first 100 lines.
 
-```python hl_lines="28 31" title="Skipping the first 100 rows"
+```python hl_lines="27 30" title="Skipping the first 100 rows"
 --8<-- "examples/streaming/src/s3_csv_stream_seek.py"
 ```
 
@@ -141,7 +141,7 @@ For instance, take `ZipTransform`. You can use the `compression` parameter if yo
 
 === "Unzipping LZMA data"
 
-    ```python hl_lines="12"
+    ```python hl_lines="11"
     --8<-- "examples/streaming/src/s3_transform_lzma.py"
     ```
 
@@ -149,7 +149,7 @@ Or, if you want to load a tab-separated file (TSV), you can use the `delimiter` 
 
 === "Deserializing tab-separated data values"
 
-    ```python hl_lines="11"
+    ```python hl_lines="9"
     --8<-- "examples/streaming/src/s3_transform_tsv.py"
     ```
 

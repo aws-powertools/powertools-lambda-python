@@ -1,0 +1,13 @@
+{
+  "name": "powertools-lambda-python",
+  "description": "Build AWS Lambda functions in Python with Powertools for AWS Lambda (Python): logging, tracing, metrics, event handlers, idempotency, batch processing, parameters, parsing and validation, with the current documentation and tested examples as references.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Powertools for AWS Lambda",
+    "email": "aws-powertools-maintainers@amazon.com"
+  },
+  "homepage": "https://docs.powertools.aws.dev/lambda/python/latest/getting-started/coding-agent-skills/",
+  "repository": "https://github.com/aws-powertools/powertools-lambda-python",
+  "license": "MIT-0",
+  "keywords": ["aws", "lambda", "serverless", "powertools", "python"]
+}

@@ -42,9 +42,6 @@ lint.ignore = [
     "A005",
     "TC006", # https://docs.astral.sh/ruff/rules/runtime-cast-value/
     "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
-    "UP006",
-    "UP007",
-    "UP035",
 ]
 
 # Exclude files and directories

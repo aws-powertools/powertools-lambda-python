@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 import warnings
@@ -16,6 +17,7 @@ from aws_lambda_powertools.utilities.circuit_breaker import (
 )
 from aws_lambda_powertools.utilities.circuit_breaker.exceptions import CircuitBreakerError
 from aws_lambda_powertools.utilities.circuit_breaker.persistence.record import CircuitStateRecord
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 # All tests disable the local read cache (max_age=0) so each call re-reads the fake store.
 
@@ -317,6 +319,17 @@ def test_disabled_env_bypasses_circuit(store, now, monkeypatch):
         assert call() == "ran anyway"
 
 
+def test_disabled_env_empty_or_unparsable_keeps_circuit_enabled(store, monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_CIRCUIT_BREAKER_DISABLED", "")
+
+    @circuit_breaker(name="c", persistence_store=store, config=CircuitBreakerConfig(local_cache_max_age=0))
+    def call():
+        return "ran"
+
+    with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_CIRCUIT_BREAKER_DISABLED has an unrecognised value"):
+        assert call() == "ran"
+
+
 def test_config_is_optional(store):
     @circuit_breaker(name="c", persistence_store=store)
     def call():
@@ -440,6 +453,60 @@ def test_stale_local_failures_reset_on_external_close(store, now):
         call()
     assert "c" not in store.db or store.db["c"].state == CircuitState.CLOSED
     assert base_module._LOCAL_FAILURES["c"] == 1  # fresh count, not 3
+
+
+def test_new_probe_election_does_not_reuse_successes_from_an_earlier_recovery_window(store, now):
+    """A probe success streak left from an earlier recovery window must not close a new one early."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "ok"
+
+    # This environment wins the probe election and gets 2 of the 3 successes it needs.
+    call()
+    call()
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 2
+
+    # Simulate: this environment goes idle, its probe lease lapses, another environment
+    # takes over, its probe fails and the circuit reopens. That environment cannot reset
+    # this one's module-level counter.
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=0, opened_at=now - 60)
+
+    # The next recovery window is won by this environment again.
+    call()
+
+    # One success must not close the circuit: the new window needs its own 3 in a row.
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 1
+    call()
+    call()
+    assert store.db["c"].state == CircuitState.CLOSED
+
+
+def test_probe_lease_takeover_starts_a_fresh_success_streak(store, now):
+    """Taking over an expired probe lease must not inherit the previous owner's streak."""
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    store.db["c"] = CircuitStateRecord(
+        name="c",
+        state=CircuitState.HALF_OPEN,
+        opened_at=now - 200,
+        half_open_owner="recycled-owner",
+        probe_lease_expiry=now - 10,  # expired
+    )
+    # The previous owner shared this environment and left 2 successes behind.
+    base_module._LOCAL_SUCCESSES["c"] = 2
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    def call():
+        return "ok"
+
+    call()
+
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    assert base_module._LOCAL_SUCCESSES["c"] == 1
 
 
 def test_store_write_failure_does_not_mask_downstream_result(store, now):
@@ -834,3 +901,186 @@ def test_settings_are_kept_per_circuit_on_a_shared_layer(store, now):
     lease = store.db["a"].probe_lease_expiry
     assert lease is not None
     assert lease <= now + 30 + 2, "the lease must derive from circuit 'a' recovery_timeout, not 'b'"
+
+
+@pytest.mark.asyncio
+async def test_async_closed_circuit_returns_result_and_writes_nothing(store):
+    @circuit_breaker(name="async-c", persistence_store=store, config=CircuitBreakerConfig(local_cache_max_age=0))
+    async def call(value):
+        return value * 2
+
+    assert await call(21) == 42
+    assert store.db == {}, "healthy path must not write to the store"
+
+
+@pytest.mark.asyncio
+async def test_async_trips_open_after_failure_threshold(store):
+    config = CircuitBreakerConfig(failure_threshold=2, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-trip", persistence_store=store, config=config)
+    async def failing_call():
+        raise ConnectionError("downstream down")
+
+    for _ in range(2):
+        with pytest.raises(ConnectionError):
+            await failing_call()
+
+    assert store.db["async-trip"].state == CircuitState.OPEN
+    assert store.db["async-trip"].opened_at is not None
+
+
+@pytest.mark.asyncio
+async def test_async_open_with_callback_returns_callback_value(store, now):
+    store.db["async-open"] = CircuitStateRecord(
+        name="async-open",
+        state=CircuitState.OPEN,
+        failure_count=5,
+        opened_at=now,
+    )
+
+    def sync_on_open(order, circuit):
+        return {"buffered": order, "state": str(circuit.state)}
+
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-open", persistence_store=store, on_circuit_open=sync_on_open, config=config)
+    async def charge(order):
+        return f"charged {order}"
+
+    result = await charge({"id": 1})
+    assert result == {"buffered": {"id": 1}, "state": "OPEN"}
+
+
+@pytest.mark.asyncio
+async def test_async_open_with_async_callback_returns_callback_value(store, now):
+    store.db["async-open-2"] = CircuitStateRecord(
+        name="async-open-2",
+        state=CircuitState.OPEN,
+        failure_count=5,
+        opened_at=now,
+    )
+
+    async def async_on_open(order, circuit):
+        return {"async_buffered": order, "state": str(circuit.state)}
+
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-open-2", persistence_store=store, on_circuit_open=async_on_open, config=config)
+    async def charge(order):
+        return f"charged {order}"
+
+    result = await charge({"id": 2})
+    assert result == {"async_buffered": {"id": 2}, "state": "OPEN"}
+
+
+@pytest.mark.asyncio
+async def test_async_open_without_callback_raises_with_circuit_info(store, now):
+    store.db["async-err"] = CircuitStateRecord(
+        name="async-err",
+        state=CircuitState.OPEN,
+        failure_count=3,
+        opened_at=now,
+    )
+    config = CircuitBreakerConfig(recovery_timeout=9999, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-err", persistence_store=store, config=config)
+    async def call():
+        return "success"
+
+    with pytest.raises(CircuitBreakerOpenError) as exc_info:
+        await call()
+
+    assert exc_info.value.circuit.name == "async-err"
+
+
+@pytest.mark.asyncio
+async def test_async_half_open_probe_success_closes(store, now):
+    store.db["async-probe"] = CircuitStateRecord(name="async-probe", state=CircuitState.OPEN, opened_at=now - 100)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-probe", persistence_store=store, config=config)
+    async def call():
+        return "healed"
+
+    res = await call()
+    assert res == "healed"
+    assert store.db["async-probe"].state == CircuitState.CLOSED
+
+
+@pytest.mark.asyncio
+async def test_async_half_open_probe_failure_reopens(store, now):
+    store.db["async-reopen"] = CircuitStateRecord(name="async-reopen", state=CircuitState.OPEN, opened_at=now - 100)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-reopen", persistence_store=store, config=config)
+    async def call():
+        raise ConnectionError("still down")
+
+    with pytest.raises(ConnectionError):
+        await call()
+
+    assert store.db["async-reopen"].state == CircuitState.OPEN
+
+
+@pytest.mark.asyncio
+async def test_async_disabled_env_bypasses_circuit(store, monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_CIRCUIT_BREAKER_DISABLED", "true")
+    config = CircuitBreakerConfig(failure_threshold=1, local_cache_max_age=0)
+
+    @circuit_breaker(name="async-disabled", persistence_store=store, config=config)
+    async def call():
+        return "bypassed"
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        result = await call()
+
+    assert result == "bypassed"
+    assert any("Disabling the circuit breaker is intended for development" in str(w.message) for w in recorded)
+
+
+@pytest.mark.asyncio
+async def test_async_concurrent_calls_run_a_single_probe(store, now):
+    """Coroutines share the thread's probe owner id, so without a guard they would all probe at once."""
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=2, local_cache_max_age=0)
+    probes = []
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    async def call(i):
+        probes.append(i)
+        await asyncio.sleep(0.01)
+        return "ok"
+
+    results = await asyncio.gather(*(call(i) for i in range(8)), return_exceptions=True)
+
+    assert len(probes) == 1, "exactly one coroutine must probe per recovery window"
+    assert sum(isinstance(r, CircuitBreakerOpenError) for r in results) == 7
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+
+
+@pytest.mark.asyncio
+async def test_async_probe_slot_is_released_after_success_and_failure(store, now):
+    store.db["c"] = CircuitStateRecord(name="c", state=CircuitState.OPEN, failure_count=5, opened_at=now - 60)
+    config = CircuitBreakerConfig(recovery_timeout=30, success_threshold=3, local_cache_max_age=0)
+    calls = []
+
+    @circuit_breaker(name="c", persistence_store=store, config=config)
+    async def call(fail=False):
+        calls.append(fail)
+        if fail:
+            raise ValueError("probe failed")
+        return "ok"
+
+    # a successful probe keeps the circuit half-open and must leave the slot free for the next probe
+    assert await call() == "ok"
+    assert await call() == "ok"
+    assert store.db["c"].state == CircuitState.HALF_OPEN
+    # a failing probe reopens; once the recovery window elapses the next call must be able to probe again
+    with pytest.raises(ValueError):
+        await call(fail=True)
+    assert store.db["c"].state == CircuitState.OPEN
+    store.db["c"].opened_at = now - 60
+    assert await call() == "ok"
+    assert calls == [False, False, True, False]
+    assert "c" not in base_module._PROBES_IN_FLIGHT

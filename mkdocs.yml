@@ -5,10 +5,18 @@ repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 site_url: https://docs.powertools.aws.dev/lambda/python/latest/
 
+# Architecture decision records live in the repository only, see docs/adr/README.md
+# The Dockerfile and requirements files are for building the docs locally, not for the site
+exclude_docs: |
+  adr/
+  /Dockerfile
+  /requirements.*
+
 nav:
   - Homepage:
       - index.md
       - Installation: getting-started/install.md
+      - Coding agent skills: getting-started/coding-agent-skills.md
       - Changelog: changelog.md
       - Tutorial: tutorial/index.md
       - Workshop 🆕: https://s12d.com/powertools-for-aws-lambda-workshop" target="_blank
@@ -17,7 +25,6 @@ nav:
           - core/logger.md
           - Metrics:
               - core/metrics/index.md
-              - Amazon CloudWatch EMF: core/metrics.md
               - Datadog: core/metrics/datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
@@ -26,9 +33,10 @@ nav:
               - core/event_handler/appsync_events.md
               - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
-          - Auth (alpha):
+          - Auth:
               - JWT verification: utilities/auth.md
               - OAuth2 client: utilities/oauth2.md
+              - Request signing: utilities/signer.md
           - utilities/batch.md
           - utilities/kafka.md
           - utilities/typing.md
@@ -88,7 +96,7 @@ nav:
           #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
           #     - Customer to advocate: contributing/tracks/customer_advocate.md
   - API Documentation:
-      - Auth (alpha): api_doc/auth_alpha.md
+      - Auth: api_doc/auth.md
       - Batch Processing:
           - Base: api_doc/batch/base.md
           - Decorators: api_doc/batch/decorators.md
@@ -139,6 +147,7 @@ nav:
       - Parameters:
           - Base: api_doc/parameters/base.md
           - AppConfig: api_doc/parameters/appconfig.md
+          - AppConfig Extension: api_doc/parameters/appconfig_extension.md
           - DynamoDB: api_doc/parameters/dynamodb.md
           - SSM: api_doc/parameters/ssm.md
           - Secrets: api_doc/parameters/secrets.md
@@ -152,8 +161,8 @@ nav:
 
 theme:
   name: material
-  font:
-    text: Ubuntu
+  variant: classic
+  font: false
   palette:
     - scheme: default
       primary: deep purple
@@ -228,8 +237,6 @@ copyright: |
   </div>
 
 plugins:
-  - privacy
-  - git-revision-date
   - search
   - llmstxt:
       markdown_description: Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity. It provides a suite of utilities for AWS Lambda Functions that makes tracing with AWS X-Ray, structured logging and creating custom metrics asynchronously easier.
@@ -244,7 +251,6 @@ plugins:
           - core/tracer.md
           - core/logger.md
           - core/metrics/index.md
-          - core/metrics.md
           - core/metrics/datadog.md
           - core/event_handler/api_gateway.md
           - core/event_handler/appsync.md
@@ -284,7 +290,7 @@ plugins:
       enable_inventory: true
       handlers:
         python:
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
           options:
             # Headings
@@ -314,6 +320,7 @@ plugins:
             summary: true
 
 extra_css:
+  - stylesheets/fonts.css
   - stylesheets/extra.css
 extra_javascript:
   - https://docs.powertools.aws.dev/shared/mermaid.min.js

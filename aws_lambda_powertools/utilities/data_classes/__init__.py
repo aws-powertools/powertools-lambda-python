@@ -25,9 +25,17 @@ from .code_deploy_lifecycle_hook_event import (
     CodeDeployLifecycleHookEvent,
 )
 from .code_pipeline_job_event import CodePipelineJobEvent
+from .connect_campaign_event import (
+    ConnectOutboundCampaignContext,
+    ConnectOutboundCampaignCustomerProfile,
+    ConnectOutboundCampaignInvocationMetadata,
+    ConnectOutboundCampaignItems,
+    ConnectOutboundCampaignsEvent,
+)
 from .connect_contact_flow_event import ConnectContactFlowEvent
 from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
+from .event_bridge_v2_event import EventBridgeV2Event
 from .event_source import event_source
 from .kafka_event import KafkaEvent
 from .kinesis_firehose_event import (
@@ -72,8 +80,14 @@ __all__ = [
     "CodeDeployLifecycleHookEvent",
     "CodePipelineJobEvent",
     "ConnectContactFlowEvent",
+    "ConnectOutboundCampaignsEvent",
+    "ConnectOutboundCampaignInvocationMetadata",
+    "ConnectOutboundCampaignContext",
+    "ConnectOutboundCampaignItems",
+    "ConnectOutboundCampaignCustomerProfile",
     "DynamoDBStreamEvent",
     "EventBridgeEvent",
+    "EventBridgeV2Event",
     "KafkaEvent",
     "KinesisFirehoseEvent",
     "KinesisStreamEvent",

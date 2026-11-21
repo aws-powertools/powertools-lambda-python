@@ -1,5 +1,4 @@
 import copy
-from typing import Dict
 
 import boto3
 
@@ -26,7 +25,7 @@ class S3Provider(BaseProvider):
         response = self.client.get_object(**sdk_options)
         return response["Body"].read().decode()
 
-    def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, **sdk_options) -> dict[str, str]:
         # Retrieve multiple values
         # E.g.:
 

@@ -43,6 +43,7 @@ RESERVED_LOG_ATTRS = (
     "threadName",
     "processName",
     "process",
+    "taskName",
     "asctime",
     "location",
     "timestamp",
@@ -237,13 +238,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         # by default, those migrating from std logging will use time format codes
         # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
         if self.use_datetime_directive and datefmt:
-            # record.msecs are microseconds, divide by 1000 to get milliseconds
-            timestamp = record.created + record.msecs / 1000
-
+            # record.created already carries the sub-second part, so it is used as is
             if self.utc:
-                dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                dt = datetime.fromtimestamp(record.created, tz=timezone.utc)
             else:
-                dt = datetime.fromtimestamp(timestamp).astimezone()
+                dt = datetime.fromtimestamp(record.created).astimezone()
 
             custom_fmt = datefmt.replace(self.custom_ms_time_directive, msecs)
             return dt.strftime(custom_fmt)
@@ -359,9 +358,13 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         if isinstance(message, str):  # could be a JSON string
             try:
-                message = self.json_deserializer(message)
+                decoded = self.json_deserializer(message)
             except (json.decoder.JSONDecodeError, TypeError, ValueError):
-                pass
+                return message
+
+            # only JSON objects and arrays become structured output; scalars like "null" or "123" stay strings
+            if isinstance(decoded, (dict, list)):
+                return decoded
 
         return message
 
@@ -492,7 +495,8 @@ def set_context_keys(**kwargs: dict[str, Any]) -> None:
 
 def remove_context_keys(keys: Iterable[str]) -> None:
     context = _get_context()
-    context_values = context.get()
+    # Copy instead of mutating in place: asyncio tasks and copied contexts share this dict object
+    context_values = dict(context.get())
 
     for k in keys:
         context_values.pop(k, None)

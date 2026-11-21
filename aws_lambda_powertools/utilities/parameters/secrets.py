@@ -6,17 +6,14 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import warnings
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 import boto3
 
-from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.parameters.base import BaseProvider, transform_value
-from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS
+from aws_lambda_powertools.utilities.parameters.base import BaseProvider, resolve_parameters_max_age, transform_value
+from aws_lambda_powertools.utilities.parameters.constants import DEFAULT_PROVIDERS
 from aws_lambda_powertools.utilities.parameters.exceptions import (
     GetSecretError,
     SetSecretError,
@@ -153,17 +150,16 @@ class SecretsProvider(BaseProvider):
         """
 
         # Merge filters: combine names with any additional filters from sdk_options
-        filters = sdk_options.get("Filters", [])
+        # without mutating the caller's Filters list (a copy avoids appending the
+        # name filter to a shared/module-level list on every call)
         name_filter = {"Key": "name", "Values": names}
-
-        # Add name filter to existing filters
-        filters.append(name_filter)
-        sdk_options["Filters"] = filters
+        sdk_options["Filters"] = [*sdk_options.get("Filters", []), name_filter]
 
         # Remove SecretIdList if present to avoid conflicts
         sdk_options.pop("SecretIdList", None)
 
         secrets: dict[str, Any] = {}
+        requested_names = set(names)
         next_token = None
 
         # Handle pagination automatically
@@ -182,6 +178,8 @@ class SecretsProvider(BaseProvider):
             # Process successful secrets
             for secret in response.get("SecretValues", []):
                 secret_name = secret["Name"]
+                if secret_name not in requested_names:
+                    continue
 
                 # Extract secret value (SecretString or SecretBinary)
                 if "SecretString" in secret:
@@ -247,10 +245,15 @@ class SecretsProvider(BaseProvider):
         # Create a unique cache key for this batch of secrets
         # Use sorted names to ensure consistent caching regardless of order
         cache_key_name = "|".join(sorted(names))
-        key = self._build_cache_key(name=cache_key_name, transform=transform, is_nested=True)
+        key = self._build_cache_key(
+            name=cache_key_name,
+            transform=transform,
+            is_nested=True,
+            sdk_options=sdk_options,
+        )
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+        max_age = resolve_parameters_max_age(choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             cached_values = self.fetch_from_cache(key)
@@ -405,12 +408,17 @@ class SecretsProvider(BaseProvider):
 
         try:
             logger.debug(f"Attempting to update secret {name}")
-            return self._update_secret(name=name, **sdk_options)
+            response = self._update_secret(name=name, **sdk_options)
         except self.client.exceptions.ResourceNotFoundException:
             logger.debug(f"Secret {name} doesn't exist, creating a new one")
-            return self._create_secret(name=name, **sdk_options)
+            response = self._create_secret(name=name, **sdk_options)
         except Exception as exc:
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
+
+        # Remove any cached value for this secret so the next read returns what we just wrote
+        self._invalidate_cache(name)
+
+        return response
 
 
 @overload
@@ -506,7 +514,7 @@ def get_secret(
     """
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
@@ -585,7 +593,7 @@ def get_secrets_by_name(
         raise GetSecretError("You must provide at least one secret name")
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+    max_age = resolve_parameters_max_age(choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:

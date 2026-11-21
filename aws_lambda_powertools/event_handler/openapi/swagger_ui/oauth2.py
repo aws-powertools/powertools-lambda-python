@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Sequence
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 

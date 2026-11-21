@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel
 # Common context model for Cognito triggers
 class CognitoCallerContextModel(BaseModel):
     awsSdkVersion: str
-    clientId: str
+    clientId: str | None = None
 
 
 # Base model for all Cognito triggers
@@ -20,9 +20,9 @@ class CognitoTriggerBaseSchema(BaseModel):
 
 # Models for Pre-Signup flow
 class CognitoPreSignupRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
-    validationData: Dict[str, Any] | None = None
-    clientMetadata: Dict[str, Any] | None = None
+    userAttributes: dict[str, Any]
+    validationData: dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
     userNotFound: bool | None = None
 
 
@@ -33,89 +33,89 @@ class CognitoPreSignupResponseModel(BaseModel):
 
 
 class CognitoPreSignupTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["PreSignUp_SignUp"]
+    triggerSource: Literal["PreSignUp_SignUp", "PreSignUp_AdminCreateUser", "PreSignUp_ExternalProvider"]
     request: CognitoPreSignupRequestModel
     response: CognitoPreSignupResponseModel
 
 
 # Models for Post-Confirmation flow
 class CognitoPostConfirmationRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
-    clientMetadata: Dict[str, Any] | None = None
+    userAttributes: dict[str, Any]
+    clientMetadata: dict[str, Any] | None = None
 
 
 class CognitoPostConfirmationTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["PostConfirmation_ConfirmSignUp"]
+    triggerSource: Literal["PostConfirmation_ConfirmSignUp", "PostConfirmation_ConfirmForgotPassword"]
     request: CognitoPostConfirmationRequestModel
-    response: Dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
 
 # Models for Pre-Authentication flow
 class CognitoPreAuthenticationRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
-    validationData: Dict[str, Any] | None = None
+    userAttributes: dict[str, Any]
+    validationData: dict[str, Any] | None = None
     userNotFound: bool | None = None
 
 
 class CognitoPreAuthenticationTriggerModel(CognitoTriggerBaseSchema):
     triggerSource: Literal["PreAuthentication_Authentication"]
     request: CognitoPreAuthenticationRequestModel
-    response: Dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
 
 # Models for Post-Authentication flow
 class CognitoPostAuthenticationRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
+    userAttributes: dict[str, Any]
     newDeviceUsed: bool | None = None
-    clientMetadata: Dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
 
 
 class CognitoPostAuthenticationTriggerModel(CognitoTriggerBaseSchema):
     triggerSource: Literal["PostAuthentication_Authentication"]
     request: CognitoPostAuthenticationRequestModel
-    response: Dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
 
 # Models for Pre-Token Generation flow
 class CognitoGroupConfigurationModel(BaseModel):
-    groupsToOverride: List[str]
-    iamRolesToOverride: List[str]
+    groupsToOverride: list[str]
+    iamRolesToOverride: list[str]
     preferredRole: str | None = None
 
 
 class CognitoPreTokenGenerationRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
+    userAttributes: dict[str, Any]
     groupConfiguration: CognitoGroupConfigurationModel
-    clientMetadata: Dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
 
 
 class CognitoPreTokenGenerationTriggerModelV1(CognitoTriggerBaseSchema):
     triggerSource: str
     request: CognitoPreTokenGenerationRequestModel
-    response: Dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
 
 class CognitoPreTokenGenerationRequestModelV2AndV3(CognitoPreTokenGenerationRequestModel):
-    scopes: Dict[str, Any] | None = None
+    scopes: dict[str, Any] | None = None
 
 
 class CognitoPreTokenGenerationTriggerModelV2AndV3(CognitoTriggerBaseSchema):
     request: CognitoPreTokenGenerationRequestModelV2AndV3
-    response: Dict[str, Any] = {}
+    response: dict[str, Any] = {}
 
 
 # Models for User Migration flow
 class CognitoMigrateUserRequestModel(BaseModel):
     password: str
-    validationData: Dict[str, Any] | None = None
-    clientMetadata: Dict[str, Any] | None = None
+    validationData: dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
 
 
 class CognitoMigrateUserResponseModel(BaseModel):
-    userAttributes: Dict[str, Any] | None = None
+    userAttributes: dict[str, Any] | None = None
     finalUserStatus: str | None = None
     messageAction: str | None = None
-    desiredDeliveryMediums: List[str] | None = None
+    desiredDeliveryMediums: list[str] | None = None
     forceAliasCreation: bool | None = None
     enableSMSMFA: bool | None = None
 
@@ -129,11 +129,11 @@ class CognitoMigrateUserTriggerModel(CognitoTriggerBaseSchema):
 
 # Models for Custom Message flow
 class CognitoCustomMessageRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
+    userAttributes: dict[str, Any]
     codeParameter: str
     linkParameter: str | None = None
     usernameParameter: str | None = None
-    clientMetadata: Dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
 
 
 class CognitoCustomMessageResponseModel(BaseModel):
@@ -152,23 +152,41 @@ class CognitoCustomMessageTriggerModel(CognitoTriggerBaseSchema):
 class CognitoCustomEmailSMSSenderRequestModel(BaseModel):
     type: str
     code: str
-    clientMetadata: Dict[str, Any] | None = None
-    userAttributes: Dict[str, Any]
+    clientMetadata: dict[str, Any] | None = None
+    userAttributes: dict[str, Any]
 
 
 class CognitoCustomEmailSenderTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["CustomEmailSender_SignUp"]
+    triggerSource: Literal[
+        "CustomEmailSender_SignUp",
+        "CustomEmailSender_ResendCode",
+        "CustomEmailSender_ForgotPassword",
+        "CustomEmailSender_UpdateUserAttribute",
+        "CustomEmailSender_VerifyUserAttribute",
+        "CustomEmailSender_AdminCreateUser",
+        "CustomEmailSender_Authentication",
+        "CustomEmailSender_AccountTakeOverNotification",
+    ]
     request: CognitoCustomEmailSMSSenderRequestModel
 
 
 class CognitoCustomSMSSenderTriggerModel(CognitoTriggerBaseSchema):
-    triggerSource: Literal["CustomSMSSender_SignUp"]
+    triggerSource: Literal[
+        "CustomSMSSender_SignUp",
+        "CustomSMSSender_ResendCode",
+        "CustomSMSSender_ForgotPassword",
+        "CustomSMSSender_UpdateUserAttribute",
+        "CustomSMSSender_VerifyUserAttribute",
+        "CustomSMSSender_AdminCreateUser",
+        "CustomSMSSender_Authentication",
+    ]
     request: CognitoCustomEmailSMSSenderRequestModel
 
 
 # Models for Challenge Authentication flows
 class CognitoChallengeResultModel(BaseModel):
     challengeName: Literal[
+        "CUSTOM_CHALLENGE",
         "SRP_A",
         "PASSWORD_VERIFIER",
         "SMS_MFA",
@@ -183,9 +201,9 @@ class CognitoChallengeResultModel(BaseModel):
 
 
 class CognitoAuthChallengeRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
-    session: List[CognitoChallengeResultModel]
-    clientMetadata: Dict[str, Any] | None = None
+    userAttributes: dict[str, Any]
+    session: list[CognitoChallengeResultModel]
+    clientMetadata: dict[str, Any] | None = None
     userNotFound: bool | None = None
 
 
@@ -202,8 +220,8 @@ class CognitoDefineAuthChallengeTriggerModel(CognitoTriggerBaseSchema):
 
 
 class CognitoCreateAuthChallengeResponseModel(BaseModel):
-    publicChallengeParameters: Dict[str, Any] | None = None
-    privateChallengeParameters: Dict[str, Any] | None = None
+    publicChallengeParameters: dict[str, Any] | None = None
+    privateChallengeParameters: dict[str, Any] | None = None
     challengeMetadata: str | None = None
 
 
@@ -214,15 +232,15 @@ class CognitoCreateAuthChallengeTriggerModel(CognitoTriggerBaseSchema):
 
 
 class CognitoVerifyAuthChallengeRequestModel(BaseModel):
-    userAttributes: Dict[str, Any]
-    privateChallengeParameters: Dict[str, Any]
+    userAttributes: dict[str, Any]
+    privateChallengeParameters: dict[str, Any]
     challengeAnswer: str
-    clientMetadata: Dict[str, Any] | None = None
+    clientMetadata: dict[str, Any] | None = None
     userNotFound: bool | None = None
 
 
 class CognitoVerifyAuthChallengeResponseModel(BaseModel):
-    answerCorrect: bool
+    answerCorrect: bool | None = None
 
 
 class CognitoVerifyAuthChallengeTriggerModel(CognitoTriggerBaseSchema):

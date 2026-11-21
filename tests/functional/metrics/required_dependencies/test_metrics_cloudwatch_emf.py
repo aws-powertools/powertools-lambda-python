@@ -26,9 +26,11 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
     MAX_METRIC_NAME_LENGTH,
+    MAX_METRICS,
     MIN_METRIC_NAME_LENGTH,
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import MetricNameError
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
@@ -1251,6 +1253,50 @@ def test_add_dimensions_with_empty_value(namespace, capsys, metric):
     assert my_dimension not in output
 
 
+def _reject_non_finite(constant: str):
+    raise ValueError(f"EMF output contains {constant}, which is not valid JSON")
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_add_metric_with_non_finite_value(namespace, capsys, metric, dimension, value):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    my_metrics.add_dimension(**dimension)
+
+    # WHEN we add a non-finite metric value next to a valid metric
+    with pytest.warns(PowertoolsUserWarning, match="The metric bad_metric has a non-finite value *"):
+        my_metrics.add_metric(name="bad_metric", unit=MetricUnit.Count, value=value)
+    my_metrics.add_metric(**metric)
+    my_metrics.flush_metrics()
+
+    # THEN the EMF output is valid JSON and only contains the valid metric
+    output = json.loads(capsys.readouterr().out.strip(), parse_constant=_reject_non_finite)
+    assert "bad_metric" not in output
+    assert output[metric["name"]] == [1.0]
+
+
+def test_single_metric_with_non_finite_value(namespace, capsys):
+    # GIVEN a single metric with a NaN value
+    # WHEN the context manager exits
+    with pytest.warns(PowertoolsUserWarning, match="The metric bad_metric has a non-finite value *"):
+        with single_metric(name="bad_metric", unit=MetricUnit.Count, value=float("nan"), namespace=namespace):
+            pass
+
+    # THEN nothing is published and no exception is raised
+    assert capsys.readouterr().out == ""
+
+
+def test_single_metric_body_raises(namespace, capsys):
+    # GIVEN a single metric whose context manager body raises
+    # WHEN the exception leaves the context manager
+    with pytest.raises(RuntimeError, match="boom"):
+        with single_metric(name="my_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+            raise RuntimeError("boom")
+
+    # THEN no metric or `null` line is printed
+    assert capsys.readouterr().out == ""
+
+
 def test_get_and_set_namespace_and_service_properties(namespace, service, metrics, capsys):
     # GIVEN Metrics instance is initialized without namespace and service
     my_metrics = Metrics()
@@ -1566,6 +1612,74 @@ def test_metrics_disabled_with_namespace_and_service(monkeypatch, capsys):
     # THEN no metrics should have been recorded
     captured = capsys.readouterr()
     assert not captured.out
+
+
+def test_single_metric_disabled_with_env_var(monkeypatch, capsys, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+
+    # WHEN a single metric is created
+    with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+        pass
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_single_metric_disabled_with_powertools_dev(monkeypatch, capsys, namespace):
+    # GIVEN POWERTOOLS_DEV is enabled and POWERTOOLS_METRICS_DISABLED is not set
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+    monkeypatch.delenv("POWERTOOLS_METRICS_DISABLED", raising=False)
+
+    # WHEN a single metric is created
+    with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+        pass
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_cold_start_metric_disabled_with_env_var(monkeypatch, capsys, namespace, service):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    # WHEN log_metrics captures the cold start metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        my_metrics.add_metric(name="test_metric", unit=MetricUnit.Count, value=1)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    # THEN neither the cold start metric nor the application metric should have been recorded
+    assert not capsys.readouterr().out
+
+
+def test_metrics_disabled_with_env_var_on_max_metrics_flush(monkeypatch, capsys, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN enough metrics are added to trigger the automatic flush
+    for i in range(MAX_METRICS):
+        my_metrics.add_metric(name=f"metric_{i}", unit=MetricUnit.Count, value=1)
+
+    # THEN no metrics should have been recorded
+    assert not capsys.readouterr().out
+    # AND the metric set is still cleared
+    assert not my_metrics.metric_set
+
+
+def test_single_metric_does_not_print_when_block_raises(capsys, namespace):
+    # GIVEN a single metric block
+    # WHEN its body raises
+    with pytest.raises(RuntimeError):
+        with single_metric(name="test_metric", unit=MetricUnit.Count, value=1, namespace=namespace):
+            raise RuntimeError("failure")
+
+    # THEN nothing should have been printed
+    assert not capsys.readouterr().out
 
 
 def test_metrics_enabled_with_env_var_false(monkeypatch, capsys):

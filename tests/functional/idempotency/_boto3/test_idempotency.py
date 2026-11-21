@@ -52,7 +52,6 @@ from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import 
     DataclassSerializer,
 )
 from aws_lambda_powertools.utilities.typing import DurableContextProtocol
-from aws_lambda_powertools.utilities.validation import envelopes, validator
 from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_response_stub,
@@ -616,6 +615,137 @@ def test_idempotent_persistence_exception_updating(
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_response_not_json_serializable_clears_in_progress_record(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    hashed_idempotency_key,
+    expected_params_put_item,
+    lambda_context,
+):
+    """
+    Test idempotent decorator when lambda_handler returns a response that can't be serialized to JSON.
+    The in progress record must be cleared so a retry with the same event runs lambda_handler again.
+    """
+    stubber = stub.Stubber(persistence_store.client)
+
+    ddb_response = {}
+    expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": {"S": hashed_idempotency_key}}}
+
+    # Each invocation saves the in progress record and clears it after failing to serialize the response
+    for _ in range(2):
+        stubber.add_response("put_item", ddb_response, expected_params_put_item)
+        stubber.add_response("delete_item", ddb_response, expected_params_delete_item)
+    stubber.activate()
+
+    handler_calls = 0
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        nonlocal handler_calls
+        handler_calls += 1
+        return {"created": dt.datetime(2026, 1, 1)}
+
+    for _ in range(2):
+        with pytest.raises(IdempotencyPersistenceLayerError) as exc:
+            lambda_handler(lambda_apigw_event, lambda_context)
+
+        assert exc.value.args[0] == "Failed to update record state to success in idempotency store"
+        assert isinstance(exc.value.__cause__, TypeError)
+
+    assert handler_calls == 2
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("use_local_cache", [False, True])
+def test_idempotent_function_output_serializer_failure_clears_in_progress_record(
+    use_local_cache: bool,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_context,
+):
+    """
+    Test idempotent_function when the output serializer fails to convert the function response.
+    The in progress record must be cleared so a retry with the same payload runs the function again.
+    """
+    mock_event = {"data": "value"}
+    function_qualified_name = "test_idempotent_function_output_serializer_failure_clears_in_progress_record.<locals>"
+    idempotency_key = (
+        f"{TESTS_MODULE_PREFIX}.{function_qualified_name}.record_handler#{hash_idempotency_key(mock_event)}"
+    )
+    stubber = stub.Stubber(persistence_store.client)
+
+    ddb_response = {}
+    expected_params_put_item = build_idempotency_put_item_stub(
+        data=mock_event,
+        function_qualified_name=function_qualified_name,
+        handler_name="record_handler",
+    )
+    expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": {"S": idempotency_key}}}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("delete_item", ddb_response, expected_params_delete_item)
+    stubber.activate()
+
+    def failing_to_dict(data: Any) -> dict:
+        raise ValueError("cannot convert response")
+
+    output_serializer = CustomDictSerializer(to_dict=failing_to_dict, from_dict=lambda data: data)
+    config = IdempotencyConfig(use_local_cache=use_local_cache)
+    config.register_lambda_context(lambda_context)
+
+    @idempotent_function(
+        config=config,
+        persistence_store=persistence_store,
+        data_keyword_argument="record",
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return {"message": "success!"}
+
+    with pytest.raises(IdempotencyPersistenceLayerError) as exc:
+        record_handler(record=mock_event)
+
+    assert exc.value.args[0] == "Failed to update record state to success in idempotency store"
+    assert isinstance(exc.value.__cause__, ValueError)
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_response_not_json_serializable_delete_failure(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    hashed_idempotency_key,
+    expected_params_put_item,
+    lambda_context,
+):
+    """
+    Test idempotent decorator when lambda_handler returns a response that can't be serialized to JSON and
+    clearing the in progress record fails too. The persistence layer error still surfaces to the caller.
+    """
+    stubber = stub.Stubber(persistence_store.client)
+
+    expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": {"S": hashed_idempotency_key}}}
+
+    stubber.add_response("put_item", {}, expected_params_put_item)
+    stubber.add_client_error("delete_item", "UnrecoverableError", expected_params=expected_params_delete_item)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return {"created": dt.datetime(2026, 1, 1)}
+
+    with pytest.raises(IdempotencyPersistenceLayerError) as exc:
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    assert exc.value.args[0] == "Failed to update record state to success in idempotency store"
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_persistence_exception_getting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -686,6 +816,7 @@ def test_idempotent_lambda_first_execution_with_validation(
     [{"use_local_cache": False}, {"use_local_cache": True}],
     indirect=True,
 )
+@pytest.mark.requires_validation
 def test_idempotent_lambda_with_validator_util(
     config_without_jmespath: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
@@ -701,6 +832,7 @@ def test_idempotent_lambda_with_validator_util(
     Test idempotent decorator where event with matching event key has already been succesfully processed, using the
     validator utility to unwrap the event
     """
+    from aws_lambda_powertools.utilities.validation import envelopes, validator
 
     stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
@@ -1167,6 +1299,33 @@ def test_jmespath_with_powertools_json(
     assert result == "test-func.handler#" + persistence_store._generate_hash(expected_value)
 
 
+def test_configure_warns_when_reused_with_a_different_config(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a persistence layer already configured with one IdempotencyConfig
+    persistence_store.configure(IdempotencyConfig(event_key_jmespath="order_id"), "charge")
+
+    # WHEN it's configured again with a config whose settings differ
+    with pytest.warns(PowertoolsUserWarning, match="Use a separate persistence layer instance for each"):
+        persistence_store.configure(IdempotencyConfig(event_key_jmespath="user_id"), "notify")
+
+    # THEN the settings of the first config are kept
+    assert persistence_store.event_key_jmespath == "order_id"
+
+
+def test_configure_does_not_warn_when_reused_with_the_same_settings(persistence_store: DynamoDBPersistenceLayer):
+    # GIVEN a persistence layer configured by a function with a shared IdempotencyConfig
+    shared_config = IdempotencyConfig(event_key_jmespath="order_id")
+    persistence_store.configure(shared_config, "charge")
+
+    # WHEN another function uses the same config, and a new config with the same settings is passed,
+    # as @idempotent does per call when no config is given
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PowertoolsUserWarning)
+        persistence_store.configure(shared_config, "notify")
+        persistence_store.configure(IdempotencyConfig(event_key_jmespath="order_id"), "notify")
+
+    # THEN no warning is emitted
+
+
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
     config_with_jmespath_options: IdempotencyConfig,
@@ -1395,6 +1554,36 @@ def test_idempotent_function_serialization_no_response():
     response = record_handler(record=mock_event)
     assert response is None
     assert from_dict_called is False, "in case response is None, from_dict should not be called"
+
+
+@pytest.mark.parametrize(
+    "expected_result",
+    [0, False, "", [], {}],
+    ids=["zero", "false", "empty_str", "empty_list", "empty_dict"],
+)
+def test_idempotent_function_falsy_response_replay(expected_result):
+    # GIVEN a function returning a falsy value
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_falsy_response_replay.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    calls = 0
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record", config=config)
+    def record_handler(record):
+        nonlocal calls
+        calls += 1
+        return expected_result
+
+    # WHEN calling the function twice with the same payload
+    first_result = record_handler(record=mock_event)
+    second_result = record_handler(record=mock_event)
+
+    # THEN the second call returns the stored falsy value instead of None
+    assert first_result == expected_result
+    assert second_result == expected_result
+    assert type(second_result) is type(expected_result)
+    assert calls == 1
 
 
 @pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
@@ -1699,6 +1888,44 @@ def test_idempotency_disabled_envvar(
 
     dummy(data=mock_event)
     dummy_handler(mock_event, lambda_context)
+
+    assert len(persistence_store.client.method_calls) == 4
+
+
+@pytest.mark.parametrize("idempotency_disabled_value", ["", " ", "maybe", None])
+def test_idempotency_disabled_envvar_empty_or_unparsable(
+    monkeypatch,
+    lambda_context,
+    persistence_store: DynamoDBPersistenceLayer,
+    idempotency_disabled_value,
+):
+    # Scenario to validate an empty, unset or unparsable 'POWERTOOLS_IDEMPOTENCY_DISABLED'
+    # keeps idempotency enabled instead of crashing the invocation
+    mock_event = {"data": "value"}
+
+    persistence_store.client = MagicMock()
+
+    if idempotency_disabled_value is None:
+        monkeypatch.delenv("POWERTOOLS_IDEMPOTENCY_DISABLED", raising=False)
+    else:
+        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", idempotency_disabled_value)
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store)
+    def dummy(data):
+        return {"message": "hello"}
+
+    @idempotent(persistence_store=persistence_store)
+    def dummy_handler(event, context):
+        return {"message": "hi"}
+
+    if idempotency_disabled_value is None:
+        assert dummy(data=mock_event) == {"message": "hello"}
+        assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
+    else:
+        with pytest.warns(PowertoolsUserWarning, match="unrecognised value"):
+            assert dummy(data=mock_event) == {"message": "hello"}
+        with pytest.warns(PowertoolsUserWarning, match="unrecognised value"):
+            assert dummy_handler(mock_event, lambda_context) == {"message": "hi"}
 
     assert len(persistence_store.client.method_calls) == 4
 

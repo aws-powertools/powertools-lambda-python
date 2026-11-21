@@ -556,6 +556,8 @@ The following environment variables are available to configure Logger at a globa
 
 Log buffering enables you to buffer logs for a specific request or invocation. Enable log buffering by passing `logger_buffer` when initializing a Logger instance. You can buffer logs at the `WARNING`, `INFO` or `DEBUG` level, and flush them automatically on error or manually as needed.
 
+When an X-Ray trace ID is unavailable, log records at the configured buffering level are emitted immediately instead of being buffered. This ensures logs generated during initialization or outside a Lambda invocation are not lost.
+
 !!! tip "This is useful when you want to reduce the number of log messages emitted while still having detailed logs when needed, such as when troubleshooting issues."
 
 === "getting_started_with_buffering_logs.py"
@@ -752,7 +754,7 @@ You can append your own thread-local keys in your existing Logger via the `threa
 
 === "thread_safe_append_keys.py"
 
-    ```python hl_lines="11"
+    ```python hl_lines="10"
     --8<-- "examples/logger/src/thread_safe_append_keys.py"
     ```
 
@@ -770,7 +772,7 @@ Use the `thread_safe_remove_keys` method to remove a list of thread-local keys t
 
 === "thread_safe_remove_keys.py"
 
-    ```python hl_lines="13"
+    ```python hl_lines="12"
     --8<-- "examples/logger/src/thread_safe_remove_keys.py"
     ```
 
@@ -786,7 +788,7 @@ Use the `thread_safe_clear_keys` method to remove all thread-local keys that wer
 
 === "thread_safe_clear_keys.py"
 
-    ```python hl_lines="13"
+    ```python hl_lines="12"
     --8<-- "examples/logger/src/thread_safe_clear_keys.py"
     ```
 
@@ -917,6 +919,24 @@ You can use import and use them as any other Logger formatter via `logger_format
 --8<-- "examples/logger/src/observability_provider_builtin_formatters.py"
 ```
 
+### CloudWatch Omni
+
+[CloudWatch Omni](https://aws.amazon.com/cloudwatch/omni/){target="_blank"} is the unified observability experience built on top of Amazon CloudWatch. It works on the telemetry you already send to CloudWatch, so there is nothing to configure in Logger: every log line goes to CloudWatch Logs as structured JSON and is available in your Omni space from there.
+
+What makes those lines useful in Omni is the shape Logger gives them. Each record is a single JSON object, and the [standard structured keys](#standard-structured-keys) are the fields you filter and correlate on:
+
+| Key | Set by | Use it to |
+| --- | --- | --- |
+| `service` | `Logger(service=...)` or `POWERTOOLS_SERVICE_NAME` | group logs of one service and tie them to the metrics emitted with the same `service` dimension |
+| `correlation_id` | `inject_lambda_context(correlation_id_path=...)` or `set_correlation_id()` | follow one request across functions |
+| `xray_trace_id` | automatically when tracing is active | jump from a log line to its X-Ray trace |
+| `function_name`, `function_request_id`, `cold_start` | `inject_lambda_context` | slice by function, invocation and cold starts |
+
+Keys you add with `append_keys()` or as `extra` become fields too, so prefer stable, flat names such as `order_id` over nested or free-form values when you plan to query them.
+
+???+ tip "Keep `service` consistent across Logger, Metrics and Tracer"
+    Omni correlates logs, metrics and traces by service. Use the same value in `Logger(service=...)`, `Metrics(service=...)` and `Tracer(service=...)`, or set `POWERTOOLS_SERVICE_NAME` once for all three.
+
 ### Migrating from other Loggers
 
 If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Child Loggers](#child-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
@@ -945,6 +965,8 @@ stateDiagram-v2
 For inheritance, Logger uses `child` parameter to ensure we don't compete with its parents config. We name child Loggers following Python's convention: _`{service}`.`{filename}`_.
 
 Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same `service` name is important when instantiating them.
+
+A child Logger without a `level` follows its parent's log level, including later changes from `setLevel()` and sampling. Pass `level` to give a child its own log level.
 
 === "logging_inheritance_good.py"
 
@@ -1087,7 +1109,7 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 === "bring_your_own_formatter_from_scratch.py"
 
-    ```python hl_lines="6 9 11-12 15 19 23 26 38"
+    ```python hl_lines="7 10 12-13 16 20 24 27 39"
     --8<-- "examples/logger/src/bring_your_own_formatter_from_scratch.py"
     ```
 

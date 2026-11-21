@@ -40,6 +40,7 @@ This utility requires additional permissions to work as expected.
 | DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                                          |
 | DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                            |
 | AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`**            |
+| AppConfig | **`AppConfigExtensionProvider.get`**                                    | Same as above, granted to the function role and used by the AppConfig Agent Lambda extension    |
 
 ### Fetching parameters
 
@@ -162,6 +163,49 @@ The following will retrieve the latest version and store it in the cache.
     --8<-- "examples/parameters/src/getting_started_appconfig.py"
     ```
 
+### Fetching app configurations with the AppConfig Agent Lambda extension
+
+The [AWS AppConfig Agent Lambda extension](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-lambda-extensions.html){target="_blank"} runs as a layer, keeps a local cache, polls AppConfig in the background, and serves configuration over HTTP on `localhost:2772`.
+
+Use `AppConfigExtensionProvider` to read from that endpoint. It makes no AppConfig API call and does not create an SDK client, so you skip the two `StartConfigurationSession` and `GetLatestConfiguration` calls on every cold start. Caching and `transform` work the same way as any other provider.
+
+=== "appconfig_extension.py"
+
+    ```python hl_lines="7 12"
+    --8<-- "examples/parameters/src/appconfig_extension.py"
+    ```
+
+=== "appconfig_extension_flags.py"
+
+    ```python hl_lines="6 11"
+    --8<-- "examples/parameters/src/appconfig_extension_flags.py"
+    ```
+
+=== "template.yaml"
+
+    ```yaml hl_lines="12-15 20 26-27"
+    --8<-- "examples/parameters/sam/appconfig_extension.yaml"
+    ```
+
+???+ note "Who calls AppConfig?"
+    The extension calls AppConfig on your behalf using the function's execution role, so the role still needs `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`. If the layer is missing, `get()` raises `GetParameterError` saying the extension is unreachable.
+
+Any keyword argument you pass to `get()` is forwarded to the extension as a query string. Use `flag="name"` or `flag=["a", "b"]` to retrieve only selected flags from an AppConfig feature flags profile.
+
+The extension itself is configured through environment variables on your function. These are the ones you are most likely to set; see the [full list](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-lambda-extensions-config.html){target="_blank"} in the AWS AppConfig documentation.
+
+| Environment variable                            | Default | Description                                                                                                        |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `AWS_APPCONFIG_EXTENSION_HTTP_PORT`             | `2772`  | Port of the local endpoint. This is the only variable Powertools reads, so the provider always matches the extension |
+| `AWS_APPCONFIG_EXTENSION_PREFETCH_LIST`         | None    | `Application:Environment:Configuration` to fetch before your handler runs, reducing cold start                      |
+| `AWS_APPCONFIG_EXTENSION_POLL_INTERVAL_SECONDS` | `45`    | How often the extension checks AppConfig for new deployments                                                        |
+| `AWS_APPCONFIG_EXTENSION_POLL_TIMEOUT_MILLIS`   | `3000`  | How long a poll may take before the extension serves the previous cached data                                      |
+| `AWS_APPCONFIG_EXTENSION_ROLE_ARN`              | None    | Role to assume to read configuration from another AWS account                                                      |
+| `AWS_APPCONFIG_EXTENSION_SERVICE_REGION`        | None    | Call AppConfig in a different Region than the function                                                             |
+
+???+ tip "Cache twice?"
+    The extension already caches and refreshes data on every poll interval. Use `max_age=0` if you want each invocation to read the extension's latest copy, or keep the default to also skip the local HTTP call between invocations.
+
 ### Environment variables
 
 The following environment variables are available to configure the parameter utility at a global scope:
@@ -252,7 +296,9 @@ The AWS Systems Manager Parameter Store provider supports two additional argumen
 | Parameter     | Default | Description                                                                                    |
 | ------------- | ------- | ---------------------------------------------------------------------------------------------- |
 | **decrypt**   | `False` | Will automatically decrypt the parameter.                                                      |
-| **recursive** | `True`  | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+| **recursive** | `False` | For `get_multiple()` only, will fetch all parameter values recursively based on a path prefix. |
+
+The module-level `get_parameters()` function defaults `recursive` to `True`.
 
 You can create `SecureString` parameters, which are parameters that have a plaintext parameter name and an encrypted parameter value. If you don't use the `decrypt` argument, you will get an encrypted value. Read [here](https://docs.aws.amazon.com/kms/latest/developerguide/services-parameter-store.html) about best practices using KMS to secure your parameters.
 
@@ -393,7 +439,7 @@ Here are two examples of implementing a custom parameter store. One using an ext
     ```
 
 === "custom_provider_s3.py"
-    ```python hl_lines="6 9 19 29"
+    ```python hl_lines="5 8 18 28"
     --8<-- "examples/parameters/src/custom_provider_s3.py"
     ```
 

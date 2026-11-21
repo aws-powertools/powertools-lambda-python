@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Type, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic.networks import IPvAnyNetwork
@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.parser.functions import _validate_source_ip
 
 
 class RequestContextV2AuthorizerIamCognito(BaseModel):
-    amr: List[str]
+    amr: list[str]
     identityId: str
     identityPoolId: str
 
@@ -24,21 +24,21 @@ class RequestContextV2AuthorizerIam(BaseModel):
 
 
 class RequestContextV2AuthorizerJwt(BaseModel):
-    claims: Dict[str, Any]
-    scopes: List[str] | None = None
+    claims: dict[str, Any]
+    scopes: list[str] | None = None
 
 
 class RequestContextV2Authorizer(BaseModel):
     jwt: RequestContextV2AuthorizerJwt | None = None
     iam: RequestContextV2AuthorizerIam | None = None
-    lambda_value: Dict[str, Any] | None = Field(None, alias="lambda")
+    lambda_value: dict[str, Any] | None = Field(None, alias="lambda")
 
 
 class RequestContextV2Http(BaseModel):
     method: Literal["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     path: str
     protocol: str
-    sourceIp: Union[IPvAnyNetwork, str]
+    sourceIp: IPvAnyNetwork | str
     userAgent: str
 
     @field_validator("sourceIp", mode="before")
@@ -66,17 +66,17 @@ class APIGatewayProxyEventV2Model(BaseModel):
     routeKey: str
     rawPath: str
     rawQueryString: str
-    cookies: List[str] | None = None
-    headers: Dict[str, str]
-    queryStringParameters: Dict[str, str] | None = None
-    pathParameters: Dict[str, str] | None = None
-    stageVariables: Dict[str, str] | None = None
+    cookies: list[str] | None = None
+    headers: dict[str, str]
+    queryStringParameters: dict[str, str] | None = None
+    pathParameters: dict[str, str] | None = None
+    stageVariables: dict[str, str] | None = None
     requestContext: RequestContextV2
-    body: Union[str, Type[BaseModel]] | None = None
+    body: str | type[BaseModel] | None = None
     isBase64Encoded: bool | None = None
 
 
 class ApiGatewayAuthorizerRequestV2(APIGatewayProxyEventV2Model):
     type: Literal["REQUEST"]
     routeArn: str
-    identitySource: List[str] | None = None
+    identitySource: list[str] | None = None

@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from typing import Dict, Set
 
 import pytest
 from pydantic import BaseModel
@@ -12,7 +11,7 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 class Person:
     name: str
     birth_date: str
-    scores: Set[int]
+    scores: set[int]
 
 
 def test_openapi_duplicated_serialization():
@@ -45,7 +44,7 @@ def test_openapi_serialize_json():
     schema = json.loads(app.get_openapi_json_schema())
 
     # THEN we should get a dictionary
-    assert isinstance(schema, Dict)
+    assert isinstance(schema, dict)
 
 
 def test_openapi_serialize_other(gw_event):

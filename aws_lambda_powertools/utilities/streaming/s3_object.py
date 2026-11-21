@@ -204,7 +204,11 @@ class S3Object(IO[bytes]):
 
     @property
     def closed(self) -> bool:
-        return self.transformed_stream.closed
+        # Don't build the transformed stream just to answer this: it can issue S3 requests (ZipFile reads the
+        # central directory on creation), and after close() it would wrap an already closed raw stream.
+        if self._transformed_stream is None:
+            return self.raw_stream.closed
+        return self._transformed_stream.closed
 
     def __enter__(self):
         return self

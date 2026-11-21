@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, model_validator
 
@@ -11,7 +11,7 @@ class S3BatchOperationTaskModel(BaseModel):
     s3Bucket: str | None = None
 
     @model_validator(mode="before")
-    def validate_s3bucket(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_s3bucket(cls, values: dict[str, Any]) -> dict[str, Any]:
         if values.get("s3BucketArn") and not values.get("s3Bucket"):
             values["s3Bucket"] = values["s3BucketArn"].split(":::")[-1]
 
@@ -20,11 +20,11 @@ class S3BatchOperationTaskModel(BaseModel):
 
 class S3BatchOperationJobModel(BaseModel):
     id: str
-    userArguments: Dict[str, Any] | None = None
+    userArguments: dict[str, Any] | None = None
 
 
 class S3BatchOperationModel(BaseModel):
     invocationId: str
     invocationSchemaVersion: Literal["1.0", "2.0"]
     job: S3BatchOperationJobModel
-    tasks: List[S3BatchOperationTaskModel]
+    tasks: list[S3BatchOperationTaskModel]

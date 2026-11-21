@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import math
 import numbers
 import os
 import warnings
@@ -165,6 +166,14 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             metric_resolutions=self._metric_resolutions,
             resolution=resolution,
         )
+        if not math.isfinite(value):
+            warnings.warn(
+                f"The metric {name} has a non-finite value ({value}) and won't be added. "
+                "CloudWatch EMF only accepts finite numbers.",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
+            )
+            return
         metric: dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
@@ -174,8 +183,9 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         if len(self.metric_set) == MAX_METRICS or len(metric["Value"]) == MAX_METRICS:
             logger.debug(f"Exceeded maximum of {MAX_METRICS} metrics - Publishing existing metric set")
-            metrics = self.serialize_metric_set()
-            print(json.dumps(metrics))
+            if not is_metrics_disabled():
+                metrics = self.serialize_metric_set()
+                print(json.dumps(metrics))
 
             # clear metric set only as opposed to metrics and dimensions set
             # since we could have more than 100 metrics

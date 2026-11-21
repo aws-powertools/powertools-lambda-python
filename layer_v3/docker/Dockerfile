@@ -43,3 +43,7 @@ RUN cd /asset/python && \
   find . -wholename "*/tests/*" -type f -delete && \
   # remove python bytecode
   find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
+
+# Hash validation survives ZIP timestamp changes; retain sources for inspection and fallback.
+RUN python -m compileall -q -j 2 --invalidation-mode checked-hash \
+  -s /asset -p /opt /asset/python
