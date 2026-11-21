@@ -603,6 +603,83 @@ async def test_asgi_query_params():
     assert body["query"] == "python"
 
 
+@pytest.mark.asyncio
+async def test_asgi_request_context_from_scope():
+    # GIVEN an app with a route that reads the request context
+    app = HttpResolverLocal()
+
+    @app.get("/whoami")
+    def whoami():
+        request_context = app.current_event.request_context
+        return {
+            "source_ip": request_context.http.source_ip,
+            "user_agent": request_context.http.user_agent,
+            "stage": request_context.stage,
+            "method": request_context.http.method,
+            "path": request_context.http.path,
+        }
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/whoami",
+        "query_string": b"",
+        "headers": [(b"user-agent", b"TestAgent/1.0")],
+        "client": ("203.0.113.10", 52314),
+        "http_version": "1.1",
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN the request context is filled from the ASGI scope
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["source_ip"] == "203.0.113.10"
+    assert body["user_agent"] == "TestAgent/1.0"
+    assert body["stage"] == "local"
+    assert body["method"] == "GET"
+    assert body["path"] == "/whoami"
+
+
+@pytest.mark.asyncio
+async def test_asgi_request_context_without_client_or_user_agent():
+    # GIVEN an app with a route that reads the request context
+    app = HttpResolverLocal()
+
+    @app.get("/whoami")
+    def whoami():
+        request_context = app.current_event.request_context
+        return {
+            "source_ip": request_context.http.source_ip,
+            "user_agent": request_context.http.user_agent,
+        }
+
+    # No client tuple and no user-agent header in the scope
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/whoami",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN the request context still resolves with empty values
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["source_ip"] == ""
+    assert body["user_agent"] == ""
+
+
 # =============================================================================
 # Async Handler Tests
 # =============================================================================
