@@ -57,6 +57,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
           - AWSLambdaPowertoolsPythonV3-python313
           - AWSLambdaPowertoolsPythonV3-python314
+          - AWSLambdaPowertoolsPythonV3-python315
         arch:
           - arm64
           - x86_64
@@ -102,6 +103,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
           - AWSLambdaPowertoolsPythonV3-python313
           - AWSLambdaPowertoolsPythonV3-python314
+          - AWSLambdaPowertoolsPythonV3-python315
         arch:
           - arm64
           - x86_64
@@ -170,6 +172,7 @@ jobs:
           - AWSLambdaPowertoolsPythonV3-python312
           - AWSLambdaPowertoolsPythonV3-python313
           - AWSLambdaPowertoolsPythonV3-python314
+          - AWSLambdaPowertoolsPythonV3-python315
         arch:
           - arm64
           - x86_64
