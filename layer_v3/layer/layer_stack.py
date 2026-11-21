@@ -12,7 +12,7 @@ from aws_cdk import (
     RemovalPolicy,
     Stack,
 )
-from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission, Runtime, RuntimeFamily
+from aws_cdk.aws_lambda import Architecture, CfnLayerVersionPermission, Runtime
 from aws_cdk.aws_ssm import StringParameter
 from constructs import Construct
 from layer_constructors.layer_stack import LambdaPowertoolsLayerPythonV3
@@ -95,7 +95,7 @@ class LayerStack(Stack):
             python_version = Runtime.PYTHON_3_14
         if python_version == "python3.15":
             # Use the runtime name until CDK provides PYTHON_3_15.
-            python_version = Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True)
+            python_version = Runtime.PYTHON_3_15
 
         has_arm64_support = CfnParameter(
             self,

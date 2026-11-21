@@ -18,7 +18,6 @@ from aws_cdk.aws_lambda import (
     Function,
     LayerVersion,
     Runtime,
-    RuntimeFamily,
     Tracing,
 )
 from filelock import FileLock
@@ -126,7 +125,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 Runtime.PYTHON_3_12,
                 Runtime.PYTHON_3_13,
                 Runtime.PYTHON_3_14,
-                Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True),
+                Runtime.PYTHON_3_15,
             ],
             compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
@@ -270,7 +269,7 @@ class BaseInfrastructure(InfrastructureProvider):
             return Runtime.PYTHON_3_14
         elif version.major == 3 and version.minor == 15:
             # Use the runtime name until CDK provides PYTHON_3_15.
-            return Runtime("python3.15", RuntimeFamily.PYTHON, supports_inline_code=True)
+            return Runtime.PYTHON_3_15
         else:
             raise ValueError(f"Unsupported Python version: {version}")
 
