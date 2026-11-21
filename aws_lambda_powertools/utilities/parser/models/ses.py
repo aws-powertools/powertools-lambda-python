@@ -24,6 +24,8 @@ class SesReceipt(BaseModel):
     spfVerdict: SesReceiptVerdict
     dmarcVerdict: SesReceiptVerdict
     action: SesReceiptAction
+    dkimVerdict: SesReceiptVerdict | None = None
+    dmarcPolicy: Literal["none", "quarantine", "reject"] | None = None
 
 
 class SesMailHeaders(BaseModel):
