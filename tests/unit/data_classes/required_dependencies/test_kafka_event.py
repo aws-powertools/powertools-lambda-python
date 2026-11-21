@@ -93,3 +93,18 @@ def test_kafka_record_property_with_stopiteration_error():
     with pytest.raises(StopIteration):
         for _ in range(5):
             assert parsed_event.record.topic is not None
+
+
+def test_kafka_event_uses_custom_json_deserializer():
+    raw_event = load_event("kafkaEventMsk.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    parsed_event = KafkaEvent(raw_event, json_deserializer=custom_deserializer)
+    record = parsed_event.record
+
+    assert record.json_value == {"deserialized_by": "custom"}
+    assert calls == [record.decoded_value.decode("utf-8")]

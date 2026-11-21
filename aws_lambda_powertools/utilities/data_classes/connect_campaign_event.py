@@ -73,7 +73,7 @@ class ConnectOutboundCampaignItems(DictWrapper):
     def customer_profiles(self) -> Iterator[ConnectOutboundCampaignCustomerProfile]:
         """Iterate over customer profiles."""
         for item in self["CustomerProfiles"]:
-            yield ConnectOutboundCampaignCustomerProfile(item)
+            yield ConnectOutboundCampaignCustomerProfile(item, json_deserializer=self._json_deserializer)
 
 
 class ConnectOutboundCampaignsEvent(DictWrapper):
@@ -92,7 +92,7 @@ class ConnectOutboundCampaignsEvent(DictWrapper):
     @property
     def items_payload(self) -> ConnectOutboundCampaignItems:
         """Items payload containing customer profiles."""
-        return ConnectOutboundCampaignItems(self["Items"])
+        return ConnectOutboundCampaignItems(self["Items"], json_deserializer=self._json_deserializer)
 
     @property
     def customer_profiles(self) -> Iterator[ConnectOutboundCampaignCustomerProfile]:

@@ -144,14 +144,14 @@ class CloudWatchAlarmData(DictWrapper):
         """
         The current state of the Alarm.
         """
-        return CloudWatchAlarmState(self["state"])
+        return CloudWatchAlarmState(self["state"], json_deserializer=self._json_deserializer)
 
     @property
     def previous_state(self) -> CloudWatchAlarmState:
         """
         The previous state of the Alarm.
         """
-        return CloudWatchAlarmState(self["previousState"])
+        return CloudWatchAlarmState(self["previousState"], json_deserializer=self._json_deserializer)
 
     @property
     def configuration(self) -> CloudWatchAlarmConfiguration:
@@ -247,4 +247,4 @@ class CloudWatchAlarmEvent(DictWrapper):
         """
         Contains basic data about the Alarm and its current and previous states.
         """
-        return CloudWatchAlarmData(self["alarmData"])
+        return CloudWatchAlarmData(self["alarmData"], json_deserializer=self._json_deserializer)

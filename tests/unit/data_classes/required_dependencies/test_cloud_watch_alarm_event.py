@@ -121,3 +121,21 @@ def test_cloud_watch_alarm_event_composite_metric():
         == raw_event["alarmData"]["configuration"]["actionsSuppressor"]
     )
     assert isinstance(parsed_event.alarm_data.configuration.metrics, list)
+
+
+def test_cloud_watch_alarm_event_uses_custom_json_deserializer():
+    raw_event = load_event("cloudWatchAlarmEventSingleMetric.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    parsed_event = CloudWatchAlarmEvent(raw_event, json_deserializer=custom_deserializer)
+
+    assert parsed_event.alarm_data.state.reason_data_decoded == {"deserialized_by": "custom"}
+    assert parsed_event.alarm_data.previous_state.reason_data_decoded == {"deserialized_by": "custom"}
+    assert calls == [
+        raw_event["alarmData"]["state"]["reasonData"],
+        raw_event["alarmData"]["previousState"]["reasonData"],
+    ]

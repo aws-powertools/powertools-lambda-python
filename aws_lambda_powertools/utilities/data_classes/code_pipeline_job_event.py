@@ -3,10 +3,13 @@ from __future__ import annotations
 import tempfile
 import zipfile
 from functools import cached_property
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote_plus
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CodePipelineConfiguration(DictWrapper):
@@ -33,7 +36,7 @@ class CodePipelineActionConfiguration(DictWrapper):
 
     @property
     def configuration(self) -> CodePipelineConfiguration:
-        return CodePipelineConfiguration(self["configuration"])
+        return CodePipelineConfiguration(self["configuration"], json_deserializer=self._json_deserializer)
 
 
 class CodePipelineS3Location(DictWrapper):
@@ -115,7 +118,10 @@ class CodePipelineData(DictWrapper):
     @property
     def action_configuration(self) -> CodePipelineActionConfiguration:
         """CodePipeline action configuration"""
-        return CodePipelineActionConfiguration(self["actionConfiguration"])
+        return CodePipelineActionConfiguration(
+            self["actionConfiguration"],
+            json_deserializer=self._json_deserializer,
+        )
 
     @property
     def input_artifacts(self) -> list[CodePipelineArtifact]:
@@ -153,8 +159,8 @@ class CodePipelineJobEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/services-codepipeline.html
     """
 
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer=json_deserializer)
         self._job = self["CodePipeline.job"]
 
     @property
@@ -170,7 +176,7 @@ class CodePipelineJobEvent(DictWrapper):
     @property
     def data(self) -> CodePipelineData:
         """Code pipeline jab data"""
-        return CodePipelineData(self._job["data"])
+        return CodePipelineData(self._job["data"], json_deserializer=self._json_deserializer)
 
     @property
     def user_parameters(self) -> str | None:
