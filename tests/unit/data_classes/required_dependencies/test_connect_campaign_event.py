@@ -43,3 +43,18 @@ def test_connect_outbound_campaigns_event():
         "email": "jane.smith@example.com",
     }
     assert p2.idempotency_token == "token-abc456"
+
+
+def test_connect_outbound_campaigns_event_uses_custom_json_deserializer():
+    raw_event = load_event("connectOutboundCampaignsEvent.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    event = ConnectOutboundCampaignsEvent(raw_event, json_deserializer=custom_deserializer)
+    profiles = list(event.customer_profiles)
+
+    assert [profile.json_customer_data for profile in profiles] == [{"deserialized_by": "custom"}] * 2
+    assert calls == [profile.customer_data for profile in profiles]

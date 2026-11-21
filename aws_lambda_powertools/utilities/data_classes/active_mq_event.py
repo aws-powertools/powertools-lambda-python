@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 
 class ActiveMQMessage(DictWrapper):
@@ -115,8 +115,8 @@ class ActiveMQEvent(DictWrapper):
     - https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/
     """
 
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer=json_deserializer)
         self._messages: Iterator[ActiveMQMessage] | None = None
 
     @property

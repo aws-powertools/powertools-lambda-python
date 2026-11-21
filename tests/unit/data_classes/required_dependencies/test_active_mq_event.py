@@ -58,3 +58,18 @@ def test_activemq_message_property_with_stopiteration_error():
         assert parsed_event.message.message_type is not None
         assert parsed_event.message.data is not None
         assert parsed_event.message.decoded_data is not None
+
+
+def test_active_mq_event_uses_custom_json_deserializer():
+    raw_event = load_event("activeMQEvent.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    parsed_event = ActiveMQEvent(raw_event, json_deserializer=custom_deserializer)
+    message = parsed_event.message
+
+    assert message.json_data == {"deserialized_by": "custom"}
+    assert calls == [message.decoded_data]
