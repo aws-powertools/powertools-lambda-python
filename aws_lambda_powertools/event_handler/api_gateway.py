@@ -74,6 +74,8 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
+# A static rule with any of these is a regex (/proxy/.+), not an exact path (/proxy/health)
+_REGEX_METACHARACTERS = frozenset(".^$*+?{}[]\\|()")
 _JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
 _ALB_MAX_RESPONSE_SIZE = 1024 * 1024
 
@@ -2589,8 +2591,20 @@ class ApiGatewayResolver(BaseRouter):
                 # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
                 # Then attempt a match for static routes before dynamic routes.
                 # This ensures that the most specific route is prioritized and processed first (studies/fetch).
+                # Within static routes, exact paths (/proxy/health) also go before regex rules
+                # without named groups (/proxy/.+), whatever the registration order.
                 if _route.rule.groups > 0:
                     self._dynamic_routes.append(_route)
+                elif _REGEX_METACHARACTERS.isdisjoint(rule):
+                    first_regex = next(
+                        (
+                            i
+                            for i, static in enumerate(self._static_routes)
+                            if not _REGEX_METACHARACTERS.isdisjoint(static.path)
+                        ),
+                        len(self._static_routes),
+                    )
+                    self._static_routes.insert(first_regex, _route)
                 else:
                     self._static_routes.append(_route)
 
