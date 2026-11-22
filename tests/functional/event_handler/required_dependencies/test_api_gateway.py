@@ -1353,6 +1353,39 @@ def test_exact_route_takes_precedence_over_catch_all_regex(catch_all_first: bool
     assert json.loads(other["body"]) == {"route": "catch-all"}
 
 
+@pytest.mark.parametrize(
+    "catch_all_rule, exact_path, other_path",
+    [
+        pytest.param("/.well-known/.+", "/.well-known/jwks.json", "/.well-known/other", id="dot in file name"),
+        pytest.param("/files/.+", "/files/readme.txt", "/files/other", id="file extension"),
+        pytest.param("/v1.0/.+", "/v1.0/health", "/v1.0/other", id="versioned prefix"),
+    ],
+)
+def test_exact_route_with_dot_takes_precedence_over_catch_all_regex(
+    catch_all_rule: str,
+    exact_path: str,
+    other_path: str,
+):
+    # GIVEN a catch-all regex route registered before an exact route whose path contains a dot
+    app = APIGatewayRestResolver()
+
+    @app.get(catch_all_rule)
+    def catch_all():
+        return {"route": "catch-all"}
+
+    @app.get(exact_path)
+    def exact():
+        return {"route": "exact"}
+
+    # WHEN calling the event handler with the exact path and with another path
+    exact_result = app({"httpMethod": "GET", "path": exact_path}, None)
+    other_result = app({"httpMethod": "GET", "path": other_path}, None)
+
+    # THEN the exact route wins, and other paths still go to the catch-all
+    assert json.loads(exact_result["body"]) == {"route": "exact"}
+    assert json.loads(other_result["body"]) == {"route": "catch-all"}
+
+
 def test_exact_route_from_router_takes_precedence_over_catch_all_regex():
     # GIVEN a catch-all regex route on the app, and an exact route included later from a prefixed router
     app = APIGatewayRestResolver()

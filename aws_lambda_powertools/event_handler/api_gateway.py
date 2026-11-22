@@ -74,8 +74,10 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
-# A static rule with any of these is a regex (/proxy/.+), not an exact path (/proxy/health)
-_REGEX_METACHARACTERS = frozenset(".^$*+?{}[]\\|()")
+# A static rule with any of these is a regex (/proxy/.+), not an exact path (/proxy/health).
+# "." is left out: a rule whose only metacharacter is "." (/files/readme.txt, /v1.0/health)
+# still matches one fixed-length path shape, so it can go before rules with quantifiers or groups.
+_REGEX_METACHARACTERS = frozenset("^$*+?{}[]\\|()")
 _JSON_DUMP_CALL = partial(json.dumps, separators=(",", ":"), cls=Encoder)
 _ALB_MAX_RESPONSE_SIZE = 1024 * 1024
 
