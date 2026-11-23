@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10, <4.0.0"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -454,7 +454,7 @@ dev = [
     { name = "boto3", specifier = ">=1.26.164,<2.0.0" },
     { name = "boto3-stubs", extras = ["appconfig", "appconfigdata", "cloudformation", "cloudwatch", "dynamodb", "lambda", "logs", "s3", "secretsmanager", "ssm", "xray"], specifier = ">=1.34.139,<2.0.0" },
     { name = "cdklabs-generative-ai-cdk-constructs", specifier = ">=0.1.289,<0.2.0" },
-    { name = "cfn-lint", specifier = "==1.57.2" },
+    { name = "cfn-lint", specifier = "==1.60.1" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.10.6,<8.0.0" },
     { name = "dirhash", specifier = ">=0.5.0,<0.6.0" },
     { name = "filelock", specifier = ">=3.16,<5.0" },
@@ -849,7 +849,7 @@ wheels = [
 
 [[package]]
 name = "cfn-lint"
-version = "1.57.2"
+version = "1.60.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonpatch" },
@@ -861,9 +861,9 @@ dependencies = [
     { name = "sympy" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/93/996a8c4a8916ed10b71207de4276c7dbec4d13ad0f9a21830f9eed04f771/cfn_lint-1.57.2.tar.gz", hash = "sha256:7e859164badf01d2bd62c6d362284ab6e814d036f0a64249ba6a05287d787d68", size = 5000546, upload-time = "2026-10-06T19:29:15.939Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/9c/114b3e8bab54caa706ad9294982499f4d86e84d041953904e5ce5c4e72e6/cfn_lint-1.60.1.tar.gz", hash = "sha256:d07d50f0f60b5c719ed3ddcd06ab7329209f74892a14e1e853c49fe4d4bb5dce", size = 5185134, upload-time = "2026-11-12T16:11:11.679Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/02/523307f365b693ee8e55564a13bef7767f5b6650fd22958dcd3d0390136e/cfn_lint-1.57.2-py3-none-any.whl", hash = "sha256:7007b30215ffb204bf1c669aeb68689253d23cddd21ef1a904fd424df13851cc", size = 5611048, upload-time = "2026-10-06T19:29:13.348Z" },
+    { url = "https://files.pythonhosted.org/packages/70/4f/4fb7a278916ce8383efe9c2a5dcc72042cdec0a2b4b3e603a070dd044fe1/cfn_lint-1.60.1-py3-none-any.whl", hash = "sha256:3c2b9390fc8f8328c8f5655caa254578b499028e725c198fdc3ba95bdf0aa004", size = 5789445, upload-time = "2026-11-12T16:11:09.152Z" },
 ]
 
 [[package]]
