@@ -63,6 +63,23 @@ def test_seek_end(s3_seekable_obj, s3_client_stub):
     assert s3_seekable_obj.tell() == 1000
 
 
+def test_seek_set_negative_raises(s3_seekable_obj):
+    with pytest.raises(ValueError, match="negative seek value -5"):
+        s3_seekable_obj.seek(-5, io.SEEK_SET)
+
+
+def test_seek_cur_negative_clamps_to_zero(s3_seekable_obj):
+    s3_seekable_obj.seek(10, io.SEEK_SET)
+    assert s3_seekable_obj.seek(-20, io.SEEK_CUR) == 0
+    assert s3_seekable_obj.tell() == 0
+
+
+def test_seek_end_negative_clamps_to_zero(s3_seekable_obj, s3_client_stub):
+    s3_client_stub.add_response("head_object", {"ContentLength": 10})
+    assert s3_seekable_obj.seek(-20, io.SEEK_END) == 0
+    assert s3_seekable_obj.tell() == 0
+
+
 def test_size(s3_seekable_obj, s3_client_stub):
     s3_client_stub.add_response("head_object", {"ContentLength": 1000})
 

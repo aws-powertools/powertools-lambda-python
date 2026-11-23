@@ -124,11 +124,13 @@ class _S3SeekableIO(IO[bytes]):
         current_position = self._position
 
         if whence == io.SEEK_SET:
+            if offset < 0:
+                raise ValueError(f"negative seek value {offset}")
             self._position = offset
         elif whence == io.SEEK_CUR:
-            self._position += offset
+            self._position = max(0, self._position + offset)
         elif whence == io.SEEK_END:
-            self._position = self.size + offset
+            self._position = max(0, self.size + offset)
         else:
             raise ValueError(f"invalid whence ({whence}, should be {io.SEEK_SET}, {io.SEEK_CUR}, {io.SEEK_END})")
 
