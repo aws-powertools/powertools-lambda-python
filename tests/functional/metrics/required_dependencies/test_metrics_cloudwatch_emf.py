@@ -1516,6 +1516,28 @@ def test_metric_with_custom_timestamp(namespace, metric, capsys, timestamp):
     assert invocation["_aws"]["Timestamp"] == metric_timestamp
 
 
+def test_metric_custom_timestamp_is_not_reused_on_next_invocation(namespace, metric, capsys):
+    # GIVEN Metrics instance is initialized and the first invocation sets a custom timestamp
+    my_metrics = Metrics(namespace=namespace)
+    custom_timestamp = int((dt.datetime.now() - dt.timedelta(days=2)).timestamp() * 1000)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        if evt.get("custom"):
+            my_metrics.set_timestamp(custom_timestamp)
+
+    # WHEN a first invocation sets a custom timestamp and a second one does not
+    lambda_handler({"custom": True}, {})
+    first = capture_metrics_output(capsys)
+    lambda_handler({}, {})
+    second = capture_metrics_output(capsys)
+
+    # THEN only the first invocation uses the custom timestamp
+    assert first["_aws"]["Timestamp"] == custom_timestamp
+    assert second["_aws"]["Timestamp"] != custom_timestamp
+
+
 def test_metric_custom_timestamp_more_than_14days_ago(namespace, metric):
     # GIVEN Metrics instance is initialized
     my_metrics = Metrics(namespace=namespace)
