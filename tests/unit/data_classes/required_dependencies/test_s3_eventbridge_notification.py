@@ -37,3 +37,20 @@ def test_s3_eventbridge_notification_detail_parsed(raw_event: dict):
     assert parsed_event.detail.restore_expiry_time == raw_event["detail"].get("restore-expiry-time")
     assert parsed_event.detail.source_ip_address == raw_event["detail"].get("source-ip-address")
     assert parsed_event.detail.source_storage_class == raw_event["detail"].get("source-storage-class")
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["a+b.txt", "a%20b.txt", "100%.txt", "folder name/ü (1).txt"],
+    ids=["plus", "percent_encoded", "percent", "space_and_non_ascii"],
+)
+def test_s3_eventbridge_notification_object_key_is_not_url_decoded(key: str):
+    # GIVEN an S3 EventBridge event, whose object key isn't URL encoded
+    raw_event = load_event("s3EventBridgeNotificationObjectCreatedEvent.json")
+    raw_event["detail"]["object"]["key"] = key
+
+    # WHEN it's parsed
+    parsed_event = S3EventBridgeNotificationEvent(raw_event)
+
+    # THEN the key is returned unchanged
+    assert parsed_event.detail.object.key == key

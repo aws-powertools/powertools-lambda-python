@@ -33,8 +33,8 @@ class S3EventNotificationEventBridgeBucket(DictWrapper):
 class S3EventBridgeNotificationObject(DictWrapper):
     @property
     def key(self) -> str:
-        """Object key"""
-        return unquote_plus(self["key"])
+        """Object key. Unlike S3 Event Notifications, EventBridge events carry the key without URL encoding."""
+        return self["key"]
 
     @property
     def size(self) -> int | None:
