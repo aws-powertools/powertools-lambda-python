@@ -208,7 +208,12 @@ class S3Object(IO[bytes]):
         # central directory on creation), and after close() it would wrap an already closed raw stream.
         if self._transformed_stream is None:
             return self.raw_stream.closed
-        return self._transformed_stream.closed
+        # Some transformations don't return IO streams (e.g. CsvTransform returns a csv.DictReader),
+        # which have no `closed` attribute; the raw stream state is authoritative in that case.
+        transformed_closed = getattr(self._transformed_stream, "closed", None)
+        if transformed_closed is None:
+            return self.raw_stream.closed
+        return transformed_closed
 
     def __enter__(self):
         return self
@@ -229,7 +234,11 @@ class S3Object(IO[bytes]):
         #   >>> s3object = S3Object(...., is_gzip=True)
         #   >>> s3object.close() <- transformed_stream doesn't exist yet at this point
         if self.raw_stream != self._transformed_stream and self._transformed_stream is not None:
-            self._transformed_stream.close()
+            # Some transformations don't return IO streams (e.g. CsvTransform returns a csv.DictReader);
+            # those have no close() to call, and the raw stream closed above releases the resource.
+            transformed_close = getattr(self._transformed_stream, "close", None)
+            if transformed_close is not None:
+                transformed_close()
 
     def read(self, size: int = -1) -> bytes:
         return self.transformed_stream.read(size)
