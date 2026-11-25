@@ -611,6 +611,7 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
+            stacklevel=stacklevel,
         )
 
     def info(
@@ -665,6 +666,7 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
+            stacklevel=stacklevel,
         )
 
     def warning(
@@ -719,6 +721,7 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
+            stacklevel=stacklevel,
         )
 
     def error(
@@ -1132,12 +1135,14 @@ class Logger:
         log_line : dict[str, Any]
             Dictionary containing log record details with keys:
             - 'level': Logging level
-            - 'filename': Source filename
-            - 'line': Line number
+            - 'pathname': Source filename
+            - 'lineno': Source line number
             - 'msg': Log message
-            - 'function': Source function name
+            - 'funcName': Source function name
+            - 'name': Name of the logger the record came from
             - 'extra': Additional context
             - 'timestamp': Original log creation time
+            - 'sinfo': Pre-formatted stack information, if any
 
         Notes
         -----
@@ -1145,17 +1150,24 @@ class Logger:
         Preserves original timestamp and source information.
         """
         record = self._logger.makeRecord(
-            name=self.name,
+            name=log_line["name"],
             level=log_line["level"],
-            fn=log_line["filename"],
-            lno=log_line["line"],
+            fn=log_line["pathname"],
+            lno=log_line["lineno"],
             msg=log_line["msg"],
             args=log_line.get("args", ()),
             exc_info=log_line["exc_info"],
-            func=log_line["function"],
+            func=log_line["funcName"],
             extra=log_line["extra"],
+            sinfo=log_line.get("sinfo"),
         )
+        # Restore the creation timestamp, including the milliseconds and the
+        # time relative to process start, so the record prints as if it had
+        # never been buffered. makeRecord stamps relativeCreated from the
+        # flush time, so shift it back by the time spent in the buffer.
+        record.relativeCreated = record.relativeCreated - (record.created - log_line["timestamp"]) * 1000
         record.created = log_line["timestamp"]
+        record.msecs = (log_line["timestamp"] - int(log_line["timestamp"])) * 1000
         self._logger.handle(record)
 
     def _add_log_record_to_buffer(
@@ -1166,6 +1178,12 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         extra: Mapping[str, object] | None = None,
+        stacklevel: int = 2,
+        pathname: str | None = None,
+        lineno: int | None = None,
+        func_name: str | None = None,
+        logger_name: str | None = None,
+        sinfo: str | None = None,
     ) -> None:
         """
         Add log record to buffer with intelligent tracer ID handling.
@@ -1179,11 +1197,27 @@ class Logger:
         args : object
             Additional arguments for the log message.
         exc_info : logging._ExcInfoType, optional
-            Exception information for the log record.
+            Exception information for the record.
         stack_info : bool, optional
             Whether to include stack information.
         extra : Mapping[str, object], optional
             Additional contextual information for the log record.
+        stacklevel : int, optional
+            Number of user frames above the logging call to report as the
+            record's location. The default reports the direct caller.
+        pathname : str, optional
+            Source filename of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        lineno : int, optional
+            Source line number of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        func_name : str, optional
+            Source function name of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        logger_name : str, optional
+            Name of the logger the record came from. Defaults to this logger.
+        sinfo : str, optional
+            Pre-formatted stack information for the record.
 
         Raises
         ------
@@ -1209,6 +1243,12 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
+            stacklevel=stacklevel,
+            pathname=pathname,
+            lineno=lineno,
+            func_name=func_name,
+            logger_name=logger_name if logger_name is not None else self.name,
+            sinfo=sinfo,
         )
 
         if not tracer_id:
