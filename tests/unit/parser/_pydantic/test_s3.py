@@ -175,6 +175,11 @@ def test_s3_trigger_event_lifecycle_transition():
     assert convert_time == 1567539447192
     assert record.eventName == raw_record["eventName"]
     assert record.glacierEventData is None
+    assert record.lifecycleEventData is not None
+    assert (
+        record.lifecycleEventData.transitionEventData.destinationStorageClass
+        == raw_record["lifecycleEventData"]["transitionEventData"]["destinationStorageClass"]
+    )
 
     user_identity = record.userIdentity
     assert user_identity.principalId == raw_record["userIdentity"]["principalId"]
@@ -198,3 +203,29 @@ def test_s3_trigger_event_lifecycle_transition():
     assert bucket.name == raw_bucket["name"]
     assert bucket.ownerIdentity.principalId == raw_bucket["ownerIdentity"]["principalId"]
     assert bucket.arn == raw_bucket["arn"]
+
+
+def test_s3_trigger_event_replication():
+    raw_event = load_event("s3EventReplication.json")
+    parsed_event: S3Model = S3Model(**raw_event)
+
+    records = list(parsed_event.Records)
+    assert len(records) == 1
+
+    record: S3RecordModel = records[0]
+    raw_record = raw_event["Records"][0]
+    assert record.eventVersion == raw_record["eventVersion"]
+    assert record.eventSource == raw_record["eventSource"]
+    assert record.awsRegion == raw_record["awsRegion"]
+    assert record.eventName == raw_record["eventName"]
+    assert record.glacierEventData is None
+    assert record.lifecycleEventData is None
+
+    replication = record.replicationEventData
+    assert replication is not None
+    raw_replication = raw_record["replicationEventData"]
+    assert replication.replicationRuleId == raw_replication["replicationRuleId"]
+    assert replication.destinationBucket == raw_replication["destinationBucket"]
+    assert replication.s3Operation == raw_replication["s3Operation"]
+    assert replication.requestTime == raw_replication["requestTime"]
+    assert replication.failureReason == raw_replication["failureReason"]

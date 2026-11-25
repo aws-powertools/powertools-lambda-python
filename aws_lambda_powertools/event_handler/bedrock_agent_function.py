@@ -192,6 +192,8 @@ class BedrockAgentFunctionResolver:
             return self._resolve()
         except KeyError as e:
             raise ValueError(f"Missing required field: {str(e)}") from e
+        finally:
+            self.clear_context()
 
     def _resolve(self) -> dict[str, Any]:
         """Internal resolution logic"""
@@ -234,8 +236,6 @@ class BedrockAgentFunctionResolver:
 
             # Call the function with the filtered parameters
             result = func(**valid_params)
-
-            self.clear_context()
 
             # Build and return the response
             return BedrockFunctionsResponseBuilder(result).build(self.current_event, serializer=self.serializer)

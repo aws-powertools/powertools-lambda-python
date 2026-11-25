@@ -5,6 +5,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger_buffer_config = LoggerBufferConfig(max_bytes=20480, flush_on_error_log=True)
 logger = Logger(level="INFO", buffer_config=logger_buffer_config)
 
+# This initialization-phase log is emitted immediately because no
+# X-Ray trace ID is available yet.
+logger.debug("Logger initialized")
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     logger.debug("a debug log")  # this is buffered
