@@ -5,6 +5,7 @@ import json
 import random
 import string
 import uuid
+import warnings
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Any
@@ -4816,4 +4817,123 @@ def test_secrets_provider_get_multiple_only_prefix_matches(config):
         with pytest.raises(GetSecretError, match="No secrets found matching the provided names"):
             provider.get_multiple(["db"])
         assert not provider.store
+        stubber.assert_no_pending_responses()
+
+
+SSM_DECRYPT_PARAM_PATH = "/app"
+SSM_DECRYPT_PARAM_NAME = "/app/param"
+SSM_DECRYPT_PARAM_VALUE = "value"
+SSM_DECRYPT_ENTRY_POINTS = [
+    "SSMProvider.get",
+    "SSMProvider.get_multiple",
+    "SSMProvider.get_parameters_by_name",
+    "get_parameter",
+    "get_parameters",
+    "get_parameters_by_name",
+]
+
+
+def stub_ssm_lookup(stubber: stub.Stubber, entry_point: str, decrypt: bool) -> None:
+    if entry_point in ("SSMProvider.get", "get_parameter"):
+        response = {
+            "Parameter": {
+                "Name": SSM_DECRYPT_PARAM_NAME,
+                "Type": "String",
+                "Value": SSM_DECRYPT_PARAM_VALUE,
+                "Version": 1,
+            },
+        }
+        stubber.add_response("get_parameter", response, {"Name": SSM_DECRYPT_PARAM_NAME, "WithDecryption": decrypt})
+    elif entry_point in ("SSMProvider.get_multiple", "get_parameters"):
+        response = {
+            "Parameters": [
+                {"Name": SSM_DECRYPT_PARAM_NAME, "Type": "String", "Value": SSM_DECRYPT_PARAM_VALUE, "Version": 1},
+            ],
+        }
+        expected_params = {"Path": SSM_DECRYPT_PARAM_PATH, "WithDecryption": decrypt, "Recursive": stub.ANY}
+        stubber.add_response("get_parameters_by_path", response, expected_params)
+    else:
+        expected_params = {"Names": [SSM_DECRYPT_PARAM_NAME]}
+        if decrypt:
+            expected_params["WithDecryption"] = True
+        response = build_get_parameters_stub({SSM_DECRYPT_PARAM_NAME: SSM_DECRYPT_PARAM_VALUE})
+        stubber.add_response("get_parameters", response, expected_params)
+
+
+def call_ssm_lookup(monkeypatch, provider: SSMProvider, entry_point: str, **kwargs) -> Any:
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", provider)
+    calls = {
+        "SSMProvider.get": lambda: provider.get(SSM_DECRYPT_PARAM_NAME, **kwargs),
+        "SSMProvider.get_multiple": lambda: provider.get_multiple(SSM_DECRYPT_PARAM_PATH, **kwargs),
+        "SSMProvider.get_parameters_by_name": lambda: provider.get_parameters_by_name(
+            parameters={SSM_DECRYPT_PARAM_NAME: {}},
+            **kwargs,
+        ),
+        "get_parameter": lambda: parameters.get_parameter(SSM_DECRYPT_PARAM_NAME, **kwargs),
+        "get_parameters": lambda: parameters.get_parameters(SSM_DECRYPT_PARAM_PATH, **kwargs),
+        "get_parameters_by_name": lambda: parameters.get_parameters_by_name(
+            parameters={SSM_DECRYPT_PARAM_NAME: {}},
+            **kwargs,
+        ),
+    }
+    return calls[entry_point]()
+
+
+@pytest.mark.parametrize("entry_point", SSM_DECRYPT_ENTRY_POINTS)
+@pytest.mark.parametrize("env_value", ["", "maybe"])
+def test_ssm_lookup_with_invalid_decrypt_env_var_warns_and_does_not_decrypt(
+    monkeypatch,
+    config,
+    entry_point,
+    env_value,
+):
+    # GIVEN POWERTOOLS_PARAMETERS_SSM_DECRYPT is set to an empty or invalid value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", env_value)
+    provider = SSMProvider(boto_config=config)
+
+    # WHEN a parameter is fetched without an explicit decrypt argument
+    with stub.Stubber(provider.client) as stubber:
+        stub_ssm_lookup(stubber, entry_point, decrypt=False)
+        with pytest.warns(PowertoolsUserWarning, match="POWERTOOLS_PARAMETERS_SSM_DECRYPT"):
+            value = call_ssm_lookup(monkeypatch, provider, entry_point)
+
+        # THEN the lookup succeeds without decryption
+        stubber.assert_no_pending_responses()
+
+    assert SSM_DECRYPT_PARAM_VALUE in (value if isinstance(value, str) else list(value.values()))
+
+
+@pytest.mark.parametrize("entry_point", SSM_DECRYPT_ENTRY_POINTS)
+@pytest.mark.parametrize("env_value, expected_decrypt", [("true", True), ("1", True), ("false", False), ("0", False)])
+def test_ssm_lookup_with_valid_decrypt_env_var(monkeypatch, config, entry_point, env_value, expected_decrypt):
+    # GIVEN POWERTOOLS_PARAMETERS_SSM_DECRYPT is set to a valid boolean value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", env_value)
+    provider = SSMProvider(boto_config=config)
+
+    # WHEN a parameter is fetched without an explicit decrypt argument
+    with stub.Stubber(provider.client) as stubber:
+        stub_ssm_lookup(stubber, entry_point, decrypt=expected_decrypt)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", PowertoolsUserWarning)
+            call_ssm_lookup(monkeypatch, provider, entry_point)
+
+        # THEN decryption follows the environment variable, with no warning
+        stubber.assert_no_pending_responses()
+
+
+@pytest.mark.parametrize("entry_point", SSM_DECRYPT_ENTRY_POINTS)
+@pytest.mark.parametrize("decrypt", [True, False])
+def test_ssm_lookup_explicit_decrypt_wins_over_invalid_decrypt_env_var(monkeypatch, config, entry_point, decrypt):
+    # GIVEN POWERTOOLS_PARAMETERS_SSM_DECRYPT is set to an invalid value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", "maybe")
+    provider = SSMProvider(boto_config=config)
+
+    # WHEN a parameter is fetched with an explicit decrypt argument
+    with stub.Stubber(provider.client) as stubber:
+        stub_ssm_lookup(stubber, entry_point, decrypt=decrypt)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", PowertoolsUserWarning)
+            call_ssm_lookup(monkeypatch, provider, entry_point, decrypt=decrypt)
+
+        # THEN the explicit argument is used and the environment variable is not read
         stubber.assert_no_pending_responses()
