@@ -67,6 +67,27 @@ def test_apigw_v2_event_jwt_authorizer():
     assert parsed_event.stageVariables == raw_event["stageVariables"]
 
 
+def test_apigw_v2_event_with_client_cert():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    parsed_event: APIGatewayProxyEventV2Model = parse(event=raw_event, model=APIGatewayProxyEventV2Model)
+
+    client_cert = parsed_event.requestContext.authentication.clientCert
+    raw_client_cert = raw_event["requestContext"]["authentication"]["clientCert"]
+    assert client_cert.clientCertPem == raw_client_cert["clientCertPem"]
+    assert client_cert.subjectDN == raw_client_cert["subjectDN"]
+    assert client_cert.issuerDN == raw_client_cert["issuerDN"]
+    assert client_cert.serialNumber == raw_client_cert["serialNumber"]
+    assert client_cert.validity.notBefore == raw_client_cert["validity"]["notBefore"]
+    assert client_cert.validity.notAfter == raw_client_cert["validity"]["notAfter"]
+
+
+def test_apigw_v2_event_without_client_cert():
+    raw_event = load_event("apiGatewayProxyV2IamEvent.json")
+    parsed_event: APIGatewayProxyEventV2Model = parse(event=raw_event, model=APIGatewayProxyEventV2Model)
+
+    assert parsed_event.requestContext.authentication is None
+
+
 def test_apigw_v2_event_empty_jwt_scopes():
     raw_event = load_event("apiGatewayProxyV2Event.json")
     raw_event["requestContext"]["authorizer"]["jwt"]["scopes"] = None
@@ -162,6 +183,16 @@ def test_apigw_v2_request_authorizer():
     assert parsed_event.type == raw_event["type"]
     assert parsed_event.identitySource == raw_event["identitySource"]
     assert parsed_event.routeArn == raw_event["routeArn"]
+
+
+def test_apigw_v2_request_authorizer_with_client_cert():
+    raw_event = load_event("apiGatewayAuthorizerV2Event.json")
+    parsed_event: ApiGatewayAuthorizerRequestV2 = parse(event=raw_event, model=ApiGatewayAuthorizerRequestV2)
+
+    client_cert = parsed_event.requestContext.authentication.clientCert
+    raw_client_cert = raw_event["requestContext"]["authentication"]["clientCert"]
+    assert client_cert.subjectDN == raw_client_cert["subjectDN"]
+    assert client_cert.serialNumber == raw_client_cert["serialNumber"]
 
 
 def test_apigw_v2_request_authorizer_without_identity_source():
