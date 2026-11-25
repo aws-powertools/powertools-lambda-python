@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from io import StringIO
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from datetime import datetime
+    from datetime import date
 
 
 class SameSite(Enum):
@@ -24,9 +25,28 @@ class SameSite(Enum):
     NONE_MODE = "None"
 
 
-def _format_date(timestamp: datetime) -> str:
+def _to_utc(timestamp: date) -> datetime:
+    # A date (which strftime accepted) means midnight
+    if not isinstance(timestamp, datetime):
+        timestamp = datetime(timestamp.year, timestamp.month, timestamp.day)
+
+    # A naive datetime has no offset and is taken as UTC
+    offset = timestamp.utcoffset() or timedelta(0)
+    try:
+        in_utc = timestamp.replace(tzinfo=None) - offset
+    except OverflowError:
+        # The instant is before year 1 or after year 9999: use the closest date format_datetime can write
+        in_utc = datetime.min if offset > timedelta(0) else datetime.max
+    return in_utc.replace(tzinfo=timezone.utc)
+
+
+def _format_date(timestamp: date) -> str:
+    # Imported on first use: the event handler imports this module but does not otherwise load email.utils
+    from email.utils import format_datetime
+
     # Specification example: Wed, 21 Oct 2015 07:28:00 GMT
-    return timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    # Unlike strftime, format_datetime uses English day and month names whatever the LC_TIME locale
+    return format_datetime(_to_utc(timestamp), usegmt=True)
 
 
 class Cookie:
@@ -69,7 +89,8 @@ class Cookie:
         max_age: int | None
             Defines the period of time after which the cookie is invalid. Use negative values to force cookie deletion.
         expires: datetime | None
-            Defines a date where the permanent cookie expires.
+            Defines a date where the permanent cookie expires. A timezone-aware datetime is sent as the same
+            instant in GMT; a naive one is taken as UTC.
         same_site: SameSite | None
             Determines if the cookie should be sent to third party websites
         custom_attributes: list[str] | None
