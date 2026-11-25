@@ -645,7 +645,7 @@ def test_buffer_preserves_third_party_logger_name_location_and_stack_info(stdout
     logger.append_keys(stack_info="%(stack_info)s")
     external_logger = logging.getLogger("external_library")
     external_logger.setLevel(logging.DEBUG)
-    copy_config_to_registered_loggers(logger, include_buffering=True)
+    copy_config_to_registered_loggers(logger, include_buffering=True, include={external_logger.name})
 
     def library_function():
         external_logger.debug("from a third-party library", stack_info=True)
