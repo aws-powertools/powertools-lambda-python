@@ -603,6 +603,83 @@ async def test_asgi_query_params():
     assert body["query"] == "python"
 
 
+@pytest.mark.asyncio
+async def test_asgi_request_context_from_scope():
+    # GIVEN an app with a route that reads the request context
+    app = HttpResolverLocal()
+
+    @app.get("/whoami")
+    def whoami():
+        request_context = app.current_event.request_context
+        return {
+            "source_ip": request_context.http.source_ip,
+            "user_agent": request_context.http.user_agent,
+            "stage": request_context.stage,
+            "method": request_context.http.method,
+            "path": request_context.http.path,
+        }
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/whoami",
+        "query_string": b"",
+        "headers": [(b"user-agent", b"TestAgent/1.0")],
+        "client": ("203.0.113.10", 52314),
+        "http_version": "1.1",
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN the request context is filled from the ASGI scope
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["source_ip"] == "203.0.113.10"
+    assert body["user_agent"] == "TestAgent/1.0"
+    assert body["stage"] == "local"
+    assert body["method"] == "GET"
+    assert body["path"] == "/whoami"
+
+
+@pytest.mark.asyncio
+async def test_asgi_request_context_without_client_or_user_agent():
+    # GIVEN an app with a route that reads the request context
+    app = HttpResolverLocal()
+
+    @app.get("/whoami")
+    def whoami():
+        request_context = app.current_event.request_context
+        return {
+            "source_ip": request_context.http.source_ip,
+            "user_agent": request_context.http.user_agent,
+        }
+
+    # No client tuple and no user-agent header in the scope
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/whoami",
+        "query_string": b"",
+        "headers": [],
+    }
+
+    receive = make_asgi_receive()
+    send, captured = make_asgi_send()
+
+    # WHEN called via ASGI interface
+    await app(scope, receive, send)
+
+    # THEN the request context still resolves with empty values
+    assert captured["status_code"] == 200
+    body = json.loads(captured["body"])
+    assert body["source_ip"] == ""
+    assert body["user_agent"] == ""
+
+
 # =============================================================================
 # Async Handler Tests
 # =============================================================================
@@ -1577,3 +1654,58 @@ def test_lambda_handler_http_api_event_uses_v2_response_shape():
     assert result["statusCode"] == 200
     assert "cookies" in result
     assert "multiValueHeaders" not in result
+
+
+# =============================================================================
+# Concurrency Tests (#8866)
+# =============================================================================
+
+
+def _asgi_scope(path: str) -> dict[str, Any]:
+    return {"type": "http", "method": "GET", "path": path, "query_string": b"", "headers": []}
+
+
+async def _asgi_call(app: HttpResolverLocal, path: str) -> dict[str, Any]:
+    send, captured = make_asgi_send()
+    await app(_asgi_scope(path), make_asgi_receive(), send)
+    return captured
+
+
+async def _gather_with_small_executor(coroutines, max_workers: int = 2):
+    # A tiny executor makes the thread starvation deterministic: with more in-flight requests
+    # than worker threads, a sync middleware that needs a second thread to run the next one never gets it
+    from concurrent.futures import ThreadPoolExecutor
+
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    asyncio.get_running_loop().set_default_executor(executor)
+    try:
+        return await asyncio.wait_for(asyncio.gather(*coroutines), timeout=5)
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
+
+
+@pytest.mark.asyncio
+async def test_asgi_concurrent_requests_with_chained_sync_middlewares_do_not_deadlock():
+    # GIVEN two consecutive sync middlewares and no validation
+    app = HttpResolverLocal()
+
+    def first(app: HttpResolverLocal, next_middleware):
+        app.append_context(first="seen")
+        return next_middleware(app)
+
+    def second(app: HttpResolverLocal, next_middleware):
+        app.append_context(second="seen")
+        return next_middleware(app)
+
+    app.use([first, second])
+
+    @app.get("/ping")
+    def ping():
+        return {"first": app.context["first"], "second": app.context["second"]}
+
+    # WHEN more requests arrive at once than there are executor threads
+    results = await _gather_with_small_executor([_asgi_call(app, "/ping") for _ in range(6)])
+
+    # THEN every request goes through both middlewares and is answered
+    assert [captured["status_code"] for captured in results] == [200] * 6
+    assert all(json.loads(captured["body"]) == {"first": "seen", "second": "seen"} for captured in results)
