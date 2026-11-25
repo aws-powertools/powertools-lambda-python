@@ -324,6 +324,27 @@ def test_log_record_exceeding_buffer_size(stdout, service_name, monkeypatch):
     assert log[0]["message"] == message
 
 
+def test_log_record_exceeding_buffer_size_in_bytes(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN a message that fits the buffer in characters but not in UTF-8 bytes
+    message = "é" * 1000
+
+    # GIVEN A logger configured with a 1600-byte buffer
+    logger_buffer_config = LoggerBufferConfig(max_bytes=1600, buffer_at_verbosity="DEBUG")
+
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging the message
+    # THEN A warning should be raised because the record is larger than max_bytes in bytes
+    with pytest.warns(PowertoolsUserWarning, match="Cannot add item to the buffer*"):
+        logger.debug(message)
+
+    # THEN the log must be flushed to avoid data loss
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["message"] == message
+
+
 @pytest.mark.parametrize("log_level", ["WARNING", "INFO"])
 def test_logger_buffer_log_output_for_levels_above_minimum(log_level, stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
@@ -680,3 +701,35 @@ def test_buffer_preserves_original_timestamp(stdout, service_name, monkeypatch):
     log = capture_logging_output(stdout)
     logged_at = dt.datetime.strptime(log["timestamp"], "%Y-%m-%d %H:%M:%S,%f%z")
     assert int(before.timestamp() * 1000) - 1 <= int(logged_at.timestamp() * 1000) <= int(after.timestamp() * 1000)
+
+    
+    def test_logger_buffer_logs_immediately_without_trace_id(stdout, service_name, monkeypatch):
+    monkeypatch.delenv(constants.XRAY_TRACE_ID_ENV, raising=False)
+
+    logger_buffer_config = LoggerBufferConfig(
+        max_bytes=10240,
+        buffer_at_verbosity="DEBUG",
+    )
+    logger = Logger(
+        level="DEBUG",
+        service=service_name,
+        stream=stdout,
+        buffer_config=logger_buffer_config,
+    )
+
+    logger.debug("This message should be logged immediately")
+
+    log = capture_multiple_logging_statements_output(stdout)
+
+    assert len(log) == 1
+    assert log[0]["message"] == "This message should be logged immediately"
+
+    # Simulate the trace ID becoming available when the Lambda invocation starts
+    monkeypatch.setenv(
+        constants.XRAY_TRACE_ID_ENV,
+        "1-67c39786-5908a82a246fb67f3089263f",
+    )
+
+    logger.flush_buffer()
+
+    assert len(capture_multiple_logging_statements_output(stdout)) == 1

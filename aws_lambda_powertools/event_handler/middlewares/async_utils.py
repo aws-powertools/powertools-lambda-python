@@ -145,6 +145,12 @@ class AsyncMiddlewareFrame:
         self.current_middleware: Callable[..., Any] = current_middleware
         self.next_middleware: Callable[..., Any] = next_middleware
         self._next_middleware_name = next_middleware.__name__
+        # Class-based middlewares expose their logic through `handler`, which may be a coroutine
+        # function even though the instance itself is not
+        middleware_handler = getattr(current_middleware, "handler", None)
+        self._is_async_middleware = inspect.iscoroutinefunction(current_middleware) or inspect.iscoroutinefunction(
+            middleware_handler,
+        )
 
     @property
     def __name__(self) -> str:  # noqa: A003
@@ -162,26 +168,43 @@ class AsyncMiddlewareFrame:
 
         extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
 
-        # Class-based middlewares expose their logic through `handler`, which may be a coroutine
-        # function even though the instance itself is not
-        middleware_handler = getattr(self.current_middleware, "handler", None)
-        is_async_middleware = inspect.iscoroutinefunction(
-            self.current_middleware,
-        ) or inspect.iscoroutinefunction(middleware_handler)
-
-        if is_async_middleware:
+        if self._is_async_middleware:
             result = self.current_middleware(app, self.next_middleware, **extra_kwargs)
             if inspect.iscoroutine(result):
                 result = await result
             return result
 
         loop = asyncio.get_running_loop()
+        return await asyncio.to_thread(self._run_sync_middleware, app, loop, extra_kwargs)
+
+    def _run_sync_middleware(self, app: ApiGatewayResolver, loop: asyncio.AbstractEventLoop, extra_kwargs: dict) -> Any:
+        """Run this sync middleware in the current worker thread.
+
+        Consecutive sync middlewares stay in this thread. Hopping back to the event loop only to borrow a
+        second executor thread for the next sync middleware is what deadlocked under load: with every
+        executor thread blocked inside the first middleware, the second one could never start (#8866).
+        Only an async next step is scheduled on the event loop.
+        """
 
         def sync_next(app: ApiGatewayResolver) -> Any:
-            future = asyncio.run_coroutine_threadsafe(self.next_middleware(app), loop)
+            next_middleware = self.next_middleware
+            if isinstance(next_middleware, AsyncMiddlewareFrame) and not next_middleware._is_async_middleware:
+                return next_middleware._run_sync_middleware_inline(app, loop)
+
+            future = asyncio.run_coroutine_threadsafe(next_middleware(app), loop)
             return future.result()
 
-        return await asyncio.to_thread(self.current_middleware, app, sync_next, **extra_kwargs)
+        return self.current_middleware(app, sync_next, **extra_kwargs)
+
+    def _run_sync_middleware_inline(self, app: ApiGatewayResolver, loop: asyncio.AbstractEventLoop) -> Any:
+        """Entry point used by the previous sync frame to run this frame in the same worker thread."""
+        logger.debug("AsyncMiddlewareFrame: %s", self)
+        app._push_processed_stack_frame(str(self))
+
+        from aws_lambda_powertools.event_handler.api_gateway import _resolve_extra_middleware_kwargs
+
+        extra_kwargs = _resolve_extra_middleware_kwargs(app, self.current_middleware)
+        return self._run_sync_middleware(app, loop, extra_kwargs)
 
 
 async def _registered_api_adapter_async(
