@@ -86,6 +86,26 @@ def test_apigw_websocket_connect_event():
     assert parsed_event.multi_value_headers == raw_event["multiValueHeaders"]
 
 
+def test_apigw_websocket_connect_event_keeps_query_strings():
+    raw_event = load_event("apiGatewayWebSocketApiConnect.json")
+
+    parsed_event = parse(event=raw_event, model=APIGatewayWebSocketConnectEventModel)
+
+    assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
+    assert parsed_event.multi_value_query_string_parameters == raw_event["multiValueQueryStringParameters"]
+
+
+def test_apigw_websocket_connect_event_without_query_strings():
+    raw_event = load_event("apiGatewayWebSocketApiConnect.json")
+    del raw_event["queryStringParameters"]
+    del raw_event["multiValueQueryStringParameters"]
+
+    parsed_event = parse(event=raw_event, model=APIGatewayWebSocketConnectEventModel)
+
+    assert parsed_event.query_string_parameters is None
+    assert parsed_event.multi_value_query_string_parameters is None
+
+
 def test_apigw_websocket_disconnect_event():
     raw_event = load_event("apiGatewayWebSocketApiDisconnect.json")
     parsed_event: APIGatewayWebSocketDisconnectEventModel = APIGatewayWebSocketDisconnectEventModel(**raw_event)
