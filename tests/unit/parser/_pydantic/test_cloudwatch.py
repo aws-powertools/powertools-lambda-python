@@ -186,3 +186,57 @@ def test_cloudwatch_envelope_plain_text_still_fails_for_object_model():
             model=MyCloudWatchBusiness,
             envelope=envelopes.CloudWatchLogsEnvelope,
         )
+
+
+def _make_cloudwatch_control_event() -> dict:
+    inner_event_dict = {
+        "messageType": "CONTROL_MESSAGE",
+        "owner": "CloudwatchLogs",
+        "logGroup": "",
+        "logStream": "",
+        "subscriptionFilters": [],
+        "logEvents": [
+            {
+                "id": "",
+                "timestamp": 1767323045678,
+                "message": "CWL CONTROL MESSAGE: Checking health of destination Lambda.",
+            },
+        ],
+    }
+    compressed = zlib.compress(json.dumps(inner_event_dict).encode("utf-8"), -1)
+    return {"awslogs": {"data": base64.b64encode(compressed)}}
+
+
+def test_handle_cloudwatch_control_message_no_envelope():
+    raw_event = _make_cloudwatch_control_event()
+    parsed_event: CloudWatchLogsModel = CloudWatchLogsModel(**raw_event)
+
+    assert parsed_event.awslogs.decoded_data.messageType == "CONTROL_MESSAGE"
+    assert parsed_event.awslogs.decoded_data.owner == "CloudwatchLogs"
+    assert parsed_event.awslogs.decoded_data.logGroup == ""
+    assert parsed_event.awslogs.decoded_data.logStream == ""
+    assert parsed_event.awslogs.decoded_data.subscriptionFilters == []
+    assert len(parsed_event.awslogs.decoded_data.logEvents) == 1
+    assert parsed_event.awslogs.decoded_data.policyLevel is None
+
+
+def test_handle_cloudwatch_control_message_with_envelope():
+    raw_event = _make_cloudwatch_control_event()
+    parsed = parse(
+        event=raw_event,
+        model=MyCloudWatchBusiness,
+        envelope=envelopes.CloudWatchLogsEnvelope,
+    )
+
+    assert parsed == []
+
+
+def test_cloudwatch_log_event_extracted_fields():
+    log_event = CloudWatchLogsLogEvent(
+        id="eventId1",
+        timestamp=1440442987000,
+        message="sample message",
+        extractedFields={"request_id": "abc-123", "status": "200"},
+    )
+
+    assert log_event.extracted_fields == {"request_id": "abc-123", "status": "200"}
