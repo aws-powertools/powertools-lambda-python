@@ -197,6 +197,53 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, 
     assert log["level"] == log_level.WARNING.name
 
 
+def test_copy_config_to_ext_loggers_keeps_caller_exclude_set(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
+    exclude = {logger.name}
+
+    # WHEN configuration copied with a caller-owned exclude set
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude=exclude)
+
+    # THEN the caller's exclude set is not changed
+    assert exclude == {logger.name}
+    assert not logger.handlers
+
+
+def test_copy_config_to_ext_loggers_log_level_notset(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+
+    # WHEN configuration copied with log_level NOTSET (0)
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        log_level=log_level.NOTSET.value,
+        include={logger.name},
+    )
+
+    # THEN external logger uses NOTSET instead of the source logger level
+    assert powertools_logger.level == log_level.CRITICAL.value
+    assert logger.level == log_level.NOTSET.value
+
+
+def test_copy_config_to_ext_loggers_empty_log_level_uses_source_level(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
+    logger = logger()
+    powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
+
+    # WHEN configuration copied with an empty log_level
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        log_level="",
+        include={logger.name},
+    )
+
+    # THEN external logger falls back to the source logger level
+    assert logger.level == log_level.CRITICAL.value
+
+
 def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_level):
     # GIVEN Powertools for AWS Lambda (Python) logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
@@ -250,6 +297,20 @@ def test_copy_config_to_parent_loggers_only_with_exclude(stdout):
     assert "customer_id" in parent_log, child_log
     assert "user_id" in parent_log, child_log
     assert child.parent.name == service
+
+
+def test_copy_config_from_child_logger_uses_parent_level(stdout, logger):
+    # GIVEN an external logger, a parent Logger with DEBUG level and a child Logger without a level
+    ext_logger = logger()
+    service = service_name()
+    Logger(stream=stdout, service=service, level="DEBUG")
+    child = Logger(stream=stdout, service=service, child=True)
+
+    # WHEN configuration is copied from the child Logger
+    utils.copy_config_to_registered_loggers(source_logger=child, include={ext_logger.name})
+
+    # THEN the external logger must use the level the child logs at, inherited from its parent
+    assert ext_logger.level == logging.DEBUG
 
 
 def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level):
@@ -354,6 +415,42 @@ def test_copy_config_with_buffering_uses_buffering_handler(stdout, logger, log_l
         powertools_logger.flush_buffer()
         output = stdout.getvalue()
         assert "Test message from external logger" in output
+
+
+def test_copy_config_with_buffering_logs_immediately_without_tracer_id(stdout, logger, log_level):
+    # GIVEN an external logger and Powertools logger with buffer_config
+    ext_logger = logger()
+    buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING")
+    powertools_logger = Logger(
+        service=service_name(),
+        level=log_level.INFO.value,
+        stream=stdout,
+        buffer_config=buffer_config,
+    )
+
+    # WHEN configuration is copied with include_buffering=True
+    utils.copy_config_to_registered_loggers(
+        source_logger=powertools_logger,
+        include_buffering=True,
+        include={ext_logger.name},
+    )
+
+    # AND the external logger emits a message without a tracer ID
+    with patch("aws_lambda_powertools.logging.logger.get_tracer_id", return_value=None):
+        ext_logger.info("Test message from external logger")
+
+    # THEN the message is emitted immediately
+    log = capture_logging_output(stdout)
+    assert log["message"] == "Test message from external logger"
+
+    # AND a subsequent flush with a tracer ID does not emit it again
+    with patch(
+        "aws_lambda_powertools.logging.logger.get_tracer_id",
+        return_value="1-67c39786-5908a82a246fb67f3089263f",
+    ):
+        powertools_logger.flush_buffer()
+
+    assert len(stdout.getvalue().strip().splitlines()) == 1
 
 
 def test_copy_config_buffering_without_config_uses_normal_handlers(stdout, logger, log_level):

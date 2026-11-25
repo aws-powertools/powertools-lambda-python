@@ -50,6 +50,59 @@ class S3EventRecordIntelligentTieringEventData(BaseModel):
     )
 
 
+class S3EventRecordLifecycleTransitionEventData(BaseModel):
+    destinationStorageClass: str = Field(
+        description="The storage class the object transitioned to. For Lifecycle Transition events.",
+        examples=[
+            "INTELLIGENT_TIERING",
+            "STANDARD_IA",
+            "GLACIER",
+        ],
+    )
+
+
+class S3EventRecordLifecycleEventData(BaseModel):
+    transitionEventData: S3EventRecordLifecycleTransitionEventData = Field(
+        description="Event data produced only for 's3:LifecycleTransition' events.",
+        examples=[
+            {
+                "transitionEventData": {
+                    "destinationStorageClass": "INTELLIGENT_TIERING",
+                },
+            },
+        ],
+    )
+
+
+class S3EventRecordReplicationEventData(BaseModel):
+    replicationRuleId: str | None = Field(
+        default=None,
+        description="The ID of the replication rule. For Replication events.",
+        examples=["replication-rule-1"],
+    )
+    destinationBucket: str | None = Field(
+        default=None,
+        description="The destination bucket ARN for the replication. For Replication events.",
+        examples=["arn:aws:s3:::destination-bucket"],
+    )
+    s3Operation: str | None = Field(
+        default=None,
+        description="The S3 operation that was replicated. For Replication events.",
+        examples=["OBJECT_PUT"],
+    )
+    requestTime: str | None = Field(
+        default=None,
+        description="The time, in ISO-8601 format, when the replication was requested. For Replication events.",
+        examples=["2019-09-03T19:37:27.192Z"],
+    )
+    failureReason: str | None = Field(
+        default=None,
+        description="The reason the replication failed, present only for failed replication events. "
+        "For Replication events.",
+        examples=["AssumeRoleNotPermitted"],
+    )
+
+
 class S3Identity(BaseModel):
     principalId: str = Field(
         description="Amazon identifier of the user, role, account or services who caused the event.",
@@ -480,6 +533,30 @@ class S3RecordModel(BaseModel):
         examples=[
             {
                 "destinationAccessTier": "ARCHIVE_ACCESS",
+            },
+        ],
+    )
+    lifecycleEventData: S3EventRecordLifecycleEventData | None = Field(
+        default=None,
+        description="The Lifecycle event data object.",
+        examples=[
+            {
+                "transitionEventData": {
+                    "destinationStorageClass": "INTELLIGENT_TIERING",
+                },
+            },
+        ],
+    )
+    replicationEventData: S3EventRecordReplicationEventData | None = Field(
+        default=None,
+        description="The Replication event data object.",
+        examples=[
+            {
+                "replicationRuleId": "replication-rule-1",
+                "destinationBucket": "arn:aws:s3:::destination-bucket",
+                "s3Operation": "OBJECT_PUT",
+                "requestTime": "2019-09-03T19:37:27.192Z",
+                "failureReason": "AssumeRoleNotPermitted",
             },
         ],
     )

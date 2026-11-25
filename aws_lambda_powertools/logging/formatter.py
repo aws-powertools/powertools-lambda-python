@@ -43,6 +43,7 @@ RESERVED_LOG_ATTRS = (
     "threadName",
     "processName",
     "process",
+    "taskName",
     "asctime",
     "location",
     "timestamp",
@@ -357,9 +358,13 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         if isinstance(message, str):  # could be a JSON string
             try:
-                message = self.json_deserializer(message)
+                decoded = self.json_deserializer(message)
             except (json.decoder.JSONDecodeError, TypeError, ValueError):
-                pass
+                return message
+
+            # only JSON objects and arrays become structured output; scalars like "null" or "123" stay strings
+            if isinstance(decoded, (dict, list)):
+                return decoded
 
         return message
 

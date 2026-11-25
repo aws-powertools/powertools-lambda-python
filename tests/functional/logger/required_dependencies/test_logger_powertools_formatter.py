@@ -122,6 +122,38 @@ def test_with_json_message(stdout, service_name):
     assert msg == log_dict["message"]
 
 
+@pytest.mark.parametrize("msg", ["null", "true", "123", "1e3", '"quoted"', "NaN"])
+def test_with_json_scalar_string_message_stays_string(stdout, service_name, msg):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a string that is also a valid JSON scalar
+    logger.info(msg)
+
+    # THEN the message is kept as the original string
+    log_dict = json.loads(stdout.getvalue())
+    assert log_dict["message"] == msg
+
+
+@pytest.mark.parametrize(
+    "msg, expected",
+    [
+        ('{"order_id": 123, "items": ["a", "b"]}', {"order_id": 123, "items": ["a", "b"]}),
+        ('["a", "b"]', ["a", "b"]),
+    ],
+)
+def test_with_json_object_or_array_string_message_is_decoded(stdout, service_name, msg, expected):
+    # GIVEN a logger with default settings
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging a string that is a JSON object or array
+    logger.info(msg)
+
+    # THEN the message is decoded into structured output
+    log_dict = json.loads(stdout.getvalue())
+    assert log_dict["message"] == expected
+
+
 def test_with_unserializable_value_in_message(stdout, service_name):
     logger = Logger(service=service_name, level="DEBUG", stream=stdout)
 
@@ -289,6 +321,29 @@ def test_log_dict_xray_is_not_present_when_explicitly_disabled(
 
     # THEN `xray_trace_id`` key should not be present
     assert "xray_trace_id" not in log_dict
+
+
+def test_log_dict_task_name_is_not_present_when_inside_asyncio_task(
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized
+    logger = Logger(
+        service=service_name,
+        stream=stdout,
+    )
+
+    # WHEN logging a message inside an asyncio task
+    async def task():
+        logger.info("in asyncio task")
+
+    asyncio.run(task())
+
+    # THEN the logs should not contain the taskName key
+    logs = capture_logging_output(stdout)
+
+    assert logs[0].get("message") == "in asyncio task"
+    assert "taskName" not in logs[0]
 
 
 def test_log_custom_std_log_attribute(stdout, service_name):
