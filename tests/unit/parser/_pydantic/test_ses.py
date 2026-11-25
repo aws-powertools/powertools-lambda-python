@@ -47,6 +47,9 @@ def test_ses_trigger_event():
     assert receipt.virusVerdict.status == raw_receipt["virusVerdict"]["status"]
     assert receipt.spfVerdict.status == raw_receipt["spfVerdict"]["status"]
     assert receipt.dmarcVerdict.status == raw_receipt["dmarcVerdict"]["status"]
+    assert receipt.dkimVerdict is not None
+    assert receipt.dkimVerdict.status == raw_receipt["dkimVerdict"]["status"]
+    assert receipt.dmarcPolicy == raw_receipt["dmarcPolicy"]
 
     action = receipt.action
     assert action.type == raw_receipt["action"]["type"]
@@ -161,3 +164,17 @@ def test_ses_trigger_event_without_common_headers():
     assert common_headers.messageId is None
     assert common_headers.date is None
     assert common_headers.subject is None
+
+
+def test_ses_trigger_event_without_dkim_verdict_and_dmarc_policy():
+    # GIVEN an SES event without dkimVerdict and dmarcPolicy
+    raw_event = load_event("sesEvent.json")
+    del raw_event["Records"][0]["ses"]["receipt"]["dkimVerdict"]
+    del raw_event["Records"][0]["ses"]["receipt"]["dmarcPolicy"]
+
+    # WHEN parsing the event
+    receipt = SesModel(**raw_event).Records[0].ses.receipt
+
+    # THEN dkimVerdict and dmarcPolicy default to None
+    assert receipt.dkimVerdict is None
+    assert receipt.dmarcPolicy is None
