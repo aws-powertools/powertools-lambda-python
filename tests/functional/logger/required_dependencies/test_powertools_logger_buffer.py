@@ -612,6 +612,99 @@ def test_flush_buffer_preserves_percent_style_formatting(stdout, service_name, m
     assert log[0]["message"] == "user=alice count=42"
 
 
+def test_logger_log_method_buffers_and_flushes_on_error(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with buffer and flush on error
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, flush_on_error_log=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging debug via log() method
+    logger.log(logging.DEBUG, "buffered via log()")
+
+    # THEN Message should be buffered, not immediately output
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+    # WHEN Logging error via log() method
+    logger.log(logging.ERROR, "error via log()")
+
+    # THEN Both the buffered debug log and error log should be output
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2
+    assert log[0]["message"] == "buffered via log()"
+    assert log[1]["message"] == "error via log()"
+
+
+def test_logger_warn_and_fatal_aliases(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger configured with buffer and flush on error
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="WARNING", flush_on_error_log=True)
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging via warn() alias
+    logger.warn("buffered via warn()")
+
+    # THEN Message should be buffered
+    log = capture_multiple_logging_statements_output(stdout)
+    assert not log
+
+    # WHEN Logging via fatal() alias
+    logger.fatal("flushed via fatal()")
+
+    # THEN Buffer should flush and both messages should appear
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 2
+    assert log[0]["message"] == "buffered via warn()"
+    assert log[1]["message"] == "flushed via fatal()"
+
+
+def test_logger_log_method_does_not_buffer_custom_level_above_threshold(stdout, service_name, monkeypatch):
+    monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
+
+    # GIVEN A logger that buffers DEBUG logs only
+    logger_buffer_config = LoggerBufferConfig(max_bytes=10240, buffer_at_verbosity="DEBUG")
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout, buffer_config=logger_buffer_config)
+
+    # WHEN Logging with a custom level between INFO and WARNING
+    logger.log(25, "custom level via log()")
+
+    # THEN Message should be output right away, like info()
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert log[0]["message"] == "custom level via log()"
+
+
+def test_logger_log_method_supports_valid_string_level(stdout, service_name):
+    # GIVEN A logger without buffering
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout)
+
+    # WHEN Logging using string level name
+    logger.log("INFO", "string level via log()")
+
+    # THEN Message should be logged with INFO level
+    log = capture_multiple_logging_statements_output(stdout)
+    assert len(log) == 1
+    assert log[0]["message"] == "string level via log()"
+    assert log[0]["level"] == "INFO"
+
+
+def test_logger_log_method_raises_on_invalid_level(stdout, service_name):
+    # GIVEN A standard logger
+    logger = Logger(level="DEBUG", service=service_name, stream=stdout)
+
+    # WHEN Logging with an unknown string level
+    # THEN ValueError should be raised
+    with pytest.raises(ValueError, match="Unknown level: 'UNKNOWN_LEVEL'"):
+        logger.log("UNKNOWN_LEVEL", "test message")
+
+    # WHEN Logging with a non-int, non-string level (e.g. None)
+    # THEN ValueError should be raised
+    with pytest.raises(ValueError, match="Unknown level: None"):
+        logger.log(None, "test message")  # type: ignore[arg-type]
+
+
 def test_buffer_honours_stacklevel_when_flushed(stdout, service_name, monkeypatch):
     monkeypatch.setenv(constants.XRAY_TRACE_ID_ENV, "1-67c39786-5908a82a246fb67f3089263f")
 

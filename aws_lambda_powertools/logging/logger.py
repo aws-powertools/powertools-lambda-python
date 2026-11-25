@@ -17,7 +17,7 @@ from contextlib import contextmanager
 from typing import IO, TYPE_CHECKING, Any, TypeVar, cast, overload
 
 from aws_lambda_powertools.logging.buffer.cache import LoggerBufferCache
-from aws_lambda_powertools.logging.buffer.functions import _check_minimum_buffer_log_level, _create_buffer_record
+from aws_lambda_powertools.logging.buffer.functions import _create_buffer_record
 from aws_lambda_powertools.logging.constants import (
     LOGGER_ATTRIBUTE_HANDLER,
     LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
@@ -570,8 +570,9 @@ class Logger:
 
         return decorate
 
-    def debug(
+    def _log(
         self,
+        level: int | str,
         msg: object,
         *args: object,
         exc_info: logging._ExcInfoType = None,
@@ -583,18 +584,40 @@ class Logger:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Logging workflow for logging.debug:
-        # 1. Buffer is completely disabled - log right away
-        # 2. DEBUG is the maximum level of buffer, so, can't bypass if enabled
-        # 3. Store in buffer for potential later processing
+        level_num = logging.getLevelName(level) if isinstance(level, str) else level
+        if not isinstance(level_num, int):
+            raise ValueError(f"Unknown level: {level!r}")
 
-        # MAINTAINABILITY_DECISION:
-        # Keeping this implementation to avoid complex code handling.
-        # Also for clarity over complexity
+        if level_num >= logging.ERROR:
+            if self._buffer_config and self._buffer_config.flush_on_error_log:
+                self.flush_buffer()
+
+            return self._logger.log(
+                level_num,
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
 
         # Buffer is not active and we need to log immediately
         if not self._buffer_config:
-            return self._logger.debug(
+            return self._logger.log(
+                level_num,
+                msg,
+                *args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                stacklevel=stacklevel,
+                extra=extra,
+            )
+
+        # Bypass buffer when log severity meets or exceeds configured minimum
+        if level_num > logging.getLevelName(self._buffer_config.buffer_at_verbosity):
+            return self._logger.log(
+                level_num,
                 msg,
                 *args,
                 exc_info=exc_info,
@@ -605,13 +628,34 @@ class Logger:
 
         # Store record in the buffer
         self._add_log_record_to_buffer(
-            level=logging.DEBUG,
+            level=level_num,
             msg=msg,
             args=args,
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
             stacklevel=stacklevel,
+        )
+
+    def debug(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        return self._log(
+            logging.DEBUG,
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel + 1,
+            extra=extra,
+            **kwargs,
         )
 
     def info(
@@ -624,49 +668,15 @@ class Logger:
         extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        # Logging workflow for logging.info:
-        # 1. Buffer is completely disabled - log right away
-        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
-        # 3. If neither condition met, store in buffer for potential later processing
-
-        # MAINTAINABILITY_DECISION:
-        # Keeping this implementation to avoid complex code handling.
-        # Also for clarity over complexity
-
-        # Buffer is not active and we need to log immediately
-        if not self._buffer_config:
-            return self._logger.info(
-                msg,
-                *args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                stacklevel=stacklevel,
-                extra=extra,
-            )
-
-        # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "INFO"):
-            return self._logger.info(
-                msg,
-                *args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                stacklevel=stacklevel,
-                extra=extra,
-            )
-
-        # Store record in the buffer
-        self._add_log_record_to_buffer(
-            level=logging.INFO,
-            msg=msg,
-            args=args,
+        return self._log(
+            logging.INFO,
+            msg,
+            *args,
             exc_info=exc_info,
             stack_info=stack_info,
+            stacklevel=stacklevel + 1,
             extra=extra,
-            stacklevel=stacklevel,
+            **kwargs,
         )
 
     def warning(
@@ -679,49 +689,15 @@ class Logger:
         extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        # Logging workflow for logging.warning:
-        # 1. Buffer is completely disabled - log right away
-        # 2. Log severity exceeds buffer's minimum threshold - bypass buffering
-        # 3. If neither condition met, store in buffer for potential later processing
-
-        # MAINTAINABILITY_DECISION:
-        # Keeping this implementation to avoid complex code handling.
-        # Also for clarity over complexity
-
-        # Buffer is not active and we need to log immediately
-        if not self._buffer_config:
-            return self._logger.warning(
-                msg,
-                *args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                stacklevel=stacklevel,
-                extra=extra,
-            )
-
-        # Bypass buffer when log severity meets or exceeds configured minimum
-        if _check_minimum_buffer_log_level(self._buffer_config.buffer_at_verbosity, "WARNING"):
-            return self._logger.warning(
-                msg,
-                *args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                stacklevel=stacklevel,
-                extra=extra,
-            )
-
-        # Store record in the buffer
-        self._add_log_record_to_buffer(
-            level=logging.WARNING,
-            msg=msg,
-            args=args,
+        return self._log(
+            logging.WARNING,
+            msg,
+            *args,
             exc_info=exc_info,
             stack_info=stack_info,
+            stacklevel=stacklevel + 1,
             extra=extra,
-            stacklevel=stacklevel,
+            **kwargs,
         )
 
     def error(
@@ -734,24 +710,15 @@ class Logger:
         extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        # Workflow: Error Logging with automatic buffer flushing
-        # 1. Buffer configuration checked for immediate flush
-        # 2. If auto-flush enabled, trigger complete buffer processing
-        # 3. Error log is not "bufferable", so ensure error log is immediately available
-
-        if self._buffer_config and self._buffer_config.flush_on_error_log:
-            self.flush_buffer()
-
-        return self._logger.error(
+        return self._log(
+            logging.ERROR,
             msg,
             *args,
             exc_info=exc_info,
             stack_info=stack_info,
-            stacklevel=stacklevel,
+            stacklevel=stacklevel + 1,
             extra=extra,
+            **kwargs,
         )
 
     def critical(
@@ -764,25 +731,41 @@ class Logger:
         extra: Mapping[str, object] | None = None,
         **kwargs: object,
     ) -> None:
-        extra = extra or {}
-        extra = {**extra, **kwargs}
-
-        # Workflow: Error Logging with automatic buffer flushing
-        # 1. Buffer configuration checked for immediate flush
-        # 2. If auto-flush enabled, trigger complete buffer processing
-        # 3. Critical log is not "bufferable", so ensure error log is immediately available
-
-        if self._buffer_config and self._buffer_config.flush_on_error_log:
-            self.flush_buffer()
-
-        return self._logger.critical(
+        return self._log(
+            logging.CRITICAL,
             msg,
             *args,
             exc_info=exc_info,
             stack_info=stack_info,
-            stacklevel=stacklevel,
+            stacklevel=stacklevel + 1,
             extra=extra,
+            **kwargs,
         )
+
+    def log(
+        self,
+        level: int | str,
+        msg: object,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
+        stack_info: bool = False,
+        stacklevel: int = 2,
+        extra: Mapping[str, object] | None = None,
+        **kwargs: object,
+    ) -> None:
+        return self._log(
+            level,
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel + 1,
+            extra=extra,
+            **kwargs,
+        )
+
+    warn = warning
+    fatal = critical
 
     def exception(
         self,
