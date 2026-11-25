@@ -11,6 +11,7 @@ from aws_lambda_powertools.metrics import (
     MetricUnit,
 )
 from aws_lambda_powertools.metrics.base import reset_cold_start_flag
+from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -18,6 +19,9 @@ def reset_metric_set():
     metrics = Metrics()
     metrics.clear_metrics()
     metrics.clear_default_dimensions()
+    datadog_metrics = DatadogMetrics()
+    datadog_metrics.clear_metrics()
+    datadog_metrics.clear_default_tags()
     reset_cold_start_flag()  # ensure each test has cold start
     yield
 
