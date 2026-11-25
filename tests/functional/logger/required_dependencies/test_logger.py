@@ -10,6 +10,7 @@ import re
 import secrets
 import string
 import sys
+import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
@@ -631,6 +632,35 @@ def test_logger_log_twice_when_log_filter_isnt_present_and_root_logger_is_setup(
     # since child's log records propagated to root logger should be rejected
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 4
+
+
+def test_suppress_filter_does_not_suppress_unrelated_logger_containing_service_name(stdout, service_name):
+    # GIVEN a root logger configured with a handler (as in Lambda runtime)
+    root_stream = io.StringIO()
+    root_handler = logging.StreamHandler(root_stream)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(root_handler)
+
+    try:
+        # AND a Powertools logger, plus an unrelated logger whose name contains the service name
+        # (like "botocore" for service "core")
+        Logger(service=service_name, stream=stdout)
+        child_logger = Logger(service=service_name, child=True, stream=stdout)
+        unrelated_logger = logging.getLogger(f"boto{service_name}")
+
+        # WHEN an unrelated logger whose name contains the service string logs a message
+        # AND a child logger of the Powertools logger logs a message
+        unrelated_logger.warning("credentials expire soon")
+        child_logger.warning("child message")
+
+        # THEN the unrelated logger must not be suppressed by the root handler's SuppressFilter
+        root_output = root_stream.getvalue()
+        assert "credentials expire soon" in root_output
+
+        # AND the genuine child logger must still be suppressed from bubbling to the root handler
+        assert "child message" not in root_output
+    finally:
+        root_logger.removeHandler(root_handler)
 
 
 def test_logger_exception_extract_exception_name(stdout, service_name):
@@ -1284,6 +1314,88 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
     assert logger.log_level == logging.INFO
 
 
+@pytest.mark.parametrize(
+    "level_input, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+        (15, 15),
+        (logging.INFO, logging.INFO),
+        ("", logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_without_alc(stdout, service_name, level_input, expected_level):
+    # GIVEN no ALC environment variable
+    # WHEN Logger is initialized with lowercase string or integer level
+    logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN the log level matches the expected numeric level
+    assert logger.log_level == expected_level
+
+    # AND setLevel also accepts lowercase and custom integer
+    logger.setLevel(level=level_input)
+    assert logger.log_level == expected_level
+
+
+@pytest.mark.parametrize(
+    "level_input, alc_level, should_warn, expected_effective_level",
+    [
+        ("debug", "INFO", True, logging.INFO),
+        ("info", "INFO", False, logging.INFO),
+        ("warning", "INFO", False, logging.INFO),
+        (15, "INFO", True, logging.INFO),
+        (15, "DEBUG", False, logging.DEBUG),
+        (25, "INFO", False, logging.INFO),
+    ],
+)
+def test_logger_level_case_insensitive_and_integer_with_alc(
+    monkeypatch,
+    stdout,
+    service_name,
+    level_input,
+    alc_level,
+    should_warn,
+    expected_effective_level,
+):
+    # GIVEN ALC is configured
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, alc_level)
+
+    # WHEN Logger is initialized with lowercase string or integer level
+    if should_warn:
+        with pytest.warns(UserWarning):
+            logger = Logger(service=service_name, stream=stdout, level=level_input)
+    else:
+        logger = Logger(service=service_name, stream=stdout, level=level_input)
+
+    # THEN ALC takes precedence
+    assert logger.log_level == expected_effective_level
+
+
+@pytest.mark.parametrize("env_var", [constants.POWERTOOLS_LOG_LEVEL_ENV, constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV])
+@pytest.mark.parametrize(
+    "env_value, expected_level",
+    [
+        ("debug", logging.DEBUG),
+        ("info", logging.INFO),
+        ("warning", logging.WARNING),
+        ("error", logging.ERROR),
+        ("critical", logging.CRITICAL),
+    ],
+)
+def test_logger_env_var_case_insensitive(monkeypatch, stdout, service_name, env_var, env_value, expected_level):
+    # GIVEN POWERTOOLS_LOG_LEVEL or LOG_LEVEL is set with lowercase string
+    monkeypatch.setenv(env_var, env_value)
+
+    # WHEN Logger is initialized without explicit level
+    logger = Logger(service=service_name, stream=stdout)
+
+    # THEN Logger normalizes the level case-insensitively
+    assert logger.log_level == expected_level
+
+
 def test_logger_add_remove_filter(stdout, service_name):
     # GIVEN a Logger with a custom logging filter
     class ApiKeyFilter(logging.Filter):  # NOSONAR  # need filter to test actual impl.
@@ -1445,6 +1557,117 @@ def test_logger_change_level_child_logger(stdout, service_name):
     logs = list(stdout.getvalue().strip().split("\n"))
     assert len(logs) == 1
     assert "service" in logs[0]
+
+
+def test_child_logger_without_level_follows_parent_level(stdout, service_name):
+    # GIVEN a child Logger without a level, created before its parent as when imported from another module
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+    Logger(service=service_name, stream=stdout, level="DEBUG")
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the parent's DEBUG level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+    assert log["level"] == "DEBUG"
+    assert child_logger.log_level == logging.DEBUG
+
+
+def test_child_logger_without_level_follows_parent_set_level(stdout, service_name):
+    # GIVEN a parent Logger and a child Logger without a level
+    logger = Logger(service=service_name, stream=stdout)
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the parent switches to DEBUG after the child was created
+    logger.setLevel("DEBUG")
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the new parent level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+
+
+def test_child_logger_without_level_follows_less_verbose_parent_level(stdout, service_name):
+    # GIVEN a parent Logger with WARNING level and a child Logger without a level
+    Logger(service=service_name, stream=stdout, level="WARNING")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits an INFO log
+    child_logger.info("CHILD")
+
+    # THEN nothing must be emitted, as the parent level is WARNING
+    assert stdout.getvalue() == ""
+
+
+def test_child_logger_without_level_follows_parent_sampled_debug_level(stdout, service_name):
+    # GIVEN a parent Logger sampling every request at DEBUG level and a child Logger without a level
+    Logger(service=service_name, stream=stdout, sampling_rate=1)
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN the child must follow the sampled DEBUG level
+    log = capture_logging_output(stdout)
+    assert log["message"] == "CHILD"
+
+
+def test_child_logger_without_level_follows_parent_level_after_sample_rate_refresh(
+    monkeypatch,
+    lambda_context,
+    stdout,
+    service_name,
+):
+    # GIVEN sampling is configured for the function but this request isn't sampled
+    monkeypatch.setenv(constants.LOGGER_LOG_SAMPLING_RATE, "0")
+    # GIVEN a parent Logger with DEBUG level and a child Logger without a level decorating the handler
+    Logger(service=service_name, stream=stdout, level="DEBUG")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    @child_logger.inject_lambda_context
+    def handler(event, context):
+        child_logger.debug("CHILD")
+
+    # WHEN the handler is invoked twice, refreshing the sampling decision on the warm invocation
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    # THEN the child must keep following the parent's DEBUG level on every invocation
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert [log["message"] for log in logs] == ["CHILD", "CHILD"]
+
+
+def test_child_logger_without_level_follows_parent_level_over_env_var(monkeypatch, stdout, service_name):
+    # GIVEN POWERTOOLS_LOG_LEVEL is DEBUG but the parent Logger has an explicit INFO level
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_ENV, "DEBUG")
+    Logger(service=service_name, stream=stdout, level="INFO")
+    child_logger = Logger(service=service_name, child=True, stream=stdout)
+
+    # WHEN the child emits a DEBUG log
+    child_logger.debug("CHILD")
+
+    # THEN nothing must be emitted, as an explicit level takes precedence over POWERTOOLS_LOG_LEVEL
+    assert stdout.getvalue() == ""
+
+
+@pytest.mark.parametrize("child_level", [None, "DEBUG"])
+def test_child_logger_respects_advanced_logging_controls(monkeypatch, stdout, service_name, child_level):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+    Logger(service=service_name, stream=stdout)
+
+    # WHEN a child Logger is created with or without a DEBUG level
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        child_logger = Logger(service=service_name, child=True, stream=stdout, level=child_level)
+    child_logger.debug("CHILD DEBUG")
+    child_logger.info("CHILD INFO")
+
+    # THEN ALC level must take precedence for the child
+    logs = capture_multiple_logging_statements_output(stdout)
+    assert [log["message"] for log in logs] == ["CHILD INFO"]
+    assert child_logger.log_level == logging.INFO
 
 
 def test_clear_state_with_append_keys():

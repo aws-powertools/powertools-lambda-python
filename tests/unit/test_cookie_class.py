@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime, timedelta, timezone
+
+import pytest
 
 from aws_lambda_powertools.shared.cookies import Cookie, SameSite
 
@@ -52,6 +54,63 @@ def test_cookie_with_expires():
     assert cookie.path == "/"
     assert cookie.expires == time_to_expire
     assert str(cookie) == "powertools=test; Path=/; Expires=Sat, 31 Dec 2022 00:00:00 GMT; Secure"
+
+
+def test_cookie_with_expires_in_another_timezone():
+    # GIVEN a cookie that expires at 12:00 in UTC+2, which is 10:00 UTC
+    time_to_expire = datetime(2026, 1, 1, 12, tzinfo=timezone(timedelta(hours=2)))
+    cookie = Cookie(name="powertools", value="test", path="/", expires=time_to_expire)
+
+    # WHEN getting the cookie's attributes
+    # THEN Expires should be the same instant in GMT
+    assert str(cookie) == "powertools=test; Path=/; Expires=Thu, 01 Jan 2026 10:00:00 GMT; Secure"
+
+
+def test_cookie_with_expires_and_non_english_locale():
+    # GIVEN an expiry datetime whose strftime names days and months in German, like after
+    # locale.setlocale(locale.LC_TIME, "de_DE.UTF-8"), without needing that locale installed
+    class GermanLocaleDatetime(datetime):
+        def strftime(self, fmt):
+            return super().strftime(fmt.replace("%a", "Fr.").replace("%b", "Okt."))
+
+    cookie = Cookie(name="powertools", value="test", path="/", expires=GermanLocaleDatetime(2026, 10, 30, 7, 28))
+
+    # WHEN getting the cookie's attributes
+    # THEN Expires should use the English day and month names browsers can parse
+    assert str(cookie) == "powertools=test; Path=/; Expires=Fri, 30 Oct 2026 07:28:00 GMT; Secure"
+
+
+def test_cookie_with_expires_date():
+    # GIVEN a cookie that expires on a date rather than a datetime
+    cookie = Cookie(name="powertools", value="test", path="/", expires=date(2026, 1, 1))
+
+    # WHEN getting the cookie's attributes
+    # THEN Expires should be midnight GMT of that date
+    assert str(cookie) == "powertools=test; Path=/; Expires=Thu, 01 Jan 2026 00:00:00 GMT; Secure"
+
+
+@pytest.mark.parametrize(
+    "time_to_expire, expected",
+    [
+        pytest.param(
+            datetime.max.replace(tzinfo=timezone(timedelta(hours=-5))),
+            "Fri, 31 Dec 9999 23:59:59 GMT",
+            id="after year 9999 in UTC",
+        ),
+        pytest.param(
+            datetime.min.replace(tzinfo=timezone(timedelta(hours=5))),
+            "Mon, 01 Jan 0001 00:00:00 GMT",
+            id="before year 1 in UTC",
+        ),
+    ],
+)
+def test_cookie_with_expires_outside_years_1_to_9999_in_utc(time_to_expire, expected):
+    # GIVEN a cookie whose expiry is an instant that UTC cannot represent
+    cookie = Cookie(name="powertools", value="test", path="/", expires=time_to_expire)
+
+    # WHEN getting the cookie's attributes
+    # THEN Expires should be the closest date that can be written, without raising
+    assert str(cookie) == f"powertools=test; Path=/; Expires={expected}; Secure"
 
 
 def test_cookie_with_max_age_positive():
