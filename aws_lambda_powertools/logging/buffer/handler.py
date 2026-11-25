@@ -63,10 +63,17 @@ class BufferingHandler(logging.Handler):
             self.source_logger._logger.handle(record)
             return
 
+        # The record already knows its origin; carry its pathname, line,
+        # function, logger name and stack info into the buffer instead of
+        # resolving a frame from inside the logging internals.
         self.source_logger._add_log_record_to_buffer(
             level=record.levelno,
             msg=record.msg,
             args=record.args,
             exc_info=record.exc_info,
-            stack_info=False,
+            pathname=record.pathname,
+            lineno=record.lineno,
+            func_name=record.funcName,
+            logger_name=record.name,
+            sinfo=record.stack_info,
         )
