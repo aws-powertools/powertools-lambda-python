@@ -1,12 +1,45 @@
 from __future__ import annotations
 
+import io
 import sys
 import time
+import traceback
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import logging
     from collections.abc import Mapping
+    from types import FrameType
+
+
+def _get_caller_frame(stacklevel: int) -> FrameType:
+    """
+    Walk up the stack from _create_buffer_record's caller, honouring stacklevel.
+
+    The walk starts at _add_log_record_to_buffer and counts user frames above
+    the logging call, mirroring logging.Logger.findCaller: the default
+    stacklevel of 2 reports the direct caller of the Powertools log method,
+    and each extra level reports one more caller up the stack. Stops at the
+    outermost frame if stacklevel walks past the top of the stack.
+    """
+    frame = sys._getframe(2)  # _add_log_record_to_buffer
+    for _ in range(stacklevel):
+        next_frame = frame.f_back
+        if next_frame is None:
+            break
+        frame = next_frame
+    return frame
+
+
+def _format_stack(frame: FrameType) -> str:
+    """
+    Format the stack starting at frame, the same way logging.Logger.findCaller does.
+    """
+    with io.StringIO() as sio:
+        sio.write("Stack (most recent call last):\n")
+        traceback.print_stack(frame, file=sio)
+        stack = sio.getvalue()
+        return stack[:-1] if stack.endswith("\n") else stack
 
 
 def _create_buffer_record(
@@ -16,7 +49,12 @@ def _create_buffer_record(
     exc_info: logging._ExcInfoType = None,
     stack_info: bool = False,
     extra: Mapping[str, object] | None = None,
-    depth: int = 4,
+    stacklevel: int = 2,
+    pathname: str | None = None,
+    lineno: int | None = None,
+    func_name: str | None = None,
+    logger_name: str | None = None,
+    sinfo: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a structured log record for buffering to save in buffer.
@@ -32,10 +70,30 @@ def _create_buffer_record(
     exc_info : logging._ExcInfoType, optional
         Exception information to be included in the log record.
         If None, no exception details will be captured.
+        Only True is resolved to the current exception; a tuple or an
+        exception instance passed by the caller is kept as-is.
     stack_info : bool, default False
         Flag to include stack trace information in the log record.
     extra : Mapping[str, object], optional
         Additional context or metadata to be attached to the log record.
+    stacklevel : int, default 2
+        Number of user frames above the logging call to report as the
+        record's location. The default reports the direct caller.
+    pathname : str, optional
+        Source filename of the record. Resolved from the caller frame
+        honouring stacklevel when not provided.
+    lineno : int, optional
+        Source line number of the record. Resolved from the caller frame
+        honouring stacklevel when not provided.
+    func_name : str, optional
+        Source function name of the record. Resolved from the caller frame
+        honouring stacklevel when not provided.
+    logger_name : str, optional
+        Name of the logger the record came from. Records from third-party
+        loggers carry their own logger name.
+    sinfo : str, optional
+        Pre-formatted stack information. Computed from the caller frame
+        when stack_info is True and no sinfo is provided.
 
     Returns
     -------
@@ -46,30 +104,42 @@ def _create_buffer_record(
     - Captures caller frame information for precise log source tracking
     - Automatically handles exception context
     """
-    # Retrieve the caller's frame information to capture precise log context
-    # Uses inspect.stack() with index 3 to get the original caller's details
-    caller_frame = sys._getframe(depth)
+    # Records from third-party loggers arrive with their origin already known;
+    # use it as-is instead of resolving a frame from inside the logging internals.
+    if pathname is None and lineno is None and func_name is None:
+        caller_frame = _get_caller_frame(stacklevel)
+        pathname = caller_frame.f_code.co_filename
+        lineno = caller_frame.f_lineno
+        func_name = caller_frame.f_code.co_name
+
+        if stack_info and sinfo is None:
+            sinfo = _format_stack(caller_frame)
 
     # Get the current timestamp
     timestamp = time.time()
 
-    # Dynamically replace exc_info with current system exception information
-    # This ensures the most recent exception is captured if available
-    if exc_info:
+    # Only True resolves to the current exception, mirroring logging.Logger._log.
+    # A tuple or an exception instance passed by the caller is kept as-is,
+    # so an exception saved outside its except block still flushes with it.
+    if exc_info is True:
         exc_info = sys.exc_info()
+    elif isinstance(exc_info, BaseException):
+        exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
 
-    # Construct and return the og record dictionary
+    # Construct and return the log record dictionary
     return {
         "level": level,
         "msg": msg,
         "args": args,
-        "filename": caller_frame.f_code.co_filename,
-        "line": caller_frame.f_lineno,
-        "function": caller_frame.f_code.co_name,
+        "pathname": pathname,
+        "lineno": lineno,
+        "funcName": func_name,
+        "name": logger_name,
         "extra": extra,
         "timestamp": timestamp,
         "exc_info": exc_info,
         "stack_info": stack_info,
+        "sinfo": sinfo,
     }
 
 

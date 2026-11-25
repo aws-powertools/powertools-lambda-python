@@ -107,7 +107,7 @@ class Logger:
     level : str, int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
         or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
-        by default "INFO"
+        by default "INFO"; a child Logger without a level follows its parent's level
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
     sampling_rate: float, optional
@@ -283,7 +283,8 @@ class Logger:
             self._buffer_cache = LoggerBufferCache(max_size_bytes=self._buffer_config.max_bytes)
 
         # Used in case of sampling
-        self.initial_log_level = self._determine_log_level(level)
+        # A child Logger without an explicit level stays NOTSET, so it follows its parent's level
+        self.initial_log_level = logging.NOTSET if child and level is None else self._determine_log_level(level)
 
         self._init_logger(
             formatter_options=formatter_options,
@@ -348,7 +349,9 @@ class Logger:
         #   c) multiple messages from being logged as handlers can be duplicated
         is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child:
-            self.setLevel(log_level)
+            # Only set a level when one was given; otherwise the child follows its parent's level
+            if log_level is not None:
+                self.setLevel(log_level)
             if getattr(self._logger.parent, "powertools_buffer_config", None):
                 # Initializes a new, empty LoggerBufferCache for child logger
                 # Preserves parent's buffer configuration while resetting cache contents
@@ -631,6 +634,7 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
+            stacklevel=stacklevel,
         )
 
     def debug(
@@ -958,7 +962,8 @@ class Logger:
 
     @property
     def log_level(self) -> int:
-        return self._logger.level
+        # Effective level, so a child Logger without its own level reports the level it inherits
+        return self._logger.getEffectiveLevel()
 
     @property
     def name(self) -> str:
@@ -984,9 +989,34 @@ class Logger:
 
         return constants.LAMBDA_ADVANCED_LOGGING_LEVELS.get(os.getenv(constants.LAMBDA_LOG_LEVEL_ENV))
 
-    def _get_powertools_log_level(self, level: str | int | None) -> str | None:
+    def _to_numeric_log_level(self, level: str | int) -> int:
+        """Convert a log level name or integer to its numeric value."""
+        if isinstance(level, str):
+            name = level.upper()
+            mapping = (
+                logging.getLevelNamesMapping() if hasattr(logging, "getLevelNamesMapping") else logging._nameToLevel
+            )
+            if name in mapping:
+                return mapping[name]
+
+            val = logging.getLevelName(name)
+            if isinstance(val, int):
+                return val
+
+            if hasattr(logging, "_checkLevel"):
+                return logging._checkLevel(name)
+
+            raise ValueError(f"Unknown level: {level!r}")
+
+        if isinstance(level, int) and not isinstance(level, bool):
+            return level
+
+        raise TypeError(f"Level not an integer or a valid string: {level!r}")
+
+    def _get_powertools_log_level(self, level: str | int | None) -> str | int | None:
         """Retrieve the log level for Powertools from the environment variable or level parameter.
-        If log level is an integer, we convert to its respective string level `logging.getLevelName()`.
+        If log level is an integer, we return it directly as an integer.
+        If log level is a string, we normalize it to uppercase.
         If no log level is provided, we check env vars for the log level: POWERTOOLS_LOG_LEVEL_ENV and POWERTOOLS_LOG_LEVEL_LEGACY_ENV.
         Parameters:
         -----------
@@ -1000,7 +1030,7 @@ class Logger:
             log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
         Returns:
         --------
-        str | None:
+        str | int | None:
             The corresponding logging level. Returns None if the log level is not explicitly specified.
         """  # noqa E501
 
@@ -1008,11 +1038,16 @@ class Logger:
         log_level_env = os.getenv(constants.POWERTOOLS_LOG_LEVEL_ENV) or os.getenv(
             constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV,
         )
-        # If level is an int (logging.INFO), return its respective string ("INFO")
-        if isinstance(level, int):
-            return logging.getLevelName(level)
+        if isinstance(level, str) and level:
+            return level.upper()
 
-        return level or log_level_env
+        if isinstance(level, int) and not isinstance(level, bool):
+            return level
+
+        if log_level_env is not None:
+            return log_level_env.upper()
+
+        return None
 
     def _determine_log_level(self, level: str | int | None) -> str | int:
         """Determine the effective log level considering Lambda and Powertools preferences.
@@ -1023,7 +1058,7 @@ class Logger:
             The specified log level as a string, integer, or None.
         Returns:
         ----------
-            str | int: The effective logging level.
+        str | int: The effective logging level.
         """
 
         # This function consider the following order of precedence:
@@ -1036,9 +1071,9 @@ class Logger:
         lambda_log_level = self._get_aws_lambda_log_level()
         powertools_log_level = self._get_powertools_log_level(level)
 
-        if powertools_log_level and lambda_log_level:
+        if powertools_log_level is not None and lambda_log_level:
             # If Powertools log level is set and higher than AWS Lambda Advanced Logging Controls, emit a warning
-            if logging.getLevelName(lambda_log_level) > logging.getLevelName(powertools_log_level):
+            if self._to_numeric_log_level(lambda_log_level) > self._to_numeric_log_level(powertools_log_level):
                 warnings.warn(
                     f"Current log level ({powertools_log_level}) does not match AWS Lambda Advanced Logging Controls "
                     f"minimum log level ({lambda_log_level}). This can lead to data loss, consider adjusting them.",
@@ -1050,8 +1085,8 @@ class Logger:
             if (
                 hasattr(self, "_buffer_config")
                 and self._buffer_config
-                and logging.getLevelName(lambda_log_level)
-                > logging.getLevelName(self._buffer_config.buffer_at_verbosity)
+                and self._to_numeric_log_level(lambda_log_level)
+                > self._to_numeric_log_level(self._buffer_config.buffer_at_verbosity)
             ):
                 warnings.warn(
                     "Advanced Logging Controls (ALC) Log Level is less verbose than Log Buffering Log Level. "
@@ -1070,7 +1105,7 @@ class Logger:
             return logging.INFO
 
         # Powertools log level is set, we use this
-        return powertools_log_level.upper()
+        return powertools_log_level
 
     # FUNCTIONS for Buffering log
 
@@ -1083,12 +1118,14 @@ class Logger:
         log_line : dict[str, Any]
             Dictionary containing log record details with keys:
             - 'level': Logging level
-            - 'filename': Source filename
-            - 'line': Line number
+            - 'pathname': Source filename
+            - 'lineno': Source line number
             - 'msg': Log message
-            - 'function': Source function name
+            - 'funcName': Source function name
+            - 'name': Name of the logger the record came from
             - 'extra': Additional context
             - 'timestamp': Original log creation time
+            - 'sinfo': Pre-formatted stack information, if any
 
         Notes
         -----
@@ -1096,17 +1133,24 @@ class Logger:
         Preserves original timestamp and source information.
         """
         record = self._logger.makeRecord(
-            name=self.name,
+            name=log_line["name"],
             level=log_line["level"],
-            fn=log_line["filename"],
-            lno=log_line["line"],
+            fn=log_line["pathname"],
+            lno=log_line["lineno"],
             msg=log_line["msg"],
             args=log_line.get("args", ()),
             exc_info=log_line["exc_info"],
-            func=log_line["function"],
+            func=log_line["funcName"],
             extra=log_line["extra"],
+            sinfo=log_line.get("sinfo"),
         )
+        # Restore the creation timestamp, including the milliseconds and the
+        # time relative to process start, so the record prints as if it had
+        # never been buffered. makeRecord stamps relativeCreated from the
+        # flush time, so shift it back by the time spent in the buffer.
+        record.relativeCreated = record.relativeCreated - (record.created - log_line["timestamp"]) * 1000
         record.created = log_line["timestamp"]
+        record.msecs = (log_line["timestamp"] - int(log_line["timestamp"])) * 1000
         self._logger.handle(record)
 
     def _add_log_record_to_buffer(
@@ -1117,6 +1161,12 @@ class Logger:
         exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         extra: Mapping[str, object] | None = None,
+        stacklevel: int = 2,
+        pathname: str | None = None,
+        lineno: int | None = None,
+        func_name: str | None = None,
+        logger_name: str | None = None,
+        sinfo: str | None = None,
     ) -> None:
         """
         Add log record to buffer with intelligent tracer ID handling.
@@ -1130,11 +1180,27 @@ class Logger:
         args : object
             Additional arguments for the log message.
         exc_info : logging._ExcInfoType, optional
-            Exception information for the log record.
+            Exception information for the record.
         stack_info : bool, optional
             Whether to include stack information.
         extra : Mapping[str, object], optional
             Additional contextual information for the log record.
+        stacklevel : int, optional
+            Number of user frames above the logging call to report as the
+            record's location. The default reports the direct caller.
+        pathname : str, optional
+            Source filename of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        lineno : int, optional
+            Source line number of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        func_name : str, optional
+            Source function name of the record. Resolved from the caller frame
+            honouring stacklevel when not provided.
+        logger_name : str, optional
+            Name of the logger the record came from. Defaults to this logger.
+        sinfo : str, optional
+            Pre-formatted stack information for the record.
 
         Raises
         ------
@@ -1147,36 +1213,51 @@ class Logger:
         between different tracer contexts.
         """
 
-        # Determine tracer ID, defaulting to first invoke marker
+        # Get the current X-Ray trace ID
         tracer_id = get_tracer_id()
 
-        if tracer_id and self._buffer_config:
-            if not self._buffer_cache.get(tracer_id):
-                # Detect new Lambda invocation context and reset buffer to maintain log isolation
-                # Ensures logs from previous invocations do not leak into current execution
-                # Prevent memory excessive usage
-                self._buffer_cache.clear()
+        if not self._buffer_config:
+            return
 
-            log_record: dict[str, Any] = _create_buffer_record(
-                level=level,
-                msg=msg,
-                args=args,
-                exc_info=exc_info,
-                stack_info=stack_info,
-                extra=extra,
+        log_record: dict[str, Any] = _create_buffer_record(
+            level=level,
+            msg=msg,
+            args=args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            extra=extra,
+            stacklevel=stacklevel,
+            pathname=pathname,
+            lineno=lineno,
+            func_name=func_name,
+            logger_name=logger_name if logger_name is not None else self.name,
+            sinfo=sinfo,
+        )
+
+        if not tracer_id:
+            # Without a tracer ID, buffer isolation is not possible.
+            # Emit immediately to avoid losing the log record.
+            self._create_and_flush_log_record(log_record)
+            return
+
+        if not self._buffer_cache.get(tracer_id):
+            # Detect new Lambda invocation context and reset buffer to maintain log isolation
+            # Ensures logs from previous invocations do not leak into current execution
+            # Prevent memory excessive usage
+            self._buffer_cache.clear()
+
+        try:
+            self._buffer_cache.add(tracer_id, log_record)
+        except BufferError:
+            warnings.warn(
+                message="Cannot add item to the buffer. "
+                f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
+                category=PowertoolsUserWarning,
+                stacklevel=2,
             )
-            try:
-                self._buffer_cache.add(tracer_id, log_record)
-            except BufferError:
-                warnings.warn(
-                    message="Cannot add item to the buffer. "
-                    f"Item size exceeds total cache size {self._buffer_config.max_bytes} bytes",
-                    category=PowertoolsUserWarning,
-                    stacklevel=2,
-                )
 
-                # flush this log to avoid data loss
-                self._create_and_flush_log_record(log_record)
+            # flush this log to avoid data loss
+            self._create_and_flush_log_record(log_record)
 
     def flush_buffer(self) -> None:
         """
