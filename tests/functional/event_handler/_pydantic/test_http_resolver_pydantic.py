@@ -540,3 +540,68 @@ def test_interrupted_asgi_request_does_not_clear_another_requests_state(interrup
             await asyncio.gather(*pending, return_exceptions=True)
 
     asyncio.run(scenario())
+
+
+# =============================================================================
+# Concurrency Tests (#8866)
+# =============================================================================
+
+
+async def _asgi_call(app: HttpResolverLocal, path: str) -> dict[str, Any]:
+    scope = {"type": "http", "method": "GET", "path": path, "query_string": b"", "headers": []}
+    send, captured = make_asgi_send()
+    await app(scope, make_asgi_receive(), send)
+    return captured
+
+
+async def _gather_with_small_executor(coroutines, max_workers: int = 2):
+    # A tiny executor makes the thread starvation deterministic: with more in-flight requests
+    # than worker threads, a sync middleware that needs a second thread to run the next one never gets it
+    from concurrent.futures import ThreadPoolExecutor
+
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    asyncio.get_running_loop().set_default_executor(executor)
+    try:
+        return await asyncio.wait_for(asyncio.gather(*coroutines), timeout=5)
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
+
+
+@pytest.mark.asyncio
+async def test_asgi_concurrent_requests_with_validation_do_not_deadlock():
+    # GIVEN an app with validation enabled, which adds two sync middlewares around every route
+    app = HttpResolverLocal(enable_validation=True)
+
+    @app.get("/ping")
+    def ping() -> dict[str, str]:
+        return {"ok": "yes"}
+
+    # WHEN more requests arrive at once than there are executor threads
+    results = await _gather_with_small_executor([_asgi_call(app, "/ping") for _ in range(6)])
+
+    # THEN every request is answered
+    assert [captured["status_code"] for captured in results] == [200] * 6
+
+
+@pytest.mark.asyncio
+async def test_asgi_concurrent_requests_keep_request_state_isolated():
+    # GIVEN validation enabled plus a sync middleware that stores request data in the context
+    app = HttpResolverLocal(enable_validation=True)
+
+    def remember_path(app: HttpResolverLocal, next_middleware):
+        app.append_context(seen=app.current_event.path)
+        return next_middleware(app)
+
+    app.use([remember_path])
+
+    @app.get("/echo/<value>")
+    def echo(value: str) -> dict[str, str]:
+        return {"value": value, "seen": app.context["seen"]}
+
+    # WHEN many distinct requests run concurrently through the sync middleware chain
+    results = await _gather_with_small_executor([_asgi_call(app, f"/echo/v{i}") for i in range(12)])
+
+    # THEN each caller gets its own value and its own context back
+    for i, captured in enumerate(results):
+        assert captured["status_code"] == 200
+        assert json.loads(captured["body"]) == {"value": f"v{i}", "seen": f"/echo/v{i}"}

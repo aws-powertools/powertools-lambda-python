@@ -1064,6 +1064,8 @@ The following environment variables are available to configure Logger at a globa
 
 Log buffering enables you to buffer logs for a specific request or invocation. Enable log buffering by passing `logger_buffer` when initializing a Logger instance. You can buffer logs at the `WARNING`, `INFO` or `DEBUG` level, and flush them automatically on error or manually as needed.
 
+When an X-Ray trace ID is unavailable, log records at the configured buffering level are emitted immediately instead of being buffered. This ensures logs generated during initialization or outside a Lambda invocation are not lost.
+
 > **Tip: This is useful when you want to reduce the number of log messages emitted while still having detailed logs when needed, such as when troubleshooting issues.**
 
 **getting_started_with_buffering_logs.py**
@@ -1075,6 +1077,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger_buffer_config = LoggerBufferConfig(max_bytes=20480, flush_on_error_log=True)
 logger = Logger(level="INFO", buffer_config=logger_buffer_config)
+
+# This initialization-phase log is emitted immediately because no
+# X-Ray trace ID is available yet.
+logger.debug("Logger initialized")
 
 def lambda_handler(event: dict, context: LambdaContext):
     logger.debug("a debug log")  # this is buffered

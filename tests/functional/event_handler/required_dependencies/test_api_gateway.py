@@ -6,6 +6,7 @@ import re
 import zlib
 from collections import deque
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from functools import partial
@@ -159,6 +160,30 @@ def test_api_gateway_v1_cookies():
     assert result["multiValueHeaders"]["Set-Cookie"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
+def test_api_gateway_v1_cookie_expires_in_gmt():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+    # AND a cookie that expires at 12:00 in UTC+2, which is 10:00 UTC
+    cookie = Cookie(
+        name="CookieMonster",
+        value="MonsterCookie",
+        expires=datetime(2026, 1, 1, 12, tzinfo=timezone(timedelta(hours=2))),
+    )
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=[cookie])
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN the cookie is sent with the same instant in GMT
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Set-Cookie"] == [
+        "CookieMonster=MonsterCookie; Expires=Thu, 01 Jan 2026 10:00:00 GMT; Secure",
+    ]
+
+
 def test_api_gateway():
     # GIVEN a Rest API Gateway proxy type event
     app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
@@ -255,6 +280,28 @@ def test_api_gateway_v2_cookies():
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
     assert result["cookies"] == ["CookieMonster=MonsterCookie; Secure"]
+
+
+def test_api_gateway_v2_cookie_expires_in_gmt():
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayHttpResolver()
+    # AND a cookie that expires at 12:00 in UTC+2, which is 10:00 UTC
+    cookie = Cookie(
+        name="CookieMonster",
+        value="MonsterCookie",
+        expires=datetime(2026, 1, 1, 12, tzinfo=timezone(timedelta(hours=2))),
+    )
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=[cookie])
+
+    # WHEN calling the event handler
+    result = app(load_event("apiGatewayProxyV2Event.json"), {})
+
+    # THEN the cookie is sent with the same instant in GMT
+    assert result["statusCode"] == 200
+    assert result["cookies"] == ["CookieMonster=MonsterCookie; Expires=Thu, 01 Jan 2026 10:00:00 GMT; Secure"]
 
 
 def test_include_rule_matching():
