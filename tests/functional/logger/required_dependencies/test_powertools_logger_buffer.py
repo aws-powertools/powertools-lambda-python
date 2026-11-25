@@ -702,8 +702,8 @@ def test_buffer_preserves_original_timestamp(stdout, service_name, monkeypatch):
     logged_at = dt.datetime.strptime(log["timestamp"], "%Y-%m-%d %H:%M:%S,%f%z")
     assert int(before.timestamp() * 1000) - 1 <= int(logged_at.timestamp() * 1000) <= int(after.timestamp() * 1000)
 
-    
-    def test_logger_buffer_logs_immediately_without_trace_id(stdout, service_name, monkeypatch):
+
+def test_logger_buffer_logs_immediately_without_trace_id(stdout, service_name, monkeypatch):
     monkeypatch.delenv(constants.XRAY_TRACE_ID_ENV, raising=False)
 
     logger_buffer_config = LoggerBufferConfig(

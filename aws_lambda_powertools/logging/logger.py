@@ -1233,6 +1233,9 @@ class Logger:
         # Get the current X-Ray trace ID
         tracer_id = get_tracer_id()
 
+        if not self._buffer_config:
+            return
+
         log_record: dict[str, Any] = _create_buffer_record(
             level=level,
             msg=msg,
@@ -1240,12 +1243,12 @@ class Logger:
             exc_info=exc_info,
             stack_info=stack_info,
             extra=extra,
-          stacklevel=stacklevel,
-          pathname=pathname,
-          lineno=lineno,
-          func_name=func_name,
-          logger_name=logger_name if logger_name is not None else self.name,
-          sinfo=sinfo,
+            stacklevel=stacklevel,
+            pathname=pathname,
+            lineno=lineno,
+            func_name=func_name,
+            logger_name=logger_name if logger_name is not None else self.name,
+            sinfo=sinfo,
         )
 
         if not tracer_id:
