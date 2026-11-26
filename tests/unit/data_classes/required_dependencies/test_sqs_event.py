@@ -166,6 +166,41 @@ def test_decode_nested_sns_event():
     assert message["username"] == raw_message["username"]
 
 
+def test_decode_nested_sns_event_reads_sqs_payload_keys():
+    # GIVEN an SNS message delivered to SQS, which uses UnsubscribeURL and SigningCertURL
+    # and has no Subject nor MessageAttributes
+    raw_event = load_event("snsSqsEvent.json")
+    raw_body = json.loads(raw_event["Records"][0]["body"])
+
+    # WHEN decoding the nested SNS message
+    sns_message: SNSMessage = next(SQSEvent(raw_event).records).decoded_nested_sns_event
+
+    # THEN every property reads the SQS payload
+    assert sns_message.unsubscribe_url == raw_body["UnsubscribeURL"]
+    assert sns_message.signing_cert_url == raw_body["SigningCertURL"]
+    assert sns_message.signature == raw_body["Signature"]
+    assert sns_message.subject is None
+    assert sns_message.message_attributes == {}
+
+
+def test_decode_nested_sns_event_from_fifo_topic():
+    # GIVEN an SNS message from a FIFO topic delivered to SQS, which has no signature fields
+    raw_event = load_event("snsSqsFifoEvent.json")
+    raw_body = json.loads(raw_event["Records"][0]["body"])
+
+    # WHEN decoding the nested SNS message
+    sns_message: SNSMessage = next(SQSEvent(raw_event).records).decoded_nested_sns_event
+
+    # THEN the signature fields are None and the other properties read the SQS payload
+    assert sns_message.signature is None
+    assert sns_message.signature_version is None
+    assert sns_message.signing_cert_url is None
+    assert sns_message.unsubscribe_url == raw_body["UnsubscribeURL"]
+    assert sns_message.message_id == raw_body["MessageId"]
+    assert sns_message.subject is None
+    assert sns_message.message_attributes == {}
+
+
 def test_sqs_event_typing():
     attributes = SQSMessageAttributes({"key": {"stringValue": "value", "dataType": "String"}})
 

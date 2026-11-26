@@ -23,9 +23,11 @@ class SNSMessageAttribute(DictWrapper):
 
 class SNSMessage(DictWrapper):
     @property
-    def signature_version(self) -> str:
-        """Version of the Amazon SNS signature used."""
-        return self["SignatureVersion"]
+    def signature_version(self) -> str | None:
+        """Version of the Amazon SNS signature used.
+
+        None when the message has no signature, e.g. for FIFO topics with content-based deduplication."""
+        return self.get("SignatureVersion")
 
     @property
     def timestamp(self) -> str:
@@ -33,14 +35,19 @@ class SNSMessage(DictWrapper):
         return self["Timestamp"]
 
     @property
-    def signature(self) -> str:
-        """Base64-encoded "SHA1withRSA" signature of the Message, MessageId, Type, Timestamp, and TopicArn values."""
-        return self["Signature"]
+    def signature(self) -> str | None:
+        """Base64-encoded "SHA1withRSA" signature of the Message, MessageId, Type, Timestamp, and TopicArn values.
+
+        None when the message has no signature, e.g. for FIFO topics with content-based deduplication."""
+        return self.get("Signature")
 
     @property
-    def signing_cert_url(self) -> str:
-        """The URL to the certificate that was used to sign the message."""
-        return self["SigningCertUrl"]
+    def signing_cert_url(self) -> str | None:
+        """The URL to the certificate that was used to sign the message.
+
+        None when the message has no signature, e.g. for FIFO topics with content-based deduplication."""
+        # SNS sends this key as SigningCertURL when it delivers the message to SQS
+        return self.get("SigningCertUrl") or self.get("SigningCertURL")
 
     @property
     def message_id(self) -> str:
@@ -56,7 +63,8 @@ class SNSMessage(DictWrapper):
 
     @property
     def message_attributes(self) -> dict[str, SNSMessageAttribute]:
-        return {k: SNSMessageAttribute(v) for (k, v) in self["MessageAttributes"].items()}
+        """The message attributes. Empty when the message was delivered to SQS without any."""
+        return {k: SNSMessageAttribute(v) for (k, v) in (self.get("MessageAttributes") or {}).items()}
 
     @property
     def get_type(self) -> str:
@@ -71,7 +79,8 @@ class SNSMessage(DictWrapper):
         """A URL that you can use to unsubscribe the endpoint from this topic.
 
         If you visit this URL, Amazon SNS unsubscribes the endpoint and stops sending notifications to this endpoint."""
-        return self["UnsubscribeUrl"]
+        # SNS sends this key as UnsubscribeURL when it delivers the message to SQS
+        return self.get("UnsubscribeUrl") or self["UnsubscribeURL"]
 
     @property
     def topic_arn(self) -> str:
@@ -79,9 +88,11 @@ class SNSMessage(DictWrapper):
         return self["TopicArn"]
 
     @property
-    def subject(self) -> str:
-        """The Subject parameter specified when the notification was published to the topic."""
-        return self["Subject"]
+    def subject(self) -> str | None:
+        """The Subject parameter specified when the notification was published to the topic.
+
+        None when the notification was published without a subject."""
+        return self.get("Subject")
 
 
 class SNSEventRecord(DictWrapper):
