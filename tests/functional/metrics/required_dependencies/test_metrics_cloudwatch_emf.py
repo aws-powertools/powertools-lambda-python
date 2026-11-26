@@ -1135,6 +1135,39 @@ def test_clear_default_dimensions(namespace):
     assert not my_metrics.default_dimensions
 
 
+def test_clear_default_dimensions_removes_them_from_next_flush(capsys, metric, namespace):
+    # GIVEN Metrics is initialized and we persist a default dimension
+    my_metrics = Metrics(namespace=namespace, service="booking")
+    my_metrics.set_default_dimensions(environment="test")
+
+    # WHEN it is removed via clear_default_dimensions before the next flush
+    my_metrics.clear_default_dimensions()
+    my_metrics.add_metric(**metric)
+    my_metrics.flush_metrics()
+    output = capture_metrics_output(capsys)
+
+    # THEN the flushed metric should only have the service dimension
+    assert output["_aws"]["CloudWatchMetrics"][0]["Dimensions"] == [["service"]]
+    assert "environment" not in output
+
+
+def test_clear_default_dimensions_keeps_dimension_added_with_another_value(capsys, metric, namespace):
+    # GIVEN a default dimension whose value is then replaced with add_dimension
+    my_metrics = Metrics(namespace=namespace, service="booking")
+    my_metrics.set_default_dimensions(environment="test")
+    with pytest.warns(PowertoolsUserWarning, match="has already been added"):
+        my_metrics.add_dimension(name="environment", value="prod")
+
+    # WHEN default dimensions are cleared before the next flush
+    my_metrics.clear_default_dimensions()
+    my_metrics.add_metric(**metric)
+    my_metrics.flush_metrics()
+    output = capture_metrics_output(capsys)
+
+    # THEN the dimension added with add_dimension should still be flushed
+    assert output["environment"] == "prod"
+
+
 def test_set_default_dimensions_no_warning_on_first_call(namespace):
     # GIVEN a Metrics instance with no dimensions set
     my_metrics = Metrics(namespace=namespace)
