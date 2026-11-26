@@ -116,6 +116,49 @@ def test_s3_closed_does_not_make_requests_for_zip(s3_client, s3_client_stub):
     s3_client_stub.assert_no_pending_responses()
 
 
+@pytest.mark.parametrize("is_gzip", [False, True], ids=["raw", "gzip"])
+def test_s3_csv_closed_after_close(s3_client, s3_client_stub, is_gzip):
+    # GIVEN a CSV object, whose transformed stream is a DictReader without closed/close attributes
+    payload = b"name,city\nfoo,bar\n"
+    wire_payload = gzip.compress(payload) if is_gzip else payload
+    _stub_get_object(s3_client_stub, wire_payload)
+    obj = S3Object(bucket="bucket", key="key", boto3_client=s3_client, is_gzip=is_gzip, is_csv=True)
+
+    # WHEN a row is read, materializing the DictReader
+    assert next(obj) == {"name": "foo", "city": "bar"}
+
+    # THEN inspecting and calling close work, and the object reports as closed
+    assert obj.closed is False
+    obj.close()
+    assert obj.closed is True
+
+
+def test_s3_csv_context_manager_close(s3_client, s3_client_stub):
+    # GIVEN a CSV object used as a context manager
+    _stub_get_object(s3_client_stub, b"name,city\nfoo,bar\n")
+
+    # WHEN a row is read inside the context
+    with S3Object(bucket="bucket", key="key", boto3_client=s3_client, is_csv=True) as obj:
+        assert next(obj) == {"name": "foo", "city": "bar"}
+
+    # THEN exiting the context closes it without raising AttributeError
+    assert obj.closed is True
+
+
+def test_s3_csv_in_place_transform_close(s3_client, s3_client_stub):
+    # GIVEN a CsvTransform applied in place
+    _stub_get_object(s3_client_stub, b"name,city\nfoo,bar\n")
+    obj = S3Object(bucket="bucket", key="key", boto3_client=s3_client)
+    obj.transform(CsvTransform(), in_place=True)
+
+    # WHEN a row is read and the object is closed
+    assert next(obj) == {"name": "foo", "city": "bar"}
+    obj.close()
+
+    # THEN it reports as closed
+    assert obj.closed is True
+
+
 def _stub_get_object(s3_client_stub, payload: bytes):
     streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
     s3_client_stub.add_response("get_object", {"Body": streaming_body})
