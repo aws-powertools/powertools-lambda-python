@@ -257,6 +257,8 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
      Use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
+     Fields holding `datetime`, `date`, `time`, `UUID`, `Enum` and `Decimal` values, and nested dataclasses (also inside lists and dictionaries), are saved as JSON and rebuilt from the field type annotations when the result is replayed.
+
     === "Inferring via the return type"
 
         ```python hl_lines="1 11 32 40 43 53"
