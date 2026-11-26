@@ -8,7 +8,7 @@ from aws_lambda_powertools.shared.functions import decode_header_bytes
 from aws_lambda_powertools.utilities.data_classes.common import CaseInsensitiveDict, DictWrapper
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 
 class KafkaEventRecordSchemaMetadata(DictWrapper):
@@ -144,8 +144,8 @@ class KafkaEvent(KafkaEventBase):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
 
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer=json_deserializer)
         self._records: Iterator[KafkaEventRecord] | None = None
 
     @property

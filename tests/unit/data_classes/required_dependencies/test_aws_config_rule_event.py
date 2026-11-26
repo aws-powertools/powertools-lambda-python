@@ -197,3 +197,18 @@ def test_aws_config_rule_scheduled():
     assert parsed_event.invoking_event.notification_creation_time == invoking_event["notificationCreationTime"]
     assert parsed_event.invoking_event.message_type == invoking_event["messageType"]
     assert parsed_event.invoking_event.record_version == invoking_event["recordVersion"]
+
+
+def test_aws_config_rule_event_uses_custom_json_deserializer():
+    raw_event = load_event("awsConfigRuleConfigurationChanged.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return json.loads(value)
+
+    parsed_event = AWSConfigRuleEvent(raw_event, json_deserializer=custom_deserializer)
+
+    assert parsed_event.rule_parameters == json.loads(raw_event["ruleParameters"])
+    assert parsed_event.invoking_event.message_type == json.loads(raw_event["invokingEvent"])["messageType"]
+    assert calls == [raw_event["ruleParameters"], raw_event["invokingEvent"]]

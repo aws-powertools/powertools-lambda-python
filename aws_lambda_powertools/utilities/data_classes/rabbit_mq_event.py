@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class BasicProperties(DictWrapper):
@@ -102,10 +105,10 @@ class RabbitMQEvent(DictWrapper):
     - https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/
     """
 
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer=json_deserializer)
         self._rmq_messages_by_queue = {
-            key: [RabbitMessage(message) for message in messages]
+            key: [RabbitMessage(message, json_deserializer=self._json_deserializer) for message in messages]
             for key, messages in self["rmqMessagesByQueue"].items()
         }
 

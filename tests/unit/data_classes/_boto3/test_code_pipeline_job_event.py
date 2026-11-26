@@ -317,3 +317,17 @@ def test_code_pipeline_put_output_artifact_not_found():
     assert parsed_event.find_output_artifact("not-found") is None
     with pytest.raises(ValueError):
         parsed_event.put_artifact(artifact_name="not-found", body="", content_type="text/plain")
+
+
+def test_code_pipeline_event_uses_custom_json_deserializer():
+    raw_event = load_event("codePipelineEventData.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    parsed_event = CodePipelineJobEvent(raw_event, json_deserializer=custom_deserializer)
+
+    assert parsed_event.decoded_user_parameters == {"deserialized_by": "custom"}
+    assert calls == [parsed_event.user_parameters]

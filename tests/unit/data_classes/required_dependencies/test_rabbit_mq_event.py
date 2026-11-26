@@ -46,3 +46,18 @@ def test_rabbit_mq_event():
     assert properties.app_id is None
     assert properties.cluster_id is None
     assert properties.body_size == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["bodySize"]
+
+
+def test_rabbit_mq_event_uses_custom_json_deserializer():
+    raw_event = load_event("rabbitMQEvent.json")
+    calls: list[str] = []
+
+    def custom_deserializer(value: str) -> dict:
+        calls.append(value)
+        return {"deserialized_by": "custom"}
+
+    parsed_event = RabbitMQEvent(raw_event, json_deserializer=custom_deserializer)
+    message = parsed_event.rmq_messages_by_queue["pizzaQueue::/"][0]
+
+    assert message.json_data == {"deserialized_by": "custom"}
+    assert calls == [message.decoded_data]

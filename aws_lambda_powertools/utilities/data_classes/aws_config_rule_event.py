@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def get_invoke_event(
@@ -286,8 +289,8 @@ class AWSConfigRuleEvent(DictWrapper):
     - https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules_lambda-functions.html
     """
 
-    def __init__(self, data: dict[str, Any]):
-        super().__init__(data)
+    def __init__(self, data: dict[str, Any], json_deserializer: Callable | None = None):
+        super().__init__(data, json_deserializer=json_deserializer)
         self._invoking_event: Any | None = None
         self._rule_parameters: Any | None = None
 
