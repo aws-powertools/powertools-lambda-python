@@ -479,16 +479,18 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
         """
-        if not raise_on_empty_metrics and not self.metric_set:
-            warnings.warn(
-                "No application metrics to publish. The cold-start metric may be published if enabled. "
-                "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
-                stacklevel=2,
-            )
-        elif not is_metrics_disabled():
-            logger.debug("Flushing existing metrics")
-            metrics = self.serialize_metric_set()
-            print(json.dumps(metrics, separators=(",", ":")))
+        try:
+            if not raise_on_empty_metrics and not self.metric_set:
+                warnings.warn(
+                    "No application metrics to publish. The cold-start metric may be published if enabled. "
+                    "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
+                    stacklevel=2,
+                )
+            elif not is_metrics_disabled():
+                logger.debug("Flushing existing metrics")
+                metrics = self.serialize_metric_set()
+                print(json.dumps(metrics, separators=(",", ":")))
+        finally:
             self.clear_metrics()
 
     def log_metrics(

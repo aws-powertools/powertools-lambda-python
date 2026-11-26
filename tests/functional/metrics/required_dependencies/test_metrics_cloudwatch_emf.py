@@ -612,6 +612,60 @@ def test_log_metrics_clear_metrics_after_invocation(metric, service, namespace):
     assert my_metrics.metric_set == {}
 
 
+def test_log_metrics_clear_dimensions_and_metadata_when_no_metrics_are_added(capsys, metric, service, namespace):
+    # GIVEN a handler that only adds a metric on some invocations
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        if evt.get("skip_metric"):
+            my_metrics.add_dimension(name="tenant", value="tenant-a")
+            my_metrics.add_dimensions(environment="dev")
+            my_metrics.add_metadata(key="request_id", value="request-a")
+            return
+        my_metrics.add_metric(**metric)
+
+    # WHEN the first invocation adds dimensions and metadata but no metrics
+    with pytest.warns(UserWarning, match="No application metrics to publish"):
+        lambda_handler({"skip_metric": True}, {})
+
+    # AND the next invocation adds a metric
+    lambda_handler({}, {})
+    output = capture_metrics_output(capsys)
+
+    # THEN the dimensions and metadata from the first invocation are not emitted
+    assert output["_aws"]["CloudWatchMetrics"][0]["Dimensions"] == [["service"]]
+    assert "tenant" not in output
+    assert "environment" not in output
+    assert "request_id" not in output
+
+
+def test_log_metrics_raise_on_empty_metrics_clear_dimensions_and_metadata(capsys, metric, service, namespace):
+    # GIVEN a handler using raise_on_empty_metrics that only adds a metric on some invocations
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    @my_metrics.log_metrics(raise_on_empty_metrics=True)
+    def lambda_handler(evt, context):
+        if evt.get("skip_metric"):
+            my_metrics.add_dimension(name="tenant", value="tenant-a")
+            my_metrics.add_metadata(key="request_id", value="request-a")
+            return
+        my_metrics.add_metric(**metric)
+
+    # WHEN the first invocation adds dimensions and metadata but no metrics
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
+        lambda_handler({"skip_metric": True}, {})
+
+    # AND the next invocation adds a metric
+    lambda_handler({}, {})
+    output = capture_metrics_output(capsys)
+
+    # THEN the dimensions and metadata from the first invocation are not emitted
+    assert output["_aws"]["CloudWatchMetrics"][0]["Dimensions"] == [["service"]]
+    assert "tenant" not in output
+    assert "request_id" not in output
+
+
 def test_log_metrics_non_string_dimension_values(capsys, service, metric, non_str_dimensions, namespace):
     # GIVEN Metrics is initialized and dimensions with non-string values are added
     my_metrics = Metrics(service=service, namespace=namespace)
@@ -1598,6 +1652,23 @@ def test_metrics_disabled_persists_after_flush(monkeypatch, capsys, namespace):
     # THEN second flush should also not emit any metrics
     captured = capsys.readouterr()
     assert not captured.out
+
+
+def test_metrics_disabled_clear_metrics_after_flush(monkeypatch, metric, dimension, metadata, namespace):
+    # GIVEN environment variable is set to disable metrics
+    monkeypatch.setenv("POWERTOOLS_METRICS_DISABLED", "true")
+    my_metrics = Metrics(namespace=namespace)
+
+    # WHEN metrics, dimensions and metadata are added and flushed
+    my_metrics.add_metric(**metric)
+    my_metrics.add_dimension(**dimension)
+    my_metrics.add_metadata(**metadata)
+    my_metrics.flush_metrics()
+
+    # THEN they are cleared from memory even though nothing was emitted
+    assert my_metrics.metric_set == {}
+    assert my_metrics.dimension_set == {}
+    assert my_metrics.metadata_set == {}
 
 
 def test_metrics_disabled_with_namespace_and_service(monkeypatch, capsys):
