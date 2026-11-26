@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from dataclasses import fields, is_dataclass
 from decimal import Decimal, InvalidOperation
 from enum import Enum
@@ -31,7 +31,7 @@ def _to_json_compatible(value: Any) -> Any:
         return {k: _to_json_compatible(v) for k, v in value.items()}
     if isinstance(value, (list, tuple, set, frozenset)):
         return [_to_json_compatible(v) for v in value]
-    if isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
+    if isinstance(value, (dt.datetime, dt.date, dt.time)):
         return value.isoformat()
     return str(value) if isinstance(value, UUID) else value
 
@@ -62,7 +62,7 @@ def _convert_scalar(value: Any, type_hint: type) -> Any:
         return type_hint(value)
     if not isinstance(value, str):
         return value
-    if issubclass(type_hint, (datetime.datetime, datetime.date, datetime.time)):
+    if issubclass(type_hint, (dt.datetime, dt.date, dt.time)):
         return type_hint.fromisoformat(value)
     if issubclass(type_hint, (UUID, Decimal)):
         return type_hint(value)
