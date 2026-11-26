@@ -1,6 +1,7 @@
 import copy
 import dataclasses
 import datetime as dt
+import time
 import warnings
 from decimal import Decimal
 from enum import Enum
@@ -1019,6 +1020,89 @@ def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
             str(w[-1].message)
             == "Couldn't determine the remaining time left. Did you call register_lambda_context on IdempotencyConfig?"
         )
+
+
+class RecordingPersistenceLayer(BasePersistenceLayer):
+    # Keeps the records it is asked to save. Replays come from the local cache.
+    def __init__(self):
+        super().__init__()
+        self.saved_records: list[DataRecord] = []
+
+    def _put_record(self, data_record: DataRecord) -> None:
+        self.saved_records.append(data_record)
+
+    def _update_record(self, data_record: DataRecord) -> None:
+        self.saved_records.append(data_record)
+
+    def _get_record(self, idempotency_key) -> DataRecord: ...
+
+    def _delete_record(self, data_record: DataRecord) -> None: ...
+
+
+@pytest.fixture
+def local_timezone(request):
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setenv("TZ", request.param)
+        time.tzset()
+        yield
+    time.tzset()
+
+
+@pytest.mark.parametrize(
+    ("local_timezone", "start"),
+    [
+        ("UTC", "2025-11-02T05:59:59+00:00"),
+        # 01:59:59 in New York, one second before the clocks go back an hour
+        ("America/New_York", "2025-11-02T05:59:59+00:00"),
+        # 01:59:59 in New York, one second before the clocks go forward an hour
+        ("America/New_York", "2026-03-08T06:59:59+00:00"),
+        # 01:30 in New York, during the hour that repeats after the clocks go back
+        ("America/New_York", "2025-11-02T06:30:00+00:00"),
+    ],
+    ids=["utc", "dst-ends", "dst-starts", "repeated-hour"],
+    indirect=["local_timezone"],
+)
+def test_idempotent_function_expiry_across_daylight_saving_change(local_timezone, start, monkeypatch, lambda_context):
+    """
+    Test idempotent_function when the local UTC offset changes while its records are stored.
+    Records must expire after the configured number of seconds, whatever the wall clock does.
+    """
+    start_time = dt.datetime.fromisoformat(start).timestamp()
+    current_time = start_time
+
+    class FrozenDatetime(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls.fromtimestamp(current_time, tz)
+
+    monkeypatch.setattr(dt, "datetime", FrozenDatetime)
+
+    persistence_store = RecordingPersistenceLayer()
+    config = IdempotencyConfig(expires_after_seconds=7200, use_local_cache=True)
+    config.register_lambda_context(lambda_context)  # one second left in the invocation
+    calls = 0
+
+    @idempotent_function(data_keyword_argument="order", persistence_store=persistence_store, config=config)
+    def process(order):
+        nonlocal calls
+        calls += 1
+        return calls
+
+    # GIVEN a first call at the start time
+    assert process(order={"id": 1}) == 1
+
+    # WHEN the same order arrives 7200 seconds later
+    current_time += 7200
+    # THEN the stored result is returned
+    assert process(order={"id": 1}) == 1
+
+    # WHEN it arrives one second after that
+    current_time += 1
+    # THEN the function runs again
+    assert process(order={"id": 1}) == 2
+
+    # AND the first in-progress record expired when its invocation ran out of time
+    assert persistence_store.saved_records[0].in_progress_expiry_timestamp == int(start_time * 1000) + 1000
 
 
 def test_data_record_invalid_status_value():
