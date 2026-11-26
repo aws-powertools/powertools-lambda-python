@@ -467,6 +467,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.dimension_set.clear()
         self.dimension_sets.clear()
         self.metadata_set.clear()
+        self.timestamp = None
         self.set_default_dimensions(**self.default_dimensions)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
