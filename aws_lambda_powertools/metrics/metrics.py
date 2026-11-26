@@ -203,6 +203,12 @@ class Metrics:
         self.default_dimensions.update(**dimensions)
 
     def clear_default_dimensions(self) -> None:
+        # Defaults are also staged in the dimension set for the next flush. Remove them there too,
+        # unless add_dimension has since given the dimension another value.
+        for name, value in self.provider.default_dimensions.items():
+            if self.provider.dimension_set.get(name) == (value if isinstance(value, str) else str(value)):
+                del self.provider.dimension_set[name]
+
         self.provider.default_dimensions.clear()
         self.default_dimensions.clear()
 
