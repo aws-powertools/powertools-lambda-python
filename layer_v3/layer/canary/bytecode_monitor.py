@@ -15,10 +15,11 @@ def track_layer_compilation(layer_root: str = "/opt/python") -> Iterator[list[st
     source_to_code = SourceFileLoader.source_to_code
     prefix = f"{layer_root.rstrip('/')}/"
 
-    def track(loader, data, path, *, _optimize=-1):
+    # Python 3.15 added a positional ``fullname`` to ``source_to_code``; forward whatever the loader passes
+    def track(loader, data, path, *args, **kwargs):
         if path.startswith(prefix):
             compiled_files.append(path)
-        return source_to_code(loader, data, path, _optimize=_optimize)
+        return source_to_code(loader, data, path, *args, **kwargs)
 
     SourceFileLoader.source_to_code = track  # type: ignore[method-assign]
     try:

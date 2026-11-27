@@ -3,6 +3,10 @@
 
 Source of truth: https://docs.powertools.aws.dev/lambda/python/latest/getting-started/install/
 
+> **Note: Python 3.15**
+
+Support is in preparation. Dependency compatibility and Lambda validation are tracked in [#8543](https://github.com/aws-powertools/powertools-lambda-python/issues/8543). Python 3.15 layers and SAR applications are not yet published.
+
 ## Package manager
 
 Most features use Python standard library and the AWS SDK _(boto3)_ that are available in the AWS Lambda runtime.

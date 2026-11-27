@@ -93,6 +93,9 @@ class LayerStack(Stack):
             python_version = Runtime.PYTHON_3_13
         if python_version == "python3.14":
             python_version = Runtime.PYTHON_3_14
+        if python_version == "python3.15":
+            # Use the runtime name until CDK provides PYTHON_3_15.
+            python_version = Runtime.PYTHON_3_15
 
         has_arm64_support = CfnParameter(
             self,

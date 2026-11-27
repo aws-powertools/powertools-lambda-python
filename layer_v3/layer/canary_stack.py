@@ -141,6 +141,9 @@ class Canary(Construct):
             runtime = Runtime.PYTHON_3_13
         elif python_version == "python3.14":
             runtime = Runtime.PYTHON_3_14
+        elif python_version == "python3.15":
+            # Use the runtime name until CDK provides PYTHON_3_15.
+            runtime = Runtime.PYTHON_3_15
         else:
             raise ValueError("Unsupported Python version")
 
