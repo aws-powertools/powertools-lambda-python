@@ -747,7 +747,8 @@ def _extract_multipart_boundary(content_type: str) -> str | None:
     """Extract the boundary string from a multipart/form-data content-type header."""
     for segment in content_type.split(";"):
         stripped = segment.strip()
-        if stripped.startswith("boundary="):
+        # Parameter names are case-insensitive (RFC 2045), the boundary value is not
+        if stripped.lower().startswith("boundary="):
             boundary = stripped[len("boundary=") :]
             # Remove optional quotes around boundary
             if boundary.startswith('"') and boundary.endswith('"'):
@@ -837,10 +838,16 @@ def _extract_header_param(header_line: str, param_name: str) -> str | None:
     """Extract a parameter value from a header line (e.g., name="file" from Content-Disposition)."""
     # Match the parameter only at the start of a "; "-separated segment, so that
     # looking up "name" does not match inside "filename"
-    match = re.search(rf'(?:^|[;:])\s*{re.escape(param_name)}="([^"]*)"', header_line, re.IGNORECASE)
+    # The value can be a quoted string or an unquoted token (RFC 7578 uses the RFC 2183 syntax)
+    match = re.search(
+        rf'(?:^|[;:])\s*{re.escape(param_name)}=(?:"([^"]*)"|([^\s;"]+))',
+        header_line,
+        re.IGNORECASE,
+    )
     if match is None:
         return None
-    return match.group(1)
+    quoted, token = match.groups()
+    return quoted if quoted is not None else token
 
 
 def _get_content_type(app: EventHandlerInstance) -> str:

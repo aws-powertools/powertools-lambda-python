@@ -3992,6 +3992,81 @@ def test_multipart_extract_header_param_does_not_match_inside_filename():
     assert _extract_header_param(header, "filename") == "a.txt"
 
 
+@pytest.mark.parametrize(
+    "file_disposition, text_disposition",
+    [
+        ("form-data; name=file_data; filename=a.txt", "form-data; name=description"),
+        ("form-data; filename=a.txt; name=file_data", "form-data;name=description"),
+        ('form-data; name=file_data; filename="a.txt"', 'form-data; name="description"'),
+    ],
+)
+def test_multipart_unquoted_content_disposition_params(gw_event, file_disposition, text_disposition):
+    """Test that unquoted (token) Content-Disposition parameter values are parsed (RFC 7578, RFC 2183)."""
+    from aws_lambda_powertools.event_handler.openapi.params import File, Form, UploadFile
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(
+        file_data: Annotated[UploadFile, File()],
+        description: Annotated[str, Form()],
+    ):
+        return {"filename": file_data.filename, "size": len(file_data), "description": description}
+
+    boundary = "----TestBoundary"
+    raw = (
+        f"--{boundary}\r\n"
+        f"Content-Disposition: {file_disposition}\r\n"
+        f"\r\n"
+        f"hello\r\n"
+        f"--{boundary}\r\n"
+        f"Content-Disposition: {text_disposition}\r\n"
+        f"\r\n"
+        f"a note\r\n"
+        f"--{boundary}--\r\n"
+    ).encode()
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; boundary={boundary}"
+    gw_event["body"] = base64.b64encode(raw).decode()
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"filename": "a.txt", "size": 5, "description": "a note"}
+
+
+@pytest.mark.parametrize("boundary_param", ["Boundary", "BOUNDARY"])
+def test_multipart_boundary_parameter_name_is_case_insensitive(gw_event, boundary_param):
+    """Test that the boundary parameter name is matched case-insensitively (RFC 2045)."""
+    from aws_lambda_powertools.event_handler.openapi.params import File
+
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.post("/upload")
+    def upload(file_data: Annotated[bytes, File()]):
+        return {"size": len(file_data)}
+
+    boundary = "----TestBoundary"
+    body, _ = _build_multipart_body(
+        [
+            {"name": "file_data", "value": b"hello", "filename": "test.txt"},
+        ],
+        boundary=boundary,
+    )
+
+    gw_event["httpMethod"] = "POST"
+    gw_event["path"] = "/upload"
+    gw_event["headers"]["content-type"] = f"multipart/form-data; {boundary_param}={boundary}"
+    gw_event["body"] = body
+    gw_event["isBase64Encoded"] = True
+
+    result = app(gw_event, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"size": 5}
+
+
 def test_json_array_for_model_body_returns_422(gw_event):
     """Test that a JSON array sent to a parameter declared as an object is rejected."""
     app = APIGatewayRestResolver(enable_validation=True)
